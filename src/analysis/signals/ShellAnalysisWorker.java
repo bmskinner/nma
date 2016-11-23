@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import stats.Sum;
 import utility.ArrayConverter;
@@ -55,7 +56,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	public ShellAnalysisWorker(IAnalysisDataset dataset, int shells){
 		super(dataset);
 		this.shells = shells;
-		this.setProgressTotal(dataset.getCollection().size());
+		this.setProgressTotal(dataset.getCollection().size()-1);
 	}
 		
 	@Override
@@ -82,15 +83,23 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			}
 
 			// make the shells and measure the values
+						
+			final AtomicInteger counter = new AtomicInteger(0);
 			
-			int progress = 0;
+//			collection.getNuclei().parallelStream().forEach( n ->{
+//				analyseNucleus(n);
+//				int i = counter.incrementAndGet();
+//				publish(i);
+//			});
+			
 			for(Nucleus n : collection.getNuclei()){
 				
 				analyseNucleus(n);
-
-				publish(progress++);
-
+				int i = counter.incrementAndGet();
+				publish(i);
+//
 			}
+			
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 
 			// get stats 
@@ -110,9 +119,9 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		
 		ICellCollection collection = this.getDataset().getCollection();
 		
-		ShellDetector shellAnalyser;
+		ShellDetector shellDetector;
 		try {
-			shellAnalyser = new ShellDetector(n, shells);
+			shellDetector = new ShellDetector(n, shells);
 		} catch (ShellAnalysisException e1) {
 			warn("Unable to make shells for "+n.getNameAndNumber());
 			stack("Error in shell detector", e1);
@@ -131,7 +140,19 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 			if(collection.getSignalManager().hasSignals(signalGroup)){
 				List<INuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup); 
-
+				if(signals.isEmpty()){
+					fine("No signals in signal group "+signalGroup+"in nucleus");
+					continue;
+				}
+				
+				File sourceFile = n.getSignalCollection().getSourceFile(signalGroup);
+				
+				if(sourceFile==null){
+					warn("Cannot find signal image for "+n.getNameAndNumber());
+					continue;
+				}
+				ImageStack signalStack = new ImageImporter(sourceFile).importImage();
+				
 				ShellCounter counter = counters.get(signalGroup);
 
 				for(INuclearSignal s : signals){
@@ -139,20 +160,16 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 
 					try {
 
-						double[] signalInSignals = shellAnalyser.findProportionPerShell(s);
-						int[]    countsInSignals = shellAnalyser.findPixelCountPerShell(s);
+						double[] signalInSignals = shellDetector.findProportionPerShell(s);
+						int[]    countsInSignals = shellDetector.findPixelCountPerShell(s);
 
-						ImageStack signalStack = new ImageImporter(s.getSourceFile()).importImage();
+						int[]    countsInNucleus = shellDetector.findPixelIntensityPerShell(signalStack, s.getChannel());
+						double[] signalInNucleus = shellDetector.findProportionPerShell(signalStack, s.getChannel());
 
-						int[]    countsInNucleus = shellAnalyser.findPixelIntensityPerShell(signalStack, s.getChannel());
-						double[] signalInNucleus = shellAnalyser.findProportionPerShell(signalStack, s.getChannel());
+						int[] dapiIntensities = shellDetector.findPixelIntensityPerShell(nucleusStack, n.getChannel());
 
-
-
-						int[] dapiIntensities = shellAnalyser.findPixelIntensityPerShell(nucleusStack, n.getChannel());
-
-						double[] normalisedSignals = shellAnalyser.normalise(signalInSignals, dapiIntensities);
-						double[] normalisedNucleus = shellAnalyser.normalise(signalInNucleus, dapiIntensities);
+						double[] normalisedSignals = shellDetector.normalise(signalInSignals, dapiIntensities);
+						double[] normalisedNucleus = shellDetector.normalise(signalInNucleus, dapiIntensities);
 
 						counter.addSignalValues(signalInSignals, normalisedSignals, countsInSignals);
 						counter.addNucleusValues(signalInNucleus, normalisedNucleus, countsInNucleus);
@@ -189,21 +206,18 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				addRandom = true;
 				ShellCounter channelCounter = counters.get(group);
 								
-				IShellResult result = new DefaultShellResult(shells)
-				.setRawMeans(       CountType.SIGNAL,  channelCounter.getRawMeans(CountType.SIGNAL))
-	        	.setRawMeans(       CountType.NUCLEUS, channelCounter.getRawMeans(CountType.NUCLEUS))
-	        	.setNormalisedMeans(CountType.SIGNAL,  channelCounter.getNormalisedMeans(CountType.SIGNAL))
-	        	.setNormalisedMeans(CountType.NUCLEUS, channelCounter.getNormalisedMeans(CountType.NUCLEUS))
-	        	.setRawStandardErrors( CountType.SIGNAL,  channelCounter.getRawStandardErrors(CountType.SIGNAL))
-	        	.setRawStandardErrors( CountType.NUCLEUS, channelCounter.getRawStandardErrors(CountType.NUCLEUS))
-	        	.setNormalisedStandardErrors( CountType.SIGNAL,  channelCounter.getNormalisedStandardErrors(CountType.SIGNAL))
-	        	.setNormalisedStandardErrors( CountType.NUCLEUS, channelCounter.getNormalisedStandardErrors(CountType.NUCLEUS))
-	        	.setPixelCounts(    CountType.SIGNAL,  channelCounter.getPixelCounts(CountType.SIGNAL))
-	        	.setPixelCounts(    CountType.NUCLEUS, channelCounter.getPixelCounts(CountType.NUCLEUS))
-	        	.setRawChiResult(      CountType.SIGNAL,  channelCounter.getRawChiSquare(CountType.SIGNAL), channelCounter.getRawPValue(CountType.SIGNAL))
-	        	.setRawChiResult(      CountType.NUCLEUS, channelCounter.getRawChiSquare(CountType.NUCLEUS), channelCounter.getRawPValue(CountType.NUCLEUS))
-				.setNormalisedChiResult(CountType.SIGNAL, channelCounter.getNormalisedChiSquare(CountType.SIGNAL), channelCounter.getNormalisedPValue(CountType.SIGNAL))
-	        	.setNormalisedChiResult(CountType.NUCLEUS,channelCounter.getNormalisedChiSquare(CountType.NUCLEUS), channelCounter.getNormalisedPValue(CountType.NUCLEUS));
+				DefaultShellResult result = new DefaultShellResult(shells);
+				
+				for(CountType type : CountType.values()){
+					result
+					.setRawMeans(          type,  channelCounter.getRawMeans(type))
+		        	.setNormalisedMeans(   type,  channelCounter.getNormalisedMeans(type))
+		        	.setRawStandardErrors( type,  channelCounter.getRawStandardErrors(type))
+		        	.setNormalisedStandardErrors( type,  channelCounter.getNormalisedStandardErrors(type))
+		        	.setRawChiResult(      type,  channelCounter.getRawChiSquare(type), channelCounter.getRawPValue(type))
+					.setNormalisedChiResult(type, channelCounter.getNormalisedChiSquare(type), channelCounter.getNormalisedPValue(type));
+				}
+				
 					
 				try {
 					getDataset().getCollection()
@@ -250,17 +264,12 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				err[i] = 0;
 			}
 			
-			int[] counts = sr.getCounts();
-
 			try{
 
 				List<Double> list       = new ArrayConverter(c).toDoubleList();
 				List<Double> errList    = new ArrayConverter(err).toDoubleList();
-				List<Integer> countList = new ArrayConverter(counts).toIntegerList();
 				
 				IShellResult randomResult = new DefaultShellResult(shells)
-					.setPixelCounts(CountType.SIGNAL, countList)
-					.setPixelCounts(CountType.NUCLEUS, countList)
 					.setRawMeans(CountType.SIGNAL, list)
 					.setRawMeans(CountType.NUCLEUS, list)
 					.setNormalisedMeans(CountType.SIGNAL, list)

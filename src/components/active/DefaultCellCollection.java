@@ -1176,10 +1176,15 @@ implements ICellCollection {
 	 */
 	public void updateVerticalNuclei(){
 
-		getNuclei().parallelStream().forEach( n -> {
-			n.updateVerticallyRotatedNucleus();
-			n.updateDependentStats();
-		});
+		try {
+			getNuclei().parallelStream().forEach( n -> {
+				n.updateVerticallyRotatedNucleus();
+				n.updateDependentStats();
+			});
+		} catch (Exception e){
+			warn("Cannot update all vertical nuclei");
+			stack("Error updating vertical nuclei", e);
+		}
 
 	}
 

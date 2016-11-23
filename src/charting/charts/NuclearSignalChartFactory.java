@@ -23,9 +23,9 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 
 import components.active.generic.UnavailableSignalGroupException;
-
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
+import analysis.signals.ShellCounter.CountType;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -129,10 +129,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		chart.getCategoryPlot().getRangeAxis().setRange(range);
 		
 		String percentLabel = options.isNormalised() ? "Normalised percent" : "Percent";
-		String locationLabel = options.isShowBounds() ? " within nuclei" : "within signals";
+		String locationLabel = options.getCountType().equals(CountType.NUCLEUS) ? "nuclei" : "signals";
 		
 
-		chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel+" of signal "+locationLabel);
+		chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel+" of signal within "+locationLabel);
 
 
 		return chart;

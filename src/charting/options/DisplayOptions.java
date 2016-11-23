@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import analysis.IAnalysisDataset;
+import analysis.signals.ShellCounter.CountType;
 import components.ICell;
 import components.generic.MeasurementScale;
 import gui.components.ColourSelecter.ColourSwatch;
@@ -111,5 +112,11 @@ public interface DisplayOptions {
 	 * @return
 	 */
 	boolean hasCell();
+	
+	/**
+	 * Get the signal counting type for shell analysis
+	 * @return
+	 */
+	CountType getCountType();
 
 }

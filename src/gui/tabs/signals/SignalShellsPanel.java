@@ -19,12 +19,14 @@
 package gui.tabs.signals;
 
 import gui.components.ExportableTable;
+import gui.components.PValueTableCellRenderer;
 import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -35,6 +37,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import analysis.signals.ShellCounter.CountType;
 import charting.charts.AbstractChartFactory;
 import charting.charts.NuclearSignalChartFactory;
 import charting.charts.panels.ExportableChartPanel;
@@ -89,19 +92,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 
 		panel.add(newAnalysis);
-		
-//		buttonGroup.add(proportionsBtn);
-//		buttonGroup.add(countsBtn);
-//		proportionsBtn.addActionListener(this);
-//		countsBtn.addActionListener(this);
-//		proportionsBtn.setToolTipText("Show the proportion of signal in each shell");
-//		countsBtn.setToolTipText("Show the total pixel intensities in each shell");
-//		
-//		proportionsBtn.setSelected(true);
-//		
-//		panel.add(proportionsBtn);
-//		panel.add(countsBtn);
-		
+
 		
 		// Add the coverage options
 		
@@ -173,12 +164,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	private void updateChartAndTable(){
 		
+		CountType type = withinNucleiBtn.isSelected() ? CountType.NUCLEUS : CountType.SIGNAL;
+		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-//			.setShowSignals(countsBtn.isSelected()) // if counts is selected, show signal counts, not proportions
 			.setTarget(chartPanel)
 			.setNormalised(dapiNormalise.isSelected())
-			.setShowBounds(withinNucleiBtn.isSelected()) // use as a proxy for whole cell bounds or just within defined signal regions
+			.setCountType(type)
 			.build();
 
 		setChart(options);
@@ -187,11 +179,16 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 
 		TableOptions tableOptions = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.build();
+			.setDatasets(getDatasets())
+			.setCountType(type)
+			.setTarget(table)
+			.setRenderer(2, new PValueTableCellRenderer())
+			.build();
+		
+		setTable(tableOptions);
 
-		TableModel model = getTable(tableOptions);
-		table.setModel(model);
+//		TableModel model = getTable(tableOptions);
+//		table.setModel(model);
 	}
 
 	@Override

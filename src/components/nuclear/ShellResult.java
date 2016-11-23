@@ -86,13 +86,6 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
     	this.normalisedMeans = means;
     }
     
-    /* (non-Javadoc)
-	 * @see components.nuclear.IShellResult#getCounts()
-	 */
-    @Override
-	public List<Integer> getPixelCounts(CountType type){
-    	return counts;
-    }
     
 	
 	/* (non-Javadoc)

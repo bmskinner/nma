@@ -952,7 +952,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			UUID signalGroup = ShellRandomDistributionCreator.RANDOM_SIGNAL_ID;
 
 			// Choose between signal or nucleus level analysis
-			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
+			CountType type = options.getCountType();
 			
 			boolean isNormalised = options.isNormalised();
 			
@@ -992,7 +992,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		try {
 			
 			// Choose between signal or nucleus level analysis
-			CountType type = options.isShowBounds() ? CountType.NUCLEUS : CountType.SIGNAL;
+			CountType type = options.getCountType();
 
 			// Choose whether to display signals or pixel counts
 //			boolean showSignals = options.isShowSignals();
@@ -1037,10 +1037,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		if( ! options.hasDatasets()){
 			return createBlankTable();
 		}
-		
-//		CountType type = options.
-		
+				
 		DefaultTableModel model = new DefaultTableModel();
+		
+		DecimalFormat pFormat = new DecimalFormat("#0.000"); 
 		
 		Object[] columnNames = {
 				
@@ -1073,7 +1073,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 								d.getName(),
 								groupName,
-								r.getRawChiSquare(CountType.SIGNAL)
+								pFormat.format(r.getRawPValue(options.getCountType()))
 						};
 
 

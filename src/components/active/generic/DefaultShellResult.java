@@ -43,7 +43,7 @@ public class DefaultShellResult implements IShellResult {
 	private double[] signalNormMeans;
 	private double[] signalRawStderrs;
 	private double[] signalNormStderrs;
-	private int[]    signalCounts;
+
 	private double   signalRawChi   = 0;
 	private double   signalRawPval  = 1;
 	private double   signalNormChi  = 0;
@@ -53,7 +53,7 @@ public class DefaultShellResult implements IShellResult {
 	private double[] nucleusNormMeans;
 	private double[] nucleusRawStderrs;
 	private double[] nucleusNormStderrs;
-	private int[]    nucleusCounts;
+
 	private double   nucleusRawChi   = 0;
 	private double   nucleusRawPval  = 1;
 	private double   nucleusNormChi  = 0;
@@ -75,13 +75,13 @@ public class DefaultShellResult implements IShellResult {
 		signalNormMeans   = new double[shellCount];
 		signalRawStderrs  = new double[shellCount];
 		signalNormStderrs = new double[shellCount];
-		signalCounts      = new int[shellCount];
+
 		
 		nucleusRawMeans    = new double[shellCount];
 		nucleusNormMeans   = new double[shellCount];
 		nucleusRawStderrs  = new double[shellCount];
 		nucleusNormStderrs = new double[shellCount];
-		nucleusCounts      = new int[shellCount];
+
 	}
 	
 	/**
@@ -242,46 +242,6 @@ public class DefaultShellResult implements IShellResult {
 		
 	}
 	
-	/**
-	 * Set the pixel count values for the given type
-	 * @param type the counting type
-	 * @param means the mean values
-	 * @return this shell result
-	 */
-	public DefaultShellResult setPixelCounts(CountType type, List<Integer> counts){
-		
-		if(type==null || counts == null){
-			throw new IllegalArgumentException("Type or list is null");
-		}
-		
-		if(counts.size()!= shellCount){
-			throw new IllegalArgumentException("List size does not match shell count");
-		}
-		
-		int[] target;
-		switch(type){
-			case SIGNAL:{
-				target = signalCounts;
-				break;
-			}
-			case NUCLEUS:{
-				target = nucleusCounts;
-				break;
-			}
-			default: {
-				target = signalCounts;
-				break;
-			}
-		}
-		
-		for(int i=0; i<counts.size(); i++){
-			target[i] = counts.get(i);
-		}
-		
-		return this;
-		
-	}
-
 	
 	/**
 	 * Set the raw chi square results for the given count type
@@ -370,8 +330,8 @@ public class DefaultShellResult implements IShellResult {
         	.setNormalisedMeans(CountType.NUCLEUS, s.getNormalisedMeans(CountType.NUCLEUS))
         	.setRawStandardErrors(CountType.SIGNAL,   s.getRawStandardErrors(CountType.SIGNAL))
         	.setRawStandardErrors(CountType.NUCLEUS,  s.getRawStandardErrors(CountType.NUCLEUS))
-        	.setPixelCounts(CountType.SIGNAL,      s.getPixelCounts(CountType.SIGNAL))
-        	.setPixelCounts(CountType.NUCLEUS,     s.getPixelCounts(CountType.NUCLEUS))
+//        	.setPixelCounts(CountType.SIGNAL,      s.getPixelCounts(CountType.SIGNAL))
+//        	.setPixelCounts(CountType.NUCLEUS,     s.getPixelCounts(CountType.NUCLEUS))
         	.setRawChiResult(CountType.SIGNAL,        s.getRawChiSquare(CountType.SIGNAL), s.getRawPValue(CountType.SIGNAL))
         	.setRawChiResult(CountType.NUCLEUS,       s.getRawChiSquare(CountType.NUCLEUS), s.getRawPValue(CountType.NUCLEUS))
         	.setNormalisedChiResult(CountType.SIGNAL,        s.getNormalisedChiSquare(CountType.SIGNAL), s.getNormalisedPValue(CountType.SIGNAL))
@@ -382,31 +342,31 @@ public class DefaultShellResult implements IShellResult {
     /* (non-Javadoc)
 	 * @see components.nuclear.IShellResult#getCounts()
 	 */
-    @Override
-	public List<Integer> getPixelCounts(CountType type){
-    	
-    	List<Integer> result = new ArrayList<Integer>(shellCount);
-    	int[] template = null;
-    	switch(type){
-			case SIGNAL:{
-				template = signalCounts;
-				break;
-			}
-			case NUCLEUS:{
-				template = nucleusCounts;
-				break;
-			}
-			default: {
-				template = signalCounts;
-				break;
-			}
-		}
-    	
-    	for(int i : template){
-    		result.add(i);
-    	}
-    	return result;
-    }
+//    @Override
+//	public List<Integer> getPixelCounts(CountType type){
+//    	
+//    	List<Integer> result = new ArrayList<Integer>(shellCount);
+//    	int[] template = null;
+//    	switch(type){
+//			case SIGNAL:{
+//				template = signalCounts;
+//				break;
+//			}
+//			case NUCLEUS:{
+//				template = nucleusCounts;
+//				break;
+//			}
+//			default: {
+//				template = signalCounts;
+//				break;
+//			}
+//		}
+//    	
+//    	for(int i : template){
+//    		result.add(i);
+//    	}
+//    	return result;
+//    }
     
 	
 	/* (non-Javadoc)

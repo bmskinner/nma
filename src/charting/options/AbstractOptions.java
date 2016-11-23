@@ -10,6 +10,7 @@ import components.ICell;
 import components.generic.MeasurementScale;
 import stats.PlottableStatistic;
 import analysis.IAnalysisDataset;
+import analysis.signals.ShellCounter.CountType;
 
 /**
  * This implements the requirements of the DisplayOptions
@@ -28,6 +29,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 	private MeasurementScale scale          = MeasurementScale.PIXELS;
 	private ColourSwatch swatch             = ColourSwatch.REGULAR_SWATCH;
 	private ICell cell                      = null;
+	private CountType type                  = CountType.SIGNAL;
 			
 	/**
 	 * Create with a list of datasets.
@@ -232,6 +234,14 @@ public abstract class AbstractOptions implements DisplayOptions {
 	public boolean hasCell(){
 		return this.cell!=null;
 	}
+	
+	public CountType getCountType(){
+		return type;
+	}
+	
+	public void setCountType(CountType t){
+		type = t;
+	}
 
 	@Override
 	public int hashCode() {
@@ -244,6 +254,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 		result = prime * result + ((stats == null) ? 0 : stats.hashCode());
 		result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
 		result = prime * result	+ ((cell == null) ? 0 : cell.hashCode());
+		result = prime * result	+ ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 
@@ -284,6 +295,12 @@ public abstract class AbstractOptions implements DisplayOptions {
 			if (other.cell != null)
 				return false;
 		} else if (!cell.equals(other.cell))
+			return false;
+		
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
 			return false;
 		
 		return true;

@@ -33,13 +33,6 @@ import analysis.signals.ShellCounter.CountType;
 public interface IShellResult extends Serializable, Loggable {
 
 	/**
-	 * Get the pixel intensity counts for the given type 
-	 * @param type the counting type
-	 * @return a list of counts per shell
-	 */
-	List<Integer> getPixelCounts(CountType type);
-
-	/**
 	 * Get the mean pixel proportions for the given type 
 	 * @param type the counting type
 	 * @return a list of proportions of signal per shell
