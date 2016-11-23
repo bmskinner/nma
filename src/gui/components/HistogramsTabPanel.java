@@ -93,7 +93,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	
 	@Override
 	public void setChartsAndTablesLoading(){
-		
+		super.setChartsAndTablesLoading();
 		for(ExportableChartPanel p : chartPanels.values()){
 			p.setChart(AbstractChartFactory.createLoadingChart());			
 		}

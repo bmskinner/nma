@@ -112,15 +112,16 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		PlottableStatistic stat = options.getStat();
 		
-		if(stat.getClass()==NucleusStatistic.class){
+		
+		if(stat instanceof NucleusStatistic){
 			return createNuclearStatsHistogram();
 		}
 		
-		if(stat.getClass()==SignalStatistic.class){
+		if(stat instanceof SignalStatistic){
 			return createSignalStatisticHistogram();
 		}
 		
-		if(stat.getClass()==SegmentStatistic.class){
+		if(stat instanceof SegmentStatistic){
 			return createSegmentStatisticHistogram();
 		}
 		
@@ -192,13 +193,14 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		List<HistogramDataset> list;
 		try {
 			list = options.hasDatasets() 
-										? new NuclearSignalDatasetCreator().createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
-										: null;
+				? new NuclearSignalDatasetCreator().createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+				: null;
 		} catch (ChartDatasetCreationException e) {
+			stack("Error making signal dataset", e);
 			return makeErrorChart();
 		}
 									
-									
+		// Make a histogram from the first dataset.
 				
 		JFreeChart chart = createHistogram(list.get(0), stat.label(options.getScale()), "Count");
 		

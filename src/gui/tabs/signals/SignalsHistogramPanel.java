@@ -43,16 +43,10 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 
 			Dimension preferredSize = new Dimension(400, 150);
 			for(SignalStatistic stat : SignalStatistic.values()){
-
-				ChartOptions options = new ChartOptionsBuilder()
-					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.setUseDensity(false)
-					.setSignalGroup(null)
-					.build();
 				
-				SelectableChartPanel panel = new SelectableChartPanel(new HistogramChartFactory(options).createStatisticHistogram(), stat.toString());
+				JFreeChart chart = HistogramChartFactory.createEmptyChart();
+				SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
+//				SelectableChartPanel panel = new SelectableChartPanel(new HistogramChartFactory(options).createStatisticHistogram(), stat.toString());
 				panel.setPreferredSize(preferredSize);
 				panel.addSignalChangeListener(this);
 				chartPanels.put(stat.toString(), panel);
@@ -61,11 +55,9 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 			}
 
 		} catch(Exception e){
-			log(Level.SEVERE, "Error creating histogram panel", e);
+			warn("Error creating signal histogram panel");
+			stack("Error creating histogram panel", e);
 		}
-		
-		// Keep disabled until CPU use is fixed
-//		useDensityPanel.setEnabled(false);
 		
 	}
 	
@@ -73,17 +65,15 @@ public class SignalsHistogramPanel extends HistogramsTabPanel {
 	protected void updateSingle() {
 		this.setEnabled(true);
 		
-		// Keep disabled until CPU use is fixed
-//		useDensityPanel.setEnabled(false);
-		
 		boolean useDensity = useDensityPanel.isSelected();
 		
 		for(SignalStatistic stat : SignalStatistic.values()){
 			SelectableChartPanel panel = chartPanels.get(stat.toString());
 
-			JFreeChart chart = null;
+//			JFreeChart chart = null;
 
 			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(getDatasets())
 				.addStatistic(stat)
 				.setScale(GlobalOptions.getInstance().getScale())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
