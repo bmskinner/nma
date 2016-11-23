@@ -103,7 +103,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			chart = getChart(options);
 		} catch (Exception e1) {
 			warn("Error creating blank signals chart");
-			log(Level.FINE, "Error creating blank signals chart", e1);
+			stack("Error creating blank signals chart", e1);
 		}
 						
 		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
@@ -180,7 +180,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			}
 		} catch(UnavailableSignalGroupException e){
 			warn("Cannot change signal colour");
-			fine("Error getting signal group", e);
+			stack("Error getting signal group", e);
 		}
 	}
 			
@@ -226,7 +226,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				panel.add(box);
 				
             	} catch(UnavailableSignalGroupException e){
-        			fine("Error getting signal group", e);
+            		stack("Error getting signal group", e);
         		}
 
 			}
@@ -259,22 +259,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.SIGNAL_STATS_TABLE)
+			.setTarget(statsTable)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
 			.build();
 		
-		TableModel model = getTable(options);
+		
+		
+		setTable(options);
 
-		statsTable.setModel(model);
-
-		// Add the signal group colours
-		if(hasDatasets()){
-			int columns = statsTable.getColumnModel().getColumnCount();
-			if(columns>1){
-				for(int i=1;i<columns;i++){
-                    statsTable.getColumnModel().getColumn(i).setCellRenderer(new SignalTableCellRenderer());
-				}
-			}
-		}
-			
 		
 	}
 	

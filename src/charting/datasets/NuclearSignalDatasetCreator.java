@@ -610,27 +610,34 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 */
 	public TableModel createSignalStatsTable(TableOptions options) {
 
-		DefaultTableModel model = new DefaultTableModel();
-
-		// Empty table
 		if(options==null){
-			model.addColumn("No data loaded");
-			return model;
+			return createBlankTable();
 		}
 			
 		if(options.isSingleDataset()){
-			return createSingleDatasetSignalStatsTable(options);
+			
+			try {
+				TableModel model = createSingleDatasetSignalStatsTable(options);
+				return model;
+			} catch(Exception e){
+				error("Error making stats table", e);
+				return createBlankTable(); 
+			}
 		}
 		
 		if(options.isMultipleDatasets()){
 			return createMultiDatasetSignalStatsTable(options);
 		}
-		
-		model.addColumn("No data loaded");
-		return model;
+
+		return createBlankTable();
 	}
 	
-	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) {
+	/**
+	 * Create the stats table model for the signals overview table
+	 * @param options the table options
+	 * @return
+	 */
+	private TableModel createSingleDatasetSignalStatsTable(TableOptions options) throws ChartDatasetCreationException{
 
 		DefaultTableModel model = new DefaultTableModel();
 		
@@ -654,7 +661,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		/*
 		 * Create the row names for the table
 		 */
-		if(maxSignalGroup==0){
+		if(maxSignalGroup<=0){
 			fine("No signals present in dataset");
 			return createBlankTable();
 			
