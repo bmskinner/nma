@@ -20,6 +20,7 @@ package analysis.signals;
 
 import ij.ImageStack;
 import io.ImageImporter;
+import io.ImageImporter.ImageImportException;
 
 import java.io.File;
 import java.util.List;
@@ -32,6 +33,7 @@ import components.generic.Tag;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
+import components.nuclear.NucleusType;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 
@@ -94,8 +96,8 @@ public class SignalDetectionWorker extends AnalysisWorker {
 				// nucleus source image
 				File imageFile = new File(folder + File.separator + n.getSourceFileName());
 				finer("Source file: "+imageFile.getAbsolutePath());
-
-				try{
+				
+				try {
 					
 					ImageStack stack = new ImageImporter(imageFile).importImage();
 
@@ -111,7 +113,10 @@ public class SignalDetectionWorker extends AnalysisWorker {
 					s.calculateFractionalSignalDistancesFromCoM(n);
 
 					fine("Calculating signal angles");
-					if(AsymmetricNucleus.class.isAssignableFrom(n.getClass())){
+					
+					// If the nucleus is asymmetric, calculate angles
+					if( ! this.getDataset().getCollection().getNucleusType().equals(NucleusType.ROUND)){
+						
 						finer("Nucleus type is asymmetric: "+n.getClass().getSimpleName());
 						
 						if(n.hasBorderTag(Tag.ORIENTATION_POINT)){
@@ -120,20 +125,21 @@ public class SignalDetectionWorker extends AnalysisWorker {
 						} else {
 							finest("No orientation point in nucleus");
 						}
+						
 					} else {
 						finer("Nucleus type is round: "+n.getClass().getSimpleName());
-					}
+					}		
 					
-					
-				} catch(Exception e){
-					error("Error detecting signal", e);
+				} catch(ImageImportException e){
+					warn("Cannot open "+imageFile.getAbsolutePath());
+					stack("Cannot load image", e);
 				}
-				
+									
 				publish(progress++);
 			}		
 			
 		} catch (Exception e){
-			error("Error in signal detection", e);
+			stack("Error in signal detection", e);
 			return false;
 		}
 

@@ -514,7 +514,20 @@ public class DefaultNucleus
 		
 	}
 	
-	
+	@Override
+	public void flipXAroundPoint(IPoint p){
+		super.flipXAroundPoint(p);
+		
+		for(UUID id : signalCollection.getSignalGroupIDs()){
+			
+			signalCollection.getSignals(id).parallelStream().forEach( s -> {
+				
+				s.flipXAroundPoint(p);				
+			});
+							
+		}
+		
+	}
 		
 	@Override
 	public void rotate(double angle){
@@ -522,9 +535,7 @@ public class DefaultNucleus
 		super.rotate(angle);
 		
 		if(angle!=0){
-			
-//			log(this.getNameAndNumber()+": Rotating signals");
-			
+						
 			for(UUID id : signalCollection.getSignalGroupIDs()){
 				
 				signalCollection.getSignals(id).parallelStream().forEach( s -> {
@@ -532,8 +543,7 @@ public class DefaultNucleus
 					s.rotate(angle);
 										
 					// get the new signal centre of mass based on the nucleus rotation
-					IPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);
-//					
+					IPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);				
 					s.moveCentreOfMass(p);					
 				});
 								

@@ -687,11 +687,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				n.setX(xNew);
 			}
 			
-			// Ensure the centre of mass does not get lost
-//			
-//			double dx = xCentre - centreOfMass.getX();
-//			double xNew = xCentre + dx;
-//			centreOfMass.setX(xNew);
 
 		}
 
