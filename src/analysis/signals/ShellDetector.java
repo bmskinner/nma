@@ -632,7 +632,7 @@ public class ShellDetector extends Detector {
 				st = new ImageImporter(s.getSourceFile()).importImage();
 				
 			} catch (ImageImportException e) {
-				
+				stack("Error importing component image", e);
 				throw new UnloadableImageException("Error importing image source file "+s.getSourceFile().getAbsolutePath(), e);
 			}
 			

@@ -144,7 +144,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		Polygon polygon = roi.getPolygon();
 		
 		
-		if( ! polygon.contains(centreOfMass.getX(), centreOfMass.getY())){
+		if( ! polygon.getBounds().contains(centreOfMass.getX(), centreOfMass.getY())){
 			
 			int minX = (int) polygon.getBounds().getX();
 			int maxX = (int) (minX + polygon.getBounds().getWidth());
@@ -153,15 +153,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			throw new IllegalArgumentException("The centre of mass ("
 					+centreOfMass.toString()
-					+") must be within the roi (x = "
+					+") must be within the roi bounds (x = "
 					+minX+"-"+maxX+
 					"), (y = "
 					+minY+"-"+maxY+")");
 		}
 		
-//		log("Creating component from roi at "+roi.getBounds());
-//		log("Creating component from pol at "+polygon.getBounds());
-//		log("Creating component from pos at "+position[0]+", "+position[1]+", "+position[2]+", "+position[3]);
+		if( ! polygon.contains(centreOfMass.getX(), centreOfMass.getY())){
+			fine("Centre of mass is not inside the object. You may have a doughnut.");
+		}
+		
 		
 		this.xpoints = new int[polygon.npoints];
 		this.ypoints = new int[polygon.npoints];
