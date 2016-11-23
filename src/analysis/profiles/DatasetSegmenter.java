@@ -20,6 +20,7 @@
  *******************************************************************************/
 package analysis.profiles;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
+import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import stats.Quartile;
 
@@ -340,27 +342,30 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {
 
 		fine("Beginning segmentation...");
-	
-			
-		// generate segments in the median profile
-		fine("Creating segments...");
-		createSegmentsInMedian(collection);
 
-		// map the segments from the median directly onto the nuclei
-		assignMedianSegmentsToNuclei(collection);
 
-		// adjust the segments to better fit each nucleus
-		fine("Revising segments by frankenprofile...");
-		
-		try{
-			reviseSegments(collection, pointType);
-		} catch (Exception e){
-			error("Error revising segments", e);
-		}
-		
-		// update the aggregate in case any borders have changed
-		collection.getProfileCollection()
+//		if( ! collection.getNucleusType().equals(NucleusType.ROUND)){
+			// generate segments in the median profile
+			fine("Creating segments...");
+			createSegmentsInMedian(collection);
+
+			// map the segments from the median directly onto the nuclei
+			assignMedianSegmentsToNuclei(collection);
+
+			// adjust the segments to better fit each nucleus
+			fine("Revising segments by frankenprofile...");
+
+			try{
+				reviseSegments(collection, pointType);
+			} catch (Exception e){
+				error("Error revising segments", e);
+			}
+
+			// update the aggregate in case any borders have changed
+			collection.getProfileCollection()
 			.createProfileAggregate(collection, collection.getProfileCollection().length());
+//		}
+		
 
 
 		fine("Segmentation complete");
@@ -404,10 +409,20 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 		int opIndex = pc.getIndex(Tag.ORIENTATION_POINT);
 		map.put(Tag.ORIENTATION_POINT, opIndex);
 		
-
-		ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
-
-		List<IBorderSegment> segments = segmenter.segment();
+		List<IBorderSegment> segments;
+		if( ! collection.getNucleusType().equals(NucleusType.ROUND)){
+			
+			ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
+			segments = segmenter.segment();
+			
+		} else {
+			
+			segments = new ArrayList<IBorderSegment>(1);
+			IBorderSegment seg1 = IBorderSegment.newSegment(0, opIndex, median.size());
+			IBorderSegment seg2 = IBorderSegment.newSegment(opIndex, median.size()-1, median.size());
+			segments.add(seg1);
+			segments.add(seg2);
+		}
 
 		finer("Found "+segments.size()+" segments in regular profile");
 		

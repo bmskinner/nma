@@ -125,6 +125,7 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			nucleusProfile = n.getProfile(ProfileType.ANGLE);
 		} catch (UnavailableProfileTypeException e1) {
 			warn("Cannot get angle profile for nucleus");
+			stack("Profile type angle is not available", e1);
 			return;
 		}
 		nucleusProfile.clearSegments();
@@ -148,12 +149,12 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 			
 			try {
 				
-			// find the index at the point of the best fit
-			int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
-			int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
+				// find the index at the point of the best fit
+				int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
+				int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
 
-			
-			
+
+
 				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
 				if(prevSeg != null){
 					seg.setPrevSegment(prevSeg);
@@ -165,7 +166,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 				prevSeg = seg;
 			
 			} catch(IllegalArgumentException | UnavailableProfileTypeException e){
-				fine("Error making segment for nucleus "+n.getNameAndNumber(), e);
+				warn("Cannot make segment");
+				stack("Error making segment for nucleus "+n.getNameAndNumber(), e);
 				break;
 				
 			}
@@ -177,8 +179,8 @@ public class SegmentAssignmentTask  extends AbstractProgressAction  {
 		nucleusProfile.setSegments(nucleusSegments);
 
 		n.setProfile(ProfileType.ANGLE, nucleusProfile);
-		log(Level.FINEST, "Assigned segments to nucleus "+n.getNameAndNumber()+":");
-		log(Level.FINEST, nucleusProfile.toString());
+		finest("Assigned segments to nucleus "+n.getNameAndNumber()+":");
+		finest(nucleusProfile.toString());
 		
 		finest("Assigned segments to "+n.getNameAndNumber());
 		
