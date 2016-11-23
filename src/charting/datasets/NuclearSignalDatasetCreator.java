@@ -147,12 +147,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
      * @return a list of rows for a table.
      */
     private List<Object> makeDetectionSettingsColumn(IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
-        
-        // format the numbers and make into a tablemodel
-        DecimalFormat df = new DecimalFormat("#0.00"); 
-        
-        ICellCollection collection = dataset.getCollection();
-        
+                        
         List<Object> rowData = new ArrayList<Object>(0);
         rowData.add(signalGroupCount);
         
@@ -178,131 +173,142 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
         if(isFromMerge){
         	
         	
-        	Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
-        	
-        	int j=0;
-        	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-
-        		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-        			continue;
-        		}
-
-        		try {
-
-        			SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-
-        			Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-        					? collection.getSignalGroup(signalGroup).getGroupColour()
-        							: ColourSelecter.getColor(j);
-
-        					cell.setColor((Color) colour);
-
-        					rowData.add("");// empty row for colour
-        					rowData.add(cell);  // group name
-
-
-					for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
-						rowData.add("N/A - merge");
-					}
-
-        		} catch (UnavailableSignalGroupException e){
-        			fine("Signal group "+signalGroup+" is not present in collection", e);
-        		} finally {
-        			j++;
-        		}
-            }
-            
-            // Add blank rows for any empty spaces in the table
-            int remaining = signalGroupCount - signalGroups.size();
-            for(int i=0;i<remaining;i++){
-              for(int k=0; k<rowsPerSignalGroup;k++){
-                  rowData.add("");
-              }
-          }
+        	addMergedSignalData(rowData, dataset, signalGroupCount, rowsPerSignalGroup);
             
         } else {
             
-            int signalGroupNumber = 0; // Store the number of signal groups processed from this dataset
-
-            int j=0;
-            for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-            	
-            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-            	
-            	try{
-
-            		signalGroupNumber++;
-
-            		SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-
-            		Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-            				? collection.getSignalGroup(signalGroup).getGroupColour()
-            						: ColourSelecter.getColor(j);
-
-            				cell.setColor((Color) colour);
-
-
-
-            				INuclearSignalOptions ns = dataset.getAnalysisOptions()
-            						.getNuclearSignalOptions(signalGroup);
-
-            				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
-            					for(int i=0; i<rowsPerSignalGroup;i++){
-            						rowData.add("");
-            					}
-
-
-            				} else {
-            					Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
-            							? ns.getThreshold()
-            									: "Variable";
-
-            							Object signalMode = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
-            									? "Forward"
-            											: ns.getDetectionMode().equals(SignalDetectionMode.REVERSE)
-            											? "Reverse"
-            													: "Adaptive";                    
-
-
-            							rowData.add("");
-            							rowData.add(cell);
-            							rowData.add(collection.getSignalManager().getSignalChannel(signalGroup));
-            							rowData.add(collection.getSignalManager().getSignalSourceFolder(signalGroup));
-            							rowData.add(  signalThreshold );
-            							rowData.add(ns.getMinSize());
-            							rowData.add(df.format(ns.getMaxFraction()));
-            							rowData.add(df.format(ns.getMinCirc()));
-            							rowData.add(df.format(ns.getMaxCirc()));
-            							rowData.add(signalMode);
-            				}
-
-            	} catch (UnavailableSignalGroupException e){
-            		fine("Signal group "+signalGroup+" is not present in collection", e);
-            	} finally {
-            		j++;
-            	}
-            }
-            
-            /*
-             * If the number of signal groups in the dataset is less than the size of the table,
-             * the remainder should be filled with blank cells
-             */
-            
-            if(signalGroupNumber < signalGroupCount){
-                
-                // There will be empty rows in the table. Fill the blanks
-                for(int i = signalGroupNumber+1; i<=signalGroupCount;i++){
-                    for(int k = 0; k<rowsPerSignalGroup;k++){
-                        rowData.add("");
-                    }
-                }                
-            }
+        	addNonMergedSignalData(rowData, dataset, signalGroupCount, rowsPerSignalGroup);
         }
         return rowData;
     }
+    
+    private void addMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+    	ICellCollection collection = dataset.getCollection();
+    	Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
+    	
+    	int j=0;
+    	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
+    		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+    			continue;
+    		}
+
+    		try {
+
+    			SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+
+    			Paint colour = collection.getSignalGroup(signalGroup).hasColour()
+    					? collection.getSignalGroup(signalGroup).getGroupColour()
+    							: ColourSelecter.getColor(j);
+
+    					cell.setColor((Color) colour);
+
+    					rowData.add("");// empty row for colour
+    					rowData.add(cell);  // group name
+
+
+				for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
+					rowData.add("N/A - merge");
+				}
+
+    		} catch (UnavailableSignalGroupException e){
+    			fine("Signal group "+signalGroup+" is not present in collection", e);
+    		} finally {
+    			j++;
+    		}
+        }
+        
+        // Add blank rows for any empty spaces in the table
+        int remaining = signalGroupCount - signalGroups.size();
+        for(int i=0;i<remaining;i++){
+          for(int k=0; k<rowsPerSignalGroup;k++){
+              rowData.add("");
+          }
+      }
+    }
+
+    
+    private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
+    	
+    	ICellCollection collection = dataset.getCollection();
+    	int signalGroupNumber = 0; // Store the number of signal groups processed from this dataset
+
+        int j=0;
+        for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+        	
+        	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+        		continue;
+        	}
+        	
+        	try{
+
+        		signalGroupNumber++;
+
+        		SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+
+        		Color colour = collection.getSignalGroup(signalGroup).hasColour()
+        				? collection.getSignalGroup(signalGroup).getGroupColour()
+        						: ColourSelecter.getColor(j);
+
+				cell.setColor( colour);
+
+
+
+				INuclearSignalOptions ns = dataset.getAnalysisOptions()
+						.getNuclearSignalOptions(signalGroup);
+
+				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
+					for(int i=0; i<rowsPerSignalGroup;i++){
+						rowData.add("");
+					}
+
+
+				} else {
+					Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
+							? ns.getThreshold()
+									: "Variable";
+
+							Object signalMode = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
+									? "Forward"
+											: ns.getDetectionMode().equals(SignalDetectionMode.REVERSE)
+											? "Reverse"
+													: "Adaptive";                    
+
+
+							rowData.add("");
+							rowData.add(cell);
+							rowData.add(ns.getChannel());
+							rowData.add(ns.getFolder());
+							rowData.add(  signalThreshold );
+							rowData.add(ns.getMinSize());
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxFraction()));
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMinCirc()));
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxCirc()));
+							rowData.add(signalMode);
+				}
+
+        	} catch (UnavailableSignalGroupException e){
+        		stack("Signal group "+signalGroup+" is not present in collection", e);
+        	} finally {
+        		j++;
+        	}
+        }
+        
+        /*
+         * If the number of signal groups in the dataset is less than the size of the table,
+         * the remainder should be filled with blank cells
+         */
+        
+        if(signalGroupNumber < signalGroupCount){
+            
+            // There will be empty rows in the table. Fill the blanks
+            for(int i = signalGroupNumber+1; i<=signalGroupCount;i++){
+                for(int k = 0; k<rowsPerSignalGroup;k++){
+                    rowData.add("");
+                }
+            }                
+        }
+    }
 	
 		
 	/**
@@ -339,7 +345,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 					}
 
 				} catch (UnavailableSignalGroupException e){
-					fine("Signal group "+signalGroup+" is not present in collection", e);
+					stack("Signal group "+signalGroup+" is not present in collection", e);
 				}
 			}
 			result.add(ds);
@@ -559,7 +565,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 					}
 
 				} catch (UnavailableSignalGroupException e){
-					fine("Signal group "+group+" is not present in collection", e);
+					stack("Signal group "+group+" is not present in collection", e);
 				}
 			}
 		}
@@ -590,7 +596,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			}
 
 		} catch (UnavailableSignalGroupException e){
-			fine("Signal group "+signalGroup+" is not present in collection", e);
+			stack("Signal group "+signalGroup+" is not present in collection", e);
 		}
 		return result;
 	}
@@ -648,88 +654,87 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		/*
 		 * Create the row names for the table
 		 */
-		if(maxSignalGroup>0){
-			// create the row names
-			fieldNames.add("Number of signal groups");
-
-			for(int i=0;i<maxSignalGroup;i++){
-				fieldNames.add("");
-				fieldNames.add("Signal group");
-				fieldNames.add("Signals");
-				fieldNames.add("Signals per nucleus");
-
-				for(SignalStatistic stat : SignalStatistic.values()){
-
-					fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
-
-				}
-			}
-
-			int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
-			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
-
-			// format the numbers and make into a tablemodel
-
-			List<Object> rowData = new ArrayList<Object>(0);
-			rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
-
-            int k=0;
-
-			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-				
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-				
-				if(collection.getSignalManager().hasSignals(signalGroup)){
-
-					try {
-
-						SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
-
-						Paint colour = collection.getSignalGroup(signalGroup).hasColour()
-								? collection.getSignalGroup(signalGroup).getGroupColour()
-										: ColourSelecter.getColor(k++);
-
-								cell.setColor((Color) colour);
-
-
-
-								rowData.add("");
-								rowData.add(cell);
-								rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
-								double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
-								rowData.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
-
-								for(SignalStatistic stat : SignalStatistic.values()){
-									double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
-
-									if(stat.isDimensionless() || stat.isAngle()){
-										rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
-									} else {
-										double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
-										rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-									}
-								}
-					} catch (UnavailableSignalGroupException e){
-						fine("Signal group "+signalGroup+" is not present", e);
-					}
-
-				} else {
-
-					for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
-						rowData.add("");
-					}
-				}
-			}
-			model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
-
-		} else {
-
-			finest("No signal groups to show");
-
-			model.addColumn("No data loaded");
+		if(maxSignalGroup==0){
+			fine("No signals present in dataset");
+			return createBlankTable();
+			
 		}
+		// create the row names
+		fieldNames.add("Number of signal groups");
+
+		for(int i=0;i<maxSignalGroup;i++){
+			fieldNames.add("");
+			fieldNames.add("Signal group");
+			fieldNames.add("Signals");
+			fieldNames.add("Signals per nucleus");
+
+			for(SignalStatistic stat : SignalStatistic.values()){
+
+				fieldNames.add(stat.label(MeasurementScale.PIXELS)  );
+
+			}
+		}
+
+		int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
+		model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+
+		// format the numbers and make into a tablemodel
+
+		List<Object> rowData = new ArrayList<Object>(0);
+		rowData.add(collection.getSignalManager().getSignalGroupIDs().size());
+
+		int k=0;
+
+		for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+
+			if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+				continue;
+			}
+
+			if(collection.getSignalManager().hasSignals(signalGroup)){
+
+				try {
+
+					SignalTableCell cell = new SignalTableCell(signalGroup, collection.getSignalManager().getSignalGroupName(signalGroup));
+
+					Color colour = collection.getSignalGroup(signalGroup).hasColour()
+							? collection.getSignalGroup(signalGroup).getGroupColour()
+									: ColourSelecter.getColor(k++);
+
+							cell.setColor(colour);
+
+
+
+							rowData.add("");
+							rowData.add(cell);
+							rowData.add(collection.getSignalManager().getSignalCount(signalGroup));
+							double signalPerNucleus = (double) collection.getSignalManager().getSignalCount(signalGroup)/  (double) collection.getSignalManager().getNumberOfCellsWithNuclearSignals(signalGroup);
+							rowData.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
+
+							for(SignalStatistic stat : SignalStatistic.values()){
+								double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+
+								if(stat.isDimensionless() || stat.isAngle()){
+									rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
+								} else {
+									double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+									rowData.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+								}
+							}
+				} catch (UnavailableSignalGroupException e){
+					stack("Signal group "+signalGroup+" is not present", e);
+				}
+
+			} else {
+
+				for(int i = 0; i<numberOfRowsPerSignalGroup;i++){
+					rowData.add("");
+				}
+			}
+		}
+		model.addColumn(collection.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
+
+
 		return model;	
 	}
 	
@@ -768,6 +773,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 					}
 				}
 				
+
 				int numberOfRowsPerSignalGroup = fieldNames.size()/(maxSignalGroup+1);
 				model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
 					

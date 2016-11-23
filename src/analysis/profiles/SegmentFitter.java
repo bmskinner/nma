@@ -206,25 +206,25 @@ public class SegmentFitter implements Loggable {
 				// Get the same segment in the nucleus, and move the tag to the segment start point
 				IBorderSegment nSeg = n.getProfile(ProfileType.ANGLE).getSegment(seg.getName());
 				n.setBorderTag(tag, nSeg.getStartIndex());
-				log(Level.FINEST, "Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
+				finest("Remapped border point '"+tag+"' to "+nSeg.getStartIndex()+" in "+n.getNameAndNumber());
 //				finest("Remapped border point '"+tag+"' to "+nSeg.getStartIndex());
 			} else {
 								
 				// A segment was not found with a start index at zero; segName is null
-				log(Level.WARNING, "Border tag '"+tag+"' not found in median profile");
-				log(Level.WARNING, "No segment with start index zero in median profile");
-				log(Level.WARNING, "Median profile:");
-				log(Level.WARNING, pc.toString());
-				log(Level.WARNING, "Median segment list:");
-				log(Level.WARNING, IBorderSegment.toString(segments));
+				fine("Border tag '"+tag+"' not found in median profile");
+				fine("No segment with start index zero in median profile");
+				fine("Median profile:");
+				fine(pc.toString());
+				fine("Median segment list:");
+				fine(IBorderSegment.toString(segments));
 //				n.log("Could not remapped border point '"+tag+"'");
 				// Check to see if the segments are reversed
 				seg = pc.getSegmentEndingWith(tag);
 				if(seg!=null){
-					log(Level.WARNING, "Found segment "+seg.getName()+" ending with tag "+tag);
+					fine("Found segment "+seg.getName()+" ending with tag "+tag);
 					
 				} else {
-					log(Level.WARNING, "No segments end with tag "+tag);
+					fine("No segments end with tag "+tag);
 				}
 				
 			}
