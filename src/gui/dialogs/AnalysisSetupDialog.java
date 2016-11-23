@@ -61,6 +61,7 @@ import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
 import analysis.IMutableAnalysisOptions;
+import analysis.IMutableCannyOptions;
 import analysis.IMutableDetectionOptions;
 import analysis.nucleus.DefaultNucleusDetectionOptions;
 import components.nuclear.NucleusType;
@@ -245,21 +246,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		nucleusOptions.setChannel(DEFAULT_CHANNEL);
 		nucleusOptions.setScale(DEFAULT_SCALE);
 		
-		ICannyOptions nucleusCannyOptions = new DefaultCannyOptions();
+		IMutableCannyOptions nucleusCannyOptions = new DefaultCannyOptions();
 		
-		nucleusCannyOptions.setUseCanny(true);
-		nucleusCannyOptions.setCannyAutoThreshold(false);
-		nucleusCannyOptions.setLowThreshold( (float) ICannyOptions.DEFAULT_CANNY_LOW_THRESHOLD);
-		nucleusCannyOptions.setHighThreshold((float) ICannyOptions.DEFAULT_CANNY_HIGH_THRESHOLD);
-		nucleusCannyOptions.setKernelRadius((float) ICannyOptions.DEFAULT_CANNY_KERNEL_RADIUS);
-		nucleusCannyOptions.setKernelWidth(ICannyOptions.DEFAULT_CANNY_KERNEL_WIDTH);
-		nucleusCannyOptions.setClosingObjectRadius(ICannyOptions.DEFAULT_CLOSING_OBJECT_RADIUS);
-		
-		nucleusCannyOptions.setUseKuwahara(ICannyOptions.DEFAULT_USE_KUWAHARA);
-		nucleusCannyOptions.setKuwaharaKernel(ICannyOptions.DEFAULT_KUWAHARA_KERNEL_RADIUS);
-		nucleusCannyOptions.setFlattenImage(ICannyOptions.DEFAULT_FLATTEN_CHROMOCENTRES);
-		nucleusCannyOptions.setFlattenThreshold(ICannyOptions.DEFAULT_FLATTEN_THRESHOLD);
-		nucleusCannyOptions.setAddBorder(ICannyOptions.DEFAULT_ADD_BORDER);
 		nucleusOptions.setCannyOptions(nucleusCannyOptions);
 		finer("Set default options");
 	}

@@ -26,14 +26,12 @@ import java.lang.reflect.Field;
 import static java.nio.file.StandardCopyOption.*;
 
 import java.nio.file.Files;
-import java.util.List;
 import java.util.UUID;
 
 import logging.Loggable;
 import stats.PlottableStatistic;
 import utility.Constants;
 import utility.Version;
-import components.CellCollection;
 import components.CellularComponent;
 import components.ClusterGroup;
 import components.ICell;
@@ -54,20 +52,28 @@ import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
-import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
-import components.generic.ProfileCollection;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.nuclear.IBorderSegment;
 import components.nuclear.INuclearSignal;
 import components.nuclear.NucleusType;
 import components.nuclei.Nucleus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import analysis.AnalysisOptions;
+import analysis.DefaultAnalysisOptions;
+import analysis.DefaultCannyOptions;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
+import analysis.ICannyOptions;
+import analysis.IMutableAnalysisOptions;
+import analysis.IMutableDetectionOptions;
+import analysis.nucleus.DefaultNucleusDetectionOptions;
 import analysis.profiles.ProfileException;
+import analysis.signals.DefaultNuclearSignalOptions;
+import analysis.signals.IMutableNuclearSignalOptions;
+import analysis.signals.INuclearSignalOptions;
 
 /**
  * This class will take old format datasets
@@ -93,6 +99,7 @@ public class DatasetConverter implements Loggable {
 	 * and ChildAnalysisDatasets from children.
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public IAnalysisDataset convert() throws DatasetConversionException {
 
 		try{
@@ -107,7 +114,60 @@ public class DatasetConverter implements Loggable {
 
 			IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
 
-			newDataset.setAnalysisOptions(oldDataset.getAnalysisOptions());
+			IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions();
+			
+			if(oldOptions != null){
+				IMutableAnalysisOptions newOptions = new DefaultAnalysisOptions();
+
+				IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+
+				IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(oldNucleusOptions);
+				newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+
+				for(UUID id : oldOptions.getNuclearSignalGroups()){
+					INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
+					File folder = oldDataset.getCollection().getSignalGroup(id).getFolder();
+					int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
+
+
+					IMutableNuclearSignalOptions newSignalOptions = new DefaultNuclearSignalOptions(oldSignalOptions);
+					newSignalOptions.setFolder(folder);
+					newSignalOptions.setChannel(channel);		
+
+					newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+				}
+
+
+				newDataset.setAnalysisOptions(newOptions);
+			} else {
+				newDataset.setAnalysisOptions(null);
+			}
+			
+			
+//			if(oldOptions instanceof AnalysisOptions ){
+//				
+//				AnalysisOptions oldAOptions = (AnalysisOptions) oldOptions;
+//								
+//				for(UUID id : oldOptions.getNuclearSignalGroups()){
+//					INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
+//					File folder = oldDataset.getCollection().getSignalGroup(id).getFolder();
+//					int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
+//					
+//					
+//					IMutableNuclearSignalOptions newSignalOptions = new DefaultNuclearSignalOptions(oldSignalOptions);
+//					newSignalOptions.setFolder(folder);
+//					newSignalOptions.setChannel(channel);		
+//					
+//					newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+//				}
+//
+//				
+//				newDataset.setAnalysisOptions(newOptions);
+//				
+//			} else {
+//				newDataset.setAnalysisOptions(new DefaultAnalysisOptions(oldOptions));
+//			}
+
 			newDataset.setDatasetColour(oldDataset.getDatasetColour());
 
 			// arrange root cluster groups

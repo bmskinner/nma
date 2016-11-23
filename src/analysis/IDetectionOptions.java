@@ -104,7 +104,7 @@ public interface IDetectionOptions extends Serializable {
 	 * Get the Canny edge detection options for this object. 
 	 * @return the Canny options, or null if none have been set
 	 */
-	ICannyOptions getCannyOptions();
+	IMutableCannyOptions getCannyOptions();
 	
 	/**
 	 * Test if the given component meets the criteria within

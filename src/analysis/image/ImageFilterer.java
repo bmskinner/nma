@@ -25,6 +25,7 @@ import components.CellularComponent;
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import analysis.ICannyOptions;
+import analysis.IMutableCannyOptions;
 import analysis.detection.CannyEdgeDetector;
 import analysis.detection.Kuwahara_Filter;
 import stats.Quartile;
@@ -506,10 +507,12 @@ public class ImageFilterer extends AbstractImageFilterer {
 		lower = lower < 0.1 ? 0.1 : lower; // hard limit
 		double upper = Math.min(255, (1.0 + (0.6 * sigma)  ) * medianPixel  ) ;
 		upper = upper < 0.3 ? 0.3 : upper; // hard limit
-		options.setLowThreshold(  (float)  lower);
-		options.setHighThreshold( (float)  upper);
-//		logger.log("Auto thresholding: low: "+lower+"  high: "+upper, Logger.DEBUG);
-
+		
+		
+		if(options instanceof IMutableCannyOptions){
+			((IMutableCannyOptions)options).setLowThreshold( (float)  lower);
+			((IMutableCannyOptions)options).setHighThreshold( (float) upper);
+		}
 	}
 	
 	/**

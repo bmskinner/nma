@@ -21,10 +21,12 @@ package analysis;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import analysis.nucleus.DefaultNucleusDetectionOptions;
 import analysis.signals.INuclearSignalOptions;
 import analysis.signals.NuclearSignalOptions;
 import stats.NucleusStatistic;
@@ -652,8 +654,8 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 
 
 
-
-	public class CannyOptions implements ICannyOptions {
+	@Deprecated
+	public class CannyOptions implements IMutableCannyOptions {
 
 		private static final long serialVersionUID = 1L;
 		
@@ -980,7 +982,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 
 
 		@Override
-		public ICannyOptions duplicate() {
+		public IMutableCannyOptions duplicate() {
 			return new CannyOptions(this);
 		}
 	}
@@ -991,7 +993,22 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 
 	@Override
 	public IMutableDetectionOptions getDetectionOptions(String key) {
-		// TODO Auto-generated method stub
+		if(key.equals(IAnalysisOptions.NUCLEUS)){
+			
+			IMutableDetectionOptions op = new DefaultNucleusDetectionOptions(this.folder);
+			
+			op.setCannyOptions( new DefaultCannyOptions (this.getCannyOptions("nucleus")));
+			op.setChannel(channel);
+			op.setThreshold(nucleusThreshold);
+			op.setScale(scale);
+			op.setNormaliseContrast(false);
+			op.setMinCirc(minNucleusCirc);
+			op.setMaxCirc(maxNucleusCirc);
+			op.setMinSize(minNucleusSize);
+			op.setMaxSize(maxNucleusSize);
+			return op;
+			
+		}
 		return null;
 	}
 
@@ -999,23 +1016,23 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 
 	@Override
 	public Set<String> getDetectionOptionTypes() {
-		// TODO Auto-generated method stub
-		return null;
+
+		Set<String> result = new HashSet<String>();
+		result.add(IAnalysisOptions.NUCLEUS);
+		return result;
 	}
 
 
 
 	@Override
 	public boolean hasDetectionOptions(String type) {
-		// TODO Auto-generated method stub
-		return false;
+		return type.equals(IAnalysisOptions.NUCLEUS);
 	}
 
 
 
 	@Override
 	public void setDetectionOptions(String key, IMutableDetectionOptions options) {
-		// TODO Auto-generated method stub
-		
+
 	}
 }

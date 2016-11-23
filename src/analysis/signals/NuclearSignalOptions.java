@@ -2,10 +2,11 @@ package analysis.signals;
 
 import java.io.File;
 
-import analysis.ICannyOptions;
+import analysis.IMutableCannyOptions;
 import analysis.IMutableDetectionOptions;
 import components.CellularComponent;
 
+@Deprecated
 public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	
 	private static final long serialVersionUID = 1L;
@@ -40,6 +41,31 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 			case ADAPTIVE: this.detectionMode = 2;
 				break;
 		}
+	}
+	
+	/**
+	 * Construct from a template object
+	 * @param template
+	 */
+	protected NuclearSignalOptions(INuclearSignalOptions template){
+		threshold = template.getThreshold();
+		
+		minCirc = template.getMinCirc();
+		maxCirc = template.getMaxCirc();
+		minSize = template.getMinSize();
+		maxFraction = template.getMaxFraction();
+		
+		SignalDetectionMode	mode = template.getDetectionMode();
+		switch(mode){
+			case FORWARD: this.detectionMode = 0;
+				break;
+			case REVERSE: this.detectionMode = 1;
+				break;
+			case ADAPTIVE: this.detectionMode = 2;
+				break;
+		}
+
+				
 	}
 
 	/* (non-Javadoc)
@@ -193,7 +219,7 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	}
 
 	@Override
-	public ICannyOptions getCannyOptions() {
+	public IMutableCannyOptions getCannyOptions() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -229,15 +255,20 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	}
 
 	@Override
-	public void setCannyOptions(ICannyOptions canny) {
+	public void setCannyOptions(IMutableCannyOptions canny) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public IMutableDetectionOptions duplicate() {
+		return new NuclearSignalOptions(this);
+	}
+
+	@Override
+	public void setNormaliseContrast(boolean b) {
 		// TODO Auto-generated method stub
-		return null;
+		
 	}
 	
 	

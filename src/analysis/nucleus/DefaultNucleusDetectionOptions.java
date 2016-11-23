@@ -24,6 +24,8 @@ import java.io.File;
 import components.CellularComponent;
 import components.nuclei.Nucleus;
 import analysis.AbstractDetectionOptions;
+import analysis.DefaultCannyOptions;
+import analysis.IDetectionOptions;
 import analysis.IMutableDetectionOptions;
 
 /**
@@ -38,18 +40,22 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	
 	public DefaultNucleusDetectionOptions(File folder){
 		super(folder);
+		
+		this.setCannyOptions( new DefaultCannyOptions());
 	}
 	
-	protected DefaultNucleusDetectionOptions(DefaultNucleusDetectionOptions template){
+	public DefaultNucleusDetectionOptions(IDetectionOptions template){
 		super(template);
 		
 	}
 	
+	@Override
 	public DefaultNucleusDetectionOptions setSize(double min, double max){
 		super.setSize(min, max);
 		return this;
 	}
 	
+	@Override
 	public DefaultNucleusDetectionOptions setCircularity(double min, double max){
 		super.setCircularity(min, max);
 		return this;

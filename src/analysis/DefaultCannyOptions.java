@@ -29,7 +29,7 @@ import java.io.IOException;
  * @since 1.13.3
  *
  */
-public class DefaultCannyOptions implements ICannyOptions {
+public class DefaultCannyOptions implements IMutableCannyOptions {
 
 		private static final long serialVersionUID = 1L;
 		
@@ -49,9 +49,33 @@ public class DefaultCannyOptions implements ICannyOptions {
 		private int   closingObjectRadius; // the circle radius for morphological closing
 		private transient boolean isAddBorder = false;
 		
-		public DefaultCannyOptions(){}
+		/**
+		 * Construct with the default options in ICannyOptions
+		 */
+		public DefaultCannyOptions(){
+			
+			useCanny            = DEFAULT_USE_CANNY;
+			cannyAutoThreshold  = DEFAULT_AUTO_THRESHOLD;
+			
+			flattenChromocentres= DEFAULT_FLATTEN_CHROMOCENTRES;
+			flattenThreshold    = DEFAULT_FLATTEN_THRESHOLD;
+			useKuwahara         = DEFAULT_USE_KUWAHARA;
+			kuwaharaKernel      = DEFAULT_KUWAHARA_KERNEL_RADIUS;
+			
+			lowThreshold        = DEFAULT_CANNY_LOW_THRESHOLD;
+			highThreshold       = DEFAULT_CANNY_HIGH_THRESHOLD;
+			kernelRadius        = DEFAULT_CANNY_KERNEL_RADIUS;
+			kernelWidth         = DEFAULT_CANNY_KERNEL_WIDTH;
+			closingObjectRadius = DEFAULT_CLOSING_OBJECT_RADIUS;
+			isAddBorder         = DEFAULT_ADD_BORDER;
+						
+		}
 		
-		protected DefaultCannyOptions(ICannyOptions template){
+		/**
+		 * Construct from a template options
+		 * @param template
+		 */
+		public DefaultCannyOptions(ICannyOptions template){
 			
 			useCanny             = template.isUseCanny();
 			cannyAutoThreshold   = template.isAddBorder();
@@ -356,7 +380,7 @@ public class DefaultCannyOptions implements ICannyOptions {
 
 
 		@Override
-		public ICannyOptions duplicate() {
+		public IMutableCannyOptions duplicate() {
 			return new DefaultCannyOptions(this);
 		}
 	

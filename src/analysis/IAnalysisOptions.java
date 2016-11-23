@@ -19,6 +19,11 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	// Standard detection keys
 	static final String NUCLEUS     = "Nucleus";
 	static final String SPERM_TAIL  = "SpermTail";
+	
+	static final boolean DEFAULT_REFOLD      = false;
+	static final boolean DEFAULT_KEEP_FAILED = false;
+	static final double  DEFAULT_WINDOW_PROPORTION = 0.05;
+	static final NucleusType DEFAULT_TYPE    = NucleusType.ROUND;
 
 	
 	/**
@@ -78,6 +83,11 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	 */
 	boolean hasSignalDetectionOptions(UUID signalGroup);
 
+	/**
+	 * Check if nuclei that do not meet the detection parameters
+	 * should be kept in a separate collection
+	 * @return
+	 */
 	boolean isKeepFailedCollections();
 
 

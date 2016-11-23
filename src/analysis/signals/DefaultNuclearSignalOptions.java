@@ -37,10 +37,14 @@ public class DefaultNuclearSignalOptions
 		super(folder);
 	}
 	
-	public DefaultNuclearSignalOptions(DefaultNuclearSignalOptions template){
+	/**
+	 * Construct from an existing nuclear options
+	 * @param template
+	 */
+	public DefaultNuclearSignalOptions(INuclearSignalOptions template){
 		super(template);
-		this.maxFraction = template.maxFraction;
-		this.mode        = template.mode;
+		this.maxFraction = template.getMaxFraction();
+		this.mode        = template.getDetectionMode();
 		
 	}
 	

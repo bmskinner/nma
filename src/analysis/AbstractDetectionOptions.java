@@ -21,7 +21,6 @@ package analysis;
 
 import java.io.File;
 
-import analysis.nucleus.DefaultNucleusDetectionOptions;
 import stats.NucleusStatistic;
 import components.CellularComponent;
 
@@ -44,16 +43,28 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	
 	private boolean isNormaliseContrast;
 	
-	private ICannyOptions cannyOptions;
+	private IMutableCannyOptions cannyOptions;
 	
 	
+	/**
+	 * Construct specifying a folder of images to be analysed
+	 * @param folder
+	 */
 	public AbstractDetectionOptions(File folder){
+		
 		this.folder = folder;
 	}
 	
-	protected AbstractDetectionOptions(AbstractDetectionOptions template){
-		this(template.getFolder());
+	/**
+	 * Construct from a template options
+	 * @param template
+	 */
+	protected AbstractDetectionOptions(IDetectionOptions template){
+		if(template==null){
+			throw new IllegalArgumentException("Template options is null");
+		}
 		
+		folder    = template.getFolder();
 		threshold = template.getThreshold();
 		channel   = template.getChannel();
 		
@@ -63,9 +74,15 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 		maxSize = template.getMaxSize();
 		scale   = template.getScale();
 		
-		isNormaliseContrast = template.isNormaliseContrast;
+		isNormaliseContrast = template.isNormaliseContrast();
 		
-		cannyOptions = template.getCannyOptions().duplicate();
+		if(template.hasCannyOptions()){
+			cannyOptions = template.getCannyOptions().duplicate();
+		} else {
+			cannyOptions = new DefaultCannyOptions();
+			cannyOptions.setUseCanny(false);
+		}
+		
 
 	}
 	
@@ -177,7 +194,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	}
 
 	@Override
-	public ICannyOptions getCannyOptions() {
+	public IMutableCannyOptions getCannyOptions() {
 		return cannyOptions;
 	}
 
@@ -226,8 +243,13 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	}
 
 	@Override
-	public void setCannyOptions(ICannyOptions canny) {
+	public void setCannyOptions(IMutableCannyOptions canny) {
 		this.cannyOptions = canny;		
+	}
+	
+	@Override
+	public void setNormaliseContrast(boolean b) {
+		this.isNormaliseContrast = b;
 	}
 
 }

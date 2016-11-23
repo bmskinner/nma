@@ -84,6 +84,8 @@ public interface IMutableDetectionOptions extends IDetectionOptions {
 	 * Set Canny edge detection options to override thresholds
 	 * @param canny
 	 */
-	void setCannyOptions(ICannyOptions canny);
+	void setCannyOptions(IMutableCannyOptions canny);
+	
+	void setNormaliseContrast(boolean b);
 
 }

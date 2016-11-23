@@ -53,6 +53,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import analysis.ICannyOptions;
+import analysis.IMutableCannyOptions;
 
 /**
  * Contains methods for laying out panels in settings dialog options
@@ -207,9 +208,9 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 		
 		private JCheckBox 	addBorderCheckBox;
 		
-		private ICannyOptions options;
+		private IMutableCannyOptions options;
 		
-		public CannyPanel(final ICannyOptions options){
+		public CannyPanel(final IMutableCannyOptions options){
 			this.options = options;
 			getDefaults();
 			createPanel();

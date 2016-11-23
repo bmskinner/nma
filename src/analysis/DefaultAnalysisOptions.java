@@ -18,7 +18,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<String, IMutableDetectionOptions> detectionOptions = new HashMap<String, IMutableDetectionOptions>();
+	private Map<String, IMutableDetectionOptions> detectionOptions = new HashMap<String, IMutableDetectionOptions>(0);
 	
 	private double profileWindowProportion;
 	
@@ -27,21 +27,36 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 	private boolean isRefoldNucleus, isKeepFailed;
 	
 	/**
-	 * The default constructor
+	 * The default constructor, which sets default options
+	 * specificed in IAnalysisOptions
 	 */
 	public DefaultAnalysisOptions(){	
-		
+		profileWindowProportion = DEFAULT_WINDOW_PROPORTION;
+		type                    = DEFAULT_TYPE;
+		isRefoldNucleus         = DEFAULT_REFOLD;
+		isKeepFailed            = DEFAULT_KEEP_FAILED;
 	}
 	
 	/**
-	 * The default constructor
+	 * Construct from a template options
+	 * @param template the options to use as a template
 	 */
-	public DefaultAnalysisOptions(IAnalysisOptions options){	
-		for(String key : options.getDetectionOptionTypes()){
+	public DefaultAnalysisOptions(IAnalysisOptions template){	
+		
+		if(template==null){
+			throw new IllegalArgumentException("Template options is null");
+		}
+		
+		for(String key : template.getDetectionOptionTypes()){
 			
-			IMutableDetectionOptions op = options.getDetectionOptions(key);
+			IMutableDetectionOptions op = template.getDetectionOptions(key);
 			this.setDetectionOptions(key, op.duplicate());
 		}
+		
+		this.profileWindowProportion = template.getProfileWindowProportion();
+		type = template.getNucleusType();
+		isRefoldNucleus = template.refoldNucleus();
+		isKeepFailed = template.isKeepFailedCollections();
 		
 	}
 
