@@ -35,6 +35,7 @@ import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusType;
 import components.nuclear.SignalGroup;
@@ -72,7 +73,7 @@ public class VirtualCellCollection implements ICellCollection {
 	private Nucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	// We need to store signal groups separately to allow shell results etc to be kept
-	private Map<UUID, ISignalGroup> signalGroups = new HashMap<UUID, ISignalGroup>(0);
+	private Map<UUID, IShellResult> shellResults = new HashMap<UUID, IShellResult>(0);
 	
 	/*
 	 * TRANSIENT FIELDS
@@ -109,18 +110,21 @@ public class VirtualCellCollection implements ICellCollection {
 		
 		// Add the signal groups from the parent
 		
-		for(UUID signalGroup : parent.getCollection().getSignalGroupIDs()){
-			try {
-				ISignalGroup group = parent.getCollection().getSignalGroup(signalGroup);
-				
-				ISignalGroup newGroup = new SignalGroup(group);
-				newGroup.setShellResult(null);
-				this.addSignalGroup(signalGroup, newGroup);
-				
-			} catch (UnavailableSignalGroupException e) {
-				stack("Error copying signal group to virtual collection", e);
-			}
-		}
+//		for(UUID signalGroup : parent.getCollection().getSignalGroupIDs()){
+//			try {
+//				ISignalGroup group = parent.getCollection().getSignalGroup(signalGroup);
+//				
+//				if(group.hasShellResult()){
+//					shellResults.put(signalGroup, group.)
+//				}
+//				ISignalGroup newGroup = new SignalGroup(group);
+//				newGroup.setShellResult(null);
+//				this.addSignalGroup(signalGroup, newGroup);
+//				
+//			} catch (UnavailableSignalGroupException e) {
+//				stack("Error copying signal group to virtual collection", e);
+//			}
+//		}
 	}
 	
 	/**
@@ -377,28 +381,58 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void removeSignalGroup(UUID id) {}
+	public void removeSignalGroup(UUID id) {
+		shellResults.remove(id);
+	}
 
 	@Override
 	public ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException {
-		return signalGroups.get(signalGroup);//parent.getCollection().getSignalGroup(signalGroup);
+		
+		// Override the shell storage to point to this collection, not the shell result
+		// This SignalGroup is never saved to file, so does not need serialising
+		@SuppressWarnings("serial")
+		ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup)){
+			
+			@Override
+			public void setShellResult(IShellResult result){
+				shellResults.put(signalGroup, result);			
+			}
+			
+			@Override
+			public boolean hasShellResult(){
+				return shellResults.containsKey(signalGroup);
+			}
+			
+			@Override
+			public IShellResult getShellResult(){
+				return shellResults.get(signalGroup);
+			}
+			
+		};
+		
+//		if(shellResults.containsKey(signalGroup)){
+//			result.setShellResult(shellResults.get(signalGroup));
+//		} else {
+//			result.setShellResult(null);
+//		}
+		return result;
 	}
 
 	@Override
 	public boolean hasSignalGroup(UUID signalGroup) {
-		return signalGroups.containsKey(signalGroup);// parent.getCollection().hasSignalGroup(signalGroup);
+		return parent.getCollection().hasSignalGroup(signalGroup);
 	}
 
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-		return signalGroups.values();
-//		return parent.getCollection().getSignalGroups();
+//		return signalGroups.values();
+		return parent.getCollection().getSignalGroups();
 	}
 
 	@Override
 	public void addSignalGroup(UUID newID, ISignalGroup newGroup) {
-		signalGroups.put(newID, newGroup);
-//		parent.getCollection().addSignalGroup(newID, newGroup);
+//		signalGroups.put(newID, newGroup);
+		parent.getCollection().addSignalGroup(newID, newGroup);
 	}
 
 	@Override
