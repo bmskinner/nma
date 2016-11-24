@@ -13,12 +13,27 @@ public class SignalTableCell {
 	
 	private UUID   id;
 	private String name;
-    private Color  color;
+    private Color  color = Color.WHITE;
 
 	
-	public SignalTableCell(UUID id, String name) {
+	/**
+	 * Construct with a signal ID, a signal name and the signal display colour
+	 * @param id
+	 * @param name
+	 * @param color
+	 */
+	public SignalTableCell(UUID id, String name, Color color) {
+		
+		if(id==null || name==null){
+			throw new IllegalArgumentException("ID or name is null");
+		}
 		this.id     = id;
 		this.name   = name;
+		
+		if(color!=null){
+			this.color = color;
+		}
+
 	}
 	
 	public UUID getID(){

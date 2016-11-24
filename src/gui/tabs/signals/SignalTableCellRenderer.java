@@ -37,9 +37,12 @@ public class SignalTableCellRenderer extends ConsistentRowTableCellRenderer {
 						// Check if the signal block has a signal group by looking at the next row
 						if(table.getModel().getValueAt(nextRow, column) != null){
 							if( ! table.getModel().getValueAt(nextRow, column).toString().equals("")){
-								SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow, column);
+								
+								if(table.getModel().getValueAt(nextRow, column) instanceof SignalTableCell){
+									SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(nextRow, column);
 
-								colour = cell.getColor();
+									colour = cell.getColor();
+								}
 							}
 						}
 

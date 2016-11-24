@@ -89,7 +89,11 @@ public class SignalManager implements Loggable {
 		  return getCellsWithNuclearSignals(signalGroup, true).size();
 	  }
 	  
-	  public int getSignalGroupCount(){
+  /**
+   * Get the number of signal groups in the cell collection
+   * @return the number of signal groups
+   */
+	public int getSignalGroupCount(){
 		  return getSignalGroupIDs().size();
 	  }
 	  	  

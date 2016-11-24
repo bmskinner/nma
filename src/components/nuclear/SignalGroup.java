@@ -36,7 +36,7 @@ public class SignalGroup implements ISignalGroup {
         isVisible   = s.isVisible();
         groupColour = s.getGroupColour();
         channel     = s.getChannel();
-        folder      = s.getFolder();
+        folder      = new File(s.getFolder().getAbsolutePath());
     }
 
     /* (non-Javadoc)

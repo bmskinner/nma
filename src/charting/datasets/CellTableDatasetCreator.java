@@ -210,14 +210,12 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 				fieldNames.add("");
 				rowData.add("");
-
-				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName());
-
-				Paint colour = g.hasColour()
+				Color colour = g.hasColour()
 						? g.getGroupColour()
 						: ColourSelecter.getColor(j);
+						
+				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName(), colour);
 
-				tableCell.setColor((Color) colour);
 
 				fieldNames.add("Signal group");
 				rowData.add(tableCell);		
