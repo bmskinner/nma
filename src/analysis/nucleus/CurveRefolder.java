@@ -133,14 +133,14 @@ public class CurveRefolder extends AnalysisWorker {
 
 		try{ 
 
-//			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
+			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
 
-//			if(collection.size()>1){
-//				
-//				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
-//				refoldCurve(); // carry out the refolding
-//				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
-//			}
+			if(collection.size()>1){
+				
+				smoothCurve(); // smooth the candidate nucleus to remove jagged edges
+				refoldCurve(); // carry out the refolding
+				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
+			}
 						
 			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
 

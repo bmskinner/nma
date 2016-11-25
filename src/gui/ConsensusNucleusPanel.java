@@ -23,8 +23,6 @@ import gui.tabs.DetailPanel;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
@@ -42,20 +40,14 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.AbstractChartFactory;
 import charting.charts.ConsensusNucleusChartFactory;
 import charting.charts.panels.ConsensusNucleusChartPanel;
-import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.CellCollection;
 import components.ICellCollection;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
 import components.generic.IPoint;
 import components.generic.Tag;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
@@ -197,80 +189,67 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		JButton moveUp = new JButton("+y");
 		moveUp.setToolTipText("Move centre of mass y+1");
-		moveUp.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().offset(0, 1);;
-					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
-				}
+		
+		moveUp.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().offset(0, 1);;
+				refreshChartCache(getDatasets());
 			}
 		});
 		panel.add(moveUp, constraints);
 		
 		JButton moveDown = new JButton("-y");
 		moveDown.setToolTipText("Move centre of mass y-1");
-		moveDown.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().offset(0, -1);;
-					refreshChartCache(getDatasets());
-				}
+		moveDown.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().offset(0, -1);;
+				refreshChartCache(getDatasets());
 			}
 		});
+
 		constraints.gridx = 1;
 		constraints.gridy = 2;
 		panel.add(moveDown, constraints);
 		
 		JButton moveLeft = new JButton("-x");
 		moveLeft.setToolTipText("Move centre of mass x-1");
-		moveLeft.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().offset(-1, 0);;
-					refreshChartCache(getDatasets());
-				}
+		moveLeft.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().offset(-1, 0);;
+				refreshChartCache(getDatasets());
 			}
 		});
+
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		panel.add(moveLeft, constraints);
 		
-		JButton moveright = new JButton("+x");
-		moveright.setToolTipText("Move centre of mass x+1");
-		moveright.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().offset(1, 0);;
-					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
-				}
+		JButton moveRight = new JButton("+x");
+		moveRight.setToolTipText("Move centre of mass x+1");
+		moveRight.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().offset(1, 0);;
+				refreshChartCache(getDatasets());
 			}
 		});
+
 		constraints.gridx = 2;
 		constraints.gridy = 1;
-		panel.add(moveright, constraints);
+		panel.add(moveRight, constraints);
 		
 		JButton moveRst = new JButton("!");
 		moveRst.setToolTipText("Reset centre of mass to 0,0");
-		moveRst.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					double x = 0;
-					double y = 0;
-					IPoint point = new FloatPoint(x, y);
-					
-					activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
-					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
-				}
+		moveRst.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				double x = 0;
+				double y = 0;
+				IPoint point = new FloatPoint(x, y);
+				
+				activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
+				refreshChartCache(getDatasets());
 			}
 		});
+
 		constraints.gridx = 1;
 		constraints.gridy = 1;
 		panel.add(moveRst, constraints);
@@ -290,66 +269,58 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		JButton rotateFwd = new JButton("-r");
 		rotateFwd.setToolTipText("Rotate anti-clockwise 1 degree");
-		rotateFwd.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().rotate(-89);
-					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
-				}
+		rotateFwd.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().rotate(-89);
+				refreshChartCache(getDatasets());
+
 			}
 		});
+
 
 		panel.add(rotateFwd, constraints);
 
 		JButton rotateBck = new JButton("+r");
 		rotateBck.setToolTipText("Rotate clockwise 1 degree");
-		rotateBck.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					activeDataset().getCollection().getConsensusNucleus().rotate(-91);
-					refreshChartCache(getDatasets());
-//					update(activeDatasetToList());
-				}
+		
+		rotateBck.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				activeDataset().getCollection().getConsensusNucleus().rotate(-91);
+				refreshChartCache(getDatasets());
 			}
 		});
+
+		
 		constraints.gridx = 2;
 		constraints.gridy = 0;
 		panel.add(rotateBck, constraints);
 
 		JButton rotateRst = new JButton("!");
 		rotateRst.setToolTipText("Reset rotation to orientation point");
-		rotateRst.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				if(activeDataset().getCollection().hasConsensusNucleus()){
-					IBorderPoint orientationPoint;
-					try {
-						orientationPoint = activeDataset().getCollection()
-								.getConsensusNucleus()
-								.getBorderTag(Tag.ORIENTATION_POINT);
-						activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
-					} catch (UnavailableBorderTagException e) {
-						fine("Cannot get OP index in nucleus profile", e);
-					}
-					
-					refreshChartCache(getDatasets());
+		
+		rotateRst.addActionListener( e -> {
+			if(activeDataset().getCollection().hasConsensusNucleus()){
+				IBorderPoint orientationPoint;
+				try {
+					orientationPoint = activeDataset().getCollection()
+							.getConsensusNucleus()
+							.getBorderTag(Tag.ORIENTATION_POINT);
+					activeDataset().getCollection().getConsensusNucleus().rotatePointToBottom(orientationPoint);
+				} catch (UnavailableBorderTagException e1) {
+					stack("Cannot get OP index in nucleus profile", e1);
 				}
+				
+				refreshChartCache(getDatasets());
 			}
 		});
+
 		constraints.gridx = 1;
 		constraints.gridy = 0;
 		panel.add(rotateRst, constraints);
 		
 		JButton refoldBtn = new JButton("Re-Refold");
-		refoldBtn.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
-			}
+		refoldBtn.addActionListener( e -> {
+			fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
 		});
 		
 		constraints.gridwidth = 3;
