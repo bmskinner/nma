@@ -21,6 +21,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.Range;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.util.SortOrder;
 
 import components.active.generic.UnavailableSignalGroupException;
 import analysis.IAnalysisDataset;
@@ -85,11 +86,11 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 			chart.getCategoryPlot().setRenderer(datasetCount, rend);
 
 			for( int i=0; i<ds.getColumnCount(); i++){
-				Comparable colKey = ds.getColumnKey(i);
+				Comparable<String> colKey = ds.getColumnKey(i).toString();
 				
 				for (int j = 0; j < ds.getRowCount(); j++) {
 
-					Comparable rowKey = ds.getRowKey(j);
+					Comparable<String> rowKey = ds.getRowKey(j).toString();
 					
 					// Get the visible range of the chart
 					range = Range.combine(range, shellDataset.getVisibleRange());
@@ -99,12 +100,13 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 					rend.setSeriesVisibleInLegend(j, false);
 					rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 					Color colour = ColourSelecter.getColor(j);
-					colour = ColourSelecter.getTransparentColour(colour, true, 128); // bars must be see through
+//					colour = ColourSelecter.getTransparentColour(colour, true, 128); // bars must be see through
 					
 					try {
 
 						colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-	                           ? ColourSelecter.getTransparentColour(d.getCollection().getSignalGroup(signalGroup).getGroupColour(), true, 128)
+							   ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
+//	                           ? ColourSelecter.getTransparentColour(d.getCollection().getSignalGroup(signalGroup).getGroupColour(), true, 128)
                                : colour;
 
                         colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) 
@@ -120,7 +122,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 	        		}
 				}	
 			}
-			
+			chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING);
 			
 			datasetCount++;
 		}

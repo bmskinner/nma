@@ -30,7 +30,6 @@ import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.CategoryItemRendererState;
 import org.jfree.chart.renderer.category.LayeredBarRenderer;
 import org.jfree.data.category.CategoryDataset;
@@ -141,7 +140,7 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         rectX = rectX + (1 - widthFactor) * state.getBarWidth() / 2.0;
         if (seriesCount > 1) {
         	
-        	// Negative values do not need shifting
+        	// Negative values do not need shifting - the bar is full width
         	if(dataset.getValue(row, column).doubleValue()<0){
         		shift = 0;
         	}
@@ -149,7 +148,7 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
             shift = rectWidth * 0.20 / (seriesCount - 1);
         }
         
-        
+        // Choose the width of the bar, incorporating reductions
         double barWidth = rectWidth - (seriesCount - 1 - row) * shift * 2;
         if(dataset.getValue(row, column).doubleValue()<0){
         	barWidth = rectWidth; // Negative values do not reduce bar width
