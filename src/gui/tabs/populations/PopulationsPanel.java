@@ -28,7 +28,6 @@ import gui.tabs.DetailPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
@@ -52,12 +51,10 @@ import java.util.logging.Level;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
-import charting.datasets.AbstractDatasetCreator;
 import analysis.IAnalysisDataset;
 import components.ClusterGroup;
 import components.ICellCollection;
@@ -212,7 +209,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 				// double click
 				if (e.getClickCount() == 2) {
 
-					if(o instanceof ClusterGroup){
+					if(o instanceof IClusterGroup){
 						clusterGroupClicked((IClusterGroup) o);
 					}
 					
@@ -239,7 +236,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 			
 			private void clusterGroupClicked(IClusterGroup g){
-
+				// No functionality assigned yet
 			}
 			
 			private void datasetClicked(IAnalysisDataset d, int row, int column){
@@ -360,16 +357,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 * Rename an existing dataset and update the population list.
 	 * @param dataset the dataset to rename
 	 */
-
 	private void renameCollection(IAnalysisDataset dataset){
 		ICellCollection collection = dataset.getCollection();
-		String newName = (String) JOptionPane.showInputDialog(this, 
+		String newName = JOptionPane.showInputDialog(this, 
 				"Choose a new name", 
 				"Rename collection", 
 				JOptionPane.INFORMATION_MESSAGE, 
 				null, 
 				null,
-				collection.getName());
+				collection.getName()).toString();
 		
 		// validate
 		if( newName==null || newName.isEmpty()){
@@ -477,7 +473,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			d=null; // clear from memory
 			finest("Deleted dataset");
 		} catch (Exception e){
-			log(Level.SEVERE, "Error deleting dataset "+d.getName(), e);
+			warn("Error deleting dataset "+d.getName());
+			stack("Error deleting dataset "+d.getName(), e);
 		}
 	}
 	

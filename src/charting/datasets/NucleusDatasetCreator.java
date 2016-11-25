@@ -387,8 +387,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 */
 	public XYDataset createSegmentedMedianProfileDataset(ChartOptions options) throws ChartDatasetCreationException {
 		
-		
-		
+
 		ICellCollection collection = options.firstDataset().getCollection();
 		DefaultXYDataset ds = new DefaultXYDataset();
 		

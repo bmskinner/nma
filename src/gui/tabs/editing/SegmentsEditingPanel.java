@@ -180,9 +180,11 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			ISegmentedProfile profile = null;
 			
+			boolean normaliseProfile = false;
+			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(true)
+				.setNormalised(normaliseProfile)
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
@@ -205,7 +207,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			ChartOptions rangeOptions = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(true)
+				.setNormalised(normaliseProfile)
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
@@ -229,7 +231,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 			}
 
-			dualPanel.setCharts(chart, profile, true, rangeChart);
+			dualPanel.setCharts(chart, profile, normaliseProfile, rangeChart);
 		}
 
 		@Override

@@ -131,6 +131,27 @@ public abstract class AbstractChartFactory implements Loggable {
 	 * @param value
 	 */
 	protected void addMarkerToXYPlot(XYPlot plot, Tag tag, double value){
+		Color colour = chooseTagColour(tag);
+		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
+	}
+	
+	/**
+	 * Draw domain markers for the given border tag at the given position
+	 * @param plot
+	 * @param tag
+	 * @param value
+	 */
+	protected void addMarkerToXYPlot(XYPlot plot, Tag tag, int value){	
+		Color colour = chooseTagColour(tag);
+		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
+	}
+	
+	/**
+	 * Get the appropriate colour for rendering tag markers
+	 * @param tag the tag to be rendered
+	 * @return the colour for the tag, or black if the tag was null or unknown
+	 */
+	private Color chooseTagColour(Tag tag){
 		Color colour = Color.BLACK;
 		
 		if(tag.equals(Tag.ORIENTATION_POINT)){
@@ -148,9 +169,7 @@ public abstract class AbstractChartFactory implements Loggable {
 		if(tag.getName().equals(BorderTag.BOTTOM_VERTICAL.toString())){
 			colour = Color.GRAY;
 		}
-		
-		
-		plot.addDomainMarker(new ValueMarker(value, colour, ChartComponents.MARKER_STROKE));	
+		return colour;
 	}
 	
 	public static JFreeChart makeErrorChart(){

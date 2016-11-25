@@ -61,6 +61,7 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 import components.AbstractCellularComponent;
 import components.ICellCollection;
+import components.active.DefaultCellularComponent;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnsegmentedProfileException;
@@ -322,7 +323,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 					// adjust the index to the offset
-					index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+					index = DefaultCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
@@ -386,7 +387,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 					   		.size();
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			fine("Error getting median profile", e);
+			stack("Error getting median profile", e);
 			return makeErrorChart();
 		}
 				
@@ -397,14 +398,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		// the 180 degree line
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
 				
-		int datasetIndex = 0;
-		for(IAnalysisDataset dataset : options.getDatasets()){
+		for(int datasetIndex = 0; datasetIndex< options.datasetCount(); datasetIndex++){
 
 			XYDataset ds;
 			try {
 				ds = new NucleusDatasetCreator().createSegmentedMedianProfileDataset( options);
 			} catch (ChartDatasetCreationException e) {
-				fine("Error creating median profile dataset", e);
+				stack("Error creating median profile dataset", e);
 				return makeErrorChart();
 			}
 
@@ -421,15 +421,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				
 				renderer.setSeriesVisibleInLegend(i, false);
 				
-				String name = (String) ds.getSeriesKey(i);
-//				IJ.log("    Series "+i + ": "+name);
+				String name = ds.getSeriesKey(i).toString();
+
 				
 				// segments along the median profile
 				if(name.startsWith("Seg_")){
 					int colourIndex = getIndexFromLabel(name);
 					renderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 					
-					Paint colour = ColourSelecter.getColor(colourIndex);
+					Color colour = ColourSelecter.getColor(colourIndex);
 				
 					renderer.setSeriesPaint(i, colour);
 					renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
@@ -441,7 +441,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		
 		if(options.isSingleDataset()){
-			
+						
 			// Add markers
 			if(options.isShowMarkers()){
 
@@ -456,18 +456,21 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 						int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 						// adjust the index to the offset
-						index = AbstractCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+						index = DefaultCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
-						double indexToDraw = index; // convert to a double to allow normalised positioning
-
+						
 						if(options.isNormalised()){ // set to the proportion of the point along the profile
-							indexToDraw =  (( indexToDraw / collection.getProfileCollection().length() ) * 100);
+							// convert to a double to allow normalised positioning
+							double indexToDraw =  ((  (double) index / collection.getProfileCollection().length() ) * 100);
+							addMarkerToXYPlot(plot, tag, indexToDraw);
+						} else {
+							addMarkerToXYPlot(plot, tag, index);
 						}
 
-						addMarkerToXYPlot(plot, tag, indexToDraw);
+						
 					
 				} catch(UnavailableBorderTagException e){
-					fine("Tag not present in profile: "+tag);
+					stack("Tag not present in profile: "+tag, e);
 				}
 					
 				}
@@ -483,16 +486,20 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 							.getOrderedSegments()){
 
 						int midPoint = seg.getMidpointIndex();
+						double xToDraw = midPoint;
+						if(options.isNormalised()){
+							xToDraw = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
+						}
+						
 
-						double x = ((double) midPoint / (double) seg.getTotalLength() ) * 100;
-						XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
+						XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), xToDraw, 320);
 						
 						Paint colour = ColourSelecter.getColor(seg.getPosition());
 						segmentAnnotation.setPaint(colour);
 						plot.addAnnotation(segmentAnnotation);
 					}
 				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-					fine("Error creating median profile dataset", e);
+					stack("Error creating median profile dataset", e);
 					return makeErrorChart();
 				}
 			}

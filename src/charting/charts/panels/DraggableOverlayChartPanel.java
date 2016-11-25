@@ -72,7 +72,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 	protected volatile Overlay overlay = null;
 		
 
-	public DraggableOverlayChartPanel(final JFreeChart chart, final SegmentedProfile profile, boolean normalised){
+	public DraggableOverlayChartPanel(final JFreeChart chart, final ISegmentedProfile profile, boolean normalised){
 		super(chart);
 		this.profile = profile;
 		this.isChartNormalised = normalised;

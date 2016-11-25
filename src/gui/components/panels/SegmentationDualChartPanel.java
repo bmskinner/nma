@@ -41,7 +41,7 @@ public class SegmentationDualChartPanel extends DualChartPanel{
 			.build();
 		
 		JFreeChart profileChart  = new MorphologyChartFactory(options).makeEmptyChart();
-		chartPanel = new DraggableOverlayChartPanel(profileChart, null, true);
+		chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
 		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
 	}
 	
