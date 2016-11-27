@@ -249,7 +249,14 @@ public interface IProfileCollection extends Serializable, Loggable{
 	 */
 	List<Integer> findMostVariableRegions(ProfileType type, Tag tag) throws UnavailableBorderTagException;
 	
-	double[] getValuesAtPosition(ProfileType type, double position);
+	/**
+	 * Get the values within the profile aggregate for the given position
+	 * @param type the profile type to search
+	 * @param position the position between zero and one
+	 * @return the values at that position
+	 * @throws UnavailableProfileTypeException if the profile type is not present
+	 */
+	double[] getValuesAtPosition(ProfileType type, double position) throws UnavailableProfileTypeException;
 	
 	List<Double> getXKeyset(ProfileType type);
 

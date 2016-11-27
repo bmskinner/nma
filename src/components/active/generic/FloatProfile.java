@@ -29,6 +29,8 @@ import components.active.DefaultCellularComponent;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.nuclear.IBorderSegment;
+import utility.ArrayConverter;
+import utility.ArrayConverter.ArrayConversionException;
 
 /**
  * The default implementation of {@link IProfile}, which stores values
@@ -93,8 +95,6 @@ public class FloatProfile implements IProfile {
 			array[i] = value;
 		}
 	}
-
-
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#size()

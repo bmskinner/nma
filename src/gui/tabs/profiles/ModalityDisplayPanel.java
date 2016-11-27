@@ -17,7 +17,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -27,7 +26,6 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
-import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ProfileType;
@@ -38,8 +36,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		
 		private JPanel mainPanel = new JPanel(new BorderLayout());
 		private JList<Double> pointList;
-		private ExportableChartPanel chartPanel;
-		private ExportableChartPanel modalityProfileChartPanel; // hold a chart showing p-values across the profile
+		private ExportableChartPanel angleDistributionPanel;
+		private ExportableChartPanel pValueChartPanel; // hold a chart showing p-values across the profile
 		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 		
 		public ModalityDisplayPanel(){
@@ -60,11 +58,11 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			/*
 			 * Make the main chart panels
 			 */
-			chartPanel                = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
-			modalityProfileChartPanel = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
+			angleDistributionPanel = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
+			pValueChartPanel       = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
 			
-			mainPanel.add(chartPanel, BorderLayout.WEST);
-			mainPanel.add(modalityProfileChartPanel, BorderLayout.CENTER);
+			mainPanel.add(angleDistributionPanel, BorderLayout.WEST);
+			mainPanel.add(pValueChartPanel, BorderLayout.CENTER);
 
 			/*
 			 * Make the list of positions along the profile
@@ -86,7 +84,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		}
 		
 		private JScrollPane createListPanel(){
-//			DecimalFormat df = new DecimalFormat("#0.00");
+
 			pointList = new JList<Double>();
 			
 			pointList.setModel(createEmptyListModel());
@@ -101,7 +99,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		}
 		
 		
-		public ListModel<Double> createEmptyListModel(){
+		private ListModel<Double> createEmptyListModel(){
 			DefaultListModel<Double> model = new DefaultListModel<Double>();
 			for(Double d=0.0; d<=100; d+=0.5){
 				model.addElement(d);
@@ -109,7 +107,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			return model;
 		}
 		
-		
+		@Override
 		public void setEnabled(boolean b){
 			super.setEnabled(b);
 			profileCollectionTypeSettingsPanel.setEnabled(b);
@@ -122,21 +120,14 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			this.setEnabled(true);
 			
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
-			
-			DefaultListModel<Double> model = new DefaultListModel<Double>();
-			List<Double> xvalues = activeDataset().getCollection()
-					.getProfileCollection()
-					.getXKeyset(type);
 
-			for(Double d: xvalues){
-				model.addElement(d);
-			}
-			pointList.setModel(model);
+			pointList.setModel(createEmptyListModel());
 			pointList.setCellRenderer(new ModalityListCellRenderer());
 			pointList.setSelectedIndex(0);
 			
 			updateModalityProfileChart();
 //			updatePositionChart(0);
+
 		}
 		
 		@Override
@@ -149,6 +140,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
 			updateModalityProfileChart();
 //			updatePositionChart(0);
+			
 		}
 		
 		@Override
@@ -163,8 +155,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		@Override
 		public void setChartsAndTablesLoading(){
 			super.setChartsAndTablesLoading();
-			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
-			modalityProfileChartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			angleDistributionPanel.setChart(AbstractChartFactory.createLoadingChart());	
+			pValueChartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 			
 		}
 		
@@ -184,34 +176,41 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(true) // here, the boolean is used to indicate the main chart
+				.setNormalised(true) // here, the boolean is used to indicate the the p-value chart
 				.setAlignment(ProfileAlignment.LEFT)
 				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setTarget(modalityProfileChartPanel)
+				.setTarget(pValueChartPanel)
 				.build();
-						
+									
 			
 			setChart(options);
 			
 		}
 		
+		/**
+		 * Update the chart to display values at the given percentage along
+		 * the profile.
+		 * @param xvalue the percentage between zero and one hundred
+		 */
 		public void updatePositionChart(double xvalue) {
 			
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 			
+			double fraction = xvalue /100d;
+			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
-				.setNormalised(false) // here, the boolean is used to indicate the position chart
+				.setNormalised(false) // here, the boolean is used to indicate the main chart
 				.setAlignment(ProfileAlignment.RIGHT)
 				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(false)
 				.setProfileType(type)
-				.setModalityPosition(xvalue)
+				.setModalityPosition(fraction)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setTarget(chartPanel)
+				.setTarget(angleDistributionPanel)
 				.build();
 			
 			
@@ -232,7 +231,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			
 			if(pointList.getSelectedValue()!=null){
 
-				double xvalue = pointList.getSelectedValue();
+				double xvalue = pointList.getSelectedValue().doubleValue();
 
 				int lastRow    = pointList.getModel().getSize()-1;
 
@@ -240,7 +239,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 					xvalue=0; // wrap arrays
 				}
 
-				finest("Selecting profile position "+xvalue);
+
 				updatePositionChart(xvalue);
 			}
 		}
@@ -252,6 +251,11 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
 		}
 		
+		/**
+		 * Render the posiitons along a profile with appropriate formatting
+		 * @author ben
+		 *
+		 */
 		private class ModalityListCellRenderer extends DefaultListCellRenderer {
 
 			DecimalFormat df = new DecimalFormat("#0.00");

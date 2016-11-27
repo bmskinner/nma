@@ -111,22 +111,27 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	/**
 	 * Get the angle values at the given position in the aggregate. If the requested
 	 * position is not an integer, the closest integer index values are returned
-	 * @param position the position to search. Must be between 0 and the length of the aggregate.
+	 * @param position the position to search. Must be between 0 and 1.
 	 * @return an unsorted array of the values at the given position
 	 */
 	public double[] getValuesAtPosition(double position) {
-		if(position < 0 || position > length ){
+		if(position < 0 || position > 1 ){
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
 		}
 		
+		double indexPosition =  (double) this.length * position;
+		
 		// Choose the best position to return
-		int index = (int) Math.round(position);
+		int index = (int) Math.round(indexPosition);
+//		log("xposition "+position+": index "+index);
+		
 		
 		float[] result = getValuesAtIndex(index);
 		
 		try {
 			return new ArrayConverter(result).toDoubleArray();
 		} catch (ArrayConversionException e) {
+			stack("Error getting values from aggregate", e);
 			return null;
 		}
 	}

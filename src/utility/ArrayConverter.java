@@ -205,7 +205,7 @@ public class ArrayConverter {
 	}
 	
 	/**
-	 * Convert the given data to a Integer[]
+	 * Convert the given data to a Float[]
 	 * @return
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
@@ -233,7 +233,7 @@ public class ArrayConverter {
 	}
 	
 	/**
-	 * Convert the given data to a int[]
+	 * Convert the given data to a float[]
 	 * @return
 	 * @throws ArrayConversionException if the data are not Numbers
 	 */
@@ -249,7 +249,7 @@ public class ArrayConverter {
 			float[] result = new float[data.size()];
 			
 			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).intValue();
+				result[i] = ( (Number) data.get(i)).floatValue();
 			}
 			return result;
 			

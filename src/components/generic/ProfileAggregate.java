@@ -329,7 +329,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
 	 * @see components.generic.IProfileAggregate#getValuesAtPosition(double)
 	 */
 	@Override
-	public double[] getValuesAtPosition(double position) throws Exception{
+	public double[] getValuesAtPosition(double position){
 		if(position < 0 || position > 100 ){
 			throw new IllegalArgumentException("Desired x-position is out of range: "+position);
 		}
@@ -366,9 +366,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
 
 		// the desired position is chosen
 		Collection<Double> values = aggregate.get(position);
-		if (values==null){
-			throw new Exception("Cannot find values at position "+position);
-		}
+		
 		
 		double[] temp;
 		  try {

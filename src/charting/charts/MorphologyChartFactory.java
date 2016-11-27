@@ -991,17 +991,15 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			return makeErrorChart();
 		}
 		
-		JFreeChart chart = 
-				ChartFactory.createXYLineChart(null,
-						"Position", "Probability", ds, PlotOrientation.VERTICAL, true, true,
-						false);
-		
+		JFreeChart chart = createBaseXYChart();
+
 		XYPlot plot = chart.getXYPlot();
-		
-		plot.setBackgroundPaint(Color.WHITE);
 		plot.getDomainAxis().setRange(0, 100);
+		plot.getDomainAxis().setLabel("Position");
 		plot.getRangeAxis().setRange(0, 1);
-		
+		plot.getRangeAxis().setLabel("Probability");
+		plot.setDataset(ds);
+
 		for(int i=0; i<options.getDatasets().size(); i++){
 			
 			IAnalysisDataset dataset = options.getDatasets().get(i);

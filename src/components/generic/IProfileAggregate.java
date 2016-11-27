@@ -66,7 +66,7 @@ public interface IProfileAggregate {
 	 * @return an unsorted array of the values at the given position
 	 * @throws Exception 
 	 */
-	double[] getValuesAtPosition(double position) throws Exception;
+	double[] getValuesAtPosition(double position);
 
 	List<Double> getXKeyset();
 

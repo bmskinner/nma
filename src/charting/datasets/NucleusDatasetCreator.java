@@ -1648,10 +1648,11 @@ public class NucleusDatasetCreator implements Loggable {
 	 * for all datasets
 	 * @param options the charting options
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public XYDataset createModalityProfileDataset(ChartOptions options) throws ChartDatasetCreationException {
 
+//		log("Creating modality p-value dataset");
 		DefaultXYDataset ds = new DefaultXYDataset();
 	
 		for(IAnalysisDataset dataset : options.getDatasets()){
@@ -1676,7 +1677,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @param xposition
 	 * @param dataset
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset 
 			dataset, ProfileType type) throws ChartDatasetCreationException {
@@ -1685,7 +1686,13 @@ public class NucleusDatasetCreator implements Loggable {
 		
 		ICellCollection collection = dataset.getCollection();
 
-		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+		double[] values;
+		try {
+			values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+		} catch (UnavailableProfileTypeException e) {
+			throw new ChartDatasetCreationException("Cannot get profile values at position "+xposition, e);
+		}
+		
 		double[] xvalues = new double[values.length];
 		for(int i=0; i<values.length; i++){
 			xvalues[i] = 0;
@@ -1707,7 +1714,12 @@ public class NucleusDatasetCreator implements Loggable {
 			ProfileType type) throws ChartDatasetCreationException {
 		ICellCollection collection = dataset.getCollection();
 		KernelEstimator est = new KernelEstimator(0.001);
-		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+		double[] values;
+		try {
+			values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+		} catch (UnavailableProfileTypeException e) {
+			throw new ChartDatasetCreationException("Cannot get profile values at position "+xposition, e);
+		}
 		// add the values to a kernel estimator
 		// give each value equal weighting
 		for(double d : values){

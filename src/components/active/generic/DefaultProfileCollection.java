@@ -438,20 +438,18 @@ public class DefaultProfileCollection implements IProfileCollection {
 	}
 	
 	@Override
-	public double[] getValuesAtPosition(ProfileType type, double position){
+	public double[] getValuesAtPosition(ProfileType type, double position) throws UnavailableProfileTypeException{
 		
-		double[] result;
-		try {
-			result = map.get(type).getValuesAtPosition(position);
-		} catch (Exception e) {
+		double[] result = map.get(type).getValuesAtPosition(position);
+		
+		if(result==null){
+			
 			result = new double[length()];
 			for(int i=0; i<result.length; i++){
 				result[i] = 0;
 			}
 		}
-		
-		
-		
+
 		return result;
 	}
 	

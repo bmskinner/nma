@@ -18,18 +18,21 @@
  *******************************************************************************/
 package stats;
 
-import ij.IJ;
-
 import java.util.List;
 
+import analysis.profiles.ProfileException;
 import jdistlib.InvNormal;
 import jdistlib.disttest.DistributionTest;
 import jdistlib.disttest.NormalityTest;
-import components.CellCollection;
+import logging.Loggable;
+import utility.ArrayConverter;
+import utility.ArrayConverter.ArrayConversionException;
 import components.ICellCollection;
+import components.active.generic.FloatProfile;
+import components.active.generic.UnavailableBorderTagException;
+import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
-import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 
@@ -39,7 +42,7 @@ import components.generic.Tag;
  * what is the difference to the median at that point? Is the list of
  * differences bimodal?
  */
-public class DipTester {
+public class DipTester implements Loggable {
 	
 	private ICellCollection collection;
 	
@@ -53,58 +56,60 @@ public class DipTester {
 	 * at each point
 	 * @param collection the collection of nuclei
 	 * @param tag the border tag to offset from
-	 * @return a boolean profile of results
+	 * @return a profile of results
 	 */
 	public IProfile testCollectionGetPValues(Tag tag, ProfileType type){
 		IProfile resultProfile = null;
-		
+
 		double[] pvals = null;
 		try {
 			int offset = collection.getProfileCollection().getIndex(tag);
-			
+
 			// ensure the postions are starting from the right place
 			List<Double> keys = collection.getProfileCollection().getXKeyset(type);
 
-			
+
 			pvals = new double[keys.size()];
-			
+
 			for(int i=0; i<keys.size(); i++ ){
-				
-				double position = keys.get(i);
-				try{ 
-					double[] values = collection.getProfileCollection().getValuesAtPosition(type, position);
 
-					double pval =  getDipTestPValue(values);
-					pvals[i] = pval;
-
-				} catch(Exception e){
-//					IJ.log("Cannot get values for position "+position);
-					pvals[i] = 1;
-				}
+				double position = keys.get(i).doubleValue();
+				double[] values = collection.getProfileCollection().getValuesAtPosition(type, position);
+				pvals[i]        = getDipTestPValue(values);
 			}
 			
-			resultProfile = new Profile(pvals);
+			float[] floatPvals = new ArrayConverter(pvals).toFloatArray();
+
+
+			resultProfile = new FloatProfile( floatPvals );
 			resultProfile = resultProfile.offset(offset);
-			
-			
-		} catch (Exception e) {
-			pvals = new double[100];
-			for(int i=0; i<100; i++){
-				pvals[i] = 1;
-			}
-			resultProfile = new Profile(pvals);
+		} catch (ArrayConversionException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+			stack("Error converting values or offsetting profile", e);
+			resultProfile = createErrorPValueProfile();
+
 		}
+//		log("result profile");
+//		log(resultProfile.toString());
 		return resultProfile;
+	}
+
+	private IProfile createErrorPValueProfile(){
+		float[] pvals = new float[100];
+		for(int i=0; i<100; i++){
+			pvals[i] = 1;
+		}
+		return new FloatProfile(pvals);
 	}
 	
 	/**
 	 * Get the p-value for a Dip Test at the given x position in the angle profile
 	 * @param collection
-	 * @param xPosition
+	 * @param xPosition the position between zero and one along the profile
 	 * @return
+	 * @throws UnavailableProfileTypeException 
 	 * @throws Exception
 	 */
-	public double getPValueForPositon(double xPosition, ProfileType type) throws Exception {
+	public double getPValueForPositon(double xPosition, ProfileType type) throws UnavailableProfileTypeException {
 		
 		double[] values = collection.getProfileCollection().getValuesAtPosition(type, xPosition);
 		return getDipTestPValue(values);
@@ -115,7 +120,6 @@ public class DipTester {
 	 * Test the given collection for non-unimodality at each point in the profile,
 	 * using Hartigan's Dip Test. Returns a boolean profile with the points at which 
 	 * the dip test p-value is less than the given significance level
-	 * @param collection the collection of nuclei
 	 * @param tag the border tag to offset from
 	 * @param significance the p-value threshold
 	 * @return a boolean profile of results
@@ -124,27 +128,21 @@ public class DipTester {
 		
 		BooleanProfile resultProfile = null;
 		boolean[] modes = null;
-		try {
-			
-			IProfile pvals = testCollectionGetPValues(tag, type);
-			modes = new boolean[pvals.size()];
-			
-			for(int i=0; i<pvals.size(); i++ ){
-				
-				if(pvals.get(i)<significance){
-					modes[i] = true;
-				} else {
-					modes[i] = false;
-				}
-				
+
+		IProfile pvals = testCollectionGetPValues(tag, type);
+		modes = new boolean[pvals.size()];
+
+		for(int i=0; i<pvals.size(); i++ ){
+
+			if(pvals.get(i)<significance){
+				modes[i] = true;
+			} else {
+				modes[i] = false;
 			}
-			resultProfile = new BooleanProfile(modes);
-		} catch (Exception e) {
-			IJ.log("Error in dip test: "+e.getMessage());
-			for(StackTraceElement e1 : e.getStackTrace()){
-				IJ.log(e1.toString());
-			}
+
 		}
+		resultProfile = new BooleanProfile(modes);
+
 		return resultProfile;
 	}
 

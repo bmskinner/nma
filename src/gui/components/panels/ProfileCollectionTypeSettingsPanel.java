@@ -26,11 +26,21 @@ import javax.swing.JRadioButton;
 
 import components.generic.ProfileType;
 
+/**
+ * This is an options panel holding a group of radio buttons
+ * for the available profile types.
+ * @author ben
+ * @since 1.11.5
+ *
+ */
 @SuppressWarnings("serial")
 public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 	
 	private Map<ProfileType, JRadioButton> map  = new  HashMap<ProfileType, JRadioButton>();
 	
+	/**
+	 * Create a new panel
+	 */
 	public ProfileCollectionTypeSettingsPanel(){
 		
 		super();
@@ -49,6 +59,7 @@ public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
 		
 	}
 	
+	@Override
 	public void setEnabled(boolean b){
 
 		for(ProfileType type : ProfileType.values()){
