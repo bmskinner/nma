@@ -30,25 +30,19 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
 import analysis.profiles.ProfileException;
 import charting.options.ChartOptions;
-import charting.options.ChartOptions;
-import components.AbstractCellularComponent;
-import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.active.DefaultCellularComponent;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnavailableSignalGroupException;
 import components.active.generic.UnsegmentedProfileException;
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.IPoint;
 import components.generic.IProfile;
@@ -56,16 +50,11 @@ import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
 import components.generic.Tag;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
-import components.nuclear.NuclearSignal;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.ConsensusNucleus;
 import components.nuclei.Nucleus;
 import gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import ij.process.FloatPolygon;
@@ -1375,7 +1364,7 @@ public class NucleusDatasetCreator implements Loggable {
 			// pointType index is given within this
 			// We need to add the index of the pointType to the values within the segment
 			int segmentIndex = segment.getStartIndex() + i;
-			int index = AbstractCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
+			int index = DefaultCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
 			IBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
