@@ -421,18 +421,32 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 				case FIRST_TRUE:{
 					TrueFalsePanel p = new TrueFalsePanel();
 					components.add(p);
-//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-//					spinner.setToolTipText("1=True; 0=False");
-//					spinners.add(   spinner   );
 					break;
 				}
 				
 				case LAST_TRUE:{
 					TrueFalsePanel p = new TrueFalsePanel();
 					components.add(p);
-//					JSpinner spinner = new JSpinner(new SpinnerNumberModel(1,	0, 1, 1));
-//					spinner.setToolTipText("1=True; 0=False");
-//					spinners.add(   spinner   );
+					break;
+				}
+				
+				case INDEX_IS_WITHIN_FRACTION_OF:{
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.1,	0, 1, 0.01));
+					spinner.setToolTipText("Fraction of profile 0-1");
+					components.add(    spinner   );
+					break;
+				}
+				
+				case INDEX_IS_OUTSIDE_FRACTION_OF:{
+					JSpinner spinner = new JSpinner(new SpinnerNumberModel(0.1,	0, 1, 0.01));
+					spinner.setToolTipText("Fraction of profile 0-1");
+					components.add(    spinner   );
+					break;
+				}
+				
+				case INVERT:{
+					TrueFalsePanel p = new TrueFalsePanel();
+					components.add(p);
 					break;
 				}
 				

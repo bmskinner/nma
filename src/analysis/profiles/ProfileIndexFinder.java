@@ -256,8 +256,9 @@ public class ProfileIndexFinder implements Loggable {
 		
 		BooleanProfile result = new BooleanProfile(p, true);
 		for(Rule rule : r.getRules()){
-			BooleanProfile b = isApplicable(p, rule, result);
-			result = result.and(b);
+//			BooleanProfile b = isApplicable(p, rule, result);
+			result = isApplicable(p, rule, result);
+//			result = result.and(b);
 		}
 		return result;
 	}
@@ -303,11 +304,56 @@ public class ProfileIndexFinder implements Loggable {
 			case LAST_TRUE:
 				return findLastTrue(limits, r.getBooleanValue());	
 				
+			case INDEX_IS_WITHIN_FRACTION_OF:
+				return findIndexWithinFractionOf(limits, r.getValue());
+				
+			case INDEX_IS_OUTSIDE_FRACTION_OF:
+				return findIndexOutsideFractionOf(limits, r.getValue());
+				
+			case INVERT:
+				return limits.invert();
+				
 			default:
 				return new BooleanProfile(p);
 		
 		}
 		
+	}
+	
+	
+	/**
+	 * Get indexes that are within the given fraction of a profile from any true value in the input limits
+	 * @param b the limits
+	 * @param fraction the fraction of the profile from 0-1 either side of true values that will be true
+	 * @return a boolean profile with each true widened by the fractional amount
+	 */
+	private BooleanProfile findIndexWithinFractionOf(final BooleanProfile b, final double fraction){
+		BooleanProfile result = new BooleanProfile(b.size(), false); 
+		
+		int range = (int) Math.round((double) b.size() * fraction);
+		
+		for(int i=0;i<b.size();i++){
+			if(b.get(i)){
+				
+				for(int j=i-range; j<i+range; j++){
+					result.set(j, true);
+				}
+				
+			}
+		}	
+		return result;
+	}
+	
+	/**
+	 * Get indexes that are within the given fraction of a profile from any true value in the input limits
+	 * @param b the limits
+	 * @param fraction the fraction of the profile from 0-1 either side of true values that will be true
+	 * @return a boolean profile with each true widened by the fractional amount
+	 */
+	private BooleanProfile findIndexOutsideFractionOf(final BooleanProfile b, final double fraction){
+		BooleanProfile result = findIndexWithinFractionOf(b, fraction); 
+		
+		return result.invert();
 	}
 	
 	/**

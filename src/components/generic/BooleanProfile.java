@@ -23,6 +23,7 @@ import java.io.Serializable;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
+import components.active.DefaultCellularComponent;
 import components.active.generic.FloatProfile;
 import ij.IJ;
 
@@ -99,11 +100,15 @@ public class BooleanProfile implements Serializable, Loggable {
 	}
 	
 	/**
-	 * Set the value at the given index
+	 * Set the value at the given index. Wraps out of bounds indexes
 	 * @param index
 	 * @param b
 	 */
 	public void set(int index, boolean b){
+		
+		if(index<0 || index >=array.length){
+			index = DefaultCellularComponent.wrapIndex(index, array.length);
+		}
 		array[index] = b;
 	}
 	

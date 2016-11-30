@@ -86,7 +86,8 @@ public class ArrayConverter {
 	public Double[] toDoubleObjectArray() throws ArrayConversionException {
 		
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new Double[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);
@@ -114,7 +115,8 @@ public class ArrayConverter {
 	public double[] toDoubleArray() throws ArrayConversionException {
 		
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new double[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);
@@ -157,7 +159,8 @@ public class ArrayConverter {
 	public Integer[] toIntegerObjectArray() throws ArrayConversionException {
 		
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new Integer[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);
@@ -185,7 +188,8 @@ public class ArrayConverter {
 	public int[] toIntArray() throws ArrayConversionException {
 		
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new int[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);
@@ -212,7 +216,8 @@ public class ArrayConverter {
 	public Float[] toFloatObjectArray() throws ArrayConversionException {
 		
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new Float[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);
@@ -239,7 +244,8 @@ public class ArrayConverter {
 	 */
 	public float[] toFloatArray() throws ArrayConversionException {
 		if(data.isEmpty()){
-			throw new ArrayConversionException("Cannot convert empty list");
+			return new float[0];
+//			throw new ArrayConversionException("Cannot convert empty list");
 		}
 		
 		Object first = data.get(0);

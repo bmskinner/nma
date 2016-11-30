@@ -116,7 +116,12 @@ public class Rule implements Serializable {
 		IS_CONSTANT_REGION,
 		
 		FIRST_TRUE,
-		LAST_TRUE;
+		LAST_TRUE,
+		
+		INDEX_IS_WITHIN_FRACTION_OF,
+		INDEX_IS_OUTSIDE_FRACTION_OF,
+		
+		INVERT;
 
 	}
 }

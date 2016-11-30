@@ -141,12 +141,30 @@ public class RuleSet implements Serializable {
 	public static RuleSet pigSpermRPRuleSet(){
 		
 		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-		
+				
 		return builder
 				.valueIsMoreThan(180)
 				.isMaximum()
 				.build();
 	}
+	
+	/**
+	 * Create a RuleSet that describes how to find the RP in 
+	 * pig sperm nuclear profiles with poorly identifiable tails
+	 * @return
+	 */
+	public static RuleSet pigSpermRPBackupRuleSet(){
+		
+		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
+		
+		return builder
+				.isMinimum()                   // This will find one of the tail dimples
+				.indexIsWithinFractionOf(0.07) // Only include indexes away from the tail
+				.invert()                      // Get the tail alone in range
+				.isMaximum()                   // Select the highest point remaining
+				.build();
+	}
+	
 	
 	/**
 	 * Create a RuleSet that describes how to find the RP in 

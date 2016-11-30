@@ -233,6 +233,28 @@ public class RuleSetBuilder implements Loggable {
 		return this;
 	}
 	
+	/**
+	 * Limit values to indexes within a certain profile fraction of valid indexes
+	 * @param fraction the fraction of the profile valid indices lie within on either side (0-1)
+	 * @return the builder
+	 */
+	public RuleSetBuilder indexIsWithinFractionOf(final double fraction){
+		Rule r = new Rule(RuleType.INDEX_IS_WITHIN_FRACTION_OF, fraction);
+		rules.add(r);
+		return this;
+	}
+	
+	
+	/**
+	 * Limit values to indexes beyond a certain profile fraction of valid indexes
+	 * @param fraction the fraction of the profile valid indices lie outside on either side (0-1)
+	 * @return the builder
+	 */
+	public RuleSetBuilder indexIsOutsideFractionOf(final double fraction){
+		Rule r = new Rule(RuleType.INDEX_IS_OUTSIDE_FRACTION_OF, fraction);
+		rules.add(r);
+		return this;
+	}
 	
 	/**
 	 * For searching boolean profiles
@@ -254,6 +276,17 @@ public class RuleSetBuilder implements Loggable {
 	public RuleSetBuilder isLastIndexInRegion(){
 
 		Rule r = new Rule(RuleType.LAST_TRUE, 1d);
+		rules.add(r);
+		return this;
+	}
+	
+	/**
+	 * Invert the currently selected indexes
+	 * @return
+	 */
+	public RuleSetBuilder invert(){
+
+		Rule r = new Rule(RuleType.INVERT, 1d);
 		rules.add(r);
 		return this;
 	}
