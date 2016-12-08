@@ -38,7 +38,6 @@ import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import components.active.generic.UnavailableSignalGroupException;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearSignalDatasetCreator;
@@ -46,8 +45,7 @@ import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
 
 /**
- * This factory creates boxplot charts. It uses a singleton pattern to allow the loggable
- * interface to be used
+ * This factory creates boxplot charts.
  * @author bms41
  *
  */

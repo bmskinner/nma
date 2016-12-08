@@ -27,7 +27,6 @@ import org.jfree.ui.RectangleEdge;
 
 import charting.datasets.ViolinCategoryDataset;
 import stats.Max;
-import stats.Stats;
 
 /**
  * The ViolinRenderer draws a boxplot with a probability density function 

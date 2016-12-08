@@ -59,7 +59,6 @@ import charting.datasets.CellDatasetCreator;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
-import components.AbstractCellularComponent;
 import components.ICellCollection;
 import components.active.DefaultCellularComponent;
 import components.active.generic.UnavailableBorderTagException;
@@ -226,7 +225,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				int offset = n.getBorderIndex(options.getTag());
 
 				// adjust the index to the offset
-				index = AbstractCellularComponent.wrapIndex( index - offset, n.getBorderLength());
+				index = n.wrapIndex( index - offset);
 
 				finest("Index of "+tag+" from RP is "+index);
 				double indexToDraw = index; // convert to a double to allow normalised positioning
@@ -378,18 +377,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		// Set the length to 100 if normalised or multiple datasets.
 		// Otherwise use the median profile length
 		int length;
-		try {
+//		try {
 			length = options.isNormalised() || options.isMultipleDatasets()
 					   ? 100 
 					   : options.firstDataset()
 					   		.getCollection()
 					   		.getProfileCollection()
-					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					   		.size();
-		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			stack("Error getting median profile", e);
-			return makeErrorChart();
-		}
+					   		.length();
+//					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+//					   		.size();
+//		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+//			stack("Error getting median profile", e);
+//			return makeErrorChart();
+//		}
 				
 
 		// the default is to use an x range of 100, for a normalised chart

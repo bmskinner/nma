@@ -25,8 +25,6 @@ import gui.components.ColourSelecter.ColourSwatch;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
-import java.util.List;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -39,7 +37,6 @@ import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NucleusDatasetCreator;
 import charting.options.ChartOptions;
-import components.CellCollection;
 import components.ICellCollection;
 
 /**

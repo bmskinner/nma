@@ -184,9 +184,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
 	@Override
 	protected void updateMultiple() {
-		updateNull();
-		
-		
+		updateNull();	
 	}
 	
 	@Override

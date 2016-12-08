@@ -23,6 +23,7 @@ package analysis.detection;
  * A mask that describes whether a value is present or
  * not within each pixel
  * @author bms41
+ * @since 1.13.3
  *
  */
 public interface Mask {

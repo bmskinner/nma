@@ -29,7 +29,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Rectangle;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -52,21 +51,17 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetUtilities;
 import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 
-import components.Cell;
 import components.CellularComponent;
 import components.ICell;
 import components.active.DefaultCell;
-import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableProfileTypeException;
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.BorderTag;
 import components.generic.IPoint;
 import components.generic.ProfileType;
-import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import analysis.IAnalysisDataset;
 import analysis.detection.BooleanAligner;
@@ -83,7 +78,6 @@ import charting.datasets.ComponentOutlineDataset;
 import charting.datasets.NucleusDatasetCreator;
 import charting.datasets.NucleusMeshXYDataset;
 import charting.datasets.OutlineDatasetCreator;
-import charting.datasets.TailDatasetCreator;
 import charting.options.ChartOptions;
 
 public class OutlineChartFactory extends AbstractChartFactory {

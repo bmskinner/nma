@@ -19,6 +19,12 @@
 
 package analysis.detection;
 
+/**
+ * A default implementation of Mask.
+ * @author bms41
+ * @since 1.13.3
+ *
+ */
 public class BooleanMask implements Mask {
 	
 	protected boolean[][] array;

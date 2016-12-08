@@ -28,8 +28,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
