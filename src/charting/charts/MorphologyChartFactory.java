@@ -382,8 +382,9 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					   ? 100 
 					   : options.firstDataset()
 					   		.getCollection()
+//					   		.getMedianArrayLength();
 					   		.getProfileCollection()
-					   		.length();
+					   		.length()-1;
 //					   		.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 //					   		.size();
 //		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
@@ -393,7 +394,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 				
 
 		// the default is to use an x range of 100, for a normalised chart
-		plot.getDomainAxis().setRange(0,length);
+		plot.getDomainAxis().setRange(-1,length);
 
 		// the 180 degree line
 		plot.addRangeMarker(ChartComponents.DEGREE_LINE_180);
@@ -456,12 +457,12 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 						int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 						// adjust the index to the offset
-						index = DefaultCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+						index = DefaultCellularComponent.wrapIndex( index - offset, collection.getMedianArrayLength());
 
 						
 						if(options.isNormalised()){ // set to the proportion of the point along the profile
 							// convert to a double to allow normalised positioning
-							double indexToDraw =  ((  (double) index / collection.getProfileCollection().length() ) * 100);
+							double indexToDraw =  ((  (double) index / (double) collection.getMedianArrayLength() ) * 100);
 							addMarkerToXYPlot(plot, tag, indexToDraw);
 						} else {
 							addMarkerToXYPlot(plot, tag, index);

@@ -383,7 +383,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 		// Find the longest nucleus profile in the collection (for alignment)
 		int maxLength = (int) getMaximumNucleusProfileLength(collection);
-		int medianProfileLength = (int) collection.getMedianArrayLength();
+
 		double offset = 0;
 				
 		IProfile profile;
@@ -399,7 +399,7 @@ public class NucleusDatasetCreator implements Loggable {
 		if(options.isNormalised()){
 			xpoints = profile.getPositions(100);
 		} else {
-			xpoints = profile.getPositions( medianProfileLength );
+			xpoints = profile.getPositions( profile.size() );
 			
 			if(options.getAlignment().equals(ProfileAlignment.RIGHT)){
 				double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
@@ -419,7 +419,7 @@ public class NucleusDatasetCreator implements Loggable {
 			if(options.isNormalised()){
 				addSegmentsFromProfile(segments, profile, ds, 100, 0);
 			} else {
-				addSegmentsFromProfile(segments, profile, ds, collection.getMedianArrayLength(), offset);
+				addSegmentsFromProfile(segments, profile, ds, profile.size() , offset);
 			}
 		} catch (UnavailableBorderTagException | ProfileException e) {
 			fine("Error getting segments", e);

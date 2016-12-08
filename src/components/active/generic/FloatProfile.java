@@ -289,7 +289,7 @@ public class FloatProfile implements IProfile {
 	public IProfile getPositions(int length){
 		float [] result = new float[array.length];
 		for(int i=0;i<array.length;i++){
-			result[i] = (float) getRescaledIndex(i, length);
+			result[i] = (float) (getIndexProportion(i) * length);
 		}
 		return new FloatProfile(result);
 	}
@@ -299,7 +299,7 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public double getRescaledIndex(int index, int newLength){
-		return (float)index / (float) array.length * (float) newLength;
+		return (float)index / (float) (array.length) * (float) newLength;
 	}
 
 	/**

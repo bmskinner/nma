@@ -47,7 +47,6 @@ import org.jfree.ui.RectangleEdge;
 
 import charting.ChartComponents;
 import components.generic.ISegmentedProfile;
-import components.generic.SegmentedProfile;
 import components.nuclear.IBorderSegment;
 
 /**
@@ -143,7 +142,8 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
 				this.addOverlay(overlay);
 				
 			} catch (Exception e1) {
-				error("Error sending signal", e1);
+				warn("Error creating segment markers");
+				stack("Error creating segment markers", e1);
 			}
 
 			this.revalidate();

@@ -124,8 +124,6 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		panel.add(ruleSetButton);
 				
 		return panel;
-		
-		
 	}
 	
 	
