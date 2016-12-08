@@ -23,7 +23,6 @@ package analysis.profiles;
 import java.util.List;
 
 import stats.Quartile;
-import utility.Constants;
 import analysis.profiles.Rule.RuleType;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
@@ -54,6 +53,14 @@ public class ProfileIndexFinder implements Loggable {
 	 * @return
 	 */
 	public BooleanProfile getMatchingIndexes(final IProfile p, final RuleSet r){
+		
+		if(p==null){
+			throw new IllegalArgumentException("Profile is null");
+		}
+		if(r==null){
+			throw new IllegalArgumentException("Ruleset is null");
+		}
+		
 		return isApplicable(p, r);
 	}
 	
@@ -64,6 +71,12 @@ public class ProfileIndexFinder implements Loggable {
 	 * @return
 	 */
 	public BooleanProfile getMatchingIndexes(final IProfile p, final Rule r){
+		if(p==null){
+			throw new IllegalArgumentException("Profile is null");
+		}
+		if(r==null){
+			throw new IllegalArgumentException("Rule is null");
+		}
 		BooleanProfile result = new BooleanProfile(p, true);
 		return isApplicable(p, r, result);
 	}
@@ -265,8 +278,8 @@ public class ProfileIndexFinder implements Loggable {
 	
 	/**
 	 * Test a profile for the applicability of a rule in a ruleset
-	 * @param p
-	 * @param r
+	 * @param p the profile to test
+	 * @param r the rule to test
 	 * @param existing the existing profile of valid indexes on which the rule will be applied
 	 * @return
 	 */
@@ -277,9 +290,9 @@ public class ProfileIndexFinder implements Loggable {
 		switch(type){
 		
 			case IS_LOCAL_MINIMUM:
-				return findLocalMinima(p, r.getBooleanValue(), r.getValue(1));
+				return findLocalMinima(p, limits, r.getBooleanValue(), r.getValue(1));
 			case IS_LOCAL_MAXIMUM:
-				return findLocalMaxima(p, r.getBooleanValue(), r.getValue(1));
+				return findLocalMaxima(p, limits, r.getBooleanValue(), r.getValue(1));
 				
 			case IS_MINIMUM:
 				return findMinimum(p, limits, r.getBooleanValue());
@@ -287,17 +300,17 @@ public class ProfileIndexFinder implements Loggable {
 				return findMaximum(p, limits, r.getBooleanValue());
 				
 			case INDEX_IS_LESS_THAN:
-				return findIndexLessThan(p, r.getValue());
+				return findIndexLessThan(p, limits,  r.getValue());
 			case INDEX_IS_MORE_THAN:
-				return findIndexMoreThan(p, r.getValue());
+				return findIndexMoreThan(p, limits,  r.getValue());
 				
 			case VALUE_IS_LESS_THAN:
-				return findValueLessThan(p, r.getValue());
+				return findValueLessThan(p, limits,  r.getValue());
 			case VALUE_IS_MORE_THAN:
-				return findValueMoreThan(p, r.getValue());
+				return findValueMoreThan(p, limits,  r.getValue());
 				
 			case IS_CONSTANT_REGION:
-				return findConstantRegion(p, r.getValue(0), r.getValue(1), r.getValue(2));
+				return findConstantRegion(p, limits, r.getValue(0), r.getValue(1), r.getValue(2));
 				
 			case FIRST_TRUE:
 				return findFirstTrue(limits, r.getBooleanValue());	
@@ -364,7 +377,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param epsilon the maximum distance from value allowed
 	 * @return
 	 */
-	private BooleanProfile findConstantRegion(final IProfile p, final double value, final double window, final double epsilon){ 
+	private BooleanProfile findConstantRegion(final IProfile p, final BooleanProfile limits, final double value, final double window, final double epsilon){ 
 		
 		BooleanProfile result = new BooleanProfile(p); // hard code the smoothing window size for now
 		
@@ -377,7 +390,7 @@ public class ProfileIndexFinder implements Loggable {
 	    	}
 
 	    }
-	
+	    result = result.and(limits);
 		return result;
 	}
 	
@@ -471,9 +484,10 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param window the size of the smoothing window
 	 * @return
 	 */
-	private BooleanProfile findLocalMinima(final IProfile p, boolean include, double window){ 
+	private BooleanProfile findLocalMinima(final IProfile p, BooleanProfile limits, boolean include, double window){ 
 		
 		BooleanProfile result = p.getLocalMinima((int) window); // hard code the smoothing window size for now
+		result = result.and(limits);
 		
 		if( ! include){
 			result = result.invert();
@@ -488,9 +502,10 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param window the size of the smoothing window
 	 * @return
 	 */
-	private BooleanProfile findLocalMaxima(final IProfile p, boolean include, double window){ 
+	private BooleanProfile findLocalMaxima(final IProfile p, BooleanProfile limits, boolean include, double window){ 
 		
 		BooleanProfile result = p.getLocalMaxima((int) window); // hard code the smoothing window size for now
+		result = result.and(limits);
 		
 		if( ! include){
 			result = result.invert();
@@ -555,7 +570,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param index
 	 * @return
 	 */
-	private BooleanProfile findIndexLessThan(final IProfile p, double proportion){
+	private BooleanProfile findIndexLessThan(final IProfile p, BooleanProfile limits, double proportion){
 		
 		int index = (int) Math.ceil(  (double) p.size() * proportion);
 		
@@ -564,6 +579,8 @@ public class ProfileIndexFinder implements Loggable {
 		for(int i=0;i<index;i++){
 			result.set(i, true);
 		}
+		
+		result = result.and(limits);
 		return result;
 		
 	}
@@ -575,7 +592,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param index
 	 * @return
 	 */
-	private BooleanProfile findIndexMoreThan(final IProfile p, double proportion){
+	private BooleanProfile findIndexMoreThan(final IProfile p, BooleanProfile limits, double proportion){
 		
 		int index = (int) Math.floor(  (double) p.size() * proportion);
 		
@@ -584,6 +601,7 @@ public class ProfileIndexFinder implements Loggable {
 		for(int i=index;i<result.size();i++){
 			result.set(i, true);
 		}
+		result = result.and(limits);
 		return result;
 		
 	}
@@ -595,7 +613,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param index
 	 * @return
 	 */
-	private BooleanProfile findValueLessThan(final IProfile p, double value){
+	private BooleanProfile findValueLessThan(final IProfile p, BooleanProfile limits, double value){
 		
 		BooleanProfile result = new BooleanProfile(p);
 
@@ -605,6 +623,7 @@ public class ProfileIndexFinder implements Loggable {
 				result.set(i, true);
 			}
 		}
+		result = result.and(limits);
 		return result;
 		
 	}
@@ -616,7 +635,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * @param index
 	 * @return
 	 */
-	private BooleanProfile findValueMoreThan(final IProfile p, double value){
+	private BooleanProfile findValueMoreThan(final IProfile p, BooleanProfile limits, double value){
 		
 		BooleanProfile result = new BooleanProfile(p);
 
@@ -626,6 +645,7 @@ public class ProfileIndexFinder implements Loggable {
 				result.set(i, true);
 			}
 		}
+		result = result.and(limits);
 		return result;
 		
 	}

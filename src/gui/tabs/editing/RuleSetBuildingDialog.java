@@ -139,6 +139,10 @@ public class RuleSetBuildingDialog extends LoadingIconDialog implements Loggable
 	}
 	
 	
+	/**
+	 * Checks if a valid rule was created and approved
+	 * @return
+	 */
 	public boolean isOK(){
 		return isOK;
 	}

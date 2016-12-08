@@ -47,13 +47,13 @@ public class RuleSetCollection implements Serializable, Loggable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Map<BorderTagObject, List<RuleSet>> map    = new HashMap<BorderTagObject, List<RuleSet>>();
+	private Map<Tag, List<RuleSet>> map    = new HashMap<Tag, List<RuleSet>>();
 	
 	/**
 	 * Create a new empty collection
 	 */
 	public RuleSetCollection(){
-		for(BorderTagObject tag : BorderTagObject.values()){
+		for(Tag tag : BorderTagObject.values()){
 			clearRuleSets(tag);
 		}
 		clearRuleSets(Tag.CUSTOM_POINT);
@@ -63,7 +63,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * Remove all the RuleSets for the given tag
 	 * @param tag
 	 */
-	public void clearRuleSets(BorderTagObject tag){
+	public void clearRuleSets(Tag tag){
 		map.put(tag, new ArrayList<RuleSet>());
 	}
 	
@@ -81,7 +81,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 	 * @param tag
 	 * @param list
 	 */
-	public void setRuleSets(BorderTagObject tag, List<RuleSet> list){
+	public void setRuleSets(Tag tag, List<RuleSet> list){
 		map.put(tag, list);
 	}
 	
@@ -94,7 +94,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		return map.get(tag);
 	}
 		
-	public Set<BorderTagObject> getTags(){
+	public Set<Tag> getTags(){
 		return map.keySet();
 	}
 	
@@ -184,7 +184,7 @@ public class RuleSetCollection implements Serializable, Loggable {
 		
 		if(  map!=null ){
 						
-			Map<BorderTagObject, List<RuleSet>> newMap = new HashMap<BorderTagObject, List<RuleSet>>();
+			Map<Tag, List<RuleSet>> newMap = new HashMap<Tag, List<RuleSet>>();
 			
 			Iterator<?> it = map.keySet().iterator();
 			

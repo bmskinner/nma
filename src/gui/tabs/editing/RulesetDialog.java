@@ -30,7 +30,6 @@ import javax.swing.tree.TreeModel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
-import utility.Constants;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
@@ -42,7 +41,6 @@ import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import analysis.profiles.ProfileIndexFinder;
@@ -232,7 +230,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			RuleSetCollection r = d.getSelected();
 //			log(r.toString());
 			
-			for(BorderTagObject tag : r.getTags()){
+			for(Tag tag : r.getTags()){
 				
 				if(r.hasRulesets(tag)){
 					
@@ -258,7 +256,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 		if(data.hasRuleSetCollection()){
 
-			BorderTagObject tag = data.getTag();
+			Tag tag = data.getTag();
 					
 			RuleSetBuildingDialog builder = new RuleSetBuildingDialog(tag);
 			if(builder.isOK()){
@@ -279,7 +277,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 	}
 	
-	private void updateBorderTagAction(BorderTagObject tag){
+	private void updateBorderTagAction(Tag tag){
 
 		if(tag!=null){
 			ProfileIndexFinder finder = new ProfileIndexFinder();
@@ -295,7 +293,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 						.updateBorderTag(tag, newTagIndex);
 				} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					warn("Unable to update border tag index");
-					fine("Profile error", e);
+					stack("Profile error", e);
 					return;
 				}
 								
@@ -326,12 +324,12 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		RuleSetCollection c = dataset.getCollection().getRuleSetCollection();
 
 
-		Set<BorderTagObject> tags = c.getTags();
+		Set<Tag> tags = c.getTags();
 		
-		List<BorderTagObject> sortedList = new ArrayList<BorderTagObject>(tags);
+		List<Tag> sortedList = new ArrayList<Tag>(tags);
 		Collections.sort(sortedList);
 
-		for(BorderTagObject t : sortedList){
+		for(Tag t : sortedList){
 
 			if(c.hasRulesets(t)){
 
@@ -349,10 +347,22 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 					DefaultMutableTreeNode profileNode = new DefaultMutableTreeNode(profileData);
 					node.add(profileNode);
 
+					
 					for(Rule rule : ruleSet.getRules()){
+						
+						RuleSet summedRules = new RuleSet(ruleSet.getType());
+						for(Rule prev : ruleSet.getRules()){
+							summedRules.addRule(prev);
+							if(prev==rule){
+								break;
+							}
+						}
 						RuleNodeData ruleData = new RuleNodeData(rule.toString());
-						ruleData.setRule(rule);
-						ruleData.setType(ruleSet.getType());
+						ruleData.setRuleSet(summedRules);
+						
+//						RuleNodeData ruleData = new RuleNodeData(rule.toString());
+//						ruleData.setRule(rule);
+//						ruleData.setType(ruleSet.getType());
 						DefaultMutableTreeNode ruleNode = new DefaultMutableTreeNode(ruleData);
 						profileNode.add(ruleNode);
 
@@ -389,6 +399,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 				node.add(profileNode);
 
 				for(Rule rule : ruleSet.getRules()){
+					
 					RuleNodeData ruleData = new RuleNodeData(rule.toString());
 					ruleData.setRule(rule);
 					ruleData.setType(ruleSet.getType());
@@ -419,8 +430,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
 		RuleNodeData data = (RuleNodeData) node.getUserObject();
-		
-		
+				
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 		
 		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
@@ -438,16 +448,17 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			}
 
 			if(data.hasRuleSet()){
-
 				RuleSet r = data.getRuleSet();
+
 				IProfile p = dataset.getCollection().getProfileCollection()
 						.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+
 				BooleanProfile b = finder.getMatchingIndexes(p, r);
 				chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
+
 			}
 
 			if(data.hasRuleSetCollection()){
-
 				RuleSetCollection c = data.getCollection();
 				IProfile p = dataset.getCollection().getProfileCollection()
 						.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
@@ -458,8 +469,8 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 			}
 
-		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1){
-			fine("Error getting profile", e1);
+		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | IllegalArgumentException e1){
+			stack("Error getting profile", e1);
 			chart = MorphologyChartFactory.makeErrorChart();
 		}
 
@@ -474,7 +485,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		private RuleSet     ruleSet  = null;
 		private Rule        rule     = null;
 		private ProfileType type     = null;
-		private BorderTagObject   tag      = null;
+		private Tag         tag      = null;
 		private RuleSetCollection collection  = null;
 		
 		
@@ -488,6 +499,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		public void setRuleSet(RuleSet r){
 			this.ruleSet = r;
+			this.type = r.getType();
 		}
 		
 		public void setRule(Rule r){
@@ -498,7 +510,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			this.type = type;
 		}
 		
-		public void setTag(BorderTagObject tag){
+		public void setTag(Tag tag){
 			this.tag = tag;
 		}
 		
@@ -524,7 +536,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 			this.collection = collection;
 		}
 
-		public BorderTagObject getTag() {
+		public Tag getTag() {
 			return tag;
 		}
 

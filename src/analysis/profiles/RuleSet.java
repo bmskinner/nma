@@ -138,7 +138,7 @@ public class RuleSet implements Serializable {
 	 * pig sperm nuclear profiles
 	 * @return
 	 */
-	public static RuleSet pigSpermRPRuleSet(){
+	public static RuleSet pigSpermRPBackupRuleSet(){
 		
 		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 				
@@ -153,15 +153,14 @@ public class RuleSet implements Serializable {
 	 * pig sperm nuclear profiles with poorly identifiable tails
 	 * @return
 	 */
-	public static RuleSet pigSpermRPBackupRuleSet(){
+	public static RuleSet pigSpermRPRuleSet(){
 		
 		RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
 		
 		return builder
 				.isMinimum()                   // This will find one of the tail dimples
-				.indexIsWithinFractionOf(0.07) // Only include indexes away from the tail
-				.invert()                      // Get the tail alone in range
-				.isMaximum()                   // Select the highest point remaining
+				.indexIsWithinFractionOf(0.07) // Expand to include indexes around the dimple
+				.isLocalMaximum()              // Select the first local max point to avoid shoulders
 				.build();
 	}
 	

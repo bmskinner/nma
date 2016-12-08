@@ -115,6 +115,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 	@Override
 	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 		
+		if(type==null){
+			throw new IllegalArgumentException("Type cannot be null");
+		}
+		
 		if(tag==null){
 			throw new IllegalArgumentException("Tag cannot be null");
 		}
