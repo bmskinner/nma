@@ -36,20 +36,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -58,11 +53,16 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
 import analysis.IAnalysisDataset;
-import components.ClusterGroup;
 import components.ICellCollection;
 import components.IClusterGroup;
 import components.active.ChildAnalysisDataset;
 
+/**
+ * The populations panel holds the list of open datasets for selection
+ * by the user. 
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 		
@@ -164,7 +164,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		List<Object> collapsedRows = treeTable.getCollapsedRows();		
 		
 		
-		PopulationTreeTableModel oldModel = (PopulationTreeTableModel) treeTable.getTreeTableModel();
+//		PopulationTreeTableModel oldModel = (PopulationTreeTableModel) treeTable.getTreeTableModel();
 		
 		// Need to modify the model, not replace it to keep ordering
 //		PopulationTreeTableModel newModel = createTableModel();
@@ -467,57 +467,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		
 		DatasetDeleter deleter = new DatasetDeleter();
 		deleter.deleteDatasets(datasets);
-//		
-//		// Now extract the unique UUIDs of all datasets to be deleted (including children)
-//		finest("There are "+datasets.size()+" datasets selected");
-//
-//		Deque<UUID> list = unique(datasets);
-//
-//		deleteDatasetsInList(list);
-//		DatasetListManager.getInstance().refreshClusters(); // remove unneeded cluster groups from datasets
-//		
-//		finest("Updating cluster groups in tree panel");
-		
-		// remove any empty cluster groups
-//		PopulationTreeTableModel model = (PopulationTreeTableModel) treeTable.getTreeTableModel();
 
-//		PopulationTreeTableNode root = (PopulationTreeTableNode)model.getRoot();
-//		for(PopulationTreeTableNode n : getSelectedNodes()){
-//				
-//			if(n.hasDataset() && datasets.contains(n.getDataset())){
-//				n.removeFromParent();
-////				int index = root.getIndex(n);
-////				root.remove(index);
-//			}
-//			
-//			
-//			if(n.hasClusterGroup()){
-//				ClusterGroup g = n.getGroup();
-//				boolean canRemove = true;
-//				for(AnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()){ 
-//
-//					finest("Parent dataset "+parent.getName());
-//
-//					for(UUID child : g.getUUIDs()){
-//						if(parent.hasChild(child)){
-//							canRemove = false; // dataset in group still exists
-//
-//						}
-//					}
-//
-//				}
-//				if(canRemove){
-////					int index = root.getIndex(n);
-////					root.remove(index);
-//					n.removeFromParent();
-//				}
-//			}
-//		}
-//		model.setRoot(root);
-
-
-		//			treeTable.updateUI();
-					update();
+		update();
 		finest("Firing update panel event");
 		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
