@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
 import analysis.IAnalysisDataset;
-import analysis.IAnalysisOptions;
 import analysis.IMutableAnalysisOptions;
 import components.ICellCollection;
 import components.IClusterGroup;
@@ -258,16 +258,21 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
 	@Override
 	public void deleteChild(UUID id) {
-		if(this.hasChild(id)){
+		Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
-			this.childDatasets.remove(id);
-			for(IClusterGroup g : clusterGroups){
-				if(g.hasDataset(id)){
-					g.removeDataset(id);
-				}
+		while (it.hasNext()){
+			IAnalysisDataset child = it.next();
+
+			if(child.getUUID().equals(id)){
+				for(IClusterGroup g : clusterGroups){
+					if(g.hasDataset(id)){
+						g.removeDataset(id);
+					}
+				}				
+				it.remove();
+				break;
 			}
-		}
-		
+		}		
 	}
 
 	@Override

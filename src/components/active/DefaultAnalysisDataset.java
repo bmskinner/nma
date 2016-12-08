@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -36,7 +37,6 @@ import components.ICell;
 import components.ICellCollection;
 import components.IClusterGroup;
 import analysis.IAnalysisDataset;
-import analysis.IAnalysisOptions;
 import analysis.IMutableAnalysisOptions;
 import analysis.nucleus.NucleusDetectionWorker;
 
@@ -177,28 +177,25 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	
 	/**
 	 * Remove the child dataset with the given UUID
-	 * @param id
+	 * @param id the child ID to be deleted
 	 */
 	private void removeChildCollection(UUID id){
-		
-		IAnalysisDataset child = null;
-		
-		for(IAnalysisDataset c : childDatasets){
-			if(c.getUUID().equals(id)){
-				child = c;
+
+		Iterator<IAnalysisDataset> it = childDatasets.iterator();
+
+		while (it.hasNext()){
+			IAnalysisDataset child = it.next();
+
+			if(child.getUUID().equals(id)){
+				for(IClusterGroup g : clusterGroups){
+					if(g.hasDataset(id)){
+						g.removeDataset(id);
+					}
+				}				
+				it.remove();
 				break;
 			}
 		}
-		
-		if(child != null){
-			this.childDatasets.remove(id);
-			for(IClusterGroup g : clusterGroups){
-				if(g.hasDataset(id)){
-					g.removeDataset(id);
-				}
-			}
-		}
-
 	}
 	
 	

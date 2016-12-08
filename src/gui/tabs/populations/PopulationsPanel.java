@@ -36,8 +36,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -435,79 +437,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		}
 
 	}
-	
-		
-	private void deleteDataset(IAnalysisDataset d){
-		
-		try{
 
-			finer("Deleting dataset: "+d.getName());
-			UUID id = d.getUUID();
-
-
-			// remove the dataset from its parents
-			finer("Removing dataset from its parents");
-			for(IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()){ //analysisDatasets.keySet()){
-//				AnalysisDataset parent = analysisDatasets.get(parentID);
-
-				finest("Parent dataset "+parent.getName());
-
-				if(parent.hasChild(id)){
-					finest("    Parent contains dataset; deleting");
-					parent.deleteChild(id);
-				}
-
-			}
-			
-			finer("Checking if dataset is root");
-			
-			if(d.isRoot()){
-				finer("Removing dataset from treeOrderMap and list manager");
-//				treeOrderMap.remove(id);
-				DatasetListManager.getInstance().removeDataset(d);
-			} else {
-				finer("Dataset is not root");
-			}
-			finest("Clearing dataset from memory");
-			
-			d=null; // clear from memory
-			finest("Deleted dataset");
-		} catch (Exception e){
-			warn("Error deleting dataset "+d.getName());
-			stack("Error deleting dataset "+d.getName(), e);
-		}
-	}
-	
-	/**
-	 * Recursively delete datasets. Remove all datasets with no children
-	 * from the list, then call this method again on all the remaining ids
-	 * @param ids
-	 */
-	private void deleteDatasetsInList(Set<UUID> ids){
-		
-		if(ids.isEmpty()){
-			return;
-		}
-		
-		Set<UUID> keepIds = new HashSet<UUID>();
-		finest("Candidate delete list has "+ids.size()+" datasets");
-		Iterator<UUID> it = ids.iterator();
-		while(it.hasNext()){
-			UUID id = it.next();
-			IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
-			
-			if( ! d.hasChildren()){
-				finest("Preparing to delete dataset: "+d.getName());
-				deleteDataset(d);
-			} else {
-				finest("Dataset "+d.getName()+" still has children");
-				keepIds.add(id);
-			}
-		}
-		
-		deleteDatasetsInList(keepIds);
-	}
-	
 	private void deleteSelectedDatasets(){
 		final List<IAnalysisDataset>         datasets = getSelectedDatasets();
 		final List<PopulationTreeTableNode> nodes    = treeTable.getSelectedNodes();
@@ -528,23 +458,28 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 		}
 		
+		
+		
 		if(datasets.isEmpty()){
 			finest("No datasets selected");
 			return;
 		}
 		
-		// Now extract the unique UUIDs of all datasets to be deleted (including children)
-		finest("There are "+datasets.size()+" datasets selected");
-
-		Set<UUID> list = unique(datasets);
-
-		deleteDatasetsInList(list);
-		DatasetListManager.getInstance().refreshClusters(); // remove unneeded cluster groups from datasets
-		
-		finest("Updating cluster groups in tree panel");
+		DatasetDeleter deleter = new DatasetDeleter();
+		deleter.deleteDatasets(datasets);
+//		
+//		// Now extract the unique UUIDs of all datasets to be deleted (including children)
+//		finest("There are "+datasets.size()+" datasets selected");
+//
+//		Deque<UUID> list = unique(datasets);
+//
+//		deleteDatasetsInList(list);
+//		DatasetListManager.getInstance().refreshClusters(); // remove unneeded cluster groups from datasets
+//		
+//		finest("Updating cluster groups in tree panel");
 		
 		// remove any empty cluster groups
-		PopulationTreeTableModel model = (PopulationTreeTableModel) treeTable.getTreeTableModel();
+//		PopulationTreeTableModel model = (PopulationTreeTableModel) treeTable.getTreeTableModel();
 
 //		PopulationTreeTableNode root = (PopulationTreeTableNode)model.getRoot();
 //		for(PopulationTreeTableNode n : getSelectedNodes()){
@@ -589,27 +524,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 		finest("Deletion complete");
 
-	}
-	
-	private Set<UUID> unique(List<IAnalysisDataset> list){
-		Set<UUID> set = new HashSet<UUID>();
-		for(IAnalysisDataset d : list){
-			finest("Selected dataset for deletion: "+d.getName());
-
-			set.add(d.getUUID());
-
-			if(d.hasChildren()){
-				finest("Children found in: "+d.getName());
-				// add all the children of a dataset
-				for(UUID childID : d.getAllChildUUIDs()){
-					finest("Adding child dataset to deletion list: "+childID.toString());
-					set.add(childID);
-				}
-			} else {
-				finest("No children in: "+d.getName());
-			}
-		}
-		return set;
 	}
 
 	/**
@@ -739,23 +653,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			}
 			return selectedIndexes;
 		}
-		
-//		private boolean rowIsDataset(int i){
-//			Object columnOneObject = treeTable.getModel().getValueAt(i, PopulationTreeTable.COLUMN_NAME);
-//			if(columnOneObject instanceof AnalysisDataset){
-//				return true;
-//			}
-//			return false;
-//		}
-//		
-//		private AnalysisDataset getDatasetAtRow(int i){
-//			Object columnOneObject = treeTable.getModel().getValueAt(i, PopulationTreeTable.COLUMN_NAME);
-//
-//			if(columnOneObject instanceof AnalysisDataset){
-//				return (AnalysisDataset) treeTable.getModel().getValueAt(i, PopulationTreeTable.COLUMN_NAME); // row i, column 0
-//			}
-//			return null;
-//		}
 		
 	}
 		

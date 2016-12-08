@@ -31,10 +31,28 @@ public interface Mask {
 	
 	int getHeight();
 	
+	/**
+	 * Offset the mask by the given amount. Empty values are filled in
+	 * with false
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	Mask offset(int x, int y);
 	
+	/**
+	 * Calculate the logical AND of the two masks
+	 * @param m
+	 * @return
+	 */
 	Mask and(Mask m);
 	
+	/**
+	 * Get the value at the given position
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	boolean get(int x, int y);
 	
 	boolean[][] toArray();
