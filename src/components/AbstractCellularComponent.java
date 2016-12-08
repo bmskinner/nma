@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import analysis.detection.BooleanMask;
+import analysis.detection.Mask;
 import analysis.image.ImageConverter;
 import logging.Loggable;
 import components.active.generic.DefaultBorderPoint;
@@ -1006,7 +1008,7 @@ public abstract class AbstractCellularComponent
 	 * @param width
 	 * @return
 	 */
-	public boolean[][] getBooleanMask(int height, int width){
+	public Mask getBooleanMask(int height, int width){
 		
 		int halfX = width >> 1;
 		int halfY = height >> 1;	
@@ -1023,7 +1025,7 @@ public abstract class AbstractCellularComponent
 			
 		}
 			
-		return result;
+		return new BooleanMask(result);
 	}
 	
 	

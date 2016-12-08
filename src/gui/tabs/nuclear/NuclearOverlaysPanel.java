@@ -57,24 +57,14 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			
 			chartPanel = new ExportableChartPanel(chart);
 			chartPanel.setFixedAspectRatio(true);
-			
-//			chartPanel.addComponentListener( new ComponentAdapter(){
-//
-//				@Override
-//				public void componentResized(ComponentEvent e) {
-//					chartPanel.restoreAutoBounds();
-//					
-//				}
-//				
-//			});
-			
+						
 			this.add(chartPanel, BorderLayout.CENTER);
 			
 			makeCreateButton();
 			
 		} catch (Exception e) {
 			warn("Error creating overlays panel");
-			log(Level.FINE, "Error creating overlays panel", e);
+			stack("Error creating overlays panel", e);
 		}
 		
 	}
@@ -146,7 +136,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 
 	@Override
 	protected void updateSingle() {
-//		log(Level.INFO, "Updating overlays panel: single");
+
 		compareConsensusButton.setEnabled(false);
 		makeOverlayChartButton.setVisible(false);
 		
@@ -184,12 +174,12 @@ public class NuclearOverlaysPanel extends DetailPanel {
 	private void createSafeChart(ChartOptions options){
 		makeOverlayChartButton.setVisible(false);
 		setAnalysing(true);
-		log(Level.FINE, "Creating overlay chart on button click");
+		fine("Creating overlay chart on button click");
 		 try {
 			getChart(options);
 			update(getDatasets());
 		} catch (Exception e) {
-			error("Error making chart", e);
+			stack("Error making chart", e);
 			update(getDatasets());
 		} finally{
 			setAnalysing(false);
@@ -232,8 +222,8 @@ public class NuclearOverlaysPanel extends DetailPanel {
 			.setTarget(chartPanel)
 			.build();
 		
-		JFreeChart chart = getChart(options);
-		chartPanel.setChart(chart);		
+		setChart(options);
+
 	}
 
 	@Override

@@ -70,6 +70,7 @@ import components.generic.XYPoint;
 import components.nuclei.Nucleus;
 import analysis.IAnalysisDataset;
 import analysis.detection.BooleanAligner;
+import analysis.detection.Mask;
 import analysis.mesh.NucleusMesh;
 import analysis.mesh.NucleusMeshEdge;
 import analysis.mesh.NucleusMeshFace;
@@ -830,7 +831,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 				
 		boolean hasConsensus = options.firstDataset().getCollection().hasConsensusNucleus();
-		boolean[][] reference = null;
+		Mask reference = null;
 		BooleanAligner aligner = null;
 		
 		if(options.isNormalised()){
@@ -877,22 +878,20 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		finest( "Creating charting datasets for vertically rotated nuclei");
 		
 		for(Nucleus n : options.firstDataset().getCollection().getNuclei()){
-			
-//			options.log(Level.FINEST, "Fetching vertically rotated nucleus: "+i);
+
 			Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
 			
 			/*
 			 * Find the best offset for the CoM to fit the consensus nucleus if present
 			 */
-//			options.log(Level.FINEST, "Setting CoM: Nucleus "+i);
 			if(options.isNormalised()){
 				if(hasConsensus){
-					boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
+					Mask test = verticalNucleus.getBooleanMask(200, 200);
 					int[] offsets = aligner.align(test);
-					verticalNucleus.moveCentreOfMass( new FloatPoint(offsets[1], offsets[0]));
+					verticalNucleus.moveCentreOfMass( IPoint.makeNew(offsets[1], offsets[0]));
 				}
 			} else {
-				verticalNucleus.moveCentreOfMass( new FloatPoint(0, 0));
+				verticalNucleus.moveCentreOfMass(IPoint.makeNew( 0, 0));
 			}
 			
 
@@ -906,7 +905,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 			} catch (ChartDatasetCreationException e) {
 				warn("Cannot create data for dataset "+options.firstDataset().getName());
-				fine("Error getting chart data", e);
+				stack("Error getting chart data", e);
 			} finally {
 				i++;
 			}

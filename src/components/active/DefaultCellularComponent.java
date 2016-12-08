@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.detection.BooleanMask;
+import analysis.detection.Mask;
 import analysis.image.ImageConverter;
 import analysis.profiles.Taggable;
 import components.CellularComponent;
@@ -925,7 +927,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 * @param width
 		 * @return
 		 */
-		public boolean[][] getBooleanMask(int height, int width){
+		public Mask getBooleanMask(int height, int width){
 			
 			int halfX = width >> 1;
 			int halfY = height >> 1;	
@@ -942,7 +944,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 				
 			}
 				
-			return result;
+			return new BooleanMask(result);
 		}
 		
 		

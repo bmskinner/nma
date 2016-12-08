@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import analysis.detection.Mask;
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
 import components.generic.BorderTagObject;
@@ -394,7 +395,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public boolean[][] getBooleanMask(int height, int width) {
+	public Mask getBooleanMask(int height, int width) {
 		// TODO Auto-generated method stub
 		return null;
 	}

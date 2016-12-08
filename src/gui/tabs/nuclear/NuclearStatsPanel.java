@@ -12,7 +12,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.AbstractChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
@@ -91,12 +90,6 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
 		finest("Updating stats panel");
 		
-//		if(this.hasDatasets()){
-//			measurementUnitSettingsPanel.setEnabled(true);
-//		} else {
-//			measurementUnitSettingsPanel.setEnabled(false);
-//		}
-		
 		TableOptions options = new TableOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setType(TableType.ANALYSIS_STATS)
@@ -126,16 +119,17 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
 			
 			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.ANALYSIS_STATS)
-			.build();
+				.setDatasets(null)
+				.setType(TableType.ANALYSIS_STATS)
+				.build();
 
 			TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
 			
 			tablePopulationStats.setModel(model);
 			
-		}catch(Exception e){
-			log(Level.SEVERE, "Error creating stats panel", e);
+		} catch(Exception e){
+			warn("Error making nuclear stats panel");
+			stack("Error creating stats panel", e);
 		}
 		return scrollPane;
 	}
@@ -144,10 +138,10 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
      public void actionPerformed(ActionEvent e) {
 
          try {
-        	 log(Level.FINEST, "Updating nucleus stats panel");
+        	 finest("Updating nucleus stats panel");
              this.update(getDatasets());
          } catch (Exception e1) {
-         	log(Level.SEVERE, "Error updating boxplot panel from action listener", e1);
+         	stack("Error updating boxplot panel from action listener", e1);
          }
          
          

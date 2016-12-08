@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import analysis.detection.Mask;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.IBorderPoint;
@@ -363,14 +364,14 @@ public interface CellularComponent
 
 	
 	/**
-	 * Create a boolean mask, in which 1 is within the nucleus and 0 is outside
-	 * the nucleus, for an image centred on the nuclear centre of mass, of the
+	 * Create a boolean mask, in which true is within the component and false is outside
+	 * the component, for an image centred on the nuclear centre of mass, of the
 	 * given size
-	 * @param height
-	 * @param width
-	 * @return
+	 * @param height the height of the mask
+	 * @param width the width of the mask
+	 * @return a mask of size width * height
 	 */
-	boolean[][] getBooleanMask(int height, int width);
+	Mask getBooleanMask(int height, int width);
 	
 	/*
     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them

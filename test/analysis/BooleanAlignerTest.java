@@ -3,6 +3,8 @@ package analysis;
 import org.junit.Test;
 
 import analysis.detection.BooleanAligner;
+import analysis.detection.BooleanMask;
+import analysis.detection.Mask;
 
 public class BooleanAlignerTest {
 	
@@ -23,7 +25,7 @@ public class BooleanAlignerTest {
 		return pixels;
 	}
 	
-	private boolean[][] createReferenceArray(int w, int h){
+	private Mask createReferenceArray(int w, int h){
 		boolean[][] array = createBlankArray(w, h);
 		
 		/*
@@ -35,11 +37,11 @@ public class BooleanAlignerTest {
 		array[2][1] = true;
 		array[0][2] = true;
 
-		return array;
+		return new BooleanMask(array);
 		
 	}
 	
-	private boolean[][] createTestArray(int w, int h){
+	private Mask createTestArray(int w, int h){
 		boolean[][] array = createBlankArray(w, h);
 		
 		/*
@@ -52,12 +54,12 @@ public class BooleanAlignerTest {
 		array[3][1] = true;
 		array[1][2] = true;
 
-		return array;
+		return new BooleanMask(array);
 		
 	}
 		
-	private void printArray(boolean[][] array){
-		
+	private void printArray(Mask mask){
+		boolean[][] array = mask.toArray();
 		int h  = array.length;
 		int w = array[0].length;
 		
@@ -78,43 +80,43 @@ public class BooleanAlignerTest {
 	
 	@Test
 	public void referenceRenders(){
-		 boolean[][] reference = createReferenceArray(3, 4);
+		Mask reference = createReferenceArray(3, 4);
 		System.out.println("\n-------------\nReference:");
 		printArray(reference);
 	}
 	
 	@Test
 	public void testRenders(){
-		 boolean[][] test = createTestArray(3, 4);
+		Mask test = createTestArray(3, 4);
 		System.out.println("\n-------------\nTest:");
 		printArray(test);
 	}
 	
 	@Test
 	public void alignCompletes(){
-		boolean[][] reference = createReferenceArray(3, 4);
-		 boolean[][] test = createTestArray(3, 4);
+		Mask reference = createReferenceArray(3, 4);
+		Mask test      = createTestArray(3, 4);
 		 
 		BooleanAligner aln = new BooleanAligner(reference);
 		 
 		System.out.println("\n-------------\nAnd:");
-		boolean[][] and = aln.and(reference, test);
+		Mask and = reference.and(test);
 		printArray(and);
 		
 		System.out.println("\n-------------\nCompare:");
-		int score =aln.compare(reference, test);
+		int score = aln.compare(reference, test);
 		System.out.println("Score: "+score+"\n");
 		 
 		int[] result = aln.align(test);
 		
 		
 		System.out.println("\n-------------\nOffset by x 1 y 0");
-		boolean[][] offset = aln.offset(test, 0, 1);
+		Mask offset = test.offset( 0, 1);
 		printArray(offset);
 		
 			
 		System.out.println("\n-------------\nAligned:");
-		boolean[][] aligned = aln.offset(test, result[1], result[0]);
+		Mask aligned = test.offset(result[1], result[0]);
 		printArray(aligned);
 		
 		
@@ -128,25 +130,5 @@ public class BooleanAlignerTest {
 		
 		
 	}
-	
 
-	
-	
-//	{
-//		int width  = array1.length;
-//		  int height = array1[0].length;
-//
-//		  int score = 0;
-//		  
-//		  boolean[][] added = and(array1, array2);
-//
-//		  for(int y=0; y<height; y++){
-//			  for(int x=0; x<width; x++){
-//				  
-//				  if(added[y][x]){ // if black
-//					  score++;
-//				  }
-//			  }
-//		  }
-//	}
 }

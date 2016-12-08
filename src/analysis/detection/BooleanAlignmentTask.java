@@ -5,20 +5,19 @@ import java.util.List;
 import java.util.concurrent.ForkJoinTask;
 
 import analysis.AbstractProgressAction;
-import components.active.generic.FloatPoint;
-import components.generic.XYPoint;
+import components.generic.IPoint;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
 public class BooleanAlignmentTask extends AbstractProgressAction {
 	
 	final BooleanAligner aligner;
-	final boolean[][] reference;
+	final Mask reference;
 	final int low, high;
 	final Nucleus[] nuclei;
 	private static final int THRESHOLD = 30;
 	
-	protected BooleanAlignmentTask(boolean[][] reference, Nucleus[] nuclei, int low, int high) throws Exception{
+	protected BooleanAlignmentTask(Mask reference, Nucleus[] nuclei, int low, int high) throws Exception{
 	
 		this.reference = reference;
 		this.low    = low;
@@ -27,7 +26,7 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 		this.aligner = new BooleanAligner(reference);
 	}
 	
-	public BooleanAlignmentTask(boolean[][] reference, Nucleus[] nuclei) throws Exception{
+	public BooleanAlignmentTask(Mask reference, Nucleus[] nuclei) throws Exception{
 		this(reference, nuclei, 0, nuclei.length);
 	}
 
@@ -36,7 +35,8 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 			try {
 				processNuclei();
 			} catch (Exception e) {
-				error("Error processing nuclei", e);
+				warn("Error processing nuclei");
+				stack("Error processing nuclei", e);
 			}
 	     else {
 	    	 int mid = (low + high) >>> 1;
@@ -56,7 +56,8 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 
 	    		 ForkJoinTask.invokeAll(tasks);
 	    	 } catch (Exception e) {
-	    		 error("Error processing nuclei", e);
+	    		 warn("Error processing nuclei");
+	    		 stack("Error processing nuclei", e);
 	    	 }
 
 	     }
@@ -70,9 +71,9 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 
 		for(int i=low; i<high; i++){
 			Nucleus verticalNucleus = nuclei[i].getVerticallyRotatedNucleus();
-			boolean[][] test = verticalNucleus.getBooleanMask(200, 200);
+			Mask test = verticalNucleus.getBooleanMask(200, 200);
 			int[] offsets = aligner.align(test);
-			verticalNucleus.moveCentreOfMass( new FloatPoint(offsets[1], offsets[0]));
+			verticalNucleus.moveCentreOfMass( IPoint.makeNew(offsets[1], offsets[0]));
 			fireProgressEvent();
 		}
 
