@@ -61,6 +61,7 @@ public class BorderTagDualChartPanel extends DualChartPanel{
 		    		int item   = ent.getItem();
 		    		double x   = ent.getDataset().getXValue(series, item);
 
+		    		
 		    		activeProfileIndex = (int) x;
 		    		MouseEvent ev = e.getTrigger();
 		    		popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());

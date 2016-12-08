@@ -24,7 +24,6 @@ import org.jfree.chart.JFreeChart;
 import charting.charts.MorphologyChartFactory;
 import charting.charts.panels.DraggableOverlayChartPanel;
 import charting.options.ChartOptions;
-import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;

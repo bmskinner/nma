@@ -133,10 +133,12 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	protected void updateSingle() {
 		
 		setButtonsEnabled(true);
+		
+		boolean normaliseProfile = false; // cannot be normalised because we must get absolute indexes
 				
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setNormalised(false)
+			.setNormalised(normaliseProfile)
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(true)
@@ -159,7 +161,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 		
 		ChartOptions rangeOptions = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
-			.setNormalised(false)
+			.setNormalised(normaliseProfile)
 			.setAlignment(ProfileAlignment.LEFT)
 			.setTag(Tag.REFERENCE_POINT)
 			.setShowMarkers(true)

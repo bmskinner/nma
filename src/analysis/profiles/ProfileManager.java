@@ -29,10 +29,9 @@ import java.util.UUID;
 import analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import logging.Loggable;
 import stats.Quartile;
-import utility.Constants;
-import components.AbstractCellularComponent;
 import components.ICell;
 import components.ICellCollection;
+import components.active.DefaultCellCollection;
 import components.active.DefaultCellularComponent;
 import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.UnavailableBorderTagException;
@@ -45,7 +44,6 @@ import components.generic.ProfileType;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;
 
 /**
@@ -186,10 +184,8 @@ public class ProfileManager implements Loggable {
 		
 		// check the index for wrapping - observed problem when OP==RP in rulesets
 		
-		index = AbstractCellularComponent.wrapIndex(index, getProfileLength());
-		
-		
-		
+		index = DefaultCellularComponent.wrapIndex(index, getProfileLength());
+
 		for(ProfileType type : ProfileType.values()){
 			if(type.equals(ProfileType.FRANKEN)){
 				continue;
@@ -753,16 +749,11 @@ public class ProfileManager implements Loggable {
 	 * @throws Exception
 	 */
 	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws Exception {
-		
-//		fine("Updating median profile segment: "+segName+" to index "+index);
-		// Get the median profile from the reference point
-		
+				
 		ISegmentedProfile oldProfile = collection
 				.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-		
-//		programLogger.log(Level.FINEST, "Old profile: "+oldProfile.toString());
-		
+			
 
 
 		IBorderSegment seg = oldProfile.getSegment(id);
@@ -875,17 +866,19 @@ public class ProfileManager implements Loggable {
 			 * With the median profile segments merged, also merge the segments
 			 * in the individual nuclei
 			 */
-			for(Nucleus n : collection.getNuclei()){
-				
-				boolean wasLocked = n.isLocked();
-				n.setLocked(false); // Merging segments is not destructive
+			if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+				for(Nucleus n : collection.getNuclei()){
 
-				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
-				IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
-				profile.mergeSegments(nSeg1, nSeg2, newID);
-				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-				n.setLocked(wasLocked);
+					boolean wasLocked = n.isLocked();
+					n.setLocked(false); // Merging segments is not destructive
+
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+					IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
+					IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
+					profile.mergeSegments(nSeg1, nSeg2, newID);
+					n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+					n.setLocked(wasLocked);
+				}
 			}
 
 			/*
@@ -913,21 +906,45 @@ public class ProfileManager implements Loggable {
 		
 	}
 	
+	
+	/**
+	 * Split the given segment into two segmnets. The split is made at the given index. The new segmnet
+	 * ids are provided
+	 * @param segName
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean splitSegment(IBorderSegment seg)  throws Exception {
+		return splitSegment(seg,  null, null);
+	}
+	
 	/**
 	 * Split the given segment into two segmnets. The split is made at the given index
 	 * @param segName
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean splitSegment(IBorderSegment seg, int index)  throws Exception {
+	public boolean splitSegment(IBorderSegment seg, UUID newID1, UUID newID2)  throws Exception {
 		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		
+		// Replace the segment with the actual median profile segment - eg when updating child datasets
+		seg = medianProfile.getSegment(seg.getID());
+		int index = seg.getMidpointIndex();
 		
 
 		// Do not try to split segments that are a merge of other segments
 		if(seg.hasMergeSources()){
 			return false;
+		}
+		
+		if(newID1==null){
+			newID1 = java.util.UUID.randomUUID();
+		}
+		
+		if(newID2==null){
+			newID2 = java.util.UUID.randomUUID();
 		}
 						
 		try{
@@ -936,8 +953,6 @@ public class ProfileManager implements Loggable {
 
 				double proportion = seg.getIndexProportion(index);
 
-				UUID newID1 = java.util.UUID.randomUUID();
-				UUID newID2 = java.util.UUID.randomUUID();
 				// split the two segments in the median
 				medianProfile.splitSegment(seg, index, newID1, newID2);
 
@@ -949,17 +964,19 @@ public class ProfileManager implements Loggable {
 				 * With the median profile segments unmerged, also split the segments
 				 * in the individual nuclei. Requires proportional alignment
 				 */
-				for(Nucleus n : collection.getNuclei()){
-					boolean wasLocked = n.isLocked();
-					n.setLocked(false); // Merging segments is not destructive
+				if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+					for(Nucleus n : collection.getNuclei()){
+						boolean wasLocked = n.isLocked();
+						n.setLocked(false); // Merging segments is not destructive
 
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-					IBorderSegment nSeg = profile.getSegment(seg.getID());
+						ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+						IBorderSegment nSeg = profile.getSegment(seg.getID());
 
-					int targetIndex = nSeg.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-					n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-					n.setLocked(wasLocked);
+						int targetIndex = nSeg.getProportionalIndex(proportion);
+						profile.splitSegment(nSeg, targetIndex, newID1, newID2);
+						n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+						n.setLocked(wasLocked);
+					}
 				}
 
 				/*
@@ -986,17 +1003,17 @@ public class ProfileManager implements Loggable {
 		}
 	}
 	
-	/**
-	 * Split the given segment into two segmnets. The split is made at the midpoint
-	 * @param segName
-	 * @return
-	 * @throws Exception
-	 */
-	public boolean splitSegment(IBorderSegment seg) throws Exception {
-			int index = seg.getMidpointIndex();
-			
-			return splitSegment(seg, index);
-	}
+//	/**
+//	 * Split the given segment into two segmnets. The split is made at the midpoint
+//	 * @param segName
+//	 * @return
+//	 * @throws Exception
+//	 */
+//	public boolean splitSegment(IBorderSegment seg) throws Exception {
+//			int index = seg.getMidpointIndex();
+//			
+//			return splitSegment(seg, index);
+//	}
 	
 	public void unmergeSegments(IBorderSegment seg) throws Exception {
 		
@@ -1016,14 +1033,16 @@ public class ProfileManager implements Loggable {
 		 * With the median profile segments unmerged, also unmerge the segments
 		 * in the individual nuclei
 		 */		
-		for(Nucleus n : collection.getNuclei()){
-			boolean wasLocked = n.isLocked();
-			n.setLocked(false); // Merging segments is not destructive
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			IBorderSegment nSeg = profile.getSegment(seg.getID());
-			profile.unmergeSegment(nSeg);
-			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-			n.setLocked(wasLocked);
+		if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+			for(Nucleus n : collection.getNuclei()){
+				boolean wasLocked = n.isLocked();
+				n.setLocked(false); // Merging segments is not destructive
+				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+				IBorderSegment nSeg = profile.getSegment(seg.getID());
+				profile.unmergeSegment(nSeg);
+				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+				n.setLocked(wasLocked);
+			}
 		}
 		
 		/*

@@ -47,6 +47,7 @@ import javax.swing.SpinnerNumberModel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
+import analysis.IAnalysisDataset;
 import analysis.IMutableAnalysisOptions;
 import analysis.profiles.ProfileException;
 import analysis.profiles.SegmentFitter;
@@ -180,7 +181,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			ISegmentedProfile profile = null;
 			
-			boolean normaliseProfile = false;
+			boolean normaliseProfile = true;
 			
 			ChartOptions options = new ChartOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -499,6 +500,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 						.getProfileManager()
 						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
 					
+					for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
+						child.getCollection()
+						.getProfileManager()
+						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
+					}
+					
 					finest("Merged segments: "+mergeOption.toString());
 					finest("Refreshing chart cache for editing panel");
 					this.refreshChartCache();
@@ -565,11 +572,20 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				this.setAnalysing(true);
 
 				IBorderSegment seg = option.getSeg();
-
+				
+				UUID newID1 = java.util.UUID.randomUUID();
+				UUID newID2 = java.util.UUID.randomUUID();
+				
 				if(activeDataset()
 						.getCollection()
 						.getProfileManager()
-						.splitSegment(seg)){
+						.splitSegment(seg, newID1, newID2)){
+					
+					for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
+						child.getCollection()
+						.getProfileManager()
+						.splitSegment(seg, newID1, newID2);
+					}
 					
 					finest("Split segment "+option.toString());
 					finest("Refreshing chart cache for editing panel");
@@ -616,6 +632,13 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				.getCollection()
 				.getProfileManager()
 				.unmergeSegments(mergeOption.getSeg());
+				
+				
+				for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
+					child.getCollection()
+					.getProfileManager()
+					.unmergeSegments(mergeOption.getSeg());
+				}
 				
 				this.setAnalysing(false);
 				
