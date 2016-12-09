@@ -120,7 +120,7 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 				}	
 			}
 			chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING); // ensure the narrower bars are on top
-			
+//			chart.getCategoryPlot().setColumnRenderingOrder(SortOrder.DESCENDING);
 			datasetCount++;
 		}
 		

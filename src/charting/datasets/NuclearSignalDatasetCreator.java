@@ -843,7 +843,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 				// Create the random distribution
 				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					addRandomShellData(ds, collection, options);
+					
+					if(options.isShowAnnotations()){
+						addRandomShellData(ds, collection, options);
+					}
 				} else {
 					addRealShellData(ds, collection, options, signalGroup);
 				}

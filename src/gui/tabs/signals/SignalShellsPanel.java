@@ -54,10 +54,6 @@ import charting.options.TableOptionsBuilder;
 public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
 	private ExportableChartPanel 	chartPanel; 
-
-//	private JRadioButton proportionsBtn = new JRadioButton("Proportions");
-//	private JRadioButton countsBtn      = new JRadioButton("Counts");
-//	private ButtonGroup  buttonGroup    = new ButtonGroup();
 	
 	private JRadioButton withinSignalsBtn = new JRadioButton("Within signals");
 	private JRadioButton withinNucleiBtn  = new JRadioButton("Within nuclei");
@@ -66,6 +62,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	private JButton 	newAnalysis	 = new JButton("Run new");
 	
 	private JCheckBox dapiNormalise = new JCheckBox("DAPI normalise", true);
+	private JCheckBox showRandomCheckbox = new JCheckBox("Show random", false);
+	
 	protected ExportableTable table;
 
 	public SignalShellsPanel(){
@@ -114,6 +112,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		dapiNormalise.setToolTipText("Apply a correction for nuclear flattening based on the DNA counterstain");
 		panel.add(dapiNormalise);
 		
+		showRandomCheckbox.addActionListener(this);
+		showRandomCheckbox.setToolTipText("Show a random distribution of signals in the consensus nucleus");
+		panel.add(showRandomCheckbox);
+		
 		setEnabled(false);
 		
 		return panel;
@@ -121,11 +123,10 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	public void setEnabled(boolean b){
 		newAnalysis.setEnabled(b);
-//		proportionsBtn.setEnabled(b);
-//		countsBtn.setEnabled(b);
 		withinNucleiBtn.setEnabled(b);
 		withinSignalsBtn.setEnabled(b);
 		dapiNormalise.setEnabled(b);
+		showRandomCheckbox.setEnabled(b);
 	}
 	
 	private JScrollPane createTablePanel(){
@@ -166,10 +167,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		CountType type = withinNucleiBtn.isSelected() ? CountType.NUCLEUS : CountType.SIGNAL;
 		
+		boolean showRandom = showRandomCheckbox.isSelected();
+		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.setTarget(chartPanel)
 			.setNormalised(dapiNormalise.isSelected())
+			.setShowAnnotations(showRandom) // proxy for random signal distribution 
 			.setCountType(type)
 			.build();
 
@@ -187,8 +191,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		setTable(tableOptions);
 
-//		TableModel model = getTable(tableOptions);
-//		table.setModel(model);
 	}
 
 	@Override
@@ -199,6 +201,9 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		if(activeDataset().getCollection().getSignalManager().hasSignals()){
 			setEnabled(true);
+			if( ! activeDataset().getCollection().hasConsensusNucleus()){
+				showRandomCheckbox.setEnabled(false);
+			}
 		}
 		
 	}

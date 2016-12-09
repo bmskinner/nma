@@ -1,5 +1,6 @@
 package components.active;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -406,6 +407,15 @@ public class VirtualCellCollection implements ICellCollection {
 			@Override
 			public IShellResult getShellResult(){
 				return shellResults.get(signalGroup);
+			}
+			
+			@Override
+			public void setGroupColour(Color newColor){
+				try {
+					parent.getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);
+				} catch (UnavailableSignalGroupException e) {
+					stack("Signal group not found", e);
+				}
 			}
 			
 		};

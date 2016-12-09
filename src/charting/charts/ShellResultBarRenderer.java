@@ -132,7 +132,7 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         // draw the bar...
         double shift = 0.0;
         double widthFactor = 1.0;
-        double seriesBarWidth = getSeriesBarWidth(row);
+        double seriesBarWidth = getSeriesBarWidth(row); 
         if (!Double.isNaN(seriesBarWidth)) {
             widthFactor = seriesBarWidth;
         }
