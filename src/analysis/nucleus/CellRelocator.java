@@ -1,6 +1,7 @@
 package analysis.nucleus;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import analysis.profiles.ProfileException;
 import components.ChildAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
@@ -50,8 +52,15 @@ public class CellRelocator extends AnalysisWorker {
 		return result;
 	}
 	
-	private void findCells() throws Exception {
-		Set<UUID> newDatasets = parsePathList();
+	private void findCells() {
+		Set<UUID> newDatasets;
+		try {
+			newDatasets = parsePathList();
+		} catch (CellRelocationException e) {
+//			warn("Error relocating cells");
+			stack("Error relocating cells", e);
+			return;
+		}
 		
 		fine("Parsing complete");
 		int newSize = newDatasets.size();
@@ -59,36 +68,45 @@ public class CellRelocator extends AnalysisWorker {
 		
 		if( newDatasets.size()>0){
 			
-			for(UUID id : newDatasets){
-				
-				if( ! id.equals(getDataset().getUUID())){
-					/*
-					 * Copy profile offsets and make the median profile
-					 */
-					getDataset().getCollection()
+			try {
+			
+				for(UUID id : newDatasets){
+
+					if( ! id.equals(getDataset().getUUID())){
+						/*
+						 * Copy profile offsets and make the median profile
+						 */
+						getDataset().getCollection()
 						.getProfileManager()
 						.copyCollectionOffsets(getDataset().getChildDataset(id).getCollection());
-					
-				}
-			}			
+
+					}
+				}			
+			} catch (ProfileException e) {
+				warn("Unable to profile new collections");
+				stack("Unable to profile new collections", e);
+				return;
+			}
 		}
 		
 	}
 	
 	
 	
-	private Set<UUID> parsePathList() throws Exception {
+	private Set<UUID> parsePathList() throws CellRelocationException {
 		fine("Input file: "+inputFile.toString());
-		
-//		List<Cell> cells = new ArrayList<Cell>();
-		
-	    Scanner scanner =  new Scanner(inputFile);
+				
+	    Scanner scanner;
+		try {
+			scanner = new Scanner(inputFile);
+		} catch (FileNotFoundException e) {
+			throw new CellRelocationException("Input file does not exist", e);
+		}
 	    
 	    UUID   activeID   = null;
 	    String activeName = null;
 	    
 	    Map<UUID, IAnalysisDataset> map = new HashMap<UUID, IAnalysisDataset>();
-//	    map.put(getDataset().getUUID(), getDataset());
 
 	    while (scanner.hasNextLine()){
 	    	
@@ -107,6 +125,15 @@ public class CellRelocator extends AnalysisWorker {
 	    		 * New dataset found
 	    		 */
 	    		activeID = UUID.fromString( line.split("\\t")[1] );
+	    		
+	    		if(getDataset().getUUID().equals(activeID) || getDataset().hasChild(activeID)){
+	    			// the dataset already exists with this id - we must fail
+	    			scanner.close();
+	    			warn("Dataset in cell file already exists");
+	    			warn("Cancelling relocation");
+	    			throw new CellRelocationException("Dataset already exists");
+	    		}
+	    		
 	    		continue;
 	    	}
 	    	
@@ -122,11 +149,6 @@ public class CellRelocator extends AnalysisWorker {
 	    				  activeID);
 	    		c.createProfileCollection();
 	    		
-//	    		ICellCollection c = new DefaultCellCollection(getDataset().getCollection().getFolder(), 
-//	    				getDataset().getCollection().getOutputFolderName(), 
-//	    				  activeName, 
-//	    				  getDataset().getCollection().getNucleusType(),
-//	    				  activeID);
 	    		IAnalysisDataset d = new ChildAnalysisDataset(getDataset(), c);
 	    		d.setAnalysisOptions(getDataset().getAnalysisOptions());
 	    		map.put(activeID, d);
@@ -154,7 +176,6 @@ public class CellRelocator extends AnalysisWorker {
 	        ICell cell = getCellFromLine(line);
 	        if(cell!=null){
 	        	map.get(activeID).getCollection().addCell(cell);
-//	        	cells.add(cell);
 	        }
 	    }
 	    fine("All cells found");
@@ -246,6 +267,14 @@ public class CellRelocator extends AnalysisWorker {
 		double x = Double.parseDouble(posArray[0]);
 		double y = Double.parseDouble(posArray[1]);
 		return IPoint.makeNew(x, y);
+	}
+	
+	public class CellRelocationException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public CellRelocationException() { super(); }
+		public CellRelocationException(String message) { super(message); }
+		public CellRelocationException(String message, Throwable cause) { super(message, cause); }
+		public CellRelocationException(Throwable cause) { super(cause); }
 	}
 
 }

@@ -56,7 +56,6 @@ public class RelocateFromFileAction extends ProgressableAction {
 		fine("Firing refresh of populations");
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		this.countdownLatch();
-		log("Cells added as new child dataset");
 		super.finished();		
 	}
 	
