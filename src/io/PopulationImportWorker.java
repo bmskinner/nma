@@ -20,12 +20,15 @@ package io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import components.active.generic.UnavailableSignalGroupException;
 import components.generic.Tag;
@@ -84,6 +87,9 @@ public class PopulationImportWorker extends AnalysisWorker {
 		finest("Beginning background work");
 		fireCooldown();
 		try {
+			
+			// Clean up old log lock files
+			cleanLockFilesInDir(file.getParentFile());
 		
 			
 			try {
@@ -172,7 +178,32 @@ public class PopulationImportWorker extends AnalysisWorker {
 			return false;
 		}
 	}
+
+	
+	/**
+	 * Older version of the program did not always close log
+	 * handlers properly, so lck files may have proliferated. 
+	 * Kill them with fire.
+	 * @param dir the directory to clean
+	 */
+	private void cleanLockFilesInDir(File dir){
 		
+		FilenameFilter filter = new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				String lowercaseName = name.toLowerCase();
+				return (lowercaseName.endsWith(".lck"));
+			}
+		};
+
+		
+		for(File lockFile : dir.listFiles(filter)){
+			
+			lockFile.delete();
+			
+		}
+		
+	}
+	
 	private void updateSignals(){
 		log("Updating signal positions for old dataset");
 		updateSignalPositions(dataset);
