@@ -43,7 +43,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	
 	private boolean isNormaliseContrast;
 	
-	private IMutableCannyOptions cannyOptions;
+	private IMutableCannyOptions cannyOptions = null;
 	
 	
 	/**
@@ -279,7 +279,9 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 		
 		result = prime * result + (isNormaliseContrast ? 1231 : 1237);
 		
-		result = prime * result + cannyOptions.hashCode();
+		if(cannyOptions!=null)
+			result = prime * result + cannyOptions.hashCode();
+		
 		return result;
 		
 	}
