@@ -18,6 +18,7 @@
  *******************************************************************************/
 package gui.tabs.nuclear;
 
+import gui.Labels;
 import gui.components.ExportableTable;
 import gui.components.PairwiseTableCellRenderer;
 import gui.dialogs.RandomSamplingDialog;
@@ -98,7 +99,11 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
 		randomSamplingButton.setEnabled(true);
-		tablePanel.add(new JLabel("Single dataset selected", JLabel.CENTER));
+		
+		JPanel panel = new JPanel(new FlowLayout());
+		panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+		tablePanel.add(panel);
+
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}

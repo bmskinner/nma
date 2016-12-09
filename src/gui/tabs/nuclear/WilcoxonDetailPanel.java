@@ -18,7 +18,10 @@
  *******************************************************************************/
 package gui.tabs.nuclear;
 
+import java.awt.FlowLayout;
+
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import charting.datasets.AbstractDatasetCreator;
@@ -42,7 +45,11 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	protected void updateSingle() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
-		tablePanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+		
+		JPanel panel = new JPanel(new FlowLayout());
+		panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+		tablePanel.add(panel);
+
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
@@ -79,7 +86,10 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	protected void updateNull() {		
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
-		tablePanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+		
+		JPanel panel = new JPanel(new FlowLayout());
+		panel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+		tablePanel.add(panel);
 		scrollPane.setViewportView(tablePanel);;
 		tablePanel.repaint();
 	}
