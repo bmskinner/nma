@@ -23,23 +23,15 @@
 */  
 package components.nuclei.sperm;
 
-import ij.gui.Roi;
-
-import java.io.File;
 import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import components.active.generic.UnavailableProfileTypeException;
-import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.Tag;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
-import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
 
 @Deprecated
 public class PigSpermNucleus 

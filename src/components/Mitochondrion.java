@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import components.nuclear.BorderPoint;
 
+@Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
 
 	private static final long serialVersionUID = 1L;
@@ -73,6 +74,12 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 	public boolean isSmoothByDefault() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public int compareTo(IMitochondrion o) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

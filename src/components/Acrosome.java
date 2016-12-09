@@ -20,6 +20,7 @@ package components;
 
 import java.io.IOException;
 
+@Deprecated
 public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 
 	private static final long serialVersionUID = 1L;

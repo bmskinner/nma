@@ -29,7 +29,6 @@ import java.util.List;
 
 import components.active.generic.FloatPoint;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 /**
  * The sperm tail is a specialised type of flagellum. It is anchored at
@@ -39,6 +38,7 @@ import components.generic.XYPoint;
  * @author bms41
  *
  */
+@Deprecated
 public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
 			
 		private static final long serialVersionUID = 1L;

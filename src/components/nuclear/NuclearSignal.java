@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -11,7 +11,9 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
  *
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
@@ -19,16 +21,10 @@
 package components.nuclear;
 
 import ij.gui.Roi;
-import stats.SignalStatistic;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
-
 import components.AbstractCellularComponent;
-import components.CellularComponent;
 import components.generic.IPoint;
-import components.generic.XYPoint;
 
 /**
  * A NuclearSignal is a region within a nucleus of interest, such as a chromosome paint. 
@@ -36,6 +32,7 @@ import components.generic.XYPoint;
  * @author ben
  *
  */
+@Deprecated
 public class NuclearSignal extends AbstractCellularComponent implements INuclearSignal {
 
 	private static final long serialVersionUID = 1L;

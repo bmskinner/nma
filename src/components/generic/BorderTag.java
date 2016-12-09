@@ -21,7 +21,13 @@ package components.generic;
 import java.util.ArrayList;
 import java.util.List;
 
-// use in charting
+
+/**
+ * Describes the types of tags than can be added around the border of
+ * an object. Wrapped into the {@link BorderTagObject} for use in components.
+ * @author bms41
+ *
+ */
 public enum BorderTag {
 	
 	REFERENCE_POINT    ("Reference point",       BorderTagType.CORE ),

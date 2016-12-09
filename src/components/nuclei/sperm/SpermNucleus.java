@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 
 import components.generic.IPoint;
-import components.generic.XYPoint;
 import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
 

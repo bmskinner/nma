@@ -27,10 +27,8 @@
 package components.nuclei.sperm;
 
 import ij.IJ;
-import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,23 +38,18 @@ import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.active.generic.DefaultBorderPoint;
 import components.active.generic.FloatPoint;
 import components.active.generic.UnavailableBorderTagException;
 import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
-import components.generic.BorderTagObject;
 import components.generic.Equation;
 import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
-import components.generic.XYPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.INuclearSignal;
-import components.nuclear.NuclearSignal;
-import components.nuclear.BorderPoint;
 import components.nuclei.Nucleus;
 
 @Deprecated

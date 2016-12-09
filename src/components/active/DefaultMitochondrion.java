@@ -19,18 +19,60 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package components.active.generic;
+package components.active;
+
+import ij.gui.Roi;
+
+import java.io.File;
+
+import components.IMitochondrion;
+import components.generic.IPoint;
 
 /**
- * Thrown when a profile type is not available within a profile collection.
+ * A default implementation of the IMitochondrion interface
  * @author bms41
  * @since 1.13.3
  *
  */
-public class UnavailableProfileTypeException extends UnavailableComponentException {
-		private static final long serialVersionUID = 1L;
-		public UnavailableProfileTypeException() { super(); }
-		public UnavailableProfileTypeException(String message) { super(message); }
-		public UnavailableProfileTypeException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableProfileTypeException(Throwable cause) { super(cause); }
+public class DefaultMitochondrion
+	extends DefaultCellularComponent 
+	implements IMitochondrion {
+	
+	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * Construct with an ROI, a source image and channel, and the original position in the source image
+	 * @param roi
+	 * @param f
+	 * @param channel
+	 * @param position
+	 * @param centreOfMass
+	 */
+	public DefaultMitochondrion(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
+		super(roi, centreOfMass, f, channel, position );
 	}
+		
+	/**
+	 * Construct from an existing mitochondrion 
+	 * @param n the template mitochondrion
+	 */
+	protected DefaultMitochondrion(IMitochondrion n) {
+		super( n);
+	}
+
+	@Override
+	public int compareTo(IMitochondrion arg0) {
+		return 0;
+	}
+
+	@Override
+	public IMitochondrion duplicate() {
+		return new DefaultMitochondrion(this);
+	}
+
+	@Override
+	public void alignVertically() {
+		// TODO Auto-generated method stub
+		
+	}
+}

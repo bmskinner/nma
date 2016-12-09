@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -11,7 +11,9 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
  *
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
@@ -28,11 +30,7 @@ import components.active.DefaultPigSpermNucleus;
 import components.active.DefaultRodentSpermNucleus;
 import components.generic.BorderTag;
 import components.generic.Tag;
-import components.nuclei.AsymmetricNucleus;
 import components.nuclei.Nucleus;
-import components.nuclei.RoundNucleus;
-import components.nuclei.sperm.PigSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
 
 /**
  * The types of nuclei we are able to analyse,

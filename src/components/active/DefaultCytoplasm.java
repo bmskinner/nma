@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -11,7 +11,9 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
  *
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
@@ -24,7 +26,6 @@ import ij.gui.Roi;
 import java.io.File;
 
 import components.ICytoplasm;
-import components.active.generic.UnprofilableObjectException;
 import components.generic.IPoint;
 
 /**
@@ -33,7 +34,9 @@ import components.generic.IPoint;
  * @since 1.13.3
  *
  */
-public class DefaultCytoplasm extends DefaultCellularComponent implements ICytoplasm {
+public class DefaultCytoplasm 
+	extends DefaultCellularComponent 
+	implements ICytoplasm {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,23 +48,17 @@ public class DefaultCytoplasm extends DefaultCellularComponent implements ICytop
 	 * @param position
 	 * @param centreOfMass
 	 */
-	public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number){
+	public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
 		super(roi, centreOfMass, f, channel, position  );
 	}
 		
-	protected DefaultCytoplasm(ICytoplasm n) throws UnprofilableObjectException {
+	protected DefaultCytoplasm(ICytoplasm n) {
 		super( n);
 	}
 	
 	@Override
 	public ICytoplasm duplicate(){
-		try {
-			return new DefaultCytoplasm(this);
-		} catch (UnprofilableObjectException e) {
-			warn("Duplication failed");
-			stack("Error duplicating cytoplasm", e);
-		}	
-		return null;
+		return new DefaultCytoplasm(this);
 	}
 
 	@Override

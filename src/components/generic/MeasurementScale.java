@@ -18,6 +18,14 @@
  *******************************************************************************/
 package components.generic;
 
+/**
+ * Describes the scales at which data may be presented.
+ * The pixel scale is what is captured by the camera. 
+ * If a conversion factor is provided, this can be shown
+ * in real units.
+ * @author bms41
+ *
+ */
 public enum MeasurementScale {
 	
 	PIXELS ("Pixels"),

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import logging.Loggable;
-import components.AbstractCellularComponent;
 import components.active.DefaultCellularComponent;
 import components.active.generic.FloatProfile;
 import ij.IJ;
@@ -165,7 +164,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	public BooleanProfile offset(int j) throws Exception{
 		boolean[] newArray = new boolean[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ AbstractCellularComponent.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ DefaultCellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new BooleanProfile(newArray);
 	}

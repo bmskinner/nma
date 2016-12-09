@@ -23,6 +23,13 @@ import java.io.Serializable;
 
 import components.generic.BorderTag.BorderTagType;
 
+/**
+ * This interface accesses the tagged points around the periphery of an object.
+ * Default tags are provided.
+ * @author bms41
+ * @since 1.13.3
+ *
+ */
 public interface Tag extends Comparable<Tag>, Serializable {
 
 	public static final BorderTagObject REFERENCE_POINT = new BorderTagObject(
@@ -55,13 +62,5 @@ public interface Tag extends Comparable<Tag>, Serializable {
 	 * @return
 	 */
 	BorderTagType type();
-
-	String toString();
-
-	int hashCode();
-
-	boolean equals(Object obj);
-
-	int compareTo(Tag arg0);
 
 }

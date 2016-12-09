@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
+ *  	Copyright (C) 2015, 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -11,7 +11,9 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
  *
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
@@ -21,7 +23,6 @@ package components.nuclear;
 
 import components.active.generic.DefaultBorderPoint;
 import components.generic.IMutablePoint;
-import components.generic.IPoint;
 
 /**
  * Border points are 2D points that also track the previous and next

@@ -20,8 +20,6 @@
 package components.generic;
 
 import stats.Quartile;
-import stats.Stats;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,13 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-
 import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import logging.Loggable;
 import utility.ArrayConverter;
-import utility.Constants;
 import utility.ArrayConverter.ArrayConversionException;
 
 /**
@@ -49,6 +44,7 @@ import utility.ArrayConverter.ArrayConversionException;
  * @author bms41
  *
  */
+@Deprecated
 public class ProfileAggregate implements Loggable, Serializable, IProfileAggregate {
 	
 	private static final long serialVersionUID = 1L;

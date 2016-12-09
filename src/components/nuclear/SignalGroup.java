@@ -1,3 +1,23 @@
+/*******************************************************************************
+ *  	Copyright (C) 2015, 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details. Gluten-free. May contain 
+ *     traces of LDL asbestos. Avoid children using heavy machinery while under the
+ *     influence of alcohol.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
 package components.nuclear;
 
 import java.awt.Color;
@@ -6,7 +26,7 @@ import java.io.File;
 import components.active.generic.DefaultShellResult;
 
 /**
- * This contains information about signals for an AnalysisDataset.
+ * This contains information about nuclear signals within an {@link ICellCollection},
  * @author bms41
  *
  */
@@ -20,10 +40,14 @@ public class SignalGroup implements ISignalGroup {
     private int         channel     = 0;
     private File        folder      = null;
     
+    /**
+     * Default constructor
+     */
     public SignalGroup(){}
     
     /**
-     * Duplicate a group
+     * Construct from an existing group, duplicating
+     * the values in the template group.
      * @param s
      */
     public SignalGroup(ISignalGroup s){

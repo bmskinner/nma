@@ -1,13 +1,3 @@
-package components.generic;
-
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.util.List;
-
-import components.active.generic.FloatPoint;
-import components.nuclear.BorderPoint;
-import components.nuclear.IBorderPoint;
-
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
  *   
@@ -26,17 +16,22 @@ import components.nuclear.IBorderPoint;
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-/*
-	-----------------------
-	EQUATION
-	-----------------------
-	Line equations
-*/
+package components.generic;
 
+import java.awt.geom.Point2D;
+import java.util.List;
+
+import components.active.generic.FloatPoint;
+import components.nuclear.IBorderPoint;
+
+/**
+ * Describes line equations of the form y=m*x + c
+ * @author bms41
+ *
+ */
 public class Equation{
 
-	final double m;
-	final double c;
+	final double m, c;
 
 	/**
 	*	Constructor using gradient and intercept. 

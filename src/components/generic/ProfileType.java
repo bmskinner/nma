@@ -20,6 +20,12 @@ package components.generic;
 
 import stats.StatisticDimension;
 
+/**
+ * Describes the types of profiles that can be generated during the 
+ * morphology analysis.
+ * @author bms41
+ *
+ */
 public enum ProfileType { 
 	  ANGLE (   "Angle profile"    , "Angle"              , StatisticDimension.ANGLE), 
 	  FRANKEN ( "Franken profile"  , "Angle"              , StatisticDimension.ANGLE),
@@ -30,7 +36,13 @@ public enum ProfileType {
 	  private String label;
 	  private StatisticDimension dimension;
 	  	  
-	  ProfileType(String name, String label, StatisticDimension dimension){
+	  /**
+	   * Constructor
+	 * @param name the name of the profile for display
+	 * @param label the label to use on chart axes with this profile
+	 * @param dimension the statistical dimension the profile covers
+	 */
+	ProfileType(String name, String label, StatisticDimension dimension){
 		  this.name = name;
 		  this.label = label;
 		  this.dimension = dimension;

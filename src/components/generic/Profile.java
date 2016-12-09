@@ -31,8 +31,6 @@ import components.nuclear.IBorderSegment;
  * Holds arrays of values with wrapping and provides
  * methods to manipulate them. Used for distance and angle
  * profiles.
- */
-/**
  * @author bms41
  *
  */

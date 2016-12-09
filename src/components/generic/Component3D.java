@@ -19,6 +19,13 @@
 
 package components.generic;
 
+/**
+ * Describes the methods required for a 3D component.
+ * To be used when simulating shells in a 3D reconstruction
+ * of a flattened cell
+ * @author bms41
+ *
+ */
 public interface Component3D {
 	
 	/**

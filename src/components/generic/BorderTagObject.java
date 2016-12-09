@@ -25,7 +25,7 @@ import java.util.List;
 import components.generic.BorderTag.BorderTagType;
 
 /**
- * This is a wrapper for the BorderTag, to allow custom points of interest
+ * This is a wrapper for the {@link BorderTag}, to allow custom points of interest
  * to be added to a nucleus. For these, use the BorderTag.CUSTOM tag, and
  * a unique name
  * @author bms41

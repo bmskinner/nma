@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import components.generic.IPoint;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 
 @Deprecated
