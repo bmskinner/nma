@@ -144,8 +144,62 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 		}
 		return null;
 	}
-
 	
+	@Override
+	public int hashCode(){
+		final int prime = 31;
+		int result = 0;
+		
+		result = prime * result + detectionOptions.hashCode();
+
+		
+		long temp = Double.doubleToLongBits(profileWindowProportion);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		result = prime * result + type.hashCode();
+		
+		result = prime * result + (isRefoldNucleus ? 1231 : 1237);
+		result = prime * result + (isKeepFailed ? 1231 : 1237);
+		
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o){
+		if (this == o)
+			return true;
+		
+		if(o==null)
+			return false;
+	
+		if( ! ( o instanceof IAnalysisOptions))
+			return false;
+		
+		
+		IAnalysisOptions other = (IAnalysisOptions) o;
+		
+		for(String s : detectionOptions.keySet()){
+			IDetectionOptions d = detectionOptions.get(s);
+			
+			if( ! d.equals(other.getDetectionOptions(s)))
+				return false;
+		}
+		
+		if(Double.doubleToLongBits(profileWindowProportion)!=
+				Double.doubleToLongBits(other.getProfileWindowProportion()))
+			return false;
+		
+		if(type!=other.getNucleusType())
+			return false;
+		
+		if(isRefoldNucleus!=other.refoldNucleus())
+			return false;
+		
+		if(isKeepFailed!=other.isKeepFailedCollections())
+			return false;
+		
+		return true;
+	}
 	
 	
 }

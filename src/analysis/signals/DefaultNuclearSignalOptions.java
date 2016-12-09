@@ -86,6 +86,37 @@ public class DefaultNuclearSignalOptions
 		return new DefaultNuclearSignalOptions(this) ;
 	}
 	
+	@Override
+	public int hashCode(){
+		final int prime = 31;
+		int result = super.hashCode();
+		
+		long temp = Double.doubleToLongBits(maxFraction);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + mode.hashCode();
+		return result;
+	}
 	
+	@Override
+	public boolean equals(Object o){
+		
+		if(! super.equals(o))
+			return false;
+		
+		if( ! (o instanceof INuclearSignalOptions))
+			return false;
+		
+		INuclearSignalOptions other = (INuclearSignalOptions) o;
+		
+		if(Double.doubleToLongBits(maxFraction) != 
+				Double.doubleToLongBits(other.getMaxFraction()))
+			return false;
+		
+		if(mode != other.getDetectionMode())
+			return false;
+		
+		return true;
+		
+	}
 
 }

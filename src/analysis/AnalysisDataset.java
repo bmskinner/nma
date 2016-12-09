@@ -58,6 +58,7 @@ import components.IClusterGroup;
  * @since 1.7.0
  *
  */
+@Deprecated
 public class AnalysisDataset implements IAnalysisDataset {
 	
 	private static final long serialVersionUID = 1L;

@@ -306,44 +306,44 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
 			return result;
 		}
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#equals(java.lang.Object)
-		 */
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
+			
 			if (obj == null)
 				return false;
-			if (getClass() != obj.getClass())
+			
+			if ( ! (obj instanceof  ICannyOptions))
 				return false;
-			DefaultCannyOptions other = (DefaultCannyOptions) obj;
-//			if (!getOuterType().equals(other.getOuterType()))
-//				return false;
-			if (cannyAutoThreshold != other.cannyAutoThreshold)
+			
+			ICannyOptions other = (ICannyOptions) obj;
+
+			if (cannyAutoThreshold != other.isCannyAutoThreshold())
 				return false;
-			if (closingObjectRadius != other.closingObjectRadius)
+			if (closingObjectRadius != other.getClosingObjectRadius())
 				return false;
-			if (flattenChromocentres != other.flattenChromocentres)
+			if (flattenChromocentres != other.isUseFlattenImage())
 				return false;
-			if (flattenThreshold != other.flattenThreshold)
+			if (flattenThreshold != other.getFlattenThreshold())
 				return false;
 			if (Float.floatToIntBits(highThreshold) != Float
-					.floatToIntBits(other.highThreshold))
+					.floatToIntBits(other.getHighThreshold()))
 				return false;
 			if (Float.floatToIntBits(kernelRadius) != Float
-					.floatToIntBits(other.kernelRadius))
+					.floatToIntBits(other.getKernelRadius()))
 				return false;
-			if (kernelWidth != other.kernelWidth)
+			if (kernelWidth != other.getKernelWidth())
 				return false;
-			if (kuwaharaKernel != other.kuwaharaKernel)
+			if (kuwaharaKernel != other.getKuwaharaKernel())
 				return false;
 			if (Float.floatToIntBits(lowThreshold) != Float
-					.floatToIntBits(other.lowThreshold))
+					.floatToIntBits(other.getLowThreshold()))
 				return false;
-			if (useCanny != other.useCanny)
+			if (useCanny != other.isUseCanny())
 				return false;
-			if (useKuwahara != other.useKuwahara)
+			if (useKuwahara != other.isUseKuwahara())
 				return false;
 			return true;
 		}

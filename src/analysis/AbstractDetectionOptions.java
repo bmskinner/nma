@@ -251,5 +251,91 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	public void setNormaliseContrast(boolean b) {
 		this.isNormaliseContrast = b;
 	}
+	
+	@Override
+	public int hashCode(){
+		
+		final int prime = 31;
+		int result = super.hashCode();
+		
+		result = prime * result + folder.hashCode();
+		result = prime * result + threshold;
+		result = prime * result + channel;
+		
+		long temp = Double.doubleToLongBits(minCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		temp = Double.doubleToLongBits(maxCirc);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		temp = Double.doubleToLongBits(minSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		temp = Double.doubleToLongBits(maxSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		temp = Double.doubleToLongBits(scale);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		result = prime * result + (isNormaliseContrast ? 1231 : 1237);
+		
+		result = prime * result + cannyOptions.hashCode();
+		return result;
+		
+	}
+	
+	@Override
+	public boolean equals(Object o){
+		if (this == o)
+			return true;
+		
+		if(o==null)
+			return false;
+	
+		if( ! ( o instanceof IDetectionOptions))
+			return false;
+		
+		
+		IDetectionOptions other = (IDetectionOptions) o;
+		
+//		if(! folder.equals(other.getFolder()))
+//			return false;
+		
+		if(threshold!=other.getThreshold())
+			return false;
+		
+		if(channel!=other.getChannel())
+			return false;
+		
+		if( Double.doubleToLongBits(minCirc)!= 
+				Double.doubleToLongBits(other.getMinCirc()))
+			return false;
+		
+		if( Double.doubleToLongBits(maxCirc)
+				!=Double.doubleToLongBits(other.getMaxCirc()))
+			return false;
+
+		if(Double.doubleToLongBits(minSize)!=
+				Double.doubleToLongBits(other.getMinSize()))
+			return false;
+		
+		if(Double.doubleToLongBits(maxSize)	!=
+				Double.doubleToLongBits(other.getMaxSize()))
+			return false;
+		
+		if(Double.doubleToLongBits(scale)!=
+				Double.doubleToLongBits(other.getScale()))
+			return false;
+		
+		if(isNormaliseContrast!=other.isNormaliseContrast())
+			return false;
+		
+		if(! cannyOptions.equals(other.getCannyOptions())){
+			return false;
+		}
+				
+		return true;
+		
+	}
 
 }
