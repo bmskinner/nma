@@ -51,9 +51,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 	private SegmentHistogramsPanel 	segmentHistogramsPanel;	// draw boxplots of segment lengths
 	private SegmentWilcoxonPanel	segmentWilcoxonPanel;	// stats between datasets
 	private SegmentMagnitudePanel	segmentMagnitudePanel;  // magnitude differences between segments
-	
-	private SegmentPositionsPanel   segmentPositionsPanel;  // the XY coordinates of the segment starts
-	
+
 	private JTabbedPane 			tabPanel;
 	
 	public SegmentsDetailPanel() {
@@ -92,15 +90,6 @@ public class SegmentsDetailPanel extends DetailPanel {
 		this.addSubPanel(segmentMagnitudePanel);
 		tabPanel.addTab("Magnitude", segmentMagnitudePanel);
 		
-		segmentPositionsPanel = new SegmentPositionsPanel();
-		segmentPositionsPanel.setMinimumSize(minimumChartSize);
-		this.addSubPanel(segmentPositionsPanel);
-		tabPanel.addTab("Start positions", segmentPositionsPanel);
-		
-		
-		
-		
-		
 		segmentStatsPanel = new SegmentStatsPanel();
 		this.addSubPanel(segmentStatsPanel);
 		segmentStatsPanel.setMinimumSize(minimumChartSize);
@@ -135,50 +124,7 @@ public class SegmentsDetailPanel extends DetailPanel {
 		this.add(panel, BorderLayout.CENTER);
 		
 		
-	}
-	
-	@Override
-	protected void updateSingle() {
-		updateMultiple() ;
-	}
-	
-
-	@Override
-	protected void updateMultiple() {
-		finest("Updating segments boxplot panel: "+this.getClass().getName());
-		segmentBoxplotsPanel.update(getDatasets()); 
-		finest("Updated segments boxplot panel: "+this.getClass().getName());
-
-		finest("Updating segments histogram panel: "+this.getClass().getName());
-		segmentHistogramsPanel.update(getDatasets());
-		finest("Updated segments histogram panel: "+this.getClass().getName());
-
-		finest("Updating segments profile panel: "+this.getClass().getName());
-		segmentProfilePanel.update(getDatasets()); 
-		finest("Updated segments profile panel: "+this.getClass().getName());
-
-		finest("Updating segments stats panel: "+this.getClass().getName());
-		segmentStatsPanel.update(getDatasets());
-		finest("Updated segments stats panel: "+this.getClass().getName());
-		
-		finest("Updating segments stats panel: "+this.getClass().getName());
-		segmentWilcoxonPanel.update(getDatasets());
-		finest("Updated segments stats panel: "+this.getClass().getName());
-		
-		finest("Updating segments magnitude panel: "+this.getClass().getName());
-		segmentMagnitudePanel.update(getDatasets());
-		finest("Updated segments magnitude panel: "+this.getClass().getName());
-		
-		finest("Updating segments positions panel: "+this.getClass().getName());
-		segmentPositionsPanel.update(getDatasets());
-		finest("Updated segments positions panel: "+this.getClass().getName());
-	}
-	
-	@Override
-	protected void updateNull() {
-		updateMultiple() ;
-	}
-					
+	}			
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) {

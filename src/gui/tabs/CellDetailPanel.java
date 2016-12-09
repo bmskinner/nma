@@ -149,12 +149,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			model.setCell(null);
 		}
 		
-		cellsListPanel.update(getDatasets());
-		outlinePanel.update(getDatasets());
-		cellStatsPanel.update(getDatasets());
-		segmentProfilePanel.update(getDatasets());
-		cellBorderTagPanel.update(getDatasets());
-		signalListPanel.update(getDatasets());
+//		cellsListPanel.update(getDatasets());
+//		outlinePanel.update(getDatasets());
+//		cellStatsPanel.update(getDatasets());
+//		segmentProfilePanel.update(getDatasets());
+//		cellBorderTagPanel.update(getDatasets());
+//		signalListPanel.update(getDatasets());
 
 	}
 	
@@ -168,12 +168,12 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		model.setCell(null);
 		model.setComponent(null);
 		
-		cellsListPanel.update(getDatasets());
-		outlinePanel.update(getDatasets());
-		cellStatsPanel.update(getDatasets());
-		segmentProfilePanel.update(getDatasets());
-		cellBorderTagPanel.update(getDatasets());
-		signalListPanel.update(getDatasets());
+//		cellsListPanel.update(getDatasets());
+//		outlinePanel.update(getDatasets());
+//		cellStatsPanel.update(getDatasets());
+//		segmentProfilePanel.update(getDatasets());
+//		cellBorderTagPanel.update(getDatasets());
+//		signalListPanel.update(getDatasets());
 
 	}
 		

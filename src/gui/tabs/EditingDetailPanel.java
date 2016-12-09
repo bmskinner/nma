@@ -98,14 +98,14 @@ public class EditingDetailPanel extends DetailPanel implements SignalChangeListe
 		cellDetailPanel.setEnabled(true);
 		segmentsEditingPanel.setEnabled(true);
 
-		cellDetailPanel.update(getDatasets()); 
-		finest("Updated segments boxplot panel");
-
-		segmentsEditingPanel.update(getDatasets()); 
-		finest("Updated segments editing panel");
-		
-		borderTagEditingPanel.update(getDatasets()); 
-		finest("Updated border tag editing panel");
+//		cellDetailPanel.update(getDatasets()); 
+//		finest("Updated segments boxplot panel");
+//
+//		segmentsEditingPanel.update(getDatasets()); 
+//		finest("Updated segments editing panel");
+//		
+//		borderTagEditingPanel.update(getDatasets()); 
+//		finest("Updated border tag editing panel");
 	}
 	
 	/**

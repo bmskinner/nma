@@ -92,54 +92,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			log(Level.SEVERE, "Error making signal panel", e);
 		}
 	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a single dataset is selected
-	 */
-	protected void updateSingle() {
-		updateMultiple();
-	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
-	 */
-	protected void updateMultiple() {
 		
-		finest("Updating shells panel: "+this.getClass().getName());
-		shellsPanel.update(getDatasets());
-		finest("Updated shells panel: "+this.getClass().getName());
-		
-		finest("Updating signals overview panel: "+this.getClass().getName());
-		overviewPanel.update(getDatasets());
-		finest("Updated signals overview panel: "+this.getClass().getName());
-		
-		finest("Updating signals histogram panel: "+this.getClass().getName());
-		histogramPanel.update(getDatasets());
-		finest("Updated signals histogram panel: "+this.getClass().getName());
-		
-		finest("Updating signals analysis panel: "+this.getClass().getName());
-		analysisPanel.update(getDatasets());
-		finest("Updated signals analysis panel: "+this.getClass().getName());
-		
-		finest("Updating signals boxplot panel: "+this.getClass().getName());
-		boxplotPanel.update(getDatasets());
-		finest("Updated signals boxplot panel: "+this.getClass().getName());
-		
-		finest("Updating signals scatter panel: "+this.getClass().getName());
-		signalScatterChartPanel.update(getDatasets());
-		finest("Updated signals scatter panel: "+this.getClass().getName());
-	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
-	protected void updateNull() {
-		updateMultiple();
-	}
-	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options){
 		return null;

@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
@@ -282,9 +283,14 @@ public abstract class DetailPanel
 			
 			this.list.addAll(list);
 		}
-		fine("Set dataset list of "+this.list.size()+" datasets");
+//		fine("Set dataset list of "+this.list.size()+" datasets");
 		setUpdating(true);
-		finest("Set updating state");
+		
+		for(TabPanel t : this.getSubPanels()){
+			t.update(getDatasets());
+		}
+		
+//		finest("Set updating state");
 		updateDetail();
 
 	}

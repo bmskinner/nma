@@ -28,6 +28,7 @@ import gui.SegmentEventListener;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.BorderTagEvent;
 import gui.tabs.DetailPanel;
+import gui.tabs.EditingTabPanel;
 
 import javax.swing.JOptionPane;
 
@@ -40,14 +41,17 @@ import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 
 @SuppressWarnings("serial")
-public abstract class AbstractEditingPanel extends DetailPanel implements SegmentEventListener, BorderTagEventListener{
+public abstract class AbstractEditingPanel extends DetailPanel 
+	implements  SegmentEventListener, 
+				BorderTagEventListener, 
+				EditingTabPanel {
 	
 	/**
 	 * Check if any of the cells in the active collection are locked for
 	 * editing. If so, ask the user whether to unlock all cells,
 	 * or leave cells locked.
 	 */
-	protected void checkCellLock(){
+	public void checkCellLock(){
 		ICellCollection collection = activeDataset().getCollection();
 		
 		if(collection.hasLockedCells()){
@@ -71,7 +75,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 	 * @param tag
 	 * @param newTagIndex
 	 */
-	protected void setBorderTagAction(Tag tag, int newTagIndex){
+	public void setBorderTagAction(Tag tag, int newTagIndex){
 
 		if(tag==null){
 			fine("Tag is null");
@@ -119,7 +123,7 @@ public abstract class AbstractEditingPanel extends DetailPanel implements Segmen
 	 * @param index
 	 * @throws Exception
 	 */
-	protected void updateSegmentStartIndexAction(UUID id, int index) throws Exception{
+	public void updateSegmentStartIndexAction(UUID id, int index) throws Exception{
 
 		checkCellLock();
 		

@@ -1,9 +1,12 @@
 package gui.tabs.cells;
 
+import gui.tabs.CellEditingTabPanel;
 import gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")
-public abstract class AbstractCellDetailPanel extends AbstractEditingPanel {
+public abstract class AbstractCellDetailPanel 
+	extends AbstractEditingPanel
+	implements CellEditingTabPanel {
 		
 	private CellViewModel model;
 	

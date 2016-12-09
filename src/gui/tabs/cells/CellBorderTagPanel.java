@@ -215,7 +215,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel  {
 		}
 		
 
-		protected void setBorderTagAction(Tag tag, int newTagIndex){
+		public void setBorderTagAction(Tag tag, int newTagIndex){
 
 			if(tag==null){
 				fine("Tag is null");

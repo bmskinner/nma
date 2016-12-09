@@ -37,20 +37,15 @@ import javax.swing.JPanel;
 import org.jfree.chart.JFreeChart;
 
 import analysis.profiles.ProfileException;
-import stats.Quartile;
 import charting.charts.AbstractChartFactory;
 import charting.charts.MorphologyChartFactory;
-import charting.charts.OutlineChartFactory;
 import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.CellCollection;
 import components.ICellCollection;
 import components.active.generic.UnavailableBorderTagException;
-import components.generic.ProfileType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
 
 /**
  * Holds a series of outline panels showing the locations of the segment
@@ -168,11 +163,6 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 		mainPanel.repaint();
 		
 		scrollPane.setViewportView(mainPanel);
-		
-		/*
-		 * Ensure charts maintain aspect ratio
-		 */
-		finest("Restoring aspect ratios");
 
 	}
 	

@@ -33,7 +33,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 
@@ -85,48 +84,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		
 		
 		this.add(tabPane, BorderLayout.CENTER);
-	}
-	
-	@Override
-	protected void updateSingle() {
-		
-		finest("Updating nuclear stats panel");
-		nuclearStatsPanel.update(getDatasets());
-		finest("Updated nuclear stats panel");
-		
-		finest("Updating nuclear boxplots panel");
-		boxplotPanel.update(getDatasets());
-		finest("Updated nuclear boxplots panel");
-		
-		finest("Updating nuclear histograms panel");
-		histogramsPanel.update(getDatasets());
-		finest("Updated nuclear histograms panel");
-		
-		finest("Updating nuclear Wilcoxon panel");
-		wilcoxonPanel.update(getDatasets());
-		finest("Updated nuclear Wilcoxon panel");
-		
-		finest("Updating nuclear magnitude panel");
-		nucleusMagnitudePanel.update(getDatasets());
-		finest("Updated nuclear magnitude panel");
-		
-		finest("Updating nuclear overlays panel");
-		nuclearOverlaysPanel.update(getDatasets());
-		finest("Updated nuclear overlays panel");
-		
-		finest("Updating nuclear scatter panel");
-		nuclearScatterChartPanel.update(getDatasets());
-		finest("Updated nuclear scatter panel");
-	}
-	
-	@Override
-	protected void updateMultiple(){
-		updateSingle();
-	}
-	
-	@Override
-	protected void updateNull() {
-		updateSingle();
 	}
 		
 	@Override

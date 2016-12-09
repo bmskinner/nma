@@ -70,35 +70,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 		this.add(profilesTabPanel, BorderLayout.CENTER);
 
 	}
-	
-	@Override
-	protected void updateSingle() {
-		updateMultiple();
-	}
-	
-	@Override
-	protected void updateMultiple() {
 		
-		for(ProfileType type : profilePanels.keySet()){
-			finest("Updating "+type.toString()+" profile panel: "+this.getClass().getName());
-			profilePanels.get(type).update(getDatasets());
-			finest("Updated "+type.toString()+" profile panel: "+this.getClass().getName());
-		}
-		
-		finest("Updating variabililty panel: "+this.getClass().getName());
-		variabilityChartPanel.update(getDatasets());
-		finest("Updated variabililty panel: "+this.getClass().getName());
-		
-		finest("Updating modality panel: "+this.getClass().getName());
-		modalityDisplayPanel.update(getDatasets());
-		finest("Updated modality panel: "+this.getClass().getName());
-	}
-	
-	@Override
-	protected void updateNull() {
-		updateMultiple();
-	}
-	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) {
 		return null;

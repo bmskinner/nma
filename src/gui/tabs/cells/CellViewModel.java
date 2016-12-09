@@ -1,6 +1,8 @@
 package gui.tabs.cells;
 
 
+import gui.tabs.CellEditingTabPanel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,7 @@ public class CellViewModel {
 	private volatile ICell cell = null;
 	private volatile CellularComponent component = null;
 	
-	List<AbstractCellDetailPanel> views = new ArrayList<AbstractCellDetailPanel>();
+	List<CellEditingTabPanel> views = new ArrayList<CellEditingTabPanel>();
 	
 	public CellViewModel(ICell cell, CellularComponent component){
 		this.cell = cell;
@@ -59,7 +61,7 @@ public class CellViewModel {
 	 * to be redrawn
 	 */
 	public void clearChartCache(){
-		for(AbstractCellDetailPanel d : views){
+		for(CellEditingTabPanel d : views){
 			d.clearCellCharts();
 		}
 		updateViews();
@@ -82,12 +84,13 @@ public class CellViewModel {
 	}
 	
 	public void updateViews(){
-		for(AbstractCellDetailPanel d : views){
+		for(CellEditingTabPanel d : views){
 			d.update();
+			d.setEnabled( cell !=null );
 		}
 	}
 	
-	public void addView(AbstractCellDetailPanel d){
+	public void addView(CellEditingTabPanel d){
 		this.views.add(d);
 	}
 		
