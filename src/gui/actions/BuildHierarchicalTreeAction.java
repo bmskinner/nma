@@ -78,7 +78,6 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 
 		IClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
-//		group.addDataset(dataset);
 		
 		ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);
 		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
@@ -91,7 +90,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
-		log(Level.FINEST, "BuildHierarchicalTreeAction heard dataset event");
+		finest("BuildHierarchicalTreeAction heard dataset event");
 		if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 			fireDatasetEvent(DatasetEvent.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
 		}

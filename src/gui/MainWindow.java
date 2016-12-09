@@ -537,10 +537,6 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.CLUSTER)){
 				log("Clustering dataset");
 				Runnable r = new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-//				Runnable task = () -> { 
-//					log("Clustering dataset");
-//					
-//				};
 				r.run();
 			
 			}
@@ -548,12 +544,6 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.BUILD_TREE)){
 				log("Building a tree from dataset");
 				Runnable r = new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-//				
-//				Runnable task = () -> { 
-//					log("Building a tree from dataset");
-//					Runnable r = new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-//					r.run();
-//				};
 				r.run();
 			}
 			

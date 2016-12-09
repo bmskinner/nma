@@ -21,6 +21,7 @@ package gui.tabs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
+import gui.InterfaceEvent;
 import gui.Labels;
 import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
@@ -104,6 +105,22 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	protected TableModel createPanelTableType(TableOptions options) {
 		return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
 	}
+	
+	@Override
+	public void datasetEventReceived(DatasetEvent event){
+		super.datasetEventReceived(event);
+		
+		if( event.getSource() instanceof ClusterTreeDialog){
+			fireDatasetEvent(event);
+		}
+	}
+	
+	public void interfaceEventReceived(InterfaceEvent event){
+    	super.interfaceEventReceived(event);
+    	if( event.getSource() instanceof ClusterTreeDialog){
+			fireInterfaceEvent(event);
+		}
+    }
 				
 	private class ClustersPanel extends JPanel {
 		
@@ -216,6 +233,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			return result;
 		}
+		
 				
 		@Override
 		public void setEnabled(boolean b){

@@ -55,15 +55,12 @@ import javax.swing.SwingConstants;
 import org.virion.jam.controlpanels.BasicControlPalette;
 
 import utility.Constants;
-import components.Cell;
-import components.CellCollection;
 import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
 import components.IClusterGroup;
 import components.VirtualCellCollection;
 import components.nuclei.Nucleus;
-import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
@@ -137,7 +134,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		} catch(Exception e){
 			
 			warn("Error creating tree view");
-			log(Level.FINE, "Error creating tree view", e);
+			stack("Error creating tree view", e);
 			this.dispose();
 		}
 	}
@@ -254,8 +251,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 			try {
 				extractSelectedNodesToCluster();
 			} catch (Exception e) {
-				log(Level.SEVERE, "Error extracting cells");
-				log(Level.FINE, "Error extracting cells", e);
+				warn("Error extracting cells");
+				stack("Error extracting cells", e);
 			}
 		} );
 		panel.add(extractButton);
@@ -541,10 +538,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
 		
 		if(!list.isEmpty()){
-			log(Level.FINEST, "Firing population update request");
+			finest("Firing population update request");
 			fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		} else {
-			log(Level.WARNING, "No datasets to analyse");
+			warn("No datasets to analyse");
 		}
 		this.setVisible(false);
 		this.dispose();
