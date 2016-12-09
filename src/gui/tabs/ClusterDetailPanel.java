@@ -30,15 +30,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -46,22 +39,26 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
-import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
 import components.IClusterGroup;
 
+/**
+ * This panel shows any cluster groups that have been created, and the 
+ * clustering options that were used to create them. 
+ * @author bms41
+ * @since 1.9.0
+ *
+ */
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
 			
@@ -86,7 +83,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	@Override
 	protected void updateMultiple() {
 		clusterPanel.update(getDatasets());		
-		log(Level.FINEST, "Updated cluster panel");
+		finest("Updated cluster panel");
 		
 	}
 
@@ -103,10 +100,10 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) {
-		return null;
+		return new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
 	}
 				
-	private class ClustersPanel extends JPanel implements MouseListener {
+	private class ClustersPanel extends JPanel {
 		
 		private JButton 	clusterButton	= new JButton("Cluster population");
 		private JButton 	buildTreeButton	= new JButton("Create tree");
@@ -135,7 +132,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 				    return false;
 				}
 			};
-			clusterDetailsTable.addMouseListener(this);
+
 			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 			
 			
@@ -151,7 +148,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 				
 			this.add(tablesPanel, BorderLayout.CENTER);
 			statusPanel = makeStatusPanel();
-			setButtonsEnabled(false);
+			setEnabled(false);
 			this.add(statusPanel, BorderLayout.NORTH);
 
 
@@ -197,9 +194,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					
 					if(g.hasTree()){
 						JButton button = new JButton("Show tree");
-						button.addActionListener( new ActionListener() {
-
-							public void actionPerformed(ActionEvent e) {
+						button.addActionListener( e ->{
 								Thread thr = new Thread(){
 									public void run(){
 										ClusterTreeDialog clusterPanel = new ClusterTreeDialog( d, g);
@@ -208,7 +203,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 									}};
 									thr.start();
 							}
-						});    
+						);    
 						result.add(button);
 					} else {
 						result.add(new Box.Filler(fillerSize, fillerSize, fillerSize));
@@ -220,11 +215,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			return result;
 		}
 				
-		
-		private void setButtonsEnabled(boolean b){
+		@Override
+		public void setEnabled(boolean b){
+			super.setEnabled(b);
 			clusterButton.setEnabled(b);
 			buildTreeButton.setEnabled(b);
-			saveClassifierButton.setEnabled(false); // not yet enabled
+//			saveClassifierButton.setEnabled(b); // not yet enabled
 		}
 		/**
 		 * This panel shows the status of the dataset, 
@@ -236,55 +232,30 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			JPanel panel = new JPanel(new BorderLayout());
 			
 			JPanel buttonPanel = new JPanel(new FlowLayout());
-			clusterButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
-					fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets());
-					
-
-				}
+			clusterButton.addActionListener( e -> {
+					fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()); 
 			});
-			clusterButton.setVisible(false);
 			
-			buildTreeButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
+			buildTreeButton.addActionListener( e -> {
 					fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
-					
-
-				}
 			});
-			buildTreeButton.setVisible(false);
 			
-			saveClassifierButton.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent arg0) {
+			saveClassifierButton.addActionListener( e -> {
 					fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
-					
-
-				}
 			});
-			saveClassifierButton.setVisible(false);
 			
 			saveClassifierButton.setEnabled(false);
 			buildTreeButton.setEnabled(true);
 			buttonPanel.add(buildTreeButton);
 			buttonPanel.add(clusterButton);
-			buttonPanel.add(saveClassifierButton);
+//			buttonPanel.add(saveClassifierButton);
 			
 			panel.add(buttonPanel, BorderLayout.SOUTH);
 			panel.add(statusLabel, BorderLayout.CENTER);
 					
 			return panel;
 		}
-		
-		private void setButtonsVisible(boolean b){
-			clusterButton.setVisible(b);
-			saveClassifierButton.setVisible(false);
-			buildTreeButton.setVisible(b);
-			
-		}
-		
+				
 		private void updateTreeButtonsPanel(){
 			
 			tablesPanel.remove(showTreeButtonPanel);
@@ -302,8 +273,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 		}
 
 		public void update(List<IAnalysisDataset> list){
-			setButtonsVisible(true);
-			setButtonsEnabled(true);
+
+			setEnabled(true);
 			
 			TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())
@@ -313,20 +284,17 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			
 			setTable(options);
 			
-//			TableModel optionsModel = new AnalysisDatasetTableCreator(options).createClusterOptionsTable();
-//			clusterDetailsTable.setModel(optionsModel);
-//			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
 
 			updateTreeButtonsPanel();
 			
 			if( ! hasDatasets()){
 				statusLabel.setText("No datasets selected");
-				setButtonsEnabled(false);
+				setEnabled(false);
 			} else {
 				
 				if(isSingleDataset()){
 					
-					setButtonsEnabled(true);
+					setEnabled(true);
 
 					if(!activeDataset().hasClusters()){
 
@@ -337,73 +305,9 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 					}
 				} else { // more than one dataset selected
 					statusLabel.setText("Multiple datasets selected");
-//					setButtonsVisible(false);
-					setButtonsEnabled(false);
+					setEnabled(false);
 				}
 			}
-		}
-
-		@Override
-		public void mouseClicked(MouseEvent e) {
-			JTable table = (JTable) e.getSource();
-			int row = table.rowAtPoint((e.getPoint()));
-			int column = table.columnAtPoint((e.getPoint()));
-			String rowName = table.getModel().getValueAt(row, 0).toString();
-			String colName = table.getColumnName(column);
-			String groupName = table.getModel().getValueAt(0, column).toString();
-			
-			// double click
-			if (e.getClickCount() == 2) {
-				
-				if(rowName.equals("Tree") && column > 0 ){
-					
-					String tree = table.getModel().getValueAt(row, column).toString();
-					if(!tree.equals("N/A")){
-						
-						IAnalysisDataset dataset = null;
-						for(IAnalysisDataset d: getDatasets()){
-							if(d.getName().equals(colName)){
-								dataset = d;
-							}
-						}
-						
-						IClusterGroup group = null;
-						for(IClusterGroup g : dataset.getClusterGroups()){
-							if(g.getName().equals(groupName)){
-								group = g;
-							}
-						}
-						ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);
-						clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-					}
-				}
-				
-			}
-			
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseExited(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mousePressed(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 	}
@@ -411,8 +315,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 	
 
 	/**
-	 * Colour analysis parameter table cell background. If all the datasets selected
-	 * have the same value, colour them light green
+	 * Colour analysis parameter table cell background. If parameters are false or N/A, 
+	 * make the text colour grey
 	 */
 	public class ClusterTableCellRenderer extends DefaultTableCellRenderer {
 

@@ -27,9 +27,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.Box;
@@ -42,7 +40,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import charting.charts.AbstractChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.ChartOptions;
@@ -51,6 +48,13 @@ import charting.options.TableOptionsBuilder;
 import charting.options.DefaultTableOptions.TableType;
 import analysis.IAnalysisDataset;
 
+/**
+ * This panel shows any merge sources for a merged dataset, and
+ * the analysis options used to create the merge
+ * @author bms41
+ * @since 1.9.0
+ *
+ */
 @SuppressWarnings("serial")
 public class MergesDetailPanel extends DetailPanel {
 		

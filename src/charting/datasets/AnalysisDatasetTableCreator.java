@@ -1168,7 +1168,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	 * @param list
 	 * @return
 	 */
-	public TableModel createClusterOptionsTable() throws ChartDatasetCreationException {
+	public TableModel createClusterOptionsTable() {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
