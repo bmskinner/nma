@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.active.IWorkspace;
+import analysis.IWorkspace;
 import gui.MainWindow;
 import gui.actions.NewAnalysisAction;
 import gui.actions.PopulationImportAction;

@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import utility.Constants;
-
 import utility.StatsMap;
 import analysis.IAnalysisOptions;
 import analysis.ICannyOptions;
@@ -37,12 +36,12 @@ import analysis.IDetectionOptions;
 import analysis.detection.Detector;
 import analysis.image.ImageConverter;
 import analysis.image.ImageFilterer;
+import components.DefaultCell;
 import components.ICell;
-import components.active.DefaultCell;
-import components.active.NucleusFactory;
-import components.active.NucleusFactory.NucleusCreationException;
 import components.generic.IPoint;
 import components.nuclei.Nucleus;
+import components.nuclei.NucleusFactory;
+import components.nuclei.NucleusFactory.NucleusCreationException;
 
 
 /**

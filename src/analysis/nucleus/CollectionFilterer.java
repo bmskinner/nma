@@ -22,11 +22,11 @@ import org.jfree.data.Range;
 
 import stats.NucleusStatistic;
 import stats.PlottableStatistic;
+import components.DefaultCell;
+import components.DefaultCellCollection;
 import components.ICell;
 import components.ICellCollection;
 import components.IMutableCell;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
 import components.generic.ProfileType;
 import components.nuclei.Nucleus;

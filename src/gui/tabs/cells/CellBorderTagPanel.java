@@ -35,7 +35,7 @@ import charting.charts.MorphologyChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTagObject;
 import components.generic.ProfileType;
 import components.generic.Tag;

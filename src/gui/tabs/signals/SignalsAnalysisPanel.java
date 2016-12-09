@@ -38,8 +38,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import components.active.generic.UnavailableSignalGroupException;
-
+import components.nuclear.UnavailableSignalGroupException;
 import charting.charts.AbstractChartFactory;
 import charting.datasets.AbstractDatasetCreator;
 import charting.datasets.NuclearSignalDatasetCreator;

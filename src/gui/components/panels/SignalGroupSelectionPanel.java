@@ -11,8 +11,8 @@ import javax.swing.JComboBox;
 
 import analysis.IAnalysisDataset;
 import analysis.signals.SignalManager;
-import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.ISignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 
 
 

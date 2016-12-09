@@ -22,9 +22,9 @@ package analysis.profiles;
 import java.util.UUID;
 
 import components.CellularComponent;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.UnavailableProfileTypeException;
 
 /**
  * Object implementing this interface are able to be

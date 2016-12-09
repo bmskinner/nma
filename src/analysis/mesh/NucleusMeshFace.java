@@ -6,8 +6,8 @@ import java.util.Set;
 
 import logging.Loggable;
 import stats.Stats;
-import components.active.generic.FloatPoint;
 import components.generic.Equation;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 

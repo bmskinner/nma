@@ -18,10 +18,10 @@ import charting.datasets.AbstractDatasetCreator;
 import charting.options.ChartOptions;
 import charting.options.TableOptions;
 import components.CellularComponent;
-import components.active.generic.UnavailableSignalGroupException;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalCollection;
 import components.nuclear.NuclearSignal;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")

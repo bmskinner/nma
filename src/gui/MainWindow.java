@@ -84,12 +84,12 @@ import logging.Loggable;
 import logging.TextAreaHandler;
 import utility.Constants;
 import utility.Version;
+import analysis.DefaultWorkspace;
 import analysis.IAnalysisDataset;
 import analysis.IMutableAnalysisOptions;
+import analysis.IWorkspace;
 import analysis.MergeSourceExtractor;
 import analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
-import components.active.DefaultWorkspace;
-import components.active.IWorkspace;
 import components.nuclei.Nucleus;
 
 /**

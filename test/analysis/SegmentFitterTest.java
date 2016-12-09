@@ -31,9 +31,9 @@ import org.junit.Test;
 
 import components.NucleusTest;
 import components.SegmentedProfileTest;
-import components.active.generic.SegmentedFloatProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.Profile;
+import components.generic.SegmentedFloatProfile;
 import components.generic.SegmentedProfile;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;

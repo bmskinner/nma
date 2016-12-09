@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import components.active.generic.SegmentedFloatProfile;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.SegmentedFloatProfile;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
 import components.nuclear.IBorderSegment;

@@ -1,6 +1,5 @@
 package components.generic;
 
-import components.active.generic.FloatPoint;
 
 /**
  * Define a coordinate in 3D space

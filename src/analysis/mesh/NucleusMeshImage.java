@@ -9,7 +9,7 @@ import java.util.Map;
 
 import logging.Loggable;
 import analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
-import components.active.generic.FloatPoint;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 

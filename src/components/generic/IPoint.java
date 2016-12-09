@@ -21,8 +21,6 @@ package components.generic;
 
 import java.awt.geom.Point2D;
 
-import components.active.generic.FloatPoint;
-
 public interface IPoint {
 
 	/**

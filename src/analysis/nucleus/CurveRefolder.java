@@ -31,19 +31,19 @@ import analysis.profiles.ProfileException;
 import stats.Quartile;
 import utility.Constants;
 import components.ICellCollection;
-import components.active.DefaultConsensusNucleus;
-import components.active.generic.FloatPoint;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnprofilableObjectException;
 import components.generic.Equation;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
+import components.generic.UnprofilableObjectException;
 import components.nuclear.IBorderPoint;
 import components.nuclear.NucleusType;
+import components.nuclei.DefaultConsensusNucleus;
 import components.nuclei.Nucleus;
 
 

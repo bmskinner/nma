@@ -20,7 +20,7 @@
 package components;
 
 import logging.Loggable;
-import components.active.generic.FloatPoint;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 
 /**

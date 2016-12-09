@@ -27,10 +27,10 @@ import java.io.IOException;
 
 import analysis.profiles.ProfileIndexFinder;
 import analysis.profiles.RuleSet;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IProfile;
 import components.generic.Profile;
 import components.generic.Tag;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.IBorderPoint;
 
 @Deprecated

@@ -31,7 +31,7 @@ import java.util.logging.Level;
 
 import logging.Loggable;
 import components.AbstractCellularComponent;
-import components.active.generic.FloatPoint;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;

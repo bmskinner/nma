@@ -19,9 +19,9 @@
 
 package components;
 
-import components.active.generic.FloatProfile;
-import components.active.generic.SegmentedFloatProfile;
+import components.generic.FloatProfile;
 import components.generic.Profile;
+import components.generic.SegmentedFloatProfile;
 import components.generic.SegmentedProfile;
 
 public class DummyMouseProfile extends SegmentedFloatProfile {

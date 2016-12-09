@@ -30,9 +30,9 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import components.active.generic.UnavailableSignalGroupException;
 import components.generic.Tag;
 import components.nuclear.NucleusType;
+import components.nuclear.UnavailableSignalGroupException;
 import gui.GlobalOptions;
 import io.DatasetConverter.DatasetConversionException;
 import analysis.AnalysisDataset;

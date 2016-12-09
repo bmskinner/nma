@@ -13,14 +13,14 @@ import analysis.profiles.ProfileManager;
 import analysis.profiles.RuleSetCollection;
 import analysis.signals.SignalManager;
 import logging.Loggable;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IProfileCollection;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NucleusType;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 
 /**

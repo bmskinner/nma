@@ -25,12 +25,12 @@ import java.util.List;
 import stats.Quartile;
 import analysis.profiles.Rule.RuleType;
 import components.ICellCollection;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 import logging.Loggable;
 
 /**

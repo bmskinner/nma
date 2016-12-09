@@ -36,8 +36,7 @@ import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
-import components.active.generic.UnavailableSignalGroupException;
-
+import components.nuclear.UnavailableSignalGroupException;
 import analysis.IAnalysisDataset;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearSignalDatasetCreator;

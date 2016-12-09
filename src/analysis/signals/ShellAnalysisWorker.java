@@ -37,12 +37,12 @@ import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellCounter.CountType;
 import components.ICellCollection;
-import components.active.generic.DefaultShellResult;
-import components.active.generic.UnavailableSignalGroupException;
+import components.nuclear.DefaultShellResult;
 import components.nuclear.INuclearSignal;
 import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
 import components.nuclear.SignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 
 public class ShellAnalysisWorker extends AnalysisWorker {

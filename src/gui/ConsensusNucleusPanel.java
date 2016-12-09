@@ -43,10 +43,10 @@ import charting.charts.panels.ConsensusNucleusChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICellCollection;
-import components.active.generic.FloatPoint;
-import components.active.generic.UnavailableBorderTagException;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderPoint;
 import components.nuclei.Nucleus;
 

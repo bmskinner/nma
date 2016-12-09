@@ -30,7 +30,7 @@ import components.Cell;
 import components.CellCollection;
 import components.ICell;
 import components.ICellCollection;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import gui.DatasetEvent;
 import gui.LoadingIconDialog;
 import gui.tabs.cells.LabelInfo;

@@ -52,12 +52,12 @@ import analysis.signals.INuclearSignalOptions.SignalDetectionMode;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.ShellCounter.CountType;
 import components.ICellCollection;
-import components.active.generic.UnavailableSignalGroupException;
 import components.generic.IPoint;
 import components.generic.MeasurementScale;
 import components.nuclear.INuclearSignal;
 import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import gui.components.ColourSelecter;
 

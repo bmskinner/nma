@@ -25,13 +25,13 @@ import java.util.UUID;
 import stats.Quartile;
 import logging.Loggable;
 import components.ICellCollection;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnsegmentedProfileException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
+import components.generic.UnsegmentedProfileException;
 import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 

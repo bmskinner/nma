@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.UUID;
 
 import analysis.profiles.ProfileException;
-import components.active.generic.SegmentedFloatProfile;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 

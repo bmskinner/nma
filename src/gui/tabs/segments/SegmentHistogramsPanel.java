@@ -26,9 +26,9 @@ import charting.options.DefaultChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.CellCollection;
 import components.ICellCollection;
-import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 

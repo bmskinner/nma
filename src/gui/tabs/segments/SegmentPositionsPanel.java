@@ -43,8 +43,8 @@ import charting.charts.panels.ExportableChartPanel;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ICellCollection;
-import components.active.generic.UnavailableBorderTagException;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
 
 /**

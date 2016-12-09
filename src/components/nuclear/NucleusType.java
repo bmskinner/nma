@@ -25,12 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import components.active.DefaultNucleus;
-import components.active.DefaultPigSpermNucleus;
-import components.active.DefaultRodentSpermNucleus;
 import components.generic.BorderTag;
 import components.generic.Tag;
+import components.nuclei.DefaultNucleus;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.DefaultPigSpermNucleus;
+import components.nuclei.sperm.DefaultRodentSpermNucleus;
 
 /**
  * The types of nuclei we are able to analyse,

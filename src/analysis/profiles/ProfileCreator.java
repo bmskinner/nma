@@ -25,10 +25,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import logging.Loggable;
-import components.active.generic.SegmentedFloatProfile;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.SegmentedFloatProfile;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
 

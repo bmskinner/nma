@@ -27,8 +27,8 @@ import javax.swing.JOptionPane;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import components.Cell;
+import components.DefaultCell;
 import components.ICell;
-import components.active.DefaultCell;
 import gui.DatasetEvent;
 import gui.dialogs.MessagingDialog;
 

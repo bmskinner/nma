@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import components.Cell;
 import components.CellCollection;
 import components.ICellCollection;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import components.generic.MeasurementScale;
 import stats.NucleusStatistic;
 

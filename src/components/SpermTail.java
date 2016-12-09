@@ -27,7 +27,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.active.generic.FloatPoint;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 
 /**

@@ -20,7 +20,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.util.SortOrder;
 
-import components.active.generic.UnavailableSignalGroupException;
+import components.nuclear.UnavailableSignalGroupException;
 import analysis.IAnalysisDataset;
 import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.ShellCounter.CountType;

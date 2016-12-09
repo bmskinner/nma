@@ -26,9 +26,6 @@ import java.util.UUID;
 import logging.Loggable;
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnsegmentedProfileException;
 import components.nuclear.IBorderSegment;
 
 public interface IProfileCollection extends Serializable, Loggable{

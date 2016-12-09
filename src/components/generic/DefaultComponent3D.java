@@ -20,7 +20,6 @@
 package components.generic;
 
 import components.CellularComponent;
-import components.active.generic.FloatPoint;
 
 /**
  * Create a 3D version of a cellular component by rotating about

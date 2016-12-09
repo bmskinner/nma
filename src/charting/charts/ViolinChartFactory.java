@@ -11,8 +11,7 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
-import components.active.generic.UnavailableSignalGroupException;
-
+import components.nuclear.UnavailableSignalGroupException;
 import analysis.IAnalysisDataset;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.ViolinCategoryDataset;

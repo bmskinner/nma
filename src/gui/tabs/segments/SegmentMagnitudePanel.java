@@ -40,9 +40,9 @@ import charting.datasets.AnalysisDatasetTableCreator;
 import charting.options.DefaultTableOptions;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.active.generic.UnavailableBorderTagException;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 

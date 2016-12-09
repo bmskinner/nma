@@ -28,13 +28,13 @@ import logging.Loggable;
 import utility.ArrayConverter;
 import utility.ArrayConverter.ArrayConversionException;
 import components.ICellCollection;
-import components.active.generic.FloatProfile;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.BooleanProfile;
+import components.generic.FloatProfile;
 import components.generic.IProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 
 /**
  * The purpose is to test the difference at a particular point of a

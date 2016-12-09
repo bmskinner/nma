@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
-import components.active.DefaultWorkspace;
-import components.active.IWorkspace;
+import analysis.DefaultWorkspace;
+import analysis.IWorkspace;
 import logging.Loggable;
 
 /**

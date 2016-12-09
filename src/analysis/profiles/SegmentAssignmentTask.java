@@ -27,12 +27,12 @@ import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
 import components.AbstractCellularComponent;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.Profile;
 import components.generic.ProfileType;
 import components.generic.SegmentedProfile;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;
 import components.nuclei.Nucleus;

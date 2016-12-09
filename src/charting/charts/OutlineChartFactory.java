@@ -55,13 +55,13 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.Layer;
 
 import components.CellularComponent;
+import components.DefaultCell;
 import components.ICell;
-import components.active.DefaultCell;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnavailableSignalGroupException;
 import components.generic.BorderTag;
 import components.generic.IPoint;
 import components.generic.ProfileType;
+import components.generic.UnavailableProfileTypeException;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import analysis.IAnalysisDataset;
 import analysis.detection.BooleanAligner;

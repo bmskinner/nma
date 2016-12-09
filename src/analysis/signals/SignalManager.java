@@ -28,15 +28,15 @@ import java.util.UUID;
 
 import components.ICell;
 import components.ICellCollection;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableSignalGroupException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.MeasurementScale;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.SignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import logging.Loggable;
 import stats.Quartile;

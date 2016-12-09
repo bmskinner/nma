@@ -54,18 +54,18 @@ import analysis.profiles.SegmentFitter;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
+import components.ChildAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
-import components.active.ChildAnalysisDataset;
-import components.active.generic.SegmentedFloatProfile;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
-import components.active.generic.UnsegmentedProfileException;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.SegmentedFloatProfile;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
+import components.generic.UnsegmentedProfileException;
 import components.nuclear.IBorderSegment;
 
 @SuppressWarnings("serial")

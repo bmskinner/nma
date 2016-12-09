@@ -34,10 +34,10 @@ import weka.core.Instances;
 import analysis.ClusteringOptions;
 import analysis.ClusteringOptions.ClusteringMethod;
 import analysis.IAnalysisDataset;
+import components.DefaultCell;
+import components.DefaultCellCollection;
 import components.ICellCollection;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 
 
 public class NucleusClusterer extends NucleusTreeBuilder {

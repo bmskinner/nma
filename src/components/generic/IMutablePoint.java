@@ -1,6 +1,5 @@
 package components.generic;
 
-import components.active.generic.FloatPoint;
 
 /**
  * This extension to the IPoint interface adds setters and

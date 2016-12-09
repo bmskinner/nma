@@ -23,10 +23,10 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import components.DefaultCell;
+import components.DefaultCellCollection;
 import components.ICell;
 import components.ICellCollection;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
 import gui.MainWindow;
 import analysis.IAnalysisDataset;
 

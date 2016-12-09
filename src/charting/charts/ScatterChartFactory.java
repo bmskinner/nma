@@ -31,8 +31,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
-import components.active.generic.UnavailableSignalGroupException;
-
+import components.nuclear.UnavailableSignalGroupException;
 import analysis.IAnalysisDataset;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;

@@ -34,11 +34,11 @@ import javax.swing.JOptionPane;
 
 import analysis.profiles.ProfileException;
 import components.ICellCollection;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel 

@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -53,9 +54,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
 import analysis.IAnalysisDataset;
+import components.ChildAnalysisDataset;
 import components.ICellCollection;
 import components.IClusterGroup;
-import components.active.ChildAnalysisDataset;
 
 /**
  * The populations panel holds the list of open datasets for selection

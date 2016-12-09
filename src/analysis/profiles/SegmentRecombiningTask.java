@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.logging.Level;
 
 import analysis.AbstractProgressAction;
-import components.active.generic.SegmentedFloatProfile;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
+import components.generic.SegmentedFloatProfile;
 import components.generic.Tag;
 import components.nuclei.Nucleus;
 

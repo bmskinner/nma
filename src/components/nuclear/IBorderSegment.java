@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
-import components.active.DefaultCellularComponent;
-import components.active.generic.DefaultBorderSegment;
+import components.DefaultCellularComponent;
+import components.generic.DefaultBorderSegment;
 import logging.Loggable;
 
 /**

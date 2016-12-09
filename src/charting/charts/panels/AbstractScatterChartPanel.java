@@ -19,7 +19,7 @@ import org.jfree.data.Range;
 
 import components.ICell;
 import components.ICellCollection;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import analysis.IAnalysisDataset;
 import analysis.nucleus.CollectionFilterer;
 import analysis.nucleus.CollectionFilterer.CollectionFilteringException;

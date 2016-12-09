@@ -21,7 +21,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import charting.datasets.AnalysisDatasetTableCreator;
-import components.active.generic.UnavailableSignalGroupException;
+import components.nuclear.UnavailableSignalGroupException;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import gui.LoadingIconDialog;

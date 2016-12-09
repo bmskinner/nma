@@ -26,8 +26,6 @@ import stats.NucleusStatistic;
 import analysis.AnalysisDataset;
 import analysis.IAnalysisDataset;
 import analysis.profiles.DatasetProfiler;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
 import components.generic.MeasurementScale;
 import components.generic.Profile;
 import components.nuclear.NucleusType;

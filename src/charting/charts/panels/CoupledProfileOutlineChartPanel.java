@@ -41,10 +41,10 @@ import org.jfree.ui.RectangleEdge;
 import analysis.profiles.ProfileException;
 import components.AbstractCellularComponent;
 import components.ICell;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 

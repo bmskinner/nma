@@ -27,10 +27,10 @@ import java.io.File;
 import org.junit.Test;
 
 import stats.NucleusStatistic;
-import components.active.DefaultRodentSpermNucleus;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 import components.nuclei.Nucleus;
+import components.nuclei.sperm.DefaultRodentSpermNucleus;
 import components.nuclei.sperm.RodentSpermNucleus;
 
 public class NucleusTest {

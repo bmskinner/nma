@@ -28,6 +28,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
 import java.util.UUID;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
@@ -42,8 +43,7 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import components.active.generic.UnavailableSignalGroupException;
-
+import components.nuclear.UnavailableSignalGroupException;
 import charting.ChartComponents;
 import charting.datasets.ChartDatasetCreationException;
 import charting.datasets.NuclearHistogramDatasetCreator;

@@ -61,7 +61,7 @@ import components.ClusterGroup;
 import components.ICell;
 import components.ICellCollection;
 import components.IClusterGroup;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import components.nuclei.Nucleus;
 import analysis.AnalysisDataset;
 import analysis.ClusteringOptions;

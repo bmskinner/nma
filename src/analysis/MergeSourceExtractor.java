@@ -31,15 +31,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import logging.Loggable;
 import analysis.profiles.ProfileException;
+import components.DefaultAnalysisDataset;
+import components.DefaultCell;
+import components.DefaultCellCollection;
 import components.ICell;
 import components.ICellCollection;
-import components.active.DefaultAnalysisDataset;
-import components.active.DefaultCell;
-import components.active.DefaultCellCollection;
-import components.active.MergeSourceAnalysisDataset;
-import components.active.generic.UnavailableSignalGroupException;
+import components.MergeSourceAnalysisDataset;
 import components.nuclear.ISignalGroup;
 import components.nuclear.SignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 
 /**

@@ -23,8 +23,6 @@ package components.nuclear;
 import java.awt.Color;
 import java.io.File;
 
-import components.active.generic.DefaultShellResult;
-
 /**
  * This contains information about nuclear signals within an {@link ICellCollection},
  * @author bms41

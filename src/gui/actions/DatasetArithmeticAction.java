@@ -21,9 +21,9 @@ package gui.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import components.DefaultAnalysisDataset;
 import components.ICellCollection;
-import components.active.DefaultAnalysisDataset;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import gui.MainWindow;
 import gui.ThreadManager;
 import gui.dialogs.DatasetArithmeticSetupDialog;

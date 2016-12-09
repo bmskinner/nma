@@ -23,7 +23,7 @@ import charting.datasets.CellTableDatasetCreator;
 import charting.datasets.SignalTableCell;
 import charting.options.TableOptions;
 import charting.options.TableOptionsBuilder;
-import components.active.generic.UnavailableSignalGroupException;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;

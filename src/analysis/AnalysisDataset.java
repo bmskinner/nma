@@ -45,10 +45,10 @@ import utility.Version;
 import components.Cell;
 import components.CellCollection;
 import components.ClusterGroup;
+import components.DefaultCell;
 import components.ICell;
 import components.ICellCollection;
 import components.IClusterGroup;
-import components.active.DefaultCell;
 
 
 /**

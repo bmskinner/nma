@@ -6,12 +6,13 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
+
 import analysis.AnalysisWorker;
 import analysis.IAnalysisDataset;
+import components.ChildAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
-import components.active.ChildAnalysisDataset;
-import components.active.VirtualCellCollection;
+import components.VirtualCellCollection;
 import components.generic.IPoint;
 
 /**

@@ -21,7 +21,7 @@
 
 package components.nuclear;
 
-import components.active.generic.DefaultBorderPoint;
+import components.generic.DefaultBorderPoint;
 import components.generic.IMutablePoint;
 
 /**

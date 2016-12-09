@@ -31,12 +31,12 @@ import java.util.UUID;
 
 import utility.Constants;
 import components.CellularComponent;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableProfileTypeException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.IPoint;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
+import components.generic.UnavailableProfileTypeException;
 import components.nuclear.IBorderPoint;
 import components.nuclear.IBorderSegment;
 import components.nuclear.INuclearSignal;

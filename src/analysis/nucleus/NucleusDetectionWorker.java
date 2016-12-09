@@ -43,9 +43,9 @@ import analysis.IAnalysisOptions;
 import analysis.IMutableAnalysisOptions;
 import analysis.ProgressEvent;
 import analysis.ProgressListener;
+import components.DefaultAnalysisDataset;
+import components.DefaultCellCollection;
 import components.ICellCollection;
-import components.active.DefaultAnalysisDataset;
-import components.active.DefaultCellCollection;
 import components.nuclear.NucleusType;
 
 public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressListener {

@@ -54,8 +54,8 @@ import analysis.detection.IconCell;
 import analysis.signals.FishRemappingWorker;
 import components.ICell;
 import components.ICellCollection;
-import components.active.VirtualCellCollection;
-import components.active.generic.FloatPoint;
+import components.VirtualCellCollection;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 

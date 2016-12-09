@@ -36,17 +36,17 @@ import stats.SignalStatistic;
 import analysis.IAnalysisDataset;
 import charting.options.TableOptions;
 import components.ICell;
-import components.active.ProfileableCellularComponent.IndexOutOfBoundsException;
-import components.active.generic.UnavailableBorderTagException;
-import components.active.generic.UnavailableSignalGroupException;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.ProfileType;
 import components.generic.Tag;
+import components.generic.UnavailableBorderTagException;
 import components.nuclear.BorderPoint;
 import components.nuclear.IBorderPoint;
 import components.nuclear.INuclearSignal;
 import components.nuclear.ISignalGroup;
 import components.nuclear.NuclearSignal;
 import components.nuclear.NucleusType;
+import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 
 /**

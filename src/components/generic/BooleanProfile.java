@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import logging.Loggable;
-import components.active.DefaultCellularComponent;
-import components.active.generic.FloatProfile;
+import components.DefaultCellularComponent;
 import ij.IJ;
 
 /**

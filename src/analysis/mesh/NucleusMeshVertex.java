@@ -23,7 +23,7 @@ package analysis.mesh;
 import java.util.HashSet;
 import java.util.Set;
 
-import components.active.generic.FloatPoint;
+import components.generic.FloatPoint;
 import components.generic.IPoint;
 import components.generic.XYPoint;
 

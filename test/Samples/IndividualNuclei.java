@@ -4,10 +4,10 @@ package Samples;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.active.generic.SegmentedFloatProfile;
 import components.generic.IProfile;
 import components.generic.ISegmentedProfile;
 import components.generic.Profile;
+import components.generic.SegmentedFloatProfile;
 import components.generic.SegmentedProfile;
 import components.nuclear.IBorderSegment;
 import components.nuclear.NucleusBorderSegment;

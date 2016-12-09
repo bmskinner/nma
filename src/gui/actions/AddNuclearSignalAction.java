@@ -31,12 +31,12 @@ import java.util.UUID;
 import analysis.IAnalysisDataset;
 import analysis.signals.IMutableNuclearSignalOptions;
 import analysis.signals.SignalDetectionWorker;
+import components.ChildAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
-import components.active.ChildAnalysisDataset;
-import components.active.VirtualCellCollection;
-import components.active.generic.UnavailableSignalGroupException;
+import components.VirtualCellCollection;
 import components.nuclear.ISignalGroup;
+import components.nuclear.UnavailableSignalGroupException;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	

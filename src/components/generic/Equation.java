@@ -21,7 +21,6 @@ package components.generic;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import components.active.generic.FloatPoint;
 import components.nuclear.IBorderPoint;
 
 /**
