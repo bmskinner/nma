@@ -21,6 +21,7 @@ package gui.tabs;
 
 import gui.DatasetEvent;
 import gui.DatasetEventListener;
+import gui.Labels;
 import gui.components.ExportableTable;
 import gui.dialogs.ClusterTreeDialog;
 
@@ -32,6 +33,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -288,7 +290,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			updateTreeButtonsPanel();
 			
 			if( ! hasDatasets()){
-				statusLabel.setText("No datasets selected");
+				statusLabel.setText(Labels.NULL_DATASETS);
 				setEnabled(false);
 			} else {
 				
@@ -304,7 +306,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 						statusLabel.setText("Dataset has "+activeDataset().getClusterGroups().size()+" cluster groups");						
 					}
 				} else { // more than one dataset selected
-					statusLabel.setText("Multiple datasets selected");
+					statusLabel.setText(Labels.MULTIPLE_DATASETS);
 					setEnabled(false);
 				}
 			}

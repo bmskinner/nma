@@ -19,11 +19,13 @@
 package gui.tabs;
 
 import gui.DatasetEvent;
+import gui.Labels;
 import gui.components.AnalysisTableCellRenderer;
 import gui.components.ExportableTable;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -60,7 +63,9 @@ public class MergesDetailPanel extends DetailPanel {
 		
 	private ExportableTable sourceParametersTable;
 	
-	private JPanel		getSourceButtonPanel;
+	private JPanel sourceButtonPanel;
+	
+	private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
 	
 	private static final String RECOVER_BUTTON_TEXT = "Recover source";
 	
@@ -103,10 +108,11 @@ public class MergesDetailPanel extends DetailPanel {
 		
 		paramScrollPane.setColumnHeaderView(sourceParametersTable.getTableHeader());
 		
-		getSourceButtonPanel = createGetSourcePanel(null);
+		sourceButtonPanel = createGetSourcePanel(null);
+		
 		
 		mainPanel.add(paramScrollPane);
-		mainPanel.add(getSourceButtonPanel);
+		mainPanel.add(sourceButtonPanel);
 		
 		this.add(mainPanel, BorderLayout.CENTER);
 		
@@ -186,22 +192,22 @@ public class MergesDetailPanel extends DetailPanel {
 	
 	private JPanel createHeaderPanel() throws Exception{
 		JPanel panel = new JPanel();
-		
+		panel.add(headerLabel);
 		return panel;
 		
 	}
 	
 	private void updateSourceButtonsPanel(){
 		
-		mainPanel.remove(getSourceButtonPanel);
+		mainPanel.remove(sourceButtonPanel);
 		
 		List<JComponent> buttons = createGetSourceButtons();
 		
 		
-		getSourceButtonPanel = createGetSourcePanel(buttons);
+		sourceButtonPanel = createGetSourcePanel(buttons);
 
 		// add this new panel
-		mainPanel.add(getSourceButtonPanel);
+		mainPanel.add(sourceButtonPanel);
 		mainPanel.revalidate();
 		mainPanel.repaint();
 		mainPanel.setVisible(true);
@@ -210,6 +216,10 @@ public class MergesDetailPanel extends DetailPanel {
 	@Override
 	protected void updateSingle()  {
 
+		headerLabel.setText(Labels.SINGLE_DATASET
+				+" with "
+				+activeDataset().getAllMergeSources().size()
+				+" merge sources");
 		updateSourceButtonsPanel();
 		
 		List<IAnalysisDataset> mergeSources = new ArrayList<IAnalysisDataset>(activeDataset().getAllMergeSources());
@@ -228,11 +238,13 @@ public class MergesDetailPanel extends DetailPanel {
 	@Override
 	protected void updateMultiple() {
 		updateNull();
+		headerLabel.setText(Labels.MULTIPLE_DATASETS);
 	}
 	
 	@Override
 	protected void updateNull() {
-		getSourceButtonPanel.setVisible(false);
+		headerLabel.setText(Labels.NULL_DATASETS);
+		sourceButtonPanel.setVisible(false);
 			
 		
 		TableOptions options = new TableOptionsBuilder()
