@@ -87,11 +87,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 
 					break;
 				case OR: // present in either (merge)
-
-					List<IAnalysisDataset> toMerge = new ArrayList<IAnalysisDataset>();
-					toMerge.add(datasetOne);
-					toMerge.add(datasetTwo);
-					new MergeCollectionAction(toMerge, mw);
+					newCollection = datasetOne.getCollection().or(datasetTwo.getCollection());
 					break;
 				case XOR: // present in either but not both
 					newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());

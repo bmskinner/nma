@@ -1159,6 +1159,32 @@ public class CellCollection implements ICellCollection {
 
 		return newCollection;
 	}
+	
+	/**
+	 * Return a collection of cells present this collection or the other
+	 * @param other the other collection
+	 * @return
+	 * @throws Exception 
+	 */
+	public ICellCollection or(ICellCollection other) {
+
+		CellCollection newCollection = new CellCollection(this, "OR operation");
+
+		for(ICell c : getCells()){
+
+			newCollection.addCell(new DefaultCell(c));
+			
+		}
+
+		for(ICell c : other.getCells()){
+			
+			if(! this.contains(c)){
+				newCollection.addCell(new DefaultCell(c));
+			}
+		}
+
+		return newCollection;
+	}
 
 	/**
 	 * Invalidate the existing cached vertically rotated nuclei,

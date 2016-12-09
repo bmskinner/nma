@@ -639,6 +639,24 @@ public class VirtualCellCollection implements ICellCollection {
 
 		return newCollection;
 	}
+	
+	@Override
+	public ICellCollection or(ICellCollection other) {
+		ICellCollection newCollection = chooseNewCollectionType(other, "OR operation");
+
+		for(ICell c : getCells()){
+				newCollection.addCell(new DefaultCell(c));
+		}
+
+		for(ICell c : other.getCells()){
+
+			if( ! this.contains(c)){
+				newCollection.addCell(new DefaultCell(c));
+			}
+		}
+
+		return newCollection;
+	}
 
 	@Override
 	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,

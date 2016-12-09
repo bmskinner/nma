@@ -1107,7 +1107,6 @@ implements ICellCollection {
 	 * Return a collection of cells present in both collections
 	 * @param other the other collection
 	 * @return
-	 * @throws Exception 
 	 */
 	public ICellCollection and(ICellCollection other) {
 
@@ -1127,7 +1126,6 @@ implements ICellCollection {
 	 * Return a collection of cells present this collection but not the other
 	 * @param other the other collection
 	 * @return
-	 * @throws Exception 
 	 */
 	public ICellCollection not(ICellCollection other) {
 
@@ -1147,7 +1145,6 @@ implements ICellCollection {
 	 * Return a collection of cells present this collection or the other but not both
 	 * @param other the other collection
 	 * @return
-	 * @throws Exception 
 	 */
 	public ICellCollection xor(ICellCollection other) {
 
@@ -1163,6 +1160,32 @@ implements ICellCollection {
 		for(ICell c : other.getCells()){
 
 			if( ! this.contains(c)){
+				newCollection.addCell(new DefaultCell(c));
+			}
+		}
+
+		return newCollection;
+	}
+	
+	/**
+	 * Return a collection of cells present this collection or the other
+	 * @param other the other collection
+	 * @return
+	 * @throws Exception 
+	 */
+	public ICellCollection or(ICellCollection other) {
+
+		ICellCollection newCollection = new DefaultCellCollection(this, "OR operation");
+
+		for(ICell c : getCells()){
+
+			newCollection.addCell(new DefaultCell(c));
+			
+		}
+
+		for(ICell c : other.getCells()){
+			
+			if(! this.contains(c)){
 				newCollection.addCell(new DefaultCell(c));
 			}
 		}
