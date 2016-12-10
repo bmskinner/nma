@@ -297,7 +297,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			
 			fis = new FileInputStream(inputFile.getAbsolutePath());
 			finest("Created file stream");
-			ois = new ObjectInputStream(fis);
+			ois = new PackageReplacementObjectInputStream(fis); // enable moving classes between packages between versions
 			finest("Created object stream");
 			
 			
