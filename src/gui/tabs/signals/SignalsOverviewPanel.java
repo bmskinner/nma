@@ -60,6 +60,7 @@ import components.nuclear.NucleusBorderSegment;
 import components.nuclear.UnavailableSignalGroupException;
 import gui.ChartSetEvent;
 import gui.ChartSetEventListener;
+import gui.Labels;
 import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
@@ -138,9 +139,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				// double click
 				if (e.getClickCount() == 2) {
 
-//					String rowName = table.getModel().getValueAt(row, 0).toString();
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
-					if(nextRowName.equals("Signal group")){
+					if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
 						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
 						updateSignalColour( signalGroup );
 					}

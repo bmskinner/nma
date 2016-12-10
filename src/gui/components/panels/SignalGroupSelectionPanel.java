@@ -10,6 +10,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 import analysis.IAnalysisDataset;
+import analysis.signals.ShellRandomDistributionCreator;
 import analysis.signals.SignalManager;
 import components.nuclear.ISignalGroup;
 import components.nuclear.UnavailableSignalGroupException;
@@ -27,6 +28,8 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		
 		
 		List<SignalIDToGroup> list = getGroups(d);
+		
+		
 
 		box = new JComboBox<SignalIDToGroup>(list.toArray( new SignalIDToGroup[0] ));
 		
@@ -93,6 +96,11 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
 		Set<UUID> signalGroups = m.getSignalGroupIDs();
 		List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
 		for(UUID id : signalGroups){
+			
+			if(id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+        		continue;
+        	}
+			
 			try {
 				list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
 			} catch (UnavailableSignalGroupException e) {

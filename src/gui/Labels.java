@@ -71,4 +71,6 @@ public class Labels {
 	public static final String SINGLE_DATASET = "Single dataset selected";
 	public static final String MULTIPLE_DATASETS = "Multiple datasets selected";
 	public static final String NULL_DATASETS = "No datasets selected";
+	
+	public static final String SIGNAL_GROUP_LABEL = "Signal group";
 }

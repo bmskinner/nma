@@ -34,6 +34,7 @@ import javax.swing.table.TableModel;
 import stats.NucleusStatistic;
 import stats.SignalStatistic;
 import analysis.IAnalysisDataset;
+import analysis.signals.ShellRandomDistributionCreator;
 import charting.options.TableOptions;
 import components.ICell;
 import components.ProfileableCellularComponent.IndexOutOfBoundsException;
@@ -203,6 +204,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		int j=0;
 
 		for(UUID signalGroup : d.getCollection().getSignalGroupIDs()){
+			
+			if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+				continue;
+			}
 			
 			try {
 

@@ -29,9 +29,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JFileChooser;
+
 import utility.Constants;
 import analysis.DatasetMerger;
 import analysis.IAnalysisDataset;
+import analysis.IAnalysisOptions;
 
 /**
  * Carry out a merge of datasets

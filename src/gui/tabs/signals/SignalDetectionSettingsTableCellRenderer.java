@@ -20,7 +20,8 @@
 	 *******************************************************************************/
 	package gui.tabs.signals;
 
-	import gui.components.ConsistentRowTableCellRenderer;
+	import gui.Labels;
+import gui.components.ConsistentRowTableCellRenderer;
 import java.awt.Color;
 import java.util.logging.Level;
 
@@ -60,7 +61,7 @@ import charting.datasets.SignalTableCell;
 			
 					int signalGroupCount = Integer.valueOf(table.getModel().getValueAt(0, column).toString());
 
-					if(nextRowHeader.equals("Group name")){
+					if(nextRowHeader.equals(Labels.SIGNAL_GROUP_LABEL)){
 
 						if( signalGroupCount>0 ){
 							// we want to colour this cell preemptively
@@ -82,7 +83,7 @@ import charting.datasets.SignalTableCell;
 
 			} catch(Exception e){
 				warn("Error in signal detection table renderer");
-				log(Level.FINE, "Error in signal detection table renderer", e);
+				stack("Error in signal detection table renderer", e);
 			}
 			
 			

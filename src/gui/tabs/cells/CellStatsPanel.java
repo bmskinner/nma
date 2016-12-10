@@ -27,6 +27,8 @@ import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import gui.DatasetEvent;
 import gui.GlobalOptions;
+import gui.Labels;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
 import gui.dialogs.CellImageDialog;
 
@@ -65,10 +67,12 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 										
 					// Look for signal group colour
 					if(rowName.equals("")){
-						String value = table.getModel().getValueAt(row+1, 0).toString();
-						if(value.equals("Signal group")){
+						String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
+						if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
 							
-							changeSignalGroupColour(row);
+							SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row+1, 1);
+							
+							changeSignalGroupColour(cell);
 
 						}
 					}						
@@ -114,14 +118,13 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		new CellImageDialog( this.getCellModel().getCell());
 	}
 	
-	private void changeSignalGroupColour(int row){
-		// the group number is in the next row down
-		String groupString = table.getModel().getValueAt(row+1, 1).toString();
-		UUID signalGroup = UUID.fromString(groupString);
+	private void changeSignalGroupColour(SignalTableCell signalGroup){
+
+		UUID id = signalGroup.getID();
 		
 		try {
 
-			Color oldColour = activeDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
+			Color oldColour = activeDataset().getCollection().getSignalGroup(id).getGroupColour();
 
 			Color newColor = JColorChooser.showDialog(
 					CellStatsPanel.this,
@@ -129,14 +132,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					oldColour);
 
 			if(newColor != null){
-				activeDataset().getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);//.setSignalGroupColour(signalGroup, newColor);
-
-				update();
-				fireSignalChangeEvent("SignalColourUpdate");
+				activeDataset().getCollection().getSignalGroup(id).setGroupColour(newColor);
+				this.update(getDatasets());
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 			}
+			
 		} catch(UnavailableSignalGroupException e){
 			warn("Cannot change signal colour");
-			fine("Error getting signal group", e);
+			stack("Error getting signal group", e);
 		}
 	}
 	

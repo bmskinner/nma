@@ -59,6 +59,7 @@ import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
 import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
+import gui.Labels;
 import gui.components.ColourSelecter;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
@@ -94,43 +95,44 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			}
 		}
 		
-		if(maxChannels>0){
-			
-			Object[] rowNameBlock = {
-					"",
-					"Group name",
-					"Channel",
-					"Source",
-					"Threshold",
-					"Min size",
-					"Max fraction",
-					"Min circ",
-					"Max circ",
-					"Detection mode"
-			};
-
-			// create the row names
-			fieldNames.add("Number of signal groups");
-
-			for(int i=0;i<maxChannels;i++){
-				
-				for(Object o : rowNameBlock){
-					fieldNames.add(o);
-				}
-			}
-
-			int numberOfRowsPerSignalGroup = rowNameBlock.length;
-			model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
-
-			// make a new column for each collection
-			for(IAnalysisDataset dataset : list){
-
-				List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
-				model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate row block for each channel
-			}
-		} else {
-			model.addColumn("No data loaded");
+		if(maxChannels==0){
+			return createBlankTable();
 		}
+		
+			
+		Object[] rowNameBlock = {
+				"",
+				Labels.SIGNAL_GROUP_LABEL,
+				"Channel",
+				"Source",
+				"Threshold",
+				"Min size",
+				"Max fraction",
+				"Min circ",
+				"Max circ",
+				"Detection mode"
+		};
+
+		// create the row names
+		fieldNames.add("Number of signal groups");
+
+		for(int i=0;i<maxChannels;i++){
+
+			for(Object o : rowNameBlock){
+				fieldNames.add(o);
+			}
+		}
+
+		int numberOfRowsPerSignalGroup = rowNameBlock.length;
+		model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+
+		// make a new column for each collection
+		for(IAnalysisDataset dataset : list){
+
+			List<Object> columnData = makeDetectionSettingsColumn(dataset, maxChannels, numberOfRowsPerSignalGroup);
+			model.addColumn(dataset.getName(), columnData.toArray(new Object[0])); // separate row block for each channel
+		}
+		
         
         return model;    
     }
@@ -644,7 +646,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		// Make an instance of row names
 		List<Object> rowNames = new ArrayList<Object>();
 		rowNames.add("");
-		rowNames.add("Signal group");
+		rowNames.add(Labels.SIGNAL_GROUP_LABEL);
 		rowNames.add("Signals");
 		rowNames.add("Signals per nucleus");
 

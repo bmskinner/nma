@@ -19,6 +19,8 @@
 package gui.tabs.signals;
 
 import gui.DatasetEvent;
+import gui.Labels;
+import gui.InterfaceEvent.InterfaceMethod;
 import gui.components.ExportableTable;
 import gui.tabs.DetailPanel;
 import ij.io.DirectoryChooser;
@@ -60,7 +62,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 
 		table  = new ExportableTable(new DefaultTableModel());
-		table.setAutoCreateColumnsFromModel(false);
+//		table.setAutoCreateColumnsFromModel(false);
 		table.setEnabled(false);
 		
         
@@ -86,13 +88,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
                     }
                     
                     
-                    if(rowName.equals("Signal group")){
+                    if(rowName.equals(Labels.SIGNAL_GROUP_LABEL)){
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
                         updateSignalName( signalGroup );
                     }
                     
                     String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
-                    if(nextRowName.equals("Signal group")){
+                    if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
                         updateSignalColour( signalGroup );
                     }
@@ -133,9 +135,9 @@ public class SignalsAnalysisPanel extends DetailPanel {
     					oldColour);
 
     			if(newColor != null){
-    				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);// .setSignalGroupColour(signalGroup.getID(), newColor);
-    				refreshTableCache();
-    				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+    				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
+    				this.update(getDatasets());
+    				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
     			}
 
     		} catch(UnavailableSignalGroupException e){
@@ -218,25 +220,12 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	protected void updateSingle() {
 		
 		TableOptions options = new TableOptionsBuilder()
-		.setDatasets(getDatasets())
-		.build();
+			.setDatasets(getDatasets())
+			.setTarget(table)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalDetectionSettingsTableCellRenderer())
+			.build();
 		
-		TableModel model = getTable(options);
-		table.setModel(model);
-		table.createDefaultColumnsFromModel();
-		
-        // Add the signal group colours
-        if(hasDatasets()){
-            int columns = table.getColumnModel().getColumnCount();
-            if(columns>1){
-                for(int i=1;i<columns;i++){
-                    table.getColumnModel().getColumn(i).setCellRenderer(new SignalDetectionSettingsTableCellRenderer());
-                }
-            }
-        }
-        
-
-		
+		setTable(options);		
 	}
 
 	@Override
