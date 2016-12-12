@@ -28,7 +28,7 @@ public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
 
 	public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Replacing images", mw);
-		this.cooldown();
+		this.setProgressBarIndeterminate();
 
 		
 

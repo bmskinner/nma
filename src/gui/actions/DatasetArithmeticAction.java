@@ -38,7 +38,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 	
 	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
 		super("Dataset arithmetic", mw);
-		this.cooldown();
+		this.setProgressBarIndeterminate();
 		this.list = list;
 
 	} 

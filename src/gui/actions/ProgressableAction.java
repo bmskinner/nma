@@ -232,7 +232,7 @@ public abstract class ProgressableAction
 		
 		if(evt.getPropertyName().equals("Cooldown")){
 			finest("Worker signaled cooldown");
-			cooldown();
+			setProgressBarIndeterminate();
 		}
 		
 	}
@@ -256,7 +256,7 @@ public abstract class ProgressableAction
 	 * to an indeterminate state when no reliable progress metric is 
 	 * available
 	 */
-	public void cooldown(){
+	public void setProgressBarIndeterminate(){
 		this.progressBar.setIndeterminate(true);
 //		logPanel.revalidate();
 //		logPanel.repaint();

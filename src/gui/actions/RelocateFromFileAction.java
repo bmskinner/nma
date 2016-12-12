@@ -19,7 +19,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 	public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
 		super(dataset, "Relocating cells", mw);
 		this.setLatch(latch);
-		cooldown();
+		setProgressBarIndeterminate();
 		
 		
 		

@@ -33,6 +33,7 @@ import gui.tabs.EditingTabPanel;
 import javax.swing.JOptionPane;
 
 import analysis.profiles.ProfileException;
+import analysis.profiles.SegmentationHandler;
 import components.ICellCollection;
 import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.BorderTag.BorderTagType;
@@ -53,6 +54,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	 */
 	public void checkCellLock(){
 		ICellCollection collection = activeDataset().getCollection();
+		
+		if(collection.isVirtual()){
+			return;
+		}
 		
 		if(collection.hasLockedCells()){
 			Object[] options = { "Keep manual values" , "Overwrite manual values" };
@@ -117,6 +122,18 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	}
 	
 	/**
+	 * This triggers a general chart recache for the active dataset
+	 * and all its children, but performs the recache on the currnt tab
+	 * first so results are showed at once
+	 */
+	protected void refreshEditingPanelCharts(){
+		finest("Refreshing chart cache for editing panel");
+		this.refreshChartCache();
+		finest("Firing general refresh cache request for loaded datasets");
+		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+	}
+	
+	/**
 	 * Update the start index of the given segment to the given index in the 
 	 * median profile, and update individual nuclei to match
 	 * @param id
@@ -124,27 +141,14 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	 * @throws Exception
 	 */
 	public void updateSegmentStartIndexAction(UUID id, int index) throws Exception{
-
+		
 		checkCellLock();
 		
-		// Update the median profile
-		activeDataset()
-			.getCollection()
-			.getProfileManager()
-			.updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel always uses seg start index
-
-		// Lock all the segments except the one to change
-		activeDataset()
-			.getCollection()
-			.getProfileManager()
-			.setLockOnAllNucleusSegmentsExcept(id, true);
-						
-		/*
-		 * Invalidate the chart cache for the active dataset.
-		 * This will force the morphology refresh to create a new chart
-		 */
-		finest("Clearing chart cache for editing panel");
-		fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.updateSegmentStartIndexAction(id, index);
+		
+		
+		refreshEditingPanelCharts();
 		
 		
 		//  Update each nucleus profile

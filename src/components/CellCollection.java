@@ -181,6 +181,14 @@ public class CellCollection implements ICellCollection {
     types of nucleus eligable
     -----------------------
 	 */
+	
+	public boolean isReal(){
+		return true;
+	}
+	
+	public boolean isVirtual(){
+		return false;
+	}
 
 	public void setName(String s){
 		this.name = s;

@@ -72,7 +72,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	@Override
 	public void run(){
 
-		this.cooldown();
+		this.setProgressBarIndeterminate();
 		
 		fine("Making analysis options");
 		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);

@@ -40,6 +40,20 @@ public interface ICellCollection
 	 * @param s
 	 */
 	void setName(String s);
+	
+	/**
+	 * Check if the collection has real cells, or is a virtual collection
+	 * with pointers to real cells in another collection
+	 * @return true if the collection is virtual
+	 */
+	boolean isVirtual();
+	
+	/**
+	 * Check if the collection has real cells, or is a virtual collection
+	 * with pointers to real cells in another collection
+	 * @return true if the collection is real
+	 */
+	boolean isReal();
 
 	/**
 	 * Get the name of the collection
@@ -385,6 +399,12 @@ public interface ICellCollection
 	 */
 	int countShared(ICellCollection d2);
 	
+	/**
+	 * Set the number of cells in the collection that are shared with
+	 * another collection. This can be used to reduce calculation times
+	 * @param d2 the other collection 
+	 * @param i the number of shared nuclei
+	 */
 	void setSharedCount(ICellCollection d2, int i);
 
 		

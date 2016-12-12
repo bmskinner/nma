@@ -47,21 +47,19 @@ import javax.swing.SpinnerNumberModel;
 import org.jfree.chart.JFreeChart;
 
 import stats.Quartile;
-import analysis.IAnalysisDataset;
 import analysis.IMutableAnalysisOptions;
 import analysis.profiles.ProfileException;
 import analysis.profiles.SegmentFitter;
+import analysis.profiles.SegmentationHandler;
 import charting.charts.MorphologyChartFactory;
 import charting.options.ChartOptions;
 import charting.options.ChartOptionsBuilder;
 import components.ChildAnalysisDataset;
 import components.ICell;
 import components.ICellCollection;
-import components.generic.IProfile;
 import components.generic.IProfileCollection;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
-import components.generic.SegmentedFloatProfile;
 import components.generic.Tag;
 import components.generic.UnavailableBorderTagException;
 import components.generic.UnavailableProfileTypeException;
@@ -397,9 +395,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			for(ICell c : activeDataset().getCollection().getCells()){
 
 				// recombine the segments at the lengths of the median profile segments
-				IProfile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
+				ISegmentedProfile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
 
-				c.getNucleus().setProfile(ProfileType.FRANKEN, new SegmentedFloatProfile(frankenProfile));
+				c.getNucleus().setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
 
 			}
 			
@@ -468,11 +466,15 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		}
 		
 		
+		/**
+		 * Choose segments to be merged in the given segmented profile
+		 * @param medianProfile
+		 * @throws Exception
+		 */
 		private void mergeAction(ISegmentedProfile medianProfile) throws Exception{
-			
+						
 			List<SegMergeItem> names = new ArrayList<SegMergeItem>();
-			
-			
+
 			// Put the names of the mergable segments into a list
 			for(IBorderSegment seg : medianProfile.getOrderedSegments()){
 				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
@@ -492,33 +494,21 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
 				this.setAnalysing(true);
 
-				if(activeDataset()
-						.getCollection()
-						.getProfileManager().testSegmentsMergeable(mergeOption.getOne(), mergeOption.getTwo())){
-					activeDataset()
-						.getCollection()
-						.getProfileManager()
-						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
-					
-					for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
-						child.getCollection()
-						.getProfileManager()
-						.mergeSegments(mergeOption.getOne(), mergeOption.getTwo());
-					}
-					
-					finest("Merged segments: "+mergeOption.toString());
-					finest("Refreshing chart cache for editing panel");
-					this.refreshChartCache();
-					finest("Firing general refresh cache request for loaded datasets");
-					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-				} else {
-					JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
-				}
-				this.setAnalysing(false);
+				SegmentationHandler sh = new SegmentationHandler(activeDataset());
+				sh.mergeSegments(mergeOption.getOne().getID(), mergeOption.getTwo().getID());
+
+
+				refreshEditingPanelCharts();
+
+
+			} else {
+				JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
 			}
+			this.setAnalysing(false);
+
 		}
 		
-		private class SegMergeItem{
+		private class SegMergeItem {
 			private IBorderSegment one, two;
 			public SegMergeItem(IBorderSegment one, IBorderSegment two){
 				this.one = one;
@@ -534,89 +524,66 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 				return two;
 			}
 		}
+				
 		
-		private class SegSplitItem{
-			private IBorderSegment seg;
-			public SegSplitItem(IBorderSegment seg){
-				this.seg = seg;
-			}
-			public String toString(){
-				return seg.getName();
-			}
-			public IBorderSegment getSeg(){
-				return seg;
-			}
-		}
 		
 		private void splitAction(ISegmentedProfile medianProfile) throws Exception{
-			
-			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
 
-			// Put the names of the mergable segments into a list
-			for(IBorderSegment seg : medianProfile.getSegments()){
-					names.add(new SegSplitItem(seg));						
-			}
-			
-			SegSplitItem[] nameArray = names.toArray(new SegSplitItem[0]);
+//			List<IBorderSegment> names = new ArrayList<IBorderSegment>();
+//
+//			// Put the names of the mergable segments into a list
+//			for(IBorderSegment seg : medianProfile.getSegments()){
+//					names.add(seg);		
+//			}
 
-			SegSplitItem option = (SegSplitItem) JOptionPane.showInputDialog(null, 
-					"Choose segment to split",
-					"Split",
+			IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
+
+			// show a list of segments that can be unmerged, and merge the selected option
+
+			IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, 
+					"Choose segments to unmerge",
+					"Unmerge",
 					JOptionPane.QUESTION_MESSAGE, 
 					null, 
 					nameArray, 
 					nameArray[0]);
 
 			if(option!=null){
-				
+
 				this.setAnalysing(true);
 
-				IBorderSegment seg = option.getSeg();
-				
-				UUID newID1 = java.util.UUID.randomUUID();
-				UUID newID2 = java.util.UUID.randomUUID();
-				
-				if(activeDataset()
-						.getCollection()
-						.getProfileManager()
-						.splitSegment(seg, newID1, newID2)){
-					
-					for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
-						child.getCollection()
-						.getProfileManager()
-						.splitSegment(seg, newID1, newID2);
-					}
-					
-					finest("Split segment "+option.toString());
-					finest("Refreshing chart cache for editing panel");
-					this.refreshChartCache();
-					finest("Firing general refresh cache request for loaded datasets");
-					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-				}
+				SegmentationHandler sh = new SegmentationHandler(activeDataset());
+				sh.splitSegment(option.getID());
+
+				refreshEditingPanelCharts();
+
 				this.setAnalysing(false);
 			}
+
+
 		}
 		
+		/**
+		 * Unmerge segments in a median profile
+		 * @param medianProfile
+		 * @throws Exception
+		 */
 		private void unmergeAction(ISegmentedProfile medianProfile) throws Exception{
 						
-			List<SegSplitItem> names = new ArrayList<SegSplitItem>();
+			List<IBorderSegment> names = new ArrayList<IBorderSegment>();
 
 			// Put the names of the mergable segments into a list
 			for(IBorderSegment seg : medianProfile.getSegments()){
 				if(seg.hasMergeSources()){
-					names.add(new SegSplitItem(seg));		
+					names.add(seg);		
 				}	
-
 			}
 			
-			SegSplitItem[] nameArray = names.toArray(new SegSplitItem[0]);
+			IBorderSegment[] nameArray = names.toArray(new IBorderSegment[0]);
 			
 			// show a list of segments that can be unmerged, and merge the selected option
 
-			// Put the names of the mergable segments into a list
-
-
-			SegSplitItem mergeOption = (SegSplitItem) JOptionPane.showInputDialog(null, 
+			IBorderSegment mergeOption = (IBorderSegment) JOptionPane.showInputDialog(null, 
 					"Choose segments to unmerge",
 					"Unmerge",
 					JOptionPane.QUESTION_MESSAGE, 
@@ -625,32 +592,20 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 					nameArray[0]);
 
 			if(mergeOption!=null){
+				
 				// a choice was made
 				this.setAnalysing(true);
-
-				activeDataset()
-				.getCollection()
-				.getProfileManager()
-				.unmergeSegments(mergeOption.getSeg());
 				
-				
-				for(IAnalysisDataset child : activeDataset().getAllChildDatasets()){
-					child.getCollection()
-					.getProfileManager()
-					.unmergeSegments(mergeOption.getSeg());
-				}
-				
+				SegmentationHandler sh = new SegmentationHandler(activeDataset());
+				sh.unmergeSegments(mergeOption.getID());
+//				
 				this.setAnalysing(false);
 				
-				finest("Unmerged segment "+mergeOption.toString());
-
-				finest("Refreshing chart cache for editing panel");
-				this.refreshChartCache();
-				finest("Firing general refresh cache request for loaded datasets");
-				fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+				refreshEditingPanelCharts();
+				
 			}
 		}
-//	}
+
 
 		@Override
 		public void segmentEventReceived(SegmentEvent event) {

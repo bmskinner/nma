@@ -206,6 +206,14 @@ implements ICellCollection {
 	public UUID getID(){
 		return this.uuid;
 	}
+	
+	public boolean isReal(){
+		return true;
+	}
+	
+	public boolean isVirtual(){
+		return false;
+	}
 
 	/**
 	 * Get the UUIDs of all the cells in the collection

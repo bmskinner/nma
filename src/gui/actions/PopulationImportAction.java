@@ -60,7 +60,7 @@ public class PopulationImportAction extends ProgressableAction {
 	
 	@Override
 	public void run(){
-		cooldown();		
+		setProgressBarIndeterminate();		
 		fine("Running dataset open action");
 		if(file!=null){
 			worker = new PopulationImportWorker(file);

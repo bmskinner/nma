@@ -29,7 +29,12 @@ public class DatasetEvent extends EventObject {
 	public static final String PROFILING_ACTION    = "Profiling action";
 	public static final String NEW_MORPHOLOGY      = "New morphology";
 	public static final String COPY_MORPHOLOGY     = "Copy morphology";
+	
+	/**
+	 * Copy existing median segments to nuclei
+	 */
 	public static final String REFRESH_MORPHOLOGY  = "Refresh morphology";
+	
 	public static final String REFOLD_CONSENSUS    = "Refold consensus";
 	public static final String SELECT_DATASETS     = "Select multiple datasets";
 	public static final String SELECT_ONE_DATASET  = "Select single dataset";

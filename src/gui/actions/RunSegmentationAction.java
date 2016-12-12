@@ -79,55 +79,64 @@ public class RunSegmentationAction extends ProgressableAction {
 	
 	@Override
 	public void run(){
-		if(this.mode==MorphologyAnalysisMode.COPY ){
-			fine("Creating segmentation copying analysis");
-			runCopyAnalysis();
-		}
-		if(this.mode==MorphologyAnalysisMode.NEW ){
-			fine("Creating new segmentation analysis");
-			runNewAnalysis();
-		}
+		
+		setProgressBarIndeterminate();
+		
+		switch(mode){
+			case NEW:{
+				runNewAnalysis();
+				break;
+			}
+			
+			case COPY:{
+				runCopyAnalysis();
+				break;
+			}
+			
+			case REFRESH:{
+				runRefreshAnalysis();
+				break;
+			}
+			
+			default:{
+				runNewAnalysis();
+				break;
+			}
+		}		
 	}
 	
 	private void runCopyAnalysis(){
+		
+		setProgressMessage("Copying segmentation");
 		worker = new DatasetSegmenter(dataset, source.getCollection());
 		worker.addPropertyChangeListener(this);
 		ThreadManager.getInstance().submit(worker);
 	}
 	
+	private void runRefreshAnalysis(){
+		
+		setProgressMessage("Refreshing segmentation");
+		worker = new DatasetSegmenter(dataset, mode);
+		worker.addPropertyChangeListener(this);
+		ThreadManager.getInstance().submit(worker);
+		
+		
+	}
+	
 	private void runNewAnalysis(){
-		try{
-			String message = null;
-			switch (this.mode) {
-			case COPY:  message = "Copying segmentation";
-			break;
+		
+		setProgressMessage("Segmenting: "+dataset.getName());
+		worker = new DatasetSegmenter(dataset, mode);
+		worker.addPropertyChangeListener(this);
+		ThreadManager.getInstance().submit(worker);
 
-			case REFRESH: message = "Refreshing segmentation";
-			break;
-
-			default: message = "Morphology analysis: "+dataset.getName();
-			break;  
-			}
-
-			this.setProgressMessage(message);
-			this.cooldown();
-
-			worker = new DatasetSegmenter(this.dataset, mode);
-			worker.addPropertyChangeListener(this);
-			fine( "Running morphology analysis");
-			ThreadManager.getInstance().submit(worker);
-		} catch(Exception e){
-			this.cancel();
-			warn("Error in morphology analysis");
-			stack("Error in morphology analysis", e);
-		}
 	}
 	
 	@Override
 	public void finished() {
 
 		// ensure the progress bar gets hidden even if it is not removed
-		this.setProgressBarVisible(false);
+		setProgressBarVisible(false);
 
 		// The analysis takes place in a new thread to accomodate refolding.
 		// See specific comment below
@@ -143,9 +152,9 @@ public class RunSegmentationAction extends ProgressableAction {
 				if(mode.equals(MorphologyAnalysisMode.REFRESH)){
 					dataset.getCollection().updateVerticalNuclei();
 					
-					if(dataset.getCollection().hasConsensusNucleus()){
-						downFlag |= MainWindow.CURVE_REFOLD;
-					}
+//					if(dataset.getCollection().hasConsensusNucleus()){
+//						downFlag |= MainWindow.CURVE_REFOLD;
+//					}
 				}
 
 				/*

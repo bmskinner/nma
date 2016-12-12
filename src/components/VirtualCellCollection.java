@@ -181,6 +181,14 @@ public class VirtualCellCollection implements ICellCollection {
 	public UUID getID() {
 		return uuid;
 	}
+	
+	public boolean isReal(){
+		return false;
+	}
+	
+	public boolean isVirtual(){
+		return true;
+	}
 
 	@Override
 	public synchronized Set<ICell> getCells() {

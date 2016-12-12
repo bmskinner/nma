@@ -45,7 +45,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		setLatch(doneSignal);
 		finest("Save dataset action created by explicit file location");
 		
-		this.cooldown();
+		this.setProgressBarIndeterminate();
 //		worker = new PopulationExporter(dataset, saveFile);
 //		worker.addPropertyChangeListener(this);
 //		
@@ -64,7 +64,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		super(dataset, "Saving dataset", mw);
 		setLatch(doneSignal);
 		finest("Save dataset action created by default or manual file location");
-		this.cooldown();
+		this.setProgressBarIndeterminate();
 //		File saveFile = null;
 		if(chooseSaveLocation){
 			

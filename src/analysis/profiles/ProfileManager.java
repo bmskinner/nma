@@ -43,6 +43,7 @@ import components.generic.UnavailableBorderTagException;
 import components.generic.UnavailableProfileTypeException;
 import components.generic.BorderTag.BorderTagType;
 import components.generic.Tag;
+import components.generic.UnsegmentedProfileException;
 import components.nuclear.IBorderSegment;
 import components.nuclei.Nucleus;
 
@@ -636,7 +637,7 @@ public class ProfileManager implements Loggable {
 	 * @param id the segmnet to leave unlocked, or to unlock if locked
 	 * @throws Exception
 	 */
-	public void setLockOnAllNucleusSegmentsExcept(UUID id, boolean b) throws Exception{
+	public void setLockOnAllNucleusSegmentsExcept(UUID id, boolean b) {
 		
 		List<UUID> ids = collection.getProfileCollection()
 				.getSegmentIDs();
@@ -689,6 +690,10 @@ public class ProfileManager implements Loggable {
 	 * @throws Exception
 	 */
 	public void updateCellSegmentStartIndex(ICell cell, UUID id, int index) throws Exception {
+		
+		if(collection.isVirtual()){
+			return;
+		}
 		
 		Nucleus n = cell.getNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
@@ -746,9 +751,13 @@ public class ProfileManager implements Loggable {
 	 * @param start
 	 * @param segName
 	 * @param index
+	 * @throws UnsegmentedProfileException 
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws Exception {
+	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
 				
 		ISegmentedProfile oldProfile = collection
 				.getProfileCollection()
@@ -807,9 +816,10 @@ public class ProfileManager implements Loggable {
 	 * @param seg1
 	 * @param seg2
 	 * @return
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	public boolean testSegmentsMergeable(IBorderSegment seg1, IBorderSegment seg2) throws Exception{
+	public boolean testSegmentsMergeable(IBorderSegment seg1, IBorderSegment seg2) throws UnavailableBorderTagException {
 			
 		
 		// check the boundaries of the segment - we do not want to merge across the BorderTags
@@ -840,9 +850,13 @@ public class ProfileManager implements Loggable {
 	 * Merge the given segments
 	 * @param seg1
 	 * @param seg2
+	 * @throws UnsegmentedProfileException 
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2) throws Exception {
+	public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2, UUID newID) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
 
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
@@ -851,9 +865,6 @@ public class ProfileManager implements Loggable {
 		 * Only try the merge if both segments are present in the profile
 		 */
 		if(medianProfile.hasSegment(seg1.getID())  && medianProfile.hasSegment(seg2.getID()) ){
-
-			// Give the new merged segment a new ID
-			UUID newID = java.util.UUID.randomUUID();
 			
 			// merge the two segments in the median
 			medianProfile.mergeSegments(seg1, seg2, newID);
@@ -866,7 +877,7 @@ public class ProfileManager implements Loggable {
 			 * With the median profile segments merged, also merge the segments
 			 * in the individual nuclei
 			 */
-			if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+			if(collection.isReal()){ // do not handle nuclei in virtual collections
 				for(Nucleus n : collection.getNuclei()){
 
 					boolean wasLocked = n.isLocked();
@@ -922,9 +933,13 @@ public class ProfileManager implements Loggable {
 	 * Split the given segment into two segmnets. The split is made at the given index
 	 * @param segName
 	 * @return
+	 * @throws UnsegmentedProfileException 
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	public boolean splitSegment(IBorderSegment seg, UUID newID1, UUID newID2)  throws Exception {
+	public boolean splitSegment(IBorderSegment seg, UUID newID1, UUID newID2) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
 		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
@@ -964,7 +979,7 @@ public class ProfileManager implements Loggable {
 				 * With the median profile segments unmerged, also split the segments
 				 * in the individual nuclei. Requires proportional alignment
 				 */
-				if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+				if(collection.isReal()){ // do not handle nuclei in virtual collections
 					for(Nucleus n : collection.getNuclei()){
 						boolean wasLocked = n.isLocked();
 						n.setLocked(false); // Merging segments is not destructive
@@ -1003,26 +1018,30 @@ public class ProfileManager implements Loggable {
 		}
 	}
 	
-//	/**
-//	 * Split the given segment into two segmnets. The split is made at the midpoint
-//	 * @param segName
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public boolean splitSegment(IBorderSegment seg) throws Exception {
-//			int index = seg.getMidpointIndex();
-//			
-//			return splitSegment(seg, index);
-//	}
-	
-	public void unmergeSegments(IBorderSegment seg) throws Exception {
+	/**
+	 * Unmerge the given segment into two segments
+	 * @param seg the segment to unmerge
+	 * @return
+	 * @throws UnsegmentedProfileException 
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws Exception
+	 */	
+	public void unmergeSegments(IBorderSegment seg) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
 		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 		
 		// Get the segments to merge
+		IBorderSegment test = medianProfile.getSegment(seg.getID());
+		if( ! test.hasMergeSources()){
+			fine("Segment has no merge sources - cannot unmerge");
+			return;
+		}
 		
-		// merge the two segments in the median - this is only a copy of the profile collection
+		
+		// unmerge the two segments in the median - this is only a copy of the profile collection
 		medianProfile.unmergeSegment(seg);
 		
 		// put the new segment pattern back with the appropriate offset
@@ -1033,7 +1052,7 @@ public class ProfileManager implements Loggable {
 		 * With the median profile segments unmerged, also unmerge the segments
 		 * in the individual nuclei
 		 */		
-		if(collection instanceof DefaultCellCollection){ // do not handle nuclei in virtual collections
+		if(collection.isReal()){ // do not handle nuclei in virtual collections
 			for(Nucleus n : collection.getNuclei()){
 				boolean wasLocked = n.isLocked();
 				n.setLocked(false); // Merging segments is not destructive

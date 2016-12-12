@@ -756,6 +756,11 @@ public class DefaultBorderSegment implements IBorderSegment{
 	@Override
 	public String toString(){
 		
+		return this.getName();
+	}
+	
+	public String getDetail(){
+
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("Segment ");

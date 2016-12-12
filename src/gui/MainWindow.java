@@ -519,12 +519,20 @@ public class MainWindow
 			}
 			
 			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
-				finer("Refreshing profiling and segmentation across nuclei");
-				int flag = MainWindow.ASSIGN_SEGMENTS;
-				Runnable p = new RunProfilingAction(list, flag, MainWindow.this);
-//				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, 0, MainWindow.this);
-				p.run();
+				finer("Refreshing segmentation across nuclei using existing border tags");
+				final int flag = 0;
+				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, flag, MainWindow.this);
+				task.run();
 			}
+			
+//			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
+//				finer("Refreshing segmentation across nuclei using existing border tags");
+//				int flag = MainWindow.ASSIGN_SEGMENTS;
+//				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+////				Runnable p = new RunProfilingAction(list, flag, MainWindow.this);
+////				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, 0, MainWindow.this);
+//				task.run();
+//			}
 			
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				
