@@ -27,9 +27,6 @@ import java.util.UUID;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import components.generic.Tag;
 import components.nuclear.NucleusType;
 import components.nuclear.UnavailableSignalGroupException;
@@ -45,6 +42,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	
 	private final File file;
 	private IAnalysisDataset dataset = null; // the active dataset of an AnalysisWorker is private and immutable, so have a new field here
+	private boolean wasConverted = false;
 	
 	public PopulationImportWorker(final File f){
 		super(null);
@@ -72,6 +70,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 		
 		this.file = f;
 		this.setProgressTotal(1);
+	}
+	
+	public boolean wasConverted(){
+		return wasConverted;
 	}
 	
 	public IAnalysisDataset getLoadedDataset() throws UnloadableDatasetException {
@@ -341,7 +343,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 		if(GlobalOptions.getInstance().isConvertDatasets()){
 			if(dataset instanceof AnalysisDataset){
 				dataset = upgradeDatasetVersion(dataset);
-
 			}
 		}
 
@@ -361,6 +362,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			dataset = converted;
 
 			log("Conversion successful");
+			wasConverted = true;
 		} catch (DatasetConversionException e){
 			warn("Unable to convert to new format.");
 			warn("Displaying as old format.");

@@ -402,16 +402,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
                 	continue;
                 }
                 
-                // If there are no signals in the group, the pdf will fail
-                if( ! collection.getSignalManager().hasSignals(signalGroup)){
-                	// Add an empty series
-                	double[] xData = { 0 };
-                	double[] yData = { 0 };
-                	double[][] data = { xData, yData} ;
-                	ds.addSeries( groupLabel, data);
-                	continue;
-                }
-
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
                 
                 // Cannot estimate pdf with too few values

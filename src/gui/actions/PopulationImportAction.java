@@ -111,6 +111,10 @@ public class PopulationImportAction extends ProgressableAction {
 		IAnalysisDataset dataset;
 		try {
 			dataset = ((PopulationImportWorker) worker).getLoadedDataset();
+			
+			if(((PopulationImportWorker) worker).wasConverted()){
+				fireDatasetEvent(DatasetEvent.SAVE, dataset);
+			}
 		} catch (UnloadableDatasetException e) {
 			warn("Unable to open dataset: "+e.getMessage());
 			return;
