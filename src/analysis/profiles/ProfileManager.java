@@ -343,6 +343,8 @@ public class ProfileManager implements Loggable {
 				.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN); 
 		
 		offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
+		
+		collection.updateVerticalNuclei();
 
 
 		/*
@@ -528,6 +530,8 @@ public class ProfileManager implements Loggable {
 		
 		// Update signals as needed
 		collection.getSignalManager().recalculateSignalAngles();
+		
+		collection.updateVerticalNuclei();
 		
 		// Run a new morphological analysis to apply the new segments
 		// TODO: this needs to trigger the progressable action

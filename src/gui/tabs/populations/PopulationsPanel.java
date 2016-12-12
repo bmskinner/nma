@@ -466,6 +466,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 			return;
 		}
 		
+		// TODO: Check if root datasets need saving before closing
+		
 		DatasetDeleter deleter = new DatasetDeleter();
 		deleter.deleteDatasets(datasets);
 

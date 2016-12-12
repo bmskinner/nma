@@ -19,16 +19,21 @@
 
 package analysis.profiles;
 
+import gui.DatasetEvent;
+import gui.InterfaceEvent.InterfaceMethod;
+
 import java.util.UUID;
 
 import logging.Loggable;
 import stats.Quartile;
+import components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import components.generic.ISegmentedProfile;
 import components.generic.ProfileType;
 import components.generic.Tag;
 import components.generic.UnavailableBorderTagException;
 import components.generic.UnavailableProfileTypeException;
 import components.generic.UnsegmentedProfileException;
+import components.generic.BorderTag.BorderTagType;
 import components.nuclear.IBorderSegment;
 import analysis.IAnalysisDataset;
 
@@ -259,6 +264,56 @@ public class SegmentationHandler implements Loggable {
 		
 	}
 	
+	
+	/**
+	 * Update the border tag in the median profile to the given index, 
+	 * and update individual nuclei to match.
+	 * @param tag
+	 * @param newTagIndex
+	 */
+	public void setBorderTag(Tag tag, int index){
+
+		if(tag==null){
+			throw new IllegalArgumentException("Tag is null");
+		}
+		
+		if(dataset.getCollection().isVirtual()){
+			return;
+		}
+
+
+		try {
+			
+			double prop = dataset.getCollection()
+					.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+					.getIndexProportion(index);
+			
+			
+			dataset.getCollection()
+				.getProfileManager()
+				.updateBorderTag(tag, index);
+			
+			
+			for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+				
+				// Update each child median profile to the same proportional index 
+				
+				int childIndex = child.getCollection()
+						.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+						.getProportionalIndex(prop);
+				
+				child.getCollection()
+					.getProfileManager()
+					.updateBorderTag(tag, childIndex);
+			}
+			
+			
+		} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+			warn("Unable to update border tag index");
+			stack("Profiling error", e);
+			return;
+		}
+	}
 	
 }
 

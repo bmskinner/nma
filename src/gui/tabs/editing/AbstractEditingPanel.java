@@ -19,6 +19,8 @@
 
 package gui.tabs.editing;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import gui.BorderTagEventListener;
@@ -32,6 +34,7 @@ import gui.tabs.EditingTabPanel;
 
 import javax.swing.JOptionPane;
 
+import analysis.IAnalysisDataset;
 import analysis.profiles.ProfileException;
 import analysis.profiles.SegmentationHandler;
 import components.ICellCollection;
@@ -82,35 +85,32 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	 */
 	public void setBorderTagAction(Tag tag, int newTagIndex){
 
+		if(activeDataset().getCollection().isVirtual()){
+			warn("Cannot update core border tag for a child dataset");
+			return;
+		}
+		
 		if(tag==null){
 			fine("Tag is null");
 			return;
 		}
+		
+		
 			
 		checkCellLock();
 
 		log("Updating "+tag+" to index "+newTagIndex);
 
 		setAnalysing(true);
-
-		try {
-			activeDataset()
-				.getCollection()
-				.getProfileManager()
-				.updateBorderTag(tag, newTagIndex);
-			
-			
-		} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-			warn("Unable to update border tag index");
-			stack("Profiling error", e);
-			return;
-		}
+		
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.setBorderTag(tag, newTagIndex);
 
 
 		refreshChartCache();
 
 		if(tag.type().equals(BorderTagType.CORE)){
-			log("Resegmenting dataset");
+
 			fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 		} else {					
 			fine("Firing refresh cache request for loaded datasets");
@@ -129,8 +129,13 @@ public abstract class AbstractEditingPanel extends DetailPanel
 	protected void refreshEditingPanelCharts(){
 		finest("Refreshing chart cache for editing panel");
 		this.refreshChartCache();
-		finest("Firing general refresh cache request for loaded datasets");
-		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+		
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+		
+		list.addAll(getDatasets());
+		list.addAll(activeDataset().getAllChildDatasets());
+		
+		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
 	}
 	
 	/**

@@ -338,8 +338,6 @@ public class PopulationImportWorker extends AnalysisWorker {
 		}
 		
 		// convert old files if needed
-		
-		
 		if(GlobalOptions.getInstance().isConvertDatasets()){
 			if(dataset instanceof AnalysisDataset){
 				dataset = upgradeDatasetVersion(dataset);
@@ -352,7 +350,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 	}
 	
 	private IAnalysisDataset upgradeDatasetVersion(IAnalysisDataset dataset){
-		log("Old style dataset detected");
+		log("Old format detected");
 		
 		try {
 

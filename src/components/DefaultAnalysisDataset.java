@@ -629,13 +629,13 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		// Is the name of the expectedImageDirectory the same as the dataset image directory?
 		if( ! checkName(expectedImageDirectory, this)){
-			throw new IllegalArgumentException("Dataset name does not match new folder; unable to update paths");
+			throw new IllegalArgumentException("Dataset name does not match new folder");
 		}
 		fine("Dataset name matches new folder");
 			
 		// Does expectedImageDirectory contain image files?
 		if( ! checkHasImages(expectedImageDirectory)){
-			throw new IllegalArgumentException("Target folder contains no images; unable to update paths");
+			throw new IllegalArgumentException("Target folder contains no images");
 		}
 		
 		fine("Target folder contains at least one image");

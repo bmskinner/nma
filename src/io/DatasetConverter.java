@@ -61,12 +61,9 @@ import components.nuclei.sperm.DefaultPigSpermNucleus;
 import components.nuclei.sperm.DefaultRodentSpermNucleus;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import analysis.AnalysisOptions;
 import analysis.DefaultAnalysisOptions;
-import analysis.DefaultCannyOptions;
 import analysis.IAnalysisDataset;
 import analysis.IAnalysisOptions;
-import analysis.ICannyOptions;
 import analysis.IMutableAnalysisOptions;
 import analysis.IMutableDetectionOptions;
 import analysis.nucleus.DefaultNucleusDetectionOptions;
@@ -199,13 +196,16 @@ public class DatasetConverter implements Loggable {
 	
 	private void makeMergeSources(IAnalysisDataset template, IAnalysisDataset dest) throws DatasetConversionException{
 		
-		for(IAnalysisDataset d : template.getMergeSources()){
-			
-			dest.addMergeSource(d);
-			
+		if(template.hasMergeSources()){
+
+			for(IAnalysisDataset d : template.getMergeSources()){
+
+				dest.addMergeSource(d);
+
+			}
+
+			log("Added merge sources");
 		}
-		
-		log("Added merge sources");
 		
 	}
 	
