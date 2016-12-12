@@ -1,0 +1,175 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+package com.bmskinner.nuclear_morphology.gui.tabs.editing;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import javax.swing.JOptionPane;
+
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
+import com.bmskinner.nuclear_morphology.gui.BorderTagEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
+import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
+
+@SuppressWarnings("serial")
+public abstract class AbstractEditingPanel extends DetailPanel 
+	implements  SegmentEventListener, 
+				BorderTagEventListener, 
+				EditingTabPanel {
+	
+	/**
+	 * Check if any of the cells in the active collection are locked for
+	 * editing. If so, ask the user whether to unlock all cells,
+	 * or leave cells locked.
+	 */
+	public void checkCellLock(){
+		ICellCollection collection = activeDataset().getCollection();
+		
+		if(collection.isVirtual()){
+			return;
+		}
+		
+		if(collection.hasLockedCells()){
+			Object[] options = { "Keep manual values" , "Overwrite manual values" };
+			int result = JOptionPane.showOptionDialog(null,
+					"Some cells have been manually segmented. Keep manual values?", 
+					"Overwrite manually segmented cells?",
+					JOptionPane.DEFAULT_OPTION, 
+					JOptionPane.QUESTION_MESSAGE,
+					null, options, options[0]);
+			
+			if(result!=0){
+				collection.setCellsLocked(false);
+			}
+		}
+	}
+	
+	/**
+	 * Update the border tag in the median profile to the given index, 
+	 * and update individual nuclei to match.
+	 * @param tag
+	 * @param newTagIndex
+	 */
+	public void setBorderTagAction(Tag tag, int newTagIndex){
+
+		if(activeDataset().getCollection().isVirtual()){
+			warn("Cannot update core border tag for a child dataset");
+			return;
+		}
+		
+		if(tag==null){
+			fine("Tag is null");
+			return;
+		}
+		
+		
+			
+		checkCellLock();
+
+		log("Updating "+tag+" to index "+newTagIndex);
+
+		setAnalysing(true);
+		
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.setBorderTag(tag, newTagIndex);
+
+
+		refreshChartCache();
+
+		if(tag.type().equals(BorderTagType.CORE)){
+
+			fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+		} else {					
+			fine("Firing refresh cache request for loaded datasets");
+			fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+		}
+
+		this.setAnalysing(false);
+
+	}
+	
+	/**
+	 * This triggers a general chart recache for the active dataset
+	 * and all its children, but performs the recache on the currnt tab
+	 * first so results are showed at once
+	 */
+	protected void refreshEditingPanelCharts(){
+		finest("Refreshing chart cache for editing panel");
+		this.refreshChartCache();
+		
+		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+		
+		list.addAll(getDatasets());
+		list.addAll(activeDataset().getAllChildDatasets());
+		
+		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
+	}
+	
+	/**
+	 * Update the start index of the given segment to the given index in the 
+	 * median profile, and update individual nuclei to match
+	 * @param id
+	 * @param index
+	 * @throws Exception
+	 */
+	public void updateSegmentStartIndexAction(UUID id, int index) throws Exception{
+		
+		checkCellLock();
+		
+		SegmentationHandler sh = new SegmentationHandler(activeDataset());
+		sh.updateSegmentStartIndexAction(id, index);
+		
+		
+		refreshEditingPanelCharts();
+		
+		
+		//  Update each nucleus profile
+		finest("Firing refresh morphology action");
+		fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+
+		
+	}
+	
+	@Override
+	public void borderTagEventReceived(BorderTagEvent event) {
+		fine("Border tag event heard, not responding: "+this.getClass().getSimpleName());
+	}
+	
+	@Override
+	public void segmentEventReceived(SegmentEvent event) {
+		fine("Segment event heard, not responding: "+this.getClass().getSimpleName());
+	}
+
+}

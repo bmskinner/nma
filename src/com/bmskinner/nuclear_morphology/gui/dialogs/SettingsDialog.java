@@ -1,0 +1,500 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package com.bmskinner.nuclear_morphology.gui.dialogs;
+
+import ij.IJ;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import com.bmskinner.nuclear_morphology.analysis.ICannyOptions;
+import com.bmskinner.nuclear_morphology.analysis.IMutableCannyOptions;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+/**
+ * Contains methods for laying out panels in settings dialog options
+ */
+@SuppressWarnings("serial")
+public abstract class SettingsDialog extends JDialog implements Loggable {
+	
+	protected boolean readyToRun = false;
+	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
+		
+	protected String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
+	
+	/**
+	 * Constructor for generic dialogs not attached to a frame 
+	 * @param programLogger
+	 */
+	public SettingsDialog(){
+		this.setLocationRelativeTo(null);
+	}
+	
+	/**
+	 * Constructor for dialogs attached to a frame
+	 * @param programLogger the logger
+	 * @param owner the frame (will be a MainWindow)
+	 * @param modal is the dialog modal
+	 */
+	public SettingsDialog(Frame owner, boolean modal){
+		super(owner, modal);
+		this.setLocationRelativeTo(null);
+	}
+	
+	public SettingsDialog(Dialog owner, boolean modal){
+		super(owner, modal);
+		this.setLocationRelativeTo(null);
+	}
+		
+	/**
+	 * Create the panel footer, with OK and Cancel option
+	 * buttons
+	 * @return
+	 */
+	protected JPanel createFooter(){
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		JButton okButton = new JButton("OK");
+		okButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				readyToRun = true;
+				setVisible(false);			
+			}
+		});
+
+		panel.add(okButton);
+
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				readyToRun = false;
+				dispose();			
+			}
+		});
+		panel.add(cancelButton);
+		return panel;
+	}
+	
+	/**
+	 * Add components to a container via a list
+	 * @param labels the list of labels
+	 * @param fields the list of components
+	 * @param gridbag the layout
+	 * @param container the container to add the labels and fields to
+	 */
+	protected void addLabelTextRows(List<JLabel> labels,
+			List<Component> fields,
+			GridBagLayout gridbag,
+			Container container) {
+		
+		JLabel[] labelArray = labels.toArray(new JLabel[0]);
+		Component[] fieldArray = fields.toArray(new Component[0]);
+		
+		addLabelTextRows(labelArray, fieldArray, gridbag, container);
+		
+	}
+	
+
+	/**
+	 * Add components to a container via arrays
+	 * @param labels the list of labels
+	 * @param fields the list of components
+	 * @param gridbag the layout
+	 * @param container the container to add the labels and fields to
+	 */
+	protected void addLabelTextRows(JLabel[] labels,
+			Component[] fields,
+			GridBagLayout gridbag,
+			Container container) {
+		GridBagConstraints c = new GridBagConstraints();
+		c.anchor = GridBagConstraints.EAST;
+		int numLabels = labels.length;
+
+		for (int i = 0; i < numLabels; i++) {
+			c.gridwidth = 1; //next-to-last
+			c.fill = GridBagConstraints.NONE;      //reset to default
+			c.weightx = 0.0;                       //reset to default
+			container.add(labels[i], c);
+
+			Dimension minSize = new Dimension(10, 5);
+			Dimension prefSize = new Dimension(10, 5);
+			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
+			c.gridwidth = GridBagConstraints.RELATIVE; //next-to-last
+			c.fill = GridBagConstraints.NONE;      //reset to default
+			c.weightx = 0.0;                       //reset to default
+			container.add(new Box.Filler(minSize, prefSize, maxSize),c);
+
+			c.gridwidth = GridBagConstraints.REMAINDER;     //end row
+			c.fill = GridBagConstraints.HORIZONTAL;
+			c.weightx = 1.0;
+			container.add(fields[i], c);
+		}
+	}
+	
+	/**
+	 * Check if this dialog was cancelled or if the subsequent
+	 * analysis can be run
+	 * @return
+	 */
+	public boolean isReadyToRun(){
+		return this.readyToRun;
+	}
+	
+	/**
+	 * Create a panel with the standard Canny detection options. Must have an
+	 * attached CannyOptions to store the settings
+	 */
+	public class CannyPanel extends JPanel implements ChangeListener, ActionListener{
+				
+		private JSpinner cannyLowThreshold;
+		private JSpinner cannyHighThreshold;
+		private JSpinner cannyKernelRadius;
+		private JSpinner cannyKernelWidth;
+		private JSpinner closingObjectRadiusSpinner;
+		private JCheckBox cannyAutoThresholdCheckBox;
+		
+		private JCheckBox 	useKuwaharaCheckBox;
+		private JSpinner 	kuwaharaRadiusSpinner;
+		
+		private JCheckBox 	flattenImageCheckBox;
+		private JSpinner 	flattenImageThresholdSpinner;
+		
+		private JCheckBox 	addBorderCheckBox;
+		
+		private IMutableCannyOptions options;
+		
+		public CannyPanel(final IMutableCannyOptions options){
+			this.options = options;
+			getDefaults();
+			createPanel();
+		}
+		
+		/**
+		 * Create the spinners with the default options in the CannyOptions
+		 * CannyOptions must therefore have been assigned defaults
+		 */
+		private void getDefaults(){
+			
+			cannyLowThreshold = new JSpinner(new SpinnerNumberModel(options.getLowThreshold(),	0, 10, 0.05));
+			cannyHighThreshold = new JSpinner(new SpinnerNumberModel(options.getHighThreshold(),	0, 20, 0.05));
+			cannyKernelRadius = new JSpinner(new SpinnerNumberModel(options.getKernelRadius(),	0, 20, 0.05));
+			cannyKernelWidth = new JSpinner(new SpinnerNumberModel(options.getKernelWidth(),	1, 50, 1));
+			closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getClosingObjectRadius(), 1,100 , 1));
+						
+			kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(options.getKuwaharaKernel(), 1,11 , 2));
+			flattenImageThresholdSpinner = new JSpinner(new SpinnerNumberModel(options.getFlattenThreshold(), 0,255 , 1));
+			
+		}
+		
+		/**
+		 * Update the display to the given options 
+		 * @param options
+		 */
+		public void update(final ICannyOptions options){
+			
+			cannyLowThreshold.setValue( (double) options.getLowThreshold());
+			cannyHighThreshold.setValue( (double) options.getHighThreshold());
+			cannyKernelRadius.setValue( (double) options.getKernelRadius());
+			cannyKernelWidth.setValue(options.getKernelWidth());
+			closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
+			kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());
+			flattenImageThresholdSpinner.setValue(options.getFlattenThreshold());
+			finest("Updated Canny spinners");
+			
+			cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
+			useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
+			flattenImageCheckBox.setSelected(options.isUseFlattenImage());
+			finest("Updated Canny checkboxes");
+		}
+		
+		
+		private void createPanel(){
+			
+			this.setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			Dimension minSize = new Dimension(10, 5);
+			Dimension prefSize = new Dimension(10, 5);
+			Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
+			c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
+			c.fill = GridBagConstraints.NONE;      //reset to default
+			c.weightx = 0.1;                       //reset to default
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			cannyAutoThresholdCheckBox = new JCheckBox("Canny auto threshold");
+			cannyAutoThresholdCheckBox.setSelected(false);
+			cannyAutoThresholdCheckBox.setActionCommand("CannyAutoThreshold");
+			cannyAutoThresholdCheckBox.addActionListener(this);
+			this.add(cannyAutoThresholdCheckBox);
+			
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			
+			// add the canny settings
+			List<JLabel> labelList	 = new ArrayList<JLabel>();
+			List<JSpinner> fieldList = new ArrayList<JSpinner>();
+			
+			labelList.add(new JLabel("Canny low threshold"));
+			labelList.add(new JLabel("Canny high threshold"));
+			labelList.add(new JLabel("Canny kernel radius"));
+			labelList.add(new JLabel("Canny kernel width"));
+			labelList.add(new JLabel("Closing radius"));
+			
+			JLabel[] labels = labelList.toArray(new JLabel[0]);
+			
+			fieldList.add(cannyLowThreshold);
+			fieldList.add(cannyHighThreshold);
+			fieldList.add(cannyKernelRadius);
+			fieldList.add(cannyKernelWidth);
+			fieldList.add(closingObjectRadiusSpinner);
+			
+			JSpinner[] fields = fieldList.toArray(new JSpinner[0]);
+			
+			// add the change listeners
+			cannyLowThreshold.addChangeListener(this);
+			cannyHighThreshold.addChangeListener(this);
+			cannyKernelRadius.addChangeListener(this);
+			cannyKernelWidth.addChangeListener(this);
+			closingObjectRadiusSpinner.addChangeListener(this);
+						
+			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			// add a space
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			// add the Kuwahara checkbox
+			useKuwaharaCheckBox = new JCheckBox("Use Kuwahara filter");
+			useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
+			useKuwaharaCheckBox.setActionCommand("UseKuwahara");
+			useKuwaharaCheckBox.addActionListener(this);
+			this.add(useKuwaharaCheckBox);
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			// add the Kuwahara radius spinner
+			labels = new JLabel[1];
+			fields = new JSpinner[1];
+			
+			labels[0] = new JLabel("Kuwahara kernel");
+			fields[0] = kuwaharaRadiusSpinner;
+			
+			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			// add a space
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+			
+			
+			// add the chromocentre flattening checkbox
+			flattenImageCheckBox = new JCheckBox("Flatten chromocentres");
+			flattenImageCheckBox.setSelected(options.isUseKuwahara());
+			flattenImageCheckBox.setActionCommand("FlattenChromocentres");
+			flattenImageCheckBox.addActionListener(this);
+			this.add(flattenImageCheckBox);
+			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+						
+			// add the flattening threshold spinner
+			labels = new JLabel[1];
+			fields = new JSpinner[1];
+
+			labels[0] = new JLabel("Flattening threshold");
+			fields[0] = flattenImageThresholdSpinner;
+			
+			flattenImageThresholdSpinner.addChangeListener(this);
+			
+			addLabelTextRows(labels, fields, new GridBagLayout(), this );
+			
+			
+			// Add the border adding box
+			addBorderCheckBox = new JCheckBox("Add border to images");
+			addBorderCheckBox.setSelected(options.isAddBorder());
+			addBorderCheckBox.setActionCommand("AddBorder");
+			addBorderCheckBox.addActionListener(this);
+//			this.add(addBorderCheckBox); // Do not enable until signal detector gets IAnalysisOptions
+//			this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+
+			
+			
+			
+			
+		}
+
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			try{
+				if(e.getSource()==cannyLowThreshold){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+
+					if( (Double) j.getValue() > (Double) cannyHighThreshold.getValue() ){
+						j.setValue( cannyHighThreshold.getValue() );
+					}
+					Double doubleValue = (Double) j.getValue();
+					options.setLowThreshold(    doubleValue.floatValue() );
+				}
+
+				if(e.getSource()==cannyHighThreshold){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+
+					if( (Double) j.getValue() < (Double) cannyLowThreshold.getValue() ){
+						j.setValue( cannyLowThreshold.getValue() );
+					}
+					Double doubleValue = (Double) j.getValue();
+					options.setHighThreshold( doubleValue.floatValue() );
+				}
+
+				if(e.getSource()==cannyKernelRadius){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					Double doubleValue = (Double) j.getValue();
+					options.setKernelRadius( doubleValue.floatValue());
+				}
+
+				if(e.getSource()==cannyKernelWidth){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					options.setKernelWidth( (Integer) j.getValue());
+				}
+
+				if(e.getSource()==closingObjectRadiusSpinner){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					options.setClosingObjectRadius( (Integer) j.getValue());
+				}
+				
+				if(e.getSource()==kuwaharaRadiusSpinner){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					Integer value = (Integer) j.getValue();
+					if(value % 2 == 0){ // even
+						value--; // only odd values are allowed
+						j.setValue(value);
+						j.commitEdit();
+						j.repaint();
+					}
+					options.setKuwaharaKernel(value);
+				}
+				
+				if(e.getSource()==flattenImageThresholdSpinner){
+					JSpinner j = (JSpinner) e.getSource();
+					j.commitEdit();
+					options.setFlattenThreshold( (Integer) j.getValue());
+				}
+				
+			
+			} catch (ParseException e1) {
+				IJ.log("Parsing error in JSpinner");
+			}
+			
+		}
+
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(e.getActionCommand().equals("CannyAutoThreshold")){
+
+				if(cannyAutoThresholdCheckBox.isSelected()){
+					options.setCannyAutoThreshold(true);
+					cannyLowThreshold.setEnabled(false);
+					cannyHighThreshold.setEnabled(false);
+				} else {
+					options.setCannyAutoThreshold(false);
+					cannyLowThreshold.setEnabled(true);
+					cannyHighThreshold.setEnabled(true);
+				}
+			}
+			
+			if(e.getActionCommand().equals("UseKuwahara")){
+
+				if(useKuwaharaCheckBox.isSelected()){
+					options.setUseKuwahara(true);
+					kuwaharaRadiusSpinner.setEnabled(true);
+				} else {
+					options.setUseKuwahara(false);
+					kuwaharaRadiusSpinner.setEnabled(false);
+				}
+			}
+			
+			if(e.getActionCommand().equals("FlattenChromocentres")){
+
+				if(flattenImageCheckBox.isSelected()){
+					options.setFlattenImage(true);
+					flattenImageThresholdSpinner.setEnabled(true);
+				} else {
+					options.setFlattenImage(false);
+					flattenImageThresholdSpinner.setEnabled(false);
+				}
+			}
+			
+			if(e.getActionCommand().equals("AddBorder")){
+
+				options.setAddBorder(addBorderCheckBox.isSelected());
+			}
+			
+		}
+		
+	}
+	
+	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.add( l );
+    }
+    
+    public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
+    	interfaceListeners.remove( l );
+    }
+	
+	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+    	
+    	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while( iterator.hasNext() ) {
+            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+        }
+    }
+}

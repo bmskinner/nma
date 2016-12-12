@@ -1,0 +1,414 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package com.bmskinner.nuclear_morphology.gui.tabs.signals;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.UUID;
+import java.util.logging.Level;
+
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
+import org.jfree.chart.JFreeChart;
+
+import com.bmskinner.nuclear_morphology.analysis.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
+import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+
+@SuppressWarnings("serial")
+public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
+
+	private ConsensusNucleusChartPanel 	chartPanel; 		// consensus nucleus plus signals
+	private ExportableTable 		statsTable;					// table for signal stats
+	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
+	private JPanel		checkboxPanel;
+	
+	private JButton warpButton;
+	
+//	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
+	
+	
+	public SignalsOverviewPanel(){
+		super();
+		
+		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+		JScrollPane scrollPane = createStatsPane();
+		this.add(scrollPane);
+		
+	
+		consensusAndCheckboxPanel = createConsensusPanel();
+		this.add(consensusAndCheckboxPanel);
+		
+	}
+	
+	private JPanel createConsensusPanel(){
+		
+		final JPanel panel = new JPanel(new BorderLayout());
+		
+		ChartOptions options = new ChartOptionsBuilder()
+				.build();
+		
+		JFreeChart chart = null;
+		try {
+			chart = getChart(options);
+		} catch (Exception e1) {
+			warn("Error creating blank signals chart");
+			stack("Error creating blank signals chart", e1);
+		}
+						
+		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
+		// this allows a checkbox panel to be added to the JPanel later
+		chartPanel = new ConsensusNucleusChartPanel(chart);// {
+		panel.add(chartPanel, BorderLayout.CENTER);
+		chartPanel.setFillConsensus(false);
+		
+		checkboxPanel = createSignalCheckboxPanel();
+		
+		panel.add(checkboxPanel, BorderLayout.NORTH);
+
+		return panel;
+	}
+	
+	private JScrollPane createStatsPane(){
+		
+		
+		TableModel tableModel = AbstractDatasetCreator.createBlankTable();
+		statsTable = new ExportableTable(tableModel); // table  for basic stats
+		statsTable.setEnabled(false);
+		
+		statsTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				JTable table = (JTable) e.getSource();
+				
+				int row = table.rowAtPoint(e.getPoint());
+				int column = table.columnAtPoint(e.getPoint());
+								
+				// double click
+				if (e.getClickCount() == 2) {
+
+					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
+					if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
+						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
+						updateSignalColour( signalGroup );
+					}
+											
+				}
+
+			}
+		});
+		
+		JScrollPane scrollPane = new JScrollPane(statsTable);
+		return scrollPane;
+	}
+	
+	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
+		return (SignalTableCell) table.getModel().getValueAt(row, column);
+	}
+	
+	
+	/**
+	 * Update the colour of the clicked signal group
+	 * @param row the row selected (the colour bar, one above the group name)
+	 */
+	private void updateSignalColour(SignalTableCell signalGroup){
+		
+		try {
+			Color oldColour = signalGroup.getColor();
+
+			Color newColor = JColorChooser.showDialog(
+					this,
+					"Choose signal Color",
+					oldColour);
+
+			if(newColor != null){
+				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
+				this.update(getDatasets());
+				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+			}
+		} catch(UnavailableSignalGroupException e){
+			warn("Cannot change signal colour");
+			stack("Error getting signal group", e);
+		}
+	}
+			
+	/**
+	 * Create the checkboxes that set each signal channel visible or not
+	 */
+	private JPanel createSignalCheckboxPanel(){
+		JPanel panel = new JPanel();
+		
+		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		
+
+		if(isSingleDataset()){
+			
+		
+            for(UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()){
+            	
+            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+            		continue;
+            	}
+            	
+            	try {
+
+            	// get the status within each dataset
+                boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
+
+				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+				
+				// make a checkbox for each signal group in the dataset
+				JCheckBox box = new JCheckBox(name, visible);
+
+				// Don't enable when the consensus is missing
+                if(activeDataset().getCollection().hasConsensusNucleus()){
+                    box.setEnabled(true);
+                } else {
+                    box.setEnabled(false);
+                }
+
+
+				// apply the appropriate action 
+				box.setActionCommand("GroupVisble_"+signalGroup);
+				box.addActionListener(this);
+				panel.add(box);
+				
+            	} catch(UnavailableSignalGroupException e){
+            		stack("Error getting signal group", e);
+        		}
+
+			}
+
+
+		}
+		
+		warpButton = new JButton("Warp signals");
+		warpButton.setToolTipText("Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
+		warpButton.addActionListener( e -> { 
+			
+				new SignalWarpingDialog(  getDatasets() );
+			}  
+		);
+
+		warpButton.setEnabled(false);
+		
+
+		panel.add(warpButton);
+		return panel;
+	}
+		
+	/**
+	 * Update the signal stats with the given datasets
+	 * @param list the datasets
+	 * @throws Exception 
+	 */
+	private void updateSignalStatsPanel() {
+		
+		TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setType(TableType.SIGNAL_STATS_TABLE)
+			.setTarget(statsTable)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
+			.build();
+		
+		
+		
+		setTable(options);
+
+		
+	}
+	
+	private void updateCheckboxPanel(){
+		if(isSingleDataset()){
+							
+			// make a new panel for the active dataset
+			consensusAndCheckboxPanel.remove(checkboxPanel);
+			checkboxPanel = createSignalCheckboxPanel();
+
+			// add this new panel
+			consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
+			consensusAndCheckboxPanel.revalidate();
+			consensusAndCheckboxPanel.repaint();
+			consensusAndCheckboxPanel.setVisible(true);
+			
+			if(activeDataset().getCollection().hasConsensusNucleus()
+					&& activeDataset().getCollection().getSignalManager().hasSignals()){
+				warpButton.setEnabled(true);
+			}
+
+		}
+		
+		if(isMultipleDatasets()){
+			if(IAnalysisDataset.haveConsensusNuclei(getDatasets())){
+				
+				// Check at least one of the selected datasets has signals
+				boolean hasSignals = false;
+				for(IAnalysisDataset d : getDatasets()){
+				
+					SignalManager m =  d.getCollection().getSignalManager();
+					if(m.hasSignals()){
+						hasSignals = true;
+						break;
+					}
+				}
+				
+				// Segments need to match for mesh creation
+				boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());		
+				
+				if(hasSignals && segmentsMatch){
+					warpButton.setEnabled(true);
+				} else {
+					warpButton.setEnabled(false);
+				}
+				
+				
+			} else {
+				warpButton.setEnabled(false);
+			}
+		}
+	}
+	
+	
+	private void updateSignalConsensusChart(){
+		try {
+
+			// The options do not hold which signal groups are visible
+			// so we must invalidate the cache whenever they change
+			this.clearChartCache(getDatasets());
+			
+			ChartOptions options = new ChartOptionsBuilder()
+					.setDatasets(getDatasets())
+					.setShowWarp(false)
+					.setTarget(chartPanel)
+					.build();
+			
+			setChart(options);		
+			
+		} catch(Exception e){
+			warn("Error updating signal overview panel");
+			log(Level.FINE, "Error updating signal overview panel", e);
+		}
+	}
+	
+	
+
+	private UUID getSignalGroupFromLabel(String label){
+		String[] names = label.split("_");
+		return UUID.fromString(names[1]);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getActionCommand().startsWith("GroupVisble_")){
+
+			try {
+
+				UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
+				JCheckBox box = (JCheckBox) e.getSource();
+				activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
+				fireSignalChangeEvent("GroupVisble_");
+				this.refreshChartCache(getDatasets());
+			} catch(UnavailableSignalGroupException e1){
+				fine("Error getting signal group", e1);
+			}
+		}
+		updateSignalConsensusChart();
+		
+	}
+
+	@Override
+	protected void updateSingle() {
+		updateMultiple();
+		
+	}
+
+	@Override
+	protected void updateMultiple() {
+		
+		updateCheckboxPanel();
+		updateSignalConsensusChart();
+		updateSignalStatsPanel();		
+	}
+
+	@Override
+	protected void updateNull() {
+		updateMultiple();
+		
+	}
+	
+	@Override
+	public void setChartsAndTablesLoading(){
+		super.setChartsAndTablesLoading();
+		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
+		statsTable.setModel(AbstractDatasetCreator.createLoadingTable());	
+		
+	}
+	
+	@Override
+	protected JFreeChart createPanelChartType(ChartOptions options) {
+		return new OutlineChartFactory(options).makeSignalOutlineChart();
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options){
+		return new NuclearSignalDatasetCreator().createSignalStatsTable(options);
+	}
+
+	@Override
+	public void chartSetEventReceived(ChartSetEvent e) {
+		((ExportableChartPanel) e.getSource()).restoreAutoBounds();
+		
+	}
+}

@@ -1,0 +1,152 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+package com.bmskinner.nuclear_morphology.gui.actions;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
+
+public class DatasetArithmeticAction extends ProgressableAction {
+
+	private IAnalysisDataset datasetOne = null;
+	
+	private List<IAnalysisDataset> list;
+	
+	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
+		super("Dataset arithmetic", mw);
+		this.setProgressBarIndeterminate();
+		this.list = list;
+
+	} 
+	
+	@Override
+	public void run(){
+		try {
+			fine("Performing arithmetic...");
+
+			/*
+			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
+			 */
+
+			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(list, mw);
+
+			if(dialog.isReadyToRun()){
+
+				datasetOne = dialog.getDatasetOne();
+				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
+				DatasetArithmeticOperation operation = dialog.getOperation();
+
+
+				log("Performing "+operation+" on datasets");
+				// prepare a new collection
+
+				ICellCollection newCollection = null; 
+
+				switch(operation){
+				case AND: // present in both
+					newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
+
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
+
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
+					break;
+				case NOT: // present in one, not present in two
+					newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
+
+					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+					newCollection.setSharedCount(datasetTwo.getCollection(), 0);
+
+					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+					datasetTwo.getCollection().setSharedCount(newCollection, 0);
+
+					break;
+				case OR: // present in either (merge)
+					newCollection = datasetOne.getCollection().or(datasetTwo.getCollection());
+					break;
+				case XOR: // present in either but not both
+					newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
+					break;
+				default:
+					break;
+
+				}
+
+				makeNewDataset(newCollection);
+
+			} else {
+				fine("User cancelled operation");
+			}
+
+
+
+		} catch (Exception e1) {
+			error("Error in dataset arithmetic", e1);
+			
+		} finally{ 
+			cancel();
+		}
+	}
+	
+	private void makeNewDataset(ICellCollection newCollection){
+		if(newCollection !=null && newCollection.size()>0){
+			
+			log("Found "+newCollection.size()+" cells");
+			log("Running morphology analysis...");
+						
+			IAnalysisDataset newDataset;
+			
+			if(newCollection instanceof VirtualCellCollection){
+
+				IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
+				
+				root.addChildCollection(newCollection);
+				newDataset = root.getChildDataset(newCollection.getID());				
+				
+			} else {
+				newDataset = new DefaultAnalysisDataset(newCollection);
+				newDataset.setRoot(true);
+			}
+			
+//			Runnable task = () -> {
+
+				int flag = MainWindow.ADD_POPULATION;
+				flag |= MainWindow.SAVE_DATASET;
+				flag |= MainWindow.ASSIGN_SEGMENTS;
+				RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
+//				pr.run();
+//			};
+//			task.run();
+			
+			ThreadManager.getInstance().execute(pr);
+								
+		} else {
+			log("No populations returned");
+		}
+	}
+}

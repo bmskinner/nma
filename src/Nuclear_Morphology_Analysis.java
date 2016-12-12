@@ -33,8 +33,8 @@ import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import gui.MainWindow;
-import logging.Loggable;
+import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is designed to work as a plugin for ImageJ - this
