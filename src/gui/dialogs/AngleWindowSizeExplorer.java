@@ -53,6 +53,7 @@ import components.DefaultCell;
 import components.DefaultCellCollection;
 import components.ICell;
 import components.ICellCollection;
+import components.VirtualCellCollection;
 import components.generic.BorderTagObject;
 import components.generic.IProfile;
 import components.generic.IProfileCollection;
@@ -229,7 +230,6 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		for(double i=windowSizeMin; i<=windowSizeMax; i+=stepSize){
 			
 			// make a duplicate collection
-			
 			ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
 			
 			// put each cell into the new collection
@@ -244,7 +244,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 			// recalc the aggregate
 			IProfileCollection pc = duplicateCollection.getProfileCollection();
 			
-			pc.createProfileAggregate(duplicateCollection, pc.length());
+			pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 						
 			for(Tag tag : dataset.getCollection().getProfileCollection().getBorderTags()){
 				pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
