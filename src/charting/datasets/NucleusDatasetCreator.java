@@ -1738,6 +1738,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 */
 	public KernelEstimator createProbabililtyKernel(double[] values, double binWidth) throws ChartDatasetCreationException {
 		KernelEstimator est = new KernelEstimator(binWidth);
+
 		// add the values to a kernel estimator
 		// give each value equal weighting
 		for(double d : values){

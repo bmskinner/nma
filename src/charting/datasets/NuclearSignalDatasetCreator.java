@@ -57,6 +57,7 @@ import components.generic.MeasurementScale;
 import components.nuclear.INuclearSignal;
 import components.nuclear.IShellResult;
 import components.nuclear.ISignalGroup;
+import components.nuclear.NucleusType;
 import components.nuclear.UnavailableSignalGroupException;
 import components.nuclei.Nucleus;
 import gui.Labels;
@@ -389,61 +390,92 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 								
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
+                
+                // If the angle is always zero, the estimator will fail
+                if(collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(SignalStatistic.ANGLE)){
+                	
+                	// Add an empty series
+                	double[] xData = { 0 };
+                	double[] yData = { 0 };
+                	double[][] data = { xData, yData} ;
+                	ds.addSeries( groupLabel, data);
+                	continue;
+                }
+                
+                // If there are no signals in the group, the pdf will fail
+                if( ! collection.getSignalManager().hasSignals(signalGroup)){
+                	// Add an empty series
+                	double[] xData = { 0 };
+                	double[] yData = { 0 };
+                	double[][] data = { xData, yData} ;
+                	ds.addSeries( groupLabel, data);
+                	continue;
+                }
 
                 double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+                
+                // Cannot estimate pdf with too few values
+                if(values.length<3){
+                	// Add an empty series
+                	double[] xData = { 0 };
+                	double[] yData = { 0 };
+                	double[][] data = { xData, yData} ;
+                	ds.addSeries( groupLabel, data);
+                	continue;
+                }
+                
                 KernelEstimator est;
-				try {
-					est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
-				} catch (Exception e1) {
-					fine("Error creating probability kernel",e1);
-					throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
-				}
+                try {
+                	est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
+                } catch (Exception e1) {
+                	fine("Error creating probability kernel",e1);
+                	throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
+                }
+                
+                double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
+                double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
+
+                int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+
+                int roundLog = log-1 == 0 ? log-2 : log-1;
+                double roundAbs = Math.pow(10, roundLog);
+
+                int binLog = log-2;
+                double stepSize = Math.pow(10, binLog);
+
+                // use int truncation to round to nearest 100 above max
+                int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
+                maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
+                int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
+                minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
+                minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
 
 
-					double min = Arrays.stream(values).min().orElse(0); //Stats.min(values);
-					double max = Arrays.stream(values).max().orElse(0); //Stats.max(values);
+                List<Double> xValues = new ArrayList<Double>();
+                List<Double> yValues = new ArrayList<Double>();
+                
+                for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
+                	xValues.add(i);
+                	yValues.add(est.getProbability(i));
+                }
 
-					int log = (int) Math.floor(  Math.log10(min)  ); // get the log scale
+                double[] xData;
+                double[] yData;
 
-					int roundLog = log-1 == 0 ? log-2 : log-1;
-					double roundAbs = Math.pow(10, roundLog);
+                try{
 
-					int binLog = log-2;
-					double stepSize = Math.pow(10, binLog);
+                	xData = new ArrayConverter(xValues).toDoubleArray();
+                	yData = new ArrayConverter(yValues).toDoubleArray();
 
-					// use int truncation to round to nearest 100 above max
-					int maxRounded = (int) ((( (int)max + (roundAbs) ) / roundAbs ) * roundAbs);
-					maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct offsets for measures between 0-1
-					int minRounded = (int) (((( (int)min + (roundAbs) ) / roundAbs ) * roundAbs  ) - roundAbs);
-					minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1;  // correct offsets for measures between 0-1
-					minRounded = minRounded < 0 ? 0 : minRounded; // ensure all measures start from at least zero
+                } catch (ArrayConversionException e) {
+                	xData = new double[0]; 
+                	yData = new double[0]; 
+                }
+                double[][] data = { xData, yData} ;
 
-
-					List<Double> xValues = new ArrayList<Double>();
-					List<Double> yValues = new ArrayList<Double>();
-
-					for(double i=minMaxRange[0]; i<=minMaxRange[1]; i+=stepSize){
-						xValues.add(i);
-						yValues.add(est.getProbability(i));
-					}
-
-					double[] xData;
-					double[] yData;
-					
-					try{
-						
-						xData = new ArrayConverter(xValues).toDoubleArray();
-						yData = new ArrayConverter(yValues).toDoubleArray();
-						
-					} catch (ArrayConversionException e) {
-						xData = new double[0]; 
-						yData = new double[0]; 
-					}
-					double[][] data = { xData, yData} ;
-
-
-	                ds.addSeries( groupLabel, data);
-				}
+                ds.addSeries( groupLabel, data);
+                
+            }
 			result.add(ds);
 		}
 
