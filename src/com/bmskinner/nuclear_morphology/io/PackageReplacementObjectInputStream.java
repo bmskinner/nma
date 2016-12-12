@@ -109,7 +109,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
                     f.set(resultClassDescriptor, replacement);
                 } catch (Exception e) {
                 	
-                    error("Error while replacing class name." + e.getMessage(), e);
+                    error("Error while replacing class name: " + e.getMessage(), e);
                 }
 
             }
