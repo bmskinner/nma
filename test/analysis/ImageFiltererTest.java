@@ -8,8 +8,7 @@ import ij.process.ImageProcessor;
 
 import org.junit.Test;
 
-import analysis.image.ImageFilterer;
-import components.generic.ProfileAggregate;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 
 public class ImageFiltererTest {
 	

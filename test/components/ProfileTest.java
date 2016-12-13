@@ -23,9 +23,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import components.generic.IProfile;
-import components.generic.Profile;
-import components.generic.SegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Profile;
 
 
 public class ProfileTest {

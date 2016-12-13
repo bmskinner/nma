@@ -23,11 +23,11 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import analysis.profiles.ProfileException;
-import components.generic.IProfile;
-import components.generic.IProfileAggregate;
-import components.generic.Profile;
-import components.generic.ProfileAggregate;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.IProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.generic.Profile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileAggregate;
 
 public class ProfileAggregateTest {
 

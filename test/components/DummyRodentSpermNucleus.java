@@ -21,7 +21,6 @@ package components;
 
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-import io.UnloadableImageException;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -31,22 +30,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import analysis.detection.Mask;
-import stats.NucleusStatistic;
-import stats.PlottableStatistic;
-import components.generic.BorderTagObject;
-import components.generic.IPoint;
-import components.generic.ISegmentedProfile;
-import components.generic.MeasurementScale;
-import components.generic.Profile;
-import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
-import components.generic.Tag;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
-import components.nuclear.IBorderPoint;
-import components.nuclear.SignalCollection;
-import components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * A rodent sperm nucleus that has only a profile, but no shape.
@@ -153,7 +153,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public SignalCollection getSignalCollection() {
+	public ISignalCollection getSignalCollection() {
 		// TODO Auto-generated method stub
 		return null;
 	}

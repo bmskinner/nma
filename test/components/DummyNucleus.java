@@ -29,15 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import stats.PlottableStatistic;
-import components.generic.BorderTagObject;
-import components.generic.MeasurementScale;
-import components.generic.ProfileType;
-import components.generic.SegmentedProfile;
-import components.generic.XYPoint;
-import components.nuclear.BorderPoint;
-import components.nuclear.SignalCollection;
-import components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 public abstract class DummyNucleus implements Nucleus {
 

@@ -4,13 +4,10 @@ package Samples;
 import java.util.ArrayList;
 import java.util.List;
 
-import components.generic.IProfile;
-import components.generic.ISegmentedProfile;
-import components.generic.Profile;
-import components.generic.SegmentedFloatProfile;
-import components.generic.SegmentedProfile;
-import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 public class IndividualNuclei {
 	

@@ -2,9 +2,9 @@ package analysis;
 
 import org.junit.Test;
 
-import analysis.detection.BooleanAligner;
-import analysis.detection.BooleanMask;
-import analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
+import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
+import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 
 public class BooleanAlignerTest {
 	

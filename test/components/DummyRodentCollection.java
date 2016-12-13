@@ -22,14 +22,16 @@ package components;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
-import stats.NucleusStatistic;
-import analysis.AnalysisDataset;
-import analysis.IAnalysisDataset;
-import analysis.profiles.DatasetProfiler;
-import components.generic.MeasurementScale;
-import components.generic.Profile;
-import components.nuclear.NucleusType;
-import components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfiler;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 public class DummyRodentCollection extends DefaultCellCollection {
 	

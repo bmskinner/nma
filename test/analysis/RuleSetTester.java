@@ -2,12 +2,11 @@ package analysis;
 
 import org.junit.Test;
 
-import analysis.profiles.ProfileIndexFinder;
-import analysis.profiles.RuleSet;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
+
 import Samples.IndividualNuclei;
-import components.generic.ISegmentedProfile;
-import components.generic.Profile;
-import components.generic.SegmentedProfile;
 
 public class RuleSetTester {
 	

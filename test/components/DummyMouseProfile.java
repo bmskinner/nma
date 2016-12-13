@@ -19,10 +19,8 @@
 
 package components;
 
-import components.generic.FloatProfile;
-import components.generic.Profile;
-import components.generic.SegmentedFloatProfile;
-import components.generic.SegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 
 public class DummyMouseProfile extends SegmentedFloatProfile {
 

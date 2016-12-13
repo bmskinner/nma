@@ -29,14 +29,11 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+
 import components.NucleusTest;
 import components.SegmentedProfileTest;
-import components.generic.ISegmentedProfile;
-import components.generic.Profile;
-import components.generic.SegmentedFloatProfile;
-import components.generic.SegmentedProfile;
-import components.nuclear.NucleusBorderSegment;
-import components.nuclei.Nucleus;
 
 public class SegmentFitterTest {
 	

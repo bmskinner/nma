@@ -25,8 +25,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import components.nuclear.IBorderSegment;
-import components.nuclear.NucleusBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 
 public class NucleuBordersSegmentTest {
 	

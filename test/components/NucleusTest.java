@@ -26,12 +26,10 @@ import java.io.File;
 
 import org.junit.Test;
 
-import stats.NucleusStatistic;
-import components.generic.IPoint;
-import components.generic.XYPoint;
-import components.nuclei.Nucleus;
-import components.nuclei.sperm.DefaultRodentSpermNucleus;
-import components.nuclei.sperm.RodentSpermNucleus;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 public class NucleusTest {
 
