@@ -26,12 +26,12 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSet;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Profile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 
 @Deprecated
 public class PigSpermNucleus 

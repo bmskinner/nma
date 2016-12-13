@@ -17,12 +17,9 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
-
-import com.bmskinner.nuclear_morphology.analysis.AbstractDetectionOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 
 public class DefaultNuclearSignalOptions 
 	extends AbstractDetectionOptions 

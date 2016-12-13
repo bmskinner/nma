@@ -24,9 +24,9 @@ import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;

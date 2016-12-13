@@ -4,9 +4,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 

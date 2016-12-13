@@ -20,9 +20,9 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 

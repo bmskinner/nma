@@ -17,43 +17,43 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
+
 
 /**
- * The setters for ICannyOptions
+ * The options that must be available for detecting nuclear signals
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface IMutableCannyOptions extends ICannyOptions {
-	
-	IMutableCannyOptions duplicate();
-	
-	/**
-	 * @param useCanny
-	 */
-	void setUseCanny(boolean useCanny);
-	
-	void setFlattenImage(boolean flattenImage);
-	
-	void setFlattenThreshold(int flattenThreshold);
-	
-	void setUseKuwahara(boolean b);
-	
-	void setKuwaharaKernel(int radius);
-	
-	void setClosingObjectRadius(int closingObjectRadius);
-	
-	void setCannyAutoThreshold(boolean cannyAutoThreshold);
-	
-	void setLowThreshold(float lowThreshold);
-	
-	void setHighThreshold(float highThreshold);
+public interface INuclearSignalOptions extends IDetectionOptions {
 
-	void setKernelRadius(float kernelRadius);
-	
-	void setKernelWidth(int kernelWidth);
-	
-	void setAddBorder(boolean b);
+	static final int    DEFAULT_SIGNAL_THRESHOLD     = 70;
+	static final int    DEFAULT_MIN_SIGNAL_SIZE      = 5;
+	static final double DEFAULT_MAX_SIGNAL_FRACTION  = 0.1;
+	static final double DEFAULT_MIN_CIRC             = 0.0;
+	static final double DEFAULT_MAX_CIRC             = 1.0;
+		
+	/**
+	 * The analysis types available for detecting signals
+	 * @author bms41
+	 * @since 1.13.3
+	 *
+	 */
+	public enum SignalDetectionMode {
+		FORWARD, REVERSE, ADAPTIVE;
+	}
+
+	/**
+	 * Get the maximum fraction of the parent component that the signal can occupy
+	 * @return the maximum faction
+	 */
+	double getMaxFraction();
+
+	/**
+	 * Get the detection mode for the signal
+	 * @return
+	 */
+	SignalDetectionMode getDetectionMode();
 
 }

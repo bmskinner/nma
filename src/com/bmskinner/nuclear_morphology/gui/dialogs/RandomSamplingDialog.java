@@ -47,12 +47,12 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.RandomSampler;
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
 
 @SuppressWarnings("serial")
 public class RandomSamplingDialog 

@@ -23,8 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 
 /**
  * This holds the ids of datasets created by clustering,

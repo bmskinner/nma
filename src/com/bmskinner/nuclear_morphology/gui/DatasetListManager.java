@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

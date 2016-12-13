@@ -32,19 +32,20 @@ import java.util.Map;
 
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.detection.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionImageProber.SignalImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class SignalProberWorker extends ImageProberWorker {

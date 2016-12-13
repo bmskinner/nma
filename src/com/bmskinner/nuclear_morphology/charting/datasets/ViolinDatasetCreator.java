@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import org.jfree.data.Range;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -19,13 +19,13 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 

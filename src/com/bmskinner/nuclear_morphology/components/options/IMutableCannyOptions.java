@@ -17,28 +17,43 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
-
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
+package com.bmskinner.nuclear_morphology.components.options;
 
 /**
- * The interface for signal detection parameters
+ * The setters for ICannyOptions
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface IMutableNuclearSignalOptions extends INuclearSignalOptions, IMutableDetectionOptions {
+public interface IMutableCannyOptions extends ICannyOptions {
+	
+	IMutableCannyOptions duplicate();
 	
 	/**
-	 * Set the maximum fraction of the parent component (e.g. nucleus) that the signal can occupy
-	 * @param maxFraction
+	 * @param useCanny
 	 */
-	void setMaxFraction(double maxFraction);
+	void setUseCanny(boolean useCanny);
 	
-	/**
-	 * Set the detection mode for signals
-	 * @param detectionMode
-	 */
-	void setDetectionMode(SignalDetectionMode detectionMode);
+	void setFlattenImage(boolean flattenImage);
+	
+	void setFlattenThreshold(int flattenThreshold);
+	
+	void setUseKuwahara(boolean b);
+	
+	void setKuwaharaKernel(int radius);
+	
+	void setClosingObjectRadius(int closingObjectRadius);
+	
+	void setCannyAutoThreshold(boolean cannyAutoThreshold);
+	
+	void setLowThreshold(float lowThreshold);
+	
+	void setHighThreshold(float highThreshold);
+
+	void setKernelRadius(float kernelRadius);
+	
+	void setKernelWidth(int kernelWidth);
+	
+	void setAddBorder(boolean b);
 
 }

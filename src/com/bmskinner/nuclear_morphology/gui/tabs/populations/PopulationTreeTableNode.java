@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {

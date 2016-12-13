@@ -50,9 +50,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 

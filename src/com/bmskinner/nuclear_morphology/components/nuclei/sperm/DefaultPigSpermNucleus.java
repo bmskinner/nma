@@ -23,7 +23,6 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
-import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSet;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -33,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.AbstractAsymmetricNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 
 import ij.gui.Roi;
 

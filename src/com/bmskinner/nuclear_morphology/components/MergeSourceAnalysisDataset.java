@@ -31,10 +31,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 
 /**
  * This provides a virtual dataset view for merge sources. 

@@ -28,8 +28,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;

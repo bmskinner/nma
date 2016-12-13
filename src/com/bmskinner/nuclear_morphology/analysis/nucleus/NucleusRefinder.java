@@ -35,11 +35,11 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 
 public class NucleusRefinder  extends NucleusDetectionWorker
 {

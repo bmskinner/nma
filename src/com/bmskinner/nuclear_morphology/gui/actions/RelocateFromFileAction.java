@@ -6,9 +6,9 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocator;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;

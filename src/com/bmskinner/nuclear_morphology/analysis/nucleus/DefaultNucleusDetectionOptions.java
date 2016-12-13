@@ -21,12 +21,12 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractDetectionOptions;
-import com.bmskinner.nuclear_morphology.analysis.DefaultCannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.AbstractDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultCannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
  * The default detection options for a nucleus

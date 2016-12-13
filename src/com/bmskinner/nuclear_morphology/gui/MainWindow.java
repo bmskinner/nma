@@ -47,12 +47,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
@@ -90,7 +91,6 @@ import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
 import com.bmskinner.nuclear_morphology.utility.Constants;
-import com.bmskinner.nuclear_morphology.utility.Version;
 
 /**
  * This is the core of the program UI. All display panels are contained here. 

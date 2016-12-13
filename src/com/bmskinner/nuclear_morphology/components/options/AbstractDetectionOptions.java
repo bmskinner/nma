@@ -17,12 +17,12 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 /**
  * The abstract implementation of IMutableDetectionOptions, which is extended

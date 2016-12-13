@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,8 +26,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class ClusteringOptions implements Serializable {
 

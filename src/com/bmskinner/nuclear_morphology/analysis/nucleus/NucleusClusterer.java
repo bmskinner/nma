@@ -24,13 +24,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-import com.bmskinner.nuclear_morphology.analysis.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.clusterers.Clusterer;

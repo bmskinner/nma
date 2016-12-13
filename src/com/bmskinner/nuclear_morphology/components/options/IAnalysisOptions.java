@@ -1,10 +1,9 @@
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

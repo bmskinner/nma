@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
 

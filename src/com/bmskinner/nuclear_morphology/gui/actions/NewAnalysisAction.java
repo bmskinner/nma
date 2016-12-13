@@ -25,11 +25,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;

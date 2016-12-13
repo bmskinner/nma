@@ -26,8 +26,8 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Equation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;

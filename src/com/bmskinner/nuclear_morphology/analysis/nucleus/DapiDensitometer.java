@@ -20,7 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 
 public class DapiDensitometer {
 

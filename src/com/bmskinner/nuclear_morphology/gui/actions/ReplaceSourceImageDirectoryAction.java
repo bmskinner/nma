@@ -20,7 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 import ij.io.DirectoryChooser;

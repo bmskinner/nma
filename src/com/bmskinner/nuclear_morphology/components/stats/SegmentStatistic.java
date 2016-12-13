@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.stats;
+package com.bmskinner.nuclear_morphology.components.stats;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 

@@ -53,17 +53,17 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.DefaultCannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.ICannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableCannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultCannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {

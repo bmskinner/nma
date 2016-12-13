@@ -31,9 +31,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.utility.Constants;
-import com.bmskinner.nuclear_morphology.utility.Version;
 
 /**
  * This is the most primitive information an analysis dataset requires.

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.stats;
+package com.bmskinner.nuclear_morphology.components.stats;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 

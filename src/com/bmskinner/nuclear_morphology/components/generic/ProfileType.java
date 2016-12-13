@@ -18,7 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import com.bmskinner.nuclear_morphology.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 /**
  * Describes the types of profiles that can be generated during the 

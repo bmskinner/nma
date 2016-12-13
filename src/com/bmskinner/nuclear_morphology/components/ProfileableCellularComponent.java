@@ -44,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 import ij.gui.Roi;
 

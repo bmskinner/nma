@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,11 +27,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
-import com.bmskinner.nuclear_morphology.analysis.signals.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.analysis.signals.NuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 /**
  * The old implementation of the IAnalysisOptions interface. 

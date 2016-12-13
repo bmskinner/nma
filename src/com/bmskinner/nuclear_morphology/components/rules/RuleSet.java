@@ -18,12 +18,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.components.rules;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
 /**

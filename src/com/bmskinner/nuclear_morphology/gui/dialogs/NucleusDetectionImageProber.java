@@ -21,8 +21,8 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 import java.awt.Dimension;
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.detection.NucleusProberWorker;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.ImageType;
 
 @SuppressWarnings("serial")

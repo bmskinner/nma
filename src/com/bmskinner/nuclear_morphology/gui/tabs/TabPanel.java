@@ -20,7 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;

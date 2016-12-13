@@ -42,9 +42,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.analysis.ClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 @SuppressWarnings("serial")

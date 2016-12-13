@@ -22,8 +22,8 @@ import java.util.concurrent.RecursiveTask;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.PlottableStatistic;
 
 @SuppressWarnings("serial")
 public abstract class AbstractStatisticFetchingTask extends RecursiveTask<double[]> implements Loggable{

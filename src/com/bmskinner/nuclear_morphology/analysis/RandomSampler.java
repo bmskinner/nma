@@ -7,10 +7,11 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.components.CellCollection;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 
 /**
  * The purpose of this class is to validate observed differences in nuclear statistics

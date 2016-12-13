@@ -30,7 +30,7 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 
 public class PopulationExporter extends AnalysisWorker {

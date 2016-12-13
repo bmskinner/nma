@@ -3,7 +3,7 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
-import com.bmskinner.nuclear_morphology.analysis.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 
 /**
  * <p><em>This software has been released into the public domain.

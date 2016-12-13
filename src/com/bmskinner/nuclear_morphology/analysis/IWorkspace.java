@@ -23,6 +23,8 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.io.File;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+
 /**
  * A workspace is a collection of nmd files that can be
  * reopened together. This interface mey be extended depending on

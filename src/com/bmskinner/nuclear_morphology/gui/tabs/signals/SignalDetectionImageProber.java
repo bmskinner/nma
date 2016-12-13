@@ -21,11 +21,11 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.Dimension;
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.signals.IMutableNuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.analysis.signals.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalProberWorker;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ImageProber;
 

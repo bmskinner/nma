@@ -25,7 +25,7 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 @SuppressWarnings("serial")
 public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask {

@@ -21,8 +21,8 @@ package com.bmskinner.nuclear_morphology.analysis.tail;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractDetectionOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.AbstractDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 public class DefaultTailDetectionOptions
 	extends AbstractDetectionOptions {

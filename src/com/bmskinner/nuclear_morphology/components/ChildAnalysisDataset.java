@@ -30,8 +30,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 
 /**
  * This is the virtual child dataset, which retains only the pointer

@@ -30,10 +30,6 @@ import java.util.List;
 
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.ICannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
@@ -41,10 +37,14 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.NucleusDetectionImageProber.NucleusImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class NucleusProberWorker extends ImageProberWorker {

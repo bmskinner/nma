@@ -1,11 +1,10 @@
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**

@@ -21,11 +21,11 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
-import com.bmskinner.nuclear_morphology.analysis.ICannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 

@@ -21,8 +21,8 @@ package com.bmskinner.nuclear_morphology.gui;
 import java.util.EventObject;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 public class DatasetEvent extends EventObject {
 	

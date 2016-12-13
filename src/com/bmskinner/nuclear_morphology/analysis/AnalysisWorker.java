@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import javax.swing.SwingWorker;
 
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 

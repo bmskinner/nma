@@ -24,6 +24,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+
 /**
  * This is a grouping of open AnalysisDatasets,
  * which can act as a shortcut to opening a lot

@@ -1,9 +1,7 @@
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.IMutableCannyOptions;
-import com.bmskinner.nuclear_morphology.analysis.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 @Deprecated

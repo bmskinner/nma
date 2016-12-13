@@ -18,6 +18,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
+@SuppressWarnings("deprecation")
 public class PackageReplacementObjectInputStream extends ObjectInputStream implements Loggable {
 
     /**
@@ -27,15 +28,17 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
 
     static
     {
-        MIGRATION_MAP.put("analysis.AnalysisDataset", com.bmskinner.nuclear_morphology.analysis.AnalysisDataset.class);
-        MIGRATION_MAP.put("analysis.AnalysisOptions", com.bmskinner.nuclear_morphology.analysis.AnalysisOptions.class);
-        MIGRATION_MAP.put("analysis.AnalysisOptions$CannyOptions", com.bmskinner.nuclear_morphology.analysis.AnalysisOptions.CannyOptions.class);
+        MIGRATION_MAP.put("analysis.AnalysisDataset", com.bmskinner.nuclear_morphology.components.AnalysisDataset.class);
+        MIGRATION_MAP.put("analysis.AnalysisOptions", com.bmskinner.nuclear_morphology.components.options.AnalysisOptions.class);
+        MIGRATION_MAP.put("analysis.AnalysisOptions$CannyOptions", com.bmskinner.nuclear_morphology.components.options.AnalysisOptions.CannyOptions.class);
         
-        MIGRATION_MAP.put("analysis.profiles.RuleSetCollection", com.bmskinner.nuclear_morphology.analysis.profiles.RuleSetCollection.class);
-        MIGRATION_MAP.put("analysis.profiles.RuleSet", com.bmskinner.nuclear_morphology.analysis.profiles.RuleSet.class);
-        MIGRATION_MAP.put("analysis.profiles.Rule", com.bmskinner.nuclear_morphology.analysis.profiles.Rule.class);
-        MIGRATION_MAP.put("analysis.profiles.Rule$RuleType", com.bmskinner.nuclear_morphology.analysis.profiles.Rule.RuleType.class);
+        MIGRATION_MAP.put("analysis.profiles.RuleSetCollection", com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection.class);
+        MIGRATION_MAP.put("analysis.profiles.RuleSet", com.bmskinner.nuclear_morphology.components.rules.RuleSet.class);
+        MIGRATION_MAP.put("analysis.profiles.Rule", com.bmskinner.nuclear_morphology.components.rules.Rule.class);
+        MIGRATION_MAP.put("analysis.profiles.Rule$RuleType", com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType.class);
         
+        MIGRATION_MAP.put("analysis.signals.NuclearSignalOptions", com.bmskinner.nuclear_morphology.components.options.NuclearSignalOptions.class);
+                
         MIGRATION_MAP.put("components.AbstractCellularComponent", com.bmskinner.nuclear_morphology.components.AbstractCellularComponent.class);
         MIGRATION_MAP.put("components.Acrosome", com.bmskinner.nuclear_morphology.components.Acrosome.class);
         MIGRATION_MAP.put("components.CellCollection", com.bmskinner.nuclear_morphology.components.CellCollection.class);
@@ -74,12 +77,12 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("components.nuclei.sperm.RodentSpermNucleus", com.bmskinner.nuclear_morphology.components.nuclei.sperm.RodentSpermNucleus.class);
         MIGRATION_MAP.put("components.nuclei.sperm.SpermNucleus", com.bmskinner.nuclear_morphology.components.nuclei.sperm.SpermNucleus.class);
         
-        MIGRATION_MAP.put("stats.NucleusStatistic", com.bmskinner.nuclear_morphology.stats.NucleusStatistic.class);
-        MIGRATION_MAP.put("stats.PlottableStatistic", com.bmskinner.nuclear_morphology.stats.PlottableStatistic.class);
-        MIGRATION_MAP.put("stats.SegmentStatistic", com.bmskinner.nuclear_morphology.stats.SegmentStatistic.class);
-        MIGRATION_MAP.put("stats.SignalStatistic", com.bmskinner.nuclear_morphology.stats.SignalStatistic.class);
+        MIGRATION_MAP.put("stats.NucleusStatistic", com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic.class);
+        MIGRATION_MAP.put("stats.PlottableStatistic", com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic.class);
+        MIGRATION_MAP.put("stats.SegmentStatistic", com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic.class);
+        MIGRATION_MAP.put("stats.SignalStatistic", com.bmskinner.nuclear_morphology.components.stats.SignalStatistic.class);
         
-        MIGRATION_MAP.put("utility.Version", com.bmskinner.nuclear_morphology.utility.Version.class);
+        MIGRATION_MAP.put("utility.Version", com.bmskinner.nuclear_morphology.components.generic.Version.class);
 
     }
 

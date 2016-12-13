@@ -32,9 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.analysis.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.utility.Constants;
