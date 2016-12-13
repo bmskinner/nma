@@ -53,6 +53,7 @@ import org.jfree.ui.Layer;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace;
@@ -143,7 +144,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 		XYPlot plot = chart.getXYPlot();
 		
-		NucleusMesh meshConsensus = new NucleusMesh( dataset.getCollection().getConsensusNucleus());
+		Mesh meshConsensus = new NucleusMesh( dataset.getCollection().getConsensusNucleus());
 		
 		if(options.isStraightenMesh()){
 			meshConsensus = meshConsensus.straighten();
@@ -283,7 +284,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							.getCollection()
 							.getConsensusNucleus(), mesh1);
 					
-					NucleusMesh result = mesh1.compareTo(mesh2);				
+					Mesh result = mesh1.compareTo(mesh2);				
 					return createMeshChart(result, 0.5);
 	
 				} else {
@@ -973,7 +974,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public JFreeChart createMeshChart(NucleusMesh mesh, double log2Ratio) throws ChartCreationException {
+	public JFreeChart createMeshChart(Mesh mesh, double log2Ratio) throws ChartCreationException {
 		
 		NucleusMeshXYDataset dataset;
 		try {
@@ -1124,7 +1125,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshHistogram(NucleusMesh mesh) throws ChartCreationException {
+	public static JFreeChart createMeshHistogram(Mesh mesh) throws ChartCreationException {
 
 		HistogramDataset ds;
 		try {

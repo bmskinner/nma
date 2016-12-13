@@ -29,14 +29,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
-import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -63,9 +61,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class NucleusMesh implements Loggable {
-	
-	public static final int DEFAULT_VERTEX_SPACING = 10;
+public class NucleusMesh implements Loggable, Mesh {
 	
 	private int segmentCount = 0; // the number of segments to divide on
 	
@@ -176,6 +172,10 @@ public class NucleusMesh implements Loggable {
 	}
 	
 			
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getNucleusName()
+	 */
+	@Override
 	public String getNucleusName() {
 		return  nucleus.getNameAndNumber();
 	}
@@ -251,101 +251,150 @@ public class NucleusMesh implements Loggable {
 		}
 	}
 		
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshVertex)
+	 */
+	@Override
 	public boolean contains(NucleusMeshVertex v){
 		return( v!=null && (peripheralVertices.contains(v) || internalVertices.contains(v)));
 	}
 	
 	
-	/**
-	 * Test if this mesh contains a face with the same vertex positions
-	 * @param test
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace)
 	 */
+	@Override
 	public boolean contains(NucleusMeshFace test){
 		return test !=null && faces.contains(test);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#contains(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
+	 */
+	@Override
 	public boolean contains(NucleusMeshEdge e){
 		return e != null && edges.contains(e);
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getSegmentCount()
+	 */
+	@Override
 	public int getSegmentCount(){
 		return segmentCount;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getVertexSpacing()
+	 */
+	@Override
 	public int getVertexSpacing(){
 		return this.vertexSpacing;
 	}
 	
-	/**
-	 * The total number of vertices, internal and peripheral
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getVertexCount()
 	 */
+	@Override
 	public int getVertexCount(){
 		return peripheralVertices.size() + internalVertices.size();
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getInternalVertexCount()
+	 */
+	@Override
 	public int getInternalVertexCount(){
 		return internalVertices.size();
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getPeripheralVertexCount()
+	 */
+	@Override
 	public int getPeripheralVertexCount(){
 		return peripheralVertices.size();
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getEdgeCount()
+	 */
+	@Override
 	public int getEdgeCount(){
 		return edges.size();
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getFaceCount()
+	 */
+	@Override
 	public int getFaceCount(){
 		return faces.size();
 	}
 		
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getPeripheralVertices()
+	 */
+	@Override
 	public List<NucleusMeshVertex> getPeripheralVertices(){
 		return peripheralVertices;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getInternalVertices()
+	 */
+	@Override
 	public List<NucleusMeshVertex> getInternalVertices(){
 		return internalVertices;
 	}
 		
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getEdges()
+	 */
+	@Override
 	public Set<NucleusMeshEdge> getEdges(){
 		return edges;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#getFaces()
+	 */
+	@Override
 	public Set<NucleusMeshFace> getFaces(){
 		return this.faces;
 	}
 	
-	public boolean isComparableTo(NucleusMesh mesh){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#isComparableTo(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
+	 */
+	@Override
+	public boolean isComparableTo(Mesh mesh){
 		
-		if(this.peripheralVertices.size()!= mesh.peripheralVertices.size()){
+		if(this.peripheralVertices.size()!= mesh.getPeripheralVertexCount()){
 			return false;
 		}
 		
-		if(this.internalVertices.size()!= mesh.internalVertices.size()){
+		if(this.internalVertices.size()!= mesh.getInternalVertexCount()){
 			return false;
 		}
 		
-		if(this.edges.size()!= mesh.edges.size()){
+		if(this.edges.size()!= mesh.getEdgeCount()){
 			return false;
 		}
 		
-		if(this.faces.size()!= mesh.faces.size()){
+		if(this.faces.size()!= mesh.getFaceCount()){
 			return false;
 		}
 		return true;
 	}
 	
 	
-	/**
-	 * Find the edge and face ratios of this mesh versus the given mesh.
-	 * Meshes must have the same number of vertices,  edges and faces. 
-	 * @param mesh
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#compareTo(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
 	 */
-	public NucleusMesh compareTo(NucleusMesh mesh){
+	@Override
+	public Mesh compareTo(NucleusMesh mesh){
 		
 		if( ! this.isComparableTo(mesh) ){
 			throw new IllegalArgumentException("Cannot compare meshes");
@@ -388,12 +437,10 @@ public class NucleusMesh implements Loggable {
 		
 	}
 	
-	/**
-	 * Reposition the vertices such that the internal
-	 * skeleton vertices form a vertical line, equally
-	 * spaced.
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#straighten()
 	 */
+	@Override
 	public NucleusMesh straighten(){
 		fine("Straightening mesh");
 		NucleusMesh result = new NucleusMesh(this);
@@ -459,10 +506,10 @@ public class NucleusMesh implements Loggable {
 	}
 	
 	
-	/**
-	 * Get a closed path comprising the peripheral points of the mesh 
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#toPath()
 	 */
+	@Override
 	public Path2D toPath(){
 		Path2D path = new Path2D.Double();
 
@@ -609,7 +656,7 @@ public class NucleusMesh implements Loggable {
 				
 				// Since the segments have been offset to the RP, correct back
 				// to the actual nucleus index
-				int correctedIndex = AbstractCellularComponent
+				int correctedIndex = DefaultCellularComponent
 						.wrapIndex(index+nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
 				
 				finest("Fetching point at index "+correctedIndex);
@@ -835,6 +882,19 @@ public class NucleusMesh implements Loggable {
 			b.append(f.toString()+"\n");
 		}
 		return b.toString();
+	}
+
+	@Override
+	public int compareTo(Mesh o) {
+		
+		if(this.isComparableTo(o)){
+			return 0;
+		}
+		
+		if(this.getVertexCount()>o.getVertexCount()){
+			return 1;
+		}
+		return -1;
 	}
 			
 }

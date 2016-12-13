@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -174,7 +175,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 		}
 		
-		NucleusMesh mesh = null;
+		Mesh mesh = null;
 		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){	
 			mesh = new NucleusMesh(collection.getConsensusNucleus());
 			attributeCount+= mesh.getFaces().size();
@@ -293,7 +294,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
 					
 					
-					NucleusMesh mesh = new NucleusMesh(n1, template);
+					Mesh mesh = new NucleusMesh(n1, template);
 					for(NucleusMeshFace face : mesh.getFaces()){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, face.getArea());

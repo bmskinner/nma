@@ -30,7 +30,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -1843,7 +1843,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(NucleusMesh mesh) throws ChartDatasetCreationException {
+	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh) throws ChartDatasetCreationException {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 //		log(mesh.toString());
@@ -1878,7 +1878,7 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(NucleusMesh mesh) throws Exception {
+	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 		for(NucleusMeshEdge edge : mesh.getEdges()){
@@ -1900,7 +1900,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public HistogramDataset createNucleusMeshHistogramDataset(NucleusMesh mesh) throws ChartDatasetCreationException {
+	public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh) throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		
 		int bins = 100;

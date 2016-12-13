@@ -28,6 +28,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
@@ -370,7 +371,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowMesh()){ 
 				
-				NucleusMesh mesh = new NucleusMesh(options.firstDataset()
+				Mesh mesh = new NucleusMesh(options.firstDataset()
 						.getCollection()
 						.getConsensusNucleus(), options.getMeshSize());
 				

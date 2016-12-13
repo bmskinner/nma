@@ -139,7 +139,7 @@ public class SignalWarper extends AnalysisWorker {
 				finer("Completed cell "+cellNumber);
 			} catch (UnloadableImageException e) {
 				warn("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber());
-				fine("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+				stack("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
 				
 			}
 

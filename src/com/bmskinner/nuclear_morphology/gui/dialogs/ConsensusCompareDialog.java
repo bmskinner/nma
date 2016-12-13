@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -244,8 +245,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);
 				
 				
-				NucleusMesh comparison1 = mesh1.compareTo(mesh2);
-				NucleusMesh comparison2 = mesh2.compareTo(mesh1);
+				Mesh comparison1 = mesh1.compareTo(mesh2);
+				Mesh comparison2 = mesh2.compareTo(mesh1);
 				
 				/*
 				 * Create log2 histograms for the entire pairwise mesh
