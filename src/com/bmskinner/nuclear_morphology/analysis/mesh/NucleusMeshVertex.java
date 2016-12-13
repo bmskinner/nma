@@ -23,17 +23,15 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 
-public class NucleusMeshVertex {
+public class NucleusMeshVertex implements MeshVertex {
 	
 	private String name; // the number in the mesh - use to compare vertexes between nuclei
 	private IPoint position; // the posiiton of the vertex
 	private boolean peripheral; // is the vertex on the border of the object
 	
-	Set<NucleusMeshEdge> edges = new HashSet<NucleusMeshEdge>(); // store the edges attached to the vertex
+	Set<MeshEdge> edges = new HashSet<MeshEdge>(); // store the edges attached to the vertex
 	
 	public NucleusMeshVertex(IPoint p, String name, boolean peripheral){
 		this.name = name;
@@ -45,43 +43,75 @@ public class NucleusMeshVertex {
 	 * Duplicate the vertex.
 	 * @param v
 	 */
-	public NucleusMeshVertex(NucleusMeshVertex v){
-		this.name = v.name;
-		this.position = new FloatPoint(v.position);
-		this.peripheral = v.peripheral;
+	public NucleusMeshVertex(MeshVertex v){
+		this.name = v.getName();
+		this.position = IPoint.makeNew(v.getPosition());
+		this.peripheral = v.isPeripheral();
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#isPeripheral()
+	 */
+	@Override
 	public boolean isPeripheral() {
 		return peripheral;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getName()
+	 */
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getPosition()
+	 */
+	@Override
 	public IPoint getPosition() {
 		return position;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#setPosition(com.bmskinner.nuclear_morphology.components.generic.IPoint)
+	 */
+	@Override
 	public void setPosition(IPoint p){
 		this.position = p;
 	}
 	
-	public void addEdge(NucleusMeshEdge e){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#addEdge(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
+	 */
+	@Override
+	public void addEdge(MeshEdge e){
 		edges.add(e);
 	}
 	
-	public void removeEdge(NucleusMeshEdge e){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#removeEdge(com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge)
+	 */
+	@Override
+	public void removeEdge(MeshEdge e){
 		edges.remove(e);
 	}
 	
-	public Set<NucleusMeshEdge> getEdges(){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getEdges()
+	 */
+	@Override
+	public Set<MeshEdge> getEdges(){
 		return edges;
 	}
 	
-	public boolean hasEdgeTo(NucleusMeshVertex v){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#hasEdgeTo(com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex)
+	 */
+	@Override
+	public boolean hasEdgeTo(MeshVertex v){
 		
-		for(NucleusMeshEdge e : edges){
+		for(MeshEdge e : edges){
 			if( e.getV1().equals(v)  || e.getV2().equals(v)) {
 				return true;
 			}
@@ -89,15 +119,13 @@ public class NucleusMeshVertex {
 		return false;
 	}
 	
-	/**
-	 * Get the edge linking this vertex to the given vertex, if present.
-	 * Otherwise returns null
-	 * @param v
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getEdgeTo(com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex)
 	 */
-	public NucleusMeshEdge getEdgeTo(NucleusMeshVertex v){
+	@Override
+	public MeshEdge getEdgeTo(MeshVertex v){
 		
-		for(NucleusMeshEdge e : edges){
+		for(MeshEdge e : edges){
 			if( e.getV1().equals(v)  || e.getV2().equals(v)){
 				return e;
 			}
@@ -106,14 +134,26 @@ public class NucleusMeshVertex {
 	}
 	
 	
-	public double getLengthTo(NucleusMeshVertex v){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getLengthTo(com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex)
+	 */
+	@Override
+	public double getLengthTo(MeshVertex v){
 		return position.getLengthTo(v.getPosition());
 	}
 	
-	public boolean overlaps(NucleusMeshVertex v){
-		return position.overlapsPerfectly(v.position);
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#overlaps(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshVertex)
+	 */
+	@Override
+	public boolean overlaps(MeshVertex v){
+		return position.overlapsPerfectly(v.getPosition());
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#getNumber()
+	 */
+	@Override
 	public int getNumber(){
 		String chars = this.name.substring(1); //, replacement)split("");
 		return Integer.valueOf(chars);
@@ -123,6 +163,9 @@ public class NucleusMeshVertex {
 		return this.name+": "+position.toString()+" : "+peripheral;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;

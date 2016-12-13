@@ -31,6 +31,7 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -1843,14 +1844,14 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public NucleusMeshXYDataset createNucleusMeshEdgeDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
 //		log(mesh.toString());
 		
 //		log("Building dataset");
 		
-		for(NucleusMeshEdge edge : mesh.getEdges()){
+		for(MeshEdge edge : mesh.getEdges()){
 			
 //			log(edge.getV1().toString());
 			
@@ -1878,10 +1879,10 @@ public class NucleusDatasetCreator implements Loggable {
 	 * @return
 	 * @throws Exception
 	 */
-	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh mesh) throws Exception {
+	public NucleusMeshXYDataset createNucleusMeshMidpointDataset(Mesh<Nucleus> mesh) throws Exception {
 		NucleusMeshXYDataset ds = new NucleusMeshXYDataset();
 		
-		for(NucleusMeshEdge edge : mesh.getEdges()){
+		for(MeshEdge edge : mesh.getEdges()){
 			
 			double[] yvalues = {
 				edge.getMidpoint().getY(),
@@ -1900,7 +1901,7 @@ public class NucleusDatasetCreator implements Loggable {
 	}
 	
 	
-	public HistogramDataset createNucleusMeshHistogramDataset(Mesh mesh) throws ChartDatasetCreationException {
+	public HistogramDataset createNucleusMeshHistogramDataset(Mesh<Nucleus> mesh) throws ChartDatasetCreationException {
 		HistogramDataset ds = new HistogramDataset();
 		
 		int bins = 100;
@@ -1916,7 +1917,7 @@ public class NucleusDatasetCreator implements Loggable {
 				.getLog2Ratio();
 		
 		double[] values = mesh.getEdges().parallelStream()
-				.mapToDouble(NucleusMeshEdge::getLog2Ratio)
+				.mapToDouble(MeshEdge::getLog2Ratio)
 				.toArray();
 
 		ds.addSeries("mesh result", values, bins, min, max );

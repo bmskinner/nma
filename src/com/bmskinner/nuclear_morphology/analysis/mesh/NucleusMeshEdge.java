@@ -26,12 +26,12 @@ import com.bmskinner.nuclear_morphology.components.generic.Equation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class NucleusMeshEdge {
-	private NucleusMeshVertex v1;
-	private NucleusMeshVertex v2;
+public class NucleusMeshEdge implements MeshEdge {
+	private MeshVertex v1;
+	private MeshVertex v2;
 	private double value;
 	
-	public NucleusMeshEdge(NucleusMeshVertex v1, NucleusMeshVertex v2, double ratio){
+	public NucleusMeshEdge(MeshVertex v1, MeshVertex v2, double ratio){
 		
 		if(v1==v2){
 			throw new IllegalArgumentException("Vertices are identical in edge constructor");
@@ -48,41 +48,73 @@ public class NucleusMeshEdge {
 	 * Duplicate the edge
 	 * @param e
 	 */
-	public NucleusMeshEdge(NucleusMeshEdge e){
-		this.v1 = new NucleusMeshVertex(e.v1);
-		this.v2 = new NucleusMeshVertex(e.v2);
+	public NucleusMeshEdge(MeshEdge e){
+		this.v1 = new NucleusMeshVertex(e.getV1());
+		this.v2 = new NucleusMeshVertex(e.getV2());
 		
-		this.value = e.value;
+		this.value = e.getValue();
 	}
 
-	public NucleusMeshVertex getV1() {
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getV1()
+	 */
+	@Override
+	public MeshVertex getV1() {
 		return v1;
 	}
 
-	public NucleusMeshVertex getV2() {
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getV2()
+	 */
+	@Override
+	public MeshVertex getV2() {
 		return v2;
 	}
 	
-	public NucleusMeshEdge reverse(){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#reverse()
+	 */
+	@Override
+	public MeshEdge reverse(){
 		return new NucleusMeshEdge(new NucleusMeshVertex(v2), new NucleusMeshVertex(v1), value);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#setValue(double)
+	 */
+	@Override
 	public void setValue(double d){
 		this.value = d;
 	}
 
-	public double getRatio() {
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getRatio()
+	 */
+	@Override
+	public double getValue() {
 		return value;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getLog2Ratio()
+	 */
+	@Override
 	public double getLog2Ratio(){
 		return Stats.calculateLog2Ratio(value);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getLength()
+	 */
+	@Override
 	public double getLength(){
 		return v1.getLengthTo(v2);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getMidpoint()
+	 */
+	@Override
 	public IPoint getMidpoint(){
 		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
 		if(v1.getPosition().getX()<v2.getPosition().getX()){
@@ -93,23 +125,30 @@ public class NucleusMeshEdge {
 		
 	}
 		
-	public boolean isLongerThan(NucleusMeshEdge e){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#isLongerThan(com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge)
+	 */
+	@Override
+	public boolean isLongerThan(MeshEdge e){
 		return getLength() > e.getLength();
 	}
 	
-	/**
-	 * Test if the edges share both endpoints
-	 * @param e
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#overlaps(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
 	 */
-	public boolean overlaps(NucleusMeshEdge e){
-		return this.containsVertex(e.v1) && this.containsVertex(e.v2);			
+	@Override
+	public boolean overlaps(MeshEdge e){
+		return this.containsVertex(e.getV1()) && this.containsVertex(e.getV2());			
 	}
 	
-	public boolean crosses(NucleusMeshEdge e){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#crosses(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
+	 */
+	@Override
+	public boolean crosses(MeshEdge e){
 		
 		Line2D line1 = new Line2D.Double(v1.getPosition().toPoint2D(), v2.getPosition().toPoint2D());
-		Line2D line2 = new Line2D.Double(e.v1.getPosition().toPoint2D(), e.v2.getPosition().toPoint2D());
+		Line2D line2 = new Line2D.Double(e.getV1().getPosition().toPoint2D(), e.getV2().getPosition().toPoint2D());
 
 		if(line1.intersectsLine(line2)){
 			
@@ -123,20 +162,27 @@ public class NucleusMeshEdge {
 		return false;
 	}
 	
-	/**
-	 * Check if any of the endpoints of the edges are shared
-	 * @param e
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#sharesEndpoint(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
 	 */
-	public boolean sharesEndpoint(NucleusMeshEdge e){
-		return this.containsVertex(e.v1) || this.containsVertex(e.v2);			
+	@Override
+	public boolean sharesEndpoint(MeshEdge e){
+		return this.containsVertex(e.getV1()) || this.containsVertex(e.getV2());			
 	}
 	
-	public boolean containsVertex(NucleusMeshVertex v){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#containsVertex(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshVertex)
+	 */
+	@Override
+	public boolean containsVertex(MeshVertex v){
 		return v1.overlaps(v)  || v2.overlaps(v);
 	}
 	
-	public boolean equals(NucleusMeshEdge e){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#equals(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)
+	 */
+	@Override
+	public boolean equals(MeshEdge e){
 		if(this==e){
 			return true;
 		}
@@ -144,22 +190,19 @@ public class NucleusMeshEdge {
 		return this.overlaps(e);
 	}
 	
-	/**
-	 * Get the point a given fraction of the way along the edge (starting at v1)
-	 * @param d
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getProportionalPosition(double)
 	 */
+	@Override
 	public IPoint getProportionalPosition(double d){
 		
 		return Equation.getProportionalDistance(v1.getPosition(), v2.getPosition(), d);
 	}
 	
-	/**
-	 * If the point lies on the edge, get the proportional distance along the 
-	 * edge from v1. Otherwise return 0
-	 * @param p
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getPositionProportion(com.bmskinner.nuclear_morphology.components.generic.IPoint)
 	 */
+	@Override
 	public double getPositionProportion(IPoint p ){
 		
 		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
@@ -178,6 +221,9 @@ public class NucleusMeshEdge {
 	
 
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#hashCode()
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -187,6 +233,9 @@ public class NucleusMeshEdge {
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -209,6 +258,10 @@ public class NucleusMeshEdge {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge#getName()
+	 */
+	@Override
 	public String getName(){
 		return v1.getName()+" - "+v2.getName();
 	}

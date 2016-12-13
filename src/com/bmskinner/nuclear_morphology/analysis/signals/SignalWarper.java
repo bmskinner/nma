@@ -4,10 +4,14 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 import ij.process.ByteProcessor;
@@ -86,7 +90,7 @@ public class SignalWarper extends AnalysisWorker {
 	private void generateImages(){
 		finer("Generating warped images for "+getDataset().getName());
 		finest("Fetching consensus nucleus from target dataset");
-		NucleusMesh meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+		Mesh<Nucleus> meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
 		
 		if(straighten){
 			meshConsensus = meshConsensus.straighten();
@@ -112,7 +116,7 @@ public class SignalWarper extends AnalysisWorker {
 		for(ICell cell : cells){
 			fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 			// Get each nucleus. Make a mesh.
-			NucleusMesh cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+			Mesh<Nucleus> cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
 			
 			if(straighten){
 				cellMesh = cellMesh.straighten();
@@ -127,11 +131,18 @@ public class SignalWarper extends AnalysisWorker {
 
 				// Create NucleusMeshImage from nucleus.
 				finer("Making nucleus mesh image");
-				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+				MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
 
 				// Draw NucleusMeshImage onto consensus mesh.
 				finer("Warping image onto consensus mesh");
-				ImageProcessor warped = im.meshToImage(meshConsensus);
+				
+				ImageProcessor warped;
+				try {
+					warped = im.createImage(meshConsensus);
+				} catch (UncomparableMeshImageException e) {
+					fine("Cannot make mesh for "+cell.getNucleus().getNameAndNumber());
+					warped = null;
+				}
 				finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
 				warpedImages[cellNumber] = warped;
 				mergedImage = combineImages();

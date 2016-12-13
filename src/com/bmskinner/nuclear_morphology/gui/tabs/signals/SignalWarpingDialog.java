@@ -46,19 +46,20 @@ import javax.swing.SwingWorker;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
@@ -520,7 +521,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		private void generateImages(){
 			finer("Generating warped images for "+sourceDataset.getName());
 			finest("Fetching consensus nucleus from target dataset");
-			NucleusMesh meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+			Mesh<Nucleus> meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
 			
 			if(straighten){
 				meshConsensus = meshConsensus.straighten();
@@ -537,7 +538,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			for(ICell cell : cells){
 				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
 
-				NucleusMesh cellMesh;
+				Mesh<Nucleus> cellMesh;
 				try {
 					cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
 					
@@ -551,11 +552,18 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					
 					// Create NucleusMeshImage from nucleus.
 					finer("Making nucleus mesh image");
-					NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+					MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
 					
 					// Draw NucleusMeshImage onto consensus mesh.
 					finer("Warping image onto consensus mesh");
-					ImageProcessor warped = im.meshToImage(meshConsensus);
+					
+					ImageProcessor warped;
+					try {
+						warped = im.createImage(meshConsensus);
+					} catch (UncomparableMeshImageException e) {
+						fine("Cannot make mesh for "+cell.getNucleus().getNameAndNumber());
+						warped = null;
+					}
 					finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
 					warpedImages[cellNumber] = warped;
 					

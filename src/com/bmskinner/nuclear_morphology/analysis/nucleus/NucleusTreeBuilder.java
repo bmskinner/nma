@@ -25,8 +25,8 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -175,7 +175,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 		}
 		
-		Mesh mesh = null;
+		Mesh<Nucleus> mesh = null;
 		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){	
 			mesh = new NucleusMesh(collection.getConsensusNucleus());
 			attributeCount+= mesh.getFaces().size();
@@ -215,7 +215,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
 			
-			for(NucleusMeshFace face : mesh.getFaces()){
+			for(MeshFace face : mesh.getFaces()){
 				finer("Including face "+face.toString());
 				Attribute a = new Attribute("mesh_"+face.toString()); 
 				attributes.addElement(a);
@@ -294,8 +294,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
 					
 					
-					Mesh mesh = new NucleusMesh(n1, template);
-					for(NucleusMeshFace face : mesh.getFaces()){
+					Mesh<Nucleus> mesh = new NucleusMesh(n1, template);
+					for(MeshFace face : mesh.getFaces()){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, face.getArea());
 					}

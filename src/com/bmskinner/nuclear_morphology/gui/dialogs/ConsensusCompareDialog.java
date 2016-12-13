@@ -245,8 +245,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);
 				
 				
-				Mesh comparison1 = mesh1.compareTo(mesh2);
-				Mesh comparison2 = mesh2.compareTo(mesh1);
+				Mesh comparison1 = mesh1.comparison(mesh2);
+				Mesh comparison2 = mesh2.comparison(mesh1);
 				
 				/*
 				 * Create log2 histograms for the entire pairwise mesh

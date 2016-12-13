@@ -54,11 +54,13 @@ import org.jfree.ui.Layer;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanAligner;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshVertex;
+import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
@@ -222,10 +224,18 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
 				
 				// Create NucleusMeshImage from nucleus.
-				NucleusMeshImage im = new NucleusMeshImage(cellMesh,ip);
+				MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
 				
 				// Draw NucleusMeshImage onto consensus mesh.
-				ImageProcessor warped = im.meshToImage(meshConsensus);
+				ImageProcessor warped;
+				
+				try {
+					warped = im.createImage(meshConsensus);
+				} catch (UncomparableMeshImageException e) {
+					fine("Cannot make mesh for "+cell.getNucleus().getNameAndNumber());
+					warped = null;
+				}
+				
 //				ImagePlus image = new ImagePlus(cell.getNucleus().getNameAndNumber(), warped);
 //				image.show();
 				drawImageAsAnnotation(warped, plot, 20, -xOffset, -yOffset, options.isShowBounds());
@@ -284,7 +294,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							.getCollection()
 							.getConsensusNucleus(), mesh1);
 					
-					Mesh result = mesh1.compareTo(mesh2);				
+					Mesh result = mesh1.comparison(mesh2);				
 					return createMeshChart(result, 0.5);
 	
 				} else {
@@ -317,7 +327,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 							+", "+bounds.getY());
 					
 					// Create a mesh image from the nucleus
-					NucleusMeshImage im;
+					MeshImage<Nucleus> im;
 					try {
 						im = new NucleusMeshImage(mesh1, options.getCell().getNucleus().getImage());
 					} catch (UnloadableImageException e) {
@@ -325,9 +335,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 						return makeErrorChart();
 					}
 	
-					// Apply the mesh image to the shape of the consensus image
-					ImageProcessor ip = im.meshToImage(mesh2);
-										
+					ImageProcessor ip;
+					
+					try {
+						ip = im.createImage(mesh2);
+					} catch (UncomparableMeshImageException e) {
+						fine("Cannot make mesh for "+options.getCell().getNucleus().getNameAndNumber());
+						ip = null;
+					}
+															
 					return OutlineChartFactory.drawImageAsAnnotation(ip);
 	
 				} else {
@@ -974,7 +990,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public JFreeChart createMeshChart(Mesh mesh, double log2Ratio) throws ChartCreationException {
+	public JFreeChart createMeshChart(Mesh<Nucleus> mesh, double log2Ratio) throws ChartCreationException {
 		
 		NucleusMeshXYDataset dataset;
 		try {
@@ -1009,7 +1025,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Show faces as polygon annotations under the chart
 		if(options.isShowMeshFaces()){ 
 			
-			for(NucleusMeshFace f : mesh.getFaces()){
+			for(MeshFace f : mesh.getFaces()){
 				
 				Path2D path = f.toPath();
 				
@@ -1028,13 +1044,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if(options.isShowAnnotations()){
 			
-			for(NucleusMeshVertex v : mesh.getPeripheralVertices()){
+			for(MeshVertex v : mesh.getPeripheralVertices()){
 				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX()-1, v.getPosition().getY());
 				annotation.setPaint(Color.BLACK);
 				plot.addAnnotation(annotation);
 			}
 			
-			for(NucleusMeshVertex v : mesh.getInternalVertices()){
+			for(MeshVertex v : mesh.getInternalVertices()){
 				XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getPosition().getX()-1, v.getPosition().getY());
 				annotation.setPaint(Color.BLACK);
 				plot.addAnnotation(annotation);
@@ -1042,7 +1058,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowMeshEdges()){ 
 
-				for(NucleusMeshEdge v : mesh.getEdges()){
+				for(MeshEdge v : mesh.getEdges()){
 					XYTextAnnotation annotation = new XYTextAnnotation(v.getName(), v.getMidpoint().getX(), v.getMidpoint().getY()+1);
 					annotation.setPaint(Color.BLUE);
 					plot.addAnnotation(annotation);
@@ -1050,7 +1066,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			
 			if(options.isShowMeshFaces()){ 
-				for(NucleusMeshFace f : mesh.getFaces()){
+				for(MeshFace f : mesh.getFaces()){
 					XYTextAnnotation annotation = new XYTextAnnotation(f.getName(),
 							f.getMidpoint().getX(),
 							f.getMidpoint().getY());

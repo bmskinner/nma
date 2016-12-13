@@ -7,10 +7,8 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshFace.NucleusMeshFaceCoordinate;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -18,42 +16,34 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class NucleusMeshImage implements Loggable {
+public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 		
-	private Map< NucleusMeshFace, Map<NucleusMeshFaceCoordinate, Integer> > map = new HashMap< NucleusMeshFace, Map<NucleusMeshFaceCoordinate, Integer> >(); 
+	private Map< MeshFace, Map<MeshFaceCoordinate, Integer> > map = new HashMap<MeshFace, Map<MeshFaceCoordinate, Integer> >(); 
 	
-	private NucleusMesh template;
+	private Mesh<Nucleus> template;
 	
 	/**
 	 * Create based on a template mesh and image. Each pixel within the 
 	 * nucleus is converted to a mesh face coordinate.
 	 * @param mesh
-	 * @param ip
+	 * @param ip the image to fetch pixels from
 	 */
-	public NucleusMeshImage(NucleusMesh mesh, ImageProcessor ip){
+	public NucleusMeshImage(Mesh<Nucleus> mesh, ImageProcessor ip){
 		template = mesh;
 		makeFaceCoordinates(mesh, ip);
 	}
 	
-	/**
-	 * Draw the image in this object at the coordinates in the given mesh
-	 * @param mesh
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage#meshToImage(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
 	 */
-	public ImageProcessor meshToImage(NucleusMesh mesh){
+	@Override
+	public ImageProcessor createImage(Mesh<Nucleus> mesh) throws UncomparableMeshImageException{
 		
 		finer("Mesh has "+mesh.getFaceCount()+" faces");
 		if( ! mesh.isComparableTo(template)){
-			warn("Cannot compare meshes");
-			return null;
+			throw new UncomparableMeshImageException("Meshes do not match");
 		}
 		
-//		boolean zeroCoM = false;
-//		if(mesh.nucleus.getCentreOfMass().getXAsInt()==0 && mesh.nucleus.getCentreOfMass().getYAsInt()==0){
-//			zeroCoM = true;
-//			fine("Nucleus centre of mass is at zero");
-//			fine("All pixels must be offset relative to the centre of the new image");
-//		}
 						
 		Rectangle r = mesh.toPath().getBounds();
 		finest("Target mesh bounds are "+r.getWidth()+" x "+r.getHeight()+"  : "+r.getX()+", "+r.getY());
@@ -84,10 +74,10 @@ public class NucleusMeshImage implements Loggable {
 		finest("Target nucleus original x,y base in image is "+xBase+", "+yBase);
 		finest("The pixels should be moved by: -"+xBase+", -"+yBase);
 		int missingPixels = 0;
-		for(NucleusMeshFace f : map.keySet()){
+		for(MeshFace f : map.keySet()){
 			
 			// Fetch the equivalent face in the target mesh
-			NucleusMeshFace targetFace = mesh.getFace(f);
+			MeshFace targetFace = mesh.getFace(f);
 
 			missingPixels += addFaceToImage(f, targetFace, ip, -xBase, -yBase);
 			
@@ -111,13 +101,13 @@ public class NucleusMeshImage implements Loggable {
 	 * @param yOffset
 	 * @return
 	 */
-	private int addFaceToImage(NucleusMeshFace templateFace, NucleusMeshFace targetFace, ImageProcessor ip, int xOffset, int yOffset){
+	private int addFaceToImage(MeshFace templateFace, MeshFace targetFace, ImageProcessor ip, int xOffset, int yOffset){
 		
 		int missingPixels = 0;
-		Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(templateFace);
+		Map<MeshFaceCoordinate, Integer> faceMap = map.get(templateFace);
 		finest("Getting pixels from face");
 		
-		for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
+		for(MeshFaceCoordinate c : faceMap.keySet() ){
 			
 			
 			int pixelValue = faceMap.get(c);
@@ -149,7 +139,7 @@ public class NucleusMeshImage implements Loggable {
 	 * @param mesh
 	 * @return
 	 */
-	private int[] findImageDimensions(NucleusMesh mesh){
+	private int[] findImageDimensions(Mesh<Nucleus> mesh){
 		
 		int maxX = 0;
 		int minX = Integer.MAX_VALUE;
@@ -157,11 +147,11 @@ public class NucleusMeshImage implements Loggable {
 		int maxY = 0;
 		int minY = Integer.MAX_VALUE;
 		
-		for(NucleusMeshFace f : map.keySet()){
+		for(MeshFace f : map.keySet()){
 			
-			Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
+			Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
 
-			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
+			for(MeshFaceCoordinate c : faceMap.keySet() ){
 
 				IPoint p = c.getPixelCoordinate(mesh.getFace(f));
 				
@@ -292,12 +282,12 @@ public class NucleusMeshImage implements Loggable {
 		b.append("Nucleus mesh image \n");
 		b.append("Image has "+map.keySet().size()+" faces\n");
 		b.append("Listing faces:\n");
-		for(NucleusMeshFace f : map.keySet()){
+		for(MeshFace f : map.keySet()){
 			
-			Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
+			Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
 			b.append(f.toString()+"\n");
 			b.append("Listing coordinates in face:\n");
-			for(NucleusMeshFaceCoordinate c : faceMap.keySet() ){
+			for(MeshFaceCoordinate c : faceMap.keySet() ){
 				
 				int pixelValue = faceMap.get(c);
 				b.append(c.toString()+pixelValue+"\n");				
@@ -313,26 +303,26 @@ public class NucleusMeshImage implements Loggable {
 	 * @param ip
 	 * @return
 	 */
-	private void makeFaceCoordinates(NucleusMesh mesh, ImageProcessor ip){
+	private void makeFaceCoordinates(Mesh<Nucleus> mesh, ImageProcessor ip){
 
 		int missedCount = 0;
 		
 		for(int x=0; x<ip.getWidth(); x++){
 			
 			for(int y=0; y<ip.getHeight(); y++){
-				IPoint p = new FloatPoint(x, y);
+				IPoint p = IPoint.makeNew(x, y);
 
-				if(mesh.nucleus.containsOriginalPoint(p)){
+				if(mesh.getComponent().containsOriginalPoint(p)){
 					
-					if(mesh.hasFaceContaining(p)){
+					if(mesh.contains(p)){
 						int pixel = ip.get(x, y);
-						NucleusMeshFace f = mesh.getFaceContaining(p);
+						MeshFace f = mesh.getFace(p);
 					
 						finest("Found face in target mesh for point "+p.toString());
-						Map<NucleusMeshFaceCoordinate, Integer> faceMap = map.get(f);
+						Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
 
 						if(faceMap==null){ // create the facemap if not present
-							map.put(f, new HashMap<NucleusMeshFaceCoordinate, Integer>());
+							map.put(f, new HashMap<MeshFaceCoordinate, Integer>());
 							faceMap = map.get(f);
 						}
 						
@@ -340,7 +330,7 @@ public class NucleusMeshImage implements Loggable {
 							fine("Error fetching face from mesh at "+p.toString());
 						}
 
-						NucleusMeshFaceCoordinate c = f.getFaceCoordinate(p);
+						MeshFaceCoordinate c = f.getFaceCoordinate(p);
 						faceMap.put(c, pixel);
 					} else {
 						missedCount++;
