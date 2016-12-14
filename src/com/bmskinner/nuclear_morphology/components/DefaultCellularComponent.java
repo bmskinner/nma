@@ -24,6 +24,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -163,23 +164,36 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		
 		
 		// Store the original points. From these, the smooth polygon can be reconstructed.
+		double epsilon = 1;
 		Polygon polygon = roi.getPolygon();
+		Rectangle2D bounds = polygon.getBounds().getFrame();
 		
+//		// since small signals can have imprecision on the CoM that puts them on the border of the
+//		// object, add a small border to consider OK
+
+		double minX = bounds.getX();
+		double maxX = minX + bounds.getWidth();
 		
-		if( ! polygon.getBounds().contains(centreOfMass.getX(), centreOfMass.getY())){
-			
-			int minX = (int) polygon.getBounds().getX();
-			int maxX = (int) (minX + polygon.getBounds().getWidth());
-			int minY = (int) polygon.getBounds().getY();
-			int maxY = (int) (minY + polygon.getBounds().getHeight());
-			
-			throw new IllegalArgumentException("The centre of mass ("
-					+centreOfMass.toString()
+		minX-= epsilon;
+		maxX+= epsilon;
+		
+		if( centreOfMass.getX() < minX || centreOfMass.getX() > maxX){
+			throw new IllegalArgumentException("The centre of mass X ("+centreOfMass.getX()+")"
 					+") must be within the roi bounds (x = "
-					+minX+"-"+maxX+
-					"), (y = "
+					+minX+"-"+maxX+")");
+		}
+		
+		double minY = bounds.getY();
+		double maxY = minY + bounds.getHeight();
+		minY-= epsilon;
+		maxY+= epsilon;
+		
+		if( centreOfMass.getY() < minY || centreOfMass.getY() > maxY){
+			throw new IllegalArgumentException("The centre of mass Y ("+centreOfMass.getY()+")"
+					+") must be within the roi bounds (y = "
 					+minY+"-"+maxY+")");
 		}
+
 		
 		if( ! polygon.contains(centreOfMass.getX(), centreOfMass.getY())){
 			fine("Centre of mass is not inside the object. You may have a doughnut.");
