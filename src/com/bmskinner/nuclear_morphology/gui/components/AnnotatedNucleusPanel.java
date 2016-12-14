@@ -18,6 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components;
 
+import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
@@ -69,7 +70,6 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	private void importNucleusImage() throws Exception {
 		
 		ImageProcessor openProcessor = cell.getNucleus().getImage();
-
 		
 		openProcessor = new NucleusAnnotator(openProcessor)
 				.annotateSegments(cell.getNucleus())
@@ -97,8 +97,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	private ImageIcon makeIcon(ImageProcessor processor){
 
 		ImageProcessor resized = new ImageFilterer(processor)
-			.crop(cell.getNucleus())
-			.fitToScreen(0.3)
+			.fitToScreen(0.6)
 			.toProcessor();
 
 		ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());

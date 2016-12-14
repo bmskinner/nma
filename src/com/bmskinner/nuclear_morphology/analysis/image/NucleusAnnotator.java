@@ -154,7 +154,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 					float[] ypoints = new float[seg.length()+1];
 					for(int j=0; j<=seg.length();j++){
 						int k = n.wrapIndex(seg.getStartIndex()+j);
-						IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+						IBorderPoint p = n.getOriginalBorderPoint(k); // get the border points in the segment
 						xpoints[j] = (float) p.getX();
 						ypoints[j] = (float) p.getY();
 					}

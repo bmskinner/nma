@@ -49,16 +49,17 @@ public class CellImageDialog extends LoadingIconDialog {
 			this.setTitle(cell.getNucleus().getNameAndNumber());
 
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			this.setLocationRelativeTo(null); // centre on screen
 
 
 			try{
 				panel.updateCell(cell);
+
 			} catch(Exception e){
 				error("Error making dialog", e);
 			}
 			this.setModal(false);
 			this.pack();
+			this.centerOnScreen();
 			this.setVisible(true);
 		}
 	}
