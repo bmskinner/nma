@@ -190,12 +190,11 @@ public class MainWindow
 		
 		
 		try {
-			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a3");
+			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
 			
 			Dimension preferredSize = new Dimension(1012, 804);
 			this.setPreferredSize(preferredSize);
 			setBounds(100, 100, 1012, 804);
-//			this.setLocationRelativeTo(null); // centre on screen
 			contentPane = new JPanel();
 			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 			contentPane.setLayout(new BorderLayout(0, 0));
