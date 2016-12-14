@@ -416,10 +416,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	
 
 	public ImageProcessor getComponentImage() throws UnloadableImageException{
-		ImageProcessor ip = getImage();
+		ImageProcessor ip = getImage().duplicate();
 
 		if(ip==null){	
-			return null;	
+			throw new UnloadableImageException("Source image is not available");
 		}
 		
 		int[] positions = getPosition();

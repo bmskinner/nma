@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
  * @author bms41
  *
  */
-public class Equation{
+public class DoubleEquation implements LineEquation {
 
 	final double m, c;
 
@@ -39,7 +39,7 @@ public class Equation{
 	* @param c the y-intercept of the line
 	* @return An Equation describing the line
 	*/
-	public Equation(final double m, final double c){
+	public DoubleEquation(final double m, final double c){
 		if(Double.valueOf(m)==null || Double.valueOf(c)==null){
 			throw new IllegalArgumentException("m or c is null");
 		}
@@ -54,7 +54,7 @@ public class Equation{
 	* @param b the second XYPoint
 	* @return An Equation describing the line between the points
 	*/
-	public Equation (IPoint a, IPoint b){
+	public DoubleEquation (IPoint a, IPoint b){
 
 		this(a.toPoint2D(), b.toPoint2D());
 	}
@@ -66,7 +66,7 @@ public class Equation{
 	* @param b the second XYPoint
 	* @return An Equation describing the line between the points
 	*/
-	public Equation (Point2D a, Point2D b){
+	public DoubleEquation (Point2D a, Point2D b){
 
 		if(a==null || b==null){
 			throw new IllegalArgumentException("Point a or b is null");
@@ -81,52 +81,51 @@ public class Equation{
 		this.c = a.getY() -  ( m * a.getX() );
 	}
 
-	/**
-	*	Returns the x value for a given y value
-	*
-	* @param y the y value on the line
-	* @return The x value at the given y value
-	*/
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getX(double)
+	 */
+	@Override
 	public double getX(double y){
 		// x = (y-c)/m
 		return (y - this.c) / this.m;
 	}
 
-	/**
-	*	Returns the y value for a given x value
-	*
-	* @param x the x value on the line
-	* @return The y value at the given x value
-	*/
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getY(double)
+	 */
+	@Override
 	public double getY(double x){
 		return (this.m * x) + this.c;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getM()
+	 */
+	@Override
 	public double getM(){
 		return this.m;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getC()
+	 */
+	@Override
 	public double getC(){
 		return this.c;
 	}
 	
-	/**
-	 * Test if the point fulfils the equation
-	 * @param p
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#isOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint)
 	 */
+	@Override
 	public boolean isOnLine(IPoint p){
 		return p.getY() == (   (m * p.getX())    +c);
 	}
 
-	/**
-	*	Returns a point a given distance away from a given point
-	* on the line specified by this Equation.
-	*
-	* @param p	the reference point to measure from
-	* @param distance	the distance along the line from the point p
-	* @return The position <distance> away from <p>
-	*/
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getPointOnLine(com.bmskinner.nuclear_morphology.components.generic.IPoint, double)
+	 */
+	@Override
 	public IPoint getPointOnLine(IPoint p, double distance){
 
 		double xA = p.getX();
@@ -145,19 +144,14 @@ public class Equation{
 		return new FloatPoint(newX, newY);	
 	}
 
-	/**
-	* Finds the line equation perpendicular to this line,
-	* at the given point. The point p must lie on the line;
-	* if the y-value for XYPoint p's x does not lie on the line
-	* to int precision, an empty Equation will be returned.
-	*
-	* @param p	the XYPoint to measure from
-	* @return The Equation of the perpendicular line
-	*/
-	public Equation getPerpendicular(IPoint p){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getPerpendicular(com.bmskinner.nuclear_morphology.components.generic.IPoint)
+	 */
+	@Override
+	public LineEquation getPerpendicular(IPoint p){
 
 		if((int)p.getY()!=(int)this.getY(p.getX())){
-			return new Equation(0,0);
+			return new DoubleEquation(0,0);
 		}
 		double pM = 0-(1/m); // invert and flip sign
 
@@ -165,33 +159,29 @@ public class Equation{
 		// y = pM.x + c
 		// y -(pM.x) = c
 		double pC = p.getY() - (pM * p.getX());
-		return new Equation(pM, pC);
+		return new DoubleEquation(pM, pC);
 	}
 
-	/**
-	* Translates the line to run through the given point,
-	* keeping the gradient but moving the y intercept.
-	*
-	* @param p	the XYPoint to intercept
-	* @return The Equation of the translated line
-	*/ 
-	public Equation translate(IPoint p ){
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#translate(com.bmskinner.nuclear_morphology.components.generic.IPoint)
+	 */ 
+	@Override
+	public LineEquation translate(IPoint p ){
 
 		double oldY = this.getY(p.getX());
 		double desiredY = p.getY();
 
 		double dy = oldY - desiredY;
 		double newC = this.c - dy;
-		return new Equation(this.m, newC);
+		return new DoubleEquation(this.m, newC);
 
 	}
 	
-	/**
-	 * Find the intercept between this equation and another.
-	 * @param eq
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getIntercept(com.bmskinner.nuclear_morphology.components.generic.Equation)
 	 */
-	public IPoint getIntercept(Equation eq){
+	@Override
+	public IPoint getIntercept(LineEquation eq){
 		// (this.m * x) + this.c = (eq.m * x) + eq.c
 		
 		// (this.m * x) - (eq.m * x) + this.c = eq.c
@@ -204,14 +194,11 @@ public class Equation{
 		return new FloatPoint(x, y);
 	}
 	
-	/**
-	 * Test if the two lines intersect. Effectively checks
-	 * if the lines are parallel, and if so, whether they share
-	 * and intercept.
-	 * @param eq
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#intersects(com.bmskinner.nuclear_morphology.components.generic.DoubleEquation)
 	 */
-	public boolean intersects(Equation eq){
+	@Override
+	public boolean intersects(DoubleEquation eq){
 		if(m == eq.m){ // they are parallel
 			return c==eq.c; 
 		}
@@ -227,7 +214,7 @@ public class Equation{
 	 */
 	public static IPoint getProportionalDistance(IPoint start, IPoint end, double proportion){
 				
-		Equation eq = new Equation(start, end);
+		LineEquation eq = new DoubleEquation(start, end);
 		double totalLength = start.getLengthTo(end);
 		double propLength  = totalLength * proportion;
 		
@@ -242,18 +229,17 @@ public class Equation{
 	}
 	
 	
-	/**
-	 * Find the smallest distance from a given point to the line
-	 * @param p
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.generic.Equation#getClosestDistanceToPoint(com.bmskinner.nuclear_morphology.components.generic.IPoint)
 	 */
+	@Override
 	public double getClosestDistanceToPoint(IPoint p){
 		
 		// translate the equation to p
-		Equation tr = this.translate(p);
+		LineEquation tr = this.translate(p);
 		
 		// get the orthogonal line, which will intersect the original equation
-		Equation orth = tr.getPerpendicular(p);
+		LineEquation orth = tr.getPerpendicular(p);
 		
 		// find the point of intercept
 		IPoint intercept = this.getIntercept(orth);
@@ -271,7 +257,7 @@ public class Equation{
 	 * @param points
 	 * @return
 	 */
-	public static Equation calculateBestFitLine(List<IBorderPoint> points){
+	public static LineEquation calculateBestFitLine(List<IBorderPoint> points){
 		
 		// Find the means of x and y
 		double xMean = 0;
@@ -312,7 +298,7 @@ public class Equation{
 		double c = yMean - (  m * xMean);
 		
 		// Return the equation
-		Equation eq = new Equation(m, c);
+		LineEquation eq = new DoubleEquation(m, c);
 		return eq;
 	}
 

@@ -47,7 +47,9 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
@@ -521,7 +523,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		private void generateImages(){
 			finer("Generating warped images for "+sourceDataset.getName());
 			finest("Fetching consensus nucleus from target dataset");
-			Mesh<Nucleus> meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+			Mesh<Nucleus> meshConsensus;
+			try {
+				meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+			} catch (MeshCreationException e2) {
+				stack("Error creating mesh",e2);
+				return;
+			}
 			
 			if(straighten){
 				meshConsensus = meshConsensus.straighten();
@@ -552,15 +560,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					
 					// Create NucleusMeshImage from nucleus.
 					finer("Making nucleus mesh image");
-					MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
-					
-					// Draw NucleusMeshImage onto consensus mesh.
-					finer("Warping image onto consensus mesh");
-					
 					ImageProcessor warped;
 					try {
-						warped = im.createImage(meshConsensus);
-					} catch (UncomparableMeshImageException e) {
+						MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
+
+						// Draw NucleusMeshImage onto consensus mesh.
+						finer("Warping image onto consensus mesh");
+
+
+
+						warped = im.drawImage(meshConsensus);
+					} catch (UncomparableMeshImageException | MeshImageCreationException e) {
 						fine("Cannot make mesh for "+cell.getNucleus().getNameAndNumber());
 						warped = null;
 					}
@@ -579,7 +589,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					
 				} catch (UnloadableImageException e) {
 					warn("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber());
-					fine("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+					stack("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
+					warpedImages[cellNumber] = createBlankProcessor();
+				} catch (MeshCreationException e1) {
+					stack("Error creating mesh",e1);
 					warpedImages[cellNumber] = createBlankProcessor();
 				} finally {
 					

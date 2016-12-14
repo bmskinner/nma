@@ -52,7 +52,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -1132,7 +1133,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		// As an anti-bibble defence, get a best fit line acrosss the region
 		// Use the line of best fit to find appropriate top and bottom vertical points
-		Equation eq = Equation.calculateBestFitLine(pointsInRegion);
+		LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
 		
 		
 		// Take values along the best fit line that are close to the original TV and BV

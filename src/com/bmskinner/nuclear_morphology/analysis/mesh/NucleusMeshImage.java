@@ -4,7 +4,9 @@ import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -17,51 +19,56 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
-		
-	private Map< MeshFace, Map<MeshFaceCoordinate, Integer> > map = new HashMap<MeshFace, Map<MeshFaceCoordinate, Integer> >(); 
 	
-	private Mesh<Nucleus> template;
+	final private Map<MeshFace, List<MeshPixel>> map = new HashMap<MeshFace, List<MeshPixel>>();
+	
+	final private Mesh<Nucleus> template;
 	
 	/**
 	 * Create based on a template mesh and image. Each pixel within the 
 	 * nucleus is converted to a mesh face coordinate.
 	 * @param mesh
 	 * @param ip the image to fetch pixels from
+	 * @throws MeshImageCreationException 
 	 */
-	public NucleusMeshImage(Mesh<Nucleus> mesh, ImageProcessor ip){
+	public NucleusMeshImage(final Mesh<Nucleus> mesh, final ImageProcessor ip) throws MeshImageCreationException{
 		template = mesh;
-		makeFaceCoordinates(mesh, ip);
+		
+		// Create MeshPixels from the image processor for the region described by the mesh
+		makeFaceCoordinates(ip);
+	}
+	
+	@Override
+	public List<MeshPixel> getMeshPixels(MeshFace f){
+		if( ! template.contains(f)){
+			throw new IllegalArgumentException("Face is not present within template mesh");
+		}
+		
+		MeshFace target = template.getFace(f); // ensure we have the exact face in the template
+		
+		return map.get(target);
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage#meshToImage(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
 	 */
 	@Override
-	public ImageProcessor createImage(Mesh<Nucleus> mesh) throws UncomparableMeshImageException{
+	public ImageProcessor drawImage(Mesh<Nucleus> mesh) throws UncomparableMeshImageException{
 		
-		finer("Mesh has "+mesh.getFaceCount()+" faces");
 		if( ! mesh.isComparableTo(template)){
 			throw new UncomparableMeshImageException("Meshes do not match");
 		}
-		
+		finer("Drawing image onto mesh");
 						
 		Rectangle r = mesh.toPath().getBounds();
-		finest("Target mesh bounds are "+r.getWidth()+" x "+r.getHeight()+"  : "+r.getX()+", "+r.getY());
-
 		
 		// The new image size
 		int w = r.width  ;
 		int h = r.height ;
-		
-		// Find the centre of each axis in the bounding rectangle
-		int xCentre = w >>1;
-		int yCentre = h >>1;
-		
+				
 		int xBase = (int) mesh.toPath().getBounds().getX();
 		int yBase = (int) mesh.toPath().getBounds().getY();
-		
-		finest("New image dimensions are "+w+" x "+h);
-		finest("New image centre point is at "+xCentre+", "+yCentre);
+
 
 		// Create a blank image processor with an appropriate size
 		// to hold the new image. Note that if the height or width is
@@ -69,64 +76,75 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 		ImageProcessor ip = createWhiteProcessor(w, h);
 				
 		// Adjust from absolute position in original target image
-		// Note that the consensus will have a position from it's template nucleus
+		// Note that the consensus will have a position from its template nucleus
 
-		finest("Target nucleus original x,y base in image is "+xBase+", "+yBase);
-		finest("The pixels should be moved by: -"+xBase+", -"+yBase);
+//		finest("Target nucleus original x,y base in image is "+xBase+", "+yBase);
+//		finest("The pixels should be moved by: -"+xBase+", -"+yBase);
 		int missingPixels = 0;
-		for(MeshFace f : map.keySet()){
+		int missingFaces  = 0;
+		for(MeshFace templateFace : map.keySet()){
 			
 			// Fetch the equivalent face in the target mesh
-			MeshFace targetFace = mesh.getFace(f);
-
-			missingPixels += addFaceToImage(f, targetFace, ip, -xBase, -yBase);
+			MeshFace targetFace = mesh.getFace(templateFace);
+			
+			if(targetFace == null){
+				fine("Cannot find template face in target mesh");
+				missingFaces++;
+				continue;
+			}
+			
+			
+			missingPixels += drawFaceToImage(templateFace, targetFace, ip, -xBase, -yBase);
 			
 		}
 		
-		if(missingPixels >0){
-			fine(missingPixels+" points lay outside the new image bounds");			
-		}
+		fine(missingFaces+" faces could not be found in the target mesh");	
+		fine(missingPixels+" points lay outside the new image bounds");			
+		
 		
 		interpolateMissingPixels(ip);
 		
 		return ip;
 	}
 	
+
 	/**
 	 * Add the pixels in the given face to an image processor. 
-	 * @param f
-	 * @param mesh
+	 * @param templateFace
+	 * @param targetFace
 	 * @param ip
 	 * @param xOffset
 	 * @param yOffset
 	 * @return
 	 */
-	private int addFaceToImage(MeshFace templateFace, MeshFace targetFace, ImageProcessor ip, int xOffset, int yOffset){
-		
+	private int drawFaceToImage(MeshFace templateFace, MeshFace targetFace, ImageProcessor ip, int xOffset, int yOffset){
+				
 		int missingPixels = 0;
-		Map<MeshFaceCoordinate, Integer> faceMap = map.get(templateFace);
-		finest("Getting pixels from face");
 		
-		for(MeshFaceCoordinate c : faceMap.keySet() ){
+		List<MeshPixel> faceMap = map.get(templateFace);
+		finer("Found "+faceMap.size()+" pixels in face");
+		
+		for(MeshPixel c : faceMap ){
 			
+			finest("Pixel:");
 			
-			int pixelValue = faceMap.get(c);
-			finest(c.toString()+" : Value: "+pixelValue);
-			IPoint p = c.getPixelCoordinate(targetFace);
+			int pixelValue = c.getValue();
+			finest("\t"+c.toString());
+			IPoint p = c.getCoordinate().getCartesianCoordinate(targetFace);
 
 			
 			int x = p.getXAsInt() + xOffset;
 			int y = p.getYAsInt() + yOffset;
 			
-			finest("Coordinate in target face is "+p.toString());
-			finest("Moving point to "+x+", "+y);
+			finest("\tCoordinate in target face is "+p.toString());
+			finest("\tMoving point to "+x+", "+y);
 			// Handle array out of bounds errors from consensus nuclei. 
 			// This is because the consensus has -ve x and y positions			
 			try {
 				ip.set(x, y, pixelValue);
-				finest("Pixel set at "+x+", "+y);
+//				finest("\tPixel set at "+x+", "+y);
 			} catch (ArrayIndexOutOfBoundsException e){
-				finer("Point outside image bounds: "+x+", "+y);
+				finer("\tPoint outside image bounds: "+x+", "+y);
 				missingPixels++;
 			}
 			
@@ -149,11 +167,11 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 		
 		for(MeshFace f : map.keySet()){
 			
-			Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
+			List<MeshPixel> faceMap = map.get(f);
 
-			for(MeshFaceCoordinate c : faceMap.keySet() ){
+			for(MeshPixel c : faceMap ){
 
-				IPoint p = c.getPixelCoordinate(mesh.getFace(f));
+				IPoint p = c.getCoordinate().getCartesianCoordinate(mesh.getFace(f));
 				
 				
 				maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
@@ -284,12 +302,12 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 		b.append("Listing faces:\n");
 		for(MeshFace f : map.keySet()){
 			
-			Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
+			List<MeshPixel> faceMap = map.get(f);
 			b.append(f.toString()+"\n");
 			b.append("Listing coordinates in face:\n");
-			for(MeshFaceCoordinate c : faceMap.keySet() ){
+			for(MeshPixel c : faceMap ){
 				
-				int pixelValue = faceMap.get(c);
+				int pixelValue = c.getValue();
 				b.append(c.toString()+pixelValue+"\n");				
 			}
 			
@@ -302,50 +320,90 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 	 * coordinates. Return a map of the face coordinates and their pixel values
 	 * @param ip
 	 * @return
+	 * @throws MeshImageCreationException 
 	 */
-	private void makeFaceCoordinates(Mesh<Nucleus> mesh, ImageProcessor ip){
+	private void makeFaceCoordinates(final ImageProcessor ip) throws MeshImageCreationException{
 
 		int missedCount = 0;
+		
+		fine("Creating MeshPixels for the template mesh based on the image processor");
+		
+		//Add an empty list of MeshPixels to each face
+		for(MeshFace face : template.getFaces()){
+			map.put(face, new ArrayList<MeshPixel>());
+		}
 		
 		for(int x=0; x<ip.getWidth(); x++){
 			
 			for(int y=0; y<ip.getHeight(); y++){
-				IPoint p = IPoint.makeNew(x, y);
+				
+				// The pixel
+				IPoint pixel = IPoint.makeNew(x, y);
+//				finer("Image pixel "+pixel);
 
-				if(mesh.getComponent().containsOriginalPoint(p)){
+				if( ! template.getComponent().containsOriginalPoint(pixel)){
+//					finer("\tTemplate component does not contain pixel "+pixel);
+					continue;
+				}
+				
+				if( ! template.contains(pixel)){
+					missedCount++;
+//					finer("\tTemplate mesh does not contain pixel "+pixel);
+					continue;
+				}
+								
+				MeshFace face = template.getFace(pixel); // the face containing the pixel
+
+				if(face==null){
+					missedCount++;
+//					finer("\tTemplate mesh does not contain a face with pixel "+pixel);
+					continue;
+				}
+
+				// The ImageJ ByteProcessor assumes unsigned values 0-255 in image processing, 
+				// but the Java type 'byte' is signed, with a range -128...+127. 
+				// It's the same for a ShortProcessor, there you have to use a mask of 0xffff.
+				// Apparently also true of a ColorProcessor (32 bit RGB processor), since imported converted greyscale
+				// images fail without this conversion
+
+				int value = ip.get(x, y);
+								
+				if(value<0){
 					
-					if(mesh.contains(p)){
-						int pixel = ip.get(x, y);
-						MeshFace f = mesh.getFace(p);
+//					log(ip.getClass().getName());
+					value = value&0xff;
+				}
+				
+				if(value<0){
+					throw new MeshImageCreationException("Pixel value is negative at "+x+", "+y+": "+value);
+				}
+				
+				List<MeshPixel> pixels = map.get(face);
+
+
+				try {
 					
-						finest("Found face in target mesh for point "+p.toString());
-						Map<MeshFaceCoordinate, Integer> faceMap = map.get(f);
-
-						if(faceMap==null){ // create the facemap if not present
-							map.put(f, new HashMap<MeshFaceCoordinate, Integer>());
-							faceMap = map.get(f);
-						}
-						
-						if(f==null){
-							fine("Error fetching face from mesh at "+p.toString());
-						}
-
-						MeshFaceCoordinate c = f.getFaceCoordinate(p);
-						faceMap.put(c, pixel);
-					} else {
-						missedCount++;
-						finest("Cannot find face in target mesh for point "+p.toString() + " (Total "+missedCount+")");
-						
+					try {
+						MeshFaceCoordinate c = face.getFaceCoordinate(pixel);
+						pixels.add( new DefaultMeshPixel(c, value) );
+					} catch(IllegalArgumentException e){
+						throw new MeshImageCreationException("Pixel value is negative");
 					}
+
+				} catch (PixelOutOfBoundsException e) {
+					missedCount++;
+//					finer("Cannot get coordinate within face: "+e.getMessage());
 				}
 				
 			}
 		}
+		
+		
 		if(missedCount >0){
 			fine("Faces could not be found for "+missedCount+" points");
-			finer(mesh.toString());
 			
 		}
 	}
+	
 
 }

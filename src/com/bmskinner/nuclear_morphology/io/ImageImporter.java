@@ -191,7 +191,7 @@ public class ImageImporter implements Loggable {
 	    result.addSlice(channels[Constants.RGB_RED].getProcessor());
 	    result.addSlice(channels[Constants.RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
-	    log(Level.FINE, "New stack has "+result.getSize()+" slices");
+	    fine("New stack has "+result.getSize()+" slices");
 	    return result;
 	}
 	

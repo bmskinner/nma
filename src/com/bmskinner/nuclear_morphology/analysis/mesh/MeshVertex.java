@@ -31,8 +31,6 @@ public interface MeshVertex {
 
 	IPoint getPosition();
 
-	void setPosition(IPoint p);
-
 	void addEdge(MeshEdge e);
 
 	void removeEdge(MeshEdge e);

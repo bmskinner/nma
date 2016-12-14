@@ -40,7 +40,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
@@ -1381,9 +1382,9 @@ public class NucleusDatasetCreator implements Loggable {
 			// decide the angle at which to place the iqr points
 			// make a line between points 3 ahead and behind. 
 			// get the orthogonal line, running through the XYPoint
-			Equation eq = new Equation(n.getBorderPoint( prevIndex  ), n.getBorderPoint( nextIndex  ));
+			LineEquation eq = new DoubleEquation(n.getBorderPoint( prevIndex  ), n.getBorderPoint( nextIndex  ));
 			// move the line to the index point, and find the orthogonal line
-			Equation perp = eq.translate(p).getPerpendicular(p);
+			LineEquation perp = eq.translate(p).getPerpendicular(p);
 			
 			// Select the index from the scaledRange corresponding to the position in the segment
 			// The scaledRange is aligned to the segment already

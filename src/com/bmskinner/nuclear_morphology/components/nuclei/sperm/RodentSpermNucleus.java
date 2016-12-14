@@ -37,7 +37,8 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -606,7 +607,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // determine the coordinates of the point intersected as int
     // for each xvalue of each point in array, get the line y value
     // at the point the yvalues are closest and not the tail point is the intersesction
-    Equation lineEquation = new Equation(this.getCentreOfMass(), this.getBorderTag(Tag.ORIENTATION_POINT));
+    LineEquation lineEquation = new DoubleEquation(this.getCentreOfMass(), this.getBorderTag(Tag.ORIENTATION_POINT));
     double minDeltaY = 100;
     int minDeltaYIndex = 0;
 

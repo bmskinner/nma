@@ -81,7 +81,7 @@ public interface Imageable {
 	/**
 	 * Get the image from which the component was detected. Opens
 	 * the image via the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches the appropriate
-	 * channel and inverts it
+	 * channel and inverts it. The complete image is returned; no cropping is performed
 	 * @return an ImageJ image processor
 	 * @throws UnloadableImageException if the image can't be loaded
 	 */

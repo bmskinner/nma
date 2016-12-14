@@ -21,7 +21,8 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
@@ -78,7 +79,7 @@ public class SignalAnalyser implements Loggable {
 				for(INuclearSignal signal : signals){
 
 					// get the line equation
-					Equation eq = new Equation(signal.getCentreOfMass(), n.getCentreOfMass());
+					LineEquation eq = new DoubleEquation(signal.getCentreOfMass(), n.getCentreOfMass());
 
 					// using the equation, get the y postion on the line for each X point around the roi
 					double minDeltaY = 100;

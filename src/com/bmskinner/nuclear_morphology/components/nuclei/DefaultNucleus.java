@@ -33,7 +33,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -526,7 +527,7 @@ public class DefaultNucleus
 		
 		// As an anti-bibble defence, get a best fit line acrosss the region
 		// Use the line of best fit to find appropriate top and bottom vertical points
-		Equation eq = Equation.calculateBestFitLine(pointsInRegion);
+		LineEquation eq = DoubleEquation.calculateBestFitLine(pointsInRegion);
 		
 		
 		// Take values along the best fit line that are close to the original TV and BV

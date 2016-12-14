@@ -36,6 +36,6 @@ public interface MeshFaceCoordinate {
 	 * @param face the face enclosing pixel values
 	 * @return the pixel at this face coordinate
 	 */
-	IPoint getPixelCoordinate(MeshFace face);
+	IPoint getCartesianCoordinate(MeshFace face);
 
 }

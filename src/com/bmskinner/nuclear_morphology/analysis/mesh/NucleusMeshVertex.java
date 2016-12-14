@@ -27,9 +27,9 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public class NucleusMeshVertex implements MeshVertex {
 	
-	private String name; // the number in the mesh - use to compare vertexes between nuclei
-	private IPoint position; // the posiiton of the vertex
-	private boolean peripheral; // is the vertex on the border of the object
+	final private String name; // the number in the mesh - use to compare vertexes between nuclei
+	final private IPoint position; // the posiiton of the vertex
+	final private boolean peripheral; // is the vertex on the border of the object
 	
 	Set<MeshEdge> edges = new HashSet<MeshEdge>(); // store the edges attached to the vertex
 	
@@ -73,13 +73,13 @@ public class NucleusMeshVertex implements MeshVertex {
 		return position;
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#setPosition(com.bmskinner.nuclear_morphology.components.generic.IPoint)
-	 */
-	@Override
-	public void setPosition(IPoint p){
-		this.position = p;
-	}
+//	/* (non-Javadoc)
+//	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#setPosition(com.bmskinner.nuclear_morphology.components.generic.IPoint)
+//	 */
+//	@Override
+//	public void setPosition(IPoint p){
+//		this.position = p;
+//	}
 	
 	/* (non-Javadoc)
 	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex#addEdge(com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge)

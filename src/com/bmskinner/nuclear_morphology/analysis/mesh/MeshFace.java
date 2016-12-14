@@ -95,7 +95,7 @@ public interface MeshFace {
 	 * @param p
 	 * @return
 	 */
-	MeshFaceCoordinate getFaceCoordinate(IPoint p);
+	MeshFaceCoordinate getFaceCoordinate(IPoint p) throws PixelOutOfBoundsException;
 	
 	/**
 	 * Count the number of vertices in the face that are peripheral

@@ -4,7 +4,9 @@ import java.awt.geom.Path2D;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -66,7 +68,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 	 * Duplicate the face
 	 * @param f
 	 */
-	public NucleusMeshFace(MeshFace f){
+	public NucleusMeshFace(final MeshFace f){
 		for(MeshEdge e : f.getEdges()){
 			edges.add(new NucleusMeshEdge(e));
 			
@@ -437,11 +439,12 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 	 * @param v the vertex opposite the edge
 	 * @param p the point within the face
 	 * @return
+	 * @throws PixelOutOfBoundsException 
 	 */
-	private double getEdgeProportion(MeshVertex v, IPoint p){
+	private double getEdgeProportion(MeshVertex v, IPoint p) throws PixelOutOfBoundsException{
 		
 		// Line from vertex to point
-		Equation eq1 = new Equation(v.getPosition(), p);
+		LineEquation eq1 = new FloatEquation(v.getPosition(), p);
 		
 		// Edge opposite the vertex
 		MeshEdge oppEdge = this.getOppositeEdge(v);
@@ -451,14 +454,19 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 		MeshVertex o2 = oppEdge.getV2(); 
 		
 		// Line marking opposite edge
-		Equation eq2 = new Equation(o1.getPosition(), o2.getPosition());
+		LineEquation eq2 = new FloatEquation(o1.getPosition(), o2.getPosition());
 		
 		// Position on edge intercepting line from vertex through point p
 		IPoint intercept = eq2.getIntercept(eq1);
 		
 		// Proportion through edge
-		double proportion = oppEdge.getPositionProportion(intercept);
-		return proportion;
+		try {
+			double proportion = oppEdge.getPositionProportion(intercept);
+			return proportion;
+		} catch(IllegalArgumentException e){
+			throw new PixelOutOfBoundsException("Cannot get the edge proportion for edge "+oppEdge);
+		}
+
 	}
 	
 	/**
@@ -499,10 +507,10 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 	 * @see com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#getFaceCoordinate(com.bmskinner.nuclear_morphology.components.generic.IPoint)
 	 */
 	@Override
-	public MeshFaceCoordinate getFaceCoordinate(IPoint p){
+	public MeshFaceCoordinate getFaceCoordinate(IPoint p) throws PixelOutOfBoundsException {
 		
 		if( ! contains(p)  ){
-			throw new IllegalArgumentException("Point is not within face: "+p.toString());
+			throw new PixelOutOfBoundsException("Point is not within face: "+p.toString());
 		}
 		
 		boolean usePeripheral = this.getPeripheralVertexCount()==2;
@@ -514,6 +522,10 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 		double p1p = getEdgeProportion(p1, p);
 		double p2p = getEdgeProportion(p2, p);
 		double i1p = getEdgeProportion(i1, p);
+		
+		if(p1p==0 && p2p==0 & i1p==0){
+			warn("Point "+p+" does not have edge proportion calculated");
+		}
 		
 		return new NucleusMeshFaceCoordinate(p1p, p2p, i1p);
 

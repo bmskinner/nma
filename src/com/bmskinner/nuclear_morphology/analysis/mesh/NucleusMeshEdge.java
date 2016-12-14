@@ -22,23 +22,31 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import java.awt.geom.Line2D;
 
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.FloatEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NucleusMeshEdge implements MeshEdge {
-	private MeshVertex v1;
-	private MeshVertex v2;
+	final private MeshVertex v1;
+	final private MeshVertex v2;
 	private double value;
 	
-	public NucleusMeshEdge(MeshVertex v1, MeshVertex v2, double ratio){
+	/**
+	 * Create from two vertices and assign a value to the edge
+	 * @param v1 the first vertex
+	 * @param v2 the second vertex
+	 * @param v the value
+	 */
+	public NucleusMeshEdge(final MeshVertex v1, final MeshVertex v2, final double v){
 		
 		if(v1==v2){
 			throw new IllegalArgumentException("Vertices are identical in edge constructor");
 		}
 		this.v1 = v1;
 		this.v2 = v2;
-		this.value = ratio;
+		this.value = v;
 		
 		v1.addEdge(this);
 		v2.addEdge(this);
@@ -48,7 +56,7 @@ public class NucleusMeshEdge implements MeshEdge {
 	 * Duplicate the edge
 	 * @param e
 	 */
-	public NucleusMeshEdge(MeshEdge e){
+	public NucleusMeshEdge(final MeshEdge e){
 		this.v1 = new NucleusMeshVertex(e.getV1());
 		this.v2 = new NucleusMeshVertex(e.getV2());
 		
@@ -116,7 +124,7 @@ public class NucleusMeshEdge implements MeshEdge {
 	 */
 	@Override
 	public IPoint getMidpoint(){
-		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
+		LineEquation eq = new DoubleEquation(v1.getPosition(), v2.getPosition());
 		if(v1.getPosition().getX()<v2.getPosition().getX()){
 			return eq.getPointOnLine(v1.getPosition(), getLength()/2);
 		} else {
@@ -196,7 +204,7 @@ public class NucleusMeshEdge implements MeshEdge {
 	@Override
 	public IPoint getProportionalPosition(double d){
 		
-		return Equation.getProportionalDistance(v1.getPosition(), v2.getPosition(), d);
+		return DoubleEquation.getProportionalDistance(v1.getPosition(), v2.getPosition(), d);
 	}
 	
 	/* (non-Javadoc)
@@ -205,17 +213,54 @@ public class NucleusMeshEdge implements MeshEdge {
 	@Override
 	public double getPositionProportion(IPoint p ){
 		
-		Equation eq = new Equation(v1.getPosition(), v2.getPosition());
-		if(eq.isOnLine(p)){
+		IPoint upperX, lowerX, upperY, lowerY;
+		
+		// Establish the bounds for the edge
+		if(v1.getPosition().getX()<v2.getPosition().getX()){
+			
+			upperX = v2.getPosition();
+			lowerX = v1.getPosition();
+		} else {
+			upperX = v1.getPosition();
+			lowerX = v2.getPosition();
+		}
+		
+		// Establish the bounds for the edge
+		if(v1.getPosition().getY()<v2.getPosition().getY()){
+
+			upperY = v2.getPosition();
+			lowerY = v1.getPosition();
+		} else {
+			upperY = v1.getPosition();
+			lowerY = v2.getPosition();
+		}
+
+		// Ensure the point lies within the X bounds of the line.
+		// Avoid using the equation in case of float / double precision issues
+		if(p.getX()<lowerX.getX() || p.getX()>upperX.getX() ){
+			throw new IllegalArgumentException("Point "+p+" does not fit on edge X: "+lowerX+" - "+upperX);
+		
+		}
+		
+		// Ensure the point lies within the Y bounds of the line.
+		// Avoid using the equation in case of float / double precision issues
+		if(p.getY()<lowerY.getY() || p.getY()>upperY.getY() ){
+			throw new IllegalArgumentException("Point "+p+" does not fit on edge Y: "+lowerY+" - "+upperY);
+
+		}
+		
+//		LineEquation eq = new FloatEquation(v1.getPosition(), v2.getPosition());
+		
+//		if(eq.isOnLine(p)){
 			
 			double totalLength = v1.getLengthTo(v2);
 			double length = p.getLengthTo(v1.getPosition());
 			
 			return length / totalLength;
 			
-		} else {
-			return 0;
-		}
+//		} else {
+//			throw new IllegalArgumentException("Point "+p+" does not lie on the edge line "+eq.toString()+" from "+v1.toString()+" - "+v2.toString());
+//		}
 		
 	}
 	

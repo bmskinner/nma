@@ -29,7 +29,8 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -255,7 +256,7 @@ public class CurveRefolder extends AnalysisWorker {
 			 * 
 			 */
 
-			Equation eq = new Equation(prevPoint, nextPoint);
+			LineEquation eq = new DoubleEquation(prevPoint, nextPoint);
 			double distance = prevPoint.getLengthTo(nextPoint) / 2;
 			IPoint newPoint = eq.getPointOnLine(prevPoint, distance);
 						
@@ -267,7 +268,7 @@ public class CurveRefolder extends AnalysisWorker {
 			 * 
 			 * This should smooth the curve without completely blunting corners
 			 */
-			Equation eq2 = new Equation(newPoint, thisPoint);
+			LineEquation eq2 = new DoubleEquation(newPoint, thisPoint);
 			double distance2 = newPoint.getLengthTo(thisPoint) / 2;
 			IPoint replacementPoint = eq2.getPointOnLine(newPoint, distance2);
 			

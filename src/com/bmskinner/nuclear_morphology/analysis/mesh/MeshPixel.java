@@ -19,34 +19,24 @@
 
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
-import java.util.List;
-
-import ij.process.ImageProcessor;
-
 /**
- * A mesh image converts the pixels within an image
- * to coordinates within each face of a Mesh. It provides
- * the mechanisms to convert a mesh back into an image
+ * Stores a value at a MeshFaceCoordinate
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface MeshImage<CellularComponent> {
-
+public interface MeshPixel {
+	
 	/**
-	 * Draw the image in this object at the coordinates in the given mesh
-	 * @param mesh the mesh to use to position pixels in cartesian space
+	 * Get the pixel value
 	 * @return
-	 * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
 	 */
-	ImageProcessor drawImage(Mesh<CellularComponent> mesh) throws UncomparableMeshImageException;
-	
+	int getValue();
 	
 	/**
-	 * Get the pixels for the given face in the mesh
-	 * @param f the face
-	 * @return the pixels within the face
+	 * Get the coordinate of the pixel
+	 * @return
 	 */
-	List<MeshPixel> getMeshPixels(MeshFace f);
+	MeshFaceCoordinate getCoordinate();
 
 }

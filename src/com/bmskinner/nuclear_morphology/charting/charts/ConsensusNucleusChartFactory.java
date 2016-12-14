@@ -29,6 +29,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
@@ -370,20 +372,23 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			finest("Creating single consensus chart");
 			
 			if(options.isShowMesh()){ 
-				
-				Mesh mesh = new NucleusMesh(options.firstDataset()
-						.getCollection()
-						.getConsensusNucleus(), options.getMeshSize());
-				
-				
-				if(options.isStraightenMesh()){
-					mesh = mesh.straighten();
-				}
-
 				try {
+					Mesh<Nucleus> mesh = new NucleusMesh(options.firstDataset()
+							.getCollection()
+							.getConsensusNucleus(), options.getMeshSize());
+
+
+					if(options.isStraightenMesh()){
+						mesh = mesh.straighten();
+					}
+
+				
 					return new OutlineChartFactory(options).createMeshChart(mesh, 0.5 );
 				} catch (ChartCreationException e) {
-					fine("Error making mesh chart", e);
+					stack("Error making mesh chart", e);
+					return makeErrorChart();
+				} catch (MeshCreationException e) {
+					stack("Error creating mesh", e);
 					return makeErrorChart();
 				}
 				

@@ -19,7 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
-import com.bmskinner.nuclear_morphology.components.generic.Equation;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -51,14 +52,14 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
 	 * @param p2 edge opposite peripheral vertex with higher number
 	 * @param i1 edge opposite internal vertex
 	 */
-	public NucleusMeshFaceCoordinate(double p1, double p2, double i1){
+	public NucleusMeshFaceCoordinate(final double p1, final double p2, final double i1){
 
 		if(p1>1 || p2>1 || i1>1){
 			throw new IllegalArgumentException("Coordinates must be less than 1");
 		}
 
 		if(p1<0 || p2<0 || i1<0){
-			throw new IllegalArgumentException("Coordinates must be greater than 0");
+			throw new IllegalArgumentException("Coordinates must be greater than or equal to 0");
 		}
 
 		this.p1 = p1;
@@ -72,8 +73,12 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
 	 * @return
 	 */
 	@Override
-	public IPoint getPixelCoordinate(MeshFace face){
-
+	public IPoint getCartesianCoordinate(final MeshFace face){
+		
+		if(face==null){
+			throw new IllegalArgumentException("Face is null when getting cartesian coordinate");
+		}
+		
 		// Identify the vertices
 		boolean usePeripheral = face.getPeripheralVertexCount()==2;
 
@@ -95,11 +100,11 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
 		IPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
 		//finest("Point along I1-P1: "+i1_p1_prop.toString());
 
-		Equation eq1 = new Equation(p2.getPosition(), i1_p1_prop);
+		LineEquation eq1 = new DoubleEquation(p2.getPosition(), i1_p1_prop);
 
 		IPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
 		//finest("Point along I1-P2: "+i1_p2_prop.toString());
-		Equation eq2 = new Equation(p1.getPosition(), i1_p2_prop);
+		LineEquation eq2 = new DoubleEquation(p1.getPosition(), i1_p2_prop);
 
 		// Find intersection
 		IPoint position = eq1.getIntercept(eq2);

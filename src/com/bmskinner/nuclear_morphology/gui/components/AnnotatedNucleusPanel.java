@@ -67,14 +67,8 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	}
 	
 	private void importNucleusImage() throws Exception {
-		File imageFile = cell.getNucleus().getSourceFile();
-		ImageStack imageStack = new ImageImporter(imageFile).importImage();
 		
-		// Get the counterstain stack, make greyscale and invert
-		ImageProcessor openProcessor= new ImageConverter(imageStack)
-			.convertToGreyscale()
-			.invert()
-			.toProcessor();
+		ImageProcessor openProcessor = cell.getNucleus().getImage();
 
 		
 		openProcessor = new NucleusAnnotator(openProcessor)
