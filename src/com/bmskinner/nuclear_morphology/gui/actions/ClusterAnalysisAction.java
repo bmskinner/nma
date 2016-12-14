@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -77,7 +78,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		String tree = (((NucleusClusterer) worker).getNewickTree());
 
 		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-		ClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
+		IClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
 
 		finest("Getting group number");
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;

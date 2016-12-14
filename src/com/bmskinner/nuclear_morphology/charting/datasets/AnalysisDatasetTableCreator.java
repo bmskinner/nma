@@ -47,10 +47,10 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -1204,7 +1204,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
 
 			for(IClusterGroup g : clusterGroups ){
-				ClusteringOptions op = g.getOptions();
+				IClusteringOptions op = g.getOptions();
 
 				Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
 						? op.getIterations()

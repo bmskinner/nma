@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
@@ -71,7 +72,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 
 		String newick = (((NucleusTreeBuilder) worker).getNewickTree());
 
-		ClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
+		IClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
 
 
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;

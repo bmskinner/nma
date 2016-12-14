@@ -22,15 +22,12 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.clusterers.Clusterer;
@@ -49,15 +46,15 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
 
 		
-	public NucleusClusterer(IAnalysisDataset dataset, ClusteringOptions options){
+	public NucleusClusterer(IAnalysisDataset dataset, IClusteringOptions options){
 		super(dataset, options);		
-		log(Level.FINEST, "Total set to "+this.getProgressTotal());
+		finest("Total set to "+this.getProgressTotal());
 	}
 	
 	@Override
 	protected Boolean doInBackground() {
 		boolean ok = cluster(collection);
-		log(Level.FINE, "Returning "+ok);
+		fine("Returning "+ok);
 		return ok;
 	}
 	
@@ -70,9 +67,6 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 		return this.clusterMap.get(cluster);
 	}
 	
-	public ClusteringOptions getOptions(){
-		return this.options;
-	}
 	
 	/**
 	 * If a tree is present (i.e clustering was hierarchical),
@@ -102,10 +96,8 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 	 * @return success or fail
 	 */
 	public boolean cluster(ICellCollection collection){
-		
-//		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
-		
-		log(Level.FINE, "Beginning clustering of population");
+
+		fine("Beginning clustering of population");
 				
 		try {
 						
@@ -134,7 +126,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					clusterer.setDistanceIsBranchLength(true);
 					clusterer.setNumClusters(1);
 					
-					log(Level.FINEST, "Building clusterer for tree");
+					finest( "Building clusterer for tree");
 					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
 					clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
 					clusterer.setPrintNewick(true);
@@ -143,7 +135,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 					
 					clusterer.setNumClusters(options.getClusterNumber());
 
-					log(Level.FINEST, "Building clusterer for clustering");
+					finest("Building clusterer for clustering");
 					clusterer.buildClusterer(instances);    // build the clusterer
 					assignClusters(clusterer, collection);		
 					
@@ -165,7 +157,7 @@ public class NucleusClusterer extends NucleusTreeBuilder {
 			error("Error in assignments", e);
 			return false;
 		}
-		log(Level.FINE, "Clustering complete");
+		fine("Clustering complete");
 		return true;
 	}
 	

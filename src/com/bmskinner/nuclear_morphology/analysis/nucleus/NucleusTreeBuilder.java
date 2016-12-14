@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -35,8 +34,8 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
@@ -56,15 +55,20 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	protected String newickTree = null;	
 		
 	protected ICellCollection collection;
-	protected ClusteringOptions options;
+	protected IClusteringOptions options;
 		
-	public NucleusTreeBuilder(IAnalysisDataset dataset, ClusteringOptions options){
+	/**
+	 * Construct from a dataset with a set of clustering options
+	 * @param dataset
+	 * @param options
+	 */
+	public NucleusTreeBuilder(IAnalysisDataset dataset, IClusteringOptions options){
 		super(dataset);
 		this.options = options;
 		this.collection = dataset.getCollection();
 		this.setProgressTotal(dataset.getCollection().size() * 2);
 		
-		log(Level.FINEST, "Total set to "+this.getProgressTotal());
+		finest("Total set to "+this.getProgressTotal());
 	}
 	
 	@Override
@@ -73,7 +77,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		return ok;
 	}
 	
-	public ClusteringOptions getOptions(){
+	public IClusteringOptions getOptions(){
 		return this.options;
 	}
 	
@@ -83,17 +87,17 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @return
 	 */
 	public String getNewickTree(){
-		return this.newickTree;
+		return newickTree;
 	}
 	
 	protected Instances makeInstances()throws Exception{
 
 		Instances instances = null;
 
-		log(Level.FINER, "Making profile instances");
+		finer("Making profile instances");
 		instances = makeProfileInstances(collection);
 
-		log(Level.FINEST, instances.toSummaryString());
+		finer( instances.toSummaryString());
 		return instances;
 		
 	}
@@ -104,11 +108,9 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @param collection
 	 * @return success or fail
 	 */
-	public boolean makeTree(ICellCollection collection){
-		
-//		this.logger = new Logger(collection.getDebugFile(), "NucleusClusterer");
-		
-		log(Level.FINE, "Beginning tree building");
+	protected boolean makeTree(ICellCollection collection){
+
+		fine("Beginning tree building");
 				
 		try {
 						
@@ -116,15 +118,15 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			Instances instances = makeInstances();
 
 			// create the clusterer to run on the Instances
-			String[] optionArray = this.options.getOptions();
+			String[] optionArray = options.getOptions();
 
 			try {
 				
 
-				log(Level.FINER, "Clusterer is type "+options.getType());
+				finer("Clusterer is type "+options.getType());
 				for(String s : optionArray){
-//					fileLogger.log(Level.FINE, "Clusterer options: "+s);
-					log(Level.FINEST, "Clusterer options: "+s);
+
+					finest("Clusterer options: "+s);
 				}
 				
 //				Cobweb clusterer = new Cobweb();
@@ -136,7 +138,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				clusterer.setNumClusters(1);
 				clusterer.setDebug(true);
 
-				log(Level.FINEST, "Building clusterer for tree");
+				finest("Building clusterer for tree");
 				firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
 				clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
 				clusterer.setPrintNewick(true);
@@ -162,7 +164,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		int profileAttributeCount = 0;
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile, spaced <windowSize> apart
-			log(Level.FINEST, "Including profile");
+			finest("Including profile");
 			profileAttributeCount = collection.getProfileCollection().getProfile(options.getProfileType(), Tag.REFERENCE_POINT, 50).size();
 			profileAttributeCount /= windowSize;
 			attributeCount += profileAttributeCount;
@@ -170,7 +172,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 			if(options.isIncludeStatistic(stat)){
-				log(Level.FINEST, "Including "+stat.toString());
+				finest("Including "+stat.toString());
 				attributeCount++;
 			}
 		}

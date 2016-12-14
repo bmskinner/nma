@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 
 /**
  * This holds the ids of datasets created by clustering,
@@ -35,7 +36,7 @@ public class ClusterGroup implements IClusterGroup {
 	
 	private static final long serialVersionUID = 1L;
 	private List<UUID> ids = new ArrayList<UUID>(0); // hold the ids of datasets in a cluster
-	private ClusteringOptions options; // store the options that were used to generate the cluster
+	private IClusteringOptions options; // store the options that were used to generate the cluster
 	private String name;
 	private String newickTree = null;
 	
@@ -44,7 +45,7 @@ public class ClusterGroup implements IClusterGroup {
 	 * @param name the group name (informal)
 	 * @param options the options used to create the cluster
 	 */
-	public ClusterGroup(String name, ClusteringOptions options){
+	public ClusterGroup(String name, IClusteringOptions options){
 		this.name = name;
 		this.options = options;
 	}
@@ -55,7 +56,7 @@ public class ClusterGroup implements IClusterGroup {
 	 * @param options the options used to create the cluster
 	 * @param tree the Newick tree for the cluster as a String
 	 */
-	public ClusterGroup(String name, ClusteringOptions options, String tree){
+	public ClusterGroup(String name, IClusteringOptions options, String tree){
 		this(name, options);
 		this.newickTree = tree;
 	}
@@ -135,7 +136,7 @@ public class ClusterGroup implements IClusterGroup {
 	 * @see components.IClusterGroup#getOptions()
 	 */
 	@Override
-	public ClusteringOptions getOptions(){
+	public IClusteringOptions getOptions(){
 		return this.options;
 	}
 	

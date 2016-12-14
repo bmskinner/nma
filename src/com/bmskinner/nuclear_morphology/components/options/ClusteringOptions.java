@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -29,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class ClusteringOptions implements Serializable {
+public class ClusteringOptions implements IClusteringOptions {
 
 	private static final long serialVersionUID = 1L;
 	private ClusteringMethod type;
@@ -64,7 +63,7 @@ public class ClusteringOptions implements Serializable {
 	 * Copy the options from an existing object
 	 * @param oldOptions
 	 */
-	public ClusteringOptions(ClusteringOptions oldOptions){
+	public ClusteringOptions(IClusteringOptions oldOptions){
 		this.type                = oldOptions.getType();
 		this.hierarchicalMethod  = oldOptions.getHierarchicalMethod();
 		this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
@@ -79,15 +78,14 @@ public class ClusteringOptions implements Serializable {
 		}
 		
 		this.profileType = oldOptions.getProfileType();
-		this.includeMesh = oldOptions.includeMesh;
+		this.includeMesh = oldOptions.isIncludeMesh();
 		
 	}
 	
-	/**
-	 * Check if the given segment is to be included in the clustering
-	 * @param stat
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#isIncludeSegment(java.util.UUID)
 	 */
+	@Override
 	public boolean isIncludeSegment(UUID i){
 		if( this.segmentMap.containsKey(i)){
 			return this.segmentMap.get(i);
@@ -96,6 +94,10 @@ public class ClusteringOptions implements Serializable {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#useSegments()
+	 */
+	@Override
 	public boolean useSegments(){
 		if(this.segmentMap.isEmpty()){
 			return false;
@@ -104,10 +106,10 @@ public class ClusteringOptions implements Serializable {
 		}
 	}
 	
-	/**
-	 * Get all the segments that are saved in this options object
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getSegments()
 	 */
+	@Override
 	public Set<UUID> getSegments(){
 		return segmentMap.keySet();
 	}
@@ -117,11 +119,10 @@ public class ClusteringOptions implements Serializable {
 	}
 		
 	
-	/**
-	 * Check if the given statistic is to be included in the clustering
-	 * @param stat
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#isIncludeStatistic(com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic)
 	 */
+	@Override
 	public boolean isIncludeStatistic(PlottableStatistic stat){
 		if( this.statMap.containsKey(stat)){
 			return this.statMap.get(stat);
@@ -130,10 +131,10 @@ public class ClusteringOptions implements Serializable {
 		}
 	}
 	
-	/**
-	 * Get all the statistics that are saved in this options object
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getSavedStatistics()
 	 */
+	@Override
 	public Set<PlottableStatistic> getSavedStatistics(){
 		return statMap.keySet();
 	}
@@ -142,6 +143,10 @@ public class ClusteringOptions implements Serializable {
 		this.statMap.put(stat, b);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#isIncludeProfile()
+	 */
+	@Override
 	public boolean isIncludeProfile(){
 		return this.includeProfile;
 	}
@@ -151,6 +156,10 @@ public class ClusteringOptions implements Serializable {
 	}
 	
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#isUseSimilarityMatrix()
+	 */
+	@Override
 	public boolean isUseSimilarityMatrix() {
 		return useSimilarityMatrix;
 	}
@@ -173,6 +182,10 @@ public class ClusteringOptions implements Serializable {
 		this.type = type;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getType()
+	 */
+	@Override
 	public ClusteringMethod getType() {
 		return type;
 	}
@@ -208,30 +221,38 @@ public class ClusteringOptions implements Serializable {
 		this.iterations = iterations;
 	}
 	
-	/**
-	 * Get the desired number of hierarchical clusters
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getClusterNumber()
 	 */
+	@Override
 	public int getClusterNumber() {
 		return clusterNumber;
 	}
 
 
-	/**
-	 * Get the chosen hierarchical method of clustering
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getHierarchicalMethod()
 	 */
+	@Override
 	public HierarchicalClusterMethod getHierarchicalMethod() {
 		return hierarchicalMethod;
 	}
 
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getIterations()
+	 */
+	@Override
 	public int getIterations() {
 		return iterations;
 	}
 	
 	
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getProfileType()
+	 */
+	@Override
 	public ProfileType getProfileType() {
 		return profileType;
 	}
@@ -242,6 +263,10 @@ public class ClusteringOptions implements Serializable {
 	
 	
 
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#isIncludeMesh()
+	 */
+	@Override
 	public boolean isIncludeMesh() {
 		return includeMesh;
 	}
@@ -250,11 +275,10 @@ public class ClusteringOptions implements Serializable {
 		this.includeMesh = includeMesh;
 	}
 
-	/**
-	 * Get a string array of the options set here suitable
-	 * for the Weka HierarchicalClusterer
-	 * @return
+	/* (non-Javadoc)
+	 * @see com.bmskinner.nuclear_morphology.components.options.IClusteringOptions#getOptions()
 	 */
+	@Override
 	public String[] getOptions(){
 	
 		String[] options = null;

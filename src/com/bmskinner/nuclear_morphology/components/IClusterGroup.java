@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public interface IClusterGroup extends Serializable, Loggable {
@@ -61,7 +62,7 @@ public interface IClusterGroup extends Serializable, Loggable {
 	 * Get the options used to make this cluster group
 	 * @return
 	 */
-	ClusteringOptions getOptions();
+	IClusteringOptions getOptions();
 
 	/** 
 	 * Test if this group contains the given dataset id
