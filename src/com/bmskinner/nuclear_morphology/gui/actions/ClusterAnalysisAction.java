@@ -18,23 +18,19 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusClusterer;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.ClusterGroup;
+import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 
 public class ClusterAnalysisAction extends ProgressableAction {
@@ -51,9 +47,10 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		ClusteringOptions options = clusterSetup.getOptions();
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+			IAnalysisMethod m = new ClusteringMethod(dataset, options);
 
-			worker = new NucleusClusterer( dataset , options );
-
+			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size() * 2);
+			
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 
@@ -73,57 +70,18 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public void finished() {
 
 		this.setProgressBarVisible(false);
-		log("Found "+((NucleusClusterer) worker).getNumberOfClusters()+" clusters");
-
-		String tree = (((NucleusClusterer) worker).getNewickTree());
-
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-		IClusteringOptions options =  ((NucleusClusterer) worker).getOptions();
-
-		finest("Getting group number");
-		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		finest("Cluster group number chosen: "+clusterNumber);
-
-		IClusterGroup group = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, tree);
-
-		for(int cluster=0;cluster<((NucleusClusterer) worker).getNumberOfClusters();cluster++){
-
-			ICellCollection c = ((NucleusClusterer) worker).getCluster(cluster);
-
-			if(c.hasCells()){
-				finest("Cluster "+cluster+": "+c.getName());
-				
-				try {
-					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-				} catch (ProfileException e) {
-					warn("Error copying collection offsets");
-					fine("Error in offsetting", e);
-				}
-
-				
-				
-				group.addDataset(c);
-				c.setName(group.getName()+"_"+c.getName());
-
-				dataset.addChildCollection(c);
-								
-				
-				// attach the clusters to their parent collection
-				log("Cluster "+cluster+": "+c.size()+" nuclei");
-				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-				clusterDataset.setRoot(false);
-				
-				// set shared counts
-				c.setSharedCount(dataset.getCollection(), c.size());
-				dataset.getCollection().setSharedCount(c, c.size());
-				
-				list.add(clusterDataset);
-			}
-
-
+		
+		
+		try {
+			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
+			int size = r.getGroup().size();
+			log("Found "+size+" clusters");
+		} catch (InterruptedException | ExecutionException e) {
+			warn("Error clustering");
+			stack("Error clustering", e);
 		}
-		fine("Profiles copied to all clusters");
-		dataset.addClusterGroup(group);
+		
+
 		fireDatasetEvent(DatasetEvent.SAVE, dataset);
 		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
 		super.finished();

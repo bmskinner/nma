@@ -1,43 +1,29 @@
-/*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
@@ -47,10 +33,9 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SparseInstance;
 
-@Deprecated
-public class NucleusTreeBuilder extends AnalysisWorker {
-		
-	protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
+public class TreeBuildingMethod extends AbstractAnalysisMethod {
+	
+protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	
 	protected String newickTree = null;	
 		
@@ -62,19 +47,25 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 	 * @param dataset
 	 * @param options
 	 */
-	public NucleusTreeBuilder(IAnalysisDataset dataset, IClusteringOptions options){
+	public TreeBuildingMethod(IAnalysisDataset dataset, IClusteringOptions options){
 		super(dataset);
 		this.options = options;
 		this.collection = dataset.getCollection();
-		this.setProgressTotal(dataset.getCollection().size() * 2);
 		
-		finest("Total set to "+this.getProgressTotal());
 	}
 	
 	@Override
-	protected Boolean doInBackground() {
+	public IAnalysisResult call() throws Exception {
+
+		run();		
+		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+		IClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newickTree);
+		IAnalysisResult r = new ClusterAnalysisResult(dataset, group);
+		return r;
+	}
+	
+	private void run() {
 		boolean ok = makeTree(collection);
-		return ok;
 	}
 	
 	public IClusteringOptions getOptions(){
@@ -139,7 +130,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				clusterer.setDebug(true);
 
 				finest("Building clusterer for tree");
-				firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
 				clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
 				clusterer.setPrintNewick(true);
 
@@ -251,7 +241,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		
 		int profilePointsToCount = profileSize/windowSize;
 		
-		NucleusMesh template = null;
+		Mesh<Nucleus> template = null;
 		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
 			template = new NucleusMesh(collection.getConsensusNucleus());
 		}
@@ -314,7 +304,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 
 				instances.add(inst);
 				cellToInstanceMap.put(inst, c.getId());
-				publish(i++);
+				fireProgressEvent();
 			}
 
 		} catch(Exception e){
@@ -323,7 +313,6 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		return instances;
 		
 	}
-
+	
 
 }
-

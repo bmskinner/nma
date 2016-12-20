@@ -22,7 +22,7 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
  * @since 1.11.4
  *
  */
-public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> implements Loggable {
+public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> implements Loggable, ProgressListener {
 
 	private int progressTotal; // the maximum value for the progress bar
 	
@@ -34,34 +34,26 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     
     private final IAnalysisDataset activeDataset;
     
+    protected IAnalysisMethod method;
+    
     /**
      * Default constructor using a dataset. If possible, a file logger will be added
      * for the dataset's debug file
      * @param dataset
      */
     public AnalysisWorker(final IAnalysisDataset dataset){
-    	this.activeDataset = dataset;
-
-//    	if(dataset!=null){
-////    		AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
-////    		fileLogger.setLevel(FILE_DEBUG_LEVEL);
-////    		try {
-////    			
-//////    			Handler h = dataset.getLogHandler();
-//////    			
-//////    			if(h!=null){
-//////    				fileLogger.addHandler(h);
-//////    			}
-////    			
-////    		} catch(Exception e){
-////    			error("Error getting log file handler", e);
-////    			fileLogger = null;
-////    		}
-//    	} else {
-//    		fileLogger = null;
-//    	}
-
-    	finest("Created worker");
+    	this.activeDataset = dataset;    	
+    }
+    
+    /**
+     * Default constructor using a dataset. If possible, a file logger will be added
+     * for the dataset's debug file
+     * @param dataset
+     */
+    public AnalysisWorker(final IAnalysisDataset dataset, final IAnalysisMethod method){
+    	this.activeDataset = dataset;  
+    	this.method = method;
+    	method.addProgressListener(this);
     	
     }
     
@@ -74,72 +66,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
      */
     public AnalysisWorker(final IAnalysisDataset dataset, final File debugFile){
     	this(dataset);
-
-//    	finest("Creating log file handler");
-//		DebugFileHandler handler = null;
-//		try {
-//			
-//			AnalysisWorker.fileLogger = Logger.getLogger(this.getClass().getName());
-//			handler = new DebugFileHandler(debugFile);
-//			handler.setFormatter(new DebugFileFormatter());
-//			fileLogger.addHandler(handler);
-//			fileLogger.setLevel(FILE_DEBUG_LEVEL);
-//
-//		} catch (SecurityException e1) {
-//			log(Level.SEVERE, "Could not create the log file handler", e1);
-//			fileLogger = null;
-//
-//		} catch (IOException e1) {
-//			log(Level.SEVERE, "Could not create the log file handler", e1);
-//			fileLogger = null;
-//		}
-		finest("Created worker");
     }
-    
-    /**
-     * Log the given message to the program log window and to the dataset
-     * debug file
-     * @param level the log level
-     * @param message the message to log
-     */
-//    @Override
-//    public void log(Level level, String message){
-//    	if(fileLogger!=null){
-//    		fileLogger.log(level, message);
-//    	}
-//		Loggable.super.log(level, message);
-//    }
-    
-    
-//    
-//    @Override
-//    public void fine(String message){
-//    	log(Level.FINE, message);
-//    }
-//    
-//    @Override
-//    public void finer(String message){
-//    	log(Level.FINER, message);
-//    }
-//    
-//    @Override
-//    public void finest(String message){
-//    	log(Level.FINEST, message);
-//    }
-//    
-//    @Override
-//    public void warn(String message){
-//    	log(Level.WARNING, message);
-//    }
-    
-//    @Override
-//    public void error(String message, Throwable t){
-//    	if(fileLogger!=null){
-//    		fileLogger.log(Level.SEVERE, message, t);
-//    	}
-//    	Loggable.super.error( message, t);
-//    }
-    
     
     protected void setProgressTotal(int i){
     	this.progressTotal = i;
@@ -152,6 +79,29 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     protected IAnalysisDataset getDataset(){
     	return this.activeDataset;
     }
+    
+	@Override
+	public void progressEventReceived(ProgressEvent event) {
+		publish(progressCount++);
+		
+	}
+	
+	@Override
+    protected Boolean doInBackground() throws Exception {
+    	
+		try{
+				fireCooldown();
+
+				method.call();
+				return Boolean.TRUE;
+			
+		} catch(Exception e){
+			
+			error("Error running analysis method", e);
+			return Boolean.FALSE;
+		} 
+
+	}
 	
     @Override
     protected void process( List<Integer> integers ) {

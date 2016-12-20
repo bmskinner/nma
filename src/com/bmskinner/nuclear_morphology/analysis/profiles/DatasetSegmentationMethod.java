@@ -1,23 +1,3 @@
-/*******************************************************************************
- *  	Copyright (C) 2015, 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details. Gluten-free. May contain 
- *     traces of LDL asbestos. Avoid children using heavy machinery while under the
- *     influence of alcohol.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.ArrayList;
@@ -27,46 +7,32 @@ import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.logging.Level;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
-/**
- * This is the core of the morphology analysis pipeline.
- * 1) Segments median profiles
- * 2) Apply the segments to nuclei
- * 3) Use frankenprofiles to generate best fist of segments in each nucleus
- */
-@Deprecated
-public class DatasetSegmenter extends AnalysisWorker implements ProgressListener {
-
-    private ICellCollection sourceCollection = null; // a collection to take segments from
+public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements ProgressListener {
+	
+	private ICellCollection sourceCollection = null; // a collection to take segments from
 
     private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 
     public enum MorphologyAnalysisMode {
     	NEW, COPY, REFRESH
     }
-
-    
-    /*
-      //////////////////////////////////////////////////
-      Constructors
-      //////////////////////////////////////////////////
-    */
     
     /**
      * Segment a dataset with the given mode
@@ -74,7 +40,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param mode
      * @param programLogger
      */
-    public DatasetSegmenter(IAnalysisDataset dataset, MorphologyAnalysisMode mode){
+    public DatasetSegmentationMethod(IAnalysisDataset dataset, MorphologyAnalysisMode mode){
     	super(dataset);
     	this.mode = mode;
     }
@@ -85,21 +51,15 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @param source
      * @param programLogger
      */
-    public DatasetSegmenter(IAnalysisDataset dataset, ICellCollection source){
+    public DatasetSegmentationMethod(IAnalysisDataset dataset, ICellCollection source){
     	this(dataset, MorphologyAnalysisMode.COPY);
     	this.sourceCollection = source;
     }
     
-    /*
-      //////////////////////////////////////////////////
-      SwingWorker methods
-      //////////////////////////////////////////////////
-     */
-        
     @Override
-    protected Boolean doInBackground() throws Exception {
+	public IAnalysisResult call() throws Exception {
     	
-    	boolean result = true;
+    	
 		try{
 			
 			switch(mode){
@@ -113,7 +73,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 					result = runRefreshAnalysis();
 					break;
 				default:
-					result = false;
+					result = null;
 					break;
 			}
 			
@@ -121,7 +81,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			// Ensure segments are copied appropriately to verticals
 			// Ensure hook statistics are generated appropriately
 //			log("Updating verticals");
-			for(Nucleus n : this.getDataset().getCollection().getNuclei()){
+			for(Nucleus n : dataset.getCollection().getNuclei()){
 //				log("Updating "+n.getNameAndNumber());
 				n.updateVerticallyRotatedNucleus();
 				n.updateDependentStats();
@@ -130,9 +90,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			fine("Updated verticals and stats");
 			
 		} catch(Exception e){
-			result = false;
+			result = null;
 			stack("Error in segmentation analysis", e);
-			return false;
 		}
 
 		return result;
@@ -146,40 +105,38 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
      * @return
      * @throws Exception
      */
-    private boolean runNewAnalysis() throws Exception {
+    private IAnalysisResult runNewAnalysis() throws Exception {
     	fine("Beginning core morphology analysis");
-
-		this.setProgressTotal(getDataset().getCollection().size()*2);
-
 
 		Tag pointType = Tag.REFERENCE_POINT;
 
 		// segment the profiles from head
-		runSegmentation(getDataset().getCollection(), pointType);
+		runSegmentation(dataset.getCollection(), pointType);
 
 		fine("Core morphology analysis complete");
-		return true;
+		
+		return new DefaultAnalysisResult(dataset);
     }
     
-    private boolean runCopyAnalysis() throws Exception{
+    private IAnalysisResult runCopyAnalysis() throws Exception{
     	if(sourceCollection==null){
 			warn("Cannot copy: source collection is null");
-			return false;
+			return null;
 		} else {
-			this.setProgressTotal(getDataset().getCollection().size());
+
 			fine( "Copying segmentation pattern");
-			reapplyProfiles(getDataset().getCollection(), sourceCollection);
+			reapplyProfiles(dataset.getCollection(), sourceCollection);
 			fine("Copying complete");
-			return true;
+			return new DefaultAnalysisResult(dataset);
 		}
     }
     
-    private boolean runRefreshAnalysis() throws Exception{
+    private IAnalysisResult runRefreshAnalysis() throws Exception{
     	fine("Refreshing segmentation");
-    	this.setProgressTotal(getDataset().getCollection().size()*3);
-		refresh(getDataset().getCollection());
+
+		refresh(dataset.getCollection());
 		fine("Refresh complete");
-		return true;
+		return new DefaultAnalysisResult(dataset);
     }
     
     
@@ -459,7 +416,7 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 			task.addProgressListener(this);
 
 			try {
-				mainPool.invoke(task);
+				task.invoke();
 			} catch(RejectedExecutionException e){
 				error("Fork task rejected: "+e.getMessage(), e);
 			}
@@ -503,7 +460,8 @@ public class DatasetSegmenter extends AnalysisWorker implements ProgressListener
 	
 	@Override
 	public void progressEventReceived(ProgressEvent event) {
-		publish(++progressCount);
+		fireProgressEvent();
 		
 	}
+
 }

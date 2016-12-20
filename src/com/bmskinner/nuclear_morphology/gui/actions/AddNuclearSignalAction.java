@@ -18,19 +18,12 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionWorker;
-import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -60,13 +53,21 @@ public class AddNuclearSignalAction extends ProgressableAction {
 						.getGroupName();
 
 
-
-				worker = new SignalDetectionWorker(dataset, 
+				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
 						analysisSetup.getFolder(), 
 						analysisSetup.getChannel(), 
 						(IMutableNuclearSignalOptions) dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
 						signalGroup, 
 						signalGroupName);
+				
+				
+				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+//				worker = new SignalDetectionWorker(dataset, 
+//						analysisSetup.getFolder(), 
+//						analysisSetup.getChannel(), 
+//						(IMutableNuclearSignalOptions) dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
+//						signalGroup, 
+//						signalGroupName);
 
 
 				this.setProgressMessage("Signal detection: "+signalGroupName);
@@ -89,18 +90,18 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		finer("Finished signal detection");
 		this.cleanup(); // remove the property change listener
 		
-		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-		
-		for(ICellCollection collection : signalPopulations){
-			finer("Processing "+collection.getName());
-			processSubPopulation(collection);
-			finer("Processed "+collection.getName());
-			list.add(dataset.getChildDataset(collection.getID()));
-		}
-		
-		fine("Finished processing sub-populations");
+//		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
+//
+//		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+//		
+//		for(ICellCollection collection : signalPopulations){
+//			finer("Processing "+collection.getName());
+//			processSubPopulation(collection);
+//			finer("Processed "+collection.getName());
+//			list.add(dataset.getChildDataset(collection.getID()));
+//		}
+//		
+//		fine("Finished processing sub-populations");
 		// we have morphology analysis to carry out, so don't use the super finished
 		// use the same segmentation from the initial analysis
 //		int flag = 0; // set the downstream analyses to run
@@ -115,84 +116,84 @@ public class AddNuclearSignalAction extends ProgressableAction {
 		
 	}
 
-	/**
-	 * Create child datasets for signal populations
-	 * and perform basic analyses
-	 * @param collection
-	 */
-	private void processSubPopulation(ICellCollection collection){
-
-		try{
-		finer("Creating new analysis dataset for "+collection.getName());
-		
-		IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection );
-
-		dataset.addChildDataset(subDataset);
-		dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
-		
-		} catch(Exception e){
-			error("Error processing signal group", e);
-		}
-	}
-
-
-	/**
-	 * Create two child populations for the given dataset: one with signals in the 
-	 * given group, and one without signals 
-	 * @param r the collection to split
-	 * @param signalGroup the signal group to split on
-	 * @return a list of new collections
-	 */
-	private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup){
-
-		List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
-		log("Dividing population by signals...");
-
-		ISignalGroup group;
-		try {
-			group = r.getSignalGroup(signalGroup);
-
-			group.setVisible(true);
-
-			Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-			if(!list.isEmpty()){
-				log("Signal group "+group.getGroupName()+": found nuclei with signals");
-				ICellCollection listCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_with_signals");
-
-
-				for(ICell c : list){
-
-					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
-					//				ICell newCell = new DefaultCell(c);
-					listCollection.addCell( c );
-				}
-				signalPopulations.add(listCollection);
-
-				// Only add a group of cells without signals if at least one cell does havea signal
-
-				Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-				if(!notList.isEmpty()){
-					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
-
-					ICellCollection notListCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_without_signals");
-
-					for(ICell c : notList){
-						notListCollection.addCell( c);
-					}
-
-					signalPopulations.add(notListCollection);
-				} else {
-					finest("No cells without signals");
-				}
-
-			}
-
-		} catch (UnavailableSignalGroupException e) {
-			error("Cannot get signal group from collection", e);
-			return new ArrayList<ICellCollection>(0);
-		}
-			
-		fine("Finished dividing populations based on signals");
-		return signalPopulations;
-	}
+//	/**
+//	 * Create child datasets for signal populations
+//	 * and perform basic analyses
+//	 * @param collection
+//	 */
+//	private void processSubPopulation(ICellCollection collection){
+//
+//		try{
+//		finer("Creating new analysis dataset for "+collection.getName());
+//		
+//		IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection );
+//
+//		dataset.addChildDataset(subDataset);
+//		dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
+//		
+//		} catch(Exception e){
+//			error("Error processing signal group", e);
+//		}
+//	}
+//
+//
+//	/**
+//	 * Create two child populations for the given dataset: one with signals in the 
+//	 * given group, and one without signals 
+//	 * @param r the collection to split
+//	 * @param signalGroup the signal group to split on
+//	 * @return a list of new collections
+//	 */
+//	private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup){
+//
+//		List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
+//		log("Dividing population by signals...");
+//
+//		ISignalGroup group;
+//		try {
+//			group = r.getSignalGroup(signalGroup);
+//
+//			group.setVisible(true);
+//
+//			Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+//			if(!list.isEmpty()){
+//				log("Signal group "+group.getGroupName()+": found nuclei with signals");
+//				ICellCollection listCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_with_signals");
+//
+//
+//				for(ICell c : list){
+//
+//					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
+//					//				ICell newCell = new DefaultCell(c);
+//					listCollection.addCell( c );
+//				}
+//				signalPopulations.add(listCollection);
+//
+//				// Only add a group of cells without signals if at least one cell does havea signal
+//
+//				Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
+//				if(!notList.isEmpty()){
+//					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
+//
+//					ICellCollection notListCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_without_signals");
+//
+//					for(ICell c : notList){
+//						notListCollection.addCell( c);
+//					}
+//
+//					signalPopulations.add(notListCollection);
+//				} else {
+//					finest("No cells without signals");
+//				}
+//
+//			}
+//
+//		} catch (UnavailableSignalGroupException e) {
+//			error("Cannot get signal group from collection", e);
+//			return new ArrayList<ICellCollection>(0);
+//		}
+//			
+//		fine("Finished dividing populations based on signals");
+//		return signalPopulations;
+//	}
 }

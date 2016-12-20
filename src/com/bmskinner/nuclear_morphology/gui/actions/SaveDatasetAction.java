@@ -21,11 +21,12 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.io.PopulationExporter;
-
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import ij.io.SaveDialog;
 
 public class SaveDatasetAction extends ProgressableAction {
@@ -82,16 +83,7 @@ public class SaveDatasetAction extends ProgressableAction {
 		} else {
 			saveFile = dataset.getSavePath();
 		}
-		
-//		if(saveFile!=null){
-//			log("Saving as "+saveFile.getAbsolutePath()+"...");
-//			worker = new PopulationExporter(dataset, saveFile);
-//			worker.addPropertyChangeListener(this);
-//			worker.execute();	
-//		} else {
-//			this.finished();
-//		}
-		
+				
 	}
 	
 	@Override
@@ -103,7 +95,12 @@ public class SaveDatasetAction extends ProgressableAction {
 		
 		if(saveFile!=null){
 			log("Saving as "+saveFile.getAbsolutePath()+"...");
-			worker = new PopulationExporter(dataset, saveFile);
+			
+			IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
+			worker = new DefaultAnalysisWorker(m);
+			
+			
+//			worker = new PopulationExporter(dataset, saveFile);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 		} else {

@@ -1,24 +1,4 @@
-/*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
-
-import ij.ImageStack;
 
 import java.io.File;
 import java.util.HashMap;
@@ -27,7 +7,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -42,32 +25,51 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
-@Deprecated
-public class ShellAnalysisWorker extends AnalysisWorker {
+import ij.ImageStack;
+
+/**
+ * Detect signal proportions within concentric shells of a nucleus
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+public class ShellAnalysisMethod extends AbstractAnalysisMethod {
 	
-	private final int shells;
+private final int shells;
 	
 	private int totalPixels = 0;
 		
 	private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 		
-	public ShellAnalysisWorker(IAnalysisDataset dataset, int shells){
+	public ShellAnalysisMethod(IAnalysisDataset dataset, int shells){
 		super(dataset);
 		this.shells = shells;
-		this.setProgressTotal(dataset.getCollection().size()-1);
+		
 	}
-		
+	
+	
 	@Override
-	protected Boolean doInBackground() {
+	public IAnalysisResult call() throws Exception {
+
+		// Set the progress total
+		ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, dataset.getCollection().size()-1);
+		fireProgressEvent(e);
+		run();	
+		IAnalysisResult r = new DefaultAnalysisResult(dataset);
+
+		return r;
+	}
+	
+	protected void run(){
 		
-		ICellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = dataset.getCollection();
 		
 		if( ! collection.getSignalManager().hasSignals()){
 			fine("No signals in population");
-			return true; // only bother if there are signals
+			return;
+
 		}
 		
 		log("Performing shell analysis with "+shells+" shells...");
@@ -97,12 +99,13 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 				analyseNucleus(n);
 				int i = counter.incrementAndGet();
-				publish(i);
+				fireProgressEvent();
 //
 			}
 			
-			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
-
+			ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE,0);
+			fireProgressEvent(e);
+			
 			// get stats 
 			createResults();
 					
@@ -111,14 +114,14 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		} catch (Exception e) {
 			warn("Error in shell analysis");
 			stack( "Error in shell analysis", e);	
-			return false;
+			return;
 		}
-		return true;
+		return;
 	}
 	
 	private void analyseNucleus(Nucleus n){
 		
-		ICellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = dataset.getCollection();
 		
 		ShellDetector shellDetector;
 		try {
@@ -197,7 +200,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private void createResults(){
 		// get stats and export
-		ICellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = dataset.getCollection();
 		
 		boolean addRandom = false;
 				
@@ -221,7 +224,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 				
 					
 				try {
-					getDataset().getCollection()
+					dataset.getCollection()
 						.getSignalGroup(group)
 						.setShellResult(result);
 				} catch (UnavailableSignalGroupException e) {
@@ -239,7 +242,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 	
 	private void addRandomSignal(){
 		
-		ICellCollection collection = this.getDataset().getCollection();
+		ICellCollection collection = dataset.getCollection();
 		
 		// Create a random sample distibution
 		if(collection.hasConsensusNucleus()){
@@ -248,7 +251,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 			random.setGroupName("Random distribution");
 			random.setFolder( new File(""));
 			
-			getDataset().getCollection()
+			dataset.getCollection()
 			.addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
 			
 			// Calculate random positions of pixels 
@@ -280,7 +283,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 					.setNormalisedStandardErrors(CountType.SIGNAL, errList)
 					.setNormalisedStandardErrors(CountType.NUCLEUS, errList);
 
-				getDataset().getCollection()
+				dataset.getCollection()
 					.getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)
 					.setShellResult(randomResult);
 

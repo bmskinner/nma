@@ -20,8 +20,11 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -46,22 +49,26 @@ public class RefoldNucleusAction extends ProgressableAction {
 		try{
 
 			this.setProgressBarIndeterminate();
-			worker = new CurveRefolder(dataset, 
+			
+			IAnalysisMethod m = new ProfileRefoldMethod(dataset, 
 					CurveRefoldingMode.FAST);
+			
+			worker = new DefaultAnalysisWorker(m, CurveRefoldingMode.FAST.maxIterations());
 
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Refolding: "+dataset.getName());
 			ThreadManager.getInstance().submit(worker);
-//			worker.execute();
 
 		} catch(Exception e1){
 			this.cancel();
-			error("Error refolding nucleus", e1);
+			warn("Error refolding nucleus");
+			stack("Error refolding nucleus", e1);
 		}
 	}
 	
 	@Override
 	public void finished(){
+		
 		this.cancel();
 		fine("Refolding finished, cleaning up");
 		super.finished();

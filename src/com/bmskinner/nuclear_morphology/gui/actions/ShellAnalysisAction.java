@@ -22,6 +22,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -55,7 +59,11 @@ public class ShellAnalysisAction extends ProgressableAction {
 		} else if (option == JOptionPane.OK_OPTION)	{
 
 			int shellCount = (Integer) spinner.getModel().getValue();
-			worker = new ShellAnalysisWorker(dataset,shellCount);
+			
+			IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
+			worker = new DefaultAnalysisWorker(m);
+			
+//			worker = new ShellAnalysisWorker(dataset,shellCount);
 
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);

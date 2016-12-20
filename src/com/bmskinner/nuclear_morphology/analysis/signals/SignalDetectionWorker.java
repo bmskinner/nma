@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  * TODO: For a paint, assume one or two signals per nucleus. 
  * If more are detected, lower the threshold until the signals merge
  */
+@Deprecated
 public class SignalDetectionWorker extends AnalysisWorker {
 	
 	protected IMutableNuclearSignalOptions options = null;
@@ -140,6 +141,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 			}		
 			
 		} catch (Exception e){
+			warn("Error in signal detection");
 			stack("Error in signal detection", e);
 			return false;
 		}

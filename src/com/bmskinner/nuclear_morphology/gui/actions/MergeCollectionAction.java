@@ -25,10 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.DatasetMerger;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -75,6 +80,8 @@ public class MergeCollectionAction extends ProgressableAction {
 					}
 				}
 
+				IAnalysisMethod m;
+				
 				if(signals>1){
 
 					DatasetMergingDialog dialog = new DatasetMergingDialog(datasets);
@@ -86,18 +93,22 @@ public class MergeCollectionAction extends ProgressableAction {
 					if(pairs.keySet().size()!=0){
 						finest("Found paired signal groups");
 						// User decided to merge signals
-						worker = new DatasetMerger(datasets, saveFile, pairs);
+						m = new DatasetMergeMethod(datasets, saveFile, pairs);
+						
+//						worker = new DatasetMerger(datasets, saveFile, pairs);
 					} else {
 						finest("No paired signal groups");
-						worker = new DatasetMerger(datasets, saveFile);
+						m = new DatasetMergeMethod(datasets, saveFile);
+//						worker = new DatasetMerger(datasets, saveFile);
 					}
 				} else {
 					finest("No signal groups to merge");
 					// no signals to merge
-					worker = new DatasetMerger(datasets, saveFile);
+//					worker = new DatasetMerger(datasets, saveFile);
+					m = new DatasetMergeMethod(datasets, saveFile);
 				}
 
-
+				worker = new DefaultAnalysisWorker(m, 100);
 				worker.addPropertyChangeListener(this);
 				ThreadManager.getInstance().submit(worker);
 			} else {
@@ -132,8 +143,17 @@ public class MergeCollectionAction extends ProgressableAction {
 	@Override
 	public void finished(){
 
-		List<IAnalysisDataset> datasets = ((DatasetMerger) worker).getResults();
-
+		IAnalysisResult r;
+		try {
+			r = worker.get();
+		} catch (InterruptedException | ExecutionException e) {
+			warn("Error merging datasets");
+			stack("Error merging datasets", e);
+			this.cancel();
+			return;
+		}
+		List<IAnalysisDataset> datasets = r.getDatasets();
+		
 		if(datasets==null){
 			this.cancel();
 			return;

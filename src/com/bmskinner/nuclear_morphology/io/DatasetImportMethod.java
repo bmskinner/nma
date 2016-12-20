@@ -1,21 +1,3 @@
-/*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
@@ -28,7 +10,9 @@ import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -39,14 +23,26 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
-@Deprecated
-public class PopulationImportWorker extends AnalysisWorker {
+/**
+ * Method to read a dataset from file
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+public class DatasetImportMethod extends AbstractAnalysisMethod {
 	
 	private final File file;
 	private IAnalysisDataset dataset = null; // the active dataset of an AnalysisWorker is private and immutable, so have a new field here
 	private boolean wasConverted = false;
 	
-	public PopulationImportWorker(final File f){
+	public static final int WAS_CONVERTED_BOOL = 0; // the IAnalysisResult boolean index for conversion state
+	
+	
+	/**
+	 * Construct with a file to be read
+	 * @param f the saved dataset file
+	 */
+	public DatasetImportMethod(final File f){
 		super(null);
 		
 		if(f==null){
@@ -71,25 +67,26 @@ public class PopulationImportWorker extends AnalysisWorker {
 
 		
 		this.file = f;
-		this.setProgressTotal(1);
 	}
-	
-	public boolean wasConverted(){
-		return wasConverted;
-	}
-	
-	public IAnalysisDataset getLoadedDataset() throws UnloadableDatasetException {
 		
-		if(this.dataset==null){
-			throw new UnloadableDatasetException("No dataset loaded");
-		}
-		return this.dataset;
-	}
 	
 	@Override
-	protected Boolean doInBackground() throws Exception {
-		finest("Beginning background work");
-		fireCooldown();
+	public IAnalysisResult call() throws Exception {
+
+		run();	
+		
+		if(dataset==null){
+			throw new UnloadableDatasetException("No dataset loaded");
+		}
+		
+		DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
+		r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
+		return r;
+	}
+	
+
+	private void run() throws Exception {
+
 		try {
 			
 			// Clean up old log lock files
@@ -101,8 +98,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			} catch (UnloadableDatasetException e){
 				warn(e.getMessage());
 				warn("Dataset version may be too old");
-				fine("Error reading dataset", e);
-				return false;
+				stack("Error reading dataset", e);
 			}
 						
 			fine("Read dataset");
@@ -164,22 +160,19 @@ public class PopulationImportWorker extends AnalysisWorker {
 					}
 
 				} catch(Exception e){
-					error("Error updating vertical nuclei", e);
+					warn("Error updating vertical nuclei");
+					stack("Error updating vertical nuclei", e);
 				}
-				
-				
-				return true;
+
 				
 			} else {
 				warn("Unable to open dataset version: "+ dataset.getVersion());
-				return false;
 			}
 			
 			
 		} catch (IllegalArgumentException e){
 			warn("Unable to open file: "+e.getMessage());
 			stack("Error opening file", e);
-			return false;
 		}
 	}
 

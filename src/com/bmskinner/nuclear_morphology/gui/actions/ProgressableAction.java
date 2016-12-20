@@ -30,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import javax.swing.JProgressBar;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
@@ -54,7 +55,7 @@ public abstract class ProgressableAction
 	protected IAnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
 	
-	protected AnalysisWorker worker = null;
+	protected IAnalysisWorker worker = null;
 	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
 	private LogPanel logPanel;
 	protected MainWindow mw;
@@ -207,10 +208,7 @@ public abstract class ProgressableAction
 	    	value = (int) newValue;
 	    }
 
-
-
-
-		finest("Property change event heard: "+value);
+		finer("Property change event heard: "+value);
 		
 		if(value >=0 && value <=100){
 			
@@ -221,7 +219,7 @@ public abstract class ProgressableAction
 		}
 
 		if(evt.getPropertyName().equals("Finished")){
-			finest("Worker signaled finished");
+			finer("Worker signaled finished");
 			finished();
 		}
 
@@ -231,7 +229,7 @@ public abstract class ProgressableAction
 		}
 		
 		if(evt.getPropertyName().equals("Cooldown")){
-			finest("Worker signaled cooldown");
+			finer("Worker signaled cooldown");
 			setProgressBarIndeterminate();
 		}
 		
@@ -242,12 +240,12 @@ public abstract class ProgressableAction
 	 */
 	public void finished(){
 		this.worker.removePropertyChangeListener(this);
-		finest("Removed property change listener from worker");
+		finer("Removed property change listener from worker");
 		removeProgressBar();		
 		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);
-		finest("Removed event listeners from action");
+		finer("Removed event listeners from action");
 	}
 	
 	

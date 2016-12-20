@@ -49,7 +49,7 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -492,7 +492,7 @@ public class MainWindow
 		if(!list.isEmpty()){
 			
 			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
-				fine("Running new profiling and segmentation");
+				fine("Creating new profiling and segmentation");
 
 				int flag = 0; // set the downstream analyses to run
 				flag |= MainWindow.ADD_POPULATION;
@@ -504,8 +504,9 @@ public class MainWindow
 					flag |= MainWindow.CURVE_REFOLD;
 				}
 				// begin a recursive morphology analysis
-				RunProfilingAction p = new RunProfilingAction(list, flag, MainWindow.this);
-				p.run();
+				Runnable task = new RunProfilingAction(list, flag, MainWindow.this);
+				fine("Running new profiling and segmentation");
+				task.run();
 
 			}
 						

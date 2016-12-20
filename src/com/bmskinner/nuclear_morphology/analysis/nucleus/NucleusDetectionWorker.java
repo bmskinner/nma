@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
+@Deprecated
 public class NucleusDetectionWorker extends AnalysisWorker  implements ProgressListener {
   
   private static final String spacerString = "---------";

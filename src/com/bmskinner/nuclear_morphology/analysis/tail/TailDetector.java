@@ -36,6 +36,7 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.SpermTail;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
@@ -78,10 +79,10 @@ public class TailDetector extends Detector {
 	 * @return a SpermTail object
 	 * @throws Exception 
 	 */
-	public List<SpermTail> detectTail(File tubulinFile, Nucleus n) throws Exception {
+	public List<Flagellum> detectTail(File tubulinFile, Nucleus n) throws Exception {
 		
 
-		List<SpermTail> tails = new ArrayList<SpermTail>(0);
+		List<Flagellum> tails = new ArrayList<Flagellum>(0);
 		log(Level.INFO, "Running on image: "+tubulinFile.getAbsolutePath());
 		// import image with tubulin in  channel
 		ImageStack stack = null;
@@ -465,14 +466,14 @@ public class TailDetector extends Detector {
 	 * @param channel the rgb channel with the tubulin stain (0 if greyscale)
 	 * @return a sperm tail or null if none found
 	 */
-	private List<SpermTail> getTailsMatchingNucleus(List<SpermTail> tails, Nucleus n){
+	private List<Flagellum> getTailsMatchingNucleus(List<Flagellum> tails, Nucleus n){
 		
 		// ensure that the positions of the nucleus are corrected to
 		// match the original image
-		List<SpermTail> result = new ArrayList<SpermTail>(0);
+		List<Flagellum> result = new ArrayList<Flagellum>(0);
 		FloatPolygon nucleusOutline = n.createOriginalPolygon();
 		
-		for(SpermTail tail : tails){
+		for(Flagellum tail : tails){
 			
 			List<IPoint> skeleton = tail.getSkeleton();
 			for(IPoint p : skeleton){
@@ -532,9 +533,9 @@ public class TailDetector extends Detector {
 	 * @param channel the rgb channel with the tubulin stain (0 if greyscale)
 	 * @return a list of sperm tails (empty if none found)
 	 */
-	private List<SpermTail> buildSpermTails(List<Roi> usableSkeletons, List<Roi> borderRois, File tubulinFile, int channel){
+	private List<Flagellum> buildSpermTails(List<Roi> usableSkeletons, List<Roi> borderRois, File tubulinFile, int channel){
 		
-		List<SpermTail> tails = new ArrayList<SpermTail>(0);
+		List<Flagellum> tails = new ArrayList<Flagellum>(0);
 
 		
 		for(Roi skeleton : usableSkeletons){

@@ -1,26 +1,8 @@
-/*******************************************************************************
- *  	Copyright (C) 2015, 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details. Gluten-free. May contain 
- *     traces of LDL asbestos. Avoid children using heavy machinery while under the
- *     influence of alcohol.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -28,48 +10,37 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
- * This class contains the methods for detecting the reference and orientation points in a median
- * profile, creating the median profile, and adjusting individual nuclei border points to fit the median.
+ * The method for profiling nuclei within a dataset
  * @author ben
+ * @since 1.13.4
  *
  */
-public class DatasetProfiler extends AnalysisWorker {
+public class DatasetProfilingMethod extends AbstractAnalysisMethod {
 	
 	private static final Tag DEFAULT_BORDER_TAG = Tag.REFERENCE_POINT;
 	
 	public static final int RECALCULATE_MEDIAN = 0;
-
-	public DatasetProfiler(IAnalysisDataset dataset){
+		
+	public DatasetProfilingMethod(IAnalysisDataset dataset){
 		super(dataset);
 	}
-	 
+	
 	@Override
-    protected Boolean doInBackground() throws Exception {
-    	
-    	boolean result = true;
-		try{
-				fireCooldown();
-
-				fine("Profiling dataset");
-
-				// profile the collection from head/tip, then apply to tail
-				runProfiler(DEFAULT_BORDER_TAG);
-
-				fine("Datset profiling complete");
-			
-			
-		} catch(Exception e){
-			
-			error("Error in dataset profiling", e);
-			return false;
-		} 
-
-		return result;
+	public IAnalysisResult call() throws Exception {
+		
+		run();		
+		IAnalysisResult r = new DefaultAnalysisResult(dataset);
+		
+		return r;
 	}
-			
+	
+	private void run(){
+		runProfiler(DEFAULT_BORDER_TAG);
+	}
+
+	
 	/**
 	 * Calculaate the median profile of the colleciton, and generate the
 	 * best fit offsets of each nucleus to match
@@ -101,7 +72,7 @@ public class DatasetProfiler extends AnalysisWorker {
 			 * 
 			 */
 			
-			ICellCollection collection = getDataset().getCollection();
+			ICellCollection collection = dataset.getCollection();
 
 			
 			// Build the ProfileCollections for each ProfileType
@@ -155,7 +126,7 @@ public class DatasetProfiler extends AnalysisWorker {
 	
 			// Identify the border tags in the median profile
 
-			for(BorderTagObject tag : BorderTagObject.values() ){
+			for(Tag tag : BorderTagObject.values() ){
 				
 				// Don't identify the RP again, it could cause off-by-one errors
 				// We do need to assign the RP in other ProfileTypes though
@@ -248,6 +219,4 @@ public class DatasetProfiler extends AnalysisWorker {
 
 		return rpIndex;
 	}
-
-			 
 }

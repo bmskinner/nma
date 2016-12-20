@@ -24,8 +24,11 @@ import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
@@ -108,7 +111,9 @@ public class RunSegmentationAction extends ProgressableAction {
 	private void runCopyAnalysis(){
 		
 		setProgressMessage("Copying segmentation");
-		worker = new DatasetSegmenter(dataset, source.getCollection());
+		IAnalysisMethod m = new DatasetSegmentationMethod(dataset, source.getCollection());
+		worker = new DefaultAnalysisWorker(m);
+//		worker = new DatasetSegmenter(dataset, source.getCollection());
 		worker.addPropertyChangeListener(this);
 		ThreadManager.getInstance().submit(worker);
 	}
@@ -116,7 +121,11 @@ public class RunSegmentationAction extends ProgressableAction {
 	private void runRefreshAnalysis(){
 		
 		setProgressMessage("Refreshing segmentation");
-		worker = new DatasetSegmenter(dataset, mode);
+		
+		IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
+		worker = new DefaultAnalysisWorker(m);
+		
+//		worker = new DatasetSegmenter(dataset, mode);
 		worker.addPropertyChangeListener(this);
 		ThreadManager.getInstance().submit(worker);
 		
@@ -126,7 +135,9 @@ public class RunSegmentationAction extends ProgressableAction {
 	private void runNewAnalysis(){
 		
 		setProgressMessage("Segmenting: "+dataset.getName());
-		worker = new DatasetSegmenter(dataset, mode);
+		IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
+		worker = new DefaultAnalysisWorker(m);
+//		worker = new DatasetSegmenter(dataset, mode);
 		worker.addPropertyChangeListener(this);
 		ThreadManager.getInstance().submit(worker);
 

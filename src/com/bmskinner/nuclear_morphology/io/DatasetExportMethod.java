@@ -1,23 +1,4 @@
-/*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
-
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -29,39 +10,42 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 
-public class PopulationExporter extends AnalysisWorker {
+public class DatasetExportMethod extends AbstractAnalysisMethod {
 	
 	private File   saveFile = null;
 //	private boolean useHDF5 = false;
 	
-	public PopulationExporter(IAnalysisDataset dataset, File saveFile) {
+	public DatasetExportMethod(IAnalysisDataset dataset, File saveFile) {
 		super(dataset);		
 		this.saveFile = saveFile;
 	}
+	
+	public IAnalysisResult call(){
+		run();		
+		IAnalysisResult r = new DefaultAnalysisResult(dataset);
+		return r;
+	}
 		
-	@Override
-	protected Boolean doInBackground() {
+	protected void run() {
 		
 		try{
 		
-			fireCooldown();
-
-			if(saveAnalysisDataset(getDataset(), saveFile)){
+			if(saveAnalysisDataset(dataset, saveFile)){
 				finest("Save was sucessful");        
-				return true;
 				
 			} else{
 				warn("Save was unsucessful");
-				return false;
 			}
 		
 		} catch(Exception e){
-			error("Unable to save dataset", e);
-			return false;
+			warn("Save was unsucessful");
+			stack("Unable to save dataset", e);
 		}
 		
 		
@@ -167,28 +151,5 @@ public class PopulationExporter extends AnalysisWorker {
 	        }
 	    }
 	}
-	
-	public static void saveAnalysisDatasetToHDF5(IAnalysisDataset dataset){
-
-		/* TODO: the basic approach show below does not work;
-		 * The HDF5 writer cannot handle the Maps within a Java object.
-		 * Each object will need to be unpacked.
-		 */
-		
-		
-//		File saveFile = new File(dataset.getSavePath().getAbsolutePath()+".hdf5");
-//		if(saveFile.exists()){
-//			saveFile.delete();
-//		}
-//		IHDF5Writer writer = HDF5FactoryProvider.get().open(saveFile);
-
-//		HDF5CompoundType<AnalysisDataset> type = writer.compound().getInferredAnonType(AnalysisDataset.class);
-
-//		writer.compound().write("ds_name", type, dataset);
-//		writer.close();
-
-
-	} 
-
 
 }

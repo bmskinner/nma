@@ -18,9 +18,14 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
+import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusTreeBuilder;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.TreeBuildingMethod;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
@@ -48,10 +53,10 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 //		Map<String, Object> options = clusterSetup.getOptions();
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-
-			worker = new NucleusTreeBuilder( dataset , options);
+			IAnalysisMethod m = new TreeBuildingMethod(dataset, options);
+//			worker = new NucleusTreeBuilder( dataset , options);
 //			worker = new NeighbourJoiningTreeBuilder( dataset , mw.getProgramLogger());
-
+			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size() * 2);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 
@@ -69,21 +74,23 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	 */
 	@Override
 	public void finished() {
-
-		String newick = (((NucleusTreeBuilder) worker).getNewickTree());
-
-		IClusteringOptions options =  ((NucleusTreeBuilder) worker).getOptions();
-
-
-		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-
-		IClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newick);
 		
-		ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, group);
-		clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
-		clusterPanel.addInterfaceEventListener(this);
+		try {
+			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 
-		cleanup(); // do not cancel, we need the MainWindow listener to remain attached 
+			ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, r.getGroup());
+			clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
+			clusterPanel.addInterfaceEventListener(this);
+
+			cleanup(); // do not cancel, we need the MainWindow listener to remain attached 
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

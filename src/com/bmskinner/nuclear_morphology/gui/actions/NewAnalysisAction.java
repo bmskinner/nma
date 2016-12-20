@@ -23,9 +23,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
+import java.util.concurrent.ExecutionException;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
@@ -35,6 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * Run a new analysis
@@ -95,34 +98,54 @@ public class NewAnalysisAction extends ProgressableAction {
 			File logFile = new File(nucleusOptions.getFolder().getAbsolutePath()
 					+ File.separator
 					+ outputFolderName
-					+ File.separator+nucleusOptions.getFolder().getName()+".log");
+					+ File.separator
+					+ nucleusOptions.getFolder().getName()
+					+ Constants.LOG_FILE_EXTENSION);
 
-//			mw.setStatus("New analysis in progress");
 			
-			worker = new NucleusDetectionWorker(this.outputFolderName, logFile, options);
+			IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);
+			// Calculate the number of files to process
+			
+			worker = new DefaultAnalysisWorker(m);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
-			log(Level.FINEST, "Worker has executed");
+			finest("Worker is executing");
 			analysisSetup.dispose();
 			
 		} else {				
 			analysisSetup.dispose();
-			log(Level.FINE, "Analysis cancelled");
+			fine("Analysis cancelled");
 			this.cancel();
 		}
 	}
 	
 	@Override
 	public void finished(){
+//		log("Method finished");
+		List<IAnalysisDataset> datasets;
 		
-		final List<IAnalysisDataset> datasets = ((NucleusDetectionWorker) worker).getDatasets();
-		
-		if(datasets.size()==0 || datasets==null){
-			log(Level.INFO, "No datasets returned");
-		} else {
-			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+
+		try {
+			IAnalysisResult r = worker.get();
+			datasets = r.getDatasets();
 			
+			if(datasets.size()==0 || datasets==null){
+				log("No datasets returned");
+			} else {
+				log("Fire profiling");
+				fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+				
+			}
+			
+		} catch (InterruptedException e) {
+			warn("Interruption to swing worker");
+    		stack("Interruption to swing worker", e);
+		} catch (ExecutionException e) {
+			warn("Execution error in swing worker");
+    		stack("Execution error in swing worker", e);
 		}
+
+		
 		super.finished();
 	}
 	

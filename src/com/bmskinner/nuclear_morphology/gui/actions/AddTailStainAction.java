@@ -22,6 +22,11 @@ import ij.io.DirectoryChooser;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.tail.TailDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.tail.TubulinTailDetector;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -61,8 +66,12 @@ public class AddTailStainAction extends ProgressableAction {
 				this.cancel();
 				return; // check folder is ok
 			}
+			
+			IAnalysisMethod m = new TailDetectionMethod(dataset, folder, channel);
+			
+			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 
-			worker = new TubulinTailDetector(dataset, folder, channel);
+//			worker = new TubulinTailDetector(dataset, folder, channel);
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Tail detection:"+dataset.getName());
 			ThreadManager.getInstance().submit(worker);

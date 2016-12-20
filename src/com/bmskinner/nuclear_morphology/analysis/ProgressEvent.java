@@ -30,11 +30,44 @@ import java.util.EventObject;
  */
 @SuppressWarnings("serial")
 public class ProgressEvent extends EventObject {
+	
+		public static final int NO_MESSAGE = 0;
+		public static final int SET_TOTAL_PROGRESS = 1;
+		public static final int SET_INDETERMINATE  = 2;
+		
+		private int message = NO_MESSAGE;
+		private int value;
 
 		/**
 		 * Create an event from a source
 		 */
 		public ProgressEvent( Object source ) {
 			super( source );
+		}
+		
+		/**
+		 * Create from a source, including a message type and value.
+		 * This allows - for example -  the total progress bar length to
+		 * be altered based on a computation in an IAnalysisMethod 
+		 * @param source the source firing the event
+		 * @param m the messsage type
+		 * @param v the value in the message
+		 */
+		public ProgressEvent( Object source, int m, int v ) {
+			super( source );
+			message = m;
+			value = v;
+		}
+		
+		public int getMessage(){
+			return message;
+		}
+		
+		public int getValue(){
+			return value;
+		}
+		
+		public boolean hasMessage(){
+			return message !=NO_MESSAGE;
 		}
 }

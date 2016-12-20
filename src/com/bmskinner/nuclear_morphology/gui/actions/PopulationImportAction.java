@@ -19,16 +19,20 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.io.PopulationImportWorker;
-import com.bmskinner.nuclear_morphology.io.PopulationImportWorker.UnloadableDatasetException;
+import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetImportMethod.UnloadableDatasetException;
 
 /**
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset
@@ -64,7 +68,11 @@ public class PopulationImportAction extends ProgressableAction {
 		setProgressBarIndeterminate();		
 		fine("Running dataset open action");
 		if(file!=null){
-			worker = new PopulationImportWorker(file);
+			
+			IAnalysisMethod m = new DatasetImportMethod(file);
+			worker = new DefaultAnalysisWorker(m);
+					
+//			worker = new PopulationImportWorker(file);
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Opening file...");
@@ -111,13 +119,23 @@ public class PopulationImportAction extends ProgressableAction {
 		setProgressBarVisible(false);
 		IAnalysisDataset dataset;
 		try {
-			dataset = ((PopulationImportWorker) worker).getLoadedDataset();
 			
-			if(((PopulationImportWorker) worker).wasConverted()){
+			IAnalysisResult r = worker.get();
+			
+			dataset = r.getFirstDataset();
+			
+			// Save newly converted datasets
+			if(r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)){
 				fireDatasetEvent(DatasetEvent.SAVE, dataset);
 			}
-		} catch (UnloadableDatasetException e) {
+
+		} catch (InterruptedException e) {
 			warn("Unable to open dataset: "+e.getMessage());
+			stack("Unable to open dataset", e);
+			return;
+		} catch (ExecutionException e) {
+			warn("Unable to open dataset: "+e.getMessage());
+			stack("Unable to open dataset", e);
 			return;
 		}
 		fine("Opened dataset");

@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.IMutableCell;
@@ -127,9 +128,9 @@ public class TubulinTailDetector extends AnalysisWorker {
 				
 				// attempt to detect the tails in the image
 				try{
-					List<SpermTail> tails = finder.detectTail(imageFile, n);
+					List<Flagellum> tails = finder.detectTail(imageFile, n);
 					
-					for(SpermTail tail : tails){
+					for(Flagellum tail : tails){
 						cell.addFlagellum(tail);
 					}
 					

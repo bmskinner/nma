@@ -1,40 +1,17 @@
-/*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
- /*
-	-----------------------
-	CURVE REFOLDER CLASS
-	-----------------------
-	Contains the code for taking a profile, and an ideal profile, and
-		making the profile fit
- */
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -45,11 +22,14 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
-@Deprecated
-public class CurveRefolder extends AnalysisWorker {
-
+/**
+ * The method that refolds a median angle profile into a shape.  
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 	private IProfile targetCurve;
 
 	private Nucleus refoldNucleus;
@@ -84,16 +64,15 @@ public class CurveRefolder extends AnalysisWorker {
 	}
 			
 	/**
-	 * construct from a collection of cells and the mode of refolding
-	 * @param collection
-	 * @param refoldMode
-	 * @throws Exception
+	 * Construct from a collection of cells and the mode of refolding
+	 * @param dataset the dataset to be refolded
+	 * @param refoldMode the type of refolding
+	 * @throws Exception if one of the myriad profile or tag exceptions is encountered TODO: clean this up
 	 */
-	public CurveRefolder(IAnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
+	public ProfileRefoldMethod(IAnalysisDataset dataset, CurveRefoldingMode refoldMode) throws Exception {
 		super(dataset);
 
 		dataset.getCollection().setRefolding(true);
-		this.setProgressTotal(refoldMode.maxIterations());
 
 		collection = dataset.getCollection();
 		
@@ -129,7 +108,14 @@ public class CurveRefolder extends AnalysisWorker {
 	}
 	
 	@Override
-	protected Boolean doInBackground() {
+	public IAnalysisResult call() throws Exception {
+
+		run();		
+		IAnalysisResult r = new DefaultAnalysisResult(dataset);
+		return r;
+	}
+	
+	private void run() {
 		
 
 		try{ 
@@ -143,8 +129,6 @@ public class CurveRefolder extends AnalysisWorker {
 				smoothCurve(); // smooth the refolded nucleus to remove jagged edges
 			}
 						
-			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
-
 			// orient refolded nucleus to put tail at the bottom
 			refoldNucleus.alignVertically();
 								
@@ -155,29 +139,17 @@ public class CurveRefolder extends AnalysisWorker {
 					refoldNucleus.flipXAroundPoint(refoldNucleus.getCentreOfMass());
 				}
 			}
-
-//			refoldNucleus.updateVerticallyRotatedNucleus();
-//			 Update the bounding box to reflect the rotated nucleus position
-//			Rectangle bounds = refoldNucleus.getVerticallyRotatedNucleus().createPolygon().getBounds();
-//			int newWidth  = (int) bounds.getWidth();
-//			int newHeight = (int) bounds.getHeight();
-//			int newX      = (int) bounds.getX();
-//			int newY      = (int) bounds.getY();
-//
-//			int[] newPosition = { newX, newY, newWidth, newHeight };
-//			refoldNucleus.setPosition(newPosition);
 //			
 			collection.setConsensusNucleus(refoldNucleus);
 			
 			fine("Updated "+pointUpdateCounter+" border points");
 
 		} catch(Exception e){
-			error("Unable to refold nucleus", e);
-			return false;
+			warn("Unable to refold nucleus");
+			stack("Unable to refold nucleus", e);
 		} finally {
 			collection.setRefolding(false);
 		}
-		return true;
 	}
 	
 	/*
@@ -196,13 +168,13 @@ public class CurveRefolder extends AnalysisWorker {
 //			double prevScore = score*2;
 			int i=0;
 			
-
-				while(  i<mode.maxIterations()){ // iterate until converging
-//					prevScore = score;
-					score = this.iterateOverNucleus();
-					publish(++i);
-					fine("Iteration "+i+": "+(int)score);
-				}
+			while(  i<mode.maxIterations()){ // iterate until converging
+				//					prevScore = score;
+				score = this.iterateOverNucleus();
+				fireProgressEvent();
+				fine("Iteration "+i+": "+(int)score);
+				i++;
+			}
 
 			fine("Refolded curve: final score: "+(int)score);
 
@@ -475,5 +447,4 @@ public class CurveRefolder extends AnalysisWorker {
 		}
 		return bestDistance;
 	}
-
 }

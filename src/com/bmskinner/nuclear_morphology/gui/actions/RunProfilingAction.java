@@ -20,10 +20,10 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfiler;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter.MorphologyAnalysisMode;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -31,21 +31,25 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 public class RunProfilingAction extends ProgressableAction {
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
-		super(dataset, "Segmentation analysis", mw, downFlag);
+		super(dataset, "Profiling", mw, downFlag);
+		fine("Creating new profiling analysis");
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw){
-		super(list, "Segmentation analysis", mw, downFlag);
+		super(list, "Profiling", mw, downFlag);
+		fine("Creating new profiling analysis");
 	}
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
-		super(dataset, "Segmentation analysis", mw, downFlag);
+		super(dataset, "Profiling", mw, downFlag);
+		fine("Creating new profiling analysis");
 		this.setLatch(latch);
 		
 	}
 	
 	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
-		super(list, "Segmentation analysis", mw, downFlag);
+		super(list, "Profiling", mw, downFlag);
+		fine("Creating new profiling analysis");
 		this.setLatch(latch);
 		
 	}
@@ -57,13 +61,14 @@ public class RunProfilingAction extends ProgressableAction {
 	
 	private void runNewAnalysis(){
 		try{
-			String message = "Profiling analysis: "+dataset.getName();
-		
+			String message = "Profiling: "+dataset.getName();
+			fine("Beginning profliling action");
 
 			this.setProgressMessage(message);
-//			this.cooldown();
+			IAnalysisMethod method = new DatasetProfilingMethod(dataset);
+			worker = new DefaultAnalysisWorker(method);
+			
 
-			worker = new DatasetProfiler(this.dataset);
 			worker.addPropertyChangeListener(this);
 			fine("Running morphology analysis");
 			ThreadManager.getInstance().submit(worker);
