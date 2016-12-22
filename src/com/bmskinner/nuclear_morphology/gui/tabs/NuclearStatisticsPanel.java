@@ -36,8 +36,8 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
 	private static final String HISTOGRAM_TAB_LBL = "Histograms";
 	private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
-	private static final String MAGNITUDE_TAB_LBL = "Detection settings";
-	private static final String OVERLAYS_TAB_LBL  = "Detection settings";
+	private static final String MAGNITUDE_TAB_LBL = "Magnitude";
+	private static final String OVERLAYS_TAB_LBL  = "Overlays";
 	private static final String SCATTER_TAB_LBL   = "Scatter";
 	
 	private JTabbedPane 	tabPane;
@@ -68,7 +68,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		tabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
 		tabPane.addTab(HISTOGRAM_TAB_LBL, histogramsPanel);
 		tabPane.addTab(WILCOXON_TAB_LBL, wilcoxonPanel);
-		tabPane.addTab(MAGNITUDE_TAB_LBL, nucleusMagnitudePanel);
+		tabPane.addTab(MAGNITUDE_TAB_LBL, null, nucleusMagnitudePanel, "Pop, pop");
 		tabPane.addTab(OVERLAYS_TAB_LBL, nuclearOverlaysPanel);
 		tabPane.addTab(SCATTER_TAB_LBL, nuclearScatterChartPanel);
 		

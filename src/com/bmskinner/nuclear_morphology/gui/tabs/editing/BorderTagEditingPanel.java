@@ -204,12 +204,6 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
 	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent e) {

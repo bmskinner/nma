@@ -26,17 +26,9 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.TableModel;
-
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentBoxplotsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentHistogramsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentMagnitudePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentPositionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentProfilePanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentStatsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentWilcoxonPanel;
@@ -44,57 +36,50 @@ import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentWilcoxonPanel;
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
 		
-	private SegmentStatsPanel 		segmentStatsPanel;		// Hold the start and end points of each segment
-	private SegmentProfilePanel		segmentProfilePanel;	// draw the segments on the median profile
-	private SegmentBoxplotsPanel 	segmentBoxplotsPanel;	// draw boxplots of segment lengths
-	private SegmentHistogramsPanel 	segmentHistogramsPanel;	// draw boxplots of segment lengths
-	private SegmentWilcoxonPanel	segmentWilcoxonPanel;	// stats between datasets
-	private SegmentMagnitudePanel	segmentMagnitudePanel;  // magnitude differences between segments
-
-	private JTabbedPane 			tabPanel;
-	
+	private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
+	private static final String HISTOGRAM_TAB_LBL = "Histograms";
+	private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
+	private static final String MAGNITUDE_TAB_LBL = "Magnitude";
+		
 	public SegmentsDetailPanel() {
 		super();
 		this.setLayout(new BorderLayout());
-		
-		tabPanel = new JTabbedPane(JTabbedPane.TOP);
-		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		JPanel panel = new JPanel(new GridBagLayout());
+		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		
+		DetailPanel segmentProfilePanel    = new SegmentProfilePanel();
+		DetailPanel segmentBoxplotsPanel   = new SegmentBoxplotsPanel();
+		DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel();
+		DetailPanel segmentWilcoxonPanel   = new SegmentWilcoxonPanel();
+		DetailPanel segmentMagnitudePanel  = new SegmentMagnitudePanel();
+		DetailPanel segmentStatsPanel      = new SegmentStatsPanel();
 		
 		Dimension minimumChartSize = new Dimension(100, 100);
-		segmentProfilePanel  = new SegmentProfilePanel();
-		this.addSubPanel(segmentProfilePanel);
+		
 		segmentProfilePanel.setMinimumSize(minimumChartSize);
 		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		segmentBoxplotsPanel = new SegmentBoxplotsPanel();
 		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
-		this.addSubPanel(segmentBoxplotsPanel);
-		tabPanel.addTab("Boxplots", segmentBoxplotsPanel);
-		
-		
-		segmentHistogramsPanel = new SegmentHistogramsPanel();
 		segmentHistogramsPanel.setMinimumSize(minimumChartSize);
-		this.addSubPanel(segmentHistogramsPanel);
-		tabPanel.addTab("Histograms", segmentHistogramsPanel);
-		
-		segmentWilcoxonPanel = new SegmentWilcoxonPanel();
 		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
-		this.addSubPanel(segmentWilcoxonPanel);
-		tabPanel.addTab("Stats", segmentWilcoxonPanel);
-		
-		segmentMagnitudePanel = new SegmentMagnitudePanel();
 		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
-		this.addSubPanel(segmentMagnitudePanel);
-		tabPanel.addTab("Magnitude", segmentMagnitudePanel);
-		
-		segmentStatsPanel = new SegmentStatsPanel();
-		this.addSubPanel(segmentStatsPanel);
 		segmentStatsPanel.setMinimumSize(minimumChartSize);
 		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
+		this.addSubPanel(segmentProfilePanel);
+		this.addSubPanel(segmentBoxplotsPanel);
+		this.addSubPanel(segmentHistogramsPanel);
+		this.addSubPanel(segmentWilcoxonPanel);
+		this.addSubPanel(segmentMagnitudePanel);
+		this.addSubPanel(segmentStatsPanel);
 		
+		
+		tabPanel.addTab(BOXPLOTS_TAB_LBL, segmentBoxplotsPanel);
+		tabPanel.addTab(HISTOGRAM_TAB_LBL, segmentHistogramsPanel);
+		tabPanel.addTab(WILCOXON_TAB_LBL, segmentWilcoxonPanel);
+		tabPanel.addTab(MAGNITUDE_TAB_LBL, segmentMagnitudePanel);
+		
+		JPanel mainPanel = new JPanel(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.gridx = 0;
@@ -105,33 +90,23 @@ public class SegmentsDetailPanel extends DetailPanel {
 		constraints.weighty = 0.5;
 		constraints.anchor = GridBagConstraints.CENTER;
 		
-		panel.add(segmentStatsPanel, constraints);
+		mainPanel.add(segmentStatsPanel, constraints);
 		
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.gridheight = 1;
 		constraints.gridwidth = 1;
 		constraints.weighty = 1;
-		panel.add(segmentProfilePanel, constraints);
+		mainPanel.add(segmentProfilePanel, constraints);
 		
 		constraints.gridx = 1;
 		constraints.gridy = 0;
 		constraints.gridheight = 2;
 		constraints.gridwidth = 1;
-		panel.add(tabPanel, constraints);
+		mainPanel.add(tabPanel, constraints);
 		
-		this.add(panel, BorderLayout.CENTER);
+		this.add(mainPanel, BorderLayout.CENTER);
 		
 		
 	}			
-
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
 }

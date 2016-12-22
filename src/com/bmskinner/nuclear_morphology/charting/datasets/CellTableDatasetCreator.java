@@ -300,42 +300,57 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		if(sc.numberOfSignals()==0){
 			return createBlankTable();
 		}
-				
-		// Make the first column, of names
-		for( List<INuclearSignal> signalsRow : sc.getSignals()){
-			
-			int sigNumber = 0;
-			
-			for(INuclearSignal row : signalsRow){
+		try {
 
-				columnNames.add("Channel_"+row.getChannel()+"_Sig_"+sigNumber);
-				sigNumber++;
-			}
+			// Make the first column, of names
+			for(UUID id : sc.getSignalGroupIDs()){
 
-		}
-		model.addColumn("Signal", columnNames.toArray(new Object[0])); 
-		
-		// Get the matrix to draw
-		double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
-		
-		// Make the subequent columns, one per signal
-		int col = 0;
-		
-		for( List<INuclearSignal> signalsRow : sc.getSignals()){
-			int sigNumber = 0;
-			for(INuclearSignal row : signalsRow){
-				String colName = "Channel_"+row.getChannel()+"_Sig_"+sigNumber;
-				List<Object> colData = new ArrayList<Object>(0);
+				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
 
-				double[] colValues = matrix[col];
-				for(double value : colValues){
-					colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+				List<INuclearSignal> signalsRow = sc.getSignals(id);
+				int sigNumber = 0;
+
+				for(INuclearSignal row : signalsRow){
+
+					columnNames.add(signalName+"_Sig_"+sigNumber);
+					sigNumber++;
 				}
-				
-				model.addColumn(colName, colData.toArray(new Object[0])); 
-				col++;
-				sigNumber++;
+
 			}
+			model.addColumn("Signal", columnNames.toArray(new Object[0])); 
+
+			// Get the matrix to draw
+			double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
+
+			// Make the subequent columns, one per signal
+			int col = 0;
+
+		
+
+			for(UUID id : sc.getSignalGroupIDs()){
+
+				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+
+				List<INuclearSignal> signalsRow = sc.getSignals(id);
+				int sigNumber = 0;
+				for(INuclearSignal row : signalsRow){
+					String colName = signalName+"_Sig_"+sigNumber;
+					List<Object> colData = new ArrayList<Object>(0);
+
+					double[] colValues = matrix[col];
+					for(double value : colValues){
+						colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+					}
+
+					model.addColumn(colName, colData.toArray(new Object[0])); 
+					col++;
+					sigNumber++;
+				}
+			}
+		
+		} catch(UnavailableSignalGroupException e){
+			stack("Error getting signal group", e);
+			return createBlankTable();
 		}
 		
 		return model;

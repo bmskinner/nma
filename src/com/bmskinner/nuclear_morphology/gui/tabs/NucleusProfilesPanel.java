@@ -19,18 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.swing.JTabbedPane;
-import javax.swing.table.TableModel;
-
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ModalityDisplayPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ProfileDisplayPanel;
@@ -39,45 +28,35 @@ import com.bmskinner.nuclear_morphology.gui.tabs.profiles.VariabilityDisplayPane
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
 	
-	private Map<ProfileType, ProfileDisplayPanel> profilePanels = new HashMap<ProfileType, ProfileDisplayPanel>();
-	
-	VariabilityDisplayPanel	variabilityChartPanel;
-	ModalityDisplayPanel 		modalityDisplayPanel;
+	private static final String MODALITY_TAB_LBL    = "Modality";
+	private static final String VARIABILITY_TAB_LBL = "Variability";
 	
 	public NucleusProfilesPanel() {
 		super();
 		this.setLayout(new BorderLayout());
-		JTabbedPane profilesTabPanel = new JTabbedPane(JTabbedPane.TOP);
+		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 		
 		for(ProfileType type : ProfileType.values()){
-			ProfileDisplayPanel panel = new ProfileDisplayPanel(type);
-			profilePanels.put(type, panel);
+			DetailPanel panel = new ProfileDisplayPanel(type);
 			this.addSubPanel(panel);
-			profilesTabPanel.addTab(type.toString(), null, panel, null);
+			tabPanel.addTab(type.toString(), panel);
 		}
 		
 		/*
 		 * Create the other profile panels
 		 */
 		
-		modalityDisplayPanel  = new ModalityDisplayPanel();		
-		variabilityChartPanel = new VariabilityDisplayPanel();
+		DetailPanel modalityDisplayPanel  = new ModalityDisplayPanel();		
+		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
+		
 		this.addSubPanel(variabilityChartPanel);
 		this.addSubPanel(modalityDisplayPanel);
 		
-		profilesTabPanel.addTab("Variability", null, variabilityChartPanel, null);
-		profilesTabPanel.addTab("Modality"   , null, modalityDisplayPanel, null);
-		this.add(profilesTabPanel, BorderLayout.CENTER);
-
-	}
+		tabPanel.addTab(VARIABILITY_TAB_LBL, variabilityChartPanel);
+		tabPanel.addTab(MODALITY_TAB_LBL   , modalityDisplayPanel);
 		
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
+		
+		this.add(tabPanel, BorderLayout.CENTER);
+
 	}
 }

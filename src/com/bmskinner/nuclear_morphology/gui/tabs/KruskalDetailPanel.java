@@ -20,15 +20,9 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.logging.Level;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.table.TableModel;
-
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -36,21 +30,22 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.dialogs.KruskalTestDialog;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel  extends DetailPanel {
 	
+	private static final String COMPARE_FRANKENPROFILE_LBL = "Compare frankenprofiles";
+	private static final String COMPARE_INFO_LBL = "Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)";
+	
 	private ExportableChartPanel chartPanel;
-	JButton frankenButton = new JButton("Compare frankenprofiles");
+	JButton frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
 
-	public KruskalDetailPanel( ) throws Exception {
+	public KruskalDetailPanel() {
 		super();
 		
 		createUI();
@@ -84,12 +79,9 @@ public class KruskalDetailPanel  extends DetailPanel {
 	private JPanel createHeaderPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 
-		panel.add(new JLabel("Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)"));
+		panel.add(new JLabel(COMPARE_INFO_LBL));
 		
-		frankenButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
+		frankenButton.addActionListener( e -> {
 				
 				Thread thr = new Thread(){
 					public void run(){
@@ -97,14 +89,14 @@ public class KruskalDetailPanel  extends DetailPanel {
 						try {
 							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1) );
 						} catch (Exception e) {
-							log(Level.SEVERE, "Error testing", e);
+							warn("Error testing frankenprofiles");
+							stack("Error testing frankenprofiles", e);
 						}
 					}
 				};
 				thr.start();
-			}
-			
-		});	
+			});
+		
 		panel.add(frankenButton);
 
 		return panel;
@@ -129,21 +121,12 @@ public class KruskalDetailPanel  extends DetailPanel {
 			.setTarget(chartPanel)
 			.build();
 		
-
-		JFreeChart chart = getChart(options);
-
-		chartPanel.setChart(chart);
-
+		setChart(options);
 	}
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options){
 		return new MorphologyChartFactory(options).makeKruskalWallisChart( false);
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
 	}
 	
 	@Override
@@ -176,7 +159,7 @@ public class KruskalDetailPanel  extends DetailPanel {
 			updateNull();
 
 		}
-		log(Level.FINEST, "Updated Kruskal panel");
+		finest("Updated Kruskal panel");
 	}
 	
 	@Override
