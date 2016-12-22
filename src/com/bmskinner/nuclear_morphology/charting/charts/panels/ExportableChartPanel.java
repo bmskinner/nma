@@ -53,6 +53,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
 import com.bmskinner.nuclear_morphology.charting.datasets.ExportableBoxAndWhiskerCategoryDataset;
+import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -351,10 +352,15 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 
 
 			if(this.getChart().getPlot() instanceof CategoryPlot){
+				
+				if( this.getChart().getCategoryPlot().getDataset() instanceof ShellResultDataset ){
+
+					return getShellData();
+				}
 
 				if( this.getChart().getCategoryPlot().getDataset() instanceof BoxAndWhiskerCategoryDataset ){
 
-					result = getBoxplotData();
+					return getBoxplotData();
 				}
 
 			} else {
@@ -362,21 +368,18 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 				if( this.getChart().getXYPlot().getDataset() instanceof DefaultXYDataset ){
 
 
-					result = getXYProfileData(); // single profiles
+					return getXYProfileData(); // single profiles
 
 				}
 				
 				if( this.getChart().getXYPlot().getDataset() instanceof HistogramDataset ){
 
-					result = getHistogramData();
+					return getHistogramData();
 				}
+				
+				
 
 			}
-
-
-
-
-
 
 		} catch (ClassCastException e2){
 			
@@ -386,32 +389,12 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 			for(StackTraceElement el : e2.getStackTrace()){
 				builder.append(el.toString()+NEWLINE);
 			}
-			result = builder.toString();
+			return builder.toString();
 		}
 		return result;
 	}
 	
 	private void export(){
-		
-		//Create a file chooser
-//		final JFileChooser fc = new JFileChooser();
-//		
-//		int returnVal = fc.showSaveDialog(this);
-//		
-//		if(returnVal==JFileChooser.APPROVE_OPTION){
-//			File file = fc.getSelectedFile();
-//			String string = getData();
-//			PrintWriter out;
-//			try {
-//
-//				out = new PrintWriter(file);
-//				out.println(string);
-//				out.close();
-//			} catch (FileNotFoundException e) {
-//				error("Cannot find save file", e);
-//				
-//			}
-//		}
 						
 		// get a place to save to
 		SaveDialog saveDialog = new SaveDialog("Export data to...", "Chart data", Constants.TAB_FILE_EXTENSION);
@@ -431,14 +414,43 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 				out.println(string);
 				out.close();
 			} catch (FileNotFoundException e) {
-				
+				warn("Cannot export to file");
+				stack("Error exporting", e);
 			}
 			
 		} 
 
 	}
 	
-	
+	// Invoke when dealing  with an XY chart
+	private String getShellData() throws ClassCastException {
+		CategoryPlot plot = this.getChart().getCategoryPlot();
+		StringBuilder builder = new StringBuilder();
+		DecimalFormat df = new DecimalFormat("#0.00");
+		
+		int datasetCount = plot.getDatasetCount();
+		
+		for(int dataset=0; dataset<datasetCount;dataset++){
+			ShellResultDataset ds = (ShellResultDataset) plot.getDataset(dataset);
+			
+			for(int column=0; column<ds.getColumnCount();column++){
+				String columnName = ds.getColumnKey(column).toString();
+				builder.append("Shell_"+columnName+":"+NEWLINE);
+				
+				for(int row=0; row<ds.getRowCount(); row++){
+					String rowName = ds.getRowKey(row).toString();
+					builder.append("\t"+rowName+":"+NEWLINE);
+					
+
+					double value = ds.getValue(row, column).doubleValue();
+					builder.append("\t\t" + df.format(  value) + NEWLINE);
+				}
+			}
+		}
+		
+		builder.append(NEWLINE);
+		return builder.toString();
+	}
 	
 	// Invoke when dealing  with an XY chart
 	private String getXYProfileData() throws ClassCastException {
