@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsOverviewPanel;
  *
  */
 @SuppressWarnings("serial")
-public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
+public class SignalsDetailPanel extends DetailPanel implements SignalChangeListener {
 		
 	private static final String OVERVIEW_TAB_LBL = "Overview";
 	private static final String BOXPLOTS_TAB_LBL = "Boxplots";
@@ -92,29 +92,18 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			error("Error making signal panel", e);
 		}
 	}
-		
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
 
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-
-		if(e.getActionCommand().startsWith("GroupVisble_")){
-			
-			for(TabPanel p : this.getSubPanels()){
-				p.update(getDatasets());
-			}			
-		}
-		
-	}
+//	@Override
+//	public void actionPerformed(ActionEvent e) {
+//
+//		if(e.getActionCommand().startsWith("GroupVisble_")){
+//			
+//			for(TabPanel p : this.getSubPanels()){
+//				p.update(getDatasets());
+//			}			
+//		}
+//		
+//	}
 	
 	
 	@Override
@@ -124,7 +113,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			update(getDatasets());
 		}
 		
-		if(event.type().startsWith("GroupVisble_")){
+		if(event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)){
 			
 			for(TabPanel p : this.getSubPanels()){
 				p.update(getDatasets());

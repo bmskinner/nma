@@ -474,8 +474,8 @@ public abstract class DetailPanel
 	
 	/**
 	 * This should be overridden to create the appropriate tables for caching
-	 * @param options
-	 * @return
+	 * @param options the table options
+	 * @return null unless overridden
 	 * @throws Exception
 	 */
 	protected TableModel createPanelTableType(TableOptions options){
@@ -484,8 +484,8 @@ public abstract class DetailPanel
 	
 	/**
 	 * This should be overridden to create the appropriate charts for caching
-	 * @param options
-	 * @return
+	 * @param options the chart options
+	 * @return null unless overridden
 	 * @throws Exception
 	 */
 	protected JFreeChart createPanelChartType(ChartOptions options){

@@ -300,6 +300,10 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		List<Object> columnNames = new ArrayList<Object>(0);
 		
 		ISignalCollection sc = cell.getNucleus().getSignalCollection();
+		
+		if(sc.numberOfSignals()==0){
+			return createBlankTable();
+		}
 				
 		// Make the first column, of names
 		for( List<INuclearSignal> signalsRow : sc.getSignals()){
@@ -326,7 +330,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 			for(INuclearSignal row : signalsRow){
 				String colName = "Channel_"+row.getChannel()+"_Sig_"+sigNumber;
 				List<Object> colData = new ArrayList<Object>(0);
-				
+
 				double[] colValues = matrix[col];
 				for(double value : colValues){
 					colData.add(DEFAULT_DECIMAL_FORMAT.format(value));

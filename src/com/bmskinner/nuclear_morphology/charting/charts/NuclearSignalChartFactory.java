@@ -176,6 +176,13 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 			return makeEmptyChart();
 		}
 		
+		int shellCount = options.firstDataset().getCollection().getSignalManager().getShellCount();
+		
+		if(shellCount==0){
+			// No shells to display
+			return makeEmptyChart();
+		}
+		
 		XYDataset shellDataset;
 		
 		try {

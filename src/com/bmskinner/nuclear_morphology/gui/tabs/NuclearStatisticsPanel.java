@@ -21,12 +21,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
-import javax.swing.table.TableModel;
-
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearBoxplotsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearHistogramsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearOverlaysPanel;
@@ -50,7 +44,6 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
 	public NuclearStatisticsPanel() throws Exception {
 		super();
-		
 		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
@@ -81,15 +74,4 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}
-		
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
-
 }

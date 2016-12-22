@@ -547,5 +547,20 @@ public class SignalManager implements Loggable {
 			}
     	}
     }
+    
+    /**
+     * Shell counts are the same for all signal groups in the collection. If a signal
+     * group in the collection has a shell result, the shell count is returned.
+     * @return the shell count of the collection, or zero if no shell results are present
+     */
+    public int getShellCount(){
+    	
+    	for(ISignalGroup group : this.getSignalGroups()){
+    		if(group.hasShellResult()){
+    			return group.getShellResult().getNumberOfShells();
+    		}
+    	}
+    	return 0;
+    }
 	  
 }

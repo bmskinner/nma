@@ -908,7 +908,14 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		// Make the shells from the consensus nucleus
 		ShellDetector c;
 		try {
-			c = new ShellDetector(options.firstDataset().getCollection().getConsensusNucleus(), ShellDetector.DEFAULT_SHELL_COUNT);
+			
+			int shellCount = options.firstDataset().getCollection().getSignalManager().getShellCount();
+			
+			if(shellCount==0){
+				throw new ChartDatasetCreationException("Cannot make dataset for zero shells");
+			}
+			
+			c = new ShellDetector(options.firstDataset().getCollection().getConsensusNucleus(), shellCount);
 		} catch (ShellAnalysisException e) {
 			stack("Error making shells in consensus", e);
 			throw new ChartDatasetCreationException("Error making shells", e);
