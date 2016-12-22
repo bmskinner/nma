@@ -9,13 +9,24 @@ import java.util.UUID;
  * @since 1.13.4
  *
  */
-public class PairwiseSignalDistanceValue extends PairwiseSignalDistance {
-	
+public class PairwiseSignalDistanceValue {
+	private UUID group1;
+	private UUID group2;
+
 	private double value;
 	
 	public PairwiseSignalDistanceValue(UUID id1, UUID id2, double value){
-		super(id1, id2);
+		group1 = id1;
+		group2 = id2;
 		this.value = value;
+	}
+	
+	public UUID getGroup1(){
+		return group1;
+	}
+	
+	public UUID getGroup2(){
+		return group2;
 	}
 	
 	public double getValue(){

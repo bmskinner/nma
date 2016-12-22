@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalScatterChartPanel
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalShellsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsAnalysisPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsBoxplotPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsColocalisationPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsHistogramPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsOverviewPanel;
 
@@ -51,6 +52,7 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 	private static final String SHELLS_TAB_LBL   = "Shells";
 	private static final String SETTINGS_TAB_LBL = "Detection settings";
 	private static final String SCATTER_TAB_LBL  = "Scatter";
+	private static final String COLOCAL_TAB_LBL  = "Colocalisation";
 
 	private JTabbedPane signalsTabPane;
 
@@ -71,6 +73,7 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 			DetailPanel shellsPanel    = new SignalShellsPanel();
 			DetailPanel analysisPanel  = new SignalsAnalysisPanel();
 			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
+			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 			
 			signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
 			signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
@@ -78,6 +81,7 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 			signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
 			signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
 			signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
+			signalsTabPane.addTab(COLOCAL_TAB_LBL, colocalistionPanel);
 
 			this.addSubPanel(overviewPanel);
 			this.addSubPanel(boxplotPanel);
@@ -85,6 +89,7 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 			this.addSubPanel(shellsPanel);
 			this.addSubPanel(analysisPanel);
 			this.addSubPanel(signalScatterChartPanel);
+			this.addSubPanel(colocalistionPanel);
 			
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			

@@ -316,7 +316,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		model.addColumn("Signal", columnNames.toArray(new Object[0])); 
 		
 		// Get the matrix to draw
-		double[][] matrix = sc.calculateDistanceMatrix();
+		double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
 		
 		// Make the subequent columns, one per signal
 		int col = 0;

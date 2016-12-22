@@ -23,6 +23,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -371,7 +372,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * Calculate the pairwise distances between all signals in the nucleus 
 	 */
 	@Override
-	public double[][] calculateDistanceMatrix(){
+	public double[][] calculateDistanceMatrix(MeasurementScale scale){
 
 		// create a matrix to hold the data
 		// needs to be between every signal and every other signal, irrespective of colour
@@ -398,7 +399,9 @@ public class DefaultSignalCollection implements ISignalCollection {
 
 							for(INuclearSignal col : signalsCol){
 								IPoint bCoM = col.getCentreOfMass();
-								matrix[matrixRow][matrixCol] = aCoM.getLengthTo(bCoM);
+								double value = aCoM.getLengthTo(bCoM);
+								value = SignalStatistic.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
+								matrix[matrixRow][matrixCol] = value;
 								matrixCol++;
 							}
 
@@ -410,6 +413,70 @@ public class DefaultSignalCollection implements ISignalCollection {
 			}
 		}
 		return matrix;
+	}
+	
+	/**
+     * For each signal group pair, find the smallest pairwise distance
+     * between signals in the collection.
+     * @return a list of shortest distances for each pairwise group
+     */
+	@Override
+	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale){
+		
+		List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
+		
+		Set<UUID> completeIDs = new HashSet<UUID>();
+		
+		for( UUID id1 : this.getSignalGroupIDs()){
+			
+			if( ! this.hasSignal(id1)){
+				continue;
+			}
+			
+			List<INuclearSignal> signalList1 = this.getSignals(id1);
+			
+			for( UUID id2 : this.getSignalGroupIDs() ){
+				
+				if(id1.equals(id2)){
+					continue;
+				}
+				
+				if( ! this.hasSignal(id2)){
+					continue;
+				}
+
+				
+				List<INuclearSignal> signalList2 = this.getSignals(id2);
+				
+				// Compare all signal pairwise distances between groups 1 and 2
+				double smallest = Double.MAX_VALUE;
+				double scaleFactor = 1;
+				for(INuclearSignal s1 : signalList1){
+					scaleFactor = s1.getScale();
+					for(INuclearSignal s2 : signalList2){
+						
+						
+						
+						double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
+						smallest = distance < smallest ? distance : smallest;
+						
+					}
+					
+				}
+
+				// Use arbitrary distance measure to convert scale
+				smallest = SignalStatistic.DISTANCE_FROM_COM.convert(smallest, scaleFactor, scale);
+				
+				
+				// Assign the pairwise distance
+				PairwiseSignalDistanceValue p = new PairwiseSignalDistanceValue(id1, id2, smallest);
+				result.add(p);
+
+				
+			}
+			completeIDs.add(id1);
+		}
+		return result;
 	}
 		
 	/* (non-Javadoc)

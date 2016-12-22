@@ -186,6 +186,16 @@ public class DefaultNucleus
 		}
 		
 	}
+	
+	@Override
+	public void setScale(double scale){
+		super.setScale(scale);
+		
+		for(INuclearSignal s : this.getSignalCollection().getAllSignals()){
+			s.setScale(scale);
+		}
+		
+	}
 
 	protected double calculateStatistic(NucleusStatistic stat) {
 		

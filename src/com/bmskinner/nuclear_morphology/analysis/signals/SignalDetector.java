@@ -177,6 +177,8 @@ public class SignalDetector extends Detector {
 							sourceFile, 
 							channel, 
 							originalPosition);
+					
+					s.setScale(n.getScale()); // copy scaling information from source nucleus
 
 					s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
 					s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));

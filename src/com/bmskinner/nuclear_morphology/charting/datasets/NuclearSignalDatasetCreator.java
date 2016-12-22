@@ -27,7 +27,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
@@ -58,6 +60,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
@@ -65,6 +68,10 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.stats.Mean;
+import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.StDev;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
@@ -1064,6 +1071,88 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			}
 
 		}
+
+		return model;
+	}
+	
+	/**
+	 * Create a table showing the colocalisation level of all signals within a single dataset
+	 * @param options
+	 * @return
+	 */
+	public TableModel createSignalColocalisationTable(TableOptions options) {
+		
+		if( ! options.isSingleDataset()){
+			return createBlankTable();
+		}
+				
+		DefaultTableModel model = new DefaultTableModel();
+		
+//		DecimalFormat pFormat = new DecimalFormat("#0.00"); 
+
+		try {
+		
+		PairwiseSignalDistanceCollection ps = options.firstDataset()
+				.getCollection()
+				.getSignalManager()
+				.calculateSignalColocalisation(options.getScale());
+		
+		List<Object> firstColumnData = new ArrayList<Object>();
+		
+		Set<UUID> ids = new HashSet<UUID>();
+		ids.addAll(ps.getIDs());
+		
+		for(UUID primaryID : ps.getIDs()){
+			String primaryName = options.firstDataset()
+					.getCollection().getSignalGroup(primaryID).getGroupName();
+			firstColumnData.add(primaryName);
+		}
+		
+		model.addColumn("Signal group", firstColumnData.toArray());
+		
+		for(UUID primaryID : ps.getIDs()){
+			
+			List<Object> columnData = new ArrayList<Object>();
+			
+			String primaryName = options.firstDataset()
+					.getCollection().getSignalGroup(primaryID).getGroupName();
+			
+			
+			for(UUID secondaryID : ps.getIDs()){
+				
+				if(primaryID.equals(secondaryID)){
+					columnData.add("");
+					continue;
+				}
+				
+				String secondaryName = options.firstDataset()
+						.getCollection().getSignalGroup(secondaryID).getGroupName();
+				
+				List<Double> values = ps.getValues(primaryID, secondaryID);
+								
+				if(values == null){
+					columnData.add("N/A");
+					continue;
+				}
+				
+				double median  = new Quartile(values, Quartile.MEDIAN).doubleValue();
+//				double stdev = new StDev(values).doubleValue();
+				columnData.add( DEFAULT_DECIMAL_FORMAT.format(median) );
+//						+ " [ " 
+//						+ DEFAULT_DECIMAL_FORMAT.format(stdev)
+//						+ " ]" );
+				
+			}
+
+			model.addColumn(primaryName, columnData.toArray());
+			
+		}
+		
+		} catch(UnavailableSignalGroupException e){
+			stack("Cannot get signal group", e);
+			return createBlankTable();
+		}
+		
 
 		return model;
 	}

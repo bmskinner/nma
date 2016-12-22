@@ -35,6 +35,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceValue;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -568,6 +570,26 @@ public class SignalManager implements Loggable {
     		}
     	}
     	return 0;
+    }
+    
+    /**
+     * For each signal group pair, find the smallest pairwise distance
+     * between signals for each nucleus in the collection. Return the data as
+     * a list of pairwise signal distance collections 
+     */
+    public PairwiseSignalDistanceCollection calculateSignalColocalisation(MeasurementScale scale){
+    	
+    	PairwiseSignalDistanceCollection ps = new PairwiseSignalDistanceCollection();
+	
+    	for(Nucleus n : collection.getNuclei()){
+			List<PairwiseSignalDistanceValue> list = n.getSignalCollection().calculateSignalColocalisation(scale);
+			
+			for(PairwiseSignalDistanceValue v : list){
+				ps.addValue(v);
+			}
+    	}
+    	
+    	return ps;
     }
 	  
 }

@@ -253,10 +253,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		
 	}
 	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){

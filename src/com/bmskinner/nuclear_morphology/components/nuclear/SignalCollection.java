@@ -625,6 +625,50 @@ public class SignalCollection implements ISignalCollection {
 		return s;
 	}
 	
+	/**
+     * For each signal group pair, find the smallest pairwise distance
+     * between signals in the collection.
+     * @return a list of shortest distances for each pairwise group
+     */
+	@Override
+	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(){
+		
+		List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
+		
+		for( UUID id1 : this.getSignalGroupIDs()){
+			
+			List<INuclearSignal> signalList1 = this.getSignals(id1);
+			
+			for( UUID id2 : this.getSignalGroupIDs() ){
+				
+				if(id1.equals(id2)){
+					continue;
+				}
+				
+				List<INuclearSignal> signalList2 = this.getSignals(id2);
+				
+				// Compare all signal pairwise distances between groups 1 and 2
+				double smallest = Double.MAX_VALUE;
+				for(INuclearSignal s1 : signalList1){
+					
+					for(INuclearSignal s2 : signalList2){
+						
+						double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
+						smallest = distance < smallest ? distance : smallest;
+						
+					}
+					
+				}
+				
+				// Assign the pairwise distance
+				PairwiseSignalDistanceValue p = new PairwiseSignalDistanceValue(id1, id2, smallest);
+				result.add(p);
+				
+			}
+		}
+		return result;
+	}
+	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("\tReading signal collection");
 		in.defaultReadObject();

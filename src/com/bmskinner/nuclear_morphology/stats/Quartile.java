@@ -32,7 +32,7 @@ public class Quartile extends DescriptiveStatistic {
 	public static final int UPPER_QUARTILE = 75;
 	public static final int MEDIAN         = 50;
 	
-	public Quartile(List<Number> values, double lowerPercent) {
+	public Quartile(List<? extends Number> values, double lowerPercent) {
 		  
 		  Number[] array = values.toArray(new Number[0]);
 		  value = new Quartile(array, lowerPercent);

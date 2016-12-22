@@ -191,5 +191,12 @@ public interface ISignalCollection extends Serializable, Loggable {
 	/**
 	 * Calculate the pairwise distances between all signals in the nucleus 
 	 */
-	public double[][] calculateDistanceMatrix();
+	double[][] calculateDistanceMatrix(MeasurementScale scale);
+	
+	/**
+     * For each signal group pair, find the smallest pairwise distance
+     * between signals in the collection.
+     * @return a list of shortest distances for each pairwise group
+     */
+	List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale);
 }

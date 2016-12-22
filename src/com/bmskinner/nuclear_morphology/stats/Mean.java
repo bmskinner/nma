@@ -48,7 +48,7 @@ public class Mean extends DescriptiveStatistic {
 		
 	
 	/**
-	 * Calculate the maximum value in the given list
+	 * Calculate the mean value in the given list
 	 * @param list
 	 */
 	public Mean(List<? extends Number> list){
@@ -60,9 +60,14 @@ public class Mean extends DescriptiveStatistic {
 	}
 		
 	private void compareList(List<? extends Number> list){
-			    
+			 
+		if(list.size()==0){
+			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+		}
+		
 	    if(list.size()==1){
 	    	value = list.get(0);
+	    	return;
 	    }
 	    
 	    double sum = 0;
