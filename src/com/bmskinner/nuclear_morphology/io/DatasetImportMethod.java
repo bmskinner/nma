@@ -142,7 +142,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod {
 				
 				
 				// Correct signal border locations from older versions for all imported datasets
-				if(v.isOlderThan( new Version(1, 13, 2))){	
+				if(v.isOlderThan( Version.v_1_13_2 )){	
 					fine("Updating signal locations for pre-1.13.2 dataset");
 					updateSignals();
 				}
@@ -270,6 +270,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod {
 			warn("Major version difference");
 			return false;
 		}
+		
 		// dataset revision should be equal or greater to program
 		if(version.getMinor()<Constants.VERSION_MINOR){
 			warn("Dataset was created with an older version of the program");

@@ -389,10 +389,6 @@ public class MainWindow
 				: populationsPanel.getSelectedDatasets().get(0);
 		
 		
-		if(event.type().equals("RunShellAnalysis")){
-			Runnable task = new ShellAnalysisAction(selectedDataset, MainWindow.this);
-			task.run();
-		}
 
 		if(event.type().equals("MergeCollectionAction")){
 			
@@ -525,14 +521,11 @@ public class MainWindow
 				task.run();
 			}
 			
-//			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
-//				finer("Refreshing segmentation across nuclei using existing border tags");
-//				int flag = MainWindow.ASSIGN_SEGMENTS;
-//				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-////				Runnable p = new RunProfilingAction(list, flag, MainWindow.this);
-////				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, 0, MainWindow.this);
-//				task.run();
-//			}
+
+			if(event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)){
+				Runnable task = new ShellAnalysisAction(event.firstDataset(), MainWindow.this);
+				task.run();
+			}
 			
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				

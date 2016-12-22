@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
@@ -32,6 +33,7 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -39,14 +41,19 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
@@ -816,7 +823,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
      * Create a boxplot dataset for signal statistics for a single analysis dataset
 	 * @param dataset the AnalysisDataset to get signal info from
 	 * @return a boxplot dataset
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException 
 	 */
     private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws ChartDatasetCreationException {
 
@@ -880,6 +887,56 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			result.add(ds);
 		}
 		return result;
+	}
+	
+	/**
+	 * Create a consensus nucleus dataset overlaid with shells
+	 * @param options the options
+	 * @return a dataset
+	 * @throws ChartDatasetCreationException
+	 */
+	public XYDataset createShellConsensusDataset(ChartOptions options) throws ChartDatasetCreationException {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+		
+		// Make the shells from the consensus nucleus
+		ShellDetector c;
+		try {
+			c = new ShellDetector(options.firstDataset().getCollection().getConsensusNucleus(), ShellDetector.DEFAULT_SHELL_COUNT);
+		} catch (ShellAnalysisException e) {
+			stack("Error making shells in consensus", e);
+			throw new ChartDatasetCreationException("Error making shells", e);
+		}
+
+		
+		// Draw the shells
+		int shellNumber = 0;	
+		for(Shell shell : c.getShells()){
+			
+			Polygon p = shell.toPolygon();
+			
+			double[] xpoints = new double[p.npoints+1];
+			double[] ypoints = new double[p.npoints+1];
+			
+			for(int i=0; i<p.npoints;i++){
+				
+				xpoints[i] = p.xpoints[i];
+				ypoints[i] = p.ypoints[i];
+			}
+			// complete the line
+			xpoints[p.npoints] = xpoints[0];
+			ypoints[p.npoints] = ypoints[0];
+			
+			double[][] data = { xpoints, ypoints };
+			ds.addSeries("Shell_"+shellNumber, data);
+			shellNumber++;
+			
+		}
+		
+		
+		
+		return ds;
+		
 	}
 	
 	

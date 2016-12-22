@@ -21,7 +21,7 @@ package com.bmskinner.nuclear_morphology.gui;
 import java.util.EventObject;
 
 public class SignalChangeEvent extends EventObject {
-
+	
 	private static final long serialVersionUID = 1L;
 	private String message;
 	private String sourceName;

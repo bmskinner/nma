@@ -33,6 +33,11 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 
 
+/**
+ * Setup a clustering of the given dataset.
+ * @author ben
+ *
+ */
 public class ClusterAnalysisAction extends ProgressableAction {
 
 	public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {

@@ -36,6 +36,8 @@ public class Version implements Serializable {
 	
 	private static final String SEPARATOR = "."; 
 	
+	public static final Version v_1_13_2 = new Version(1,13,2);
+	
 	public Version(final int major, final int minor, final int revision ){
 		this.major = major;
 		this.minor = minor;

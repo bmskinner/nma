@@ -30,6 +30,7 @@ import ij.gui.Roi;
 import ij.plugin.RoiEnlarger;
 import ij.process.ImageProcessor;
 
+import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -715,6 +716,10 @@ public class ShellDetector extends Detector {
 		}
 		
 		public Shape toShape(){
+			return shellRoi.getPolygon();
+		}
+		
+		public Polygon toPolygon(){
 			return shellRoi.getPolygon();
 		}
 		

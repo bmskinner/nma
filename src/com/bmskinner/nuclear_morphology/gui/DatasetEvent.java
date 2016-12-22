@@ -24,22 +24,24 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
+/**
+ * Carries instructions on analyses to be performed on a list of datasets.
+ * @author ben
+ *
+ */
 public class DatasetEvent extends EventObject {
 	
 	public static final String PROFILING_ACTION    = "Profiling action";
 	public static final String NEW_MORPHOLOGY      = "New morphology";
 	public static final String COPY_MORPHOLOGY     = "Copy morphology";
 	
-	/**
-	 * Copy existing median segments to nuclei
-	 */
 	public static final String REFRESH_MORPHOLOGY  = "Refresh morphology";
 	
 	public static final String REFOLD_CONSENSUS    = "Refold consensus";
 	public static final String SELECT_DATASETS     = "Select multiple datasets";
 	public static final String SELECT_ONE_DATASET  = "Select single dataset";
 	public static final String EXTRACT_SOURCE      = "Extract source";
-	public static final String CLUSTER             =  "Cluster";
+	public static final String CLUSTER             = "Cluster";
 	public static final String BUILD_TREE          = "Build tree";
 	public static final String TRAIN_CLASSIFIER    = "Train classifier";
 	public static final String REFRESH_CACHE       = "Refresh caches";
@@ -49,6 +51,7 @@ public class DatasetEvent extends EventObject {
 	public static final String ADD_DATASET         = "Add dataset";
 	public static final String RESEGMENT           = "Resegment dataset";
 	public static final String RECALCULATE_MEDIAN  = "Recalculate median profiles";
+	public static final String RUN_SHELL_ANALYSIS  = "Run shell analysis";
 	
 
 	private static final long serialVersionUID = 1L;

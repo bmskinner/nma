@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.charting.charts;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -19,7 +20,9 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.util.SortOrder;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
@@ -29,16 +32,29 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
-public class NuclearSignalChartFactory  extends AbstractChartFactory {
+/**
+ * Create the charts for nuclear signals
+ * @author ben
+ *
+ */
+public class NuclearSignalChartFactory extends AbstractChartFactory {
 	
 	public NuclearSignalChartFactory(ChartOptions o){
 		super(o);
 	}
 	
+	/**
+	 * Create an empty chart
+	 * @return
+	 */
 	public static JFreeChart makeEmptyChart(){
 		return ConsensusNucleusChartFactory.makeEmptyChart();
 	}
 	
+	/**
+	 * Create a shell chart with no data
+	 * @return
+	 */
 	private JFreeChart createEmptyShellChart(){
 		JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
 		shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
@@ -46,6 +62,10 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 		return shellsChart;
 	}
 	
+	/**
+	 * Create an overlapping bar chart showing the signal distribution in each shell 
+	 * @return a chart
+	 */
 	public JFreeChart createShellChart(){
 		
 		if( ! options.hasDatasets()){
@@ -134,6 +154,58 @@ public class NuclearSignalChartFactory  extends AbstractChartFactory {
 
 
 		return chart;
+	}
+	
+	
+	/**
+	 * Create a chart showing the shells on a consensus nucleus
+	 * @return the chart
+	 */
+	public JFreeChart createShellConsensusChart(){
+		if( ! options.hasDatasets()){
+			finer("No datasets for signal outline chart");
+			return makeEmptyChart();
+		}
+		
+		// Do not allow multi datasets here
+		if( options.isMultipleDatasets()){
+			finer("Multiple datasets for signal outline chart");
+			return makeEmptyChart();
+		}
+		
+		// Check for consensus nucleus
+		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+			finer("No consensus for signal outline chart");
+			return makeEmptyChart();
+		}
+		
+		XYDataset shellDataset;
+		
+		try {
+			shellDataset = new NuclearSignalDatasetCreator().createShellConsensusDataset(options);
+		} catch (ChartDatasetCreationException e) {
+			return makeErrorChart();
+		}
+		
+		
+		JFreeChart chart = createBaseXYChart();
+		XYPlot plot = chart.getXYPlot();
+		plot.setDataset(shellDataset);
+		
+
+//		plot.getDomainAxis().setRange(-max,max);
+//		plot.getRangeAxis().setRange(-max,max);
+
+		int seriesCount = plot.getSeriesCount();
+		for (int i = 0; i < seriesCount; i++) {
+			plot.getRenderer().setSeriesVisibleInLegend(i, false);
+			plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+		}	
+
+		applyAxisOptions(chart);
+		return chart;
+				
 	}
 	
 	/**

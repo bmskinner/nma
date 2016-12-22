@@ -337,7 +337,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 			
 
 		} catch (Exception e){
-			log(Level.FINER,"Error restoring auto bounds, falling back to default", e);
+			stack("Error restoring auto bounds, falling back to default", e);
 			super.restoreAutoBounds();
 		}
 	
