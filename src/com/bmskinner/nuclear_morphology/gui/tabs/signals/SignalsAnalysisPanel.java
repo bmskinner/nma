@@ -62,7 +62,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 
 		table  = new ExportableTable(new DefaultTableModel());
-//		table.setAutoCreateColumnsFromModel(false);
+
 		table.setEnabled(false);
 		
         

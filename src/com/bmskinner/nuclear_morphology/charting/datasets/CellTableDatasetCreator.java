@@ -286,11 +286,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 */
 	public TableModel createPairwiseSignalDistanceTable(TableOptions options){
 
-		if( ! options.hasDatasets()){
-			return createBlankTable();
-		}
-
-		if(options.isMultipleDatasets()){
+		if(! options.isSingleDataset()){
 			return createBlankTable();
 		}
 

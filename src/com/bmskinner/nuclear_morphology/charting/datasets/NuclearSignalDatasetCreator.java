@@ -99,9 +99,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
 			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
-			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-				maxChannels--;
-			}
 		}
 		
 		if(maxChannels==0){
@@ -200,10 +197,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
     	int j=0;
     	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
-    		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-    			continue;
-    		}
-
     		try {
 
     			
@@ -248,10 +241,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
         int j=0;
         for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-        	
-        	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-        		continue;
-        	}
         	
         	try{
 
@@ -341,10 +330,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			ICellCollection collection = dataset.getCollection();
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
-				
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					continue;
-				}
 
 				try {
 
@@ -391,11 +376,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			ICellCollection collection = dataset.getCollection();
 			
             for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-            	
-            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-
 								
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
                 
@@ -498,10 +478,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		for(IAnalysisDataset dataset : list){
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
-				
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
 
 				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
 
@@ -742,12 +718,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			
 			List<Object> temp = new ArrayList<Object>(0);
 			try {
-				
-				
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					continue;
-				}
-
 
 				if( collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
 					for(int j = 0; j<numberOfRowsPerSignalGroup;j++){ // Make a blank block of cells
@@ -837,10 +807,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
         	ICellCollection collection = d.getCollection();
 
         	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-        		
-        		if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
 
         		double[] values = collection.getSignalManager().getSignalStatistics(stat, options.getScale(), signalGroup);
         		/*
@@ -876,19 +842,16 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			ShellResultDataset ds = new ShellResultDataset();
 			
 			ICellCollection collection = dataset.getCollection();
+			
+			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+				if(options.isShowAnnotations()){
+					addRandomShellData(ds, collection, options);
+				}
+			}
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
-				// Create the random distribution
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					
-					if(options.isShowAnnotations()){
-						addRandomShellData(ds, collection, options);
-					}
-				} else {
-					addRealShellData(ds, collection, options, signalGroup);
-				}
-				
+				addRealShellData(ds, collection, options, signalGroup);
 			}
 			result.add(ds);
 		}
@@ -896,13 +859,18 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	}
 	
 	/**
-	 * Create a consensus nucleus dataset overlaid with shells
+	 * Create a consensus nucleus dataset overlaid with shells. Requires a single dataset
+	 * in the options.
 	 * @param options the options
-	 * @return a dataset
-	 * @throws ChartDatasetCreationException
+	 * @return a chart dataset
+	 * @throws ChartDatasetCreationException if the IAnalysisDataset has no shell results or the dataset count is not 1
 	 */
 	public XYDataset createShellConsensusDataset(ChartOptions options) throws ChartDatasetCreationException {
 
+		if(! options.isSingleDataset()){
+			throw new ChartDatasetCreationException("Single dataset required");
+		}
+		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		// Make the shells from the consensus nucleus
@@ -1068,10 +1036,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		for(IAnalysisDataset d : options.getDatasets()){
 			
 			for(UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()){
-
-				if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-					continue;
-				}
 
 				try {
 

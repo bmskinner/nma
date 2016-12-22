@@ -94,17 +94,24 @@ public class SignalManager implements Loggable {
    * @return the number of signal groups
    */
 	public int getSignalGroupCount(){
-		  return getSignalGroupIDs().size();
+		int count = getSignalGroupIDs().size();
+		if(this.hasSignals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+			count--;
+		}
+		 return count;
 	  }
 	  	  
 	  /**
-	   * Fetch the signal group ids in this collection
-	   * @param id
+	   * Fetch the signal group ids in this collection. This does not include
+	   * any random signals created in shell analysis
 	   * @return
 	   */
-	  public Set<UUID> getSignalGroupIDs(){
-	      return collection.getSignalGroupIDs();
-	  }
+	public Set<UUID> getSignalGroupIDs(){
+
+		Set<UUID> ids = new HashSet<UUID>(collection.getSignalGroupIDs());
+		ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
+		return ids;
+	}
 	  
 	  /**
 	   * Remove the given signal group

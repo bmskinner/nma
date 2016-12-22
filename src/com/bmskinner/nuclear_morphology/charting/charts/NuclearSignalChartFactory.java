@@ -159,20 +159,13 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 	 * @return the chart
 	 */
 	public JFreeChart createShellConsensusChart(){
-		if( ! options.hasDatasets()){
-			finer("No datasets for signal outline chart");
-			return makeEmptyChart();
-		}
 		
-		// Do not allow multi datasets here
-		if( options.isMultipleDatasets()){
-			finer("Multiple datasets for signal outline chart");
+		if(! options.isSingleDataset()){
 			return makeEmptyChart();
 		}
 		
 		// Check for consensus nucleus
 		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
-			finer("No consensus for signal outline chart");
 			return makeEmptyChart();
 		}
 		
@@ -188,6 +181,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		try {
 			shellDataset = new NuclearSignalDatasetCreator().createShellConsensusDataset(options);
 		} catch (ChartDatasetCreationException e) {
+			stack("Error making shell consensus dataset", e);
 			return makeErrorChart();
 		}
 		
@@ -195,17 +189,15 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
 		plot.setDataset(shellDataset);
-		
-
-//		plot.getDomainAxis().setRange(-max,max);
-//		plot.getRangeAxis().setRange(-max,max);
 
 		int seriesCount = plot.getSeriesCount();
 		for (int i = 0; i < seriesCount; i++) {
 			plot.getRenderer().setSeriesVisibleInLegend(i, false);
-			plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+			plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
 			plot.getRenderer().setSeriesPaint(i, Color.BLACK);
 		}	
+		
+		// TODO: if there is only one shell result, add overlays showing signal distribution
 
 		applyAxisOptions(chart);
 		return chart;
