@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellBorderTagPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellOutlinePanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellProfilePanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellSignalStatsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellStatsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellViewModel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsListPanel;
@@ -47,14 +48,21 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		
 	private JTabbedPane tabPane; 
 	
+	private static final String CELL_INFO_LBL    = "Info";
+	private static final String CELL_SEGS_LBL    = "Segments";
+	private static final String CELL_TAGS_LBL    = "Tags";
+	private static final String CELL_OUTLINE_LBL = "Outline";
+	private static final String CELL_SIGNALS_LBL = "Signals";
+	
 	protected CellsListPanel	 cellsListPanel;		// the list of cells in the active dataset
 	protected CellProfilePanel	 segmentProfilePanel;// = new CellProfilePanel(); 		// the nucleus angle profile
 	protected CellBorderTagPanel cellBorderTagPanel;//  = new CellBorderTagPanel();
 	protected CellOutlinePanel 	 outlinePanel  ;//      = new CellOutlinePanel(); 		// the outline of the cell and detected objects
 	protected CellStatsPanel 	 cellStatsPanel ;//     = new CellStatsPanel();		// the stats table
 	protected ComponentListPanel signalListPanel;	// choose which background image to display
+	protected CellSignalStatsPanel 	 cellsignalStatsPanel ; // show pairwise distances for signals
 
-	private CellViewModel model                      = new CellViewModel(null, null);
+	private CellViewModel model   = new CellViewModel(null, null);
 	
 	public CellDetailPanel() {
 
@@ -75,24 +83,22 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 			this.addSubPanel(outlinePanel);
 			this.addSubPanel(cellsListPanel);
 			this.addSubPanel(signalListPanel);
-
+			this.addSubPanel(cellsignalStatsPanel);
 			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
 			
-			tabPane.add("Info", cellStatsPanel);
-			
-			tabPane.add("Segments", segmentProfilePanel);
-			
-			tabPane.add("Tags", cellBorderTagPanel);
-			
-			tabPane.add("Outline", outlinePanel);
+			tabPane.add(CELL_INFO_LBL, cellStatsPanel);
+			tabPane.add(CELL_SEGS_LBL, segmentProfilePanel);
+			tabPane.add(CELL_TAGS_LBL, cellBorderTagPanel);
+			tabPane.add(CELL_OUTLINE_LBL, outlinePanel);
+			tabPane.add(CELL_SIGNALS_LBL, cellsignalStatsPanel);
 
-			
-
+		
 			this.validate();
 		} catch(Exception e){
-			error("Error creating cell detail panel", e);
+			warn("Error creating cell detail panel");
+			stack("Error creating cell detail panel", e);
 		}
 
 	}
@@ -102,11 +108,13 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		cellBorderTagPanel  = new CellBorderTagPanel(model);
 		outlinePanel        = new CellOutlinePanel(model); 		// the outline of the cell and detected objects
 		cellStatsPanel      = new CellStatsPanel(model);		// the stats table
+		cellsignalStatsPanel= new CellSignalStatsPanel(model);
 		
 		model.addView(segmentProfilePanel);
 		model.addView(cellBorderTagPanel);
 		model.addView(outlinePanel);
 		model.addView(cellStatsPanel);
+		model.addView(cellsignalStatsPanel);
 	}
 	
 	private JPanel createCellandSignalListPanels(){
@@ -147,14 +155,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 		if( model.hasCell() && ! activeDataset().getCollection().containsExact(model.getCell())){
 			model.setCell(null);
 		}
-		
-//		cellsListPanel.update(getDatasets());
-//		outlinePanel.update(getDatasets());
-//		cellStatsPanel.update(getDatasets());
-//		segmentProfilePanel.update(getDatasets());
-//		cellBorderTagPanel.update(getDatasets());
-//		signalListPanel.update(getDatasets());
-
 	}
 	
 	@Override
@@ -166,14 +166,6 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 	protected void updateNull() {
 		model.setCell(null);
 		model.setComponent(null);
-		
-//		cellsListPanel.update(getDatasets());
-//		outlinePanel.update(getDatasets());
-//		cellStatsPanel.update(getDatasets());
-//		segmentProfilePanel.update(getDatasets());
-//		cellBorderTagPanel.update(getDatasets());
-//		signalListPanel.update(getDatasets());
-
 	}
 		
 	@Override
@@ -189,7 +181,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
-		if(event.type().equals("SignalColourUpdate")){
+		if(event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)){
 			model.updateViews();
 		}
 

@@ -25,11 +25,9 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+
 /**
-   * These are the values that we can make boxplots from
-   *
-   */
-  /**
+ * The measures that can be calculated for nuclei
  * @author ben
  *
  */

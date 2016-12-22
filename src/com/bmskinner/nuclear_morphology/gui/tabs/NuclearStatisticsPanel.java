@@ -37,50 +37,47 @@ import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.WilcoxonDetailPanel;
 
 @SuppressWarnings("serial")
 public class NuclearStatisticsPanel extends DetailPanel {
-		
-	private NuclearBoxplotsPanel   boxplotPanel;
-	private NuclearHistogramsPanel histogramsPanel;
-	private WilcoxonDetailPanel    wilcoxonPanel;
-	private NucleusMagnitudePanel  nucleusMagnitudePanel;
-	private NuclearOverlaysPanel   nuclearOverlaysPanel;
-	private NuclearStatsPanel      nuclearStatsPanel;
-	private NuclearScatterChartPanel nuclearScatterChartPanel;
+	
+	private static final String OVERVIEW_TAB_LBL  = "Average stats";
+	private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
+	private static final String HISTOGRAM_TAB_LBL = "Histograms";
+	private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
+	private static final String MAGNITUDE_TAB_LBL = "Detection settings";
+	private static final String OVERLAYS_TAB_LBL  = "Detection settings";
+	private static final String SCATTER_TAB_LBL   = "Scatter";
 	
 	private JTabbedPane 	tabPane;
 
 	public NuclearStatisticsPanel() throws Exception {
 		super();
+		
+		
 		this.setLayout(new BorderLayout());
 		tabPane = new JTabbedPane(JTabbedPane.TOP);
 		
-		nuclearStatsPanel 	= new NuclearStatsPanel();
+		DetailPanel nuclearStatsPanel        = new NuclearStatsPanel();
+		DetailPanel boxplotPanel             = new NuclearBoxplotsPanel();
+		DetailPanel histogramsPanel          = new NuclearHistogramsPanel();
+		DetailPanel wilcoxonPanel 	         = new WilcoxonDetailPanel();
+		DetailPanel nucleusMagnitudePanel    = new NucleusMagnitudePanel();
+		DetailPanel nuclearOverlaysPanel 	 = new NuclearOverlaysPanel();
+		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
+		
 		this.addSubPanel(nuclearStatsPanel);
-		tabPane.addTab("Average stats", null, nuclearStatsPanel, null);
-		
-		boxplotPanel = new NuclearBoxplotsPanel();
 		this.addSubPanel(boxplotPanel);
-		tabPane.addTab("Boxplots", boxplotPanel);
-		
-		histogramsPanel = new NuclearHistogramsPanel();
 		this.addSubPanel(histogramsPanel);
-		tabPane.addTab("Histograms", histogramsPanel);
-		
-		wilcoxonPanel 	= new WilcoxonDetailPanel();
 		this.addSubPanel(wilcoxonPanel);
-		tabPane.addTab("Wilcoxon stats", null, wilcoxonPanel, null);
-		
-		nucleusMagnitudePanel 	= new NucleusMagnitudePanel();
 		this.addSubPanel(nucleusMagnitudePanel);
-		tabPane.addTab("Magnitude", null, nucleusMagnitudePanel, null);
-		
-		nuclearOverlaysPanel 	= new NuclearOverlaysPanel();
 		this.addSubPanel(nuclearOverlaysPanel);
-		tabPane.addTab("Overlays", null, nuclearOverlaysPanel, null);
-		
-		nuclearScatterChartPanel 	= new NuclearScatterChartPanel();
 		this.addSubPanel(nuclearScatterChartPanel);
-		tabPane.addTab("Scatter", null, nuclearScatterChartPanel, null);
 		
+		tabPane.addTab(OVERVIEW_TAB_LBL, nuclearStatsPanel);		
+		tabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
+		tabPane.addTab(HISTOGRAM_TAB_LBL, histogramsPanel);
+		tabPane.addTab(WILCOXON_TAB_LBL, wilcoxonPanel);
+		tabPane.addTab(MAGNITUDE_TAB_LBL, nucleusMagnitudePanel);
+		tabPane.addTab(OVERLAYS_TAB_LBL, nuclearOverlaysPanel);
+		tabPane.addTab(SCATTER_TAB_LBL, nuclearScatterChartPanel);
 		
 		this.add(tabPane, BorderLayout.CENTER);
 	}

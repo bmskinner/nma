@@ -447,33 +447,33 @@ public class CurveRefolder extends AnalysisWorker {
 	}
 
 	
-	/**
-	 * Go through the nucleus outline. Measure the angle to the tail 
-	 * and the distance to the CoM. If closest to target angle, return distance.
-	 * @param angle the target angle
-	 * @param n the nucleus to measure
-	 * @return
-	 */
-	public static double getDistanceFromAngle(double angle, Nucleus n){
-
-		double bestDiff = 180;
-		double bestDistance = 180;
-
-		for(int i=0;i<n.getBorderLength();i++){
-			IPoint p = n.getBorderPoint(i);
-			double distance = p.getLengthTo(n.getCentreOfMass());
-			double pAngle = n.getCentreOfMass().findAngle( p, new FloatPoint(0,-10));
-			if(p.getX()<0){
-				pAngle = 360-pAngle;
-			}
-
-			if(Math.abs(angle-pAngle) < bestDiff){
-
-				bestDiff = Math.abs(angle-pAngle);
-				bestDistance = distance;
-			}
-		}
-		return bestDistance;
-	}
+//	/**
+//	 * Go through the nucleus outline. Measure the angle to the tail 
+//	 * and the distance to the CoM. If closest to target angle, return distance.
+//	 * @param angle the target angle
+//	 * @param n the nucleus to measure
+//	 * @return
+//	 */
+//	public static double getDistanceFromAngle(double angle, Nucleus n){
+//
+//		double bestDiff = 180;
+//		double bestDistance = 180;
+//
+//		for(int i=0;i<n.getBorderLength();i++){
+//			IPoint p = n.getBorderPoint(i);
+//			double distance = p.getLengthTo(n.getCentreOfMass());
+//			double pAngle = n.getCentreOfMass().findAngle( p, new FloatPoint(0,-10));
+//			if(p.getX()<0){
+//				pAngle = 360-pAngle;
+//			}
+//
+//			if(Math.abs(angle-pAngle) < bestDiff){
+//
+//				bestDiff = Math.abs(angle-pAngle);
+//				bestDistance = distance;
+//			}
+//		}
+//		return bestDistance;
+//	}
 
 }

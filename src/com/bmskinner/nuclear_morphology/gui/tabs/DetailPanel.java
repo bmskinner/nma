@@ -104,7 +104,7 @@ public abstract class DetailPanel
 	/**
 	 * Add another detail panel as a sub panel to this.
 	 * This will pass on refreshes and UI updates
-	 * @param panel
+	 * @param panel the panel to add
 	 */
 	public void addSubPanel(final TabPanel panel){
 		subPanels.add(panel);

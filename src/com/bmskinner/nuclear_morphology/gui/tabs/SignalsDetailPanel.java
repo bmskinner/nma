@@ -18,18 +18,14 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
-
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
-
 import javax.swing.JTabbedPane;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
@@ -41,15 +37,20 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsBoxplotPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsHistogramPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsOverviewPanel;
 
+/**
+ * The top level tab panel showing information on signals at the dataset level
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel implements ActionListener, SignalChangeListener {
 		
-	private SignalsOverviewPanel	overviewPanel; 	//container for chart and stats table
-	private SignalsHistogramPanel 	histogramPanel;
-	private SignalsAnalysisPanel	analysisPanel;
-	private SignalsBoxplotPanel	    boxplotPanel;
-	private SignalShellsPanel		shellsPanel;
-	private SignalScatterChartPanel signalScatterChartPanel;
+	private static final String OVERVIEW_TAB_LBL = "Overview";
+	private static final String BOXPLOTS_TAB_LBL = "Boxplots";
+	private static final String HISTOGRAM_TAB_LBL= "Histograms";
+	private static final String SHELLS_TAB_LBL   = "Shells";
+	private static final String SETTINGS_TAB_LBL = "Detection settings";
+	private static final String SCATTER_TAB_LBL  = "Scatter";
 
 	private JTabbedPane signalsTabPane;
 
@@ -64,19 +65,19 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 
 			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			overviewPanel  = new SignalsOverviewPanel();			
-			boxplotPanel   = new SignalsBoxplotPanel();
-			histogramPanel = new SignalsHistogramPanel();
-			shellsPanel    = new SignalShellsPanel();
-			analysisPanel  = new SignalsAnalysisPanel();
-			signalScatterChartPanel = new SignalScatterChartPanel();
+			DetailPanel overviewPanel  = new SignalsOverviewPanel();			
+			DetailPanel boxplotPanel   = new SignalsBoxplotPanel();
+			DetailPanel histogramPanel = new SignalsHistogramPanel();
+			DetailPanel shellsPanel    = new SignalShellsPanel();
+			DetailPanel analysisPanel  = new SignalsAnalysisPanel();
+			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
 			
-			signalsTabPane.addTab("Overview", overviewPanel);
-			signalsTabPane.addTab("Boxplots", boxplotPanel);
-			signalsTabPane.addTab("Histograms", histogramPanel);
-			signalsTabPane.addTab("Shells", shellsPanel);
-			signalsTabPane.addTab("Detection settings", analysisPanel);
-			signalsTabPane.addTab("Scatter", signalScatterChartPanel);
+			signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
+			signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
+			signalsTabPane.addTab(HISTOGRAM_TAB_LBL, histogramPanel);
+			signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
+			signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
+			signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
 
 			this.addSubPanel(overviewPanel);
 			this.addSubPanel(boxplotPanel);
@@ -88,7 +89,7 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 			this.add(signalsTabPane, BorderLayout.CENTER);
 			
 		} catch (Exception e){
-			log(Level.SEVERE, "Error making signal panel", e);
+			error("Error making signal panel", e);
 		}
 	}
 		
@@ -107,11 +108,10 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getActionCommand().startsWith("GroupVisble_")){
-			overviewPanel.update(getDatasets());
-			histogramPanel.update(getDatasets());
-			boxplotPanel.update(getDatasets());
-			shellsPanel.update(getDatasets());
 			
+			for(TabPanel p : this.getSubPanels()){
+				p.update(getDatasets());
+			}			
 		}
 		
 	}
@@ -120,15 +120,15 @@ public class SignalsDetailPanel extends DetailPanel implements ActionListener, S
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		super.signalChangeReceived(event);
-		if(event.type().equals("SignalColourUpdate")){
+		if(event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)){
 			update(getDatasets());
 		}
 		
 		if(event.type().startsWith("GroupVisble_")){
-			overviewPanel.update(getDatasets());
-			histogramPanel.update(getDatasets());
-			boxplotPanel.update(getDatasets());
-			shellsPanel.update(getDatasets());
+			
+			for(TabPanel p : this.getSubPanels()){
+				p.update(getDatasets());
+			}
 		}
 	}
 

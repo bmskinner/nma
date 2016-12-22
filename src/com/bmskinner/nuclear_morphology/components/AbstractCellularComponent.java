@@ -1410,5 +1410,33 @@ public abstract class AbstractCellularComponent
 		double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
 		return new FloatPoint(newX, newY);
 	}
+	
+	/**
+	 * Go around the border of the object, measuring the angle to the OP. 
+	 * If the angle is closest to target angle, return the distance to the CoM.
+	 * @param angle the target angle
+	 * @return the distance from the closest border point at the requested angle to the CoM
+	 */
+	public double getDistanceFromCoMToBorderAtAngle(double angle){
+
+		double bestDiff = 180;
+		double bestDistance = 180;
+
+		for(int i=0;i<getBorderLength();i++){
+			IPoint p = getBorderPoint(i);
+			double distance = p.getLengthTo(getCentreOfMass());
+			double pAngle = getCentreOfMass().findAngle( p, IPoint.makeNew(0,-10));
+			if(p.getX()<0){
+				pAngle = 360-pAngle;
+			}
+
+			if(Math.abs(angle-pAngle) < bestDiff){
+
+				bestDiff = Math.abs(angle-pAngle);
+				bestDistance = distance;
+			}
+		}
+		return bestDistance;
+	}
 		
 }

@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -364,6 +365,51 @@ public class DefaultSignalCollection implements ISignalCollection {
 			fine("Error importing image source file "+f.getAbsolutePath(), e);
 			throw new  UnloadableImageException("Unable to load signal image",e);
 		}
+	}
+	
+	/**
+	 * Calculate the pairwise distances between all signals in the nucleus 
+	 */
+	@Override
+	public double[][] calculateDistanceMatrix(){
+
+		// create a matrix to hold the data
+		// needs to be between every signal and every other signal, irrespective of colour
+		int matrixSize = numberOfSignals();
+
+		double [][] matrix = new double[matrixSize][matrixSize];
+		
+		int matrixRow = 0;
+		int matrixCol = 0;
+		
+		for( List<INuclearSignal> signalsRow : getSignals()){
+
+			if(!signalsRow.isEmpty()){
+
+				for(INuclearSignal row : signalsRow){
+					
+					matrixCol=0;
+
+					IPoint aCoM = row.getCentreOfMass();
+
+					for( List<INuclearSignal> signalsCol : getSignals()){
+
+						if(!signalsCol.isEmpty()){
+
+							for(INuclearSignal col : signalsCol){
+								IPoint bCoM = col.getCentreOfMass();
+								matrix[matrixRow][matrixCol] = aCoM.getLengthTo(bCoM);
+								matrixCol++;
+							}
+
+						}
+
+					}
+					matrixRow++;
+				}
+			}
+		}
+		return matrix;
 	}
 		
 	/* (non-Javadoc)

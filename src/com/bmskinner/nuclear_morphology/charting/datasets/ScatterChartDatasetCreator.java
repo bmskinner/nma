@@ -169,8 +169,6 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
 		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
 		
-//		DecimalFormat df = new DecimalFormat("#0.00"); 
-
 		for (int i=0; i < datasets.size(); i++) {
 
 			ICellCollection c = datasets.get(i).getCollection();

@@ -187,7 +187,9 @@ public interface ISignalCollection extends Serializable, Loggable {
 	 * @throws UnloadableImageException if the image cannot be loaded from file
 	 */
 	ImageProcessor getImage(UUID signalGroup) throws UnloadableImageException;
-
-	String toString();
-
+	
+	/**
+	 * Calculate the pairwise distances between all signals in the nucleus 
+	 */
+	public double[][] calculateDistanceMatrix();
 }

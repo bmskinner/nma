@@ -135,5 +135,13 @@ public interface Profileable extends CellularComponent {
 	 * @return
 	 */
 	double getPathLength(ProfileType type) throws UnavailableProfileTypeException;
+	
+	/**
+	 * Go around the border of the object, measuring the angle to the OP. 
+	 * If the angle is closest to target angle, return the distance to the CoM.
+	 * @param angle the target angle
+	 * @return the distance from the closest border point at the requested angle to the CoM
+	 */
+	double getDistanceFromCoMToBorderAtAngle(double angle);
 		
 }

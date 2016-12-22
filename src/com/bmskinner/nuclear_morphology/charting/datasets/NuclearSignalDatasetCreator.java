@@ -543,8 +543,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 
 		double fractionalDistance = n.getStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM);
 
-		// determine the total distance to the border at this angle
-		double distanceToBorder = CurveRefolder.getDistanceFromAngle(angle, outline);
+		// determine the distance to the border at this angle
+		double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
 
 		// convert to fractional distance to signal
 		double signalDistance = distanceToBorder * fractionalDistance;
@@ -861,6 +861,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 		return result;
 	}
 		
+	/**
+	 * Create a list of shell result datasets for each analysis dataset in the given options
+	 * @param options
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
 	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options) throws ChartDatasetCreationException {
 		
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
@@ -989,7 +995,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options the chart options
 	 */
 	private void addRealShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options, UUID signalGroup){
-		// Create the random distribution
 
 		try {
 			

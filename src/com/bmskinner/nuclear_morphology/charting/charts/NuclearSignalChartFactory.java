@@ -1,6 +1,5 @@
 package com.bmskinner.nuclear_morphology.charting.charts;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -20,9 +19,7 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.util.SortOrder;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;

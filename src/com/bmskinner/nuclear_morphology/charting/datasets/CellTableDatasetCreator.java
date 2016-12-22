@@ -33,12 +33,14 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -274,6 +276,69 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		fieldNames.add("First border point");
 		rowData.add(s.getBorderPoint(0).toString());
 		
+	}
+
+
+	/**
+	 * Create a table model showing the distances between all signals in a cell
+	 * @param options
+	 * @return
+	 */
+	public TableModel createPairwiseSignalDistanceTable(TableOptions options){
+
+		if( ! options.hasDatasets()){
+			return createBlankTable();
+		}
+
+		if(options.isMultipleDatasets()){
+			return createBlankTable();
+		}
+
+		IAnalysisDataset d = options.firstDataset();
+		DefaultTableModel model = new DefaultTableModel();
+
+		List<Object> columnNames = new ArrayList<Object>(0);
+		
+		ISignalCollection sc = cell.getNucleus().getSignalCollection();
+				
+		// Make the first column, of names
+		for( List<INuclearSignal> signalsRow : sc.getSignals()){
+			
+			int sigNumber = 0;
+			
+			for(INuclearSignal row : signalsRow){
+
+				columnNames.add("Channel_"+row.getChannel()+"_Sig_"+sigNumber);
+				sigNumber++;
+			}
+
+		}
+		model.addColumn("Signal", columnNames.toArray(new Object[0])); 
+		
+		// Get the matrix to draw
+		double[][] matrix = sc.calculateDistanceMatrix();
+		
+		// Make the subequent columns, one per signal
+		int col = 0;
+		
+		for( List<INuclearSignal> signalsRow : sc.getSignals()){
+			int sigNumber = 0;
+			for(INuclearSignal row : signalsRow){
+				String colName = "Channel_"+row.getChannel()+"_Sig_"+sigNumber;
+				List<Object> colData = new ArrayList<Object>(0);
+				
+				double[] colValues = matrix[col];
+				for(double value : colValues){
+					colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+				}
+				
+				model.addColumn(colName, colData.toArray(new Object[0])); 
+				col++;
+				sigNumber++;
+			}
+		}
+		
+		return model;
 	}
 
 }
