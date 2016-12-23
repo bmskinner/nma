@@ -24,16 +24,15 @@ import java.text.DecimalFormat;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class AbstractDatasetCreator implements Loggable {	
+public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {	
 	
-	protected final DisplayOptions options;
+	protected final E options;
 	
-	public AbstractDatasetCreator(final DisplayOptions options){
+	public AbstractDatasetCreator(final E options){
 		if(options==null){
 			throw new IllegalArgumentException("Options cannot be null");
 		}

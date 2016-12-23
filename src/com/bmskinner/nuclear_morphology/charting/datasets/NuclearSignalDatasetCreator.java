@@ -71,7 +71,7 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
 
 import weka.estimators.KernelEstimator;
 
-public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
+public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<DisplayOptions>  {
 	
 	public NuclearSignalDatasetCreator(final DisplayOptions o){
 		super(o);

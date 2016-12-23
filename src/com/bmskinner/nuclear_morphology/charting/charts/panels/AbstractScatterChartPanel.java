@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.ScatterTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -164,7 +165,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) {
-		return new ScatterChartDatasetCreator(options).createSpearmanCorrlationTable();
+		return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable();
 	}
 
 	@Override

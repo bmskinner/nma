@@ -9,13 +9,9 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -29,81 +25,88 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOptions> {
-
-	public ScatterChartDatasetCreator(final ChartOptions options){
+public class ScatterTableDatasetCreator extends AbstractDatasetCreator<TableOptions> {
+	
+	public ScatterTableDatasetCreator(final TableOptions options){
 		super(options);
 	}
 	
 	/**
-	 * Create a scatter dataset for the given statistics for each analysis dataset
-	 * @return a charting dataset
-	 * @throws ChartDatasetCreationException
+	 * Create a table model for the Spearman's Rank correlation coefficients between the 
+	 * selected statisics
+	 * @return
 	 */
-	public XYDataset createScatterDataset() throws ChartDatasetCreationException{
+	public TableModel createSpearmanCorrlationTable(){
 		
-		PlottableStatistic stat = options.getStat();
-		
-		if(stat instanceof NucleusStatistic){
-			return createNucleusScatterDataset();
+		if( ! options.hasDatasets()){
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
-		if(stat instanceof SignalStatistic){
-			return createSignalScatterDataset();
+		if(options.getStats().size()!=2){
+			return AnalysisDatasetTableCreator.createBlankTable();
 		}
 		
-		throw new ChartDatasetCreationException("Stat not recognised: "+stat);
+		PlottableStatistic firstStat = options.getStat();
 		
+		for(PlottableStatistic stat : options.getStats()){
+			if( ! stat.getClass().equals(firstStat.getClass())){
+				fine("Statistic classes are different");
+				createBlankTable();
+			}
+		}
+		
+		if(firstStat instanceof NucleusStatistic){
+			return createNucleusSpearmanCorrlationTable();
+		}
+		
+		if(firstStat instanceof SignalStatistic){
+			return createSignalSpearmanCorrlationTable();
+		}
+		
+		return createBlankTable();
 	}
-	
-	
-	
+
 	/*
 	 * 
 	 * PRIVATE METHODS
 	 * 
 	 * 
 	 */
+	
+	
+	private TableModel createNucleusSpearmanCorrlationTable(){
 
-	/**
-	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param options the charting options
-	 * @return
-	 * @throws ChartDatasetCreationException
-	 */
-	private XYDataset createNucleusScatterDataset() throws ChartDatasetCreationException {
-		
-		DefaultXYDataset ds = new DefaultXYDataset();
-		
 		if( ! options.hasDatasets()){
-			return ds;
+			return createBlankTable();
 		}
 		
-		if( ! (options.getStat(0) instanceof NucleusStatistic)){
-			throw new ChartDatasetCreationException("Stat 0 cannot be cast to NucleusStatistic");
+		if(options.getStats().size()!=2){
+			return createBlankTable();
 		}
 		
-		if( ! (options.getStat(1) instanceof NucleusStatistic)){
-			throw new ChartDatasetCreationException("Stat 1 cannot be cast to NucleusStatistic");
-		}
-		
+		DefaultTableModel model = new DefaultTableModel();
+
+		Vector<Object> names 	= new Vector<Object>();
+		Vector<Object> rho   	= new Vector<Object>();
+
+
 		List<IAnalysisDataset> datasets = options.getDatasets();
-				
+
+		List<PlottableStatistic> stats =  options.getStats();
+
 		MeasurementScale scale = options.getScale();
-		
-		NucleusStatistic statA = (NucleusStatistic) options.getStat(0);
-		NucleusStatistic statB = (NucleusStatistic) options.getStat(1);
 
+		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
+		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
 		
-
 		for (int i=0; i < datasets.size(); i++) {
-			
+
 			ICellCollection c = datasets.get(i).getCollection();
 
 			// draw the segment itself
 			double[] xpoints = new double[c.size()];
 			double[] ypoints = new double[c.size()];
-			
+
 			List<ICell> cells = new ArrayList<ICell>(c.getCells());
 			// go through each index in the segment.
 			for(int j=0; j<cells.size();j++){
@@ -134,35 +137,41 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 				xpoints[j] = statAValue;
 				ypoints[j] = statBValue;
 
-
 			}
-
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries(c.getName(), data);
+			names.add(c.getName());
+			
+			double rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+			rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ));
+			
+//			double p = Stats.getSpearmanPValue(rhoValue, cells.size());
+//			pValue.add( df.format( p ));
 		}
 
-		return ds;
+
+		model.addColumn("Dataset", names);
+		model.addColumn("Spearman's Rho", rho);
+//		model.addColumn("p", pValue);
+		return model;
+
 	}
 	
-	
-	/**
-	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param options the charting options
-	 * @return
-	 * @throws Exception
-	 */
-	private XYDataset createSignalScatterDataset() {
+	private TableModel createSignalSpearmanCorrlationTable(){
+
+		DefaultTableModel model = new DefaultTableModel();
+
+		Vector<Object> names 	= new Vector<Object>();
+		Vector<Object> rho   	= new Vector<Object>();
+
+
 		List<IAnalysisDataset> datasets = options.getDatasets();
-		
+
 		List<PlottableStatistic> stats =  options.getStats();
-		
+
 		MeasurementScale scale = options.getScale();
-		
+
 		SignalStatistic statA = (SignalStatistic) stats.get(0);
 		SignalStatistic statB = (SignalStatistic) stats.get(1);
-
-		DefaultXYDataset ds = new DefaultXYDataset();
-
+				
 		for (int i=0; i < datasets.size(); i++) {
 			
 			ICellCollection c = datasets.get(i).getCollection();
@@ -171,31 +180,47 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 			Set<UUID> groups = m.getSignalGroupIDs();
 			
 			for(UUID id : groups){
-				
-				int signalCount = m.getSignalCount(id);
-				
-				double[] xpoints = new double[signalCount];
-				double[] ypoints = new double[signalCount];
-				
-				List<INuclearSignal> list = m.getSignals(id);
-				
-				for(int j=0; j<signalCount;j++){
-					
-					xpoints[j] = list.get(j).getStatistic(statA, scale);
-					ypoints[j] = list.get(j).getStatistic(statB, scale);
 
+				if(id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
+					continue;
 				}
 
-				double[][] data = { xpoints, ypoints };
-				ds.addSeries(c.getName()+"|"+id.toString(), data);
-				
+				try {
+
+					int signalCount = m.getSignalCount(id);
+
+					double[] xpoints = new double[signalCount];
+					double[] ypoints = new double[signalCount];
+
+					List<INuclearSignal> list = m.getSignals(id);
+
+					for(int j=0; j<signalCount;j++){
+
+						xpoints[j] = list.get(j).getStatistic(statA, scale);
+						ypoints[j] = list.get(j).getStatistic(statB, scale);
+
+					}
+					names.add(c.getName()+"_"+m.getSignalGroupName(id));
+
+					double rhoValue = 0;
+
+					if(xpoints.length>0){ // If a collection has signal group, but not signals
+						rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+					}
+
+					rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ) );
+
+				} catch (UnavailableSignalGroupException e){
+					fine("Signal group "+id+" is not present in collection", e);
+				}
 			}
 
 			
 		}
 
-		return ds;
+		model.addColumn("Dataset", names);
+		model.addColumn("Spearman's Rho", rho);
+		return model;
+
 	}
-	
-	
 }
