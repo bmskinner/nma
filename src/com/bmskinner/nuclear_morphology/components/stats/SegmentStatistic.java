@@ -38,11 +38,7 @@ public enum SegmentStatistic implements PlottableStatistic {
 	}
 
 	public boolean isDimensionless(){
-		if(this.dimension.equals(StatisticDimension.DIMENSIONLESS)){
-			return true;
-		} else {
-			return false;
-		}
+		return dimension.equals(StatisticDimension.DIMENSIONLESS);
 	}
 
 	/**
@@ -76,56 +72,11 @@ public enum SegmentStatistic implements PlottableStatistic {
 	 * @return
 	 */
 	public double convert(double value, double factor, MeasurementScale scale){
-		double result = value;
-
-		switch(scale){
-		case MICRONS:
-		{
-			switch(this.dimension){
-			case AREA:
-				result = PlottableStatistic.micronArea(value, factor);
-				break;
-			case DIMENSIONLESS:
-				break;
-			case LENGTH:
-				result = PlottableStatistic.micronLength(value, factor);
-				break;
-			case ANGLE:
-				break;
-			default:
-				break;
-
-			}
-		}
-		break;
-		case PIXELS:
-			break;
-		default:
-			break;
-		}
-		return result;
+		return PlottableStatistic.convert(value, factor, scale, dimension);
 	}
 
 	public String units(MeasurementScale scale){
-		String result = "";
-		switch(dimension){
-
-		case AREA:
-			result = "square "+scale.toString().toLowerCase();
-			break;
-		case DIMENSIONLESS:
-			break;
-		case LENGTH:
-			result = scale.toString().toLowerCase();
-			break;
-		case ANGLE:
-			result = "degrees";
-			break;
-		default:
-			break;
-
-		}
-		return result;
+		return PlottableStatistic.units(scale, dimension);
 	}
 
 	public PlottableStatistic[] getValues(){

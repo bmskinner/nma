@@ -10,6 +10,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -41,29 +42,71 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		PlottableStatistic stat = options.getStat();
 		
-		finest("Creating boxplot for "+stat);
-		
 		try {
 		
-			if(stat.getClass()==NucleusStatistic.class){
+			if(stat instanceof NucleusStatistic){
 				return createNucleusStatisticPlot();
 			}
 
-			if(stat.getClass()==SignalStatistic.class){
+			if(stat instanceof SignalStatistic){
 				return createSignalStatisticPlot();
 			}
 
-			if(stat.getClass()==SegmentStatistic.class){
+			if(stat instanceof SegmentStatistic){
 				return createSegmentPlot();
 			}
 		} catch(Exception e){
-			error("Error making violin chart", e);
-			return makeEmptyChart();
+			stack("Error making violin chart", e);
+			return makeErrorChart();
 		}
 		
 		return makeEmptyChart();
 		
 	}
+	
+	
+	/**
+	 * Create a segment length boxplot for the given segment name
+	 * @param ds the dataset
+	 * @return
+	 */
+	public JFreeChart createSignalColocalisationViolinChart() {
+		
+		ViolinCategoryDataset ds = null;
+		if(options.hasDatasets()){
+			 try {
+				ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
+			} catch (ChartDatasetCreationException e) {
+				stack("Error creating volin dataset", e);
+				return makeErrorChart();
+			}
+		}
+		
+		String scaleString = options.getScale().toString().toLowerCase();
+		
+		JFreeChart chart = createViolinChart(null, 
+				null, 
+				"Distance between signal pairs ("+scaleString+")", 
+				ds, 
+				false);
+		
+
+		CategoryPlot plot = chart.getCategoryPlot();
+		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+
+		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+
+			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+
+				renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
+				renderer.setSeriesOutlinePaint(series, Color.BLACK);
+			}
+
+		}
+			
+		return chart;
+	}
+	
 	
 	/*
 	 * 
@@ -251,5 +294,5 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 			
 		return chart;
 	}
-
+	
 }

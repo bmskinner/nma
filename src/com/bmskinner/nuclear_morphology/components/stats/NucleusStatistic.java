@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -69,11 +71,7 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 	  }
 	  
 	  public boolean isDimensionless(){
-		  if(this.dimension.equals(StatisticDimension.DIMENSIONLESS)){
-			  return true;
-		  } else {
-			  return false;
-		  }
+		  return dimension.equals(StatisticDimension.DIMENSIONLESS);
 	  }
 	  
 	  /**
@@ -112,50 +110,12 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 	   * @return
 	   */
 	  public double convert(double value, double factor, MeasurementScale scale){
-		  double result = value;
-		 
-
-		  switch(scale){
-		  	case MICRONS: {
-				  switch(this.dimension){
-					  case AREA:
-						  result = PlottableStatistic.micronArea(value, factor);
-						  break;
-					  case LENGTH:
-						  result = PlottableStatistic.micronLength(value, factor);
-						  break;
-					  default:
-						  break;
-	
-				  }
-				  break;
-			  }
-			  
-		  default:
-			  break;
-				
-		}
-//		finer("Converting "+value+" to "+scale+" gives "+result);
-		return result;
+		  
+		  return PlottableStatistic.convert(value, factor, scale, dimension);
 	  }
 	  
 	  public String units(MeasurementScale scale){
-		  String result = "";
-		  switch(dimension){
-	
-			  case AREA:
-				  result = "square "+scale.toString().toLowerCase();
-				  break;
-			  case LENGTH:
-				  result = scale.toString().toLowerCase();
-				  break;
-			  case ANGLE:
-				  result = "degrees";
-			  default:
-				  break;
-
-		  }
-		  return result;
+		  return PlottableStatistic.units(scale, dimension);
 	  }
 	  
 	  
@@ -170,15 +130,15 @@ public enum NucleusStatistic implements PlottableStatistic, Loggable {
 	   */
 	public NucleusStatistic[] values(NucleusType type){
 		
-		List<NucleusStatistic> result = new ArrayList<NucleusStatistic>();
+		Set<NucleusStatistic> result = new HashSet<NucleusStatistic>();
 		  for(NucleusStatistic stat : NucleusStatistic.values()){
 			  
 			  for(NucleusType t : stat.getApplicableTypes()){
-				  if(t.equals(NucleusType.ROUND) && !result.contains(stat)){
+				  if(t.equals(NucleusType.ROUND)){
 					  result.add(stat);
 				  }
 				  
-				  if(t.equals(type) && !result.contains(stat)){
+				  if(t.equals(type)){
 					  result.add(stat);
 				  }
 			  }

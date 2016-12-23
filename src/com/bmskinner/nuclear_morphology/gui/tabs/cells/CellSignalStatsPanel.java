@@ -2,6 +2,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
@@ -17,6 +19,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 	
+	private static final String HEADER_LBL    = "Pairwise distances between the centres of mass of all signals";
 	private static final String TABLE_TOOLTIP = "Shows the distances between the centres of mass of signals";
 	
 	private ExportableTable table; // individual cell stats
@@ -26,6 +29,8 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 	public CellSignalStatsPanel(CellViewModel model) {
 		super(model);
 		this.setLayout(new BorderLayout());
+		
+		JPanel header    = createHeader();
 		
 		scrollPane = new JScrollPane();
 
@@ -38,9 +43,24 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 		scrollPane.setViewportView(table);
 		scrollPane.setColumnHeaderView(table.getTableHeader());
 		
+		
+		this.add(header,     BorderLayout.NORTH);
 		this.add(scrollPane, BorderLayout.CENTER);
 		
 		this.setEnabled(false);
+	}
+	
+	/**
+	 * Create the header panel
+	 * @return
+	 */
+	private JPanel createHeader(){
+		JPanel panel = new JPanel();
+		
+		JLabel label = new JLabel(HEADER_LBL);
+		
+		panel.add(label);
+		return panel;
 	}
 	
 	public synchronized void update(){

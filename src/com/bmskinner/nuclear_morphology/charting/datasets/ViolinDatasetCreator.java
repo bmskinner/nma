@@ -31,9 +31,9 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.estimators.KernelEstimator;
 
-public class ViolinDatasetCreator implements Loggable {
+public class ViolinDatasetCreator extends AbstractDatasetCreator {
 		
-	private ChartOptions options;
+	protected ChartOptions options;
 	
 	public ViolinDatasetCreator(final ChartOptions options){
 		this.options = options;
@@ -266,7 +266,7 @@ public class ViolinDatasetCreator implements Loggable {
 		return dataset;
 	}
 	
-	private void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey, Comparable<?> colKey){
+	protected void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey, Comparable<?> colKey){
 		
 		List<Number> pdfValues = new ArrayList<Number>();
 		

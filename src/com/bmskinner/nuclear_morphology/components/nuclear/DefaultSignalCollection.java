@@ -22,8 +22,11 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +35,9 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -478,6 +483,89 @@ public class DefaultSignalCollection implements ISignalCollection {
 		}
 		return result;
 	}
+	
+	/**
+	 * Calculate the shortest distances between signals in the given signal groups. Each signal is considered
+	 * only once. Hence a group with 4 signals compared to a group with 3 signals will produce a list of 3 values.
+	 * @param id1 the first signal group
+	 * @param id2 the second signal group
+	 * @return a list of the pixel distances between paired signals
+	 */
+	public List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2){
+	
+		if(id1.equals(id2)){
+			throw new IllegalArgumentException("Signal IDs are the same");
+		}
+		
+		Set<INuclearSignal> d1 = new HashSet<INuclearSignal>(this.getSignals(id1));
+		Set<INuclearSignal> d2 = new HashSet<INuclearSignal>(this.getSignals(id2));
+		
+		List<Colocalisation<INuclearSignal>> result = findColocalisingSignals(d1, d2);
+		
+		return result;
+		
+	}
+	
+	/**
+	 * Recursively find signal pairs with the shortest distance between them.
+	 * @param d1 the nuclear signals in group 1
+	 * @param d2 the nuclear signals in group 2
+	 * @param scale the measurement scale
+	 * @return a list of best colocalising signals
+	 */
+	private List<Colocalisation<INuclearSignal>> findColocalisingSignals(Set<INuclearSignal> d1, Set<INuclearSignal> d2){
+		
+		List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+		
+		if(d2.isEmpty() || d1.isEmpty()){
+			return result;
+		}
+
+		
+		
+		double smallest = Double.MAX_VALUE;
+		
+		INuclearSignal chosen1 = null, chosen2 = null;
+		
+		// Check all pairwise comparisons before returning a Colocalisation
+		// in case the set lengths are unequal
+		Iterator<INuclearSignal> it1 = d1.iterator();
+		while(it1.hasNext()){
+			
+			INuclearSignal s1 = it1.next();
+		
+			Iterator<INuclearSignal> it2 = d2.iterator();
+			while(it2.hasNext()){
+				INuclearSignal s2 = it2.next();
+				double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
+				
+				boolean smaller = distance < smallest;
+				
+				// Replace selected signals if closer
+				smallest  = smaller ? distance : smallest;
+				chosen2   = smaller ? s2 : chosen2;
+				chosen1   = smaller ? s1 : chosen1;
+			}
+		}
+		
+		// Make a cColocalisation from the best pair
+		
+		if(chosen1 !=null && chosen2 !=null){
+			
+			Colocalisation<INuclearSignal> col = new Colocalisation<INuclearSignal>(chosen1, chosen2);
+			d1.remove(chosen1);
+			d2.remove(chosen2);
+			result.add(col);
+			
+			if( ! d1.isEmpty() && ! d2.isEmpty()){
+				result.addAll(findColocalisingSignals(d1, d2));
+			}
+		}
+		
+		
+		return result;
+	}
+	
 		
 	/* (non-Javadoc)
 	 * @see components.nuclear.ISignalCollection#toString()

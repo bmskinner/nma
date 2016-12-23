@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+
 import ij.process.ImageProcessor;
 
 /**
@@ -31,7 +33,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.3
  *
  */
-public interface MeshImage<CellularComponent> {
+public interface MeshImage<E extends CellularComponent> {
 
 	/**
 	 * Draw the image in this object at the coordinates in the given mesh
@@ -39,7 +41,7 @@ public interface MeshImage<CellularComponent> {
 	 * @return
 	 * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
 	 */
-	ImageProcessor drawImage(Mesh<CellularComponent> mesh) throws UncomparableMeshImageException;
+	ImageProcessor drawImage(Mesh<E> mesh) throws UncomparableMeshImageException;
 	
 	
 	/**

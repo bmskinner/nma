@@ -32,25 +32,25 @@ public interface PlottableStatistic {
 	 * Get the string representation (name) of the statistic. 
 	 * @return
 	 */
-	public String toString();
+	String toString();
 
 	/**
 	 * Test if the statistic has units
 	 * @return
 	 */
-	public boolean isDimensionless();
+	boolean isDimensionless();
 
 	/**
 	 * Get the dimension of the statistic (area, length, angle, none)
 	 * @return
 	 */
-	public StatisticDimension getDimension();
+	StatisticDimension getDimension();
 
 	/**
 	 * Get the label (name and units) for the stat
 	 * @return
 	 */
-	public String label(MeasurementScale scale);
+	String label(MeasurementScale scale);
 
 
 	/**
@@ -61,7 +61,15 @@ public interface PlottableStatistic {
 	 * @param scale the desired scale
 	 * @return
 	 */
-	public double convert(double value, double factor, MeasurementScale scale);
+	double convert(double value, double factor, MeasurementScale scale);
+	
+	/**
+	 * Get the appropriate units label for the statistic, based on its dimension.
+	 * Eg. square units, units or nothing
+	 * @param scale
+	 * @return
+	 */
+	String units(MeasurementScale scale);
 	
 	/**
 	 * Convert the length in pixels into a length in microns.
@@ -70,7 +78,7 @@ public interface PlottableStatistic {
 	 * @param scale the size of a pixel in microns
 	 * @return
 	 */
-	public static double micronLength(double pixels, double scale){
+	static double micronLength(double pixels, double scale){
 		double microns = pixels / scale;
 		return microns;
 	}
@@ -82,28 +90,84 @@ public interface PlottableStatistic {
 	 * @param scale the size of a pixel in microns
 	 * @return
 	 */
-	public static double micronArea(double pixels, double scale){
+	static double micronArea(double pixels, double scale){
 		double microns = pixels / (scale*scale);
 		return microns;
 	}	
-
-	/**
-	 * Get the appropriate units label for the statistic, based on its dimension.
-	 * Eg. square units, units or nothing
-	 * @param scale
-	 * @return
-	 */
-	public String units(MeasurementScale scale);
 	
+	/**
+	   * Convert the input value (assumed to be pixels) using the given
+	   * factor ( CellularComponent.getScale() ) into the appropriate scale
+	   * @param value the pixel measure
+	   * @param factor the conversion factor to microns
+	   * @param scale the desired scale
+	   * @param dim the dimension of the statistic
+	   * @return the converted value
+	   */
+	static double convert(double value, double factor, MeasurementScale scale, StatisticDimension dim){
+		double result = value;
+
+		switch(scale){
+		case MICRONS:
+		{
+			switch(dim){
+			case AREA:
+				result = PlottableStatistic.micronArea(value, factor);
+				break;
+			case DIMENSIONLESS:
+				break;
+			case LENGTH:
+				result = PlottableStatistic.micronLength(value, factor);
+				break;
+			case ANGLE:
+				break;
+			default:
+				break;
+
+			}
+		}
+		break;
+		case PIXELS:
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+
+	  /**
+	   * Create a units label for the given scale and dimension
+	   * @param scale
+	   * @param dim
+	   * @return
+	   */
+	  static String units(MeasurementScale scale, StatisticDimension dim){
+		  String result = "";
+		  switch(dim){
+
+		  case AREA:
+			  result = "square "+scale.toString().toLowerCase();
+			  break;
+		  case DIMENSIONLESS:
+			  break;
+		  case LENGTH:
+			  result = scale.toString().toLowerCase();
+			  break;
+		  case ANGLE:
+			  result = "degrees";
+			  break;
+		  default:
+			  break;
+
+		  }
+		  return result;
+	  }
+	  	
 	/**
 	 * Calls the values() method of the underlying enum, allowing
 	 * iteration access via the interface
 	 * @return
 	 */
-	public PlottableStatistic[] getValues();
-	
-	public boolean equals(Object o);
-	
-	public int hashCode();
+	PlottableStatistic[] getValues();
 }
 

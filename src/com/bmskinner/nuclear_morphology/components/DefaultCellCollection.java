@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.analysis.NucleusStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentStatisticFetchingTask;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
@@ -1296,7 +1297,10 @@ implements ICellCollection {
 	 * @return
 	 */
 	public Set<UUID> getSignalGroupIDs(){
-		return this.signalGroups.keySet();
+		
+		Set<UUID> ids = new HashSet<UUID>(signalGroups.keySet());
+		ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
+		return ids;
 	}
 
 	/**

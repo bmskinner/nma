@@ -456,7 +456,7 @@ public class SignalCollection implements ISignalCollection {
 	/**
 	 * Find the pairwise distances between all signals in the nucleus 
 	 */
-	public double[][] calculateDistanceMatrix(){
+	public double[][] calculateDistanceMatrix(MeasurementScale scale){
 
 		// create a matrix to hold the data
 		// needs to be between every signal and every other signal, irrespective of colour
@@ -631,7 +631,7 @@ public class SignalCollection implements ISignalCollection {
      * @return a list of shortest distances for each pairwise group
      */
 	@Override
-	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(){
+	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale){
 		
 		List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
 		

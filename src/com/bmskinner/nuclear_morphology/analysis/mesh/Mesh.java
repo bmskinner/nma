@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 
@@ -52,12 +53,12 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @since 1.13.3
  *
  */
-public interface Mesh<CellularComponent> extends Comparable<Mesh<CellularComponent>>{
+public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>>{
 
 	public static final int DEFAULT_VERTEX_SPACING = 10;
 
 	
-	CellularComponent getComponent();
+	E getComponent();
 	
 	String getComponentName();
 
@@ -136,7 +137,7 @@ public interface Mesh<CellularComponent> extends Comparable<Mesh<CellularCompone
 
 	Set<MeshFace> getFaces();
 
-	boolean isComparableTo(Mesh<CellularComponent>  mesh);
+	boolean isComparableTo(Mesh<E>  mesh);
 
 	/**
 	 * Find the edge and face ratios of this mesh versus the given mesh.
@@ -144,7 +145,7 @@ public interface Mesh<CellularComponent> extends Comparable<Mesh<CellularCompone
 	 * @param mesh
 	 * @return
 	 */
-	Mesh<CellularComponent> comparison(Mesh<CellularComponent> mesh);
+	Mesh<E> comparison(Mesh<E> mesh);
 
 	/**
 	 * Reposition the vertices such that the internal
@@ -152,7 +153,7 @@ public interface Mesh<CellularComponent> extends Comparable<Mesh<CellularCompone
 	 * spaced.
 	 * @return
 	 */
-	Mesh<CellularComponent> straighten();
+	Mesh<E> straighten();
 	
 	
 	/**

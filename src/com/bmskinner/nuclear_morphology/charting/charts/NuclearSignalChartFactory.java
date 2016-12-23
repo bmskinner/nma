@@ -284,5 +284,5 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		}
 		return chart;
 	}
-
+	
 }

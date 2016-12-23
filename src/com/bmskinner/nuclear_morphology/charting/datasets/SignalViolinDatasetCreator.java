@@ -1,0 +1,183 @@
+package com.bmskinner.nuclear_morphology.charting.datasets;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+
+public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
+	
+	public SignalViolinDatasetCreator(final ChartOptions options){
+		super(options);
+	}
+	
+	
+	public ViolinCategoryDataset createSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
+		
+		if(options.isSingleDataset()){
+			return createSingleSignalColocalisationViolinDataset();
+		}
+		
+		if(options.isMultipleDatasets()){
+			return createMultipleSignalColocalisationViolinDataset();
+		}
+		
+		return new ViolinCategoryDataset();
+		
+	}
+
+	/**
+	 * Create a signal colocalisation dataset for signals in a single analysis dataset
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	private ViolinCategoryDataset createSingleSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
+		
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
+		
+		if( ! options.isSingleDataset()){
+			return ds;
+		}
+		
+		
+		try {
+			IAnalysisDataset dataset = options.firstDataset();
+
+			MeasurementScale scale = options.getScale();
+			ICellCollection c = dataset.getCollection();
+
+
+			Set<UUID> signalGroups = c.getSignalGroupIDs();
+
+			Set<UUID> done = new HashSet<UUID>();
+
+			for(UUID id1 : signalGroups){
+
+				String rowKey = c.getSignalGroup(id1).getGroupName();
+
+
+				for(UUID id2 : signalGroups){
+
+					if(id1.equals(id2)){
+						continue;
+					}
+
+					if(done.contains(id2)){
+						continue;
+					}
+
+					String colKey = c.getSignalGroup(id2).getGroupName()+" vs "+rowKey;
+
+					// Find the colocalising signal pairs
+					List<Colocalisation<INuclearSignal>> coloc = c.getSignalManager().getColocalisingSignals(id1, id2);
+
+					if(coloc.isEmpty()){
+						continue;
+					}
+
+					List<Number> list = new ArrayList<Number>();
+					for (Colocalisation<INuclearSignal> lc : coloc) {
+						list.add( lc.getDistance(scale)  );
+					}
+
+					ds.add(list, "Default", colKey); // Don't use a rowKey - it will cause an empty box space
+
+					addProbabilities(ds, list, "Default", colKey);  
+
+				}
+
+				done.add(id1);
+
+			}
+
+		}catch(UnavailableSignalGroupException e){
+			stack("Cannot get signal group", e);
+			throw new ChartDatasetCreationException("Cannot get signal group");
+		}
+
+		return ds;
+	}
+
+	/**
+	 * Create a signal colocalisation dataset for signals in multiple analysis datasets
+	 * @return
+	 * @throws ChartDatasetCreationException
+	 */
+	private ViolinCategoryDataset createMultipleSignalColocalisationViolinDataset() throws ChartDatasetCreationException {
+
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
+
+		if( ! options.isMultipleDatasets()){
+			return ds;
+		}
+		
+
+		try {
+			
+			for(IAnalysisDataset dataset : options.getDatasets()){	
+
+				MeasurementScale scale = options.getScale();
+				ICellCollection c = dataset.getCollection();
+
+
+				Set<UUID> signalGroups = c.getSignalGroupIDs();
+
+				Set<UUID> done = new HashSet<UUID>();
+
+				for(UUID id1 : signalGroups){
+
+					String rowKey = c.getSignalGroup(id1).getGroupName();
+
+
+					for(UUID id2 : signalGroups){
+
+						if(id1.equals(id2)){
+							continue;
+						}
+
+						if(done.contains(id2)){
+							continue;
+						}
+
+						String colKey = dataset.getName()+": "+c.getSignalGroup(id2).getGroupName()+" vs "+rowKey;
+
+						// Find the colocalising signal pairs
+						List<Colocalisation<INuclearSignal>> coloc = c.getSignalManager().getColocalisingSignals(id1, id2);
+
+						if(coloc.isEmpty()){
+							continue;
+						}
+
+						List<Number> list = new ArrayList<Number>();
+						for (Colocalisation<INuclearSignal> lc : coloc) {
+							list.add( lc.getDistance(scale)  );
+						}
+
+						ds.add(list, "Default", colKey); // Don't use a rowKey - it will cause an empty box space
+
+						addProbabilities(ds, list, "Default", colKey);  
+
+					}
+
+					done.add(id1);
+
+				}
+
+			}
+		}catch(UnavailableSignalGroupException e){
+			stack("Cannot get signal group", e);
+			throw new ChartDatasetCreationException("Cannot get signal group");
+		}
+		
+		return ds;
+	}
+}

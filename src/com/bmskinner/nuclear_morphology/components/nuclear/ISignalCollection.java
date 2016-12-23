@@ -199,4 +199,13 @@ public interface ISignalCollection extends Serializable, Loggable {
      * @return a list of shortest distances for each pairwise group
      */
 	List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale);
+	
+	/**
+	 * Calculate the shortest distances between signals in the given signal groups. Each signal is considered
+	 * only once. Hence a group with 4 signals compared to a group with 3 signals will produce a list of 3 values.
+	 * @param id1 the first signal group
+	 * @param id2 the second signal group
+	 * @return a list of the pixel distances between paired signals
+	 */
+	List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2);
 }

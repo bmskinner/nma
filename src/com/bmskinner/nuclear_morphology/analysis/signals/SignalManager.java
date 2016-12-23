@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
@@ -590,6 +591,27 @@ public class SignalManager implements Loggable {
     	}
     	
     	return ps;
+    }
+    
+    /**
+     * Calculate the best colocalising signal pairs in the collection
+     * @param signalGroup1 the first signal group id
+     * @param signalGroup2 the second signal group id
+     * @return a list of colocalising signals
+     * @throws IllegalArgumentException if the UUIDs are the same
+     */
+    public List<Colocalisation<INuclearSignal>> getColocalisingSignals(UUID signalGroup1, UUID signalGroup2){
+    	
+    	if(signalGroup1.equals(signalGroup2)){
+			throw new IllegalArgumentException("Signal IDs are the same");
+		}
+    	
+    	List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+    	
+    	for(Nucleus n : collection.getNuclei()){
+    		result.addAll(n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
+    	}
+    	return result;
     }
 	  
 }

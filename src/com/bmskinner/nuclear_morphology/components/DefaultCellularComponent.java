@@ -39,7 +39,6 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
