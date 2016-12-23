@@ -140,6 +140,6 @@ public class SignalsColocalisationPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalDatasetCreator().createSignalColocalisationTable(options);
+		return new NuclearSignalDatasetCreator(options).createSignalColocalisationTable();
 	}
 }

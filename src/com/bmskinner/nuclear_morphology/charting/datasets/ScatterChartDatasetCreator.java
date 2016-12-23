@@ -14,8 +14,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -23,7 +22,6 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -32,8 +30,72 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 
-	public ScatterChartDatasetCreator(){}
-
+	public ScatterChartDatasetCreator(final DisplayOptions options){
+		super(options);
+	}
+	
+	/**
+	 * Create a scatter dataset for the given statistics for each analysis dataset
+	 * @return a charting dataset
+	 * @throws ChartDatasetCreationException
+	 */
+	public XYDataset createScatterDataset() throws ChartDatasetCreationException{
+		
+		PlottableStatistic stat = options.getStat();
+		
+		if(stat instanceof NucleusStatistic){
+			return createNucleusScatterDataset();
+		}
+		
+		if(stat instanceof SignalStatistic){
+			return createSignalScatterDataset();
+		}
+		
+		throw new ChartDatasetCreationException("Stat not recognised: "+stat);
+		
+	}
+	
+	/**
+	 * Create a table model for the Spearman's Rank correlation coefficients between the 
+	 * selected statisics
+	 * @return
+	 */
+	public TableModel createSpearmanCorrlationTable(){
+		
+		if( ! options.hasDatasets()){
+			return AnalysisDatasetTableCreator.createBlankTable();
+		}
+		
+		if(options.getStats().size()!=2){
+			return AnalysisDatasetTableCreator.createBlankTable();
+		}
+		
+		PlottableStatistic firstStat = options.getStat();
+		
+		for(PlottableStatistic stat : options.getStats()){
+			if( ! stat.getClass().equals(firstStat.getClass())){
+				fine("Statistic classes are different");
+				createBlankTable();
+			}
+		}
+		
+		if(firstStat instanceof NucleusStatistic){
+			return createNucleusSpearmanCorrlationTable();
+		}
+		
+		if(firstStat instanceof SignalStatistic){
+			return createSignalSpearmanCorrlationTable();
+		}
+		
+		return createBlankTable();
+	}
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 * 
+	 */
 
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
@@ -41,7 +103,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createNucleusScatterDataset(ChartOptions options) throws ChartDatasetCreationException {
+	private XYDataset createNucleusScatterDataset() throws ChartDatasetCreationException {
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -114,37 +176,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	public TableModel createSpearmanCorrlationTable(TableOptions options){
-		
-		if( ! options.hasDatasets()){
-			return AnalysisDatasetTableCreator.createBlankTable();
-		}
-		
-		if(options.getStats().size()!=2){
-			return AnalysisDatasetTableCreator.createBlankTable();
-		}
-		
-		PlottableStatistic firstStat = options.getStat();
-		
-		for(PlottableStatistic stat : options.getStats()){
-			if( ! stat.getClass().equals(firstStat.getClass())){
-				fine("Statistic classes are different");
-				createBlankTable();
-			}
-		}
-		
-		if(firstStat instanceof NucleusStatistic){
-			return createNucleusSpearmanCorrlationTable(options);
-		}
-		
-		if(firstStat instanceof SignalStatistic){
-			return createSignalSpearmanCorrlationTable(options);
-		}
-		
-		return createBlankTable();
-	}
 	
-	private TableModel createNucleusSpearmanCorrlationTable(TableOptions options){
+	private TableModel createNucleusSpearmanCorrlationTable(){
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -231,7 +264,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createSignalScatterDataset(ChartOptions options) {
+	private XYDataset createSignalScatterDataset() {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		
 		List<PlottableStatistic> stats =  options.getStats();
@@ -277,7 +310,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	private TableModel createSignalSpearmanCorrlationTable(TableOptions options){
+	private TableModel createSignalSpearmanCorrlationTable(){
 
 		DefaultTableModel model = new DefaultTableModel();
 

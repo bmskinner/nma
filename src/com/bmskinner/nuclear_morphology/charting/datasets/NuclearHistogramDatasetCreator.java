@@ -54,14 +54,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 	public static final int MIN_ROUNDED = 0;
 	public static final int MAX_ROUNDED = 1;
 	public static final int STEP_SIZE   = 2;
-	
-	protected final ChartOptions options;
 		
 	public NuclearHistogramDatasetCreator(final ChartOptions o){
-		if(o==null){
-			throw new IllegalArgumentException("Options cannot be null");
-		}
-		options = o;
+		super(o);
 		
 	}
 	

@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,20 +28,17 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -58,8 +54,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	
-	public CellTableDatasetCreator(ICell c){
-		super(c);
+	public CellTableDatasetCreator(final DisplayOptions options, final ICell c){
+		super(options, c);
 	}
 	
 	
@@ -70,7 +66,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * @throws ChartDatasetCreationException 
 	 * @throws Exception 
 	 */
-	public TableModel createCellInfoTable(TableOptions options){
+	public TableModel createCellInfoTable(){
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -168,6 +164,90 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 			
 		return model;	
 	}
+	
+	
+	/**
+	 * Create a table model showing the distances between all signals in a cell
+	 * @param options
+	 * @return
+	 */
+	public TableModel createPairwiseSignalDistanceTable(){
+
+		if(! options.isSingleDataset()){
+			return createBlankTable();
+		}
+
+		IAnalysisDataset d = options.firstDataset();
+		DefaultTableModel model = new DefaultTableModel();
+
+		List<Object> columnNames = new ArrayList<Object>(0);
+		
+		ISignalCollection sc = cell.getNucleus().getSignalCollection();
+		
+		if(sc.numberOfSignals()==0){
+			return createBlankTable();
+		}
+		try {
+
+			// Make the first column, of names
+			for(UUID id : sc.getSignalGroupIDs()){
+
+				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+
+				List<INuclearSignal> signalsRow = sc.getSignals(id);
+				int sigNumber = 0;
+
+				for(INuclearSignal row : signalsRow){
+
+					columnNames.add(signalName+"_Sig_"+sigNumber);
+					sigNumber++;
+				}
+
+			}
+			model.addColumn("Signal", columnNames.toArray(new Object[0])); 
+
+			// Get the matrix to draw
+			double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
+
+			// Make the subequent columns, one per signal
+			int col = 0;
+
+		
+
+			for(UUID id : sc.getSignalGroupIDs()){
+
+				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+
+				List<INuclearSignal> signalsRow = sc.getSignals(id);
+				int sigNumber = 0;
+				for(INuclearSignal row : signalsRow){
+					String colName = signalName+"_Sig_"+sigNumber;
+					List<Object> colData = new ArrayList<Object>(0);
+
+					double[] colValues = matrix[col];
+					for(double value : colValues){
+						colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+					}
+
+					model.addColumn(colName, colData.toArray(new Object[0])); 
+					col++;
+					sigNumber++;
+				}
+			}
+		
+		} catch(UnavailableSignalGroupException e){
+			stack("Error getting signal group", e);
+			return createBlankTable();
+		}
+		
+		return model;
+	}
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 */
 	
 	/**
 	 * Add the nuclear statistic information to a cell table
@@ -279,81 +359,5 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	}
 
 
-	/**
-	 * Create a table model showing the distances between all signals in a cell
-	 * @param options
-	 * @return
-	 */
-	public TableModel createPairwiseSignalDistanceTable(TableOptions options){
-
-		if(! options.isSingleDataset()){
-			return createBlankTable();
-		}
-
-		IAnalysisDataset d = options.firstDataset();
-		DefaultTableModel model = new DefaultTableModel();
-
-		List<Object> columnNames = new ArrayList<Object>(0);
-		
-		ISignalCollection sc = cell.getNucleus().getSignalCollection();
-		
-		if(sc.numberOfSignals()==0){
-			return createBlankTable();
-		}
-		try {
-
-			// Make the first column, of names
-			for(UUID id : sc.getSignalGroupIDs()){
-
-				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
-
-				List<INuclearSignal> signalsRow = sc.getSignals(id);
-				int sigNumber = 0;
-
-				for(INuclearSignal row : signalsRow){
-
-					columnNames.add(signalName+"_Sig_"+sigNumber);
-					sigNumber++;
-				}
-
-			}
-			model.addColumn("Signal", columnNames.toArray(new Object[0])); 
-
-			// Get the matrix to draw
-			double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
-
-			// Make the subequent columns, one per signal
-			int col = 0;
-
-		
-
-			for(UUID id : sc.getSignalGroupIDs()){
-
-				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
-
-				List<INuclearSignal> signalsRow = sc.getSignals(id);
-				int sigNumber = 0;
-				for(INuclearSignal row : signalsRow){
-					String colName = signalName+"_Sig_"+sigNumber;
-					List<Object> colData = new ArrayList<Object>(0);
-
-					double[] colValues = matrix[col];
-					for(double value : colValues){
-						colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
-					}
-
-					model.addColumn(colName, colData.toArray(new Object[0])); 
-					col++;
-					sigNumber++;
-				}
-			}
-		
-		} catch(UnavailableSignalGroupException e){
-			stack("Error getting signal group", e);
-			return createBlankTable();
-		}
-		
-		return model;
-	}
 
 }

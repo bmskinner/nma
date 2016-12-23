@@ -134,11 +134,16 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = new ViolinDatasetCreator(options).createNucleusStatisticViolinDataset();
+			try {
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
+			} catch (ChartDatasetCreationException e) {
+				stack("Error making chart dataset", e);
+				return makeErrorChart();
+			}
 		}
-		
+
 		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
-		
+
 //		log("Making violin chart");
 		
 		CategoryPlot plot = chart.getCategoryPlot();
@@ -179,7 +184,12 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
-			 ds = new ViolinDatasetCreator(options).createSignalStatisticViolinDataset();
+			try {
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
+			} catch (ChartDatasetCreationException e) {
+				stack("Error making chart dataset", e);
+				return makeErrorChart();
+			}
 		}
 		
 		JFreeChart chart = createViolinChart(null, 
@@ -261,7 +271,7 @@ public class ViolinChartFactory extends AbstractChartFactory implements Loggable
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
 			 try {
-				ds = new ViolinDatasetCreator(options).createSegmentStatisticDataset();
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
 			} catch (ChartDatasetCreationException e) {
 				fine("Error creating volin dataset", e);
 				return makeErrorChart();

@@ -62,17 +62,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	
-	protected final TableOptions options;
-
 	/**
 	 * Create with a set of table options
-	 * @param o
 	 */
 	public AnalysisDatasetTableCreator(final TableOptions o){
-		if(o==null){
-			throw new IllegalArgumentException("Options cannot be null");
-		}
-		options = o;
+		super(o);
 	}
 		
 	public TableModel createMedianProfileStatisticTable() {
@@ -315,14 +309,16 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 			return createBlankTable();
 		} 
 		
-		finest("Table options type "+options.getType());
+		TableOptions op = (TableOptions) options;
 		
-		if(options.getType().equals(TableType.ANALYSIS_PARAMETERS)){
+		finest("Table options type "+op.getType());
+		
+		if(op.getType().equals(TableType.ANALYSIS_PARAMETERS)){
 			finest("Creating analysis parameters table model");
 			return createAnalysisParametersTable();
 		}
 		
-		if(options.getType().equals(TableType.ANALYSIS_STATS)){
+		if(op.getType().equals(TableType.ANALYSIS_STATS)){
 			finest("Creating analysis stats table model");
 			return createStatsTable();
 		}

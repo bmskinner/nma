@@ -26,25 +26,23 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.sperm.RodentSpermNucleus;
 
 public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	
 	private final CellularComponent component;
 	
-	public OutlineDatasetCreator(final CellularComponent c){
-		
+	public OutlineDatasetCreator(final DisplayOptions options, final CellularComponent c){
+		super(options);
 		if(c==null){
 			throw new IllegalArgumentException("Component cannot be null");
 		}
@@ -253,42 +251,42 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	}
 	
 	
-	/**
-	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus. If the
-	 * given cell does not contain a rodent sperm nucleus, the returned dataset is empty
-	 * @param cell
-	 * @return
-	 * @throws ChartDatasetCreationException 
-	 */
-	public XYDataset createNucleusHookHumpOutline() throws ChartDatasetCreationException {
-		
-		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		if(  ! (component instanceof Nucleus) ){
-			throw new ChartDatasetCreationException("Component is not a Nucleus");
-		}
-		
-		if(  ! (component instanceof RodentSpermNucleus) ){
-			throw new ChartDatasetCreationException("Component is not a rodent sperm nucleus");
-		}
-					
-		RodentSpermNucleus nucleus = (RodentSpermNucleus) component;
-
-		double[] xpoints = new double[nucleus.getHookRoi().size()];
-		double[] ypoints = new double[nucleus.getHookRoi().size()];
-
-		int i =0;
-		for(IPoint p : nucleus.getHookRoi()){
-			xpoints[i] = p.getX()-0.5;
-			ypoints[i] = p.getY()-0.5;
-			i++;
-		}
-
-		double[][] data = { xpoints, ypoints };
-		ds.addSeries("Hook", data);
-
-
-		return ds;
-	}
+//	/**
+//	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus. If the
+//	 * given cell does not contain a rodent sperm nucleus, the returned dataset is empty
+//	 * @param cell
+//	 * @return
+//	 * @throws ChartDatasetCreationException 
+//	 */
+//	public XYDataset createNucleusHookHumpOutline() throws ChartDatasetCreationException {
+//		
+//		DefaultXYDataset ds = new DefaultXYDataset();
+//		
+//		if(  ! (component instanceof Nucleus) ){
+//			throw new ChartDatasetCreationException("Component is not a Nucleus");
+//		}
+//		
+//		if(  ! (component instanceof RodentSpermNucleus) ){
+//			throw new ChartDatasetCreationException("Component is not a rodent sperm nucleus");
+//		}
+//					
+//		RodentSpermNucleus nucleus = (RodentSpermNucleus) component;
+//
+//		double[] xpoints = new double[nucleus.getHookRoi().size()];
+//		double[] ypoints = new double[nucleus.getHookRoi().size()];
+//
+//		int i =0;
+//		for(IPoint p : nucleus.getHookRoi()){
+//			xpoints[i] = p.getX()-0.5;
+//			ypoints[i] = p.getY()-0.5;
+//			i++;
+//		}
+//
+//		double[][] data = { xpoints, ypoints };
+//		ds.addSeries("Hook", data);
+//
+//
+//		return ds;
+//	}
 
 }

@@ -814,7 +814,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset positionDataset;
 		try {
-			positionDataset = new CellDatasetCreator().createPositionFeatureDataset(options);
+			positionDataset = new CellDatasetCreator(options).createPositionFeatureDataset();
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}

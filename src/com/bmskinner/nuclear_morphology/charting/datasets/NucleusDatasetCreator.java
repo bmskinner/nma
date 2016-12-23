@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -75,17 +76,6 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator implements Loggable {
 	
-//private static NucleusDatasetCreator instance = null;
-	
-//	private NucleusDatasetCreator(){}
-//	
-//	public static NucleusDatasetCreator getInstance(){
-//		if(instance==null){
-//			instance = new NucleusDatasetCreator();
-//		}
-//		return instance;
-//	}
-
 	public NucleusDatasetCreator(){}
 	
 	/**
@@ -1469,6 +1459,8 @@ public class NucleusDatasetCreator implements Loggable {
 	public List<ComponentOutlineDataset> createSignalOutlines(ICell cell, IAnalysisDataset dataset) throws ChartDatasetCreationException {
 		
 		List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);
+		List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(0);
+		datasets.add(dataset);
 		
 		if(cell==null){
 			finest("Input cell is null, returning blank signal outline dataset list");
@@ -1511,7 +1503,7 @@ public class NucleusDatasetCreator implements Loggable {
 
 						String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
 						finest("Adding signal to dataset: "+seriesKey);
-						OutlineDatasetCreator dc = new OutlineDatasetCreator(signal);
+						OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
 						try {
 							dc.createOutline(groupDataset, seriesKey, false);
 

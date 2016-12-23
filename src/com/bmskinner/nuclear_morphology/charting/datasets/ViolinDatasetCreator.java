@@ -8,6 +8,7 @@ import org.jfree.data.Range;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -20,9 +21,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -31,13 +32,52 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.estimators.KernelEstimator;
 
+/**
+ * Creator for violin datasets
+ * @author ben
+ *
+ */
 public class ViolinDatasetCreator extends AbstractDatasetCreator {
 		
-	protected ChartOptions options;
 	
-	public ViolinDatasetCreator(final ChartOptions options){
-		this.options = options;
+	/**
+	 * Create with options
+	 * @param options
+	 */
+	public ViolinDatasetCreator(final DisplayOptions options){
+		super(options);
 	}
+	
+	/**
+	 * Get a violin dataset for the given statistic for each dataset in the options
+	 * @param stat the statistic to chart
+	 * @return a violin dataset
+	 * @throws ChartDatasetCreationException if any error occurs or the statistic was not recognised
+	 */
+	public ViolinCategoryDataset createPlottableStatisticViolinDataset(PlottableStatistic stat) throws ChartDatasetCreationException {
+
+		if(stat instanceof NucleusStatistic){
+			return createNucleusStatisticViolinDataset();
+		}
+
+		if(stat instanceof SignalStatistic){
+			return createSignalStatisticViolinDataset();
+		}
+
+		if(stat instanceof SegmentStatistic){
+			return createSegmentStatisticDataset();
+		}
+		
+		throw new ChartDatasetCreationException("Stat not recognised: "+stat);
+
+	}
+	
+	/*
+	 * 
+	 * PRIVATE METHODS
+	 * 
+	 * 
+	 */
 	
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
@@ -45,7 +85,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createNucleusStatisticViolinDataset() {
+	private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		NucleusStatistic stat = (NucleusStatistic) options.getStat();
 		MeasurementScale scale = options.getScale();
@@ -80,7 +120,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator {
 	 * @return a boxplot dataset
 	 * @throws Exception 
 	 */
-    public ViolinCategoryDataset createSignalStatisticViolinDataset() {
+    private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
     	List<IAnalysisDataset> datasets = options.getDatasets();
     	SignalStatistic stat = (SignalStatistic) options.getStat();
@@ -131,7 +171,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator {
      * @throws ChartDatasetCreationException 
 	 * @throws Exception
 	 */
-	public ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
+    private ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 		
 		SegmentStatistic stat = (SegmentStatistic) options.getStat();
 		
@@ -145,13 +185,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator {
 		}
 	}
 	
-	
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 * 
-	 */
+
 	
 	/**
 	 * Get the lengths of the given segment in the collections

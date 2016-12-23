@@ -26,24 +26,21 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 public class CellDatasetCreator extends AbstractDatasetCreator {
 		
-	public CellDatasetCreator(){}
-	
+	public CellDatasetCreator(final DisplayOptions options){
+		super(options);
+	}
 	
 	
 	/**
@@ -51,14 +48,14 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @param options the chart options
 	 * @return a chart
 	 */
-	public XYDataset createPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException {
+	public XYDataset createPositionFeatureDataset() throws ChartDatasetCreationException {
 
 		XYDataset ds = null;
 		
 		if(options.isSingleDataset()){
 			finest("Creating single dataset position dataset");
 			
-			ds = createSinglePositionFeatureDataset(options);
+			ds = createSinglePositionFeatureDataset();
 
 		}
 		
@@ -68,7 +65,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 			
 			if(IBorderSegment.segmentCountsMatch(options.getDatasets())){
 			
-				ds = createMultiPositionFeatureDataset(options);
+				ds = createMultiPositionFeatureDataset();
 			} else {
 				fine("Unable to create multiple chart: segment counts do not match");
 			}
@@ -84,7 +81,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createSinglePositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
+	private XYDataset createSinglePositionFeatureDataset() throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
@@ -116,7 +113,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws Exception
 	 */
-	private XYDataset createMultiPositionFeatureDataset(ChartOptions options) throws ChartDatasetCreationException{
+	private XYDataset createMultiPositionFeatureDataset() throws ChartDatasetCreationException{
 		
 		DefaultXYDataset ds = new DefaultXYDataset();
 

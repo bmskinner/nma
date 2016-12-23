@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
@@ -35,27 +34,24 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CurveRefolder;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
-import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
@@ -68,10 +64,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.stats.Mean;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.stats.StDev;
-import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
@@ -80,7 +73,9 @@ import weka.estimators.KernelEstimator;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	
-	public NuclearSignalDatasetCreator(){}
+	public NuclearSignalDatasetCreator(final DisplayOptions o){
+		super(o);
+	}
 	
 	/**
 	 * Create a table of signal stats for the given list of datasets. This table
@@ -88,7 +83,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param list the AnalysisDatasets to include
 	 * @return a table model
 	 */
-	public TableModel createSignalDetectionParametersTable(TableOptions options) {
+	public TableModel createSignalDetectionParametersTable() {
 
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -626,13 +621,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a table model
 	 * @throws Exception 
 	 */
-	public TableModel createSignalStatsTable(TableOptions options) {
-
-		if(options==null){
-			return createBlankTable();
-		}
-			
-		return createMultiDatasetSignalStatsTable(options);
+	public TableModel createSignalStatsTable() {			
+		return createMultiDatasetSignalStatsTable();
 	}
 		
 	/**
@@ -640,7 +630,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options
 	 * @return
 	 */
-	private TableModel createMultiDatasetSignalStatsTable(TableOptions options) {
+	private TableModel createMultiDatasetSignalStatsTable() {
 
 		DefaultTableModel model = new DefaultTableModel();
 
@@ -790,9 +780,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
      * @return a boxplot dataset
      * @throws Exception 
      */
-    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset(ChartOptions options) throws ChartDatasetCreationException {
+    public BoxAndWhiskerCategoryDataset createSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
         
-    	return createMultiDatasetSignalStatisticBoxplotDataset(options);        
+    	return createMultiDatasetSignalStatisticBoxplotDataset();        
     }
     
       
@@ -802,7 +792,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a boxplot dataset
 	 * @throws ChartDatasetCreationException 
 	 */
-    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset(ChartOptions options) throws ChartDatasetCreationException {
+    private BoxAndWhiskerCategoryDataset createMultiDatasetSignalStatisticBoxplotDataset() throws ChartDatasetCreationException {
 
 
     	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
@@ -840,8 +830,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return
 	 * @throws ChartDatasetCreationException
 	 */
-	public List<CategoryDataset> createShellBarChartDataset(ChartOptions options) throws ChartDatasetCreationException {
-		
+	public List<CategoryDataset> createShellBarChartDataset() throws ChartDatasetCreationException {
+		ChartOptions op = (ChartOptions) options;
 		List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
 		for(IAnalysisDataset dataset : options.getDatasets()){
@@ -851,14 +841,14 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 			ICellCollection collection = dataset.getCollection();
 			
 			if(collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-				if(options.isShowAnnotations()){
-					addRandomShellData(ds, collection, options);
+				if(op.isShowAnnotations()){
+					addRandomShellData(ds, collection, op);
 				}
 			}
 
 			for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
 
-				addRealShellData(ds, collection, options, signalGroup);
+				addRealShellData(ds, collection, op, signalGroup);
 			}
 			result.add(ds);
 		}
@@ -872,7 +862,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @return a chart dataset
 	 * @throws ChartDatasetCreationException if the IAnalysisDataset has no shell results or the dataset count is not 1
 	 */
-	public XYDataset createShellConsensusDataset(ChartOptions options) throws ChartDatasetCreationException {
+	public XYDataset createShellConsensusDataset() throws ChartDatasetCreationException {
 
 		if(! options.isSingleDataset()){
 			throw new ChartDatasetCreationException("Single dataset required");
@@ -1021,7 +1011,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createShellChiSquareTable(TableOptions options) {
+	public TableModel createShellChiSquareTable() {
 		
 		if( ! options.hasDatasets()){
 			return createBlankTable();
@@ -1080,7 +1070,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator  {
 	 * @param options
 	 * @return
 	 */
-	public TableModel createSignalColocalisationTable(TableOptions options) {
+	public TableModel createSignalColocalisationTable() {
 		
 		if( ! options.isSingleDataset()){
 			return createBlankTable();

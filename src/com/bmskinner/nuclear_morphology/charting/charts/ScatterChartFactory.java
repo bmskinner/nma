@@ -104,10 +104,10 @@ public class ScatterChartFactory extends AbstractChartFactory {
 				
 		XYDataset ds;
 		try {
-			ds = new ScatterChartDatasetCreator().createNucleusScatterDataset(options);
+			ds = new ScatterChartDatasetCreator(options).createScatterDataset();
 		} catch (ChartDatasetCreationException e) {
-			error("Error creating scatter dataset", e);
-			return makeEmptyChart();
+			stack("Error creating scatter dataset", e);
+			return makeErrorChart();
 		}
 		
 		String xLabel = options.getStat(0).label(options.getScale());
@@ -154,7 +154,13 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSignalStatisticScatterChart(){
 				
-		XYDataset ds = new ScatterChartDatasetCreator().createSignalScatterDataset(options);
+		XYDataset ds;
+		try {
+			ds = new ScatterChartDatasetCreator(options).createScatterDataset();
+		} catch (ChartDatasetCreationException e) {
+			stack("Error creating scatter dataset", e);
+			return makeErrorChart();
+		}
 		
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());

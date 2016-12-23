@@ -24,10 +24,21 @@ import java.text.DecimalFormat;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class AbstractDatasetCreator implements Loggable {	
+	
+	protected final DisplayOptions options;
+	
+	public AbstractDatasetCreator(final DisplayOptions options){
+		if(options==null){
+			throw new IllegalArgumentException("Options cannot be null");
+		}
+		this.options = options;
+	}
 		
 	/**
 	 * The standard formatter for datasets. At least one integer, and 2 decimals: 0.00

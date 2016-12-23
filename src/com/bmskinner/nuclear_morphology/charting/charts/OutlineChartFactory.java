@@ -492,7 +492,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		 */
 		try {
 			
-			OutlineDatasetCreator dc = new OutlineDatasetCreator(cell.getNucleus());
+			OutlineDatasetCreator dc = new OutlineDatasetCreator(options, cell.getNucleus());
 			
 			XYDataset nucleusDataset = dc.createOutline(true);
 			hash.put(hash.size(), "Nucleus"); // add to the first free entry
@@ -891,7 +891,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				Nucleus consensus = options.firstDataset().getCollection().getConsensusNucleus();
 				
-				OutlineDatasetCreator dc = new OutlineDatasetCreator(consensus);
+				OutlineDatasetCreator dc = new OutlineDatasetCreator(options, consensus);
 
 				
 				try {
@@ -934,7 +934,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			}
 			
 
-			OutlineDatasetCreator dc = new OutlineDatasetCreator(verticalNucleus);
+			OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
 			
 			try {
 				
@@ -989,7 +989,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 				Nucleus verticalNucleus = n.getVerticallyRotatedNucleus();
 				
-				OutlineDatasetCreator dc = new OutlineDatasetCreator(verticalNucleus);
+				OutlineDatasetCreator dc = new OutlineDatasetCreator(options, verticalNucleus);
 				
 				try {
 					

@@ -119,7 +119,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 	protected TableModel createPanelTableType(TableOptions options){
 		
 		if(getCellModel().hasCell()){
-			return new CellTableDatasetCreator(getCellModel().getCell()).createPairwiseSignalDistanceTable(options);
+			return new CellTableDatasetCreator(options, getCellModel().getCell()).createPairwiseSignalDistanceTable();
 		} else {
 			return CellTableDatasetCreator.createBlankTable();
 		}

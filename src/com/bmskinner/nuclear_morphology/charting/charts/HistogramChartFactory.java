@@ -190,7 +190,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		List<HistogramDataset> list;
 		try {
 			list = options.hasDatasets() 
-				? new NuclearSignalDatasetCreator().createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
+				? new NuclearSignalDatasetCreator(options).createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale())
 				: null;
 		} catch (ChartDatasetCreationException e) {
 			stack("Error making signal dataset", e);
@@ -276,7 +276,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		List<DefaultXYDataset> list;
 		try {
-			list = new NuclearSignalDatasetCreator().createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+			list = new NuclearSignalDatasetCreator(options).createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}

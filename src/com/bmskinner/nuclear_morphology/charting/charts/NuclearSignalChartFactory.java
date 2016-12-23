@@ -71,7 +71,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		
 		List<CategoryDataset> list;
 		try {
-			list = new NuclearSignalDatasetCreator().createShellBarChartDataset(options);
+			list = new NuclearSignalDatasetCreator(options).createShellBarChartDataset();
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}
@@ -179,7 +179,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		XYDataset shellDataset;
 		
 		try {
-			shellDataset = new NuclearSignalDatasetCreator().createShellConsensusDataset(options);
+			shellDataset = new NuclearSignalDatasetCreator(options).createShellConsensusDataset();
 		} catch (ChartDatasetCreationException e) {
 			stack("Error making shell consensus dataset", e);
 			return makeErrorChart();
@@ -232,7 +232,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		}
 		
 		
-		XYDataset signalCoMs = new NuclearSignalDatasetCreator().createSignalCoMDataset(options.firstDataset());
+		XYDataset signalCoMs = new NuclearSignalDatasetCreator(options).createSignalCoMDataset(options.firstDataset());
 		
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
@@ -263,7 +263,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
 			int j=0;
 			for(UUID signalGroup : options.firstDataset().getCollection().getSignalManager().getSignalGroupIDs()){
-				List<Shape> shapes = new NuclearSignalDatasetCreator().createSignalRadiusDataset(options.firstDataset(), signalGroup);
+				List<Shape> shapes = new NuclearSignalDatasetCreator(options).createSignalRadiusDataset(options.firstDataset(), signalGroup);
 
 				int signalCount = shapes.size();
 

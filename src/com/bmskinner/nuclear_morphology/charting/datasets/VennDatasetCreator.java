@@ -27,6 +27,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * This is only an experimental class. Not in use.
+ * @author ben
+ */
 public class VennDatasetCreator implements Loggable {
 	
 	public VennDatasetCreator(List<IAnalysisDataset> list){

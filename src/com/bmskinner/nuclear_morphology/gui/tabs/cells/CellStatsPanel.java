@@ -260,7 +260,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	protected TableModel createPanelTableType(TableOptions options){
 		
 		if(getCellModel().hasCell()){
-			return new CellTableDatasetCreator(getCellModel().getCell()).createCellInfoTable(options);
+			return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellInfoTable();
 		} else {
 			return CellTableDatasetCreator.createBlankTable();
 		}
