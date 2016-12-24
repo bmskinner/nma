@@ -18,6 +18,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
@@ -206,7 +207,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	public synchronized void update(){
 		
 		if(this.isMultipleDatasets() || ! this.hasDatasets()){
-			table.setModel(AbstractDatasetCreator.createBlankTable());
+			table.setModel(AbstractTableCreator.createBlankTable());
 			return;
 		}
 		
@@ -231,7 +232,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	@Override
 	public void setChartsAndTablesLoading(){
 		
-		table.setModel(AbstractDatasetCreator.createLoadingTable());
+		table.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	@Override
@@ -250,7 +251,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 	@Override
 	protected void updateNull() {
-		table.setModel(AbstractDatasetCreator.createBlankTable());
+		table.setModel(AbstractTableCreator.createBlankTable());
 		
 	}
 
@@ -262,7 +263,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 		if(getCellModel().hasCell()){
 			return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellInfoTable();
 		} else {
-			return CellTableDatasetCreator.createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 	}
 	

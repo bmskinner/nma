@@ -33,6 +33,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -65,7 +66,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 		
 		JPanel pairwisePanel = new JPanel(new BorderLayout());
 
-		TableModel model = AbstractDatasetCreator.createBlankTable();
+		TableModel model = AbstractTableCreator.createBlankTable();
 
 		pairwiseVennTable = new ExportableTable(model);
 				
@@ -83,13 +84,13 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 	@Override
 	public void setChartsAndTablesLoading(){
 //		log("Updating venn detail panel with loading state");
-		pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
+		pairwiseVennTable.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	@Override
 	protected void updateSingle() {
 //		log("Updating venn detail panel with single state");
-		pairwiseVennTable.setModel(AbstractDatasetCreator.createBlankTable());
+		pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
 	}
 	
 
@@ -116,7 +117,7 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 //		log("Updating venn detail panel with null state");
 //		Exception e = new Exception("Updating venn detail panel with null state");
 //		error("Cause of null update", e);
-		pairwiseVennTable.setModel(AbstractDatasetCreator.createBlankTable());
+		pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
 	}
 		
 	@Override

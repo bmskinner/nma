@@ -39,6 +39,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -174,14 +175,14 @@ public class MergesDetailPanel extends DetailPanel {
 	@Override
 	public void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
-		sourceParametersTable.setModel(AbstractDatasetCreator.createLoadingTable());
+		sourceParametersTable.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	private JPanel createAnalysisParametersPanel() throws Exception{
 		JPanel panel = new JPanel(new BorderLayout());
 		
 		
-		TableModel model = AbstractDatasetCreator.createBlankTable();
+		TableModel model = AbstractTableCreator.createBlankTable();
 	
 		sourceParametersTable =  new ExportableTable(model);
 		panel.add(sourceParametersTable, BorderLayout.CENTER);

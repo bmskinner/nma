@@ -31,7 +31,7 @@ import javax.swing.JTable;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 
 @SuppressWarnings("serial")
@@ -62,7 +62,7 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
 			for(Component c : this.getComponents()){
 				if(c instanceof JTable){
 					
-					((JTable)c).setModel(AbstractDatasetCreator.createLoadingTable());
+					((JTable)c).setModel(AbstractTableCreator.createLoadingTable());
 				}
 			}
 			

@@ -41,8 +41,10 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -337,7 +339,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
 		consensusPanel.setChart(AbstractChartFactory.createLoadingChart());	
-		table.setModel(AbstractDatasetCreator.createLoadingTable());	
+		table.setModel(AbstractTableCreator.createLoadingTable());	
 		
 	}
 	
@@ -352,7 +354,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalDatasetCreator(options).createShellChiSquareTable();
+		return new NuclearSignalTableCreator(options).createShellChiSquareTable();
 	}
 
 	@Override

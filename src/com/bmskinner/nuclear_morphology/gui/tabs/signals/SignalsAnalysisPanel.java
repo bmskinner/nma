@@ -37,7 +37,9 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -249,14 +251,14 @@ public class SignalsAnalysisPanel extends DetailPanel {
 	@Override
 	public void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
-		table.setModel(AbstractDatasetCreator.createLoadingTable());	
+		table.setModel(AbstractTableCreator.createLoadingTable());	
 		
 	}
 	
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalDatasetCreator(options).createSignalDetectionParametersTable();
+		return new NuclearSignalTableCreator(options).createSignalDetectionParametersTable();
 	}
 
 }

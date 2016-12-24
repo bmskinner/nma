@@ -69,11 +69,11 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	public TableModel createCellInfoTable(){
 		
 		if( ! options.hasDatasets()){
-			return createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 		
 		if(options.isMultipleDatasets()){
-			return createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 		
 		IAnalysisDataset d = options.firstDataset();
@@ -138,7 +138,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 						p = n.getBorderPoint(tag);
 					} catch (UnavailableBorderTagException e) {
 						fine("Tag not present: "+tag);
-						return createBlankTable();
+						return AbstractTableCreator.createBlankTable();
 					}
 					
 					int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
@@ -174,7 +174,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	public TableModel createPairwiseSignalDistanceTable(){
 
 		if(! options.isSingleDataset()){
-			return createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 
 		IAnalysisDataset d = options.firstDataset();
@@ -185,7 +185,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		ISignalCollection sc = cell.getNucleus().getSignalCollection();
 		
 		if(sc.numberOfSignals()==0){
-			return createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 		try {
 
@@ -237,7 +237,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		
 		} catch(UnavailableSignalGroupException e){
 			stack("Error getting signal group", e);
-			return createBlankTable();
+			return AbstractTableCreator.createBlankTable();
 		}
 		
 		return model;

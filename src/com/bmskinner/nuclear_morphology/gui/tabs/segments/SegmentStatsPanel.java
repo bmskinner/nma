@@ -35,6 +35,7 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -105,7 +106,7 @@ public class SegmentStatsPanel extends DetailPanel {
 
 	@Override
 	protected void updateNull() {
-		table.setModel(AbstractDatasetCreator.createBlankTable());
+		table.setModel(AbstractTableCreator.createBlankTable());
 //		TableModel model = getTable(makeOptions());
 //
 //		table.setModel(model);
@@ -118,7 +119,7 @@ public class SegmentStatsPanel extends DetailPanel {
 	@Override
 	public void setChartsAndTablesLoading(){
 		
-		table.setModel(AbstractDatasetCreator.createLoadingTable());
+		table.setModel(AbstractTableCreator.createLoadingTable());
 		
 	}
 	

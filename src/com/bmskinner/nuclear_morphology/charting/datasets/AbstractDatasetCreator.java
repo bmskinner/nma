@@ -21,11 +21,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.text.DecimalFormat;
 
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
-import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {	
@@ -44,40 +40,9 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 	 */
 	public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00"); 
 	
-//	public static final TableModel BLANK_TABLE_MODEL = new BlankTableModel();
-	
-	
 	static {
 		
 		DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
 		DEFAULT_DECIMAL_FORMAT.setMinimumIntegerDigits(1);
 	}
-	
-	/**
-	 * Create an empty table declaring no data is loaded
-	 * @return
-	 */
-	public static TableModel createBlankTable(){
-		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn(Labels.NO_DATA_LOADED);
-		return model;
-	}
-	
-	/**
-	 * Create an empty table declaring no data is loaded
-	 * @return
-	 */
-	public static TableModel createLoadingTable(){
-		DefaultTableModel model = new DefaultTableModel();
-		model.addColumn(Labels.LOADING_DATA);
-		return model;
-	}
-	
-//	@SuppressWarnings("serial")
-//	private static class BlankTableModel extends DefaultTableModel {
-//		public BlankTableModel(){
-//			addColumn(Labels.NO_DATA_LOADED);
-//		}
-//	}
-
 }

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.charting.charts.panels;
+package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -22,9 +22,9 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.Coll
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -38,8 +38,13 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
+/**
+ * An abstract class implementing the plottable statistic header on a detail panel
+ * for drawing scatter charts
+ * @author ben
+ *
+ */
 @SuppressWarnings("serial")
 public abstract class AbstractScatterChartPanel extends DetailPanel implements ActionListener {
 	
@@ -48,9 +53,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	
 	protected JButton gateButton;
 	
-	protected JComboBox<PlottableStatistic> statABox;
-	protected JComboBox<PlottableStatistic> statBBox;
-	
+	protected JComboBox<PlottableStatistic> statABox, statBBox;
+
 	protected ExportableTable rhoTable;
 	
 	public AbstractScatterChartPanel(PlottableStatistic stat){
@@ -153,14 +157,14 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	protected void updateNull() {
 
 		chartPanel.setChart(AbstractChartFactory.createEmptyChart());
-		rhoTable.setModel(AbstractDatasetCreator.createBlankTable());
+		rhoTable.setModel(AbstractTableCreator.createBlankTable());
 		gateButton.setEnabled(false);
 	}
 	
 	@Override
 	public synchronized void setChartsAndTablesLoading(){
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());		
-		rhoTable.setModel(AbstractDatasetCreator.createLoadingTable());
+		rhoTable.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	@Override

@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
@@ -61,7 +62,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		tablePanel = createTablePanel();
 		for(NucleusStatistic stat : NucleusStatistic.values()){
 
-			ExportableTable table = new ExportableTable(AbstractDatasetCreator.createLoadingTable());
+			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 			
 			TableOptions options = new TableOptionsBuilder()
 				.setDatasets(getDatasets())

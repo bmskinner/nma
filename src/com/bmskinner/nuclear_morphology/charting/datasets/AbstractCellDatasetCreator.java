@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
  * @author bms41
  *
  */
-public class AbstractCellDatasetCreator extends AbstractDatasetCreator {
+public class AbstractCellDatasetCreator extends AbstractDatasetCreator<DisplayOptions> {
 	
 	protected final ICell cell;
 	

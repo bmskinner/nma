@@ -14,6 +14,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -140,6 +141,6 @@ public class SignalsColocalisationPanel extends DetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalDatasetCreator(options).createSignalColocalisationTable();
+		return new NuclearSignalTableCreator(options).createSignalColocalisationTable();
 	}
 }

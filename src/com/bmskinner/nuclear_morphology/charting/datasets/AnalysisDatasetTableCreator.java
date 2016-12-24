@@ -60,7 +60,7 @@ import com.bmskinner.nuclear_morphology.stats.Mean;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
+public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	
 	/**
 	 * Create with a set of table options
@@ -213,7 +213,7 @@ public class AnalysisDatasetTableCreator extends AbstractDatasetCreator {
 	private TableModel createMultiDatasetMedianProfileSegmentStatsTable() {
 
 		if( ! options.hasDatasets()){
-			return AbstractDatasetCreator.createBlankTable();
+			return createBlankTable();
 		} 
 				
 		DefaultTableModel model = new DefaultTableModel();

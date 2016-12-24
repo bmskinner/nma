@@ -46,7 +46,9 @@ import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -123,7 +125,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	private JScrollPane createStatsPane(){
 		
 		
-		TableModel tableModel = AbstractDatasetCreator.createBlankTable();
+		TableModel tableModel = AbstractTableCreator.createBlankTable();
 		statsTable = new ExportableTable(tableModel); // table  for basic stats
 		statsTable.setEnabled(false);
 		
@@ -392,7 +394,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	public void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
 		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
-		statsTable.setModel(AbstractDatasetCreator.createLoadingTable());	
+		statsTable.setModel(AbstractTableCreator.createLoadingTable());	
 		
 	}
 	
@@ -403,7 +405,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalDatasetCreator(options).createSignalStatsTable();
+		return new NuclearSignalTableCreator(options).createSignalStatsTable();
 	}
 
 	@Override

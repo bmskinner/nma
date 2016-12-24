@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class ScatterTableDatasetCreator extends AbstractDatasetCreator<TableOptions> {
+public class ScatterTableDatasetCreator extends AbstractTableCreator {
 	
 	public ScatterTableDatasetCreator(final TableOptions options){
 		super(options);

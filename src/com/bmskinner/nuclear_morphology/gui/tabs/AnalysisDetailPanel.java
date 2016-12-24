@@ -28,6 +28,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -65,7 +66,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	@Override
 	public synchronized void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
-		tableAnalysisParameters.setModel(AbstractDatasetCreator.createLoadingTable());
+		tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	@Override
@@ -87,7 +88,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 	
 	@Override
 	protected void updateNull() {
-		tableAnalysisParameters.setModel(AbstractDatasetCreator.createBlankTable());
+		tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
 	}
 			
 	

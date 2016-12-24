@@ -13,6 +13,7 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -79,7 +80,7 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 	@Override
 	public void setChartsAndTablesLoading(){
 		super.setChartsAndTablesLoading();
-		tablePopulationStats.setModel(AbstractDatasetCreator.createLoadingTable());
+		tablePopulationStats.setModel(AbstractTableCreator.createLoadingTable());
 	}
 	
 	/**
