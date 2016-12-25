@@ -26,7 +26,7 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -36,9 +36,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
-public class CellDatasetCreator extends AbstractDatasetCreator {
+public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		
-	public CellDatasetCreator(final DisplayOptions options){
+	public CellDatasetCreator(final ChartOptions options){
 		super(options);
 	}
 	

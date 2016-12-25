@@ -33,6 +33,8 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
@@ -435,6 +437,9 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 		
 		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
 		
+		ChartOptions options = new DefaultChartOptions( (IAnalysisDataset) null);
+		MorphologyChartFactory chf = new MorphologyChartFactory(options);
+		
 		try {
 
 			if(data.hasRule()){
@@ -444,7 +449,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 				IProfile p = dataset.getCollection().getProfileCollection()
 						.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
 				BooleanProfile b = finder.getMatchingIndexes(p, r);
-				chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
+				chart = chf.createBooleanProfileChart(p, b);
 			}
 
 			if(data.hasRuleSet()){
@@ -454,7 +459,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 						.getProfile(data.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
 				BooleanProfile b = finder.getMatchingIndexes(p, r);
-				chart = MorphologyChartFactory.createBooleanProfileChart(p, b);
+				chart = chf.createBooleanProfileChart(p, b);
 
 			}
 
@@ -465,7 +470,7 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 				BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(), c.getRuleSets(data.getTag()));
 
-				chart = MorphologyChartFactory.createBooleanProfileChart(p, limits);
+				chart = chf.createBooleanProfileChart(p, limits);
 
 			}
 

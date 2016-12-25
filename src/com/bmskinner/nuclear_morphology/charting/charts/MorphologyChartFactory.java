@@ -171,7 +171,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createSegmentedProfileDataset(n, options.getType());
+			ds = new NucleusDatasetCreator(options).createSegmentedProfileDataset(n);
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating profile chart", e);
 			return makeErrorChart();
@@ -284,10 +284,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			try {
 
 				if(options.getType().equals(ProfileType.FRANKEN)){
-					ds = new NucleusDatasetCreator().createFrankenSegmentDataset(options);
+					ds = new NucleusDatasetCreator(options).createFrankenSegmentDataset();
 
 				} else {
-					ds = new NucleusDatasetCreator().createSegmentedProfileDataset(options);
+					ds = new NucleusDatasetCreator(options).createSegmentedProfileDataset();
 				}
 			} catch(ChartDatasetCreationException e){
 				fine("Error making profile dataset", e);
@@ -402,7 +402,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
 			XYDataset ds;
 			try {
-				ds = new NucleusDatasetCreator().createSegmentedMedianProfileDataset( options);
+				ds = new NucleusDatasetCreator(options).createSegmentedMedianProfileDataset( );
 			} catch (ChartDatasetCreationException e) {
 				stack("Error creating median profile dataset", e);
 				return makeErrorChart();
@@ -581,16 +581,16 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		List<XYSeriesCollection> iqrProfiles = null;
 		XYDataset medianProfiles			 = null;
 		
-		NucleusDatasetCreator creator = new NucleusDatasetCreator();
+		NucleusDatasetCreator creator = new NucleusDatasetCreator(options);
 				
 		try {
 
 			if(options.getType().equals(ProfileType.FRANKEN)){
 				iqrProfiles     = creator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
-				medianProfiles	= creator.createMultiProfileFrankenDataset(	options );
+				medianProfiles	= creator.createMultiProfileFrankenDataset(	 );
 			} else {
-				iqrProfiles     = creator.createMultiProfileIQRDataset( options );				
-				medianProfiles	= creator.createMultiProfileDataset(    options );
+				iqrProfiles     = creator.createMultiProfileIQRDataset(  );				
+				medianProfiles	= creator.createMultiProfileDataset(     );
 
 			}
 
@@ -720,7 +720,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	private JFreeChart makeSingleVariabilityChart() {
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createIQRVariabilityDataset(options);
+			ds = new NucleusDatasetCreator(options).createIQRVariabilityDataset();
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating variability chart", e);
 			return makeErrorChart();
@@ -776,7 +776,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @return a chart
 	 */
 	private JFreeChart makeMultiVariabilityChart() throws Exception {
-		XYDataset ds =  new NucleusDatasetCreator().createIQRVariabilityDataset(options);
+		XYDataset ds =  new NucleusDatasetCreator(options).createIQRVariabilityDataset();
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -823,7 +823,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset nuclearOutlines;
 		try {
-			nuclearOutlines = new NucleusDatasetCreator().createMultiNucleusOutline(options.getDatasets(), options.getScale());
+			nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}
@@ -942,8 +942,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		int iteration = 0;
 		for(IAnalysisDataset dataset : list){
 			
-			XYDataset ds 	 =  new NucleusDatasetCreator().createModalityProbabililtyDataset(position, dataset, type);
-			XYDataset values =  new NucleusDatasetCreator().createModalityValuesDataset(position, dataset, type);
+			XYDataset ds 	 =  new NucleusDatasetCreator(options).createModalityProbabililtyDataset(position, dataset, type);
+			XYDataset values =  new NucleusDatasetCreator(options).createModalityValuesDataset(position, dataset, type);
 			
 			Paint colour = dataset.getDatasetColour() == null 
 					? ColourSelecter.getColor(iteration)
@@ -986,7 +986,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createModalityProfileDataset(options);
+			ds = new NucleusDatasetCreator(options).createModalityProfileDataset();
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}
@@ -1156,17 +1156,17 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset kruskalDataset = null;
 
-		NucleusDatasetCreator creator =  new NucleusDatasetCreator();
+		NucleusDatasetCreator creator =  new NucleusDatasetCreator(options);
 		
 		XYDataset firstProfileDataset;
 		XYDataset secondProfileDataset;
 		try {
 			if(frankenNormalise){
 
-				kruskalDataset = creator.createFrankenKruskalProfileDataset(options);
+				kruskalDataset = creator.createFrankenKruskalProfileDataset();
 
 			} else {
-				kruskalDataset = creator.createKruskalProfileDataset(options);
+				kruskalDataset = creator.createKruskalProfileDataset();
 			}
 
 			firstProfileDataset = creator.createNonsegmentedMedianProfileDataset(options.firstDataset(),
@@ -1253,11 +1253,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 	 * @param limits
 	 * @return
 	 */
-	public static JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits){
+	public JFreeChart createBooleanProfileChart(IProfile p, BooleanProfile limits){
 		
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createBooleanProfileDataset(p, limits);
+			ds = new NucleusDatasetCreator(options).createBooleanProfileDataset(p, limits);
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}

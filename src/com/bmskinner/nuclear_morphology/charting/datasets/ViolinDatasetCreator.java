@@ -37,14 +37,14 @@ import weka.estimators.KernelEstimator;
  * @author ben
  *
  */
-public class ViolinDatasetCreator extends AbstractDatasetCreator {
+public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		
 	
 	/**
 	 * Create with options
 	 * @param options
 	 */
-	public ViolinDatasetCreator(final DisplayOptions options){
+	public ViolinDatasetCreator(final ChartOptions options){
 		super(options);
 	}
 	
@@ -308,7 +308,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator {
 
 		if(list.size()>2 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
 			
-			KernelEstimator est = new NucleusDatasetCreator().createProbabililtyKernel(  list , 0.001 );
+			KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(  list , 0.001 );
 //			double min = Stats.min(list).doubleValue();
 			double min = new Min(list).doubleValue();
 			double max = new Max(list).doubleValue();

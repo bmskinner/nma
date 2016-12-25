@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.UUID;
 import java.util.concurrent.ForkJoinPool;
 
@@ -30,12 +31,16 @@ import org.jfree.chart.plot.Plot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public abstract class AbstractChartFactory implements Loggable {
@@ -170,6 +175,10 @@ public abstract class AbstractChartFactory implements Loggable {
 		return colour;
 	}
 	
+	/**
+	 * Create a chart displaying an error message
+	 * @return
+	 */
 	public static JFreeChart makeErrorChart(){
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -191,12 +200,15 @@ public abstract class AbstractChartFactory implements Loggable {
 	/**
 	 * Create a new XY Line Chart, with vertical orientation,
 	 * and set the background to white
-	 * @return
+	 * @param xLabel the x axis label
+	 * @param yLabel the y axis label
+	 * @param ds the charting dataset
+	 * @return a chart with default settings
 	 */
-	protected static JFreeChart createBaseXYChart(){
+	protected static JFreeChart createBaseXYChart(String xLabel, String yLabel, XYDataset ds){
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
-						null, null, null, PlotOrientation.VERTICAL, false, false,
+						xLabel, yLabel, ds, PlotOrientation.VERTICAL, false, false,
 						false);
 		
 		XYPlot plot = chart.getXYPlot();
@@ -207,6 +219,49 @@ public abstract class AbstractChartFactory implements Loggable {
 		chart.setAntiAlias(GlobalOptions.getInstance().isAntiAlias());
 		
 		return chart;
+	}
+	
+	/**
+	 * Create a new XY Line Chart, with vertical orientation,
+	 * and set the background to white. The charting dataset is null.
+	 * @param xLabel the x axis label
+	 * @param yLabel the y axis label
+	 * @return a chart with default settings
+	 */
+	protected static JFreeChart createBaseXYChart(String xLabel, String yLabel){
+		return createBaseXYChart(xLabel, yLabel, null);
+	}
+	
+	/**
+	 * Create a new XY Line Chart, with vertical orientation,
+	 * and set the background to white. The charting dataset is null.
+	 * @return
+	 */
+	protected static JFreeChart createBaseXYChart(){
+		return createBaseXYChart(null, null, null);
+	}
+	
+	
+	/**
+	 * Assuming there is a single XYDataset in the XYPlot of the chart,
+	 * and a single renderer, apply dataset colours based on position 
+	 * in the chart options dataset list.
+	 */
+	protected void applySingleXYDatasetColours(XYPlot plot){
+		int seriesCount = plot.getDataset().getSeriesCount();
+	
+		XYItemRenderer renderer = plot.getRenderer();
+		for (int i = 0; i < seriesCount; i++) {
+			
+			Paint colour = ColourSelecter.getColor(i);
+			
+			if(options.getDatasets().get(i).hasDatasetColour()){
+				colour = options.getDatasets().get(i).getDatasetColour();
+			}
+								
+			renderer.setSeriesPaint(i, colour);
+			 
+		}	
 	}
 	
 	/**

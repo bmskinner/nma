@@ -18,16 +18,14 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.options;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.jfree.chart.ChartPanel;
 
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
@@ -77,8 +75,20 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
 	
 
 	
-	public DefaultChartOptions(List<IAnalysisDataset> list){
+	public DefaultChartOptions(final List<IAnalysisDataset> list){
 		super(list);
+	}
+	
+	public DefaultChartOptions(final IAnalysisDataset d){
+		super( new ArrayList<IAnalysisDataset>(){
+			
+			private List<IAnalysisDataset> init(){
+				this.add(d);
+				return this;
+			}
+			
+			
+		}.init());
 	}
 			
 	/* (non-Javadoc)

@@ -1169,6 +1169,20 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			return createBlankTable();
 		}
 		
+		// Check that there are some cluster groups to render
+		boolean hasClusters = false;
+		for(IAnalysisDataset d : options.getDatasets()){
+			if( d.hasClusters()){
+				hasClusters = true;
+			}
+		}
+		
+		if(! hasClusters){
+			return createBlankTable();
+		}
+		
+		// Make the table model
+		
 		DefaultTableModel model = new DefaultTableModel();
 
 		List<Object> columnList = new ArrayList<Object>();

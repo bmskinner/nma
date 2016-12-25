@@ -50,6 +50,8 @@ import org.jfree.chart.JFreeChart;
 import com.bmskinner.nuclear_morphology.analysis.RandomSampler;
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
@@ -243,14 +245,16 @@ public class RandomSamplingDialog
 
 			JFreeChart chart = null;
 			if(showDensity.isSelected()){
-				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+				ChartOptions options = new DefaultChartOptions(dataset);
+				chart = new HistogramChartFactory(options).createRandomSampleDensity(resultList);
 			} else {
 				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
 			}
 			chartPanel.setChart(chart);
 			setStatusLoaded();
 		} catch (Exception e) {
-			log(Level.SEVERE, "Error running sampling", e);
+			warn("Error running sampling");
+			stack("Error running sampling", e);
 		}
 	}
 
@@ -259,8 +263,8 @@ public class RandomSamplingDialog
 		JFreeChart chart = null;
 		try {
 			if(showDensity.isSelected()){
-
-				chart = HistogramChartFactory.createRandomSampleDensity(resultList);
+				ChartOptions options = new DefaultChartOptions(dataset);
+				chart = new HistogramChartFactory(options).createRandomSampleDensity(resultList);
 
 			} else {
 				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);

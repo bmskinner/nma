@@ -26,18 +26,24 @@ import org.jfree.data.xy.DefaultXYDataset;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
+/**
+ * Holds the outline of a cellular component
+ * @author ben
+ *
+ * @param <E> the component class to be drawn
+ */
 @SuppressWarnings("serial")
-public class ComponentOutlineDataset 
+public class ComponentOutlineDataset<E extends CellularComponent> 
 	extends DefaultXYDataset {
 	
-	Map<Comparable, CellularComponent> nuclei = new HashMap<Comparable, CellularComponent>();
+	Map<Comparable, E> nuclei = new HashMap<Comparable, E>();
 		
 	/**
 	 * Set the component for the given series
 	 * @param i
 	 * @param n
 	 */
-	public void setComponent(Comparable seriesKey, CellularComponent n){
+	public void setComponent(Comparable seriesKey, E n){
 		nuclei.put(seriesKey, n);
 	}
 	
@@ -46,7 +52,7 @@ public class ComponentOutlineDataset
 	 * @param i
 	 * @return
 	 */
-	public CellularComponent getComponent(Comparable seriesKey){
+	public E getComponent(Comparable seriesKey){
 		return nuclei.get(seriesKey);
 	}
 	

@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
 
 import weka.estimators.KernelEstimator;
 
-public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
+public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
 	public static final int MIN_ROUNDED = 0;
 	public static final int MAX_ROUNDED = 1;
@@ -196,7 +196,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
+				est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}
@@ -450,7 +450,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = new NucleusDatasetCreator().createProbabililtyKernel(lengths , 0.001);
+				est = new NucleusDatasetCreator(options).createProbabililtyKernel(lengths , 0.001);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}
@@ -534,7 +534,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 		return ds;
 	}
 	
-	public static XYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws ChartDatasetCreationException{
+	public XYDataset createDensityDatasetFromList(List<Double> list, double binWidth) throws ChartDatasetCreationException{
 		DefaultXYDataset ds = new DefaultXYDataset();
 		if(!list.isEmpty()){
 			
@@ -550,7 +550,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator {
 			
 			KernelEstimator est;
 			try {
-				est = new NucleusDatasetCreator().createProbabililtyKernel(values, binWidth);
+				est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, binWidth);
 			} catch (Exception e1) {
 				throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
 			}

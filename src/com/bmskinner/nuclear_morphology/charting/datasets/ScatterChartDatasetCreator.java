@@ -4,18 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
-
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -23,14 +16,23 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOptions> {
+/**
+ * Create scatter chart datasets
+ * @author ben
+ *
+ */
+public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
+	/**
+	 * Construct with an options
+	 * @param options the chart options
+	 */
 	public ScatterChartDatasetCreator(final ChartOptions options){
 		super(options);
 	}
@@ -149,9 +151,10 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 	 * Get a boxplot dataset for the given statistic for each collection
 	 * @param options the charting options
 	 * @return
+	 * @throws ChartDatasetCreationException 
 	 * @throws Exception
 	 */
-	private XYDataset createSignalScatterDataset() {
+	private SignalXYDataset createSignalScatterDataset() throws ChartDatasetCreationException {
 		List<IAnalysisDataset> datasets = options.getDatasets();
 		
 		List<PlottableStatistic> stats =  options.getStats();
@@ -161,7 +164,7 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 		SignalStatistic statA = (SignalStatistic) stats.get(0);
 		SignalStatistic statB = (SignalStatistic) stats.get(1);
 
-		DefaultXYDataset ds = new DefaultXYDataset();
+		SignalXYDataset ds = new SignalXYDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 			
@@ -171,6 +174,14 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 			Set<UUID> groups = m.getSignalGroupIDs();
 			
 			for(UUID id : groups){
+				
+				ISignalGroup gp;
+				try {
+					gp = c.getSignalGroup(id);
+				} catch (UnavailableSignalGroupException e) {
+					stack("Error getting signal group", e);
+					throw new ChartDatasetCreationException("Cannot get signal group", e);					
+				}
 				
 				int signalCount = m.getSignalCount(id);
 				
@@ -187,7 +198,12 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<DisplayOp
 				}
 
 				double[][] data = { xpoints, ypoints };
-				ds.addSeries(c.getName()+"|"+id.toString(), data);
+				
+				String seriesKey = c.getName()+"_"+gp.getGroupName();
+				ds.addSeries(seriesKey, data);
+				ds.addDataset(datasets.get(i), seriesKey);
+				ds.addSignalGroup(gp, seriesKey);
+				ds.addSignalId(id, seriesKey);
 				
 			}
 

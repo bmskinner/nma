@@ -46,51 +46,9 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 public class ChartOptionsBuilder {
 	
 	private DefaultChartOptions options;
-//	private List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-//	private ColourSwatch swatch        = GlobalOptions.getInstance().getSwatch();
-//	private boolean normalised         = false;
-//	private ProfileAlignment alignment = ProfileAlignment.LEFT;
-//	private Tag tag              = Tag.REFERENCE_POINT;
-//	private boolean showMarkers        = false;
-//	private boolean hideProfiles       = false;
-//	private ProfileType type           = ProfileType.ANGLE;
-//	private UUID signalGroup           = null;
-//	private boolean useDensity         = false;
-//	private List<PlottableStatistic> stats    = new ArrayList<PlottableStatistic>();
-//	private MeasurementScale scale     = MeasurementScale.PIXELS;
-//	private UUID segID                 = null;
-//	private int segPosition            = 0;
-//	private double modalityPosition    = 0;
-//	private boolean showPoints         = false;
-//	private boolean showLines          = true;
-//	private boolean showAnnotations    = true;
-//	private boolean showBorderTags     = true; // used in cell outlines
-//	private boolean showSignals        = true; // used in cell outlines
-//	
-//	// Options for nucleus mesh creation
-//	private boolean showMesh           = false;
-//	private boolean showMeshEdges      = true;
-//	private boolean showMeshFaces      = false;
-//	private boolean straightenMesh     = false;
-//	private int     meshSize           = 10;
-//	private boolean showBounds         = false; // Bounding box for meshes and warped images
-//	
-//	// Chart axis options
-//	private boolean showXAxis           = true;
-//	private boolean showYAxis           = true;
-//	private boolean invertXAxis         = false;
-//	private boolean invertYAxis         = false;
-//	
-//	// Cells tab
-//	private RotationMode rotateMode     = RotationMode.ACTUAL;
-//	private ICell cell                   = null;
-//	private CellularComponent component = null;
-//	private boolean showWarp            = false;
-//	
-//	private ChartPanel target           = null;
 	
 	public ChartOptionsBuilder(){
-		options = new DefaultChartOptions(null);
+		options = new DefaultChartOptions((List<IAnalysisDataset>)null);
 	}
 	
 	public ChartOptionsBuilder setDatasets(List<IAnalysisDataset> list){

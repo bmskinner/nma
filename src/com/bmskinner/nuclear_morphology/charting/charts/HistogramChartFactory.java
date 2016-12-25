@@ -146,8 +146,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
-		XYDataset ds = NuclearHistogramDatasetCreator.createDensityDatasetFromList(list, 0.0001);
+	public JFreeChart createRandomSampleDensity(List<Double> list) throws Exception{
+		XYDataset ds = new NuclearHistogramDatasetCreator(options).createDensityDatasetFromList(list, 0.0001);
 		String xLabel = "Magnitude difference between populations";
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -276,7 +276,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		
 		List<DefaultXYDataset> list;
 		try {
-			list = new NuclearSignalDatasetCreator(options).createSignalDensityHistogramDataset(options.getDatasets(), stat, options.getScale());
+			list = new NuclearSignalDatasetCreator(options).createSignalDensityHistogramDataset();
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}

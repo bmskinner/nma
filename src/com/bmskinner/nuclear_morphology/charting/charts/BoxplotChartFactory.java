@@ -106,7 +106,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		BoxAndWhiskerCategoryDataset ds = null;
 		if(options.getDatasets()!=null){
 			 try {
-				ds = new NucleusDatasetCreator().createBoxplotDataset(options);
+				ds = new NucleusDatasetCreator(options).createBoxplotDataset();
 			} catch (ChartDatasetCreationException e) {
 				fine("Error creating boxplot", e);
 				return makeErrorChart();
@@ -134,7 +134,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		
 		BoxAndWhiskerCategoryDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createSegmentStatDataset(options);
+			ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating boxplot", e);
 			return makeErrorChart();

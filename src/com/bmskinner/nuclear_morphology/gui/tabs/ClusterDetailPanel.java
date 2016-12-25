@@ -41,6 +41,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -63,18 +64,208 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
  */
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
+	
+	private static final String NEW_CLUSTER_LBL = "Cluster nuclei";
+	private static final String NEW_TREE_LBL    = "Create tree";
+	private static final String NEW_CLASS_LBL   = "Create classifier";
+	private static final String SHOW_TREE_LBL   = "Show tree";
+	private static final String NO_CLUSTERS_LBL = "No clusters present";
+	
+	private JButton 	clusterButton	= new JButton(NEW_CLUSTER_LBL);
+	private JButton 	buildTreeButton	= new JButton(NEW_TREE_LBL);
+	private JButton 	saveClassifierButton	= new JButton(NEW_CLASS_LBL);
+	
+	private JLabel		statusLabel 	= new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
+	private JPanel		statusPanel		= new JPanel(new BorderLayout());
+	
+	private JPanel		showTreeButtonPanel;
+	
+	private JPanel      mainPanel;
+	private ExportableTable clusterDetailsTable; 
 			
-	private ClustersPanel clusterPanel;
+//	private ClustersPanel clusterPanel;
 
 	public ClusterDetailPanel() {
 		super();
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		
-		clusterPanel = new ClustersPanel();
-		this.add(clusterPanel);
+		this.setLayout(new BorderLayout());
+		
+		mainPanel = createMainPanel();
+		statusPanel = createHeader();
+		
+		this.add(mainPanel,   BorderLayout.CENTER);
+		this.add(statusPanel, BorderLayout.NORTH);
+
+		setEnabled(false);
 
 	}
 	
+	/**
+	 * Create the main panel with cluster table
+	 * @return
+	 */
+	private JPanel createMainPanel(){
+		JPanel panel = new JPanel();
+		
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		
+		TableModel optionsModel = AbstractTableCreator.createBlankTable();
+		clusterDetailsTable = new ExportableTable(optionsModel){
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+			    return false;
+			}
+		};
+
+		setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
+		
+		
+		JScrollPane scrollPane = new JScrollPane(clusterDetailsTable);
+		
+		JPanel tablePanel = new JPanel(new BorderLayout());
+		
+		tablePanel.add(scrollPane, BorderLayout.CENTER);
+		tablePanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
+		
+		panel.add(tablePanel);
+		
+		showTreeButtonPanel = createTreeButtonPanel(null);
+		panel.add(showTreeButtonPanel);
+		return panel;
+		
+	}
+	
+	/**
+	 * This panel shows the status of the dataset, 
+	 * and holds the clustering button
+	 * @return
+	 */
+	private JPanel createHeader(){
+		
+		JPanel panel = new JPanel(new BorderLayout());
+		
+		JPanel buttonPanel = new JPanel(new FlowLayout());
+		clusterButton.addActionListener( e -> {
+				fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()); 
+		});
+		
+		buildTreeButton.addActionListener( e -> {
+				fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
+		});
+		
+		saveClassifierButton.addActionListener( e -> {
+				fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
+		});
+		
+		saveClassifierButton.setEnabled(false);
+		buildTreeButton.setEnabled(true);
+		buttonPanel.add(buildTreeButton);
+		buttonPanel.add(clusterButton);
+//		buttonPanel.add(saveClassifierButton);
+		
+		panel.add(buttonPanel, BorderLayout.SOUTH);
+		panel.add(statusLabel, BorderLayout.CENTER);
+				
+		return panel;
+	}
+	
+	/**
+	 * Create the panel holding 'Show tree' buttons
+	 * @param buttons the buttons to be drawn
+	 * @return
+	 */
+	private JPanel createTreeButtonPanel(List<JComponent> buttons){
+		JPanel panel = new JPanel();
+		
+		GridBagLayout gbl = new GridBagLayout();
+		panel.setLayout(gbl);
+		
+		GridBagConstraints c = new GridBagConstraints();
+		
+		c.anchor = GridBagConstraints.CENTER; // place the buttons in the middle of their grid
+		c.gridwidth = buttons==null ? 1 : buttons.size()+1; // one button per column, plus a blank
+		c.gridheight = 1;
+		c.fill = GridBagConstraints.NONE;      // don't resize the buttons
+		c.weightx = 1.0; 						// buttons have padding between them
+		
+		Dimension fillerSize = new Dimension(10, 5);
+		panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
+		if(buttons!=null){
+			for(JComponent button : buttons){
+				panel.add(button, c);
+			}
+		}
+
+		return panel;
+	}
+	
+	/**
+	 * Create the appropriate number of 'Show tree' buttons for the selected
+	 * datasets, and return them as a list
+	 * @return
+	 */
+	private List<JComponent> createShowTreeButtons(){
+		 
+		if(!hasDatasets()){
+			return null;
+		}
+		
+		List<JComponent> result = new  ArrayList<JComponent>(); 
+		Dimension fillerSize = new Dimension(10, 5);
+		
+		for(final IAnalysisDataset d : getDatasets()){
+			
+			for(final IClusterGroup g : d.getClusterGroups()){
+				
+				if(g.hasTree()){
+					JButton button = new JButton(SHOW_TREE_LBL);
+					button.addActionListener( e ->{
+							Thread thr = new Thread(){
+								public void run(){
+									ClusterTreeDialog clusterPanel = new ClusterTreeDialog( d, g);
+									clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
+									clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
+								}};
+								thr.start();
+						}
+					);    
+					result.add(button);
+				} else {
+					result.add(new Box.Filler(fillerSize, fillerSize, fillerSize));
+				}
+				
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		clusterButton.setEnabled(b);
+		buildTreeButton.setEnabled(b);
+//		saveClassifierButton.setEnabled(b); // not yet enabled
+	}
+	
+			
+	private void updateTreeButtonsPanel(){
+		
+		mainPanel.remove(showTreeButtonPanel);
+		
+		List<JComponent> buttons = createShowTreeButtons();
+		
+		
+		showTreeButtonPanel = createTreeButtonPanel(buttons);
+
+		// add this new panel
+		mainPanel.add(showTreeButtonPanel);
+		mainPanel.revalidate();
+		mainPanel.repaint();
+		mainPanel.setVisible(true);
+	}
 	
 	@Override
 	protected void updateSingle() {
@@ -84,7 +275,40 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
 	@Override
 	protected void updateMultiple() {
-		clusterPanel.update(getDatasets());		
+		setEnabled(true);
+		
+		TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setTarget(clusterDetailsTable)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer())
+			.build();
+		
+		setTable(options);
+		
+
+		updateTreeButtonsPanel();
+		
+		if( ! hasDatasets()){
+			statusLabel.setText(Labels.NULL_DATASETS);
+			setEnabled(false);
+		} else {
+			
+			if(isSingleDataset()){
+				
+				setEnabled(true);
+
+				if(!activeDataset().hasClusters()){
+
+					statusLabel.setText(NO_CLUSTERS_LBL);
+
+				} else {
+					statusLabel.setText("Dataset has "+activeDataset().getClusterGroups().size()+" cluster groups");						
+				}
+			} else { // more than one dataset selected
+				statusLabel.setText(Labels.MULTIPLE_DATASETS);
+				setEnabled(false);
+			}
+		}
 		finest("Updated cluster panel");
 		
 	}
@@ -120,219 +344,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 			fireInterfaceEvent(event);
 		}
     }
-				
-	private class ClustersPanel extends JPanel {
-		
-		private JButton 	clusterButton	= new JButton("Cluster population");
-		private JButton 	buildTreeButton	= new JButton("Create tree");
-		private JButton 	saveClassifierButton	= new JButton("Create classifier");
-		
-		private JLabel		statusLabel 	= new JLabel("No clusters present", SwingConstants.CENTER);
-		private JPanel		statusPanel		= new JPanel(new BorderLayout());
-		
-		private JPanel		showTreeButtonPanel;
-		
-		private JPanel tablesPanel;
-		private ExportableTable clusterDetailsTable; 
-		
-		public ClustersPanel(){
-			this.setLayout(new BorderLayout());
-		
 			
-			tablesPanel = new JPanel();
-			tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
-					
-			JPanel clusterDetailPanel = new JPanel(new BorderLayout());
-			TableModel optionsModel = AnalysisDatasetTableCreator.createBlankTable();
-			clusterDetailsTable = new ExportableTable(optionsModel){
-				@Override
-				public boolean isCellEditable(int rowIndex, int columnIndex) {
-				    return false;
-				}
-			};
-
-			setRenderer(clusterDetailsTable, new ClusterTableCellRenderer());
-			
-			
-			JScrollPane detailScrollPanel = new JScrollPane(clusterDetailsTable);
-			clusterDetailPanel.add(detailScrollPanel, BorderLayout.CENTER);
-			clusterDetailPanel.add(clusterDetailsTable.getTableHeader(), BorderLayout.NORTH);
-			
-			tablesPanel.add(clusterDetailPanel);
-			
-			showTreeButtonPanel = createTreeButtonPanel(null);
-			tablesPanel.add(showTreeButtonPanel);
-			
-				
-			this.add(tablesPanel, BorderLayout.CENTER);
-			statusPanel = makeStatusPanel();
-			setEnabled(false);
-			this.add(statusPanel, BorderLayout.NORTH);
-
-
-		}
-		
-		private JPanel createTreeButtonPanel(List<JComponent> buttons){
-			JPanel panel = new JPanel();
-			
-			GridBagLayout gbl = new GridBagLayout();
-			panel.setLayout(gbl);
-			
-			GridBagConstraints c = new GridBagConstraints();
-			
-			c.anchor = GridBagConstraints.CENTER; // place the buttons in the middle of their grid
-			c.gridwidth = buttons==null ? 1 : buttons.size()+1; // one button per column, plus a blank
-			c.gridheight = 1;
-			c.fill = GridBagConstraints.NONE;      // don't resize the buttons
-			c.weightx = 1.0; 						// buttons have padding between them
-			
-			Dimension fillerSize = new Dimension(10, 5);
-			panel.add(new Box.Filler(fillerSize, fillerSize, fillerSize), c);
-			if(buttons!=null){
-				for(JComponent button : buttons){
-					panel.add(button, c);
-				}
-			}
-
-			return panel;
-		}
-		
-		private List<JComponent> createShowTreeButtons(){
-			 
-			if(!hasDatasets()){
-				return null;
-			}
-			
-			List<JComponent> result = new  ArrayList<JComponent>(); 
-			Dimension fillerSize = new Dimension(10, 5);
-			
-			for(final IAnalysisDataset d : getDatasets()){
-				
-				for(final IClusterGroup g : d.getClusterGroups()){
-					
-					if(g.hasTree()){
-						JButton button = new JButton("Show tree");
-						button.addActionListener( e ->{
-								Thread thr = new Thread(){
-									public void run(){
-										ClusterTreeDialog clusterPanel = new ClusterTreeDialog( d, g);
-										clusterPanel.addDatasetEventListener(ClusterDetailPanel.this);
-										clusterPanel.addInterfaceEventListener(ClusterDetailPanel.this);
-									}};
-									thr.start();
-							}
-						);    
-						result.add(button);
-					} else {
-						result.add(new Box.Filler(fillerSize, fillerSize, fillerSize));
-					}
-					
-				}
-			}
-			
-			return result;
-		}
-		
-				
-		@Override
-		public void setEnabled(boolean b){
-			super.setEnabled(b);
-			clusterButton.setEnabled(b);
-			buildTreeButton.setEnabled(b);
-//			saveClassifierButton.setEnabled(b); // not yet enabled
-		}
-		/**
-		 * This panel shows the status of the dataset, 
-		 * and holds the clustering button
-		 * @return
-		 */
-		private JPanel makeStatusPanel(){
-			
-			JPanel panel = new JPanel(new BorderLayout());
-			
-			JPanel buttonPanel = new JPanel(new FlowLayout());
-			clusterButton.addActionListener( e -> {
-					fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets()); 
-			});
-			
-			buildTreeButton.addActionListener( e -> {
-					fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
-			});
-			
-			saveClassifierButton.addActionListener( e -> {
-					fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
-			});
-			
-			saveClassifierButton.setEnabled(false);
-			buildTreeButton.setEnabled(true);
-			buttonPanel.add(buildTreeButton);
-			buttonPanel.add(clusterButton);
-//			buttonPanel.add(saveClassifierButton);
-			
-			panel.add(buttonPanel, BorderLayout.SOUTH);
-			panel.add(statusLabel, BorderLayout.CENTER);
-					
-			return panel;
-		}
-				
-		private void updateTreeButtonsPanel(){
-			
-			tablesPanel.remove(showTreeButtonPanel);
-			
-			List<JComponent> buttons = createShowTreeButtons();
-			
-			
-			showTreeButtonPanel = createTreeButtonPanel(buttons);
-
-			// add this new panel
-			tablesPanel.add(showTreeButtonPanel);
-			tablesPanel.revalidate();
-			tablesPanel.repaint();
-			tablesPanel.setVisible(true);
-		}
-
-		public void update(List<IAnalysisDataset> list){
-
-			setEnabled(true);
-			
-			TableOptions options = new TableOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setTarget(clusterDetailsTable)
-				.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new ClusterTableCellRenderer())
-				.build();
-			
-			setTable(options);
-			
-
-			updateTreeButtonsPanel();
-			
-			if( ! hasDatasets()){
-				statusLabel.setText(Labels.NULL_DATASETS);
-				setEnabled(false);
-			} else {
-				
-				if(isSingleDataset()){
-					
-					setEnabled(true);
-
-					if(!activeDataset().hasClusters()){
-
-						statusLabel.setText("Dataset contains no clusters");
-
-					} else {
-						statusLabel.setText("Dataset has "+activeDataset().getClusterGroups().size()+" cluster groups");						
-					}
-				} else { // more than one dataset selected
-					statusLabel.setText(Labels.MULTIPLE_DATASETS);
-					setEnabled(false);
-				}
-			}
-		}
-
-	}
-	
-	
-
 	/**
 	 * Colour analysis parameter table cell background. If parameters are false or N/A, 
 	 * make the text colour grey

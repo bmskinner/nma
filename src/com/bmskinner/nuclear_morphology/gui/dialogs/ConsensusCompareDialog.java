@@ -245,16 +245,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);
 				
 				
-				Mesh comparison1 = mesh1.comparison(mesh2);
-				Mesh comparison2 = mesh2.comparison(mesh1);
+				Mesh<Nucleus> comparison1 = mesh1.comparison(mesh2);
+				Mesh<Nucleus> comparison2 = mesh2.comparison(mesh1);
 				
 				/*
 				 * Create log2 histograms for the entire pairwise mesh
 				 */
-				
-				histoChartOne = OutlineChartFactory.createMeshHistogram(comparison1);
-				histoChartTwo = OutlineChartFactory.createMeshHistogram(comparison2);
-				
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setShowAnnotations(showAnnotations)
@@ -263,6 +259,10 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 					.build();
 	
 				OutlineChartFactory ocf = new OutlineChartFactory(options);
+				
+				histoChartOne = ocf.createMeshHistogram(comparison1);
+				histoChartTwo = ocf.createMeshHistogram(comparison2);
+				
 				chartOne = ocf.createMeshChart(comparison1, logRatio );
 				chartTwo = ocf.createMeshChart(comparison2, logRatio);
 	
@@ -275,7 +275,7 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 				histoChartOne = ConsensusNucleusChartFactory.makeErrorChart();
 				histoChartTwo = ConsensusNucleusChartFactory.makeErrorChart();
 
-				log(Level.FINE, "Error creating mesh chart", e);
+				stack("Error creating mesh chart", e);
 			}
 			
 			

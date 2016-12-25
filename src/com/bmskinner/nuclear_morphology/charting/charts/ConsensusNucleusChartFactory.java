@@ -144,7 +144,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
 		} catch (ChartDatasetCreationException e) {
 			fine("Error creating boxplot", e);
 			return makeErrorChart();
@@ -219,7 +219,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		ICellCollection collection = dataset.getCollection();
 		try {
-			ds = new NucleusDatasetCreator().createSegmentedNucleusOutline(collection);
+			ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
 		} catch (ChartDatasetCreationException e) {
 			warn("Cannot make consensus chart");
 			fine("Error making segmented outline", e);
@@ -293,7 +293,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		// multiple nuclei
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createMultiNucleusOutline(options.getDatasets(), options.getScale());
+			ds = new NucleusDatasetCreator(options).createMultiNucleusOutline(options.getDatasets(), options.getScale());
 		} catch (ChartDatasetCreationException e) {
 			fine("Error making consensus dataset", e);
 			return makeErrorChart();

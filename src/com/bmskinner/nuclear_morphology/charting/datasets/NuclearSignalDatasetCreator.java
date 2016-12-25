@@ -126,8 +126,11 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	 * @return a charting dataset
 	 * @throws Exception
 	 */
-	public List<DefaultXYDataset> createSignalDensityHistogramDataset(List<IAnalysisDataset> list, 
-			SignalStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
+	public List<DefaultXYDataset> createSignalDensityHistogramDataset() throws ChartDatasetCreationException {
+		
+		List<IAnalysisDataset> list = options.getDatasets();
+		SignalStatistic stat = (SignalStatistic) options.getStat();
+		MeasurementScale scale = options.getScale();
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
 		
@@ -169,7 +172,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                 
                 KernelEstimator est;
                 try {
-                	est = new NucleusDatasetCreator().createProbabililtyKernel(values, 0.001);
+                	est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
                 } catch (Exception e1) {
                 	fine("Error creating probability kernel",e1);
                 	throw new ChartDatasetCreationException("Cannot make probability dataset", e1);

@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class ViolinChartFactory extends AbstractChartFactory implements Loggable {
+public class ViolinChartFactory extends AbstractChartFactory {
 		
 	public ViolinChartFactory(ChartOptions o){
 		super(o);

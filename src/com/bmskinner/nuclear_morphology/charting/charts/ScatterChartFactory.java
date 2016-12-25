@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Shape;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -29,11 +30,13 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.DefaultXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
@@ -83,11 +86,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 			}
 		}
 		
-		if(firstStat.getClass().equals(NucleusStatistic.class)){
+		if(firstStat instanceof NucleusStatistic){
 			return createNucleusStatisticScatterChart();
 		}
 		
-		if(firstStat.getClass().equals(SignalStatistic.class)){
+		if(firstStat instanceof SignalStatistic){
 			return createSignalStatisticScatterChart();
 		}
 		
@@ -112,38 +115,19 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());
-		
-		JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel,
-				yLabel,  ds);  
+
+		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 		
 		XYPlot plot = chart.getXYPlot();
-		plot.setBackgroundPaint(Color.WHITE);
 		
 		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
 		yAxis.setAutoRangeIncludesZero(false);
 		
-		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
-		renderer.setBaseShapesVisible(true);
-		renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		XYItemRenderer renderer = new ScatterChartRenderer();
 		plot.setRenderer(renderer);
-		
-		int seriesCount = plot.getDataset().getSeriesCount();
 
-		for (int i = 0; i < seriesCount; i++) {
-			
-			renderer.setSeriesVisibleInLegend(i, false);
-			renderer.setSeriesLinesVisible(i, false);
-			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
-			
-			Paint colour = ColourSelecter.getColor(i);
-			
-			if(options.getDatasets().get(i).hasDatasetColour()){
-				colour = options.getDatasets().get(i).getDatasetColour();
-			}
-								
-			renderer.setSeriesPaint(i, colour);
-			 
-		}	
+		applySingleXYDatasetColours(plot);
+		
 		return chart;
 	}
 	
@@ -154,9 +138,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSignalStatisticScatterChart(){
 				
-		XYDataset ds;
+		SignalXYDataset ds;
 		try {
-			ds = new ScatterChartDatasetCreator(options).createScatterDataset();
+			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options).createScatterDataset();
 		} catch (ChartDatasetCreationException e) {
 			stack("Error creating scatter dataset", e);
 			return makeErrorChart();
@@ -165,56 +149,81 @@ public class ScatterChartFactory extends AbstractChartFactory {
 		String xLabel = options.getStat(0).label(options.getScale());
 		String yLabel = options.getStat(1).label(options.getScale());
 		
-		JFreeChart chart = createBaseXYChart();
-		chart.getXYPlot().getDomainAxis().setLabel(xLabel);
-		chart.getXYPlot().getRangeAxis().setLabel(yLabel);
-
+		JFreeChart chart = createBaseXYChart(xLabel, yLabel, ds);
 		
 		XYPlot plot = chart.getXYPlot();
-		plot.setDataset(ds);
-//		plot.setBackgroundPaint(Color.WHITE);
 		
 		NumberAxis yAxis = (NumberAxis) plot.getRangeAxis();
 		yAxis.setAutoRangeIncludesZero(false);
 		
-		DefaultXYItemRenderer renderer = new DefaultXYItemRenderer();
-		renderer.setBaseShapesVisible(true);
-		renderer.setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);
+		XYItemRenderer renderer = new ScatterChartRenderer();
+		
 		plot.setRenderer(renderer);
 		
 		int seriesCount = plot.getDataset().getSeriesCount();
 		
 		for (int i = 0; i < seriesCount; i++) {
 			
-			renderer.setSeriesVisibleInLegend(i, false);
-			renderer.setSeriesLinesVisible(i, false);
-			renderer.setSeriesShape(i, ChartComponents.DEFAULT_POINT_SHAPE);
+			String seriesKey = ds.getSeriesKey(i).toString();
+			ds.getSignalGroup(seriesKey);
 			
-			String seriesName = ds.getSeriesKey(i).toString();
-			String[] split = seriesName.split("\\|");
-			String datasetName = split[0];
-			UUID id = UUID.fromString(split[1]);
+			IAnalysisDataset d = ds.getDataset(seriesKey);
+			UUID id = ds.getSignalId(seriesKey);
 			
 			Paint colour = ColourSelecter.getColor(i);
-			
-			for(IAnalysisDataset d : options.getDatasets()){
-				if(d.getName().equals(datasetName)){
-					
-					try {
-					
-						if(d.getCollection().hasSignalGroup(id)){
-							colour = d.getCollection().getSignalGroup(id).hasColour()
-									? d.getCollection().getSignalGroup(id).getGroupColour()
-											: colour;
-						}
-					} catch (UnavailableSignalGroupException e){
-						fine("Signal group "+id+" is not present in collection", e);
-					}
+	
+			try {
+
+				if(d.getCollection().hasSignalGroup(id)){
+					colour = d.getCollection().getSignalGroup(id).hasColour()
+							? d.getCollection().getSignalGroup(id).getGroupColour()
+									: colour;
 				}
-			}				
+			} catch (UnavailableSignalGroupException e){
+				stack("Signal group "+id+" is not present in collection", e);
+			}
+
+
 			renderer.setSeriesPaint(i, colour);
 			 
 		}	
 		return chart;
+	}
+	
+	/**
+	 * Overrides the methods of the DefaultXYItemRenderer to use a consistent
+	 * point shape and not display lines.
+	 * @author ben
+	 * @since 1.13.4
+	 *
+	 */
+	private class ScatterChartRenderer extends DefaultXYItemRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		public ScatterChartRenderer(){
+			super();
+			setBaseShapesVisible(true);
+			setBaseShape(ChartComponents.DEFAULT_POINT_SHAPE);	
+		}
+		
+		@Override
+		public Boolean getSeriesLinesVisible(int series){
+			return false;
+		}
+		
+		@Override
+		public Boolean getSeriesVisibleInLegend(int series){
+			return false;
+		}
+		
+		@Override
+		public Shape getSeriesShape(int series){
+			return this.getBaseShape();
+		}
+		
+		
+		
+		
 	}
 }

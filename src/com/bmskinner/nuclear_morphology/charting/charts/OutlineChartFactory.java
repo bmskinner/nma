@@ -163,7 +163,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
 		} catch (ChartDatasetCreationException e) {
 			stack("Error creating outline", e);
 			return makeErrorChart();
@@ -273,7 +273,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createBareNucleusOutline(dataset);
+			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
 		} catch (ChartDatasetCreationException e) {
 			stack("Error creating outline", e);
 			return makeErrorChart();
@@ -355,7 +355,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 						// Draw the image onto the shape described by the consensus nucleus
 						ImageProcessor ip = im.drawImage(mesh2);
 						
-						return OutlineChartFactory.drawImageAsAnnotation(ip);
+						return drawImageAsAnnotation(ip);
 
 					} catch (UnloadableImageException e) {
 						warn("Cannot load nucleus image: "+options.getCell().getNucleus().getSourceFile().getAbsolutePath());
@@ -399,7 +399,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		JFreeChart chart = createBaseXYChart();
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createBareNucleusOutline(options.getCell().getNucleus());
+			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getCell().getNucleus());
 		} catch (ChartDatasetCreationException e) {
 			fine("Error making outline", e);
 			return makeErrorChart();
@@ -510,7 +510,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(options.isShowBorderTags()){
 			XYDataset tags;
 			try {
-				tags = new NucleusDatasetCreator().createNucleusIndexTags(cell);
+				tags = new NucleusDatasetCreator(options).createNucleusIndexTags(cell);
 			} catch (ChartDatasetCreationException e) {
 				throw new ChartCreationException("Cannot get tags for nucleus", e);
 			}
@@ -526,7 +526,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			if(cell.getNucleus().getSignalCollection().hasSignal()){
 				List<ComponentOutlineDataset> signalsDatasets;
 				try {
-					signalsDatasets = new NucleusDatasetCreator().createSignalOutlines(cell, dataset);
+					signalsDatasets = new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset);
 				} catch (ChartDatasetCreationException e) {
 					return makeErrorChart();
 				}
@@ -686,12 +686,12 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param yOffset a position to move the image 0,0 to
 	 * @return
 	 */		
-	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset, boolean showBounds){	
+	private void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha, int xOffset, int yOffset, boolean showBounds){	
 		plot.setBackgroundPaint(Color.WHITE);
 		plot.getRangeAxis().setInverted(false);
 		
 		// Make a dataset to allow the autoscale to work
-		XYDataset bounds = new NucleusDatasetCreator().createAnnotationRectangleDataset(ip.getWidth(), ip.getHeight());
+		XYDataset bounds = new NucleusDatasetCreator(options).createAnnotationRectangleDataset(ip.getWidth(), ip.getHeight());
 		plot.setDataset(0, bounds);
 		
 		
@@ -739,7 +739,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param alpha
 	 * @return
 	 */
-	private static void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha){
+	private void drawImageAsAnnotation( ImageProcessor ip, XYPlot plot, int alpha){
 		drawImageAsAnnotation(ip, plot, alpha, 0, 0, false);
 	}
 	
@@ -749,7 +749,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param ip
 	 * @return
 	 */
-	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip){
+	private JFreeChart drawImageAsAnnotation( ImageProcessor ip){
 		return drawImageAsAnnotation(ip, 255);
 	}
 	
@@ -760,7 +760,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param alpha
 	 * @return
 	 */
-	private static JFreeChart drawImageAsAnnotation( ImageProcessor ip, int alpha){
+	private JFreeChart drawImageAsAnnotation( ImageProcessor ip, int alpha){
 		
 		JFreeChart chart = 
 				ChartFactory.createXYLineChart(null,
@@ -1022,7 +1022,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		NucleusMeshXYDataset dataset;
 		try {
-			dataset = new NucleusDatasetCreator().createNucleusMeshEdgeDataset(mesh);
+			dataset = new NucleusDatasetCreator(options).createNucleusMeshEdgeDataset(mesh);
 		} catch (Exception e) {
 			throw new ChartCreationException("Cannot create mesh chart", e);
 		}
@@ -1169,11 +1169,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @return
 	 * @throws Exception 
 	 */
-	public static JFreeChart createMeshHistogram(Mesh mesh) throws ChartCreationException {
+	public JFreeChart createMeshHistogram(Mesh<Nucleus> mesh) throws ChartCreationException {
 
 		HistogramDataset ds;
 		try {
-			ds = new NucleusDatasetCreator().createNucleusMeshHistogramDataset(mesh);
+			ds = new NucleusDatasetCreator(options).createNucleusMeshHistogramDataset(mesh);
 		} catch (Exception e) {
 			throw new ChartCreationException("Cannot make mesh histogram", e);
 		}

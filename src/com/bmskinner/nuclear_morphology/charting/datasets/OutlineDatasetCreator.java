@@ -26,6 +26,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
+import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -37,11 +38,11 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
-public class OutlineDatasetCreator extends AbstractDatasetCreator {
+public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
 	private final CellularComponent component;
 	
-	public OutlineDatasetCreator(final DisplayOptions options, final CellularComponent c){
+	public OutlineDatasetCreator(final ChartOptions options, final CellularComponent c){
 		super(options);
 		if(c==null){
 			throw new IllegalArgumentException("Component cannot be null");
@@ -103,7 +104,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	 * @throws ChartDatasetCreationException 
 	 */
 	private XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws ChartDatasetCreationException {
-		ComponentOutlineDataset ds = new ComponentOutlineDataset();
+		ComponentOutlineDataset<Nucleus> ds = new ComponentOutlineDataset<Nucleus>();
 		finest("Creating nucleus outline");
 		if(segmented){
 			createSegmentedOutline();
@@ -124,7 +125,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	 * @throws ChartDatasetCreationException 
 	 */
 	private XYDataset createSegmentedOutline() throws ChartDatasetCreationException {
-		ComponentOutlineDataset ds = new ComponentOutlineDataset();
+		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
 		return createSegmentedOutline(ds);
 	}
 	
@@ -135,7 +136,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 * @throws ChartDatasetCreationException 
 	 */
-	private XYDataset createSegmentedOutline(ComponentOutlineDataset ds) throws ChartDatasetCreationException {
+	private XYDataset createSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds) throws ChartDatasetCreationException {
 				
 		if( ! (component instanceof Taggable)){
 			throw new ChartDatasetCreationException("Component is not segmentable");
@@ -206,7 +207,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator {
 	 * @return
 	 */
 	private XYDataset createNonSegmentedOutline(){
-		ComponentOutlineDataset ds = new ComponentOutlineDataset();
+		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
 		
 		String seriesKey = chooseSeriesKey();
 		
