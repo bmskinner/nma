@@ -1,28 +1,6 @@
-/*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
-package com.bmskinner.nuclear_morphology.analysis.detection;
-
-import ij.process.ImageProcessor;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
 import java.awt.Dimension;
-import java.awt.Image;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -31,20 +9,17 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
-/**
- * This is used to generate the images for display in an ImageProber window.
- * Extending classes should use this for their particular ImageType
- * @author bms41
- *
- */
-@Deprecated
-public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> implements Loggable{
+import ij.process.ImageProcessor;
+
+public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProberTableCell> implements Loggable{
 	
 	protected File file;
 	protected IAnalysisOptions options;
@@ -89,13 +64,13 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
 	protected abstract void analyseImages() throws Exception;
 	
 	@Override
-    protected void process( List<IconCell> chunks ) {
+    protected void process( List<ImageProberTableCell> chunks ) {
         
 //		log("Processing "+chunks.size()+" chunks");
 		
 		progress+= chunks.size();
        
-		for(IconCell im : chunks){
+		for(ImageProberTableCell im : chunks){
         	
         	int pos = im.getType().getPosition();
         	
@@ -115,11 +90,11 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
         }
     }
 	
-	protected IconCell makeIconCell(ImageProcessor ip, ImageType type){
+	protected ImageProberTableCell makeIconCell(ImageProcessor ip, ImageType type){
 		
 		ImageFilterer filt = new ImageFilterer(ip);
 		ImageIcon ic = filt.fitToScreen().toImageIcon();
-		IconCell iconCell = new IconCell(ic, type);
+		ImageProberTableCell iconCell = new ImageProberTableCell(ic, type);
 		
 		ImageIcon small = filt.resize( (int) smallDimension.getWidth(), (int) smallDimension.getHeight())
 				.toImageIcon();
@@ -156,8 +131,5 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, IconCell> i
        }
 
     } 
-	
-
-	
 
 }

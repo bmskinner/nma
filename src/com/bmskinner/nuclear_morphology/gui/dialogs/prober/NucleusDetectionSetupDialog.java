@@ -26,6 +26,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 public class NucleusDetectionSetupDialog extends SettingsDialog {
 	
 	private IMutableAnalysisOptions options;
+	
+	private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
 	/**
 	 * Create using a folder to analyse.
@@ -53,32 +55,29 @@ public class NucleusDetectionSetupDialog extends SettingsDialog {
 		} else {
 			options = op;
 		}
-		
-		try {
-			IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
-			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-			
 
-			setModal(true); // ensure nothing happens until this window is closed
-			this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
-			this.addWindowListener(new WindowAdapter() {
-
-				public void windowClosing(WindowEvent e) {
-					NucleusDetectionSetupDialog.this.options = null;
-					NucleusDetectionSetupDialog.this.setVisible(false);
-				}
+		IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
+		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
 
-			});
+		setModal(true); // ensure nothing happens until this window is closed
+		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-			createAndShowGUI();
-			pack();
-			setVisible(true);
-		} catch(Exception e){
-			warn("Cannot make dialog");
-			stack("Error making analysis setup", e);
-		}
+		this.addWindowListener(new WindowAdapter() {
+
+			public void windowClosing(WindowEvent e) {
+				NucleusDetectionSetupDialog.this.options = null;
+				NucleusDetectionSetupDialog.this.setVisible(false);
+			}
+
+
+		});
+
+		createAndShowGUI();
+		this.setTitle(DIALOG_TITLE_BAR_LBL);
+		pack();
+		setVisible(true);
+
 			
 	}
 

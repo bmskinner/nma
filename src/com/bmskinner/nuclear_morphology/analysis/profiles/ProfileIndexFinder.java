@@ -569,7 +569,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * Make a boolean profile where the indexes are less than the
 	 * given value
 	 * @param p
-	 * @param index
+	 * @param fileIndex
 	 * @return
 	 */
 	private BooleanProfile findIndexLessThan(final IProfile p, BooleanProfile limits, double proportion){
@@ -591,7 +591,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * Make a boolean profile where the indexes are more than the
 	 * given value
 	 * @param p
-	 * @param index
+	 * @param fileIndex
 	 * @return
 	 */
 	private BooleanProfile findIndexMoreThan(final IProfile p, BooleanProfile limits, double proportion){
@@ -612,7 +612,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * Make a boolean profile where the values are less than the
 	 * given value
 	 * @param p
-	 * @param index
+	 * @param fileIndex
 	 * @return
 	 */
 	private BooleanProfile findValueLessThan(final IProfile p, BooleanProfile limits, double value){
@@ -634,7 +634,7 @@ public class ProfileIndexFinder implements Loggable {
 	 * Make a boolean profile where the values are more than the
 	 * given value
 	 * @param p
-	 * @param index
+	 * @param fileIndex
 	 * @return
 	 */
 	private BooleanProfile findValueMoreThan(final IProfile p, BooleanProfile limits, double value){

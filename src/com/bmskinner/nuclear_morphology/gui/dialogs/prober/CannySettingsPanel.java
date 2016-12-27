@@ -167,6 +167,14 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				FLATTEN_THRESHOLD_MAX , 
 				KERNEL_STEP_SIZE));
 		
+		
+		// add the change listeners
+		cannyLowThreshold.addChangeListener(this);
+		cannyHighThreshold.addChangeListener(this);
+		cannyKernelRadius.addChangeListener(this);
+		cannyKernelWidth.addChangeListener(this);
+		closingObjectRadiusSpinner.addChangeListener(this);
+		
 	}
 		
 	private void createPanel(){
@@ -209,13 +217,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 		fieldList.add(closingObjectRadiusSpinner);
 		
 		JSpinner[] fields = fieldList.toArray(new JSpinner[0]);
-		
-		// add the change listeners
-		cannyLowThreshold.addChangeListener(this);
-		cannyHighThreshold.addChangeListener(this);
-		cannyKernelRadius.addChangeListener(this);
-		cannyKernelWidth.addChangeListener(this);
-		closingObjectRadiusSpinner.addChangeListener(this);
+
 					
 		addLabelTextRows(labels, fields, new GridBagLayout(), this );
 		

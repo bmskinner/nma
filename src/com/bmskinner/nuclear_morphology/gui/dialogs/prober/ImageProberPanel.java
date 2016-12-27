@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Window;
@@ -30,31 +31,39 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
+import com.bmskinner.nuclear_morphology.analysis.detection.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber.IconCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This panel holds a table that shows the detection steps for a given
  * method of detection. Buttons allow stepping through a folder of files.
  * @author ben
- *
+ * @since 1.13.4
  */
+@SuppressWarnings("serial")
 public class ImageProberPanel extends JPanel
 	implements Loggable, 
 				PropertyChangeListener, 
 				OptionsChangeListener {
 	
-	public static final int DEFAULT_COLUMN_COUNT = 2;
+	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
-
+	
+	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
+	private static final String PREV_IMAGE_BTN = "Prev";
+	private static final String NEXT_IMAGE_BTN = "Next";
+	
 	private int rowHeight = 200;
 	
 	protected JProgressBar progressBar;
 	
-
-	protected IAnalysisOptions options; // the options to detect with
-	protected File            openImage;			// the image currently open
+	protected IDetectionOptions options; // the options to detect with
 
 	private ImageSet imageType;
 	
@@ -63,83 +72,61 @@ public class ImageProberPanel extends JPanel
 	
 	protected JTable table; 
 	
-	private JLabel headerLabel = new JLabel("Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.");
+	private JLabel headerLabel = new JLabel(HEADER_LBL);
+
+	protected List<File> imageFiles; // the list of image files
+	protected File openImage;	     // the image currently open
+	protected int fileIndex = 0; 	 // the index of the open file
 	
-//	private JButton okButton     = new JButton("Proceed with analysis");
-//	private JButton cancelButton = new JButton("Revise settings");
-	
-	private boolean ok = false;
-	
-	protected List<File> imageFiles;	// the list of image files
-	protected int index = 0; 	
-	
-	public ImageProberPanel(final IAnalysisOptions options, final ImageSet set, final File folder){
+	public ImageProberPanel(final IDetectionOptions options, final ImageSet set){
 		super();
 		this.options = options;
 		this.imageType = set;
-		// configure for class of E
-		
+
 		setLayout(new BorderLayout());
 		
 
-		JPanel header = this.createHeader();
-		this.add(header, BorderLayout.NORTH);
+		JPanel headerPanel = createHeader();
+		JPanel tablePanel  = createTablePanel();
 
+		JButton nextButton = new JButton(NEXT_IMAGE_BTN);
+		nextButton.addActionListener( e ->{
+			openImage = getNextImage();
+			importAndDisplayImage(openImage);
+		});
+		
+		
+		JButton prevButton = new JButton(PREV_IMAGE_BTN);
+		prevButton.addActionListener( e ->{
+			openImage = getPrevImage();
+			importAndDisplayImage(openImage);
+		});
+		
 
+		this.add(headerPanel, BorderLayout.NORTH);
+		this.add(tablePanel,  BorderLayout.CENTER);
+		this.add(nextButton,  BorderLayout.EAST);
+		this.add(prevButton,  BorderLayout.WEST);
+		
+		createFileList(options.getFolder());
+	}
+	
+	private JPanel createTablePanel(){
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
 		table = createImageTable();
-		
-		JPanel centralPanel = new JPanel(new BorderLayout());
-		centralPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setViewportView(table);
 		
-		centralPanel.add(scrollPane, BorderLayout.CENTER);
+		panel.add(scrollPane, BorderLayout.CENTER);
 		
 		progressBar = new JProgressBar();
 		progressBar.setString("Working...");
 		progressBar.setStringPainted(true);
 		progressBar.setVisible(false);
-		centralPanel.add(progressBar, BorderLayout.SOUTH);
-
-		
-		this.add(centralPanel, BorderLayout.CENTER);
-
-
-		JButton nextButton = new JButton("Next");
-		nextButton.addActionListener( e ->{
-			openImage = getNextImage();
-
-			try{
-				finest("Opening image "+openImage.getAbsolutePath());
-				importAndDisplayImage(openImage);
-			} catch(Exception ex){
-				error("Error opening image", ex);
-			}
-
-		});
-		
-		
-		JButton prevButton = new JButton("Prev");
-		prevButton.addActionListener( e ->{
-			openImage = getPrevImage();
-
-			try{
-				finest("Opening image "+openImage.getAbsolutePath());
-				importAndDisplayImage(openImage);
-			} catch(Exception ex){
-				error("Error opening image", ex);
-			}
-
-		});
-
-
-		this.add(nextButton, BorderLayout.EAST);
-		this.add(prevButton, BorderLayout.WEST);
-		
-		createFileList(folder);
+		panel.add(progressBar, BorderLayout.SOUTH);
+		return panel;
 	}
 	
 	/**
@@ -147,17 +134,18 @@ public class ImageProberPanel extends JPanel
 	 * @return
 	 */
 	private JPanel createHeader(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout());
-		
-		panel.add(headerLabel, BorderLayout.NORTH);
+		JPanel panel = new JPanel(new FlowLayout());
 
-//		panel.add(this.getLoadingLabel(), BorderLayout.SOUTH);
+		panel.add(headerLabel);
 
 		return panel;
 	}
 	
-private JTable createImageTable(){
+	/**
+	 * Make the table that will hold the images
+	 * @return
+	 */
+	private JTable createImageTable(){
 		
 		int values = imageType.size();
 		if(values == 1){
@@ -171,14 +159,13 @@ private JTable createImageTable(){
 		finer("Creating image panel size "+rows+" by "+cols+" for "+imageType.size()+" steps");
 		
 		
-		
 		TableModel model = createEmptyTableModel(rows, cols);
 		
 		table = new JTable( model ) {
             //  Returning the Class of each column will allow different
             //  renderers to be used based on Class
             public Class<?> getColumnClass(int column){
-            	return IconCell.class;
+            	return ImageProberTableCell.class;
             }
         };
         
@@ -186,9 +173,8 @@ private JTable createImageTable(){
         	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
         }
         
-//		int rowHeight = 200;
         rowHeight =  (int) Math.ceil(((java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight() * IMAGE_SCREEN_PROPORTION) / (rows+1)));
-//		int rowHeight =  (int) (windowHeight / (rows+1));
+
 		table.setRowHeight(rowHeight);	
 
         table.setCellSelectionEnabled(true);
@@ -230,7 +216,30 @@ private JTable createImageTable(){
 	 * @param imageFile
 	 */
 	protected void importAndDisplayImage(File imageFile){
-	
+//		try {
+//			this.setStatusLoading();
+//			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
+//			table.setModel(createEmptyTableModel(rows, cols));
+//			
+//			for(int col=0; col<cols; col++){
+//	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
+//	        }
+//			
+//			NucleusProberWorker worker = new NucleusProberWorker(imageFile, 
+//					options, 
+//					NucleusImageType.DETECTED_OBJECTS, 
+//					table.getModel());
+//			
+//			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
+//			
+//			worker.addPropertyChangeListener(this);
+//			progressBar.setVisible(true);
+//			worker.execute();
+//
+//
+//		} catch (Exception e) { // end try
+//			error("Error in image processing", e);
+//		} 
 	}
 	
 	protected TableModel createEmptyTableModel(int rows, int cols){
@@ -253,11 +262,11 @@ private JTable createImageTable(){
 				
 				if(count<values){
 				
-					ImageProberTableCell cell = new ImageProberTableCell(null, imageType, imageType.get(count++));
-
+					ImageProberTableCell cell = new ImageProberTableCell(null, imageType, imageType.get(count), count);
+					count++;
 					model.setValueAt(cell, row, col);
 				} else {
-					IconCell cell = new IconCell(null, null);
+					ImageProberTableCell cell = new ImageProberTableCell(null, null, null, 0);
 					model.setValueAt(cell, row, col);
 				}
 			}
@@ -274,12 +283,12 @@ private JTable createImageTable(){
 	 */
 	private File getNextImage(){
 
-		if(index >= imageFiles.size()-1){
-			index = 0;
+		if(fileIndex >= imageFiles.size()-1){
+			fileIndex = 0;
 		} else {
-			index++;
+			fileIndex++;
 		}
-		File f =  imageFiles.get(index);
+		File f =  imageFiles.get(fileIndex);
 		return f;
 
 	}
@@ -290,13 +299,13 @@ private JTable createImageTable(){
 	 */
 	private File getPrevImage(){
 		
-		if(index <= 0){
-			index = imageFiles.size()-1;
+		if(fileIndex <= 0){
+			fileIndex = imageFiles.size()-1;
 		} else {
-			index--;
+			fileIndex--;
 		}
 
-		File f =  imageFiles.get(index);
+		File f =  imageFiles.get(fileIndex);
 		return f;
 	}
 	
@@ -317,7 +326,7 @@ private JTable createImageTable(){
 				imageFiles = importImages(folder);
 				
 				if(imageFiles.size()>0){
-					openImage = imageFiles.get(index);
+					openImage = imageFiles.get(fileIndex);
 					importAndDisplayImage(openImage);
 				} else {
 					warn("No images found in folder");
@@ -325,9 +334,6 @@ private JTable createImageTable(){
 							"No images found in folder.", 
 							"Nope.",
 							JOptionPane.ERROR_MESSAGE);
-					
-					ImageProberPanel.this.ok = false;
-					ImageProberPanel.this.setVisible(false);
 				}
 			}
 		};	
@@ -341,13 +347,13 @@ private JTable createImageTable(){
 	 * @param folder the folder to check
 	 * @return a list of image files
 	 */
-	private List<File> importImages(File folder){
+	private List<File> importImages(final File folder){
 
 		List<File> files = new ArrayList<File>();
 
 		for (File file :  folder.listFiles()) {
 
-			boolean ok = NucleusDetectionWorker.checkFile(file); // check file extension
+			boolean ok = ImageImporter.checkFile(file); // check file extension
 
 			if(ok){
 				files.add(file);
@@ -392,7 +398,12 @@ private JTable createImageTable(){
 		
 	}
 	
-
+	@Override
+	public void optionsChangeEventReceived(OptionsChangeEvent e) {
+		importAndDisplayImage(openImage);
+		
+	}
+	
 	public class IconCellRenderer extends DefaultTableCellRenderer	{
 	    @Override
 	    public Component getTableCellRendererComponent(
@@ -467,10 +478,6 @@ private JTable createImageTable(){
 		
 	}
 
-	@Override
-	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	
 	
 }

@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.IntegratedImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
@@ -86,11 +88,13 @@ public class NewAnalysisAction extends ProgressableAction {
 		
 		fine("Making analysis options");
 		
-		NucleusDetectionSetupDialog analysisSetup = new NucleusDetectionSetupDialog(folder);
+		IntegratedImageProber analysisSetup = new IntegratedImageProber( folder );
+
+//		NucleusDetectionSetupDialog analysisSetup = new NucleusDetectionSetupDialog(folder);
 		
 //		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);
-		
-		if( analysisSetup.getOptions()!=null){
+		if(analysisSetup.isOk()){
+//		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
 			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);

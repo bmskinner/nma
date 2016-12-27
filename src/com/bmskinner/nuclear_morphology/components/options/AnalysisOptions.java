@@ -983,6 +983,12 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 		public IMutableCannyOptions duplicate() {
 			return new CannyOptions(this);
 		}
+
+		@Override
+		public void set(ICannyOptions options) {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 
 

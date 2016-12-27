@@ -268,6 +268,12 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void set(IDetectionOptions options) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 }

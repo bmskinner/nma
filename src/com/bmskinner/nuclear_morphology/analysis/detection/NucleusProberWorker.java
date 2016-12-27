@@ -47,6 +47,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImage
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
+@Deprecated
 public class NucleusProberWorker extends ImageProberWorker {
 
 	public NucleusProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model) {

@@ -8,10 +8,12 @@ public class ImageProberTableCell {
 	private ImageSet type = null;
 	private String label = "";
 	private boolean enabled = true;
+	private int position = 0;
 	
-	public ImageProberTableCell(ImageIcon largeIcon, ImageSet type, String label){
+	public ImageProberTableCell(ImageIcon largeIcon, ImageSet type, String label, int position){
 		this.largeIcon = largeIcon;
 		this.type = type;
+		this.position = position;
 	}
 
 	public ImageIcon getSmallIcon() {
