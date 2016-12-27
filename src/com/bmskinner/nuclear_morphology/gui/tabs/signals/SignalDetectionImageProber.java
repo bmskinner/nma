@@ -26,8 +26,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ImageProber;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 
 
 @SuppressWarnings("serial")

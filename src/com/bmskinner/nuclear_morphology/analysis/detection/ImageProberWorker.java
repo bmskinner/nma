@@ -33,7 +33,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 

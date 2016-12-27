@@ -16,14 +16,13 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.dialogs;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.Dimension;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
 
 @SuppressWarnings("serial")
 public class NucleusDetectionImageProber extends ImageProber {

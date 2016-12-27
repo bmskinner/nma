@@ -55,5 +55,11 @@ public interface IMutableCannyOptions extends ICannyOptions {
 	void setKernelWidth(int kernelWidth);
 	
 	void setAddBorder(boolean b);
+	
+	/**
+	 * Set the options to match the given values
+	 * @param options
+	 */
+	void set(ICannyOptions options);
 
 }

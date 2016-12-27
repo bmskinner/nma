@@ -24,6 +24,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import javax.swing.JFileChooser;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -37,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
@@ -76,8 +80,15 @@ public class NewAnalysisAction extends ProgressableAction {
 
 		this.setProgressBarIndeterminate();
 		
+		if(folder==null){
+			getImageDirectory();
+		}
+		
 		fine("Making analysis options");
-		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);
+		
+		NucleusDetectionSetupDialog analysisSetup = new NucleusDetectionSetupDialog(folder);
+		
+//		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);
 		
 		if( analysisSetup.getOptions()!=null){
 
@@ -147,6 +158,32 @@ public class NewAnalysisAction extends ProgressableAction {
 
 		
 		super.finished();
+	}
+	
+	private boolean getImageDirectory(){
+		
+//		File defaultDir = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		
+		JFileChooser fc = new JFileChooser( (File) null); // if null, will be home dir
+
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return false; // user cancelled
+		}
+		
+		File file = fc.getSelectedFile();
+
+		if( ! file.isDirectory()){
+			return false;
+		}
+		fine("Selected directory: "+file.getAbsolutePath());
+		folder = file;
+		options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
+
+		return true;
 	}
 	
 }

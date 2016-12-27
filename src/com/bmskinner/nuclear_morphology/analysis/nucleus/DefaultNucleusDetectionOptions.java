@@ -36,10 +36,23 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
  */
 public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
+	public static final int    DEFAULT_MIN_NUCLEUS_SIZE = 2000;
+	public static final int    DEFAULT_MAX_NUCLEUS_SIZE = 10000;
+	public static final double DEFAULT_MIN_NUCLEUS_CIRC = 0.2;
+	public static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
+	public static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
+	private static final double    DEFAULT_SCALE = 1.0;
+	private static final int    DEFAULT_CHANNEL      = 2;
 	private static final long serialVersionUID = 1L;
 	
 	public DefaultNucleusDetectionOptions(File folder){
 		super(folder);
+		
+		this.setSize(DEFAULT_MIN_NUCLEUS_SIZE, DEFAULT_MAX_NUCLEUS_SIZE);
+		this.setCircularity(DEFAULT_MIN_NUCLEUS_CIRC, DEFAULT_MAX_NUCLEUS_CIRC);
+		this.setThreshold(DEFAULT_NUCLEUS_THRESHOLD);
+		this.setScale(DEFAULT_SCALE);
+		this.setChannel(DEFAULT_CHANNEL);
 		
 		this.setCannyOptions( new DefaultCannyOptions());
 	}

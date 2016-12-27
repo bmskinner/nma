@@ -21,7 +21,7 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import javax.swing.ImageIcon;
 
-import com.bmskinner.nuclear_morphology.gui.ImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 
 public class IconCell {
 	

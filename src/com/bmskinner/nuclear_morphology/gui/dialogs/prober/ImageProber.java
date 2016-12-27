@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui.dialogs;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -53,7 +53,6 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 
 @SuppressWarnings("serial")
@@ -550,11 +549,9 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	        	return this;
 	        }
 	        
-	        if(info.hasType()){
-	        	setText(info.toString());
-	        } else {
-	        	setText("");
-	        }
+	        String text = info.hasType() ? info.getType().toString() : "";
+	        
+	        setText(text);
 	        
 	        if(info.hasSmallIcon()){
 	        	setIcon( info.getSmallIcon() );
@@ -598,7 +595,9 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 //			DecimalFormat df = new DecimalFormat("#0.00"); 
 //
 //	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
-			this.setTitle(cell.getType().toString());
+			 String text = cell.hasType() ? cell.getType().toString() : "";
+		        
+			this.setTitle(text);
 			
 	        this.setModal(false);
 	        this.setResizable(false);

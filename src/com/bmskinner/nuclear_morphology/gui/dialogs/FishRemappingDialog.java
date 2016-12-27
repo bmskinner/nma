@@ -54,10 +54,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 
 /**
  * @author bms41

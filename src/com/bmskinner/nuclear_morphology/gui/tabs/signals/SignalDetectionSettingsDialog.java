@@ -59,8 +59,8 @@ import com.bmskinner.nuclear_morphology.components.options.NuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class SignalDetectionSettingsDialog extends SettingsDialog implements ChangeListener {

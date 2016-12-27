@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
  * @since 1.11.4
  *
  */
+@Deprecated
 public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> implements Loggable, ProgressListener {
 
 	private int progressTotal; // the maximum value for the progress bar

@@ -87,5 +87,11 @@ public interface IMutableDetectionOptions extends IDetectionOptions {
 	void setCannyOptions(IMutableCannyOptions canny);
 	
 	void setNormaliseContrast(boolean b);
+	
+	/**
+	 * Set this options to match the parameters in the given option
+	 * @param options
+	 */
+	void set(IDetectionOptions options);
 
 }

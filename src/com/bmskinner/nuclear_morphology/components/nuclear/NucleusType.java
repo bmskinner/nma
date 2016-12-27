@@ -47,7 +47,7 @@ public enum NucleusType {
 	
     private final String name;   
     private final Class<?> nucleusClass;
-    
+     
     private final Map<Tag, String> map = new HashMap<Tag, String>();
     
     NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {

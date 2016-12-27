@@ -253,6 +253,21 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	}
 	
 	@Override
+	public void set(IDetectionOptions options){
+		
+		this.cannyOptions.set(options.getCannyOptions());
+		this.setChannel(options.getChannel());
+		this.setCircularity(options.getMinCirc(), options.getMaxCirc());
+		this.setSize(options.getMinSize(), options.getMaxSize());
+		this.setFolder(options.getFolder());
+		this.setThreshold(options.getThreshold());
+		this.setScale(options.getScale());
+		this.setNormaliseContrast(options.isNormaliseContrast());
+		
+	}
+	
+	
+	@Override
 	public int hashCode(){
 		
 		final int prime = 31;

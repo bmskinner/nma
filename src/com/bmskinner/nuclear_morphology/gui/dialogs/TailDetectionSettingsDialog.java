@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
@@ -42,7 +43,7 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 	
 	private JComboBox<String> channelSelection;
 	
-	private CannyPanel cannyPanel;
+	private CannySettingsPanel cannyPanel;
 	
 	private IAnalysisOptions options;
 	
@@ -75,7 +76,7 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 		channelSelection.addActionListener(this);
 		contentPanel.add(channelSelection);
 		
-		cannyPanel = new CannyPanel(options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions());
+		cannyPanel = new CannySettingsPanel(options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions());
 		contentPanel.add(cannyPanel);
 		
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

@@ -42,8 +42,8 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
-import com.bmskinner.nuclear_morphology.gui.dialogs.NucleusDetectionImageProber.NucleusImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 

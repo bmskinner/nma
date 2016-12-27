@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionImageProber.SignalImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;

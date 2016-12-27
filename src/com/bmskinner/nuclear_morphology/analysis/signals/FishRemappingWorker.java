@@ -48,8 +48,8 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.detection.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.gui.ImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.FishRemappingDialog.FishMappingImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 

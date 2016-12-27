@@ -383,6 +383,26 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
 		public IMutableCannyOptions duplicate() {
 			return new DefaultCannyOptions(this);
 		}
+
+		@Override
+		public void set(ICannyOptions template) {
+
+			useCanny             = template.isUseCanny();
+			cannyAutoThreshold   = template.isAddBorder();
+			flattenChromocentres = template.isUseFlattenImage();
+			flattenThreshold     = template.getFlattenThreshold();
+			
+			useKuwahara          = template.isUseKuwahara();
+			kuwaharaKernel       = template.getKuwaharaKernel();
+			
+			lowThreshold         = template.getLowThreshold();
+			highThreshold        = template.getHighThreshold();
+			kernelRadius         = template.getKernelRadius();
+			kernelWidth          = template.getKernelWidth();
+			closingObjectRadius  = template.getClosingObjectRadius();
+			isAddBorder          = template.isAddBorder();
+			
+		}
 	
 
 }

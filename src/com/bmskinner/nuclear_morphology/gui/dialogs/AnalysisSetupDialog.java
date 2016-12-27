@@ -64,6 +64,9 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.CannySettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
@@ -88,7 +91,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	
-	private CannyPanel 	nucleusCannyPanel;
+	private CannySettingsPanel 	nucleusCannyPanel;
 	private JPanel 		nucleusThresholdPanel;
 	private JPanel 		cardPanel;
 	
@@ -305,7 +308,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 			refoldCheckBox.setSelected(options.refoldNucleus());
 			finest("Updated checkboxes");
 
-			nucleusCannyPanel.update(nucleusOptions.getCannyOptions());
+			nucleusCannyPanel.set(nucleusOptions.getCannyOptions());
 			finest("Updated canny panel");
 			
 			fine("Updated gui");
@@ -453,8 +456,8 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		JPanel detectionSwitchPanel = makeNucleusDetectionSwitchPanel();
 		panel.add(detectionSwitchPanel);
 		
-		nucleusCannyPanel = new CannyPanel(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
-		
+		nucleusCannyPanel = new CannySettingsPanel(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
+
 		nucleusThresholdPanel = makeNucleusThresholdPanel();
 		
 		cardPanel = new JPanel(new CardLayout());
@@ -768,12 +771,6 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 
 		analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
 
-//		if(analysisOptions.isReanalysis()){
-//			OpenDialog fileDialog = new OpenDialog("Select a mapping file...");
-//			String fileName = fileDialog.getPath();
-//			if(fileName==null) return false;
-//			analysisOptions.setMappingFile(new File(fileName));
-//		}
 		return true;
 	}
 }
