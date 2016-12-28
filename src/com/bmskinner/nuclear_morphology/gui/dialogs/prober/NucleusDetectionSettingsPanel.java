@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public class NucleusDetectionSettingsPanel extends SettingsPanel implements Loggable, OptionsChangeListener {
+public class NucleusDetectionSettingsPanel extends SettingsPanel {
 	
 	private IMutableAnalysisOptions options;
 	
@@ -60,13 +60,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel implements Logg
 		this.addSubPanel(profilePanel);
 		this.addSubPanel(miscPanel);
 		this.addSubPanel(channelPanel);
-		
-		switchPanel.addOptionsChangeListener(this);
-		sizePanel.addOptionsChangeListener(this);
-		profilePanel.addOptionsChangeListener(this);
-		miscPanel.addOptionsChangeListener(this);
-		channelPanel.addOptionsChangeListener(this);
-		
+				
 		panel.add(channelPanel);
 		panel.add(switchPanel);
 		panel.add(profilePanel);
@@ -75,6 +69,13 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel implements Logg
 		
 		
 		return panel;
-	}	
+	}
+	
+	@Override
+	public void optionsChangeEventReceived(OptionsChangeEvent e) {
 
+		
+		fireProberReloadEvent();
+
+	}
 }

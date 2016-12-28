@@ -9,10 +9,10 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.Constants;
@@ -22,24 +22,24 @@ import ij.process.ImageProcessor;
 public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProberTableCell> implements Loggable{
 	
 	protected File file;
-	protected IAnalysisOptions options;
+	protected IDetectionOptions options;
 	
 	protected TableModel model; // model for a table with an IconCellRenderer
 	
 	private int columnCount; // the number of columns the table has;
 	
 	private int progress = 0; // the number of images processed
-	
-	protected ImageType type; // the type of analysis images to be generated
+		
+	protected ImageSet imageSet; // the set of images to be created
 	
 	protected Dimension smallDimension; // the max size of the small icons
 	
-	public ImageProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model){
+	public ImageProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model){
 		this.file = f;
 		this.options = options;
 		this.columnCount = model.getColumnCount();
 		this.model = model;
-		this.type = type;
+		this.imageSet = type;
 	}
 	
 	public void setSmallIconSize(Dimension d){
@@ -72,29 +72,34 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
        
 		for(ImageProberTableCell im : chunks){
         	
-        	int pos = im.getType().getPosition();
+        	int pos = im.getPosition();
         	
         	int col = pos % columnCount;
         	
         	int row = pos / columnCount;
-
-//        	log("Processing chunk: Type is "+im.toString());
             
     		model.setValueAt(im, row, col);
         }
 				
-        int percent = (int) ( (double) progress / (double) type.getValues().length * 100);
+        int percent = (int) ( (double) progress / (double) imageSet.size() * 100);
 //        log("Firing percent is: "+percent);
         if(percent >= 0 && percent <=100){
         	setProgress(percent); // the integer representation of the percent
         }
     }
 	
-	protected ImageProberTableCell makeIconCell(ImageProcessor ip, ImageType type){
+	/**
+	 * Create a table cell from the given image, specifying the image type and enabled
+	 * @param ip
+	 * @param enabled
+	 * @param type
+	 * @return
+	 */
+	protected ImageProberTableCell makeIconCell(ImageProcessor ip, boolean enabled, ImageType type){
 		
 		ImageFilterer filt = new ImageFilterer(ip);
 		ImageIcon ic = filt.fitToScreen().toImageIcon();
-		ImageProberTableCell iconCell = new ImageProberTableCell(ic, type);
+		ImageProberTableCell iconCell = new ImageProberTableCell( ic, type, enabled, imageSet.getPosition(type));
 		
 		ImageIcon small = filt.resize( (int) smallDimension.getWidth(), (int) smallDimension.getHeight())
 				.toImageIcon();

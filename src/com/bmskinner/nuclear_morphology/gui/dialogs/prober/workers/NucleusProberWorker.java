@@ -17,11 +17,9 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis.detection;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
@@ -34,29 +32,29 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
-@Deprecated
 public class NucleusProberWorker extends ImageProberWorker {
 
-	public NucleusProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model) {
+	public NucleusProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model) {
 		super(f, options, type, model);
 		
 	}
 	
 	
 	protected void analyseImages() throws Exception {
+		log("Analysing images");
 		ImageStack imageStack =  new ImageImporter(file).importImage();
 		finer("Imported image as stack");
 		
@@ -72,7 +70,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 */
 		finer("Creating processed images");
 		
-		ICannyOptions cannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions();
+		ICannyOptions cannyOptions = options.getCannyOptions();
 
 		ImageConverter conv = new ImageConverter(imageStack);
 		
@@ -113,8 +111,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			}
 			kuwaharaProcessor.invert();
 			
-			IconCell iconCell = makeIconCell(kuwaharaProcessor, NucleusImageType.KUWAHARA);
-			iconCell.setEnabled(cannyOptions.isUseKuwahara());
+			ImageProberTableCell iconCell = makeIconCell(kuwaharaProcessor, cannyOptions.isUseKuwahara(), DetectionImageType.KUWAHARA);
 			publish(iconCell);
 			
 			
@@ -132,8 +129,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			} 
 			flattenProcessor.invert();
 			
-			IconCell iconCell1 = makeIconCell(flattenProcessor, NucleusImageType.FLATTENED);
-			iconCell1.setEnabled(cannyOptions.isUseFlattenImage());
+			ImageProberTableCell iconCell1 = makeIconCell(flattenProcessor, cannyOptions.isUseFlattenImage(), DetectionImageType.FLATTENED);
 			publish(iconCell1);
 			
 			
@@ -144,7 +140,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			ImageProcessor invertedEdges = processedImage.duplicate(); // make a copy for display only
 			invertedEdges.invert();
 			
-			IconCell iconCell2 = makeIconCell(invertedEdges, NucleusImageType.EDGE_DETECTION);
+			ImageProberTableCell iconCell2 = makeIconCell(invertedEdges, true, DetectionImageType.EDGE_DETECTION);
 			publish(iconCell2);
 			
 
@@ -154,7 +150,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 				.morphologyClose(cannyOptions.getClosingObjectRadius()).toProcessor();
 			ImageProcessor closedIP = processedImage.duplicate(); // make a copy for display only
 			closedIP.invert();
-			IconCell iconCell3 = makeIconCell(closedIP, NucleusImageType.MORPHOLOGY_CLOSED);
+			ImageProberTableCell iconCell3 = makeIconCell(closedIP, true, DetectionImageType.MORPHOLOGY_CLOSED);
 			publish(iconCell3);
 
 
@@ -173,7 +169,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 				drawNucleus(cell, openProcessor);
 			}
 			
-			IconCell iconCell4 = makeIconCell(openProcessor, NucleusImageType.DETECTED_OBJECTS);
+			ImageProberTableCell iconCell4 = makeIconCell(openProcessor, true, DetectionImageType.DETECTED_OBJECTS);
 			publish(iconCell4);
 			
 						
@@ -187,9 +183,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 				drawNucleus(cell, openProcessor);
 			}
 			
-			for(ImageType key : NucleusImageType.values()){
+			for(ImageType key : imageSet.values()){
 				
-				IconCell iconCell = makeIconCell(openProcessor, key);
+				ImageProberTableCell iconCell = makeIconCell(openProcessor, true, key);
 				publish(iconCell );
 			}
 		}
@@ -205,7 +201,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 */
 	private List<ICell> getCells(ImageStack imageStack, File imageFile) {
 		
-		IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+		IMutableDetectionOptions nucleusOptions = (IMutableDetectionOptions) options;
 		
 		double minSize = nucleusOptions.getMinSize();
 		double maxSize = nucleusOptions.getMaxSize();
@@ -223,7 +219,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		finer("Finding cells");
 		
-		NucleusDetector finder = new NucleusDetector(options, null);
+		NucleusDetector finder = new NucleusDetector(nucleusOptions, NucleusType.ROUND, 0.05);
 		
 		List<ICell> cells = finder.getDummyCells(imageStack, imageFile);
 		
@@ -247,12 +243,11 @@ public class NucleusProberWorker extends ImageProberWorker {
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
-		IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 		
 		Nucleus n = cell.getNucleus();
 		// annotate the image processor with the nucleus outline
 		
-		Color colour = nucleusOptions.isValid(n) ? Color.ORANGE : Color.RED;
+		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
 
 		ip = new NucleusAnnotator(ip).annotateBorder(n, colour).toProcessor();
 

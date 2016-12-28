@@ -61,8 +61,8 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 		SettingsPanel cannyPanel     = new CannySettingsPanel(options.getCannyOptions());
 		SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
 		
-		cannyPanel.addOptionsChangeListener(this);
-		thresholdPanel.addOptionsChangeListener(this);
+		this.addSubPanel(cannyPanel);
+		this.addSubPanel(thresholdPanel);
 		
 		JPanel cardPanel = new JPanel(new CardLayout());
 		cardPanel.add(cannyPanel,     EDGE_LBL);
@@ -118,12 +118,6 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 				
 	}
 
-	@Override
-	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-		fireOptionsChangeEvent(); // pass upwards
-		
-		
-	}
 
 	@Override
 	public void update() {

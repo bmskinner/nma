@@ -1,10 +1,14 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
+import java.util.Set;
+
 public interface ImageSet {
 
 	int size();
 	
-	String get(int i);
+	ImageType getType(int i);
+
+	int getPosition(ImageType s);
 	
-	int getPosition(String s);
+	Set<ImageType> values();
 }

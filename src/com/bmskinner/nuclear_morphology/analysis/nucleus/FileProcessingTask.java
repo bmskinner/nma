@@ -37,7 +37,9 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		this.high            = high;
 		this.outputFolder    = outputFolder;
 		this.analysisOptions = analysisOptions;
-		this.finder          = new NucleusDetector( analysisOptions, outputFolder);
+		this.finder          = new NucleusDetector( analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS), 
+				analysisOptions.getNucleusType(), 
+				analysisOptions.getProfileWindowProportion());
 	}
 
 	public FileProcessingTask(File folder, File[] files, ICellCollection collection, String outputFolder, IAnalysisOptions analysisOptions) {

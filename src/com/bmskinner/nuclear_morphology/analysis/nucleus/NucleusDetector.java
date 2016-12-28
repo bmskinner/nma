@@ -33,10 +33,10 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.NucleusCreationException;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -51,26 +51,29 @@ import com.bmskinner.nuclear_morphology.utility.StatsMap;
  */
 public class NucleusDetector extends Detector {
 	
-	private final IAnalysisOptions options;
-	private final String outputFolderName;
+	private final IDetectionOptions options;
+	private final NucleusType type;
+	private final double proportion;
+	
+//	private final String outputFolderName;
 	
 	private final NucleusFactory factory = new NucleusFactory();
 	
-	public NucleusDetector(final IAnalysisOptions options, final String outputFolderName){
+	public NucleusDetector(final IDetectionOptions options, NucleusType type, double proportion){
 		
 		if(options==null){
 			throw new IllegalArgumentException("Options is null");
 		}
 
 		this.options = options;
-		this.outputFolderName = outputFolderName;
+//		this.outputFolderName = outputFolderName;
+		this.type = type;
+		this.proportion = proportion;
 		
-		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-		
-		setMaxSize(  nucleusOptions.getMaxSize());
-		setMinCirc(  nucleusOptions.getMinCirc());
-		setMaxCirc(  nucleusOptions.getMaxCirc());
-		setThreshold(nucleusOptions.getThreshold());
+		setMaxSize(  options.getMaxSize());
+		setMinCirc(  options.getMinCirc());
+		setMaxCirc(  options.getMaxCirc());
+		setThreshold(options.getThreshold());
 	}
 	
 	/**
@@ -114,17 +117,17 @@ public class NucleusDetector extends Detector {
 		
 		List<Roi> roiList = new ArrayList<Roi>();
 		
-		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 		if(closed==Detector.CLOSED_OBJECTS){
-			setMinSize(nucleusOptions.getMinSize()); // get polygon rois
+			setMinSize(options.getMinSize()); // get polygon rois
 		} else {
 			setMinSize(0); // get line rois
 		}
 
 		try{
 			
-			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(nucleusOptions.getChannel()));
+			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
 			roiList = detectRois(ip);
 		
 		} catch(Exception e){
@@ -199,10 +202,10 @@ public class NucleusDetector extends Detector {
 	 */
 	private ImageStack preprocessImage(ImageStack image) {
 		
-		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 		
 		finer("Preprocessing image");
-		ICannyOptions nucleusCannyOptions = nucleusOptions.getCannyOptions();
+		ICannyOptions nucleusCannyOptions = options.getCannyOptions();
 
 		ImageStack searchStack = null;
 		
@@ -223,9 +226,9 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseKuwahara()){
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = new ImageFilterer(image)
-					.runKuwaharaFiltering( Constants.rgbToStack(nucleusOptions.getChannel())  , kernel)
+					.runKuwaharaFiltering( Constants.rgbToStack(options.getChannel())  , kernel)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(nucleusOptions.getChannel()));
+				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run Kuwahara");
 			}
 
@@ -233,13 +236,13 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseFlattenImage()){
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = new ImageFilterer(image)
-					.squashChromocentres( Constants.rgbToStack(nucleusOptions.getChannel()), threshold)
+					.squashChromocentres( Constants.rgbToStack(options.getChannel()), threshold)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(nucleusOptions.getChannel()));
+				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
 				finer("Run flattening");
 			}
 			searchStack = new ImageFilterer(image)
-				.runEdgeDetector(Constants.rgbToStack(nucleusOptions.getChannel()), nucleusCannyOptions).toStack();
+				.runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;
@@ -264,12 +267,12 @@ public class NucleusDetector extends Detector {
 	private ICell makeCell(Roi roi, ImageStack image, int nucleusNumber, File path, boolean makeDummyCell) 
 			throws NucleusCreationException{
 
-		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//		IDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 		
 		ICell result = null;
 		
 		  // measure the area, density etc within the nucleus
-		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(nucleusOptions.getChannel()));
+		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
 		StatsMap values   = measure(roi, ip);
 
 		  // save the position of the roi, for later use
@@ -288,10 +291,10 @@ public class NucleusDetector extends Detector {
 
 		Nucleus currentNucleus = factory.createNucleus(roi, 
 				path, 
-				nucleusOptions.getChannel(),
+				options.getChannel(),
 				nucleusNumber, 
 				originalPosition, 
-				options.getNucleusType(), 
+				type, 
 				centreOfMass);
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
@@ -305,11 +308,11 @@ public class NucleusDetector extends Detector {
 		currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
 		currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
 
-		currentNucleus.setScale(nucleusOptions.getScale());
+		currentNucleus.setScale(options.getScale());
 
 //		if ( ! makeDummyCell) {
 
-			currentNucleus.initialise(options.getProfileWindowProportion());
+			currentNucleus.initialise(proportion);
 
 			currentNucleus.findPointsAroundBorder();
 //		}

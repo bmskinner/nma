@@ -3,17 +3,18 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import javax.swing.ImageIcon;
 
 public class ImageProberTableCell {
-	private ImageIcon smallIcon = null;
-	private ImageIcon largeIcon = null;
-	private ImageSet type = null;
-	private String label = "";
-	private boolean enabled = true;
-	private int position = 0;
+	private ImageIcon smallIcon;
+	private ImageIcon largeIcon;
+	private ImageType type;
+	private boolean enabled;
+	private int position;
 	
-	public ImageProberTableCell(ImageIcon largeIcon, ImageSet type, String label, int position){
+	public ImageProberTableCell(ImageIcon largeIcon, ImageType type, boolean enabled, int position){
+		
 		this.largeIcon = largeIcon;
 		this.type = type;
 		this.position = position;
+		this.enabled = enabled;
 	}
 
 	public ImageIcon getSmallIcon() {
@@ -24,13 +25,17 @@ public class ImageProberTableCell {
 		return largeIcon;
 	}
 
-	public ImageSet getType() {
+	public ImageType getType() {
 		return type;
 	}
 	
-	public String getLabel(){
-		return label;
+	public int getPosition(){
+		return position;
 	}
+	
+//	public String getLabel(){
+//		return label;
+//	}
 	
 	public boolean hasType(){
 		return type!=null;
@@ -64,6 +69,6 @@ public class ImageProberTableCell {
 	}
 
 	public String toString(){
-		return type==null ? "" : enabled ? label : label+" (disabled)";
+		return type==null ? "" : enabled ? type.toString() : type.toString()+" (disabled)";
 	}
 }

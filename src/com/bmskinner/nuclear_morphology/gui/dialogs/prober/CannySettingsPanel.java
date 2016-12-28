@@ -395,12 +395,4 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 		}
 		fireOptionsChangeEvent();
 	}
-
-	@Override
-	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-		
-		update();
-		fireOptionsChangeEvent();
-		
-	}
 }

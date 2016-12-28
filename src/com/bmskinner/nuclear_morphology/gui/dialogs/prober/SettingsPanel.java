@@ -25,6 +25,7 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	
 	private List<SettingsPanel> subPanels = new ArrayList<SettingsPanel>();
 	List<OptionsChangeListener> optionsListeners = new ArrayList<OptionsChangeListener>();
+	List<ProberReloadEventListener> proberListeners = new ArrayList<ProberReloadEventListener>();
 	
 	protected String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
@@ -40,6 +41,7 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	 */
 	protected void addSubPanel(SettingsPanel panel){
 		subPanels.add(panel);
+		panel.addOptionsChangeListener(this);
 	}
 	
 	/**
@@ -150,12 +152,31 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 		}
 	}
 	
+	public void addProberReloadEventListener(ProberReloadEventListener l){
+		proberListeners.add(l);
+	}
+	
+	public void removeProberReloadEventListener(ProberReloadEventListener l){
+		proberListeners.remove(l);
+	}
+	
+	protected void fireProberReloadEvent(){
+		ProberReloadEvent e = new ProberReloadEvent(this);
+		
+		Iterator<ProberReloadEventListener> it = proberListeners.iterator();
+		
+		while(it.hasNext()){
+			ProberReloadEventListener l = it.next();
+			l.proberReloadEventReceived(e);
+		}
+	}
+	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-//		log(this.getClass().getSimpleName()+": Heard options changed");
+
+		log("Heard update from "+e.getSource().getClass().getSimpleName());
 		if(this.hasSubPanel((SettingsPanel) e.getSource())){
 			update();
-		} else {
 			fireOptionsChangeEvent();
 		}
 		

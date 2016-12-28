@@ -29,9 +29,9 @@ public class IntegratedImageProber extends LoadingIconDialog {
 	
 	private IMutableAnalysisOptions options; // the active options
 	
-	private JPanel optionsSettingsPanel; // settings
+	private SettingsPanel optionsSettingsPanel; // settings
 	
-	private JPanel imageProberPanel; // result
+	private ImageProberPanel imageProberPanel; // result
 	
 	private boolean ok = false;
 	
@@ -39,33 +39,31 @@ public class IntegratedImageProber extends LoadingIconDialog {
 
 	
 	public IntegratedImageProber(final File folder){
-		
-		options = new DefaultAnalysisOptions();
-
-		IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
-		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-
-		// make the panel
-		optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
-		this.add(optionsSettingsPanel, BorderLayout.WEST);
-		
 		try {
-		imageProberPanel = new ImageProberPanel(options.getDetectionOptions(IAnalysisOptions.NUCLEUS), new NucleusImageSet());
+			options = new DefaultAnalysisOptions();
+
+			IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
+			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+
+			// make the panel
+			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
+			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, new NucleusImageSet());
+			JPanel footerPanel   = createFooter();
+			
+			this.add(optionsSettingsPanel, BorderLayout.WEST);
+			this.add(imageProberPanel,     BorderLayout.CENTER);
+			this.add(footerPanel,          BorderLayout.SOUTH);
+
+			this.setTitle(DIALOG_TITLE_BAR_LBL);
+			
+			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+			
+			
 		} catch (Exception e){
-			error("Error", e);
-			imageProberPanel = new JPanel();
-		}
-		
-		this.add(imageProberPanel,     BorderLayout.CENTER);
-		
-		JPanel footerPanel = createFooter();
-		this.add(footerPanel,     BorderLayout.SOUTH);
-		
-		this.setTitle(DIALOG_TITLE_BAR_LBL);
-		this.setModal(true);
-		this.pack();
-		this.setVisible(true);
-				
+			warn("Error launching analysis window");
+			stack(e.getMessage(), e);
+			this.dispose();
+		}	
 		// add a listener to the options settings panel - when they change, refresh the
 		// panel and update the analysis options
 		
@@ -73,6 +71,10 @@ public class IntegratedImageProber extends LoadingIconDialog {
 		// table cells are updated
 		
 		// Need to be able to cancel updating panels when options change
+		this.pack();
+		this.setModal(true);
+		this.setLocationRelativeTo(null); // centre on screen
+		this.setVisible(true);
 	}
 	
 	/**

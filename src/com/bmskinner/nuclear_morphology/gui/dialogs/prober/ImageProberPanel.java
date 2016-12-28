@@ -31,12 +31,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
-import com.bmskinner.nuclear_morphology.analysis.detection.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber.IconCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -47,11 +47,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  */
 @SuppressWarnings("serial")
-public class ImageProberPanel extends JPanel
+public abstract class ImageProberPanel extends JPanel
 	implements Loggable, 
 				PropertyChangeListener, 
-				OptionsChangeListener {
-	
+				ProberReloadEventListener {
+		
 	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
 	
@@ -65,7 +65,7 @@ public class ImageProberPanel extends JPanel
 	
 	protected IDetectionOptions options; // the options to detect with
 
-	private ImageSet imageType;
+	protected ImageSet imageSet;
 	
 	protected int rows = 0;
 	protected int cols = 2;
@@ -78,11 +78,18 @@ public class ImageProberPanel extends JPanel
 	protected File openImage;	     // the image currently open
 	protected int fileIndex = 0; 	 // the index of the open file
 	
-	public ImageProberPanel(final IDetectionOptions options, final ImageSet set){
+	private Window parent;
+	
+	public ImageProberPanel(final Window parent, final IDetectionOptions options, final ImageSet set){
 		super();
+		
+		if(options==null || set==null){
+			throw new IllegalArgumentException("Options or image set is null");
+		}
+		
 		this.options = options;
-		this.imageType = set;
-
+		this.imageSet = set;
+		
 		setLayout(new BorderLayout());
 		
 
@@ -107,8 +114,15 @@ public class ImageProberPanel extends JPanel
 		this.add(tablePanel,  BorderLayout.CENTER);
 		this.add(nextButton,  BorderLayout.EAST);
 		this.add(prevButton,  BorderLayout.WEST);
-		
-		createFileList(options.getFolder());
+	
+	}
+	
+
+	/**
+	 * Run the prober worker on the currently open image
+	 */
+	public void run() {
+		importAndDisplayImage(openImage);
 	}
 	
 	private JPanel createTablePanel(){
@@ -147,7 +161,7 @@ public class ImageProberPanel extends JPanel
 	 */
 	private JTable createImageTable(){
 		
-		int values = imageType.size();
+		int values = imageSet.size();
 		if(values == 1){
 			rows = 1;
 			cols = 1;
@@ -156,7 +170,7 @@ public class ImageProberPanel extends JPanel
 			cols = DEFAULT_COLUMN_COUNT;
 		}
 
-		finer("Creating image panel size "+rows+" by "+cols+" for "+imageType.size()+" steps");
+		finer("Creating image panel size "+rows+" by "+cols+" for "+imageSet.size()+" steps");
 		
 		
 		TableModel model = createEmptyTableModel(rows, cols);
@@ -198,7 +212,7 @@ public class ImageProberPanel extends JPanel
         			ImageProberTableCell selectedData = (ImageProberTableCell) model.getValueAt( row, col );
 
         			if(selectedData.getLargeIcon()!=null){
-        				new LargeImageDialog(selectedData, ImageProberPanel.this);
+        				new LargeImageDialog(selectedData, parent);
         			}
         			
         		}
@@ -215,32 +229,7 @@ public class ImageProberPanel extends JPanel
 	 * display the image with annotated  outlines
 	 * @param imageFile
 	 */
-	protected void importAndDisplayImage(File imageFile){
-//		try {
-//			this.setStatusLoading();
-//			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
-//			table.setModel(createEmptyTableModel(rows, cols));
-//			
-//			for(int col=0; col<cols; col++){
-//	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
-//	        }
-//			
-//			NucleusProberWorker worker = new NucleusProberWorker(imageFile, 
-//					options, 
-//					NucleusImageType.DETECTED_OBJECTS, 
-//					table.getModel());
-//			
-//			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
-//			
-//			worker.addPropertyChangeListener(this);
-//			progressBar.setVisible(true);
-//			worker.execute();
-//
-//
-//		} catch (Exception e) { // end try
-//			error("Error in image processing", e);
-//		} 
-	}
+	protected abstract void importAndDisplayImage(File imageFile);
 	
 	protected TableModel createEmptyTableModel(int rows, int cols){
 		DefaultTableModel model = new DefaultTableModel(){
@@ -254,21 +243,20 @@ public class ImageProberPanel extends JPanel
 		model.setColumnCount(cols);
 		
 		int count = 0;
-		int values = imageType.size();
+		int values = imageSet.size();
 		
 		for(int row=0; row<rows; row++){
 			for(int col=0; col<cols; col++){
-				
-				
+				ImageProberTableCell cell;
 				if(count<values){
-				
-					ImageProberTableCell cell = new ImageProberTableCell(null, imageType, imageType.get(count), count);
-					count++;
-					model.setValueAt(cell, row, col);
+					cell = new ImageProberTableCell(null, imageSet.getType(count), true, count);
+
 				} else {
-					ImageProberTableCell cell = new ImageProberTableCell(null, null, null, 0);
-					model.setValueAt(cell, row, col);
+					cell = new ImageProberTableCell(null, null, true, count);
+					
 				}
+				model.setValueAt(cell, row, col);
+				count++;
 			}
 		}
 
@@ -397,45 +385,50 @@ public class ImageProberPanel extends JPanel
 	    }
 		
 	}
-	
-	@Override
-	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-		importAndDisplayImage(openImage);
 		
+	@Override
+	public void proberReloadEventReceived(ProberReloadEvent e) {
+		importAndDisplayImage(openImage);
 	}
-	
+
 	public class IconCellRenderer extends DefaultTableCellRenderer	{
-	    @Override
-	    public Component getTableCellRendererComponent(
-	        JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-	    	super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		@Override
+		public Component getTableCellRendererComponent(
 
-	    	ImageProberTableCell info = (ImageProberTableCell) value;
-	        setHorizontalAlignment(JLabel.CENTER);
-	        setHorizontalTextPosition(JLabel.CENTER);
-	        setVerticalTextPosition(JLabel.BOTTOM);
-	        setVerticalAlignment(JLabel.TOP); // image has no offset
-	        setBackground(Color.WHITE);
-	        
-	        if(info==null){
-	        	setText("");
-	        	return this;
-	        }
-	        
-	        setText(info.getLabel());
-	        
-	        if(info.hasSmallIcon()){
-	        	setIcon( info.getSmallIcon() );
-	        } else {
-	        	setIcon(null);
-	        }
 
-	        return this;
-	    }
-	    
-	    
-	}
+				JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			try {
+				super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+				ImageProberTableCell info = (ImageProberTableCell) value;
+				setHorizontalAlignment(JLabel.CENTER);
+				setHorizontalTextPosition(JLabel.CENTER);
+				setVerticalTextPosition(JLabel.BOTTOM);
+				setVerticalAlignment(JLabel.TOP); // image has no offset
+				setBackground(Color.WHITE);
+
+				if(info==null){
+					setText("");
+					return this;
+				}
+
+				setText(info.toString());
+
+				if(info.hasSmallIcon()){
+					setIcon( info.getSmallIcon() );
+				} else {
+					setIcon(null);
+				}
+			}
+			catch (Exception e){
+				error("Renderer error", e);
+			}
+
+			return this;
+		}
+
+
+}
 	
 	/**
 	 * Show images in a non-modal window at IMAGE_SCREEN_PROPORTION of the 
@@ -449,8 +442,8 @@ public class ImageProberPanel extends JPanel
 		 * @param key the image to show
 		 * @param parent the parent ImageProber window
 		 */
-		public LargeImageDialog(final ImageProberTableCell cell, Component parent){
-			super( (Window) null);
+		public LargeImageDialog(final ImageProberTableCell cell, Window parent){
+			super( parent );
 			
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			
@@ -467,7 +460,7 @@ public class ImageProberPanel extends JPanel
 //			DecimalFormat df = new DecimalFormat("#0.00"); 
 //
 //	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
-			this.setTitle(cell.getLabel());
+			this.setTitle(cell.toString());
 			
 	        this.setModal(false);
 	        this.setResizable(false);
