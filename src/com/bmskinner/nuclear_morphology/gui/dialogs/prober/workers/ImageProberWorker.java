@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
@@ -34,6 +35,8 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	
 	protected Dimension smallDimension; // the max size of the small icons
 	
+	protected volatile AtomicBoolean cancelled = new AtomicBoolean(false);
+	
 	public ImageProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model){
 		this.file = f;
 		this.options = options;
@@ -54,8 +57,12 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 			error("Error in signal image probing", e);
 			return false;
 		}
-
 		return true;
+	}
+	
+
+	public synchronized void cancel(){
+		cancelled.set(true);
 	}
 	
 	/**

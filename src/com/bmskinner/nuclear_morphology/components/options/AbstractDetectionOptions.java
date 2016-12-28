@@ -256,13 +256,17 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	public void set(IDetectionOptions options){
 		
 		this.cannyOptions.set(options.getCannyOptions());
-		this.setChannel(options.getChannel());
-		this.setCircularity(options.getMinCirc(), options.getMaxCirc());
-		this.setSize(options.getMinSize(), options.getMaxSize());
-		this.setFolder(options.getFolder());
-		this.setThreshold(options.getThreshold());
-		this.setScale(options.getScale());
-		this.setNormaliseContrast(options.isNormaliseContrast());
+		channel = options.getChannel();
+		maxCirc = options.getMaxCirc();
+		minCirc = options.getMinCirc();
+		maxSize = options.getMaxSize();
+		minSize = options.getMinSize();
+		threshold = options.getThreshold();
+		scale = options.getScale();
+		isNormaliseContrast = options.isNormaliseContrast();
+
+		folder = new File(options.getFolder().getAbsolutePath());
+
 		
 	}
 	

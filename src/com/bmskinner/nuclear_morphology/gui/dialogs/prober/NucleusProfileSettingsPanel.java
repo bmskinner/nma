@@ -57,37 +57,34 @@ public class NucleusProfileSettingsPanel extends SettingsPanel  {
 	 * Create the settings spinners based on the input options
 	 */
 	private void createSpinners(){
-		
-		
 
 		typeBox = new JComboBox<NucleusType>(NucleusType.values());
-		typeBox.setSelectedItem(NucleusType.RODENT_SPERM);
+		typeBox.setSelectedItem(options.getNucleusType());
 		
 		typeBox.addActionListener( e ->{
-			IMutableDetectionOptions nucleusOptions  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 			
-			if(e.getActionCommand().equals(TYPE_LBL)){
-				NucleusType type = (NucleusType) typeBox.getSelectedItem();
-				options.setNucleusType(type);
+			IMutableDetectionOptions nucleusOptions  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+			NucleusType type = (NucleusType) typeBox.getSelectedItem();
+			options.setNucleusType(type);
 
-				if(type.equals(NucleusType.ROUND)){
-					nucleusOptions.setMinCirc(  0.0 );
-					nucleusOptions.setMaxCirc(  1.0 );				
-				}
-				
-				if(type.equals(NucleusType.RODENT_SPERM)){
-					nucleusOptions.setMinCirc(  0.2 );
-					nucleusOptions.setMaxCirc(  0.8 );
-				}
-				
-				if(type.equals(NucleusType.PIG_SPERM)){
-					nucleusOptions.setMinCirc(  0.2 );
-					nucleusOptions.setMaxCirc(  0.8 );
-				}
+			if(type.equals(NucleusType.ROUND)){
+				nucleusOptions.setMinCirc(  0.0 );
+				nucleusOptions.setMaxCirc(  1.0 );				
 			}
+
+			if(type.equals(NucleusType.RODENT_SPERM)){
+				nucleusOptions.setMinCirc(  0.2 );
+				nucleusOptions.setMaxCirc(  0.8 );
+			}
+
+			if(type.equals(NucleusType.PIG_SPERM)){
+				nucleusOptions.setMinCirc(  0.2 );
+				nucleusOptions.setMaxCirc(  0.8 );
+			}
+
 			fireOptionsChangeEvent();
 		});
-		
+
 		
 		profileWindow = new JSpinner(new SpinnerNumberModel(
 				options.getProfileWindowProportion(),	

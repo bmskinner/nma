@@ -33,16 +33,17 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 		}
 		
 		try {
-//			log("Importing image "+imageFile.getAbsolutePath());
-//			this.setStatusLoading();
-//			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
+
+			setImageLabel(imageFile.getAbsolutePath());
+			
+			
 			table.setModel(createEmptyTableModel(rows, cols));
 			
 			for(int col=0; col<cols; col++){
 	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
 	        }
 			
-			NucleusProberWorker worker = new NucleusProberWorker(imageFile, 
+			worker = new NucleusProberWorker(imageFile, 
 					options, 
 					imageSet, 
 					table.getModel());

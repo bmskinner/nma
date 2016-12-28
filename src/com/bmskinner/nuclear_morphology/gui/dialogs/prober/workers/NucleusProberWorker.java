@@ -49,12 +49,15 @@ public class NucleusProberWorker extends ImageProberWorker {
 
 	public NucleusProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model) {
 		super(f, options, type, model);
-		
 	}
 	
 	
 	protected void analyseImages() throws Exception {
-//		log("Analysing images");
+
+		if(cancelled.get()){
+			return;
+		}
+		
 		ImageStack imageStack =  new ImageImporter(file).importImage();
 		finer("Imported image as stack");
 		
@@ -71,6 +74,10 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 * Make an icon from each
 		 */
 		finer("Creating processed images");
+		
+		if(cancelled.get()){
+			return;
+		}
 		
 		ICannyOptions cannyOptions = options.getCannyOptions();
 
@@ -115,7 +122,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell = makeIconCell(kuwaharaProcessor, cannyOptions.isUseKuwahara(), DetectionImageType.KUWAHARA);
 			publish(iconCell);
-			
+			if(cancelled.get()){
+				return;
+			}
 			
 			// Flatten the chromocentres
 			
@@ -133,7 +142,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell1 = makeIconCell(flattenProcessor, cannyOptions.isUseFlattenImage(), DetectionImageType.FLATTENED);
 			publish(iconCell1);
-			
+			if(cancelled.get()){
+				return;
+			}
 			
 			// Run the edge detection
 			
@@ -144,7 +155,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell2 = makeIconCell(invertedEdges, true, DetectionImageType.EDGE_DETECTION);
 			publish(iconCell2);
-			
+			if(cancelled.get()){
+				return;
+			}
 
 			// Run morhological closing
 			
@@ -154,7 +167,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			closedIP.invert();
 			ImageProberTableCell iconCell3 = makeIconCell(closedIP, true, DetectionImageType.MORPHOLOGY_CLOSED);
 			publish(iconCell3);
-
+			if(cancelled.get()){
+				return;
+			}
 
 //			Show the detected objects
 			
@@ -202,36 +217,20 @@ public class NucleusProberWorker extends ImageProberWorker {
 	 * @throws Exception 
 	 */
 	private List<ICell> getCells(ImageStack imageStack, File imageFile) {
-		
-		IMutableDetectionOptions nucleusOptions = (IMutableDetectionOptions) options;
-		
-		double minSize = nucleusOptions.getMinSize();
-		double maxSize = nucleusOptions.getMaxSize();
-		double minCirc = nucleusOptions.getMinCirc();
-		double maxCirc = nucleusOptions.getMaxCirc();
-		boolean addBorder = nucleusOptions.getCannyOptions().isAddBorder();
-		
-		finer("Widening detection parameters");
+
+		IMutableDetectionOptions nucleusOptions = (IMutableDetectionOptions) options.duplicate();
 
 		nucleusOptions.setMinSize(50);
-		nucleusOptions.setMaxSize(imageStack.getWidth()*imageStack.getHeight());
+		nucleusOptions.setMaxSize(imageStack.getWidth()*imageStack.getHeight());// dimensions of the image
 		nucleusOptions.setMinCirc(0);
 		nucleusOptions.setMaxCirc(1);
 		nucleusOptions.getCannyOptions().setAddBorder(false);
-		
+
 		finer("Finding cells");
 		
 		NucleusDetector finder = new NucleusDetector(nucleusOptions, NucleusType.ROUND, 0.05);
 		
 		List<ICell> cells = finder.getDummyCells(imageStack, imageFile);
-		
-		finer("Resetting detetion parameters");
-		
-		nucleusOptions.setMinSize(minSize);
-		nucleusOptions.setMaxSize(maxSize);
-		nucleusOptions.setMinCirc(minCirc);
-		nucleusOptions.setMaxCirc(maxCirc);
-		nucleusOptions.getCannyOptions().setAddBorder(addBorder);
 		return cells;
 	}
 	

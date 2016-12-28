@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber.IconCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -57,7 +58,7 @@ public abstract class ImageProberPanel extends JPanel
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
 	
 	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
-	private static final String FOLDER_LBL = "Showing images in ";
+	private static final String FOLDER_LBL = "Probing ";
 	private static final String PREV_IMAGE_BTN = "Prev";
 	private static final String NEXT_IMAGE_BTN = "Next";
 	
@@ -73,12 +74,15 @@ public abstract class ImageProberPanel extends JPanel
 	protected int cols = 2;
 	
 	protected JTable table; 
+	private JLabel imageLabel;
 	
 	protected List<File> imageFiles; // the list of image files
 	protected File openImage;	     // the image currently open
 	protected int fileIndex = 0; 	 // the index of the open file
 	
 	private Window parent;
+	
+	protected ImageProberWorker worker;
 	
 	public ImageProberPanel(final Window parent, final IDetectionOptions options, final ImageSet set){
 		super();
@@ -125,6 +129,16 @@ public abstract class ImageProberPanel extends JPanel
 		importAndDisplayImage(openImage);
 	}
 	
+	public void cancel(){
+		worker.cancel();
+		worker.removePropertyChangeListener(this);
+		worker = null;
+		progressBar.setVisible(false);
+		progressBar.setValue(0);
+		TableModel model = createEmptyTableModel(rows, cols);
+		table.setModel(model);
+	}
+	
 	private JPanel createTablePanel(){
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -152,7 +166,9 @@ public abstract class ImageProberPanel extends JPanel
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		panel.add( new JLabel(HEADER_LBL));
-		panel.add( new JLabel(FOLDER_LBL + options.getFolder().getAbsolutePath()));
+		
+		imageLabel = new JLabel(FOLDER_LBL + options.getFolder().getAbsolutePath());
+		panel.add( imageLabel );
 
 		return panel;
 	}
@@ -232,6 +248,15 @@ public abstract class ImageProberPanel extends JPanel
 	 * @param imageFile
 	 */
 	protected abstract void importAndDisplayImage(File imageFile);
+	
+	
+	/**
+	 * Set the text in the header label
+	 * @param s
+	 */
+	protected void setImageLabel(String s){
+		imageLabel.setText(FOLDER_LBL + s);
+	}
 	
 	protected TableModel createEmptyTableModel(int rows, int cols){
 		DefaultTableModel model = new DefaultTableModel(){
@@ -444,7 +469,7 @@ public abstract class ImageProberPanel extends JPanel
 		 * @param key the image to show
 		 * @param parent the parent ImageProber window
 		 */
-		public LargeImageDialog(final ImageProberTableCell cell, Window parent){
+		public LargeImageDialog(final ImageProberTableCell cell, final Window parent){
 			super( parent );
 			
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -464,7 +489,7 @@ public abstract class ImageProberPanel extends JPanel
 //	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
 			this.setTitle(cell.toString());
 			
-	        this.setModal(false);
+	        this.setModal(true);
 	        this.setResizable(false);
 	        this.pack();
 	        this.setLocationRelativeTo(null);

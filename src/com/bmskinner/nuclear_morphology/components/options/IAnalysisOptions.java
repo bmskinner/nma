@@ -19,10 +19,10 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	static final String NUCLEUS     = "Nucleus";
 	static final String SPERM_TAIL  = "SpermTail";
 	
-	static final boolean DEFAULT_REFOLD      = false;
+	static final boolean DEFAULT_REFOLD      = true;
 	static final boolean DEFAULT_KEEP_FAILED = false;
 	static final double  DEFAULT_WINDOW_PROPORTION = 0.05;
-	static final NucleusType DEFAULT_TYPE    = NucleusType.ROUND;
+	static final NucleusType DEFAULT_TYPE    = NucleusType.RODENT_SPERM;
 
 	
 	/**

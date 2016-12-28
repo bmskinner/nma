@@ -147,7 +147,7 @@ public class NewAnalysisAction extends ProgressableAction {
 			if(datasets.size()==0 || datasets==null){
 				log("No datasets returned");
 			} else {
-				log("Fire profiling");
+//				log("Fire profiling");
 				fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
 				
 			}

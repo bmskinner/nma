@@ -34,6 +34,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 		type                    = DEFAULT_TYPE;
 		isRefoldNucleus         = DEFAULT_REFOLD;
 		isKeepFailed            = DEFAULT_KEEP_FAILED;
+
 	}
 	
 	/**

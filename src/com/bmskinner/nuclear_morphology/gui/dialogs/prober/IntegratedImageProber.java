@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 @SuppressWarnings("serial")
 public class IntegratedImageProber extends LoadingIconDialog {
 	
-	private static final String PROCEED_LBL          = "Proceed with analysis";
+	private static final String PROCEED_LBL          = "Proceed with detection";
 	private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
 	
