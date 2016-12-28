@@ -115,6 +115,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, EDGE_LBL);
 		}
+		fireOptionsChangeEvent();
 				
 	}
 

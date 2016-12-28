@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -56,6 +57,7 @@ public abstract class ImageProberPanel extends JPanel
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
 	
 	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
+	private static final String FOLDER_LBL = "Showing images in ";
 	private static final String PREV_IMAGE_BTN = "Prev";
 	private static final String NEXT_IMAGE_BTN = "Next";
 	
@@ -72,8 +74,6 @@ public abstract class ImageProberPanel extends JPanel
 	
 	protected JTable table; 
 	
-	private JLabel headerLabel = new JLabel(HEADER_LBL);
-
 	protected List<File> imageFiles; // the list of image files
 	protected File openImage;	     // the image currently open
 	protected int fileIndex = 0; 	 // the index of the open file
@@ -148,9 +148,11 @@ public abstract class ImageProberPanel extends JPanel
 	 * @return
 	 */
 	private JPanel createHeader(){
-		JPanel panel = new JPanel(new FlowLayout());
-
-		panel.add(headerLabel);
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		
+		panel.add( new JLabel(HEADER_LBL));
+		panel.add( new JLabel(FOLDER_LBL + options.getFolder().getAbsolutePath()));
 
 		return panel;
 	}

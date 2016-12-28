@@ -73,9 +73,19 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
+		
+		if(this.hasSubPanel((SettingsPanel) e.getSource())){
+			update();
+			
+			if(e.getSource() instanceof EdgeThresholdSwitchPanel 
+					|| e.getSource() instanceof ComponentSizeSettingsPanel 
+					|| e.getSource() instanceof ImageChannelSettingsPanel){
+				fireProberReloadEvent(); // don't fire an update for values that have no effect on a prober
+			}
+		}
 
 		
-		fireProberReloadEvent();
+		
 
 	}
 }

@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
  *
  */
 @SuppressWarnings("serial")
-public class NucleusProfileSettingsPanel extends SettingsPanel implements ChangeListener {
+public class NucleusProfileSettingsPanel extends SettingsPanel  {
 	
 	private static final double MIN_PROFILE_PROP = 0;
 	private static final double MAX_PROFILE_PROP = 1;
@@ -38,6 +38,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel implements Change
 	
 	private static final String TYPE_LBL           = "Nucleus type";
 	private static final String PROFILE_WINDOW_LBL = "Profile window";
+	
 	
 	private IMutableAnalysisOptions options;
 	
@@ -94,18 +95,27 @@ public class NucleusProfileSettingsPanel extends SettingsPanel implements Change
 				MAX_PROFILE_PROP, 
 				STEP_PROFILE_PROP));
 		
-		Dimension dim = new Dimension(80, 20);
+		Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
 		profileWindow.setPreferredSize(dim);
-		profileWindow.addChangeListener(this);
+		
+		profileWindow.addChangeListener( e -> {
+			JSpinner j = (JSpinner) e.getSource();
+			try {
+				j.commitEdit();
+				options.setAngleWindowProportion(  (Double) j.getValue());
+			} catch (Exception e1) {
+				warn("Parsing error in spinner");
+				stack("Parsing error in JSpinner", e1);
+			}
+			
+		});
 	}
 	
 	private JPanel createPanel(){
 		
 		this.createSpinners();
 		
-		JPanel panel = new JPanel();
-
-		panel.setLayout(new GridBagLayout());
+		JPanel panel = new JPanel(new GridBagLayout());
 		
 		List<JLabel> labels = new ArrayList<JLabel>();
 		labels.add(new JLabel(TYPE_LBL));
@@ -117,7 +127,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel implements Change
 		fields.add(typeBox);
 		fields.add(profileWindow);
 		
-		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
+		addLabelTextRows(labels, fields, panel );
 
 		return panel;
 	}
@@ -131,21 +141,4 @@ public class NucleusProfileSettingsPanel extends SettingsPanel implements Change
 		profileWindow.setValue( options.getProfileWindowProportion());
 	}
 		
-	@Override
-	public void stateChanged(ChangeEvent e) {
-
-		try {
-			if(e.getSource()==profileWindow){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setAngleWindowProportion(  (Double) j.getValue());
-			}	
-			
-			fireOptionsChangeEvent();
-		} catch (ParseException e1) {
-			stack("Parsing error in JSpinner", e1);
-		}
-		
-	}
-
 }

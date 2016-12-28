@@ -54,9 +54,11 @@ public class NucleusProberWorker extends ImageProberWorker {
 	
 	
 	protected void analyseImages() throws Exception {
-		log("Analysing images");
+//		log("Analysing images");
 		ImageStack imageStack =  new ImageImporter(file).importImage();
 		finer("Imported image as stack");
+		
+		int stackNumber = Constants.rgbToStack(options.getChannel());
 		
 		/*
 		 * Insert steps to show each applied filter in the same order as from analysis
@@ -95,7 +97,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			}
 			
 			// Make a copy of the counterstain to use at each processing step
-			ImageProcessor processedImage = imageStack.getProcessor(Constants.COUNTERSTAIN).duplicate();
+			ImageProcessor processedImage = imageStack.getProcessor(stackNumber).duplicate();
 			
 			
 			// Run a Kuwahara filter to enhance edges in the image

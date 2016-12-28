@@ -31,7 +31,7 @@ public class MiscNucleusSettingsPanel extends SettingsPanel {
 	 */
 	private void createSpinners(){
 
-		Dimension dim = new Dimension(80, 20);
+		Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
 
 
 		keepFailedheckBox.addActionListener( e -> {
@@ -57,7 +57,7 @@ public class MiscNucleusSettingsPanel extends SettingsPanel {
 
 		fields.add(keepFailedheckBox);
 
-		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
+		addLabelTextRows(labels, fields, panel );
 
 		return panel;
 	}

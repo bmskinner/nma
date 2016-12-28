@@ -78,7 +78,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 				MIN_RANGE_CIRC, MAX_RANGE_CIRC, 
 				CIRC_STEP_SIZE));
 		
-		Dimension dim = new Dimension(80, 20);
+		Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
 		minSizeSpinner.setPreferredSize(dim);
 		maxSizeSpinner.setPreferredSize(dim);
 		minCircSpinner.setPreferredSize(dim);
@@ -118,7 +118,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 		fields.add(minCircSpinner);
 		fields.add(maxCircSpinner);
 
-		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
+		addLabelTextRows(labels, fields, panel );
 
 		return panel;
 	}

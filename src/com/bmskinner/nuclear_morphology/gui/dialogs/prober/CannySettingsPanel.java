@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -97,6 +98,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 	 */
 	protected void update(){
 		super.update();
+
 		cannyLowThreshold.setValue( (double) options.getLowThreshold());
 		cannyHighThreshold.setValue( (double) options.getHighThreshold());
 		cannyKernelRadius.setValue( (double) options.getKernelRadius());
@@ -104,12 +106,12 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 		closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
 		kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());
 		flattenImageThresholdSpinner.setValue(options.getFlattenThreshold());
-		finest("Updated Canny spinners");
+
 		
 		cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
 		useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
 		flattenImageCheckBox.setSelected(options.isUseFlattenImage());
-		finest("Updated Canny checkboxes");
+
 	}
 	
 	public void set(final ICannyOptions options){
@@ -168,114 +170,71 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				KERNEL_STEP_SIZE));
 		
 		
+		cannyAutoThresholdCheckBox = new JCheckBox("", false);
+		cannyAutoThresholdCheckBox.setActionCommand(AUTO_THRESHOLD_ACTION);
+		cannyAutoThresholdCheckBox.addActionListener(this);
+
+		useKuwaharaCheckBox = new JCheckBox("", options.isUseKuwahara());
+		useKuwaharaCheckBox.setActionCommand(USE_KUWAHARA_ACTION);
+		useKuwaharaCheckBox.addActionListener(this);
+		
+		flattenImageCheckBox = new JCheckBox("", options.isUseKuwahara());
+		flattenImageCheckBox.setActionCommand(FLATTEN_CHROMOCENTRES_ACTION);
+		flattenImageCheckBox.addActionListener(this);
+		
+		// Add the border adding box
+		addBorderCheckBox = new JCheckBox("", options.isAddBorder());
+		addBorderCheckBox.setActionCommand(ADD_BORDER_ACTION);
+		addBorderCheckBox.addActionListener(this);
+		
 		// add the change listeners
 		cannyLowThreshold.addChangeListener(this);
 		cannyHighThreshold.addChangeListener(this);
 		cannyKernelRadius.addChangeListener(this);
 		cannyKernelWidth.addChangeListener(this);
 		closingObjectRadiusSpinner.addChangeListener(this);
+		flattenImageThresholdSpinner.addChangeListener(this);
 		
 	}
 		
 	private void createPanel(){
 		
 		this.setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		Dimension minSize = new Dimension(10, 5);
-		Dimension prefSize = new Dimension(10, 5);
-		Dimension maxSize = new Dimension(Short.MAX_VALUE, 5);
-		c.gridwidth = GridBagConstraints.REMAINDER; //next-to-last
-		c.fill = GridBagConstraints.NONE;      //reset to default
-		c.weightx = 0.1;                       //reset to default
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
+
+		List<JLabel> labelList	   = new ArrayList<JLabel>();
+		List<JComponent> fieldList = new ArrayList<JComponent>();
 		
-		cannyAutoThresholdCheckBox = new JCheckBox(AUTO_THRESHOLD_LBL);
-		cannyAutoThresholdCheckBox.setSelected(false);
-		cannyAutoThresholdCheckBox.setActionCommand(AUTO_THRESHOLD_ACTION);
-		cannyAutoThresholdCheckBox.addActionListener(this);
-		this.add(cannyAutoThresholdCheckBox);
-		
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-		
-		
-		// add the canny settings
-		List<JLabel> labelList	 = new ArrayList<JLabel>();
-		List<JSpinner> fieldList = new ArrayList<JSpinner>();
-		
+		labelList.add(new JLabel(AUTO_THRESHOLD_LBL));
 		labelList.add(new JLabel(LOW_THRESHOLD_LBL));
 		labelList.add(new JLabel(HIGH_THRESHOLD_LBL));
 		labelList.add(new JLabel(KERNEL_RADIUS_LBL));
 		labelList.add(new JLabel(KERNEL_WIDTH_LBL));
 		labelList.add(new JLabel(CLOSING_RADIUS_LBL));
+		labelList.add(new JLabel(USE_KUWAHARA_LBL));
+		labelList.add(new JLabel(KUWAHARA_KERNEL_LBL));
+		labelList.add(new JLabel(FLATTEN_CHROMOCENTRES_LBL));
+		labelList.add(new JLabel(FLATTENING_THRESHOLD_LBL));
+//		labelList.add(new JLabel(ADD_BORDER_LBL));
+		
 		
 		JLabel[] labels = labelList.toArray(new JLabel[0]);
 		
+		fieldList.add(cannyAutoThresholdCheckBox);
 		fieldList.add(cannyLowThreshold);
 		fieldList.add(cannyHighThreshold);
 		fieldList.add(cannyKernelRadius);
 		fieldList.add(cannyKernelWidth);
 		fieldList.add(closingObjectRadiusSpinner);
+		fieldList.add(useKuwaharaCheckBox);
+		fieldList.add(kuwaharaRadiusSpinner);
+		fieldList.add(flattenImageCheckBox);
+		fieldList.add(flattenImageThresholdSpinner);
+//		fieldList.add(addBorderCheckBox);
 		
-		JSpinner[] fields = fieldList.toArray(new JSpinner[0]);
+		JComponent[] fields = fieldList.toArray(new JComponent[0]);
 
 					
-		addLabelTextRows(labels, fields, new GridBagLayout(), this );
-		
-		// add a space
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-		
-		// add the Kuwahara checkbox
-		useKuwaharaCheckBox = new JCheckBox(USE_KUWAHARA_LBL);
-		useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
-		useKuwaharaCheckBox.setActionCommand(USE_KUWAHARA_ACTION);
-		useKuwaharaCheckBox.addActionListener(this);
-		this.add(useKuwaharaCheckBox);
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-		
-		// add the Kuwahara radius spinner
-		labels = new JLabel[1];
-		fields = new JSpinner[1];
-		
-		labels[0] = new JLabel(KUWAHARA_KERNEL_LBL);
-		fields[0] = kuwaharaRadiusSpinner;
-		
-		addLabelTextRows(labels, fields, new GridBagLayout(), this );
-		
-		// add a space
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-		
-		
-		// add the chromocentre flattening checkbox
-		flattenImageCheckBox = new JCheckBox(FLATTEN_CHROMOCENTRES_LBL);
-		flattenImageCheckBox.setSelected(options.isUseKuwahara());
-		flattenImageCheckBox.setActionCommand(FLATTEN_CHROMOCENTRES_ACTION);
-		flattenImageCheckBox.addActionListener(this);
-		this.add(flattenImageCheckBox);
-		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-					
-		// add the flattening threshold spinner
-		labels = new JLabel[1];
-		fields = new JSpinner[1];
-
-		labels[0] = new JLabel(FLATTENING_THRESHOLD_LBL);
-		fields[0] = flattenImageThresholdSpinner;
-		
-		flattenImageThresholdSpinner.addChangeListener(this);
-		
-		addLabelTextRows(labels, fields, new GridBagLayout(), this );
-		
-		
-		// Add the border adding box
-		addBorderCheckBox = new JCheckBox(ADD_BORDER_LBL);
-		addBorderCheckBox.setSelected(options.isAddBorder());
-		addBorderCheckBox.setActionCommand(ADD_BORDER_ACTION);
-		addBorderCheckBox.addActionListener(this);
-//		this.add(addBorderCheckBox); // Do not enable until signal detector gets IAnalysisOptions
-//		this.add(new Box.Filler(minSize, prefSize, maxSize),c);
-
-		
-		
-		
+		addLabelTextRows(labels, fields, this );
 		
 	}
 

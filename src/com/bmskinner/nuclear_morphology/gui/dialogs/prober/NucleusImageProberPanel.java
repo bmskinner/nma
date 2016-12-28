@@ -33,7 +33,7 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 		}
 		
 		try {
-			log("Importing image "+imageFile.getAbsolutePath());
+//			log("Importing image "+imageFile.getAbsolutePath());
 //			this.setStatusLoading();
 //			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
 			table.setModel(createEmptyTableModel(rows, cols));

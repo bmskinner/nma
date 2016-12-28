@@ -61,7 +61,7 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
 			ok = loadResources(path);
 		}
 		if(!ok){
-			log(Level.WARNING, "Resource loading failed (gif): "+path);
+			fine("Resource loading failed (gif): "+path);
 		}
 		
 		this.loadingLabel.setIcon(blankGif);

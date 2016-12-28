@@ -23,6 +23,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class SettingsPanel extends JPanel implements Loggable, OptionsChangeListener {
 	
+
+	protected static final int BOX_WIDTH = 80;
+	protected static final int BOX_HEIGHT = 20;
+	
 	private List<SettingsPanel> subPanels = new ArrayList<SettingsPanel>();
 	List<OptionsChangeListener> optionsListeners = new ArrayList<OptionsChangeListener>();
 	List<ProberReloadEventListener> proberListeners = new ArrayList<ProberReloadEventListener>();
@@ -87,13 +91,12 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	 */
 	protected void addLabelTextRows(List<JLabel> labels,
 			List<Component> fields,
-			GridBagLayout gridbag,
 			Container container) {
 		
 		JLabel[] labelArray = labels.toArray(new JLabel[0]);
 		Component[] fieldArray = fields.toArray(new Component[0]);
 		
-		addLabelTextRows(labelArray, fieldArray, gridbag, container);
+		addLabelTextRows(labelArray, fieldArray, container);
 		
 	}
 	
@@ -106,7 +109,7 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	 */
 	protected void addLabelTextRows(JLabel[] labels,
 			Component[] fields,
-			GridBagLayout gridbag,
+			
 			Container container) {
 		GridBagConstraints c = new GridBagConstraints();
 		c.anchor = GridBagConstraints.EAST;
@@ -174,7 +177,7 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
 
-		log("Heard update from "+e.getSource().getClass().getSimpleName());
+		// Pass upwards
 		if(this.hasSubPanel((SettingsPanel) e.getSource())){
 			update();
 			fireOptionsChangeEvent();

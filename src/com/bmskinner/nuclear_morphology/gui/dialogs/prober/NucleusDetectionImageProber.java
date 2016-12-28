@@ -72,30 +72,30 @@ public class NucleusDetectionImageProber extends ImageProber {
 	@Override
 	protected void importAndDisplayImage(File imageFile){
 
-		try {
-			this.setStatusLoading();
-			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
-			table.setModel(createEmptyTableModel(rows, cols));
-			
-			for(int col=0; col<cols; col++){
-	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
-	        }
-			
-			NucleusProberWorker worker = new NucleusProberWorker(imageFile, 
-					options, 
-					NucleusImageType.DETECTED_OBJECTS, 
-					table.getModel());
-			
-			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
-			
-			worker.addPropertyChangeListener(this);
-			progressBar.setVisible(true);
-			worker.execute();
-
-
-		} catch (Exception e) { // end try
-			error("Error in image processing", e);
-		} 
+//		try {
+//			this.setStatusLoading();
+//			this.setLoadingLabelText("Looking for nuclei in "+imageFile.getAbsolutePath());
+//			table.setModel(createEmptyTableModel(rows, cols));
+//			
+//			for(int col=0; col<cols; col++){
+//	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
+//	        }
+//			
+//			NucleusProberWorker worker = new NucleusProberWorker(imageFile, 
+//					options, 
+//					NucleusImageType.DETECTED_OBJECTS, 
+//					table.getModel());
+//			
+//			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
+//			
+//			worker.addPropertyChangeListener(this);
+//			progressBar.setVisible(true);
+//			worker.execute();
+//
+//
+//		} catch (Exception e) { // end try
+//			error("Error in image processing", e);
+//		} 
 	}
 
 }

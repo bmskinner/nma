@@ -73,8 +73,6 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 				j.commitEdit();
 				options.setScale(  (Double) j.getValue());
 
-
-				fireOptionsChangeEvent();
 			} catch (ParseException e1) {
 				stack("Parsing error in JSpinner", e1);
 			}
@@ -104,7 +102,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 		fields.add(channelBox);
 		fields.add(scaleSpinner);
 
-		addLabelTextRows(labels, fields, new GridBagLayout(), panel );
+		addLabelTextRows(labels, fields, panel );
 
 		return panel;
 	}
