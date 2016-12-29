@@ -1,87 +1,62 @@
-/*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
-package com.bmskinner.nuclear_morphology.analysis.signals;
-
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
-import com.bmskinner.nuclear_morphology.analysis.detection.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionImageProber.SignalImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
-@Deprecated
-public class SignalProberWorker extends ImageProberWorker {
-	
-	private IAnalysisDataset dataset;
-	private int channel;
-	private IMutableNuclearSignalOptions testOptions;
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
-	public SignalProberWorker(File f, IAnalysisOptions options, ImageType type, TableModel model, IAnalysisDataset dataset, int channel, IMutableNuclearSignalOptions testOptions) {
+/**
+ * Detect signals within nuclei in a given image
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+public class SignalProberWorker  extends ImageProberWorker {
+	
+	final private Set<Nucleus> nuclei;
+	
+	public SignalProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final Set<Nucleus> nuclei, final TableModel model) {
 		super(f, options, type, model);
-		this.dataset = dataset;
-		this.channel = channel;
-		this.testOptions = testOptions;
-		
+		this.nuclei = nuclei;
 	}
 	
+	
 	protected void analyseImages() throws Exception {
-//		setStatusLoading();
-//		this.setLoadingLabelText("Probing image "+index+": "+imageFile.getAbsolutePath()+"...");
-
+		
+		IMutableNuclearSignalOptions testOptions = (IMutableNuclearSignalOptions) options.duplicate(); 
+		
 		finer("Importing image "+file.getAbsolutePath());
 		
 		// Import the image as a stack
 		ImageStack stack = new ImageImporter(file).importImage();
-		
-		if(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).hasCannyOptions()){
-			
-			if(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions().isAddBorder()){
-				ImageConverter conv = new ImageConverter(stack);
-				stack = conv.addBorder(10).toStack();
-			}
-		}
 
 		// Find the processor number in the stack to use
-		int stackNumber = Constants.rgbToStack(channel);
+		int stackNumber = Constants.rgbToStack(options.getChannel());
 		
 		finer("Converting image");
 		// Get the greyscale processor for the signal channel
@@ -97,6 +72,8 @@ public class SignalProberWorker extends ImageProberWorker {
 
 
 		// Store the options
+		
+		
 		double minSize  = testOptions.getMinSize();
 		double maxFract = testOptions.getMaxFraction();
 		int threshold   = testOptions.getThreshold();
@@ -105,14 +82,14 @@ public class SignalProberWorker extends ImageProberWorker {
 		testOptions.setMaxFraction(1d);
 		
 		// Create the finder
-		SignalDetector finder = new SignalDetector(testOptions, channel);
+		SignalDetector finder = new SignalDetector(testOptions, testOptions.getChannel());
 
 		Map<Nucleus, List<INuclearSignal>> map = new HashMap<Nucleus, List<INuclearSignal>>();
 
 		// Get the cells matching the desred imageFile, and find signals
 		finer("Detecting signals in image");
 
-		for(Nucleus n : dataset.getCollection().getNuclei()){
+		for(Nucleus n : nuclei){
 //			log(Level.FINEST, "Testing nucleus "+n.getImageName()+" against "+imageName);
 			if(n.getSourceFileName().equals(imageName)){
 //				log(Level.FINEST, "  Nucleus is in image; finding signals");
@@ -131,7 +108,7 @@ public class SignalProberWorker extends ImageProberWorker {
 		// annotate detected signals onto the imagefile
 		drawSignals(map, openProcessor);
 		
-		IconCell iconCell = makeIconCell(openProcessor, SignalImageType.DETECTED_OBJECTS);
+		ImageProberTableCell iconCell = makeIconCell(openProcessor, true, DetectionImageType.DETECTED_OBJECTS);
 		publish(iconCell);
 
 //		updateImageThumbnails();
@@ -180,6 +157,10 @@ public class SignalProberWorker extends ImageProberWorker {
 	}
 	
 	private boolean checkSignal(INuclearSignal s, Nucleus n) throws Exception{
+		
+		INuclearSignalOptions testOptions = (INuclearSignalOptions) options; 
+		
+		
 		boolean result = true;
 		
 		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){
@@ -193,6 +174,5 @@ public class SignalProberWorker extends ImageProberWorker {
 		}		
 		return result;
 	}
-	
 
 }

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;

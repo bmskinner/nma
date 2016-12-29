@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;

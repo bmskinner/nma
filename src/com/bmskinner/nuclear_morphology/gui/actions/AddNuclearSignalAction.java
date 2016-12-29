@@ -18,21 +18,22 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.io.File;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
+import javax.swing.JFileChooser;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionSettingsDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	
 	private UUID signalGroup = null;
+	private File folder;
+
 	
 	public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Signal detection", mw);
@@ -41,38 +42,37 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	@Override
 	public void run(){
 		try{
+			
+			if( ! this.getImageDirectory()){
+				cancel();
+			}
 			// add dialog for non-default detection options
-			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset);
+//			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset);
+			
+			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
-			if(analysisSetup.isReadyToRun()){
+			if(analysisSetup.isOk()){
 
-				this.signalGroup = analysisSetup.getSignalGroup();
-
-				String signalGroupName = dataset.getCollection()
-						.getSignalGroup(signalGroup)
-						.getGroupName();
-
-
-				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
-						analysisSetup.getFolder(), 
-						analysisSetup.getChannel(), 
-						(IMutableNuclearSignalOptions) dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
-						signalGroup, 
-						signalGroupName);
-				
-				
-				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
-//				worker = new SignalDetectionWorker(dataset, 
+//				this.signalGroup = analysisSetup.getSignalGroup();
+//
+//				String signalGroupName = dataset.getCollection()
+//						.getSignalGroup(signalGroup)
+//						.getGroupName();
+//
+//
+//				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
 //						analysisSetup.getFolder(), 
 //						analysisSetup.getChannel(), 
 //						(IMutableNuclearSignalOptions) dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
 //						signalGroup, 
 //						signalGroupName);
-
-
-				this.setProgressMessage("Signal detection: "+signalGroupName);
-				worker.addPropertyChangeListener(this);
-				ThreadManager.getInstance().submit(worker);
+//				
+//				
+//				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+//
+//				this.setProgressMessage("Signal detection: "+signalGroupName);
+//				worker.addPropertyChangeListener(this);
+//				ThreadManager.getInstance().submit(worker);
 			} else {
 				this.cancel();
 				return;
@@ -89,111 +89,35 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	public void finished(){
 		finer("Finished signal detection");
 		this.cleanup(); // remove the property change listener
-		
-//		List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);
-//
-//		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-//		
-//		for(ICellCollection collection : signalPopulations){
-//			finer("Processing "+collection.getName());
-//			processSubPopulation(collection);
-//			finer("Processed "+collection.getName());
-//			list.add(dataset.getChildDataset(collection.getID()));
-//		}
-//		
-//		fine("Finished processing sub-populations");
-		// we have morphology analysis to carry out, so don't use the super finished
-		// use the same segmentation from the initial analysis
-//		int flag = 0; // set the downstream analyses to run
-//		flag |= MainWindow.ADD_POPULATION;
-//		fine("Firing cache refresh request");
 		fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-//		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-//		fine("Running new segmentation on sub-populations");
-//		new RunSegmentationAction(list, dataset, flag, mw);
 
 		cancel();
 		
 	}
+	
+	private boolean getImageDirectory(){
+		
+		File defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		
+		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
 
-//	/**
-//	 * Create child datasets for signal populations
-//	 * and perform basic analyses
-//	 * @param collection
-//	 */
-//	private void processSubPopulation(ICellCollection collection){
-//
-//		try{
-//		finer("Creating new analysis dataset for "+collection.getName());
-//		
-//		IAnalysisDataset subDataset = new ChildAnalysisDataset(dataset, collection );
-//
-//		dataset.addChildDataset(subDataset);
-//		dataset.getCollection().getProfileManager().copyCollectionOffsets(collection);
-//		
-//		} catch(Exception e){
-//			error("Error processing signal group", e);
-//		}
-//	}
-//
-//
-//	/**
-//	 * Create two child populations for the given dataset: one with signals in the 
-//	 * given group, and one without signals 
-//	 * @param r the collection to split
-//	 * @param signalGroup the signal group to split on
-//	 * @return a list of new collections
-//	 */
-//	private List<ICellCollection> dividePopulationBySignals(ICellCollection r, UUID signalGroup){
-//
-//		List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
-//		log("Dividing population by signals...");
-//
-//		ISignalGroup group;
-//		try {
-//			group = r.getSignalGroup(signalGroup);
-//
-//			group.setVisible(true);
-//
-//			Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-//			if(!list.isEmpty()){
-//				log("Signal group "+group.getGroupName()+": found nuclei with signals");
-//				ICellCollection listCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_with_signals");
-//
-//
-//				for(ICell c : list){
-//
-//					finer("  Added cell: "+c.getNucleus().getNameAndNumber());
-//					//				ICell newCell = new DefaultCell(c);
-//					listCollection.addCell( c );
-//				}
-//				signalPopulations.add(listCollection);
-//
-//				// Only add a group of cells without signals if at least one cell does havea signal
-//
-//				Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-//				if(!notList.isEmpty()){
-//					log("Signal group "+r.getSignalGroup(signalGroup).getGroupName()+": found nuclei without signals");
-//
-//					ICellCollection notListCollection = new VirtualCellCollection(dataset, group.getGroupName()+"_without_signals");
-//
-//					for(ICell c : notList){
-//						notListCollection.addCell( c);
-//					}
-//
-//					signalPopulations.add(notListCollection);
-//				} else {
-//					finest("No cells without signals");
-//				}
-//
-//			}
-//
-//		} catch (UnavailableSignalGroupException e) {
-//			error("Cannot get signal group from collection", e);
-//			return new ArrayList<ICellCollection>(0);
-//		}
-//			
-//		fine("Finished dividing populations based on signals");
-//		return signalPopulations;
-//	}
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return false; // user cancelled
+		}
+		
+		File file = fc.getSelectedFile();
+
+		if( ! file.isDirectory()){
+			return false;
+		}
+		fine("Selected directory: "+file.getAbsolutePath());
+		folder = file;
+
+		return true;
+	}
+
 }

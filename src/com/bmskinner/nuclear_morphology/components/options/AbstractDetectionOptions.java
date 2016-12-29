@@ -52,7 +52,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	 */
 	public AbstractDetectionOptions(File folder){
 		
-		this.folder = folder;
+		this.folder = folder;		
 	}
 	
 	/**

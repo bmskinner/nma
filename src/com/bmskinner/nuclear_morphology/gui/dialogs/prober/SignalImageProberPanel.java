@@ -3,17 +3,21 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.io.File;
+import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
-
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.SignalProberWorker;
 
 @SuppressWarnings("serial")
-public class NucleusImageProberPanel extends ImageProberPanel {
+public class SignalImageProberPanel extends ImageProberPanel {
+
+	private final IAnalysisDataset dataset;
 	
-	public NucleusImageProberPanel(final Window parent, final IDetectionOptions options, final ImageSet set){
+	public SignalImageProberPanel(final Window parent, final IDetectionOptions options, final ImageSet set, final IAnalysisDataset dataset){
 		super(parent, options, set);
-		
+		this.dataset = dataset;
 		createFileList(options.getFolder());
 	}
 	
@@ -40,9 +44,13 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
 	        }
 			
-			worker = new NucleusProberWorker(imageFile, 
+			// TODO: need to change this to fetch only on file names
+			Set<Nucleus> list = dataset.getCollection().getNuclei(imageFile);
+			
+			worker = new SignalProberWorker(imageFile, 
 					options, 
 					imageSet, 
+					list,
 					table.getModel());
 			
 			worker.setSmallIconSize(new Dimension(SMALL_ICON_WIDTH, table.getRowHeight()-30));
@@ -56,5 +64,4 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 			error(e.getMessage(), e);
 		} 
 	}
-
 }

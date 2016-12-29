@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -33,7 +33,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 	private static final String MIN_CIRC_LBL = "Min circ (pixels)";
 	private static final String MAX_CIRC_LBL = "Min circ (pixels)";
 			
-	private static final Integer MIN_RANGE_SIZE = 100;
+	private static final Integer MIN_RANGE_SIZE = 1;
 	private static final double  MIN_RANGE_CIRC = 0;
 	private static final double  MAX_RANGE_CIRC = 1;
 	

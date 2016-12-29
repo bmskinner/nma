@@ -21,9 +21,16 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+/**
+ * The default implementation of the nuclear signal options
+ * interface
+ * @author ben
+ *
+ */
 public class DefaultNuclearSignalOptions 
 	extends AbstractDetectionOptions 
 	implements IMutableNuclearSignalOptions {
+	 
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -32,6 +39,17 @@ public class DefaultNuclearSignalOptions
 	
 	public DefaultNuclearSignalOptions(File folder){
 		super(folder);
+		maxFraction = DEFAULT_MAX_SIGNAL_FRACTION;
+		mode        = DEFAULT_METHOD;
+		
+		setMinSize(DEFAULT_MIN_SIGNAL_SIZE);
+		setMaxSize(DEFAULT_MAX_SIGNAL_SIZE);
+		setMinCirc(INuclearSignalOptions.DEFAULT_MIN_CIRC);
+		setMaxCirc(INuclearSignalOptions.DEFAULT_MAX_CIRC);
+		setChannel(DEFAULT_CHANNEL);
+		setThreshold(DEFAULT_SIGNAL_THRESHOLD);
+		setScale(DEFAULT_SCALE);
+		
 	}
 	
 	/**

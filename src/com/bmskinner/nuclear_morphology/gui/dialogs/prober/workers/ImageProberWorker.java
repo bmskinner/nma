@@ -20,6 +20,10 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import ij.process.ImageProcessor;
 
+/**
+ * @author ben
+ *
+ */
 public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProberTableCell> implements Loggable{
 	
 	protected File file;
@@ -35,7 +39,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	
 	protected Dimension smallDimension; // the max size of the small icons
 	
-	protected volatile AtomicBoolean cancelled = new AtomicBoolean(false);
+//	protected volatile AtomicBoolean cancelled = new AtomicBoolean(false);
 	
 	public ImageProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model){
 		this.file = f;
@@ -60,10 +64,11 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 		return true;
 	}
 	
+	
 
-	public synchronized void cancel(){
-		cancelled.set(true);
-	}
+//	public synchronized void cancel(){
+//		cancelled.set(true);
+//	}
 	
 	/**
 	 * Carry out the analysis

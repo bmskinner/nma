@@ -33,6 +33,10 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
  */
 public interface IDetectionOptions extends Serializable {
 	
+	static final double DEFAULT_SCALE = 1;
+	static final double DEFAULT_MIN_CIRC = 0;
+	static final double DEFAULT_MAX_CIRC = 1;
+	
 	
 	/**
 	 * Create a copy of these options

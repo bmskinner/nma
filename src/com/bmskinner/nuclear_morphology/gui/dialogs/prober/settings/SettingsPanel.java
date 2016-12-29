@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -12,6 +12,11 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEventListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -90,7 +95,7 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 	 * @param container the container to add the labels and fields to
 	 */
 	protected void addLabelTextRows(List<JLabel> labels,
-			List<Component> fields,
+			List<? extends Component> fields,
 			Container container) {
 		
 		JLabel[] labelArray = labels.toArray(new JLabel[0]);

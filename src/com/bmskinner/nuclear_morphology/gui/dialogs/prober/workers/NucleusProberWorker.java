@@ -54,13 +54,13 @@ public class NucleusProberWorker extends ImageProberWorker {
 	
 	protected void analyseImages() throws Exception {
 
-		if(cancelled.get()){
+		if(this.isCancelled()){
 			return;
 		}
 		
 		ImageStack imageStack =  new ImageImporter(file).importImage();
-		finer("Imported image as stack");
-		
+//		finer("Imported image as stack");
+//		
 		int stackNumber = Constants.rgbToStack(options.getChannel());
 		
 		/*
@@ -73,9 +73,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 * 
 		 * Make an icon from each
 		 */
-		finer("Creating processed images");
+//		finer("Creating processed images");
 		
-		if(cancelled.get()){
+		if(this.isCancelled()){
 			return;
 		}
 		
@@ -122,7 +122,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell = makeIconCell(kuwaharaProcessor, cannyOptions.isUseKuwahara(), DetectionImageType.KUWAHARA);
 			publish(iconCell);
-			if(cancelled.get()){
+			if(this.isCancelled()){
 				return;
 			}
 			
@@ -142,7 +142,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell1 = makeIconCell(flattenProcessor, cannyOptions.isUseFlattenImage(), DetectionImageType.FLATTENED);
 			publish(iconCell1);
-			if(cancelled.get()){
+			if(this.isCancelled()){
 				return;
 			}
 			
@@ -155,7 +155,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			
 			ImageProberTableCell iconCell2 = makeIconCell(invertedEdges, true, DetectionImageType.EDGE_DETECTION);
 			publish(iconCell2);
-			if(cancelled.get()){
+			if(this.isCancelled()){
 				return;
 			}
 
@@ -167,7 +167,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			closedIP.invert();
 			ImageProberTableCell iconCell3 = makeIconCell(closedIP, true, DetectionImageType.MORPHOLOGY_CLOSED);
 			publish(iconCell3);
-			if(cancelled.get()){
+			if(this.isCancelled()){
 				return;
 			}
 

@@ -56,6 +56,8 @@ public abstract class ImageProberPanel extends JPanel
 		
 	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
+	protected static final int SMALL_ICON_WIDTH = 500;
+	protected static final String NULL_FILE_ERROR = "File is null";
 	
 	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
 	private static final String FOLDER_LBL = "Probing ";
@@ -130,7 +132,7 @@ public abstract class ImageProberPanel extends JPanel
 	}
 	
 	public void cancel(){
-		worker.cancel();
+		worker.cancel(true);
 		worker.removePropertyChangeListener(this);
 		worker = null;
 		progressBar.setVisible(false);

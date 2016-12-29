@@ -12,19 +12,18 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImage
  * @author ben
  *
  */
-public class NucleusImageSet implements ImageSet {
+public class DefaultImageSet implements ImageSet {
 		
 	private Map<ImageType, Integer> values;
 	
-	public NucleusImageSet(){
-		values = new HashMap<ImageType, Integer>();
-		
-		values.put(DetectionImageType.KUWAHARA,          0);
-		values.put(DetectionImageType.FLATTENED,         1);
-		values.put(DetectionImageType.EDGE_DETECTION,    2);
-		values.put(DetectionImageType.MORPHOLOGY_CLOSED, 3);
-		values.put(DetectionImageType.DETECTED_OBJECTS,  4);
-		
+	public DefaultImageSet(){
+		values = new HashMap<ImageType, Integer>();		
+	}
+	
+	public ImageSet add(ImageType t){
+		int i = values.size();
+		values.put(t, i);
+		return this;
 	}
 	
 	@Override

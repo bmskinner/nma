@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.IntegratedImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
@@ -88,7 +89,7 @@ public class NewAnalysisAction extends ProgressableAction {
 		
 		fine("Making analysis options");
 		
-		IntegratedImageProber analysisSetup = new IntegratedImageProber( folder );
+		NucleusImageProber analysisSetup = new NucleusImageProber( folder );
 
 //		NucleusDetectionSetupDialog analysisSetup = new NucleusDetectionSetupDialog(folder);
 		

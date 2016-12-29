@@ -19,6 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 
 /**
  * The options that must be available for detecting nuclear signals
@@ -30,9 +31,12 @@ public interface INuclearSignalOptions extends IDetectionOptions {
 
 	static final int    DEFAULT_SIGNAL_THRESHOLD     = 70;
 	static final int    DEFAULT_MIN_SIGNAL_SIZE      = 5;
+	static final int    DEFAULT_MAX_SIGNAL_SIZE      = 100000;
 	static final double DEFAULT_MAX_SIGNAL_FRACTION  = 0.1;
 	static final double DEFAULT_MIN_CIRC             = 0.0;
 	static final double DEFAULT_MAX_CIRC             = 1.0;
+	static final SignalDetectionMode DEFAULT_METHOD = SignalDetectionMode.FORWARD;
+	static final int DEFAULT_CHANNEL = 0;
 		
 	/**
 	 * The analysis types available for detecting signals
