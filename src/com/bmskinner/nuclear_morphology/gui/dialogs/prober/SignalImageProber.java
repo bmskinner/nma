@@ -19,14 +19,28 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignal
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
+/**
+ * Show the results of a signal detection with given options
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+@SuppressWarnings("serial")
 public class SignalImageProber extends IntegratedImageProber {
 	
 	private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
+	private static final String NEW_NAME_LBL = "Enter a signal group name";
 	
 	private final IMutableNuclearSignalOptions options;
 	final IAnalysisDataset dataset;
 	private UUID id;
 
+	/**
+	 * Create with a dataset (from which nuclei will be drawn) and a folder of images to
+	 * be analysed
+	 * @param dataset the analysis dataset
+	 * @param folder the folder of images
+	 */
 	public SignalImageProber(final IAnalysisDataset dataset, final File folder){
 		this.dataset = dataset;
 		options = new DefaultNuclearSignalOptions(folder);
@@ -65,10 +79,15 @@ public class SignalImageProber extends IntegratedImageProber {
 		return options;
 	}
 	
+	/**
+	 * Get the ID of the newly created signal group
+	 * @return
+	 */
 	public UUID getId(){
 		return id;
 	}
 	
+	@Override
 	protected void okButtonClicked(){
 		
 		String name = getGroupName();
@@ -97,14 +116,13 @@ public class SignalImageProber extends IntegratedImageProber {
 	}
 
 	/**
-	 * Check that the input signal group name is ok. 
+	 * Get the name of a signal group
 	 * If blank, requests a new name 
-	 * @param name the name to check
 	 * @return a valid name
 	 */
 	private String getGroupName(){
 
-		String name = (String) JOptionPane.showInputDialog("Enter a signal group name");
+		String name = (String) JOptionPane.showInputDialog(NEW_NAME_LBL);
 
 
 		return name;

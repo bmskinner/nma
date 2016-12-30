@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.SignalProberWorker;
 
@@ -44,8 +45,16 @@ public class SignalImageProberPanel extends ImageProberPanel {
 	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
 	        }
 			
-			// TODO: need to change this to fetch only on file names
-			Set<Nucleus> list = dataset.getCollection().getNuclei(imageFile);
+			// fetch nuclei based on file names
+			File nucleusFolder = dataset.getAnalysisOptions()
+					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getFolder();
+			
+			String imageName = imageFile.getName();
+			
+			File nucleusFile = new File(nucleusFolder, imageName);
+			
+			Set<Nucleus> list = dataset.getCollection().getNuclei(nucleusFile);
 			
 			worker = new SignalProberWorker(imageFile, 
 					options, 

@@ -35,6 +35,11 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionSettingsDialog;
 
+/**
+ * Show the setup screen to detect nuclear signals, and run a detection analysis
+ * @author ben
+ *
+ */
 public class AddNuclearSignalAction extends ProgressableAction {
 	
 	private UUID signalGroup = null;

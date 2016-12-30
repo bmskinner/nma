@@ -41,22 +41,29 @@ public class Labels {
 			+ "This will detect <i>locations</i> of signals surrounded by <br>"
 			+ "bright background, but will not detect signal <i>sizes</i> <br>"
 			+ "accurately</html>";
-
+	
 	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = 
-			  "<html>The intensity histogram within the nuclear bounding box <br>"
-			+ "is trimmed to the minimum signal threshold defined in <br>"
-			+ "the options, then scanned for the position with maximum dropoff <br>"
-			+ "Formally, in the delta profile, this is the local minimum <br>"
-			+ "(a) below zero <br>"
-			+ "(b) with an absolute value greater than 10% of the total <br>"
-			+ "intensity range of the trimmed profile <br>"
-			+ "(c) with the highest index. <br><br>"
-			+ "Since this position lies in the middle of the dropoff, <br>"
-			+ "a (currently) fixed offset is added to the index to remove <br>"
-			+ "remaining background. <br>"
-			+ "This index is used as the new threshold for the detector. <br>"
-			+ "If a suitable position is not found, we fall back to the <br>"
-			+ "minimum signal threshold defined in the options.</html>";
+			  "<html>Experimental. Attempts to distinguish<br>"
+			  + "signal fom background based on the pixel<br>"
+			  + "intensity histogram.</html>";
+
+//	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = 
+//			  "<html>The intensity histogram within the nuclear <br> "
+//			  + "bounding box is trimmed to the minimum signal <br> "
+//			  + "threshold then scanned for the position with <br>"
+//			  + " maximum dropoff. <br>"
+//			+ "Formally, in the delta profile, this is the <br>"
+//			+ "local minimum: <br>"
+//			+ "(a) below zero <br>"
+//			+ "(b) with an absolute value greater than 10% of the <br>"
+//			+ " total intensity range of the trimmed profile <br>"
+//			+ "(c) with the highest index. <br><br>"
+//			+ "Since this position lies in the middle of the dropoff, <br>"
+//			+ "a (currently) fixed offset is added to the index to <br>"
+//			+ "remove remaining background. <br>"
+//			+ "This index is used as the new threshold for the detector. <br>"
+//			+ "If a suitable position is not found, we fall back to the <br>"
+//			+ "minimum signal threshold defined in the options.</html>";
 	
 	public static final String MINIMUM_SIGNAL_AREA = "The smallest number of pixels a signal can contain";
 	public static final String MAXIMUM_SIGNAL_FRACTION = "The largest size of a signal, as a fraction of the nuclear area (0-1)";
