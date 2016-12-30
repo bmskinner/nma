@@ -9,7 +9,8 @@ public enum DetectionImageType implements ImageType {
 	FLATTENED 			("Chromocentre flattening"),
 	EDGE_DETECTION 		("Edge detection"),
 	MORPHOLOGY_CLOSED 	("Gap closing"),
-	DETECTED_OBJECTS 	("Detected objects");
+	DETECTED_OBJECTS 	("Detected objects"),
+	ANNOTAED_OBJECTS    ("Annotated objects");
 
 	private String name;
 

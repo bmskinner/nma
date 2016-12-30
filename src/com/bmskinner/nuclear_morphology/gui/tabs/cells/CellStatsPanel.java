@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -178,6 +179,10 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					if(activeDataset().getCollection().hasConsensusNucleus()){
 						activeDataset().getCollection().getConsensusNucleus().setScale(scale);
 					}
+					
+					activeDataset().getAnalysisOptions()
+						.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+						.setScale(scale);
 					
 
 				} else {

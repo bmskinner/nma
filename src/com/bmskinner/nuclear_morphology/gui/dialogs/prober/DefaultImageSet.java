@@ -10,6 +10,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImage
  * Hold a set of detection image types and their position
  * in a table
  * @author ben
+ * @since 1.13.4
  *
  */
 public class DefaultImageSet implements ImageSet {

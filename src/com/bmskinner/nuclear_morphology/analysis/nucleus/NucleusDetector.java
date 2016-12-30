@@ -54,9 +54,7 @@ public class NucleusDetector extends Detector {
 	private final IDetectionOptions options;
 	private final NucleusType type;
 	private final double proportion;
-	
-//	private final String outputFolderName;
-	
+
 	private final NucleusFactory factory = new NucleusFactory();
 	
 	public NucleusDetector(final IDetectionOptions options, NucleusType type, double proportion){
@@ -66,7 +64,6 @@ public class NucleusDetector extends Detector {
 		}
 
 		this.options = options;
-//		this.outputFolderName = outputFolderName;
 		this.type = type;
 		this.proportion = proportion;
 		

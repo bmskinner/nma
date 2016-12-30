@@ -73,7 +73,6 @@ public class NucleusProberWorker extends ImageProberWorker {
 		 * 
 		 * Make an icon from each
 		 */
-//		finer("Creating processed images");
 		
 		if(this.isCancelled()){
 			return;
@@ -189,6 +188,16 @@ public class NucleusProberWorker extends ImageProberWorker {
 			ImageProberTableCell iconCell4 = makeIconCell(openProcessor, true, DetectionImageType.DETECTED_OBJECTS);
 			publish(iconCell4);
 			
+			ImageProcessor ap = openProcessor.duplicate();
+			
+			for(ICell cell : cells){
+
+				annotateStats(cell, ap);
+			}
+			
+			ImageProberTableCell iconCell5 = makeIconCell(ap, true, DetectionImageType.ANNOTAED_OBJECTS);
+			publish(iconCell5);
+			
 						
 		} else {
 			// Threshold option selected - do not run edge detection
@@ -250,7 +259,25 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
 
-		ip = new NucleusAnnotator(ip).annotateBorder(n, colour).toProcessor();
+		ip = new NucleusAnnotator(ip)
+				.annotateBorder(n, colour)
+				.toProcessor();
 
 	}	
+	
+	private void annotateStats(ICell cell, ImageProcessor ip){
+		if(cell==null){
+			throw new IllegalArgumentException("Input cell is null");
+		}
+		
+		
+		Nucleus n = cell.getNucleus();
+		// annotate the image processor with the nucleus outline
+		
+		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
+
+		ip = new NucleusAnnotator(ip)
+				.annotateStats(n, Color.ORANGE, Color.BLUE)
+				.toProcessor();
+	}
 }

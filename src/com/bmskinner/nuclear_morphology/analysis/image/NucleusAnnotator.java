@@ -25,6 +25,7 @@ import ij.process.ImageProcessor;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
@@ -122,6 +124,30 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 		
 		return annotatePolygon(roi, c);
+	}
+	
+	/**
+	 * Draw the size and shape values over the CoM of the component
+	 * @param n the component to draw
+	 * @param c the color of the text
+	 * @return
+	 */
+	public NucleusAnnotator annotateStats(CellularComponent n, Color text, Color back){
+		
+		DecimalFormat df = new DecimalFormat("#.##");
+		
+		String areaLbl  = "Area: " + df.format( n.getStatistic(NucleusStatistic.AREA));
+		String perimLbl = "Circ: " + df.format( n.getStatistic(NucleusStatistic.CIRCULARITY));
+		
+		
+		ip.setColor(text);
+		String label = areaLbl + "\n" + perimLbl;
+		ip.drawString(label, 
+				n.getOriginalCentreOfMass().getXAsInt(),
+				n.getOriginalCentreOfMass().getYAsInt(), 
+				back);
+		
+		return this;
 	}
 	
 

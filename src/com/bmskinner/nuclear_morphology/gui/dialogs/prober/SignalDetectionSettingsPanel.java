@@ -1,29 +1,33 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ComponentSizeSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.EdgeThresholdSwitchPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalMethodSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalSizeSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ThresholdSettingsPanel;
 
+/**
+ * The settings panel for detection nuclear signals. This is designed
+ * to be included in an image prober, and will fire a prober reload event
+ * when settings are changed.
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+@SuppressWarnings("serial")
 public class SignalDetectionSettingsPanel extends SettingsPanel {
 		
 		private IMutableNuclearSignalOptions options;
 		
 		private static final String OBJECT_FINDING_LBL = "Object finding";
 		private static final String SIZE_SETTINGS_LBL  = "Filtering";
-		private static final String THRESHOLD_LBL      = "Threshold";
-		private static final String MISC_LBL           = "Other";
+		private static final String THRESHOLD_LBL      = "Thresholding";
 		private static final String CHANNEL_LBL        = "Image";
 		
 		public SignalDetectionSettingsPanel(IMutableNuclearSignalOptions options){
@@ -32,7 +36,6 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 			this.options = options;
 			
 			this.add(createPanel(), BorderLayout.CENTER);
-//			this.setMaximumSize(new Dimension(300, 1000));
 			} catch (Exception e){
 				error(e.getMessage(), e);
 			}
@@ -43,19 +46,14 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 			JPanel panel = new JPanel();
 			panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 			
-//			SettingsPanel switchPanel  = new EdgeThresholdSwitchPanel(nucleusOptions);
 			SettingsPanel sizePanel    = new SignalSizeSettingsPanel(options);
 			SettingsPanel threshPanel  = new ThresholdSettingsPanel(options);
 			SettingsPanel methodPanel  = new SignalMethodSettingsPanel(options);
-//			SettingsPanel miscPanel    = new MiscNucleusSettingsPanel(options);
 			SettingsPanel channelPanel = new ImageChannelSettingsPanel(options);
 			
-			
-
 			methodPanel.setBorder( BorderFactory.createTitledBorder(OBJECT_FINDING_LBL));
 			sizePanel.setBorder(   BorderFactory.createTitledBorder(SIZE_SETTINGS_LBL ));
 			threshPanel.setBorder(BorderFactory.createTitledBorder(THRESHOLD_LBL     ));
-//			miscPanel.setBorder(   BorderFactory.createTitledBorder(MISC_LBL          ));
 			channelPanel.setBorder(BorderFactory.createTitledBorder(CHANNEL_LBL       ));
 
 			this.addSubPanel(methodPanel);
@@ -84,9 +82,5 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 					fireProberReloadEvent(); // don't fire an update for values that have no effect on a prober
 				}
 			}
-
-			
-			
-
 		}
 }
