@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.UUID;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
@@ -23,9 +24,11 @@ public class SignalImageProber extends IntegratedImageProber {
 	private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
 	
 	private final IMutableNuclearSignalOptions options;
+	final IAnalysisDataset dataset;
+	private UUID id;
 
 	public SignalImageProber(final IAnalysisDataset dataset, final File folder){
-		
+		this.dataset = dataset;
 		options = new DefaultNuclearSignalOptions(folder);
 		double scale = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale();
 		options.setScale(scale);
@@ -62,27 +65,49 @@ public class SignalImageProber extends IntegratedImageProber {
 		return options;
 	}
 	
+	public UUID getId(){
+		return id;
+	}
+	
 	protected void okButtonClicked(){
-//		UUID signalGroup = java.util.UUID.randomUUID();
-//		
-//		// get the group name
-//        
-//        SignalGroup group = new SignalGroup();
-//  
-//        group.setChannel(signalOptions.getChannel());
-//        group.setFolder(signalOptions.getFolder());
-//        
-//       
-//        
-//        dataset.getCollection().addSignalGroup(signalGroup, group);
-//        
-//        // Set the default colour for the signal group
-//        int totalGroups = dataset.getCollection().getSignalGroups().size();
-//        Color colour = (Color) ColourSelecter.getColor(totalGroups);
-//        group.setGroupColour(colour);
-//        
-//        
-//        options.setDetectionOptions(signalGroup.toString(), testOptions);//.addNuclearSignalOptions( signalGroup, testOptions);
+		
+		String name = getGroupName();
+		
+		UUID signalGroup = java.util.UUID.randomUUID();
+		id = signalGroup;
+		
+		// get the group name
+        
+        SignalGroup group = new SignalGroup();
+  
+        group.setChannel(options.getChannel());
+        group.setFolder(options.getFolder());
+        group.setGroupName(name);
+        
+        dataset.getCollection().addSignalGroup(signalGroup, group);
+        
+        // Set the default colour for the signal group
+        int totalGroups = dataset.getCollection().getSignalGroups().size();
+        Color colour = (Color) ColourSelecter.getColor(totalGroups);
+        group.setGroupColour(colour);
+        
+        
+        dataset.getAnalysisOptions().setDetectionOptions(signalGroup.toString(), options);
+
+	}
+
+	/**
+	 * Check that the input signal group name is ok. 
+	 * If blank, requests a new name 
+	 * @param name the name to check
+	 * @return a valid name
+	 */
+	private String getGroupName(){
+
+		String name = (String) JOptionPane.showInputDialog("Enter a signal group name");
+
+
+		return name;
 
 	}
 

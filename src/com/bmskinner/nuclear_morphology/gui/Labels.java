@@ -28,20 +28,32 @@ public class Labels {
 	/*
 	 * signal detection
 	 */
-	public static final String FORWARD_THRESHOLDING_RADIO_LABEL = "Take all objects with pixels over the threshold, meeting the size requirements. If there is a lot of bright background, it can mistake this for signal.";
+	public static final String FORWARD_THRESHOLDING_RADIO_LABEL = 
+			  "<html>Includes all pixels over the threshold. </html>";;
 
-	public static final String REVERSE_THRESHOLDING_RADIO_LABEL = "Starts with the brightest pixels (intensity 255), and tries to detect objects meeting size and shape criteria. If it fails, it looks at pixels with intensity 254 or above. "
-			+ "This recurses until either a signal is found, or the signal threshold is reached.";
+	public static final String REVERSE_THRESHOLDING_RADIO_LABEL = 
+			  "<html>Starts with the brightest pixels <br>"
+			+ "(intensity 255), and tries to find objects meeting <br>"
+			+ "size and shape criteria. If no objects are found, <br>"
+			+ "pixels with intensity 254 or above are considered. <br>"
+			+ "This recurses until either a signal is found, <br>"
+			+ "or the signal threshold is reached.<br><br>"
+			+ "This will detect <i>locations</i> of signals surrounded by <br>"
+			+ "bright background, but will not detect signal <i>sizes</i> <br>"
+			+ "accurately</html>";
 
-	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = "<html>The intensity histogram within the nuclear bounding box is trimmed to the minimum <br>"
-			+ "signal threshold defined in the options, <br>"
-			+ "then scanned for the position with maximum dropoff <br>"
+	public static final String ADAPTIVE_THRESHOLDING_RADIO_LABEL = 
+			  "<html>The intensity histogram within the nuclear bounding box <br>"
+			+ "is trimmed to the minimum signal threshold defined in <br>"
+			+ "the options, then scanned for the position with maximum dropoff <br>"
 			+ "Formally, in the delta profile, this is the local minimum <br>"
 			+ "(a) below zero <br>"
-			+ "(b) with an absolute value greater than 10% of the total intensity range of the trimmed profile <br>"
-			+ "(c) with the highest index). <br>"
+			+ "(b) with an absolute value greater than 10% of the total <br>"
+			+ "intensity range of the trimmed profile <br>"
+			+ "(c) with the highest index. <br><br>"
 			+ "Since this position lies in the middle of the dropoff, <br>"
-			+ "a (currently) fixed offset is added to the index to remove remaining background. <br>"
+			+ "a (currently) fixed offset is added to the index to remove <br>"
+			+ "remaining background. <br>"
 			+ "This index is used as the new threshold for the detector. <br>"
 			+ "If a suitable position is not found, we fall back to the <br>"
 			+ "minimum signal threshold defined in the options.</html>";

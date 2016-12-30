@@ -63,6 +63,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
+@Deprecated
 public class SignalDetectionSettingsDialog extends SettingsDialog implements ChangeListener {
 
 	private JPanel contentPanel;

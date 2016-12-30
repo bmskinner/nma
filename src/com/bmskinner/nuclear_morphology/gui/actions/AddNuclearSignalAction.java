@@ -23,11 +23,17 @@ import java.util.UUID;
 
 import javax.swing.JFileChooser;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionSettingsDialog;
 
 public class AddNuclearSignalAction extends ProgressableAction {
 	
@@ -53,26 +59,21 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 			if(analysisSetup.isOk()){
 
-//				this.signalGroup = analysisSetup.getSignalGroup();
-//
-//				String signalGroupName = dataset.getCollection()
-//						.getSignalGroup(signalGroup)
-//						.getGroupName();
+				INuclearSignalOptions options = analysisSetup.getOptions();
 //
 //
-//				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
-//						analysisSetup.getFolder(), 
-//						analysisSetup.getChannel(), 
-//						(IMutableNuclearSignalOptions) dataset.getAnalysisOptions().getNuclearSignalOptions(signalGroup), 
-//						signalGroup, 
-//						signalGroupName);
-//				
-//				
-//				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
-//
-//				this.setProgressMessage("Signal detection: "+signalGroupName);
-//				worker.addPropertyChangeListener(this);
-//				ThreadManager.getInstance().submit(worker);
+				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
+						options, 
+						analysisSetup.getId());
+				
+				
+				String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).getGroupName();
+				
+				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+
+				this.setProgressMessage("Signal detection: "+name);
+				worker.addPropertyChangeListener(this);
+				ThreadManager.getInstance().submit(worker);
 			} else {
 				this.cancel();
 				return;
@@ -81,7 +82,8 @@ public class AddNuclearSignalAction extends ProgressableAction {
 
 		} catch (Exception e){
 			this.cancel();
-			error("Error in signal analysis", e);
+			warn("Error in signal detection");
+			stack("Error in signal detection", e);
 		}
 	}
 	

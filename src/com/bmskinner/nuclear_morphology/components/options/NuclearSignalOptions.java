@@ -15,8 +15,8 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 
 	public NuclearSignalOptions(){
 		this(   DEFAULT_SIGNAL_THRESHOLD, 
-				DEFAULT_MIN_CIRC,
-				DEFAULT_MAX_CIRC,
+				INuclearSignalOptions.DEFAULT_MIN_CIRC,
+				INuclearSignalOptions.DEFAULT_MAX_CIRC,
 				DEFAULT_MIN_SIGNAL_SIZE,
 				DEFAULT_MAX_SIGNAL_FRACTION,
 				SignalDetectionMode.FORWARD);

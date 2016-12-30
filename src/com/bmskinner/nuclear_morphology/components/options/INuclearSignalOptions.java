@@ -19,7 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 
 /**
  * The options that must be available for detecting nuclear signals
@@ -45,7 +45,27 @@ public interface INuclearSignalOptions extends IDetectionOptions {
 	 *
 	 */
 	public enum SignalDetectionMode {
-		FORWARD, REVERSE, ADAPTIVE;
+		FORWARD ("Forward",  Labels.FORWARD_THRESHOLDING_RADIO_LABEL), 
+		REVERSE ("Reverse",  Labels.REVERSE_THRESHOLDING_RADIO_LABEL),
+		ADAPTIVE("Adaptive", Labels.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
+		
+		private String name;
+		private String desc;
+		
+		private SignalDetectionMode(String name, String desc){
+			this.name = name;
+			this.desc = desc;
+		}
+		
+		public String toString(){
+			return name;
+		}
+		
+		public String getDesc(){
+			return desc;
+		}
+		
+		
 	}
 
 	/**

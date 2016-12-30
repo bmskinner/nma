@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -30,6 +31,7 @@ public class SignalDetectionSettingsPanel extends SettingsPanel {
 			this.options = options;
 			
 			this.add(createPanel(), BorderLayout.CENTER);
+//			this.setMaximumSize(new Dimension(300, 1000));
 			} catch (Exception e){
 				error(e.getMessage(), e);
 			}

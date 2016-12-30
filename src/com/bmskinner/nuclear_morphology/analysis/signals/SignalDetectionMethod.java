@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -42,16 +43,17 @@ public class SignalDetectionMethod extends AbstractAnalysisMethod {
 	 * @param channel the RGB channel to search
 	 * @param options the analysis options
 	 * @param group the signal group to add signals to
+	 * @throws UnavailableSignalGroupException 
 	 */
 
-	public SignalDetectionMethod(IAnalysisDataset d, File folder, int channel, IMutableNuclearSignalOptions options, UUID group, String channelName){
+	public SignalDetectionMethod(IAnalysisDataset d, INuclearSignalOptions options, UUID group) throws UnavailableSignalGroupException{
 		super(d);
 		
-		this.options	 = options;
-		this.folder		 = folder;
-		this.channel	 = channel;
+		this.options	 = (IMutableNuclearSignalOptions) options.duplicate();
+		this.folder		 = options.getFolder();
+		this.channel	 = options.getChannel();
 		this.signalGroup = group;
-		this.channelName = channelName;
+		this.channelName = d.getCollection().getSignalGroup(group).getGroupName();
 		
 	}
 	
