@@ -24,6 +24,7 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Paint;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -31,6 +32,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -41,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
@@ -136,15 +139,74 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		
 		DecimalFormat df = new DecimalFormat("#.##");
 		
-		String areaLbl  = "Area: " + df.format( n.getStatistic(NucleusStatistic.AREA));
-		String perimLbl = "Circ: " + df.format( n.getStatistic(NucleusStatistic.CIRCULARITY));
+		String areaLbl;
+		String perimLbl;
 		
+		double circ;
+		double area;
 		
+		if(n instanceof INuclearSignal){
+
+			area = n.getStatistic(SignalStatistic.AREA);
+			double perim2 = Math.pow(n.getStatistic(SignalStatistic.PERIMETER), 2);
+			circ = (4 * Math.PI) * (area / perim2);
+
+		} else {
+			area =  n.getStatistic(NucleusStatistic.AREA);
+			circ =  n.getStatistic(NucleusStatistic.CIRCULARITY);
+		}
+		
+		areaLbl  = "Area: " + df.format( area);
+		perimLbl = "Circ: " + df.format( circ);
+
+		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
 		ip.setColor(text);
 		String label = areaLbl + "\n" + perimLbl;
 		ip.drawString(label, 
 				n.getOriginalCentreOfMass().getXAsInt(),
 				n.getOriginalCentreOfMass().getYAsInt(), 
+				back);
+		
+		return this;
+	}
+	
+	/**
+	 * Draw the size and shape values over the CoM of the component
+	 * @param n the component to draw
+	 * @param c the color of the text
+	 * @return
+	 */
+	public NucleusAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text, Color back){
+		
+		DecimalFormat df = new DecimalFormat("#.##");
+		
+		String areaLbl;
+		String perimLbl;
+		
+		double circ = 0;
+		double area = 0;
+		double fraction;
+		
+		if(signal instanceof INuclearSignal){
+
+			area = signal.getStatistic(SignalStatistic.AREA);
+			double perim2 = Math.pow(signal.getStatistic(SignalStatistic.PERIMETER), 2);
+			circ = (4 * Math.PI) * (area / perim2);
+
+		} 
+		
+		fraction  = area / parent.getStatistic(NucleusStatistic.AREA);
+		
+		areaLbl  = "Area: " + df.format( area);
+		perimLbl = "Circ: " + df.format( circ);
+		String fractLabel = "Fract: " + df.format( fraction);
+
+		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
+		ip.setColor(text);
+		String label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
+		ip.drawString(label, 
+				signal.getOriginalCentreOfMass().getXAsInt(),
+				signal.getOriginalCentreOfMass().getYAsInt(), 
 				back);
 		
 		return this;

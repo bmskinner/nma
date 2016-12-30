@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
@@ -106,10 +107,18 @@ public class SignalProberWorker  extends ImageProberWorker {
 
 		finer("Drawing signals");
 		// annotate detected signals onto the imagefile
-		drawSignals(map, openProcessor);
+		drawSignals(map, openProcessor, false);
 		
 		ImageProberTableCell iconCell = makeIconCell(openProcessor, true, DetectionImageType.DETECTED_OBJECTS);
 		publish(iconCell);
+		
+		ImageProcessor ap = openProcessor.duplicate();
+		// annotate detected signals onto the imagefile
+		drawSignals(map, ap, true);
+		ImageProberTableCell iconCell2 = makeIconCell(ap, true, DetectionImageType.ANNOTAED_OBJECTS);
+		publish(iconCell2);
+		
+		
 
 //		updateImageThumbnails();
 //
@@ -117,41 +126,31 @@ public class SignalProberWorker  extends ImageProberWorker {
 //		this.setStatusLoaded();
 	}
 	
-	protected void drawSignals(Map<Nucleus, List<INuclearSignal>> map, ImageProcessor ip) throws Exception{
+	protected void drawSignals(Map<Nucleus, List<INuclearSignal>> map, ImageProcessor ip, boolean annotate) throws Exception{
 		if(map==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
-		ip.setLineWidth(2);
 		for(Nucleus n : map.keySet()){
-			int[] positions = n.getPosition();
+
 			List<INuclearSignal> list = map.get(n);
 			
-			// Draw the nucleus
-			ip.setColor(Color.BLUE);
-			FloatPolygon npolygon = n.createPolygon();
-			PolygonRoi nroi = new PolygonRoi(npolygon, PolygonRoi.POLYGON);
-			nroi.setLocation(positions[CellularComponent.X_BASE], positions[CellularComponent.Y_BASE]);
-			ip.draw(nroi);
+			ip = new NucleusAnnotator(ip)
+					.annotateBorder(n, Color.BLUE)
+					.toProcessor();
 			
-			
-		
 			for(INuclearSignal s : list){
-				if(checkSignal(s, n)){
-					ip.setColor(Color.YELLOW);
-				} else {
-					ip.setColor(Color.RED);
+				
+				Color color = checkSignal(s, n) ? Color.ORANGE : Color.RED;
+				NucleusAnnotator an = new NucleusAnnotator(ip);
+				an.annotateBorder(s, color);
+						
+				
+				if(annotate){
+					an.annotateSignalStats(n, s, Color.YELLOW, Color.BLUE);
 				}
-
-				FloatPolygon polygon = s.createPolygon();
-				PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 				
-				// Offset the roi to the nucleus bouding box
-				double x = positions[CellularComponent.X_BASE]+s.getCentreOfMass().getX() - ( roi.getBounds().getWidth() /2);
-				double y = positions[CellularComponent.Y_BASE]+s.getCentreOfMass().getY()- ( roi.getBounds().getHeight() /2);
-				
-				roi.setLocation( x,y );
-				ip.draw(roi);
+				ip = an.toProcessor();
 			}
 		}
 	}

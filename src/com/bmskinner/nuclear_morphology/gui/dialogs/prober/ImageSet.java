@@ -20,7 +20,8 @@ public interface ImageSet {
 			.add(DetectionImageType.ANNOTAED_OBJECTS);
 	
 	static final ImageSet SIGNAL_IMAGE_SET = new DefaultImageSet()
-			.add(DetectionImageType.DETECTED_OBJECTS);
+			.add(DetectionImageType.DETECTED_OBJECTS)
+			.add(DetectionImageType.ANNOTAED_OBJECTS);
 
 	
 	/**
