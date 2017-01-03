@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
+
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;

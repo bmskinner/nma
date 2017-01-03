@@ -57,7 +57,6 @@ import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {

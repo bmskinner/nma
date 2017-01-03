@@ -29,7 +29,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * Export the locations of the centre of mass of nuclei in a dataset
@@ -37,7 +36,7 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
  * @author ben
  *
  */
-public class MappingFileExporter {
+public class MappingFileExporter implements Exporter {
 	
 	private static final String NEWLINE = System.getProperty("line.separator"); 
 	
@@ -47,17 +46,12 @@ public class MappingFileExporter {
 				+File.separator
 				+d.getName()
 				+"."
-				+Constants.LOC_FILE_EXTENSION);
+				+Importer.LOC_FILE_EXTENSION);
 		
-//		IJ.log("Export to "+exportFile.getAbsolutePath());
-//		
+		
 		if(exportFile.exists()){
 			exportFile.delete();
 		}
-		
-//		IJ.log("Making string");
-		
-		//
 		
 		StringBuilder builder = new StringBuilder();
 		

@@ -68,7 +68,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
 	
@@ -1057,7 +1057,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 			// Add the annotation
 			double yPos = yMax - ( index * (yMax / 20));
 			String statisticalTesting = "p(unimodal) = "+df.format(pvalue);
-			if(pvalue<Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+			if(pvalue< SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
 				statisticalTesting = "* " + statisticalTesting;
 			}
 			XYTextAnnotation annotation = new XYTextAnnotation(statisticalTesting,355, yPos);

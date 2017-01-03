@@ -21,7 +21,6 @@
 	package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 	import java.awt.Color;
-import java.util.logging.Level;
 
 import javax.swing.JLabel;
 

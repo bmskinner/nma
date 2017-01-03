@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 @Deprecated
 public class PopulationImportWorker extends AnalysisWorker {
@@ -65,7 +64,7 @@ public class PopulationImportWorker extends AnalysisWorker {
 			throw new IllegalArgumentException("File has non-normal attributes or is not a file");
 		}
 		
-		if( ! f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+		if( ! f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)){
 			throw new IllegalArgumentException("File is not nmd format or has been renamed");
 		}
 
@@ -117,9 +116,10 @@ public class PopulationImportWorker extends AnalysisWorker {
 
 				
 				// update the log file to the same folder as the dataset
-				File logFile = new File(file.getParent()
-						+File.separator
-						+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
+				File logFile = Importer.replaceFileExtension(file, Importer.SAVE_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION);
+//				File logFile = new File(file.getParent()
+//						+File.separator
+//						+file.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
 				
 				dataset.setDebugFile(logFile);
 				fine("Updated log file location");
@@ -273,12 +273,12 @@ public class PopulationImportWorker extends AnalysisWorker {
 				
 		
 		// major version MUST be the same
-		if(version.getMajor()!=Constants.VERSION_MAJOR){
+		if(version.getMajor()!=Version.VERSION_MAJOR){
 			warn("Major version difference");
 			return false;
 		}
 		// dataset revision should be equal or greater to program
-		if(version.getMinor()<Constants.VERSION_MINOR){
+		if(version.getMinor()<Version.VERSION_MINOR){
 			warn("Dataset was created with an older version of the program");
 			warn("Some functionality may not work as expected");
 		}

@@ -57,12 +57,11 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
@@ -72,9 +71,9 @@ import jebl.evolution.taxa.Taxon;
 import jebl.evolution.trees.RootedTree;
 import jebl.evolution.trees.TransformedRootedTree;
 import jebl.evolution.trees.Tree;
-import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 import jebl.gui.trees.treeviewer.TreeViewer.TreeLayoutType;
+import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener {
@@ -578,7 +577,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 		newOptions.setClusterNumber(list.size());		
 		
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		ClusterGroup newGroup = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, newOptions, group.getTree());
+		ClusterGroup newGroup = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, newOptions, group.getTree());
 		return newGroup;
 	}
 	

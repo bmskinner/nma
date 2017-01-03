@@ -9,7 +9,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
@@ -29,8 +28,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;

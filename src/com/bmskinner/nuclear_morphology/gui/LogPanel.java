@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Importer;
 
 /**
  * The log panel is where logging messages are displayed. It also holds
@@ -228,7 +228,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 						for(File f : fileList){
 							fine("Checking dropped file");
-							if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+							if(f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)){
 								finer("Opening file "+f.getAbsolutePath());
 
 								fireSignalChangeEvent("Open|"+f.getAbsolutePath());

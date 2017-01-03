@@ -21,8 +21,6 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Color;
 
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
@@ -94,7 +92,7 @@ public class ImageConverter extends AbstractImageFilterer {
 				return makeGreyScaleIamge();
 			}
 			if(st.getSize()>1){
-				return makeGreyRGBImage(Constants.COUNTERSTAIN); // default is counterstain
+				return makeGreyRGBImage(ImageImporter.COUNTERSTAIN); // default is counterstain
 			}
 		}
 
@@ -129,7 +127,7 @@ public class ImageConverter extends AbstractImageFilterer {
 	public ImageConverter invert(){
 		// Handle stacks first
 		if(st!=null){
-			ip = st.getProcessor(Constants.COUNTERSTAIN);
+			ip = st.getProcessor(ImageImporter.COUNTERSTAIN);
 		}
 
 		if(ip!=null){
@@ -276,22 +274,7 @@ public class ImageConverter extends AbstractImageFilterer {
 	 * @return the image
 	 */
 	private ImageConverter makeGreyScaleIamge(){
-		return makeGreyRGBImage(Constants.COUNTERSTAIN);
-		
-//		int w = st.getWidth();
-//		int h = st.getHeight();
-//		
-//		byte[] blank = new byte[ w * h ];
-//
-//		ImagePlus[] images = new ImagePlus[3];
-//		images[ImageImporter.RGB_RED]   = new ImagePlus("red",   st.getProcessor(Constants.COUNTERSTAIN));  
-//		images[Constants.RGB_GREEN] = new ImagePlus("green", st.getProcessor(Constants.COUNTERSTAIN));
-//		images[Constants.RGB_BLUE]  = new ImagePlus("blue",  st.getProcessor(Constants.COUNTERSTAIN));      
-//
-//		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
-//
-//		result = result.flatten();
-//		return new ImageConverter(result.getProcessor());
+		return makeGreyRGBImage(ImageImporter.COUNTERSTAIN);
 	}
 
 	
@@ -303,9 +286,9 @@ public class ImageConverter extends AbstractImageFilterer {
 	private ImageConverter mergeStack(){
 
 		ImagePlus[] images = new ImagePlus[3];
-		images[ImageImporter.RGB_RED]   = new ImagePlus("red",   st.getProcessor(Constants.FIRST_SIGNAL_CHANNEL));  
+		images[ImageImporter.RGB_RED]   = new ImagePlus("red",   st.getProcessor(ImageImporter.FIRST_SIGNAL_CHANNEL));  
 		images[ImageImporter.RGB_GREEN] = new ImagePlus("green", st.getProcessor(3));  
-		images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue",  st.getProcessor(Constants.COUNTERSTAIN));      
+		images[ImageImporter.RGB_BLUE]  = new ImagePlus("blue",  st.getProcessor(ImageImporter.COUNTERSTAIN));      
 
 		ImagePlus result = RGBStackMerge.mergeChannels(images, false); 
 		

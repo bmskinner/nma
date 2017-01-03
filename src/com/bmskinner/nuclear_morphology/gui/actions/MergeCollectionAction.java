@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import ij.io.SaveDialog;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -27,19 +25,17 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.JFileChooser;
-
 import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
-import com.bmskinner.nuclear_morphology.analysis.DatasetMerger;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Importer;
+
+import ij.io.SaveDialog;
 
 /**
  * Carry out a merge of datasets
@@ -64,7 +60,7 @@ public class MergeCollectionAction extends ProgressableAction {
 			
 		} else {
 
-			SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Constants.SAVE_FILE_EXTENSION);
+			SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Importer.SAVE_FILE_EXTENSION);
 
 			String fileName   = saveDialog.getFileName();
 			String folderName = saveDialog.getDirectory();

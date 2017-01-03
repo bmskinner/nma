@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values,

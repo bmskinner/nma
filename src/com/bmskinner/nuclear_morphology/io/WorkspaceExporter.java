@@ -13,7 +13,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public class WorkspaceExporter implements Loggable {
+public class WorkspaceExporter implements Loggable, Exporter {
 	
 	private static final String NEWLINE = System.getProperty("line.separator"); 
 	final IWorkspace w;

@@ -50,9 +50,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ExportableBoxAndWhiske
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
+import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 import ij.io.SaveDialog;
 
 
@@ -390,7 +390,7 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
 	private void export(){
 						
 		// get a place to save to
-		SaveDialog saveDialog = new SaveDialog("Export data to...", "Chart data", Constants.TAB_FILE_EXTENSION);
+		SaveDialog saveDialog = new SaveDialog("Export data to...", "Chart data", Exporter.TAB_FILE_EXTENSION);
 
 		String fileName   = saveDialog.getFileName();
 		String folderName = saveDialog.getDirectory();

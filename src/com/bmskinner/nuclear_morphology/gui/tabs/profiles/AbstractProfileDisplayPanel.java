@@ -19,14 +19,12 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
-import javax.swing.JTable;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
@@ -36,7 +34,6 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagOptionsPanel;

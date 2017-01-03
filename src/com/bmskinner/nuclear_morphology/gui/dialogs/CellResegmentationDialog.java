@@ -43,9 +43,9 @@ import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFac
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
+import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;

@@ -20,9 +20,11 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;

@@ -20,8 +20,6 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
 
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 /**
  * Hold version information, and parsing methods
  * @author bms41
@@ -30,6 +28,16 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
 public class Version implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * The fields for setting the version. Version will be stored in AnalysisDatasets.
+	 * Backwards compatability should be maintained between bugfix increments, but is not
+	 * guaranteed between revision or major version increments.
+	 */
+	public static final int VERSION_MAJOR     = 1;
+	public static final int VERSION_MINOR     = 13;
+	public static final int VERSION_REVISION  = 4;
+	
 	private final int major;
 	private final int minor;
 	private final int revision;
@@ -45,7 +53,7 @@ public class Version implements Serializable {
 	}
 	
 	public static Version currentVersion(){
-		return new Version(Constants.VERSION_MAJOR, Constants.VERSION_MINOR, Constants.VERSION_REVISION);
+		return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	}
 	
 	/**

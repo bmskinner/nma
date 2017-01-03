@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Dimension;
-import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 
@@ -27,7 +26,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;

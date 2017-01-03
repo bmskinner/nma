@@ -44,7 +44,6 @@ import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import weka.estimators.KernelEstimator;
@@ -334,7 +333,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 
 			int bins = findBinSizeForHistogram(values, minMaxStep);
 
-			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+			ds.addSeries(IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 			}catch(UnavailableBorderTagException | ProfileException e){
 				throw new ChartDatasetCreationException("Cannot get segments for "+dataset.getName(), e);
 			}
@@ -500,7 +499,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 			double[][] data = { xData, yData} ;
 				
 			
-			ds.addSeries(Constants.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), data);
+			ds.addSeries(IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), data);
 		}
 
 		return ds;

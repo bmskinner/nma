@@ -15,8 +15,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 import weka.clusterers.Clusterer;
 import weka.clusterers.EM;
 import weka.clusterers.HierarchicalClusterer;
@@ -48,7 +46,7 @@ public class ClusteringMethod extends TreeBuildingMethod {
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
 		finest("Cluster group number chosen: "+clusterNumber);
 
-		IClusterGroup group = new ClusterGroup(Constants.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, newickTree);
+		IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, newickTree);
 
 		for(int cluster=0;cluster<clusterMap.size();cluster++){
 

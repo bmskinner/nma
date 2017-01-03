@@ -18,51 +18,17 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.tail;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.filter.Binary;
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
-import java.awt.Color;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.swing.SwingWorker;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
-import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.IMutableCell;
-import com.bmskinner.nuclear_morphology.components.SpermTail;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.AnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.AnalysisOptions.CannyOptions;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
-import mmorpho.MorphoProcessor;
-import mmorpho.StructureElement;
-import skeleton_analysis.AnalyzeSkeleton_;
-import skeleton_analysis.Edge;
-import skeleton_analysis.Graph;
-import skeleton_analysis.SkeletonResult;
 
 
 

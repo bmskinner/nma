@@ -19,12 +19,11 @@
 
 package com.bmskinner.nuclear_morphology.io;
 
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-
-import static java.nio.file.StandardCopyOption.*;
-
 import java.nio.file.Files;
 import java.util.UUID;
 
@@ -41,8 +40,8 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IMutableCell;
-import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -68,7 +67,6 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignal
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
@@ -80,7 +78,7 @@ import ij.gui.Roi;
  * @since 1.13.3
  *
  */
-public class DatasetConverter implements Loggable {
+public class DatasetConverter implements Loggable, Importer {
 	
 	private IAnalysisDataset oldDataset;
 	
@@ -741,11 +739,7 @@ public class DatasetConverter implements Loggable {
 		
 		if(saveFile.exists()){
 			
-			String newFileName = saveFile.getAbsolutePath().replace(Constants.SAVE_FILE_EXTENSION, Constants.BAK_FILE_EXTENSION);
-			
-			log("Copying to "+newFileName);
-			
-			File newFile = new File(newFileName);
+			File newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
 			
 			if(newFile.exists()){
 				

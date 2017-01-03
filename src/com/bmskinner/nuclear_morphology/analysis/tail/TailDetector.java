@@ -18,16 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.tail;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.filter.Binary;
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
@@ -39,9 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.SpermTail;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.AnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
@@ -50,9 +38,17 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.plugin.filter.Binary;
+import ij.process.BinaryProcessor;
+import ij.process.ByteProcessor;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;

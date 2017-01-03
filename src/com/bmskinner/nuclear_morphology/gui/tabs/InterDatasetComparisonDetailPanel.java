@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JTabbedPane;
 
 @SuppressWarnings("serial")

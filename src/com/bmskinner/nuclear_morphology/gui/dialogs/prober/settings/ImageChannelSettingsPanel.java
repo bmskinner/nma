@@ -16,7 +16,6 @@ import javax.swing.SpinnerNumberModel;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * Panel for image channel settings

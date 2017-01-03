@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
+
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;

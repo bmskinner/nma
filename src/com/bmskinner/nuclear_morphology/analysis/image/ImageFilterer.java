@@ -27,8 +27,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import ij.ImagePlus;

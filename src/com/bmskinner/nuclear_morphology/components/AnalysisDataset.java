@@ -40,9 +40,9 @@ import java.util.regex.Pattern;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 
 /**
@@ -89,10 +89,8 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @param collection
 	 */
 	public AnalysisDataset(ICellCollection collection){
-		this(collection, new File(collection.getOutputFolder()
-				+File.separator
-				+collection.getName()
-				+Constants.SAVE_FILE_EXTENSION));
+		this(collection, new File(collection.getOutputFolder(),
+				collection.getName()+Importer.SAVE_FILE_EXTENSION));
 	}
 	
 	/**
@@ -104,11 +102,9 @@ public class AnalysisDataset implements IAnalysisDataset {
 		this.thisCollection = (CellCollection) collection;
 		this.savePath       = saveFile;
 		
-		this.debugFile      = new File(saveFile.getParent()
-				                        + File.separator
-				                        + saveFile.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
+		this.debugFile      = Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION);
 		this.isRoot         = false;
-		this.version        = new Version(Constants.VERSION_MAJOR,Constants.VERSION_MINOR,Constants.VERSION_REVISION);
+		this.version        = new Version(Version.VERSION_MAJOR,Version.VERSION_MINOR,Version.VERSION_REVISION);
 	}
 	
 	
@@ -566,7 +562,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 
 				String name = g.getName();
 
-				Pattern p = Pattern.compile("^"+Constants.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
+				Pattern p = Pattern.compile("^"+IClusterGroup.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
 
 				Matcher m = p.matcher(name);
 				if(m.find()){

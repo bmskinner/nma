@@ -25,7 +25,7 @@ import java.text.ParseException;
 
 import javax.swing.table.DefaultTableCellRenderer;
 
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 @SuppressWarnings("serial")
 public class PValueTableCellRenderer extends DefaultTableCellRenderer {
@@ -43,11 +43,11 @@ public class PValueTableCellRenderer extends DefaultTableCellRenderer {
 		try {
 			pvalue = nf.parse(value.toString()).doubleValue();
 
-			if(pvalue <= Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+			if(pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
 				colour = Color.YELLOW;
 			}
 
-			if(pvalue <= Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL){
+			if(pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL){
 				colour = Color.GREEN;
 			}
 		} catch (ParseException e) {

@@ -24,7 +24,7 @@ import java.text.ParseException;
 
 import javax.swing.JLabel;
 
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
  * Colour a table cell background based on its value to show statistical 
@@ -61,8 +61,8 @@ public class WilcoxonTableCellRenderer extends PairwiseTableCellRenderer {
 	        int numberOfTests = 5; // correct for the different variables measured;
 	        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
 	        
-	        double fivePct = Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
-	        double onePct = Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
+	        double fivePct = SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
+	        double onePct = SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
 //	        IJ.log("Columns: "+table.getColumnCount());
 	        
 	        if(pvalue<=fivePct){

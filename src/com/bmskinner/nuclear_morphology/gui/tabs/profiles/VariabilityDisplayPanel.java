@@ -45,11 +45,11 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagOptionsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
-import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 @SuppressWarnings("serial")
 public class VariabilityDisplayPanel extends DetailPanel implements ActionListener, ChangeListener {
@@ -82,7 +82,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 		borderTagOptionsPanel.setEnabled(false);
 
 
-		pvalueSpinner = new JSpinner(new SpinnerNumberModel(Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
+		pvalueSpinner = new JSpinner(new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
 		pvalueSpinner.setEnabled(false);
 		pvalueSpinner.addChangeListener(this);
 		JComponent field = ((JSpinner.DefaultEditor) pvalueSpinner.getEditor());

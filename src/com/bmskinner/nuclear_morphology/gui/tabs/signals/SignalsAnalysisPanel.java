@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
-import ij.io.DirectoryChooser;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
@@ -33,23 +31,19 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+
+import ij.io.DirectoryChooser;
 
 
 @SuppressWarnings("serial")

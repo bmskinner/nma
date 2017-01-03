@@ -18,17 +18,15 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
+import java.io.File;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-
-import java.io.File;
-import java.util.logging.Level;
-
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * This class takes any given input image, and will convert it
@@ -37,15 +35,30 @@ import com.bmskinner.nuclear_morphology.utility.Constants;
  * @since 1.11.0
  *
  */
-public class ImageImporter implements Loggable {
+public class ImageImporter implements Loggable, Importer {
 	
 	private final File f;
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
+	
+	// The file types that the program will try to open
+	public static final String[] IMPORTABLE_FILE_TYPES = {".tif", ".tiff", ".jpg"};
+	
+	// The prefix to use when exporting images
+	public static final String IMAGE_PREFIX = "export.";
+	
+	// Images with these prefixes are ignored by the image importer
+	public static final String[] PREFIXES_TO_IGNORE = { IMAGE_PREFIX, "composite", "plot", "._"};
 	
 	// RGB colour channels
 	public static final int RGB_RED = 0;
 	public static final int RGB_GREEN = 1;
 	public static final int RGB_BLUE = 2;	
+	
+	// imported images - stack positions
+	public static final int COUNTERSTAIN = 1; // ImageStack slices are numbered from 1; first slice is blue
+	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are numbered from 1; first slice is blue
+		
+			
 	
 	/**
 	 * Construct from a file. Checks that the given File object is valid, and 
@@ -53,20 +66,8 @@ public class ImageImporter implements Loggable {
 	 * @param f the file to import
 	 */
 	public ImageImporter(final File f){
-		if(f==null){
-			throw new IllegalArgumentException("File cannot be null");
-		}
-		
-		if( ! f.exists()){
-			throw new IllegalArgumentException("File does not exist");
-		}
-		
-		if( f.isDirectory()){
-			throw new IllegalArgumentException("File is a directory");
-		}
-		
-		if( ! f.isFile()){
-			throw new IllegalArgumentException("File has non-normal attributes or is not a file");
+		if( ! Importer.isSuitableImportFile(f)){
+			throw new IllegalArgumentException(INVALID_FILE_ERROR);
 		}
 		
 		this.f = f;
@@ -90,13 +91,13 @@ public class ImageImporter implements Loggable {
 	    
 	    String fileName = file.getName();
 	    
-	    for( String prefix : Constants.PREFIXES_TO_IGNORE){
+	    for( String prefix : PREFIXES_TO_IGNORE){
 	    	if(fileName.startsWith(prefix)){
 	    		return false;
 	    	}
 	    }
 
-	    for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
+	    for( String fileType : IMPORTABLE_FILE_TYPES){
 	    	if( fileName.endsWith(fileType) ){
 	    		return true;
 	    	}
@@ -116,10 +117,10 @@ public class ImageImporter implements Loggable {
 		  }
 
 		  int stackNumber = channel==RGB_RED 
-				  ? Constants.FIRST_SIGNAL_CHANNEL
+				  ? FIRST_SIGNAL_CHANNEL
 						  : channel==RGB_GREEN
-						  ? Constants.FIRST_SIGNAL_CHANNEL+1
-								  : Constants.COUNTERSTAIN;
+						  ? FIRST_SIGNAL_CHANNEL+1
+								  : COUNTERSTAIN;
 		  return stackNumber;
 	  }
 
@@ -278,7 +279,7 @@ public class ImageImporter implements Loggable {
 	 * @return the stack
 	 */
 	private ImageStack convert16bitGrey(ImagePlus image) throws ImageImportException {
-		log(Level.FINE, "Converting image from 16 bit");
+		fine("Converting image from 16 bit");
 		ImageConverter converter = new ImageConverter(image);
 		converter.convertToGray8();
 		return convertGreyscale(image);

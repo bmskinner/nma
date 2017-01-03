@@ -9,13 +9,12 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Importer;
 
 public class RelocateFromFileAction extends ProgressableAction {
 
@@ -70,7 +69,7 @@ public class RelocateFromFileAction extends ProgressableAction {
 	 */
 	private File selectFile(){
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Constants.LOC_FILE_EXTENSION);
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
 		File defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
 //		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
 		JFileChooser fc = new JFileChooser("Select a file...");

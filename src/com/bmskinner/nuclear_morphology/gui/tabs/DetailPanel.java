@@ -54,11 +54,11 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

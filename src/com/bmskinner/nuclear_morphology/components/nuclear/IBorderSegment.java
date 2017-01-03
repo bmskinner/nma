@@ -54,6 +54,7 @@ public interface IBorderSegment
 	// causing errors when fitting segments to individual nuclei
 	static final int MINIMUM_SEGMENT_LENGTH       = 3;
 	static final int INTERPOLATION_MINIMUM_LENGTH = 2;
+	static final String SEGMENT_PREFIX = "Seg_";
 	
 	/**
 	 * Create the preferred segment type for this interface

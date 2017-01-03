@@ -12,7 +12,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -150,13 +149,13 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 
 		String fileName = file.getName();
 
-		for( String prefix : Constants.PREFIXES_TO_IGNORE){
+		for( String prefix : ImageImporter.PREFIXES_TO_IGNORE){
 			if(fileName.startsWith(prefix)){
 				return false;
 			}
 		}
 
-		for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
+		for( String fileType : ImageImporter.IMPORTABLE_FILE_TYPES){
 			if( fileName.endsWith(fileType) ){
 				return true;
 			}

@@ -32,19 +32,15 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.dialogs.AnalysisSetupDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.IntegratedImageProber;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Importer;
+
 
 /**
  * Run a new analysis
@@ -106,17 +102,13 @@ public class NewAnalysisAction extends ProgressableAction {
 			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
 			// craete the analysis folder early. Did not before in case folder had no images
-			File analysisFolder = new File(nucleusOptions.getFolder().getAbsolutePath()+File.separator+outputFolderName);
+			File analysisFolder = new File(nucleusOptions.getFolder(), outputFolderName);
 			if(!analysisFolder.exists()){
 				analysisFolder.mkdir();
 			}
 //			
-			File logFile = new File(nucleusOptions.getFolder().getAbsolutePath()
-					+ File.separator
-					+ outputFolderName
-					+ File.separator
-					+ nucleusOptions.getFolder().getName()
-					+ Constants.LOG_FILE_EXTENSION);
+			File logFile = new File(analysisFolder, 
+					nucleusOptions.getFolder().getName() + Importer.LOG_FILE_EXTENSION);
 
 			
 			IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);

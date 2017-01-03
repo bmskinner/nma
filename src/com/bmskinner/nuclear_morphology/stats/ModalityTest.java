@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
  * mvalue approach.
  *
  */
-public class ModalityTest {
+public class ModalityTest implements SignificanceTest {
 
 	private IProfile profile;
 	

@@ -19,18 +19,15 @@
 
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-
 import java.awt.Color;
 import java.io.File;
 import java.util.List;
 
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -43,7 +40,9 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+
+import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 public class NucleusProberWorker extends ImageProberWorker {
 

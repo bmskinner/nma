@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
+
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearBoxplotsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearHistogramsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearOverlaysPanel;

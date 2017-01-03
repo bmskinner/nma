@@ -18,22 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 
 @SuppressWarnings("serial")
 public class ManualCellCurator extends LoadingIconDialog {

@@ -12,7 +12,6 @@ import javax.swing.SwingWorker;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * This class provides progress and done signalling control for SwingWorker analyses.

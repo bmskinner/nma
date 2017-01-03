@@ -34,9 +34,9 @@ import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * This is the replacement analysis dataset designed to use less memory from
@@ -84,10 +84,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 * @param collection
 	 */
 	public DefaultAnalysisDataset(ICellCollection collection){
-		this(collection, new File(collection.getOutputFolder()
-				+File.separator
-				+collection.getName()
-				+Constants.SAVE_FILE_EXTENSION));
+		this(collection, new File(collection.getOutputFolder(),
+				collection.getName()+Importer.SAVE_FILE_EXTENSION));
 	}
 	
 	/**
@@ -97,11 +95,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	 */
 	public DefaultAnalysisDataset(ICellCollection collection, File saveFile){
 		super(collection);
-		this.savePath       = saveFile;
-		this.debugFile      = new File(saveFile.getParent()
-				                        + File.separator
-				                        + saveFile.getName().replace(Constants.SAVE_FILE_EXTENSION, Constants.LOG_FILE_EXTENSION));
-		this.isRoot         = false;
+		this.savePath     = saveFile;
+		this.debugFile    = Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION);
+		this.isRoot       = false;
 	}
 	
 	/* (non-Javadoc)

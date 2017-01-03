@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
-import ij.io.DirectoryChooser;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -56,6 +54,8 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
+
+import ij.io.DirectoryChooser;
 
 /**
  * @author bms41

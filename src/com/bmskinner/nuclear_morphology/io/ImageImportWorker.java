@@ -26,7 +26,6 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.LabelInfo;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import ij.gui.PolygonRoi;
 import ij.process.Blitter;

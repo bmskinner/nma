@@ -20,9 +20,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -67,7 +64,9 @@ import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{

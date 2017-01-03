@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.text.NumberFormat;
 import java.text.ParseException;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,9 +30,9 @@ import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 
 @SuppressWarnings("serial")

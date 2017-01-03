@@ -60,7 +60,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
@@ -68,7 +67,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 

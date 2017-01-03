@@ -70,7 +70,6 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.KruskalTester;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import ij.process.FloatPolygon;
@@ -1078,7 +1077,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				list.add(length);
 			}
 
-			dataset.add(list, Constants.SEGMENT_PREFIX+segPosition+"_"+i, Constants.SEGMENT_PREFIX+segPosition);
+			dataset.add(list, IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i, IBorderSegment.SEGMENT_PREFIX+segPosition);
 		}
 		return dataset;
 	}
@@ -1128,7 +1127,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				}		
 			}
 
-			dataset.add(list, Constants.SEGMENT_PREFIX+segPosition+"_"+i, Constants.SEGMENT_PREFIX+segPosition);
+			dataset.add(list, IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i, IBorderSegment.SEGMENT_PREFIX+segPosition);
 		}
 		return dataset;
 	}

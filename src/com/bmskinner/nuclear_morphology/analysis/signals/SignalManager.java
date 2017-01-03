@@ -28,14 +28,12 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceValue;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
@@ -46,7 +44,6 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**

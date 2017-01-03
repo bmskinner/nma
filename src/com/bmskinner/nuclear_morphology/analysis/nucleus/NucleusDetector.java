@@ -18,10 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import ij.ImageStack;
-import ij.gui.Roi;
-import ij.process.ImageProcessor;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
@@ -41,8 +37,11 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.StatsMap;
+
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
 
 
 /**

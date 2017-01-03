@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
-import ij.IJ;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
@@ -28,31 +26,21 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

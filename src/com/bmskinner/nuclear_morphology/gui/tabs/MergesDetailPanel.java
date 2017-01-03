@@ -20,7 +20,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
@@ -38,13 +37,12 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;

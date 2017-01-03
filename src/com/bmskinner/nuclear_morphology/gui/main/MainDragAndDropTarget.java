@@ -15,9 +15,9 @@ import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget implements Loggable {
@@ -52,12 +52,12 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 				// Open the files - we process only *.nmd and *.wrk files
 
 				for(File f : fileList){
-					if(f.getName().endsWith(Constants.SAVE_FILE_EXTENSION)){
+					if(f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)){
 						fine("File is nmd");
 						receiveDatasetFile(f);
 					} 
 					
-					if(f.getName().endsWith(Constants.WRK_FILE_EXTENSION)){	
+					if(f.getName().endsWith(Importer.WRK_FILE_EXTENSION)){	
 						fine("File is wrk");
 						receiveWorkspaceFile(f);
 					} 

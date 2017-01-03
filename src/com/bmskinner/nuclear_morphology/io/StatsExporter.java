@@ -18,26 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.bmskinner.nuclear_morphology.components.CellCollection;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-
-public class StatsExporter {
+public class StatsExporter implements Exporter {
 //	
 //	private static Logger logger;
 //

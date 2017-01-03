@@ -40,7 +40,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
  * This class is extended for making a panel with multiple stats histograms

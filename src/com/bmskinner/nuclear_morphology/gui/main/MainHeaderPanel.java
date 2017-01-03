@@ -6,7 +6,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;

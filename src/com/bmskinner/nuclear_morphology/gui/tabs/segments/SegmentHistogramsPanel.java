@@ -17,19 +17,14 @@ import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellCollection;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
 public class SegmentHistogramsPanel extends HistogramsTabPanel  {

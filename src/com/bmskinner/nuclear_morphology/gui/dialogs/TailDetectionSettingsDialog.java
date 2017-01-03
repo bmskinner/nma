@@ -34,7 +34,6 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
 

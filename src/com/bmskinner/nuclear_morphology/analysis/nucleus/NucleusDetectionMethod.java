@@ -12,7 +12,6 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
-import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -22,7 +21,6 @@ import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOption
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 

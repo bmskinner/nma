@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public interface IClusterGroup extends Serializable, Loggable {
-
+	
+	static final String CLUSTER_GROUP_PREFIX = "Group";
+	
 	/**
 	 * Get the public name of the cluster groups
 	 * @return

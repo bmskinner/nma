@@ -32,21 +32,17 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 public class SegmentStatsPanel extends DetailPanel {
 	
@@ -189,10 +185,10 @@ public class SegmentStatsPanel extends DetailPanel {
 					pval = 0;
 				}
 
-				if(  pval < Constants.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
+				if(  pval < SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
 					colour = Color.YELLOW;
 				}
-				if(  pval < Constants.ONE_PERCENT_SIGNIFICANCE_LEVEL){
+				if(  pval < SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL){
 					colour = Color.GREEN;
 				}
 

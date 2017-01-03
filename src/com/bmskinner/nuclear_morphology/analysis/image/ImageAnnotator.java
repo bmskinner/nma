@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -45,7 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 public class ImageAnnotator  extends AbstractImageFilterer {
 
@@ -306,9 +305,9 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		for( UUID id : signalCollection.getSignalGroupIDs()){
 			int i = signalCollection.getSignalGroupNumber(id);
 			List<INuclearSignal> signals = signalCollection.getSignals(id);
-			Color colour = i==Constants.FIRST_SIGNAL_CHANNEL 
+			Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
 						 ? Color.RED 
-						 : i==Constants.FIRST_SIGNAL_CHANNEL+1 
+						 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
 						 	? Color.GREEN 
 						 	: Color.WHITE;
 			

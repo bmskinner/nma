@@ -38,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;

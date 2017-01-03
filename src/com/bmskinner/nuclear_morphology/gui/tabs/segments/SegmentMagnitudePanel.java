@@ -28,23 +28,18 @@ import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
 public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel  {

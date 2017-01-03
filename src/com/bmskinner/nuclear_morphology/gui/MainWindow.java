@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui;
 
-import ij.io.SaveDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -85,12 +83,14 @@ import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+
+import ij.io.SaveDialog;
 
 /**
  * This is the core of the program UI. All display panels are contained here. 
@@ -1051,7 +1051,7 @@ public class MainWindow
     	}
 		log("Saving workspace...");
     	// Choose save file
-    	SaveDialog saveDialog = new SaveDialog("Save workspace as...", "Workspace", Constants.WRK_FILE_EXTENSION);
+    	SaveDialog saveDialog = new SaveDialog("Save workspace as...", "Workspace", Importer.WRK_FILE_EXTENSION);
 
 		String fileName   = saveDialog.getFileName();
 		String folderName = saveDialog.getDirectory();

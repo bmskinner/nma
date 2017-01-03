@@ -43,7 +43,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 @Deprecated

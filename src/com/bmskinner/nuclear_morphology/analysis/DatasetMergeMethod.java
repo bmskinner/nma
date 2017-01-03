@@ -16,7 +16,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Importer;
 
 public class DatasetMergeMethod extends AbstractAnalysisMethod {
 	
@@ -110,7 +110,7 @@ public class DatasetMergeMethod extends AbstractAnalysisMethod {
 			// ensure the new file name is valid
 			newDatasetFile = checkName(newDatasetFile);
 
-			String newDatasetName = newDatasetFile.getName().replace(Constants.SAVE_FILE_EXTENSION, "");
+			String newDatasetName = newDatasetFile.getName().replace(Importer.SAVE_FILE_EXTENSION, "");
 			fine("Checked new file names");
 
 			// check all collections are of the same type
@@ -266,12 +266,12 @@ public class DatasetMergeMethod extends AbstractAnalysisMethod {
 	 */
 	private File checkName(File name){
 		String fileName = name.getName();
-		String datasetName = fileName.replace(Constants.SAVE_FILE_EXTENSION, "");
+		String datasetName = fileName.replace(Importer.SAVE_FILE_EXTENSION, "");
 		
-		File newFile = new File(name.getParentFile()+File.separator+datasetName+Constants.SAVE_FILE_EXTENSION);
+		File newFile = new File(name.getParentFile(), datasetName+Importer.SAVE_FILE_EXTENSION);
 		if(name.exists()){
 			datasetName += "_1";
-			newFile = new File(name.getParentFile()+File.separator+datasetName+Constants.SAVE_FILE_EXTENSION);
+			newFile = new File(name.getParentFile(), datasetName+Importer.SAVE_FILE_EXTENSION);
 			newFile = checkName(newFile);
 		}
 		return newFile;

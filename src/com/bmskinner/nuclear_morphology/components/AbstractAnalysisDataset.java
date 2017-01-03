@@ -32,7 +32,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
  * This is the most primitive information an analysis dataset requires.
@@ -137,7 +136,7 @@ private static final long serialVersionUID = 1L;
 
 				String name = g.getName();
 
-				Pattern p = Pattern.compile("^"+Constants.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
+				Pattern p = Pattern.compile("^"+IClusterGroup.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
 
 				Matcher m = p.matcher(name);
 				if(m.find()){

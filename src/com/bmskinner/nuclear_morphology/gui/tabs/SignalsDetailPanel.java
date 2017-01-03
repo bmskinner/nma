@@ -19,15 +19,9 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+
 import javax.swing.JTabbedPane;
-import javax.swing.table.TableModel;
 
-import org.jfree.chart.JFreeChart;
-
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalScatterChartPanel;

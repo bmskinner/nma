@@ -9,10 +9,9 @@ import java.util.Set;
 
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetector;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -24,11 +23,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 /**

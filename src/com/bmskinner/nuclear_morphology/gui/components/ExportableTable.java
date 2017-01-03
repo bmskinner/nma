@@ -29,7 +29,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.utility.Constants;
+import com.bmskinner.nuclear_morphology.io.Exporter;
 
 import ij.io.SaveDialog;
 
@@ -74,7 +74,7 @@ public class ExportableTable extends JTable {
 			
 			
 			// get a place to save to
-			SaveDialog saveDialog = new SaveDialog("Export table to...", "Table", Constants.TAB_FILE_EXTENSION);
+			SaveDialog saveDialog = new SaveDialog("Export table to...", "Table", Exporter.TAB_FILE_EXTENSION);
 
 			String fileName = saveDialog.getFileName();
 			String folderName = saveDialog.getDirectory();

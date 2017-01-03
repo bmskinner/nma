@@ -24,9 +24,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Cell;
-import com.bmskinner.nuclear_morphology.components.CellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;

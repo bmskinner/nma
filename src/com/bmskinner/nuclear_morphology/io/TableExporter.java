@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,9 +27,11 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 
+import ij.IJ;
+
 // this will take columns of data, and write them out to a specified folder
 // Since the data is arbitrary and only for export, convert everything to strings. 
-public class TableExporter {
+public class TableExporter implements Exporter {
 	
 	private File exportFolder;
 	private Map<String, List<String>> columns = new LinkedHashMap<String, List<String>>();

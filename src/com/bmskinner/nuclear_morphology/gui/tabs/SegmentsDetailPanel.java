@@ -26,6 +26,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentBoxplotsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentHistogramsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentMagnitudePanel;

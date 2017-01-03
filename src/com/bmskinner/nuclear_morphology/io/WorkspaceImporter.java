@@ -16,7 +16,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public class WorkspaceImporter implements Loggable {
+public class WorkspaceImporter implements Loggable, Importer {
 	
 	private final File file;
 	public final String CHARSET = "ISO-8859-1";
@@ -27,21 +27,10 @@ public class WorkspaceImporter implements Loggable {
 	 * @throws IllegalArgumentException if the file is null, a folder, or otherwise not a valid file
 	 */
 	public WorkspaceImporter(final File f){
-		if(f==null){
-			throw new IllegalArgumentException("File cannot be null");
+		if( ! Importer.isSuitableImportFile(f)){
+			throw new IllegalArgumentException(INVALID_FILE_ERROR);
 		}
-		
-		if( ! f.exists()){
-			throw new IllegalArgumentException("File does not exist");
-		}
-		
-		if( f.isDirectory()){
-			throw new IllegalArgumentException("File is a directory");
-		}
-		
-		if( ! f.isFile()){
-			throw new IllegalArgumentException("File has non-normal attributes or is not a file");
-		}
+
 		file = f;
 	}
 	

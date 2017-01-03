@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Sum;
-import com.bmskinner.nuclear_morphology.utility.Constants;
 
 import weka.estimators.KernelEstimator;
 
@@ -230,8 +229,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 				}
 				
-				String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
-				String colKey = Constants.SEGMENT_PREFIX+segPosition;
+				String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;
+				String colKey = IBorderSegment.SEGMENT_PREFIX+segPosition;
 				dataset.add(list, rowKey, colKey);
 
 				addProbabilities(dataset, list, rowKey, colKey);
@@ -290,8 +289,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 				list.add(displacement);
 			}
 			
-			String rowKey = Constants.SEGMENT_PREFIX+segPosition+"_"+i;
-			String colKey = Constants.SEGMENT_PREFIX+segPosition;
+			String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;
+			String colKey = IBorderSegment.SEGMENT_PREFIX+segPosition;
 
 			dataset.add(list, rowKey, colKey);
 

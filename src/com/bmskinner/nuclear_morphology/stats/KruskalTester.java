@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import jdistlib.disttest.DistributionTest;
 
-public class KruskalTester implements Loggable {
+public class KruskalTester implements Loggable, SignificanceTest {
 	
 	public KruskalTester(){}
 	

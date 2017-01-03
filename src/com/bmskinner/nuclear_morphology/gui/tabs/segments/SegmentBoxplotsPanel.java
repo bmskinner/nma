@@ -25,7 +25,6 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -41,21 +40,16 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellCollection;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
 public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {

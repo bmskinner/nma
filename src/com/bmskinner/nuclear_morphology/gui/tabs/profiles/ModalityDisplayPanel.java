@@ -5,7 +5,6 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
@@ -26,8 +25,8 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
-import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")

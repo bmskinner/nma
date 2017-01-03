@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JTabbedPane;
+
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ModalityDisplayPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ProfileDisplayPanel;
