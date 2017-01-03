@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -101,7 +102,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 //
 			}
 			
-			firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());
+			firePropertyChange("Cooldown", getProgress(), IAnalysisWorker.INDETERMINATE);
 
 			// get stats 
 			createResults();

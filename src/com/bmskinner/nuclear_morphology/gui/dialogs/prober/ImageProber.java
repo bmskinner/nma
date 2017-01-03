@@ -51,9 +51,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 @SuppressWarnings("serial")
 public abstract class ImageProber extends LoadingIconDialog implements PropertyChangeListener {
@@ -473,7 +473,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 
 		for (File file :  folder.listFiles()) {
 
-			boolean ok = NucleusDetectionWorker.checkFile(file); // check file extension
+			boolean ok = ImageImporter.checkFile(file); // check file extension
 
 			if(ok){
 				files.add(file);

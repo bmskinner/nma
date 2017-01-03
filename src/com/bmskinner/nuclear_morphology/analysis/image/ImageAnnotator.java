@@ -47,14 +47,14 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
-public class NucleusAnnotator  extends AbstractImageFilterer {
+public class ImageAnnotator  extends AbstractImageFilterer {
 
-	public NucleusAnnotator(ImageProcessor ip) {
+	public ImageAnnotator(ImageProcessor ip) {
 		super(ip);
 	}
 		
 	
-	public NucleusAnnotator annotateNucleus(Nucleus n){
+	public ImageAnnotator annotateNucleus(Nucleus n){
 		
 		try{
 
@@ -72,21 +72,21 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		return this;
 	}
 	
-	private NucleusAnnotator annotatePoint(IPoint p, Color c){
+	private ImageAnnotator annotatePoint(IPoint p, Color c){
 		ip.setColor(c);
 		ip.setLineWidth(3);
 		ip.drawDot( p.getXAsInt(), p.getYAsInt());
 		return this;
 	}
 	
-	private NucleusAnnotator annotateLine(IPoint p1, IPoint p2, Color c){
+	private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c){
 		ip.setColor(c);
 		ip.setLineWidth(1);
 		ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
 		return this;
 	}
 	
-	private NucleusAnnotator annotatePolygon(PolygonRoi p, Paint c){
+	private ImageAnnotator annotatePolygon(PolygonRoi p, Paint c){
 		ip.setColor((Color) c);
 		ip.setLineWidth(2);
 		ip.draw(p);
@@ -94,7 +94,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	}
 	
 
-	public NucleusAnnotator annotateOP(Nucleus n){		
+	public ImageAnnotator annotateOP(Nucleus n){		
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
 		} catch (UnavailableBorderTagException e) {
@@ -103,7 +103,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		}
 	}
 
-	public NucleusAnnotator annotateRP(Nucleus n){
+	public ImageAnnotator annotateRP(Nucleus n){
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
 		} catch (UnavailableBorderTagException e) {
@@ -112,7 +112,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		}
 	}
 	
-	public NucleusAnnotator annotateCoM(CellularComponent n){
+	public ImageAnnotator annotateCoM(CellularComponent n){
 		return annotatePoint(n.getCentreOfMass(), Color.MAGENTA);
 	}
 	
@@ -122,11 +122,57 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	 * @param c the colour
 	 * @return
 	 */
-	public NucleusAnnotator annotateBorder(CellularComponent n, Color c){
+	public ImageAnnotator annotateBorder(CellularComponent n, Color c){
 		FloatPolygon p = n.createOriginalPolygon();
 		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 		
 		return annotatePolygon(roi, c);
+	}
+	
+	
+	
+	/**
+	 * Annotate the image with the given text. The text background is white and the
+	 * text colour is black
+	 * @param x the string x
+	 * @param y the string y
+	 * @param s the text
+	 * @return
+	 */
+	public ImageAnnotator annotateString(int x, int y, String s){
+		return this.annotateString(x, y, s, Color.BLACK);
+	}
+	
+	/**
+	 * Annotate the image with the given text. The text background is white.
+	 * @param x the string x
+	 * @param y the string y
+	 * @param s the text
+	 * @param text the text colour
+	 * @return
+	 */
+	public ImageAnnotator annotateString(int x, int y, String s, Color text){
+		return this.annotateString(x, y, s, text, Color.WHITE);
+	}
+	
+	/**
+	 * Annotate the image with the given text.
+	 * @param x the string x
+	 * @param y the string y
+	 * @param s the text
+	 * @param text the text colour
+	 * @param back the backgound colour
+	 * @return
+	 */
+	public ImageAnnotator annotateString(int x, int y, String s, Color text, Color back){
+		
+		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
+		ip.setColor(text);
+		ip.drawString(s, 
+				x,
+				y, 
+				back);
+		return this;
 	}
 	
 	/**
@@ -135,7 +181,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	 * @param c the color of the text
 	 * @return
 	 */
-	public NucleusAnnotator annotateStats(CellularComponent n, Color text, Color back){
+	public ImageAnnotator annotateStats(CellularComponent n, Color text, Color back){
 		
 		DecimalFormat df = new DecimalFormat("#.##");
 		
@@ -158,16 +204,11 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		
 		areaLbl  = "Area: " + df.format( area);
 		perimLbl = "Circ: " + df.format( circ);
-
-		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
-		ip.setColor(text);
 		String label = areaLbl + "\n" + perimLbl;
-		ip.drawString(label, 
-				n.getOriginalCentreOfMass().getXAsInt(),
-				n.getOriginalCentreOfMass().getYAsInt(), 
-				back);
 		
-		return this;
+		return this.annotateString(n.getOriginalCentreOfMass().getXAsInt(),
+				n.getOriginalCentreOfMass().getYAsInt(), 
+				label, text, back);
 	}
 	
 	/**
@@ -176,7 +217,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	 * @param c the color of the text
 	 * @return
 	 */
-	public NucleusAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text, Color back){
+	public ImageAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text, Color back){
 		
 		DecimalFormat df = new DecimalFormat("#.##");
 		
@@ -201,20 +242,17 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		perimLbl = "Circ: " + df.format( circ);
 		String fractLabel = "Fract: " + df.format( fraction);
 
-		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
-		ip.setColor(text);
 		String label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
-		ip.drawString(label, 
-				signal.getOriginalCentreOfMass().getXAsInt(),
-				signal.getOriginalCentreOfMass().getYAsInt(), 
-				back);
 		
-		return this;
+		return this.annotateString(signal.getOriginalCentreOfMass().getXAsInt(),
+				signal.getOriginalCentreOfMass().getYAsInt(), 
+				label, text, back);
+
 	}
 	
 
 
-	public NucleusAnnotator annotateMinFeret(Nucleus n){
+	public ImageAnnotator annotateMinFeret(Nucleus n){
 		int minIndex;
 		try {
 			minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
@@ -229,7 +267,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 		
 	}
 	
-	public NucleusAnnotator annotateSegments(Nucleus n){
+	public ImageAnnotator annotateSegments(Nucleus n){
 
 		try{
 
@@ -262,7 +300,7 @@ public class NucleusAnnotator  extends AbstractImageFilterer {
 	}
 	
 	
-	public NucleusAnnotator annotateSignals(Nucleus n){
+	public ImageAnnotator annotateSignals(Nucleus n){
 
 		ISignalCollection signalCollection = n.getSignalCollection();
 		for( UUID id : signalCollection.getSignalGroupIDs()){

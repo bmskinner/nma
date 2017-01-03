@@ -67,6 +67,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
@@ -286,7 +287,7 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		
 		try{
 			
-			channelSelection.setSelectedItem(Constants.channelIntToName(nucleusOptions.getChannel()));
+			channelSelection.setSelectedItem(ImageImporter.channelIntToName(nucleusOptions.getChannel()));
 			
 			nucleusThresholdSpinner.setValue(nucleusOptions.getThreshold());
 		
@@ -600,10 +601,10 @@ public class AnalysisSetupDialog extends SettingsDialog implements ActionListene
 		
 		if(e.getSource()==channelSelection){
 			nucleusOptions.setChannel(channelSelection.getSelectedItem().equals("Red") 
-					? Constants.RGB_RED
+					? ImageImporter.RGB_RED
 							: channelSelection.getSelectedItem().equals("Green") 
-							? Constants.RGB_GREEN
-									: Constants.RGB_BLUE);
+							? ImageImporter.RGB_GREEN
+									: ImageImporter.RGB_BLUE);
 
 		}
 

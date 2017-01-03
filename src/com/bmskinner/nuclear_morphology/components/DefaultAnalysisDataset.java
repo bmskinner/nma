@@ -32,8 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.utility.Constants;
@@ -686,7 +686,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
 		for (File file : listOfFiles) {
 
-			boolean ok = NucleusDetectionWorker.checkFile(file);
+			boolean ok = ImageImporter.checkFile(file);
 
 			if(ok){
 				result++;

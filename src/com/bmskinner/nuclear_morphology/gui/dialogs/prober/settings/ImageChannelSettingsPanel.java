@@ -15,6 +15,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 /**
@@ -48,13 +49,13 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	private void createSpinners(){
 
 
-		channelBox.setSelectedItem(Constants.channelIntToName(options.getChannel()));
+		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
 		channelBox.addActionListener( e -> {
 			options.setChannel(channelBox.getSelectedItem().equals("Red") 
-					? Constants.RGB_RED
+					? ImageImporter.RGB_RED
 							: channelBox.getSelectedItem().equals("Green") 
-							? Constants.RGB_GREEN
-									: Constants.RGB_BLUE);
+							? ImageImporter.RGB_GREEN
+									: ImageImporter.RGB_BLUE);
 			fireOptionsChangeEvent();
 		});
 		
@@ -113,7 +114,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	@Override
 	protected void update(){
 		super.update();
-		channelBox.setSelectedItem(Constants.channelIntToName(options.getChannel()));
+		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
 		scaleSpinner.setValue(options.getScale());
 	}
 

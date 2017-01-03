@@ -10,7 +10,7 @@ import java.util.Set;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
@@ -41,7 +41,11 @@ public class SignalProberWorker  extends ImageProberWorker {
 	
 	final private Set<Nucleus> nuclei;
 	
-	public SignalProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final Set<Nucleus> nuclei, final TableModel model) {
+	public SignalProberWorker(final File f, 
+			final IDetectionOptions options, 
+			final ImageSet type, 
+			final Set<Nucleus> nuclei, 
+			final TableModel model) {
 		super(f, options, type, model);
 		this.nuclei = nuclei;
 	}
@@ -57,7 +61,7 @@ public class SignalProberWorker  extends ImageProberWorker {
 		ImageStack stack = new ImageImporter(file).importImage();
 
 		// Find the processor number in the stack to use
-		int stackNumber = Constants.rgbToStack(options.getChannel());
+		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
 		
 		finer("Converting image");
 		// Get the greyscale processor for the signal channel
@@ -135,14 +139,14 @@ public class SignalProberWorker  extends ImageProberWorker {
 
 			List<INuclearSignal> list = map.get(n);
 			
-			ip = new NucleusAnnotator(ip)
+			ip = new ImageAnnotator(ip)
 					.annotateBorder(n, Color.BLUE)
 					.toProcessor();
 			
 			for(INuclearSignal s : list){
 				
 				Color color = checkSignal(s, n) ? Color.ORANGE : Color.RED;
-				NucleusAnnotator an = new NucleusAnnotator(ip);
+				ImageAnnotator an = new ImageAnnotator(ip);
 				an.annotateBorder(s, color);
 						
 				

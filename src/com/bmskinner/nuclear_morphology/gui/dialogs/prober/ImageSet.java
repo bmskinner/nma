@@ -22,6 +22,10 @@ public interface ImageSet {
 	static final ImageSet SIGNAL_IMAGE_SET = new DefaultImageSet()
 			.add(DetectionImageType.DETECTED_OBJECTS)
 			.add(DetectionImageType.ANNOTAED_OBJECTS);
+	
+	static final ImageSet FISH_REMAPPING_IMAGE_SET = new DefaultImageSet()
+			.add(DetectionImageType.ORIGINAL)
+			.add(DetectionImageType.FISH_IMAGE);
 
 	
 	/**

@@ -3,8 +3,6 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
@@ -14,8 +12,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,14 +27,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProber.IconCellRenderer;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.ImageProberWorker;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -278,7 +269,9 @@ public abstract class ImageProberPanel extends JPanel
 			for(int col=0; col<cols; col++){
 				ImageProberTableCell cell;
 				if(count<values){
-					cell = new ImageProberTableCell(null, imageSet.getType(count), true, count);
+					
+					ImageIcon blankIcon = ImageConverter.createBlankImage(600, 600).toImageIcon();
+					cell = new ImageProberTableCell(blankIcon, imageSet.getType(count), true, count);
 
 				} else {
 					cell = new ImageProberTableCell(null, null, true, count);

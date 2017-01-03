@@ -95,7 +95,7 @@ public class TailDetector extends Detector {
 		}
 		
 		// the stack in the ImageStack must be converted from the given rgb channel 
-		int stackNumber = Constants.rgbToStack(channel);
+		int stackNumber = ImageImporter.rgbToStack(channel);
 				
 		
 		// file must match dimensions of existing nucleus image file

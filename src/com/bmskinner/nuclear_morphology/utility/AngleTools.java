@@ -19,6 +19,11 @@
 
 package com.bmskinner.nuclear_morphology.utility;
 
+/**
+ * Calculate the x and y components of a vector
+ * @author ben
+ *
+ */
 public class AngleTools {
 	
 	public AngleTools(){}

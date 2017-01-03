@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -84,18 +85,18 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     	 try {
             if(this.get()){
             	finest("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);            
 
             } else {
             	finest("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
             }
         } catch (InterruptedException e) {
         	error("Interruption error in worker", e);
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
         	error("Execution error in worker", e);
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
        }
 
     } 

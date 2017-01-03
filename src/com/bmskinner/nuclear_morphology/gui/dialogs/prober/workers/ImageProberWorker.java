@@ -4,24 +4,24 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.Constants;
-
 import ij.process.ImageProcessor;
 
 /**
+ * The templae for image prober workers. These calculate the steps in object
+ * detection, and display them in a TableModel.
  * @author ben
+ * @since 1.13.4
  *
  */
 public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProberTableCell> implements Loggable{
@@ -38,9 +38,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	protected ImageSet imageSet; // the set of images to be created
 	
 	protected Dimension smallDimension; // the max size of the small icons
-	
-//	protected volatile AtomicBoolean cancelled = new AtomicBoolean(false);
-	
+		
 	public ImageProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model){
 		this.file = f;
 		this.options = options;
@@ -65,11 +63,6 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	}
 	
 	
-
-//	public synchronized void cancel(){
-//		cancelled.set(true);
-//	}
-	
 	/**
 	 * Carry out the analysis
 	 */
@@ -77,9 +70,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	
 	@Override
     protected void process( List<ImageProberTableCell> chunks ) {
-        
-//		log("Processing "+chunks.size()+" chunks");
-		
+        		
 		progress+= chunks.size();
        
 		for(ImageProberTableCell im : chunks){
@@ -129,22 +120,24 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
     	 try {
             if(this.get()){
             	finest("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);            
 
             } else {
             	finest("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
             }
         } catch (InterruptedException e) {
-        	error("Interruption error in worker", e);
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	warn("Interruption to worker: "+e.getMessage());
+        	stack("Interruption error in worker", e);
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-        	error("Execution error in worker", e);
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	warn("Execution error in worker: "+e.getMessage());
+        	stack("Execution error in worker", e);
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
        } catch(Error e){
-    	   
-    	   error("Something went really wrong in the image prober", e);
-    	   firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+    	   warn("Unexpected error in worker: "+e.getMessage());
+    	   stack(e.getMessage(), e);
+    	   firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
        }
 
     } 

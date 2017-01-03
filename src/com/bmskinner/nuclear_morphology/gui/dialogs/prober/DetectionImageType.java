@@ -5,10 +5,12 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
  * @since 1.13.4
  */
 public enum DetectionImageType implements ImageType {
+	ORIGINAL            ("Input image"),
 	KUWAHARA 			("Kuwahara filtering"),
 	FLATTENED 			("Chromocentre flattening"),
 	EDGE_DETECTION 		("Edge detection"),
 	MORPHOLOGY_CLOSED 	("Gap closing"),
+	FISH_IMAGE      	("FISH image"),
 	DETECTED_OBJECTS 	("Detected objects"),
 	ANNOTAED_OBJECTS    ("Annotated objects");
 

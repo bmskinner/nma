@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignal
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.StatsMap;
 
@@ -135,7 +136,7 @@ public class SignalDetector extends Detector {
 //		SignalCollection signalCollection = n.getSignalCollection();
 		
 		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
+		int stackNumber = ImageImporter.rgbToStack(channel);
 		
 		setMaxSize(n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
 		setMinSize(options.getMinSize());
@@ -235,7 +236,7 @@ public class SignalDetector extends Detector {
 //		SignalCollection signalCollection = n.getSignalCollection();
 		finest( "Beginning reverse detection for nucleus");
 		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
+		int stackNumber = ImageImporter.rgbToStack(channel);
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
 		FloatPolygon polygon = n.createOriginalPolygon();
@@ -306,7 +307,7 @@ public class SignalDetector extends Detector {
 		fine( "Beginning histogram detection for nucleus");
 
 		// choose the right stack number for the channel
-		int stackNumber = Constants.rgbToStack(channel);
+		int stackNumber = ImageImporter.rgbToStack(channel);
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
 		int[] positions = n.getPosition();

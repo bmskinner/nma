@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
@@ -139,7 +140,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 				clusterer.setDebug(true);
 
 				finest("Building clusterer for tree");
-				firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
+				firePropertyChange("Cooldown", getProgress(), IAnalysisWorker.FINISHED);
 				clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
 				clusterer.setPrintNewick(true);
 

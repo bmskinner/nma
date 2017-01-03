@@ -606,7 +606,7 @@ public class ShellDetector extends Detector {
 		public int getDensity(ImageStack st, int channel){
 
 						
-			int stackNumber = Constants.rgbToStack(channel);
+			int stackNumber = ImageImporter.rgbToStack(channel);
 			ImageProcessor ip = st.getProcessor(stackNumber);
 
 			int result = getDensity(ip, this.toShape());
@@ -638,7 +638,7 @@ public class ShellDetector extends Detector {
 			}
 			
 			
-			int stackNumber = Constants.rgbToStack(s.getChannel());
+			int stackNumber = ImageImporter.rgbToStack(s.getChannel());
 			ImageProcessor ip = st.getProcessor(stackNumber);
 			
 			// Keep pixels that are in both shapes

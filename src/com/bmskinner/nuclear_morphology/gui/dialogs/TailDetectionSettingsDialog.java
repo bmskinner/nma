@@ -33,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
@@ -122,10 +123,10 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 			String channelName = cb.getSelectedItem().toString();
 	        
 	        channel = channelName.equals("Red") 
-					? Constants.RGB_RED
+					? ImageImporter.RGB_RED
 							: channelName.equals("Green") 
-							? Constants.RGB_GREEN
-									: Constants.RGB_BLUE;
+							? ImageImporter.RGB_GREEN
+									: ImageImporter.RGB_BLUE;
 		}
 		
 	}

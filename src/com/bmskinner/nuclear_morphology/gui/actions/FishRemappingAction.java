@@ -18,14 +18,21 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+import javax.swing.JOptionPane;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.FishRemappingDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
+
+import ij.io.DirectoryChooser;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
@@ -33,82 +40,156 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.FishRemappingDialog;
  */
 public class FishRemappingAction extends ProgressableAction {
 	
-	final List<IAnalysisDataset> datasets;
+	private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
+	
+	private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
+    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
+    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
+    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
+	
+	private File fishDir;
 
 	public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-		super("Remapping", mw);
-		this.datasets = datasets;
+		super(datasets, "Remapping", mw);
 		
 	}
 	
 	@Override
 	public void run(){
 		try{
+//			
+//			if(datasets.size()>1){
+//				log( "Multiple datasets selected, cancelling");
+//				cancel();
+//				return;
+//			}
+//	
+//			final IAnalysisDataset dataset = datasets.get(0);
 
-			if(datasets.size()==1){
-				
-				final IAnalysisDataset dataset = datasets.get(0);
-				
-				if(dataset.hasMergeSources()){
-					log(Level.INFO, "Cannot remap merged datasets");
+			if(dataset.hasMergeSources()){
+				warn("Cannot remap merged datasets");
+				cancel();
+				return;
+			}
+			
+			if( ! getPostFISHDirectory()){
+				log("Remapping cancelled");
+				cancel();
+				return;
+			}
+			
+			if( fishDir==null){
+				warn("Null FISH directory");
+				cancel();
+				return;
+			}
+
+			FishRemappingProber fishMapper = new FishRemappingProber(dataset, fishDir);
+//			FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset);
+
+			if(fishMapper.isOk()){
+
+				log("Fetching collections...");
+				final List<IAnalysisDataset> newList = fishMapper.getNewDatasets();
+
+				if(newList.isEmpty()){
+					log("No collections returned");
 					cancel();
 					return;
 				}
-				
-				FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset);
-
-				if(fishMapper.getOK()){
 					
-					log(Level.INFO, "Fetching collections...");
-					List<ICellCollection> subs = fishMapper.getSubCollections();
-					
-					if(!subs.isEmpty()){
+				log("Reapplying morphology...");
 
-						final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
-						for(ICellCollection sub : subs){
-
-							if(sub.hasCells()){
-								
-								log(sub.getName()+": "+sub.size()+" cells");
-
-								dataset.addChildCollection(sub);
-
-								final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-								newList.add(subDataset);
-							}
-						}
-						log(Level.INFO, "Reapplying morphology...");
+				new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+				finished();
 
 
-
-						new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
-						finished();
-					}else {
-						log(Level.INFO, "No collections returned");
-						cancel();
-					}
-
-				} else {
-					log(Level.INFO, "Remapping cancelled");
-					cancel();
-				}
-				
 			} else {
-				log(Level.INFO, "Multiple datasets selected, cancelling");
+				log("Remapping cancelled");
 				cancel();
 			}
 
+
+
 		} catch(Exception e){
-			error("Error in FISH remapping: "+e.getMessage(), e);
+			warn("Error in FISH remapping: "+e.getMessage());
+			stack("Error in FISH remapping: "+e.getMessage(), e);
 		}
 	}
 	
 	@Override
 	public void finished(){
 		// Do not use super.finished(), or it will trigger another save action
-		log(Level.FINE, "FISH mapping complete");
+		fine("FISH mapping complete");
 		cancel();		
 		this.removeInterfaceEventListener(mw);
 		this.removeDatasetEventListener(mw);		
+	}
+	
+	/**
+	 * Choose the directory containing the post-FISH images
+	 * @return true if the directory is valid, false otherwise
+	 */
+	private boolean getPostFISHDirectory(){
+		DirectoryChooser.setDefaultDirectory(dataset.getAnalysisOptions()
+				.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
+		DirectoryChooser dc = new DirectoryChooser(SELECT_FOLDER_LBL);
+				
+	    String folderName = dc.getDirectory();
+
+	    if(folderName==null) return false; // user cancelled
+	   
+	    File folder =  new File(folderName);
+	    
+	    if(!folder.isDirectory() ){
+	    	JOptionPane.showMessageDialog(null, NOT_A_FOLDER_ERROR, CANNOT_USE_FOLDER, JOptionPane.ERROR_MESSAGE); 
+	    	return false;
+	    }
+	    if(!folder.exists()){
+	    	JOptionPane.showMessageDialog(null, FOLDER_NOT_FOUND_ERROR, CANNOT_USE_FOLDER, JOptionPane.ERROR_MESSAGE); 
+	    	return false; // check folder is ok
+	    }
+	    
+	    if(!containsFiles(folder)){
+	    	
+	    	JOptionPane.showMessageDialog(null, FILES_NOT_FOUND_ERROR, CANNOT_USE_FOLDER, JOptionPane.ERROR_MESSAGE); 
+	    	return false; // check folder has something in it
+	    }
+	    
+
+	    fishDir = folder;
+	    finer("Selected "+fishDir.getAbsolutePath()+" as post-FISH image directory");
+	    return true;
+	}
+	
+	/**
+	 * Check if the given folder has files (not just directories)
+	 * @param folder
+	 * @return
+	 */
+	private boolean containsFiles(File folder){
+				
+		File[] files = folder.listFiles();
+		
+		// There must be items in the folder
+		if(files.length==0){
+			return false;
+		}
+		
+		int countFiles=0;
+		
+		// Some of the items must be files
+		for(File f : files){
+			if(f.isFile()){
+				countFiles++;
+			}
+		}
+		
+		if(countFiles==0){
+			return false;
+		}
+		
+		return true;
+		
 	}
 }

@@ -19,8 +19,6 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
-import java.util.UUID;
-
 import javax.swing.JFileChooser;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
@@ -33,7 +31,6 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionSettingsDialog;
 
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
@@ -42,7 +39,6 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalDetectionSettings
  */
 public class AddNuclearSignalAction extends ProgressableAction {
 	
-	private UUID signalGroup = null;
 	private File folder;
 
 	
@@ -58,8 +54,6 @@ public class AddNuclearSignalAction extends ProgressableAction {
 				cancel();
 			}
 			// add dialog for non-default detection options
-//			SignalDetectionSettingsDialog analysisSetup = new SignalDetectionSettingsDialog(dataset);
-			
 			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
 			if(analysisSetup.isOk()){
@@ -104,7 +98,9 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	
 	private boolean getImageDirectory(){
 		
-		File defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		File defaultDir = dataset.getAnalysisOptions()
+				.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+				.getFolder();
 		
 		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
 

@@ -32,7 +32,7 @@ import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -71,7 +71,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 		
 		ImageProcessor openProcessor = cell.getNucleus().getImage();
 		
-		openProcessor = new NucleusAnnotator(openProcessor)
+		openProcessor = new ImageAnnotator(openProcessor)
 				.annotateSegments(cell.getNucleus())
 				.toProcessor();
 

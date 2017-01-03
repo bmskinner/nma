@@ -37,9 +37,9 @@ import java.util.logging.Handler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionWorker;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.utility.Constants;
@@ -882,7 +882,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 
 		for (File file : listOfFiles) {
 
-			boolean ok = NucleusDetectionWorker.checkFile(file);
+			boolean ok = ImageImporter.checkFile(file);
 
 			if(ok){
 				result++;

@@ -42,6 +42,11 @@ public class ImageImporter implements Loggable {
 	private final File f;
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
+	// RGB colour channels
+	public static final int RGB_RED = 0;
+	public static final int RGB_GREEN = 1;
+	public static final int RGB_BLUE = 2;	
+	
 	/**
 	 * Construct from a file. Checks that the given File object is valid, and 
 	 * throws an IllegalArgumentException if not.
@@ -90,7 +95,7 @@ public class ImageImporter implements Loggable {
 	    		return false;
 	    	}
 	    }
-	    
+
 	    for( String fileType : Constants.IMPORTABLE_FILE_TYPES){
 	    	if( fileName.endsWith(fileType) ){
 	    		return true;
@@ -99,12 +104,51 @@ public class ImageImporter implements Loggable {
 	    return false;
 	  }
 
+	  /**
+	   * Given an RGB channel, get the ImageStack stack for internal use
+	   * @param channel the channel
+	   * @return the stack
+	   */
+	  public static int rgbToStack(int channel){
 
-	/**
-	 * Import and convert the image in the given file to an ImageStack
-	 * @return the ImageStack
-	 */
-	public ImageStack importImage() throws ImageImportException{
+		  if(channel < 0){
+			  throw new IllegalArgumentException("Channel cannot be less than 0");
+		  }
+
+		  int stackNumber = channel==RGB_RED 
+				  ? Constants.FIRST_SIGNAL_CHANNEL
+						  : channel==RGB_GREEN
+						  ? Constants.FIRST_SIGNAL_CHANNEL+1
+								  : Constants.COUNTERSTAIN;
+		  return stackNumber;
+	  }
+
+	  /**
+	   * Given a channel integer, return the name of the channel.
+	   * Handles red (0), green (1) and blue(2). Other ints will 
+	   * return a null string.
+	   * @param channel
+	   * @return
+	   */
+	  public static String channelIntToName(int channel){
+		  if(channel == RGB_RED){
+			  return "Red";
+		  }
+		  if(channel == RGB_GREEN){
+			  return "Green";
+		  }
+		  if(channel == RGB_BLUE){
+			  return "Blue";
+		  }
+		  return null;
+	  }
+
+
+	  /**
+	   * Import and convert the image in the given file to an ImageStack
+	   * @return the ImageStack
+	   */
+	  public ImageStack importImage() throws ImageImportException{
 
 		ImageStack stack = null;
 
@@ -126,7 +170,7 @@ public class ImageImporter implements Loggable {
 	 */
 	public ImageProcessor importImage(int channel) throws ImageImportException {
 		ImageStack s = importImage();
-		int stack = Constants.rgbToStack(channel);
+		int stack = rgbToStack(channel);
 		ImageProcessor ip = s.getProcessor(stack);
 		ip.invert();
 		return ip;
@@ -219,9 +263,9 @@ public class ImageImporter implements Loggable {
 		// split out colour channel
 	    ImagePlus[] channels = ChannelSplitter.split(image);
 	    
-	    result.addSlice("counterstain", channels[Constants.RGB_BLUE].getProcessor());
-	    result.addSlice(channels[Constants.RGB_RED].getProcessor());
-	    result.addSlice(channels[Constants.RGB_GREEN].getProcessor());
+	    result.addSlice("counterstain", channels[RGB_BLUE].getProcessor());
+	    result.addSlice(channels[RGB_RED].getProcessor());
+	    result.addSlice(channels[RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
 	    fine("New stack has "+result.getSize()+" slices");
 	    return result;

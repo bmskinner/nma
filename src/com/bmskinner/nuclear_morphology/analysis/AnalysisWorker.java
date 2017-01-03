@@ -115,7 +115,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     }
     
     protected void fireCooldown(){
-    	firePropertyChange("Cooldown", getProgress(), Constants.Progress.COOLDOWN.code());  
+    	firePropertyChange("Cooldown", getProgress(), IAnalysisWorker.INDETERMINATE);  
     }
     
     @Override
@@ -132,19 +132,19 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
     	 try {
             if(this.get()){
             	finest("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), Constants.Progress.FINISHED.code());            
+                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);            
 
             } else {
             	finest("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
             }
     	 } catch(StackOverflowError e){
     		 warn("Stack overflow detected");
     		 fine("Stack overflow in worker", e);
-    		 firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+    		 firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
         	error("Interruption error in worker", e);
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
         	if(e.getCause() instanceof java.lang.OutOfMemoryError){
         		warn("Error: Not enough memory!");
@@ -155,7 +155,7 @@ public abstract class AnalysisWorker extends SwingWorker<Boolean, Integer> imple
         		
         	}
         	
-        	firePropertyChange("Error", getProgress(), Constants.Progress.ERROR.code());
+        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
        }
 
     } 

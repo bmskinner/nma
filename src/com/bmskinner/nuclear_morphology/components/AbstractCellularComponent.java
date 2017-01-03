@@ -315,7 +315,7 @@ public abstract class AbstractCellularComponent
 		if(getSourceFile().exists()){
 			
 			// Get the stack, make greyscale and invert
-			int stack = Constants.rgbToStack(getChannel());
+			int stack = ImageImporter.rgbToStack(getChannel());
 			
 			try {
 				ImageStack imageStack = new ImageImporter(getSourceFile()).importImage();

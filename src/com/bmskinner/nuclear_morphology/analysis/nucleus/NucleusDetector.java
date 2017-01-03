@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.Nucleus
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.utility.Constants;
 import com.bmskinner.nuclear_morphology.utility.StatsMap;
 
@@ -124,7 +125,7 @@ public class NucleusDetector extends Detector {
 
 		try{
 			
-			ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+			ImageProcessor ip = image.getProcessor(ImageImporter.rgbToStack(options.getChannel()));
 			roiList = detectRois(ip);
 		
 		} catch(Exception e){
@@ -223,9 +224,9 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseKuwahara()){
 				int kernel = nucleusCannyOptions.getKuwaharaKernel();
 				ImageProcessor ip = new ImageFilterer(image)
-					.runKuwaharaFiltering( Constants.rgbToStack(options.getChannel())  , kernel)
+					.runKuwaharaFiltering( ImageImporter.rgbToStack(options.getChannel())  , kernel)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				image.setProcessor(ip, ImageImporter.rgbToStack(options.getChannel()));
 				finer("Run Kuwahara");
 			}
 
@@ -233,13 +234,13 @@ public class NucleusDetector extends Detector {
 			if(nucleusCannyOptions.isUseFlattenImage()){
 				int threshold = nucleusCannyOptions.getFlattenThreshold();
 				ImageProcessor ip = new ImageFilterer(image)
-					.squashChromocentres( Constants.rgbToStack(options.getChannel()), threshold)
+					.squashChromocentres( ImageImporter.rgbToStack(options.getChannel()), threshold)
 					.toProcessor();
-				image.setProcessor(ip, Constants.rgbToStack(options.getChannel()));
+				image.setProcessor(ip, ImageImporter.rgbToStack(options.getChannel()));
 				finer("Run flattening");
 			}
 			searchStack = new ImageFilterer(image)
-				.runEdgeDetector(Constants.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
+				.runEdgeDetector(ImageImporter.rgbToStack(options.getChannel()), nucleusCannyOptions).toStack();
 			finer("Run edge detection");
 		} else {
 			searchStack = image;
@@ -269,7 +270,7 @@ public class NucleusDetector extends Detector {
 		ICell result = null;
 		
 		  // measure the area, density etc within the nucleus
-		ImageProcessor ip = image.getProcessor(Constants.rgbToStack(options.getChannel()));
+		ImageProcessor ip = image.getProcessor(ImageImporter.rgbToStack(options.getChannel()));
 		StatsMap values   = measure(roi, ip);
 
 		  // save the position of the roi, for later use

@@ -44,14 +44,11 @@ import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.IconCell;
-import com.bmskinner.nuclear_morphology.analysis.signals.FishRemappingWorker;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -247,7 +244,7 @@ public class FishRemappingDialog extends ImageProber {
 		double largeX = x * factor;
 		double largeY = y * factor;
 		
-		IPoint p = new FloatPoint(largeX, largeY);
+		IPoint p = IPoint.makeNew(largeX, largeY);
 		finer("Clicked in large image "+p.toString());
 		
 		// See if the selected position in the large icon is in a nucleus
@@ -310,16 +307,16 @@ public class FishRemappingDialog extends ImageProber {
 	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
 	        }
 			
-			FishRemappingWorker worker = new FishRemappingWorker(imageFile, 
-					 
-					FishMappingImageType.ORIGINAL_IMAGE, 
-					table.getModel(), postFISHImageDirectory);
-			
-			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
-			
-			worker.addPropertyChangeListener(this);
-			progressBar.setVisible(true);
-			worker.execute();
+//			FishRemappingWorker worker = new FishRemappingWorker(imageFile, 
+//					 
+//					FishMappingImageType.ORIGINAL_IMAGE, 
+//					table.getModel(), postFISHImageDirectory);
+//			
+//			worker.setSmallIconSize(new Dimension(500, table.getRowHeight()-30));
+//			
+//			worker.addPropertyChangeListener(this);
+//			progressBar.setVisible(true);
+//			worker.execute();
 			
 			// Get the relevant cells to speed mouse responses
 			openCells = dataset.getCollection().getCells(openImage);

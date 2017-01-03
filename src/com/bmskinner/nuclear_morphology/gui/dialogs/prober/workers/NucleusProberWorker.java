@@ -30,7 +30,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.image.NucleusAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -61,7 +61,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		ImageStack imageStack =  new ImageImporter(file).importImage();
 //		finer("Imported image as stack");
 //		
-		int stackNumber = Constants.rgbToStack(options.getChannel());
+		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
 		
 		/*
 		 * Insert steps to show each applied filter in the same order as from analysis
@@ -259,7 +259,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
 
-		ip = new NucleusAnnotator(ip)
+		ip = new ImageAnnotator(ip)
 				.annotateBorder(n, colour)
 				.toProcessor();
 
@@ -276,7 +276,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 		
 		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
 
-		ip = new NucleusAnnotator(ip)
+		ip = new ImageAnnotator(ip)
 				.annotateStats(n, Color.ORANGE, Color.BLUE)
 				.toProcessor();
 	}
