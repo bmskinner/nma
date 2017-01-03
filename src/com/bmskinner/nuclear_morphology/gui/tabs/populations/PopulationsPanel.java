@@ -487,9 +487,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		public void valueChanged(TreeSelectionEvent e) {
 			
 			try {
-				
-//				log("Ctrl down: "+isCtrlPressed());
-				
+
 				if( ! isCtrlPressed()){
 
 					datasetSelectionOrder.clear();
@@ -581,7 +579,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					}
 				}
 			} catch(Exception ex){
-				error("Error in tree selection handler", ex);
+				warn("Error in tree selection handler");
+				stack("Error in tree selection handler", ex);
 			}
 		}
 		

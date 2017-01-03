@@ -77,6 +77,8 @@ import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
+	private static final double DEFAULT_PROFILE_LENGTH = 100;
+	
 	public NucleusDatasetCreator(ChartOptions options){
 		super(options);
 	}
@@ -640,10 +642,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @throws Exception 
 	 */
 	private XYSeriesCollection addMultiProfileIQRSeries(IProfileCollection pc, 
-			ProfileType type, 
-			Tag point, int series, double length, 
-			double medianLength, boolean normalised, 
-			ProfileAlignment alignment) throws ChartDatasetCreationException{
+			int series, double length, double medianLength) throws ChartDatasetCreationException{
+		
+		ProfileType type     = options.getType();
+		Tag point            = options.getTag();
+		boolean normalised   = options.isNormalised();
+		ProfileAlignment aln = options.getAlignment();
 		
 		IProfile profile;
 		try {
@@ -661,7 +665,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			xpoints = profile.getPositions( (int) medianLength );
 		}
 		
-		if(alignment.equals(ProfileAlignment.RIGHT)){
+		if(aln.equals(ProfileAlignment.RIGHT)){
 			double differenceToMaxLength = length - medianLength;
 			xpoints = xpoints.add(differenceToMaxLength);
 		}
@@ -695,43 +699,24 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	    return xsc;
 	}
 	
-	
-	public List<XYSeriesCollection> createMultiProfileIQRDataset() throws ChartDatasetCreationException{
-		return createMultiProfileIQRDataset(options.getDatasets(),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag(),
-				options.getType());
-	}
-
-	
 	/**
 	 * Get the IQR for a set of profiles as a dataset
-	 * @param list the datasets
-	 * @param normalised should the data be normalised or raw length
-	 * @param rightAlign should raw data be aligned to the right edge of the plot
-	 * @return a dataset
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException 
 	 */
-	private List<XYSeriesCollection> createMultiProfileIQRDataset(final List<IAnalysisDataset> list,
-			boolean normalised, ProfileAlignment alignment, Tag borderTag, ProfileType type) throws ChartDatasetCreationException{
-
+	public List<XYSeriesCollection> createMultiProfileIQRDataset() throws ChartDatasetCreationException{
+		
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 		
-		double length = getMaximumMedianProfileLength(list);
+		double length = getMaximumMedianProfileLength(options.getDatasets());
 
-		for(int i=0; i<list.size(); i++){ //AnalysisDataset dataset : list){
-			IAnalysisDataset dataset = list.get(i);
+		for(int i=0; i<options.datasetCount(); i++){ //AnalysisDataset dataset : list){
+			IAnalysisDataset dataset = options.getDatasets().get(i);
 			ICellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
-										type,
-										borderTag,
 										i,
 										length,
-										collection.getMedianArrayLength(),
-										normalised,
-										alignment);
+										collection.getMedianArrayLength());
 		    result.add(xsc);
 		}
 		return result;
@@ -744,23 +729,18 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset(List<IAnalysisDataset> list, 
-			boolean normalised, ProfileAlignment alignment,  Tag borderTag) throws ChartDatasetCreationException{
+	public List<XYSeriesCollection> createMultiProfileIQRFrankenDataset() throws ChartDatasetCreationException{
 		List<XYSeriesCollection> result = new ArrayList<XYSeriesCollection>(0);
 
 		int i=0;
-		for(IAnalysisDataset dataset : list){
+		for(IAnalysisDataset dataset : options.getDatasets()){
 			
 			ICellCollection collection = dataset.getCollection();
 			
 			XYSeriesCollection xsc = addMultiProfileIQRSeries(collection.getProfileCollection(), 
-					ProfileType.FRANKEN,
-					borderTag,
 					i,
-					100,
-					100,
-					true,
-					alignment);
+					DEFAULT_PROFILE_LENGTH,
+					DEFAULT_PROFILE_LENGTH);
 		    result.add(xsc);
 		    i++;
 		}
@@ -769,11 +749,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 	/**
 	 * Create a chart of the variability in the interquartile ranges across the angle profiles of the given datasets
-	 * @param list
-	 * @param borderTag
-	 * @param data.type
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public XYDataset createIQRVariabilityDataset() throws ChartDatasetCreationException {
 		
@@ -833,29 +810,20 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		return ds;
 	}
 	
-	
-	public XYDataset createFrankenSegmentDataset() throws ChartDatasetCreationException {
-		return createFrankenSegmentDataset(options.firstDataset().getCollection(),
-				options.isNormalised(),
-				options.getAlignment(),
-				options.getTag());
-	}
-		
-		
 	/**
 	 * Create a dataset containing series for each segment within the FrankenCollection
-	 * @param collection the cell collection to draw from
-	 * @param normalised should the chart be normalised to 100
-	 * @param alignment hang the chart from left or right
-	 * @param point the zero index of the chart
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
-	private XYDataset createFrankenSegmentDataset(ICellCollection collection, boolean normalised, 
-			ProfileAlignment alignment, Tag point) throws ChartDatasetCreationException{
+	public XYDataset createFrankenSegmentDataset() throws ChartDatasetCreationException {
+		
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
-//		String pointType = collection.getOrientationPoint();
+		ICellCollection collection = options.firstDataset().getCollection();
+		boolean normalised = options.isNormalised();
+		ProfileAlignment alignment = options.getAlignment();
+		Tag point = options.getTag();
+		
 		IProfile profile;
 		try {
 			profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.MEDIAN);
@@ -935,9 +903,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * Create a segmented dataset for an individual nucleus. Segments are added for
 	 * all types except frankenprofiles, since the frankenprofile boundaries will not match
 	 * @param nucleus the nucleus to draw
-	 * @param type the profile type to draw.
 	 * @return
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException 
 	 */
 	public XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws ChartDatasetCreationException {
 		
@@ -974,9 +941,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param options the charting options
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public BoxAndWhiskerCategoryDataset createBoxplotDataset() throws ChartDatasetCreationException {
 		List<IAnalysisDataset> datasets = options.getDatasets();
@@ -1001,12 +967,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 	/**
 	 * Create a box and whisker dataset for the desired segment statistic
-	 * @param collections the datasets to include
-	 * @param segName the segment to calculate for
-	 * @param scale the scale
-	 * @param stat the segment statistic to use
 	 * @return
-	 * @throws Exception
+	 * @throws ChartDatasetCreationException
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentStatDataset() throws ChartDatasetCreationException {
 		
@@ -1024,10 +986,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 	/**
 	 * Get the lengths of the given segment in the collections
-	 * @param collections
-	 * @param segName
 	 * @return
-	 * @throws Exception 
+	 * @throws ChartDatasetCreationException 
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, 
 			int segPosition, MeasurementScale scale) throws ChartDatasetCreationException {

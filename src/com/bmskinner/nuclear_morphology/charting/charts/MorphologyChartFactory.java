@@ -586,8 +586,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		try {
 
 			if(options.getType().equals(ProfileType.FRANKEN)){
-				iqrProfiles     = creator.createMultiProfileIQRFrankenDataset(  options.getDatasets(), options.isNormalised(), options.getAlignment(), options.getTag());				
-				medianProfiles	= creator.createMultiProfileFrankenDataset(	 );
+				iqrProfiles     = creator.createMultiProfileIQRFrankenDataset();				
+				medianProfiles	= creator.createMultiProfileFrankenDataset();
 			} else {
 				iqrProfiles     = creator.createMultiProfileIQRDataset(  );				
 				medianProfiles	= creator.createMultiProfileDataset(     );

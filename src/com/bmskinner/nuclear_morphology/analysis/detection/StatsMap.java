@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.utility;
+package com.bmskinner.nuclear_morphology.analysis.detection;
 
 import java.util.HashMap;
 import java.util.Set;

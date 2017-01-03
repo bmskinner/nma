@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.utility;
+package com.bmskinner.nuclear_morphology.io;
 
 import ij.IJ;
 
@@ -25,7 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class MappingFileParser {
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+public class MappingFileParser implements Importer, Loggable {
 
 	static List<String> result = new ArrayList<String>(0);
 
@@ -42,7 +44,7 @@ public class MappingFileParser {
 		scanner.close();
 		
 		} catch(Exception e){
-			IJ.log("Error parsing mapping file");
+//			IJ.log("Error parsing mapping file");
 		}
 		return result;
 	}

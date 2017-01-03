@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
@@ -39,7 +40,6 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.StatsMap;
 
 import ij.ImageStack;
 import ij.gui.Roi;

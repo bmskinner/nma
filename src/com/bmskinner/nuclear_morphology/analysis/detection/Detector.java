@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.StatsMap;
 
 
 /**

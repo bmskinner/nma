@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
@@ -37,7 +38,6 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.utility.StatsMap;
 
 import ij.ImageStack;
 import ij.gui.Roi;
