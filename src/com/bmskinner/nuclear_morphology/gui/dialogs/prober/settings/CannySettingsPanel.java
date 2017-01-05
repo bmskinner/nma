@@ -237,6 +237,33 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 		addLabelTextRows(labels, fields, this );
 		
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		
+		if(b){
+			cannyLowThreshold.setEnabled(!cannyAutoThresholdCheckBox.isSelected());
+			cannyHighThreshold.setEnabled(!cannyAutoThresholdCheckBox.isSelected());
+			flattenImageThresholdSpinner.setEnabled(flattenImageCheckBox.isSelected());
+			kuwaharaRadiusSpinner.setEnabled(useKuwaharaCheckBox.isSelected());
+		} else {
+			cannyLowThreshold.setEnabled(false);
+			cannyHighThreshold.setEnabled(false);
+			flattenImageThresholdSpinner.setEnabled(false);
+			kuwaharaRadiusSpinner.setEnabled(false);
+		}
+		
+		
+		cannyKernelRadius.setEnabled(b);
+		cannyKernelWidth.setEnabled(b);
+		closingObjectRadiusSpinner.setEnabled(b);
+
+		cannyAutoThresholdCheckBox.setEnabled(b);
+		useKuwaharaCheckBox.setEnabled(b);
+		flattenImageCheckBox.setEnabled(b);
+
+	}
 
 
 	@Override
@@ -251,6 +278,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				}
 				Double doubleValue = (Double) j.getValue();
 				options.setLowThreshold(    doubleValue.floatValue() );
+				fireOptionsChangeEvent();
 			}
 
 			if(e.getSource()==cannyHighThreshold){
@@ -262,6 +290,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				}
 				Double doubleValue = (Double) j.getValue();
 				options.setHighThreshold( doubleValue.floatValue() );
+				fireOptionsChangeEvent();
 			}
 
 			if(e.getSource()==cannyKernelRadius){
@@ -269,18 +298,21 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				j.commitEdit();
 				Double doubleValue = (Double) j.getValue();
 				options.setKernelRadius( doubleValue.floatValue());
+				fireOptionsChangeEvent();
 			}
 
 			if(e.getSource()==cannyKernelWidth){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				options.setKernelWidth( (Integer) j.getValue());
+				fireOptionsChangeEvent();
 			}
 
 			if(e.getSource()==closingObjectRadiusSpinner){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				options.setClosingObjectRadius( (Integer) j.getValue());
+				fireOptionsChangeEvent();
 			}
 			
 			if(e.getSource()==kuwaharaRadiusSpinner){
@@ -294,15 +326,17 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 					j.repaint();
 				}
 				options.setKuwaharaKernel(value);
+				fireOptionsChangeEvent();
 			}
 			
 			if(e.getSource()==flattenImageThresholdSpinner){
 				JSpinner j = (JSpinner) e.getSource();
 				j.commitEdit();
 				options.setFlattenThreshold( (Integer) j.getValue());
+				fireOptionsChangeEvent();
 			}
 			
-			fireOptionsChangeEvent();
+			
 			
 		} catch (ParseException e1) {
 			stack("Parsing error in JSpinner", e1);

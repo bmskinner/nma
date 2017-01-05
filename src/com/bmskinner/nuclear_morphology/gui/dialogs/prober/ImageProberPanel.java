@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
@@ -12,6 +11,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -29,7 +30,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -46,6 +46,8 @@ public abstract class ImageProberPanel extends JPanel
 	implements Loggable, 
 				PropertyChangeListener, 
 				ProberReloadEventListener {
+	
+	List<PanelUpdatingEventListener> updatingListeners = new ArrayList<PanelUpdatingEventListener>();
 		
 	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
@@ -96,14 +98,10 @@ public abstract class ImageProberPanel extends JPanel
 
 		JPanel headerPanel = createHeader();
 		JPanel tablePanel  = createTablePanel();
-		
-//		int minWidth = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.7);
-//		int minHeight = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
-//		Dimension minPanelSize = new Dimension(minWidth, minHeight);
-//		tablePanel.setPreferredSize(minPanelSize);
 
 		JButton nextButton = new JButton(NEXT_IMAGE_BTN);
 		nextButton.addActionListener( e ->{
+			cancel();
 			openImage = getNextImage();
 			importAndDisplayImage(openImage);
 		});
@@ -111,6 +109,7 @@ public abstract class ImageProberPanel extends JPanel
 		
 		JButton prevButton = new JButton(PREV_IMAGE_BTN);
 		prevButton.addActionListener( e ->{
+			cancel();
 			openImage = getPrevImage();
 			importAndDisplayImage(openImage);
 		});
@@ -139,6 +138,7 @@ public abstract class ImageProberPanel extends JPanel
 		progressBar.setValue(0);
 		TableModel model = createEmptyTableModel(rows, cols);
 		table.setModel(model);
+		firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
 	}
 	
 	private JPanel createTablePanel(){
@@ -301,7 +301,7 @@ public abstract class ImageProberPanel extends JPanel
 	 * @return
 	 */
 	private File getNextImage(){
-
+		
 		if(fileIndex >= imageFiles.size()-1){
 			fileIndex = 0;
 		} else {
@@ -404,10 +404,11 @@ public abstract class ImageProberPanel extends JPanel
 	    	
 	    	
 	    	if(evt.getPropertyName().equals("Finished")){
-//				log("Worker signaled finished");
+
 				progressBar.setVisible(false);
 				table.repaint();
 				repaint();
+				firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
 				
 			}
 	    	
@@ -419,6 +420,7 @@ public abstract class ImageProberPanel extends JPanel
 		
 	@Override
 	public void proberReloadEventReceived(ProberReloadEvent e) {
+//		cancel();
 		importAndDisplayImage(openImage);
 	}
 
@@ -509,7 +511,46 @@ public abstract class ImageProberPanel extends JPanel
 		}
 		
 	}
+	
+	public void addPanelUpdatingEventListener(PanelUpdatingEventListener l){
+		updatingListeners.add(l);
+	}
+	
+	public void removePanelUpdatingEventListener(PanelUpdatingEventListener l){
+		updatingListeners.remove(l);
+	}
 
+	protected void firePanelUpdatingEvent(int type){
+		Iterator<PanelUpdatingEventListener> it = updatingListeners.iterator();
+		PanelUpdatingEvent e = new PanelUpdatingEvent(this, type);
+		while(it.hasNext()){
+			it.next().panelUpdatingEventReceived(e);
+		}
+	}
+	
+	
+	public interface PanelUpdatingEventListener {
+		void panelUpdatingEventReceived(PanelUpdatingEvent e);
+	}
+	
+	@SuppressWarnings("serial")
+	public class PanelUpdatingEvent extends EventObject {
+		
+		public static final int UPDATING = 0;
+		public static final int COMPLETE = 1;
+		
+		private int type;
+		
+		public PanelUpdatingEvent(Object source, int type){
+			super(source);
+			this.type = type;
+		}
+		
+		public int getType(){
+			return type;
+		}
+
+	}
 	
 	
 }

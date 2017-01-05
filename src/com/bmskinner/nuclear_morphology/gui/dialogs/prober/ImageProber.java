@@ -56,6 +56,7 @@ import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 @SuppressWarnings("serial")
+@Deprecated
 public abstract class ImageProber extends LoadingIconDialog implements PropertyChangeListener {
 	
 	public static final int DEFAULT_COLUMN_COUNT = 2;

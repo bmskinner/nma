@@ -15,7 +15,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannel
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.MiscNucleusSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusProfileSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The detection setttings for nuclei. Composed of subpanels that set each type

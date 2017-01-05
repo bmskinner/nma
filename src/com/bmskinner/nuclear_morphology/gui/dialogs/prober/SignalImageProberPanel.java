@@ -9,6 +9,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.SignalProberWorker;
 
 @SuppressWarnings("serial")
@@ -66,6 +67,7 @@ public class SignalImageProberPanel extends ImageProberPanel {
 			
 			worker.addPropertyChangeListener(this);
 			progressBar.setVisible(true);
+			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
 			worker.execute();
 
 

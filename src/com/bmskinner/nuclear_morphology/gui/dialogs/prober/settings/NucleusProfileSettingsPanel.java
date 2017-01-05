@@ -137,5 +137,12 @@ public class NucleusProfileSettingsPanel extends SettingsPanel  {
 		super.update();
 		profileWindow.setValue( options.getProfileWindowProportion());
 	}
-		
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		profileWindow.setEnabled(b);
+		typeBox.setEnabled(b);
+
+	}	
 }

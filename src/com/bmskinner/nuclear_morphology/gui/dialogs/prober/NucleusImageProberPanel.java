@@ -5,6 +5,7 @@ import java.awt.Window;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
 
 
@@ -30,7 +31,7 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 		}
 		
 		try {
-
+			progressBar.setValue(0);
 			setImageLabel(imageFile.getAbsolutePath());
 			
 			
@@ -49,6 +50,11 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 			
 			worker.addPropertyChangeListener(this);
 			progressBar.setVisible(true);
+			finer("Firing panel updating event");
+			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
+			
+			
+			
 			worker.execute();
 
 

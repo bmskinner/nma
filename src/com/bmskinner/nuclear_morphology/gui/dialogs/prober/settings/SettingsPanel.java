@@ -13,6 +13,8 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEventListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;
@@ -26,7 +28,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class SettingsPanel extends JPanel implements Loggable, OptionsChangeListener {
+public abstract class SettingsPanel extends JPanel implements Loggable, OptionsChangeListener, PanelUpdatingEventListener {
 	
 
 	protected static final int BOX_WIDTH = 80;
@@ -187,8 +189,27 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 			update();
 			fireOptionsChangeEvent();
 		}
+
+	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		finer(this.getClass().getSimpleName()+": Setting updating "+b);
+		for(SettingsPanel p : subPanels){
+			p.setEnabled(b);
+		}
+	}
+	
+	@Override
+	public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
+
+		if(e.getType()==PanelUpdatingEvent.UPDATING){
+			this.setEnabled(false);
+		}
 		
-		
-		
+		if(e.getType()==PanelUpdatingEvent.COMPLETE){
+			this.setEnabled(true);
+		}
+
 	}
 }

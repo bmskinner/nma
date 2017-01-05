@@ -73,6 +73,13 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel implements Ch
 		super.update();
 		thresholdSpinner.setValue(options.getThreshold());
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		thresholdSpinner.setEnabled(b);
+
+	}
 
 	@Override
 	public void set(IDetectionOptions options) {

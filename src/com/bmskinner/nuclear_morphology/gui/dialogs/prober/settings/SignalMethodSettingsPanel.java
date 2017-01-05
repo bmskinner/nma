@@ -89,6 +89,12 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 		
 		
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		box.setEnabled(b);
 
+	}
 
 }

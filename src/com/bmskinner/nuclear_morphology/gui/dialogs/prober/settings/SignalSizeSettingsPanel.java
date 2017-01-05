@@ -130,6 +130,16 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
 		minCircSpinner.setValue(options.getMinCirc());
 		maxCircSpinner.setValue(options.getMaxCirc());
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		minSizeSpinner.setEnabled(b);
+		maxSizeSpinner.setEnabled(b);
+		minCircSpinner.setEnabled(b);
+		maxCircSpinner.setEnabled(b);
+
+	}
 		
 	/**
 	 * Set the options values and update the spinners

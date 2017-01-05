@@ -41,7 +41,8 @@ public class NucleusImageProber extends IntegratedImageProber {
 
 			this.setTitle(DIALOG_TITLE_BAR_LBL);
 			
-			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
+			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform update needed
+			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
 			
 			
 		} catch (Exception e){

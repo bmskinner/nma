@@ -134,6 +134,14 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 		}
 		
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		thresholdBtn.setEnabled(b);
+		edgeBtn.setEnabled(b);
+
+	}
 
 	@Override
 	public void set(IDetectionOptions options) {

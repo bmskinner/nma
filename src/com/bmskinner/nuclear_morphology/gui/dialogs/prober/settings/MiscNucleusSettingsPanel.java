@@ -70,5 +70,12 @@ public class MiscNucleusSettingsPanel extends SettingsPanel {
 		super.update();
 		keepFailedheckBox.setSelected(options.isKeepFailedCollections());
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		keepFailedheckBox.setEnabled(b);
+
+	}
 
 }

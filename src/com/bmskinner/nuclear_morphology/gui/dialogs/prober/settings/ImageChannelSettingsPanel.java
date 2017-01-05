@@ -116,6 +116,14 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
 		scaleSpinner.setValue(options.getScale());
 	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		channelBox.setEnabled(b);
+		scaleSpinner.setEnabled(b);
+
+	}
 
 	/**
 	 * Set the options values and update the spinners
