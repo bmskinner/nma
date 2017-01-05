@@ -37,7 +37,6 @@ import ij.process.ImageProcessor;
  */
 public class ImageImporter implements Loggable, Importer {
 	
-	private final File f;
 	private static final int[] IMAGE_TYPES_PROCESSED = { ImagePlus.GRAY8, ImagePlus.COLOR_RGB, ImagePlus.GRAY16 };
 	
 	// The file types that the program will try to open
@@ -59,6 +58,7 @@ public class ImageImporter implements Loggable, Importer {
 	public static final int FIRST_SIGNAL_CHANNEL = 2; // ImageStack slices are numbered from 1; first slice is blue
 		
 			
+	private final File f;
 	
 	/**
 	 * Construct from a file. Checks that the given File object is valid, and 
@@ -113,7 +113,7 @@ public class ImageImporter implements Loggable, Importer {
 	  public static int rgbToStack(int channel){
 
 		  if(channel < 0){
-			  throw new IllegalArgumentException("Channel cannot be less than 0");
+			  throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
 		  }
 
 		  int stackNumber = channel==RGB_RED 
@@ -132,6 +132,11 @@ public class ImageImporter implements Loggable, Importer {
 	   * @return
 	   */
 	  public static String channelIntToName(int channel){
+		  
+		  if(channel < 0){
+			  throw new IllegalArgumentException(CHANNEL_BELOW_ZERO_ERROR);
+		  }
+		  
 		  if(channel == RGB_RED){
 			  return "Red";
 		  }
@@ -149,11 +154,9 @@ public class ImageImporter implements Loggable, Importer {
 	   * Import and convert the image in the given file to an ImageStack
 	   * @return the ImageStack
 	   */
-	  public ImageStack importImage() throws ImageImportException{
+	  public ImageStack importImage() throws ImageImportException {
 
 		ImageStack stack = null;
-
-		fine("Importing image: "+f.getAbsolutePath());
 
 		ImagePlus image = new ImagePlus(f.getAbsolutePath());
 
@@ -213,19 +216,16 @@ public class ImageImporter implements Loggable, Importer {
 		switch(image.getType()){
 		
 			case ImagePlus.GRAY8:{
-				fine("Converting 8 bit greyscale to stack");
 				result = convertGreyscale(image);
 				break;
 			}
 			
 			case ImagePlus.COLOR_RGB:{
-				fine("Converting RGB to stack");
 				result = convertRGB(image);
 				break;
 			}
 			
 			case ImagePlus.GRAY16:{
-				fine("Converting 16 bit greyscale to 8 bit stack");
 				result = convert16bitGrey(image);
 				break;
 			}
@@ -258,17 +258,25 @@ public class ImageImporter implements Loggable, Importer {
 	 * @return the stack
 	 */
 	private ImageStack convertRGB(ImagePlus image){
-		ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
-//		ImageStack result = new ImageStack(image.getWidth(), image.getHeight());
 		
+		int imageDepth = 0; // number of images in the stack to begin
+		int bitDepth   = 8; // default 8 bit images
+		 
+		// Create a new empty stack. There will be a blank image in the
+		// stack at index 1. NB stacks do not use zero indexing.
+		ImageStack result = ImageStack.create(image.getWidth(), 
+				image.getHeight(), 
+				imageDepth, 
+				bitDepth);
+
 		// split out colour channel
 	    ImagePlus[] channels = ChannelSplitter.split(image);
 	    
+	    // Put each channel into the correct stack position
 	    result.addSlice("counterstain", channels[RGB_BLUE].getProcessor());
 	    result.addSlice(channels[RGB_RED].getProcessor());
 	    result.addSlice(channels[RGB_GREEN].getProcessor());
 	    result.deleteSlice(1); // remove the blank first slice
-	    fine("New stack has "+result.getSize()+" slices");
 	    return result;
 	}
 	
@@ -279,12 +287,17 @@ public class ImageImporter implements Loggable, Importer {
 	 * @return the stack
 	 */
 	private ImageStack convert16bitGrey(ImagePlus image) throws ImageImportException {
-		fine("Converting image from 16 bit");
+		// this is the ij.process.ImageConverter, not my analysis.image.ImageConverter
 		ImageConverter converter = new ImageConverter(image);
 		converter.convertToGray8();
 		return convertGreyscale(image);
 	}
 	
+	/**
+	 * Thrown when a conversion fails or a file is not convertible
+	 * @author ben
+	 *
+	 */
 	public class ImageImportException extends Exception {
 		private static final long serialVersionUID = 1L;
 		public ImageImportException() { super(); }

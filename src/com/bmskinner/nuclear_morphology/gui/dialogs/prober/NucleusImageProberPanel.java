@@ -45,7 +45,7 @@ public class NucleusImageProberPanel extends ImageProberPanel {
 					imageSet, 
 					table.getModel());
 			
-			worker.setSmallIconSize(new Dimension(SMALL_ICON_WIDTH, table.getRowHeight()-30));
+			worker.setSmallIconSize(new Dimension(SMALL_ICON_MAX_WIDTH, table.getRowHeight()-30));
 			
 			worker.addPropertyChangeListener(this);
 			progressBar.setVisible(true);

@@ -1,13 +1,10 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
 import java.io.File;
-import java.util.Set;
-
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
@@ -22,15 +19,13 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 	
 	private static final String FISH_FOLDER_IS_FILE_ERROR = "FISH directory is not a folder";
 	
-	private File dir;
-	final private Set<Nucleus> nuclei;
+	private final File dir;
 	
 	public FishRemappingProberWorker(final File f, 
 			final IDetectionOptions options, 
 			final ImageSet type, 
 			final TableModel model, 
-			final File postFishDir,
-			final Set<Nucleus> nuclei) {
+			final File postFishDir) {
 		
 		super(f, options, type, model);
 		
@@ -39,7 +34,6 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 		}
 		
 		this.dir = postFishDir;
-		this.nuclei = nuclei;
 	}
 
 	@Override
@@ -57,8 +51,11 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 		String imageName = file.getName();
 
 		finest("Converting image");
-		ImageProcessor openProcessor = new ImageConverter(stack).convertToGreyscale().toProcessor();
-		openProcessor.invert();
+		ImageProcessor openProcessor = new ImageConverter(stack)
+				.convertToGreyscale()
+				.invert()
+				.toProcessor();
+
 		
 		ImageProberTableCell iconCell = makeIconCell(openProcessor, true, DetectionImageType.ORIGINAL);
 		publish(iconCell);
@@ -71,7 +68,8 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 			ImageProcessor ep = ImageConverter.createBlankImage(openProcessor.getWidth(), openProcessor.getHeight())
 					.toProcessor();
 			
-			ImageAnnotator an = new ImageAnnotator(ep).annotateString(ep.getWidth()/2, ep.getHeight()/2, "File not found");
+			ImageAnnotator an = new ImageAnnotator(ep)
+					.annotateString(ep.getWidth()/2, ep.getHeight()/2, "File not found");
 			ImageProberTableCell iconCell1 = makeIconCell(an.toProcessor(), true, DetectionImageType.FISH_IMAGE);
 			publish(iconCell1);
 			return;

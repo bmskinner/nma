@@ -49,15 +49,36 @@ public abstract class AbstractImageFilterer implements Loggable {
 		this.st = f.st;
 	}
 	
+	/**
+	 * Get the current image processor
+	 * @return
+	 */
 	public ImageProcessor toProcessor(){
+		if(ip==null){
+			throw new NullPointerException("Filterer does not contain an image processor");
+		}
 		return ip;
 	}
 	
+	/**
+	 * Get the current image stack
+	 * @return
+	 */
 	public ImageStack toStack(){
+		if(st==null){
+			throw new NullPointerException("Filterer does not contain an image stack");
+		}
 		return st;
 	}
 	
+	/**
+	 * Create an image icon from the current processor
+	 * @return
+	 */
 	public ImageIcon toImageIcon(){
+		if(ip==null){
+			throw new NullPointerException("Filterer does not contain an image processor");
+		}
 		return new ImageIcon( ip.getBufferedImage() );
 	}
 	

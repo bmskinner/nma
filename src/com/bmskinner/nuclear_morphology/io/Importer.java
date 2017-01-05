@@ -10,7 +10,8 @@ public interface Importer {
 	static final String BAK_FILE_EXTENSION = ".bak"; // backup files made in conversions
 	static final String WRK_FILE_EXTENSION = ".wrk"; // workspace files for multiple nmds
 	
-	static final String INVALID_FILE_ERROR = "File is not valid for importing";
+	static final String INVALID_FILE_ERROR       = "File is not valid for importing";
+	static final String CHANNEL_BELOW_ZERO_ERROR = "Channel cannot be less than 0";
 	
 	
 	/**

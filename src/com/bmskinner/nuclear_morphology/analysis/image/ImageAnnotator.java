@@ -30,6 +30,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -46,6 +47,11 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+/**
+ * Draw components and features on image processors.
+ * @author ben
+ *
+ */
 public class ImageAnnotator  extends AbstractImageFilterer {
 
 	public ImageAnnotator(ImageProcessor ip) {
@@ -53,6 +59,12 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	}
 		
 	
+	/**
+	 * Draw the outline of the given nucleus, with the OP, RP,
+	 * CoM, feret, segments and any signals markerd
+	 * @param n the nucleus to draw
+	 * @return the annotator
+	 */
 	public ImageAnnotator annotateNucleus(Nucleus n){
 		
 		try{
@@ -71,13 +83,35 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		return this;
 	}
 	
-	private ImageAnnotator annotatePoint(IPoint p, Color c){
+	/**
+	 * Draw a point on the image processor
+	 * @param p the point to draw
+	 * @param c the colour to draw
+	 * @return the annotator
+	 */
+	public ImageAnnotator annotatePoint(IPoint p, Color c){
+		
+		if(p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth()){
+			throw new IllegalArgumentException("Point x is out of image bounds");
+		}
+		
+		if(p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight()){
+			throw new IllegalArgumentException("Point y is out of image bounds");
+		}
+				
 		ip.setColor(c);
 		ip.setLineWidth(3);
 		ip.drawDot( p.getXAsInt(), p.getYAsInt());
 		return this;
 	}
 	
+	/**
+	 * Draw a line on the image processor
+	 * @param p1 the first endpoint
+	 * @param p1 the second endpoint
+	 * @param c the colour to draw
+	 * @return the annotator
+	 */
 	private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c){
 		ip.setColor(c);
 		ip.setLineWidth(1);
@@ -93,6 +127,12 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	}
 	
 
+	/**
+	 * Draw the orientation point of a nucleus in cyan. For other colours
+	 * use {@link ImageAnnotator#annotatePoint} directly
+	 * @param n the nucleus
+	 * @return the annotator
+	 */
 	public ImageAnnotator annotateOP(Nucleus n){		
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
@@ -102,6 +142,12 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		}
 	}
 
+	/**
+	 * Draw the reference point of a nucleus in yellow. For other colours
+	 * use {@link ImageAnnotator#annotatePoint} directly
+	 * @param n the nucleus
+	 * @return the annotator
+	 */
 	public ImageAnnotator annotateRP(Nucleus n){
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
@@ -111,6 +157,12 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		}
 	}
 	
+	/**
+	 * Draw the centre of mass of a component in magenta. For other colours
+	 * use {@link ImageAnnotator#annotatePoint} directly
+	 * @param n the component
+	 * @return the annotator
+	 */
 	public ImageAnnotator annotateCoM(CellularComponent n){
 		return annotatePoint(n.getCentreOfMass(), Color.MAGENTA);
 	}
@@ -119,7 +171,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	 * Draw the outline of the component in the given colour
 	 * @param n the component
 	 * @param c the colour
-	 * @return
+	 * @return the annotator
 	 */
 	public ImageAnnotator annotateBorder(CellularComponent n, Color c){
 		FloatPolygon p = n.createOriginalPolygon();
@@ -251,7 +303,13 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	
 
 
-	public ImageAnnotator annotateMinFeret(Nucleus n){
+	/**
+	 * Draw the feret diameter of a profilable component in magenta. For other colours
+	 * use {@link ImageAnnotator#annotateLine} directly
+	 * @param n the component
+	 * @return the annotator
+	 */
+	public ImageAnnotator annotateMinFeret(Profileable n){
 		int minIndex;
 		try {
 			minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
@@ -266,7 +324,13 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		
 	}
 	
-	public ImageAnnotator annotateSegments(Nucleus n){
+	/**
+	 * Draw the segments of a profilable component in the global
+	 * colour swatch colours.
+	 * @param n the component
+	 * @return the annotator
+	 */
+	public ImageAnnotator annotateSegments(Profileable n){
 
 		try{
 
@@ -298,7 +362,11 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		return this;
 	}
 	
-	
+	/**
+	 * Draw the signals within a nucleus
+	 * @param n the nucleus
+	 * @return the annotator
+	 */
 	public ImageAnnotator annotateSignals(Nucleus n){
 
 		ISignalCollection signalCollection = n.getSignalCollection();

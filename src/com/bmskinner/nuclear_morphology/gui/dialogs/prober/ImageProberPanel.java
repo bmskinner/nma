@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
@@ -28,6 +29,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.ImageProberWorker;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -47,7 +49,9 @@ public abstract class ImageProberPanel extends JPanel
 		
 	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
-	protected static final int SMALL_ICON_WIDTH = 500;
+	protected static final int SMALL_ICON_MAX_WIDTH   = 500;
+	protected static final int SMALL_ICON_MAX_HEIGHT = 500;
+	
 	protected static final String NULL_FILE_ERROR = "File is null";
 	
 	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
@@ -92,6 +96,11 @@ public abstract class ImageProberPanel extends JPanel
 
 		JPanel headerPanel = createHeader();
 		JPanel tablePanel  = createTablePanel();
+		
+//		int minWidth = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth() * 0.7);
+//		int minHeight = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight() * 0.7);
+//		Dimension minPanelSize = new Dimension(minWidth, minHeight);
+//		tablePanel.setPreferredSize(minPanelSize);
 
 		JButton nextButton = new JButton(NEXT_IMAGE_BTN);
 		nextButton.addActionListener( e ->{
@@ -270,7 +279,7 @@ public abstract class ImageProberPanel extends JPanel
 				ImageProberTableCell cell;
 				if(count<values){
 					
-					ImageIcon blankIcon = ImageConverter.createBlankImage(600, 600).toImageIcon();
+					ImageIcon blankIcon = ImageConverter.createBlankImage(SMALL_ICON_MAX_WIDTH, SMALL_ICON_MAX_HEIGHT).toImageIcon();
 					cell = new ImageProberTableCell(blankIcon, imageSet.getType(count), true, count);
 
 				} else {
@@ -413,6 +422,12 @@ public abstract class ImageProberPanel extends JPanel
 		importAndDisplayImage(openImage);
 	}
 
+	/**
+	 * This renderer displays the small icons from an ImageProberTableCell, and sets text
+	 * appropriate to the label within the cell.
+	 * @author ben
+	 *
+	 */
 	public class IconCellRenderer extends DefaultTableCellRenderer	{
 		@Override
 		public Component getTableCellRendererComponent(
@@ -459,6 +474,8 @@ public abstract class ImageProberPanel extends JPanel
 	 */
 	public class LargeImageDialog extends JDialog {
 		
+		public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
+		
 		/**
 		 * Create a full-scale image for the given key in this ImageProber.
 		 * @param key the image to show
@@ -469,8 +486,8 @@ public abstract class ImageProberPanel extends JPanel
 			
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			
-			final ImageIcon icon = cell.getLargeIcon();
-			
+			final ImageIcon icon = cell.getLargeIconFitToScreen(DEFAULT_SCREEN_PROPORTION);
+
 			this.setLayout(new BorderLayout());
 			
 			

@@ -56,7 +56,8 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 		try {
 			analyseImages();
 		} catch(Exception e){
-			error("Error in signal image probing", e);
+			warn("Error in image probing");
+			stack("Error in signal image probing", e);
 			return false;
 		}
 		return true;
@@ -101,13 +102,14 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	protected ImageProberTableCell makeIconCell(ImageProcessor ip, boolean enabled, ImageType type){
 		
 		ImageFilterer filt = new ImageFilterer(ip);
-		ImageIcon ic = filt.fitToScreen().toImageIcon();
+//		ImageIcon ic = filt.fitToScreen().toImageIcon(); // This causes problems when drawing overlay nuclei based on original image size
+		ImageIcon ic = filt.toImageIcon();
 		ImageProberTableCell iconCell = new ImageProberTableCell( ic, type, enabled, imageSet.getPosition(type));
 		
 		ImageIcon small = filt.resize( (int) smallDimension.getWidth(), (int) smallDimension.getHeight())
 				.toImageIcon();
 						
-		iconCell.setSmallIcon(small );
+		iconCell.setSmallIcon( small );
 		return iconCell;
 	}
 	

@@ -61,7 +61,7 @@ public class FishRemappingProber extends IntegratedImageProber {
 
 	@Override
 	protected void okButtonClicked() {
-		// TODO Auto-generated method stub
+
 		List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel).getSubCollections();
 
 		if(subs.isEmpty()){
