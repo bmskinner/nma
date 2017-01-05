@@ -16,9 +16,16 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 
+/**
+ * A size settings panel for signals, which replaces the max size with a 
+ * max fraction option.
+ * @author ben
+ * @since 1.13.4
+ *
+ */
+@SuppressWarnings("serial")
 public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
 	
 	private static final String MIN_SIZE_LBL = "Min area (pixels)";

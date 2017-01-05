@@ -8,18 +8,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 @SuppressWarnings("serial")
-public class ThresholdSettingsPanel extends DetectionSettingsPanel implements ChangeListener {
+public class ThresholdSettingsPanel extends DetectionSettingsPanel  {
 	
-	private static final int  MIN_RANGE = 0;
-	private static final int  MAX_RANGE = 255;
-	private static final int  STEP      = 1;
+	private static final Integer  MIN_RANGE = Integer.valueOf(0);
+	private static final Integer  MAX_RANGE = Integer.valueOf(255);
+	private static final Integer  STEP      = Integer.valueOf(1);
 	
 	private static final String THRESHOLD_LBL = "Threshold";
 	
@@ -36,7 +33,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel implements Ch
 		JPanel panel = new JPanel(new FlowLayout());
 		
 		thresholdSpinner = new JSpinner(new SpinnerNumberModel(
-				options.getThreshold(),	
+				Integer.valueOf( options.getThreshold() ),	
 				MIN_RANGE, 
 				MAX_RANGE, 
 				STEP));
@@ -45,27 +42,19 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel implements Ch
 		
 		panel.add(lbl);
 		panel.add(thresholdSpinner);
-		thresholdSpinner.addChangeListener(this);
 		
-		return panel;
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		
-		try {
-			if(e.getSource()==thresholdSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();	
-				options.setThreshold(  (Integer) j.getValue());
+		thresholdSpinner.addChangeListener( e ->{
+			try {
+				thresholdSpinner.commitEdit();	
+				options.setThreshold(  ((Integer) thresholdSpinner.getValue()).intValue() );
+				fireOptionsChangeEvent();
+			} catch (ParseException e1) {
+				warn("Parsing error in JSpinner");
+				stack("Parsing error in JSpinner", e1);
 			}
-			
-			fireOptionsChangeEvent();
-		} catch (ParseException e1) {
-			stack("Parsing error in JSpinner", e1);
-		}
-		
-		
+		});
+
+		return panel;
 	}
 	
 	@Override

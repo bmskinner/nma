@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ComponentSiz
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CopyFromOpenDatasetPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.EdgeThresholdSwitchPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImagePreprocessingSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.MiscNucleusSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusProfileSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
@@ -34,6 +35,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 	private static final String PROFILING_LBL      = "Profiling";
 	private static final String MISC_LBL           = "Other";
 	private static final String CHANNEL_LBL        = "Image";
+	private static final String PREPROCESSING_LBL  = "Preprocessing";
 	
 	public NucleusDetectionSettingsPanel(IMutableAnalysisOptions options){
 		this.options = options;
@@ -49,6 +51,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		
 		SettingsPanel switchPanel  = new EdgeThresholdSwitchPanel(nucleusOptions);
+		SettingsPanel prePanel     = new ImagePreprocessingSettingsPanel(nucleusOptions);
 		SettingsPanel sizePanel    = new ComponentSizeSettingsPanel(nucleusOptions);
 		SettingsPanel profilePanel = new NucleusProfileSettingsPanel(options);
 		SettingsPanel miscPanel    = new MiscNucleusSettingsPanel(options);
@@ -56,13 +59,14 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		SettingsPanel copyPanel    = new CopyFromOpenDatasetPanel(nucleusOptions);
 		
 
+		prePanel.setBorder(    BorderFactory.createTitledBorder(PREPROCESSING_LBL));
 		switchPanel.setBorder( BorderFactory.createTitledBorder(OBJECT_FINDING_LBL));
 		sizePanel.setBorder(   BorderFactory.createTitledBorder(SIZE_SETTINGS_LBL ));
 		profilePanel.setBorder(BorderFactory.createTitledBorder(PROFILING_LBL     ));
 		miscPanel.setBorder(   BorderFactory.createTitledBorder(MISC_LBL          ));
 		channelPanel.setBorder(BorderFactory.createTitledBorder(CHANNEL_LBL       ));
 		
-
+		this.addSubPanel(prePanel);
 		this.addSubPanel(switchPanel);
 		this.addSubPanel(sizePanel);
 		this.addSubPanel(profilePanel);
@@ -71,6 +75,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		this.addSubPanel(copyPanel);
 				
 		panel.add(channelPanel);
+		panel.add(prePanel);
 		panel.add(switchPanel);
 		panel.add(profilePanel);
 		panel.add(sizePanel);
@@ -87,6 +92,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 			update();
 			
 			if(e.getSource() instanceof EdgeThresholdSwitchPanel 
+					|| e.getSource() instanceof ImagePreprocessingSettingsPanel 
 					|| e.getSource() instanceof ComponentSizeSettingsPanel 
 					|| e.getSource() instanceof ImageChannelSettingsPanel){
 				fireProberReloadEvent(); // don't fire an update for values that have no effect on a prober

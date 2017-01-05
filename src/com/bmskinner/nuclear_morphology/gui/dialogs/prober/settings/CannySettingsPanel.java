@@ -38,52 +38,31 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	public static final Integer CANNY_KERNEL_WIDTH_MAX  = Integer.valueOf(50);
 	public static final Integer CANNY_KERNEL_WIDTH_STEP = Integer.valueOf(1);
 	
-	public static final Integer KUWAHARA_WIDTH_MIN  = Integer.valueOf(1);
-	public static final Integer KUWAHARA_WIDTH_MAX  = Integer.valueOf(11);
-	public static final Integer KUWAHARA_WIDTH_STEP = Integer.valueOf(2);
+	
 	
 	public static final Integer CLOSING_RADIUS_MIN  = Integer.valueOf(1);
 	public static final Integer CLOSING_RADIUS_MAX  = Integer.valueOf(100);
 	public static final Integer CLOSING_RADIUS_STEP = Integer.valueOf(1);
 	
-	public static final Integer FLATTEN_THRESHOLD_MIN  = Integer.valueOf(0);
-	public static final Integer FLATTEN_THRESHOLD_MAX  = Integer.valueOf(255);
-	public static final Integer FLATTEN_THRESHOLD_STEP = Integer.valueOf(1);
+	
 	
 	private static final String AUTO_THRESHOLD_ACTION        = "CannyAutoThreshold";
-	private static final String USE_KUWAHARA_ACTION          = "UseKuwahara";
-	private static final String FLATTEN_CHROMOCENTRES_ACTION = "FlattenChromocentres";
-	private static final String ADD_BORDER_ACTION            = "AddBorder";
-	
+		
 	private static final String AUTO_THRESHOLD_LBL         = "Canny auto threshold";
-	private static final String USE_KUWAHARA_LBL           = "Use Kuwahara filter";
-	private static final String FLATTEN_CHROMOCENTRES_LBL  = "Flatten chromocentres";
-	private static final String ADD_BORDER_LBL             = "Add border to images";
 	
 	private static final String LOW_THRESHOLD_LBL        = "Canny low threshold";
 	private static final String HIGH_THRESHOLD_LBL       = "Canny high threshold";
 	private static final String KERNEL_RADIUS_LBL        = "Canny kernel radius";
 	private static final String KERNEL_WIDTH_LBL         = "Canny kernel width";
 	private static final String CLOSING_RADIUS_LBL       = "Closing radius";
-	private static final String KUWAHARA_KERNEL_LBL      = "Kuwahara kernel";
-	private static final String FLATTENING_THRESHOLD_LBL = "Flattening threshold";
-	
-	
+
 	private JSpinner cannyLowThreshold;
 	private JSpinner cannyHighThreshold;
 	private JSpinner cannyKernelRadius;
 	private JSpinner cannyKernelWidth;
 	private JSpinner closingObjectRadiusSpinner;
 	private JCheckBox cannyAutoThresholdCheckBox;
-	
-	private JCheckBox 	useKuwaharaCheckBox;
-	private JSpinner 	kuwaharaRadiusSpinner;
-	
-	private JCheckBox 	flattenImageCheckBox;
-	private JSpinner 	flattenImageThresholdSpinner;
-	
-	private JCheckBox 	addBorderCheckBox;
-	
+
 	private IMutableCannyOptions options;
 	
 	public CannySettingsPanel(final IMutableCannyOptions options){
@@ -104,13 +83,8 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		cannyKernelRadius.setValue( (double) options.getKernelRadius());
 		cannyKernelWidth.setValue(options.getKernelWidth());
 		closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
-		kuwaharaRadiusSpinner.setValue(options.getKuwaharaKernel());
-		flattenImageThresholdSpinner.setValue(options.getFlattenThreshold());
-
 		
 		cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
-		useKuwaharaCheckBox.setSelected(options.isUseKuwahara());
-		flattenImageCheckBox.setSelected(options.isUseFlattenImage());
 
 	}
 	
@@ -157,35 +131,11 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 				CLOSING_RADIUS_MAX , 
 				CLOSING_RADIUS_STEP));
 					
-		kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(
-				Integer.valueOf( options.getKuwaharaKernel() ), 
-				KUWAHARA_WIDTH_MIN,
-				KUWAHARA_WIDTH_MAX , 
-				KUWAHARA_WIDTH_STEP));
-		
-		flattenImageThresholdSpinner = new JSpinner(new SpinnerNumberModel(
-				Integer.valueOf(options.getFlattenThreshold()), 
-				FLATTEN_THRESHOLD_MIN,
-				FLATTEN_THRESHOLD_MAX , 
-				FLATTEN_THRESHOLD_STEP));
-		
-		
+				
 		cannyAutoThresholdCheckBox = new JCheckBox("", false);
 		cannyAutoThresholdCheckBox.setActionCommand(AUTO_THRESHOLD_ACTION);
 		cannyAutoThresholdCheckBox.addActionListener(this);
 
-		useKuwaharaCheckBox = new JCheckBox("", options.isUseKuwahara());
-		useKuwaharaCheckBox.setActionCommand(USE_KUWAHARA_ACTION);
-		useKuwaharaCheckBox.addActionListener(this);
-		
-		flattenImageCheckBox = new JCheckBox("", options.isUseKuwahara());
-		flattenImageCheckBox.setActionCommand(FLATTEN_CHROMOCENTRES_ACTION);
-		flattenImageCheckBox.addActionListener(this);
-		
-		// Add the border adding box
-		addBorderCheckBox = new JCheckBox("", options.isAddBorder());
-		addBorderCheckBox.setActionCommand(ADD_BORDER_ACTION);
-		addBorderCheckBox.addActionListener(this);
 		
 		// add the change listeners
 		cannyLowThreshold.addChangeListener( e -> {
@@ -266,44 +216,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 			}
 
 		});
-		
-		flattenImageThresholdSpinner.addChangeListener( e -> {
-			try {
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setFlattenThreshold( (Integer) j.getValue());
-				fireOptionsChangeEvent();
-			} catch(ParseException e1){
-				warn("Parsing exception");
-				stack("Parsing error in JSpinner", e1);
-			}
-
-		});
-		
-		kuwaharaRadiusSpinner.addChangeListener( e -> {
-			try {
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				Integer value = (Integer) j.getValue();
 				
-				if(value.intValue() % 2 == 0){ // even
-					// only odd values are allowed
-					j.setValue(value.intValue() - 1);
-
-				} else {
-					options.setKuwaharaKernel(value);
-					fireOptionsChangeEvent();
-				}
-				
-			} catch(ParseException e1){
-				warn("Parsing exception");
-				stack("Parsing error in JSpinner", e1);
-			}
-
-		});
-
-
-		
 	}
 		
 	private void createPanel(){
@@ -319,11 +232,6 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		labelList.add(new JLabel(KERNEL_RADIUS_LBL));
 		labelList.add(new JLabel(KERNEL_WIDTH_LBL));
 		labelList.add(new JLabel(CLOSING_RADIUS_LBL));
-		labelList.add(new JLabel(USE_KUWAHARA_LBL));
-		labelList.add(new JLabel(KUWAHARA_KERNEL_LBL));
-		labelList.add(new JLabel(FLATTEN_CHROMOCENTRES_LBL));
-		labelList.add(new JLabel(FLATTENING_THRESHOLD_LBL));
-//		labelList.add(new JLabel(ADD_BORDER_LBL));
 		
 		
 		JLabel[] labels = labelList.toArray(new JLabel[0]);
@@ -334,11 +242,6 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		fieldList.add(cannyKernelRadius);
 		fieldList.add(cannyKernelWidth);
 		fieldList.add(closingObjectRadiusSpinner);
-		fieldList.add(useKuwaharaCheckBox);
-		fieldList.add(kuwaharaRadiusSpinner);
-		fieldList.add(flattenImageCheckBox);
-		fieldList.add(flattenImageThresholdSpinner);
-//		fieldList.add(addBorderCheckBox);
 		
 		JComponent[] fields = fieldList.toArray(new JComponent[0]);
 
@@ -354,13 +257,9 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		if(b){
 			cannyLowThreshold.setEnabled(!cannyAutoThresholdCheckBox.isSelected());
 			cannyHighThreshold.setEnabled(!cannyAutoThresholdCheckBox.isSelected());
-			flattenImageThresholdSpinner.setEnabled(flattenImageCheckBox.isSelected());
-			kuwaharaRadiusSpinner.setEnabled(useKuwaharaCheckBox.isSelected());
 		} else {
 			cannyLowThreshold.setEnabled(false);
 			cannyHighThreshold.setEnabled(false);
-			flattenImageThresholdSpinner.setEnabled(false);
-			kuwaharaRadiusSpinner.setEnabled(false);
 		}
 		
 		
@@ -369,8 +268,6 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		closingObjectRadiusSpinner.setEnabled(b);
 
 		cannyAutoThresholdCheckBox.setEnabled(b);
-		useKuwaharaCheckBox.setEnabled(b);
-		flattenImageCheckBox.setEnabled(b);
 
 	}
 
@@ -390,33 +287,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 				cannyHighThreshold.setEnabled(true);
 			}
 		}
-		
-		if(e.getActionCommand().equals(USE_KUWAHARA_ACTION)){
-
-			if(useKuwaharaCheckBox.isSelected()){
-				options.setUseKuwahara(true);
-				kuwaharaRadiusSpinner.setEnabled(true);
-			} else {
-				options.setUseKuwahara(false);
-				kuwaharaRadiusSpinner.setEnabled(false);
-			}
-		}
-		
-		if(e.getActionCommand().equals(FLATTEN_CHROMOCENTRES_ACTION)){
-
-			if(flattenImageCheckBox.isSelected()){
-				options.setFlattenImage(true);
-				flattenImageThresholdSpinner.setEnabled(true);
-			} else {
-				options.setFlattenImage(false);
-				flattenImageThresholdSpinner.setEnabled(false);
-			}
-		}
-		
-		if(e.getActionCommand().equals(ADD_BORDER_ACTION)){
-
-			options.setAddBorder(addBorderCheckBox.isSelected());
-		}
+				
 		fireOptionsChangeEvent();
 	}
 }
