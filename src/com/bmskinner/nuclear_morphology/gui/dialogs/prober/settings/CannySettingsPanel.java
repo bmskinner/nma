@@ -1,7 +1,5 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,19 +7,13 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
-
-import ij.IJ;
 
 /**
  * A panel that allows changes to be made to a CannyOptions
@@ -30,25 +22,33 @@ import ij.IJ;
  *
  */
 @SuppressWarnings("serial")
-public class CannySettingsPanel extends SettingsPanel implements ActionListener, ChangeListener {
+public class CannySettingsPanel extends SettingsPanel implements ActionListener {
 	
 	public static final double THRESHOLD_STEP_SIZE = 0.05;
-	public static final double KERNEL_STEP_SIZE    = 1;
-	public static final double KUWAHARA_STEP_SIZE  = 2;
 	
 	public static final double THRESHOLD_MIN      = 0;
 	public static final double KERNEL_RADIUS_MIN  = 0;
-	public static final double KERNEL_WIDTH_MIN   = 1;
-	public static final double KUWAHARA_WIDTH_MIN = 1;
-	public static final double CLOSING_RADIUS_MIN = 1;
 	
 	public static final double LOW_THRESHOLD_MAX  = 10;
 	public static final double HIGH_THRESHOLD_MAX = 20;
 	public static final double KERNEL_RADIUS_MAX  = 20;
-	public static final double KERNEL_WIDTH_MAX   = 50;
-	public static final double KUWAHARA_WIDTH_MAX = 11;
-	public static final double CLOSING_RADIUS_MAX = 100;
-	public static final double FLATTEN_THRESHOLD_MAX = 255;
+	
+	
+	public static final Integer CANNY_KERNEL_WIDTH_MIN  = Integer.valueOf(1);
+	public static final Integer CANNY_KERNEL_WIDTH_MAX  = Integer.valueOf(50);
+	public static final Integer CANNY_KERNEL_WIDTH_STEP = Integer.valueOf(1);
+	
+	public static final Integer KUWAHARA_WIDTH_MIN  = Integer.valueOf(1);
+	public static final Integer KUWAHARA_WIDTH_MAX  = Integer.valueOf(11);
+	public static final Integer KUWAHARA_WIDTH_STEP = Integer.valueOf(2);
+	
+	public static final Integer CLOSING_RADIUS_MIN  = Integer.valueOf(1);
+	public static final Integer CLOSING_RADIUS_MAX  = Integer.valueOf(100);
+	public static final Integer CLOSING_RADIUS_STEP = Integer.valueOf(1);
+	
+	public static final Integer FLATTEN_THRESHOLD_MIN  = Integer.valueOf(0);
+	public static final Integer FLATTEN_THRESHOLD_MAX  = Integer.valueOf(255);
+	public static final Integer FLATTEN_THRESHOLD_STEP = Integer.valueOf(1);
 	
 	private static final String AUTO_THRESHOLD_ACTION        = "CannyAutoThreshold";
 	private static final String USE_KUWAHARA_ACTION          = "UseKuwahara";
@@ -146,28 +146,28 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 				THRESHOLD_STEP_SIZE));
 		
 		cannyKernelWidth   = new JSpinner(new SpinnerNumberModel(
-				options.getKernelWidth(),	
-				KERNEL_WIDTH_MIN, 
-				KERNEL_WIDTH_MAX, 
-				KERNEL_STEP_SIZE));
+				Integer.valueOf( options.getKernelWidth() ),	
+				CANNY_KERNEL_WIDTH_MIN, 
+				CANNY_KERNEL_WIDTH_MAX, 
+				CANNY_KERNEL_WIDTH_STEP));
 		
 		closingObjectRadiusSpinner = new JSpinner(new SpinnerNumberModel(
-				options.getClosingObjectRadius(), 
+				Integer.valueOf( options.getClosingObjectRadius() ), 
 				CLOSING_RADIUS_MIN, 
 				CLOSING_RADIUS_MAX , 
-				KERNEL_STEP_SIZE));
+				CLOSING_RADIUS_STEP));
 					
 		kuwaharaRadiusSpinner = new JSpinner(new SpinnerNumberModel(
-				options.getKuwaharaKernel(), 
+				Integer.valueOf( options.getKuwaharaKernel() ), 
 				KUWAHARA_WIDTH_MIN,
 				KUWAHARA_WIDTH_MAX , 
-				KUWAHARA_STEP_SIZE));
+				KUWAHARA_WIDTH_STEP));
 		
 		flattenImageThresholdSpinner = new JSpinner(new SpinnerNumberModel(
-				options.getFlattenThreshold(), 
-				THRESHOLD_MIN,
+				Integer.valueOf(options.getFlattenThreshold()), 
+				FLATTEN_THRESHOLD_MIN,
 				FLATTEN_THRESHOLD_MAX , 
-				KERNEL_STEP_SIZE));
+				FLATTEN_THRESHOLD_STEP));
 		
 		
 		cannyAutoThresholdCheckBox = new JCheckBox("", false);
@@ -188,12 +188,121 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 		addBorderCheckBox.addActionListener(this);
 		
 		// add the change listeners
-		cannyLowThreshold.addChangeListener(this);
-		cannyHighThreshold.addChangeListener(this);
-		cannyKernelRadius.addChangeListener(this);
-		cannyKernelWidth.addChangeListener(this);
-		closingObjectRadiusSpinner.addChangeListener(this);
-		flattenImageThresholdSpinner.addChangeListener(this);
+		cannyLowThreshold.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				cannyLowThreshold.commitEdit();
+
+				if( (Double) j.getValue() > (Double) cannyHighThreshold.getValue() ){
+					cannyLowThreshold.setValue( cannyHighThreshold.getValue() );
+				}
+				Double doubleValue = (Double) j.getValue();
+				options.setLowThreshold(    doubleValue.floatValue() );
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+			
+		});
+		
+		// add the change listeners
+		cannyHighThreshold.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+
+				if( (Double) j.getValue() < (Double) cannyLowThreshold.getValue() ){
+					j.setValue( cannyLowThreshold.getValue() );
+				}
+				Double doubleValue = (Double) j.getValue();
+				options.setHighThreshold( doubleValue.floatValue() );
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+		
+		cannyKernelRadius.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				Double doubleValue = (Double) j.getValue();
+				options.setKernelRadius( doubleValue.floatValue());
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+		
+		
+		cannyKernelWidth.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				Integer value = (Integer) j.getValue();
+				options.setKernelWidth( value.intValue());
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+		
+		closingObjectRadiusSpinner.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setClosingObjectRadius( (Integer) j.getValue());
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+		
+		flattenImageThresholdSpinner.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				options.setFlattenThreshold( (Integer) j.getValue());
+				fireOptionsChangeEvent();
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+		
+		kuwaharaRadiusSpinner.addChangeListener( e -> {
+			try {
+				JSpinner j = (JSpinner) e.getSource();
+				j.commitEdit();
+				Integer value = (Integer) j.getValue();
+				
+				if(value.intValue() % 2 == 0){ // even
+					// only odd values are allowed
+					j.setValue(value.intValue() - 1);
+
+				} else {
+					options.setKuwaharaKernel(value);
+					fireOptionsChangeEvent();
+				}
+				
+			} catch(ParseException e1){
+				warn("Parsing exception");
+				stack("Parsing error in JSpinner", e1);
+			}
+
+		});
+
+
 		
 	}
 		
@@ -265,84 +374,6 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener,
 
 	}
 
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		try{
-			if(e.getSource()==cannyLowThreshold){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-
-				if( (Double) j.getValue() > (Double) cannyHighThreshold.getValue() ){
-					j.setValue( cannyHighThreshold.getValue() );
-				}
-				Double doubleValue = (Double) j.getValue();
-				options.setLowThreshold(    doubleValue.floatValue() );
-				fireOptionsChangeEvent();
-			}
-
-			if(e.getSource()==cannyHighThreshold){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-
-				if( (Double) j.getValue() < (Double) cannyLowThreshold.getValue() ){
-					j.setValue( cannyLowThreshold.getValue() );
-				}
-				Double doubleValue = (Double) j.getValue();
-				options.setHighThreshold( doubleValue.floatValue() );
-				fireOptionsChangeEvent();
-			}
-
-			if(e.getSource()==cannyKernelRadius){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				Double doubleValue = (Double) j.getValue();
-				options.setKernelRadius( doubleValue.floatValue());
-				fireOptionsChangeEvent();
-			}
-
-			if(e.getSource()==cannyKernelWidth){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setKernelWidth( (Integer) j.getValue());
-				fireOptionsChangeEvent();
-			}
-
-			if(e.getSource()==closingObjectRadiusSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setClosingObjectRadius( (Integer) j.getValue());
-				fireOptionsChangeEvent();
-			}
-			
-			if(e.getSource()==kuwaharaRadiusSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				Integer value = (Integer) j.getValue();
-				if(value % 2 == 0){ // even
-					value--; // only odd values are allowed
-					j.setValue(value);
-					j.commitEdit();
-					j.repaint();
-				}
-				options.setKuwaharaKernel(value);
-				fireOptionsChangeEvent();
-			}
-			
-			if(e.getSource()==flattenImageThresholdSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setFlattenThreshold( (Integer) j.getValue());
-				fireOptionsChangeEvent();
-			}
-			
-			
-			
-		} catch (ParseException e1) {
-			stack("Parsing error in JSpinner", e1);
-		}
-		
-	}
 
 
 	@Override

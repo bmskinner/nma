@@ -9,6 +9,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
  * @since 1.13.4
  *
  */
+@SuppressWarnings("serial")
 public abstract class DetectionSettingsPanel extends SettingsPanel {
 	
 	protected  IMutableDetectionOptions options;

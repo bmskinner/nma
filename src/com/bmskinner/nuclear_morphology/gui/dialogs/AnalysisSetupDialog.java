@@ -68,6 +68,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImage
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+@Deprecated
 public class AnalysisSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
 	private IMutableAnalysisOptions analysisOptions = new DefaultAnalysisOptions();

@@ -10,6 +10,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ComponentSizeSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CopyFromOpenDatasetPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.EdgeThresholdSwitchPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.MiscNucleusSettingsPanel;
@@ -52,6 +53,7 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		SettingsPanel profilePanel = new NucleusProfileSettingsPanel(options);
 		SettingsPanel miscPanel    = new MiscNucleusSettingsPanel(options);
 		SettingsPanel channelPanel = new ImageChannelSettingsPanel(nucleusOptions);
+		SettingsPanel copyPanel    = new CopyFromOpenDatasetPanel(nucleusOptions);
 		
 
 		switchPanel.setBorder( BorderFactory.createTitledBorder(OBJECT_FINDING_LBL));
@@ -59,19 +61,21 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		profilePanel.setBorder(BorderFactory.createTitledBorder(PROFILING_LBL     ));
 		miscPanel.setBorder(   BorderFactory.createTitledBorder(MISC_LBL          ));
 		channelPanel.setBorder(BorderFactory.createTitledBorder(CHANNEL_LBL       ));
+		
 
 		this.addSubPanel(switchPanel);
 		this.addSubPanel(sizePanel);
 		this.addSubPanel(profilePanel);
 		this.addSubPanel(miscPanel);
 		this.addSubPanel(channelPanel);
+		this.addSubPanel(copyPanel);
 				
 		panel.add(channelPanel);
 		panel.add(switchPanel);
 		panel.add(profilePanel);
 		panel.add(sizePanel);
 		panel.add(miscPanel);
-		
+		panel.add(copyPanel);
 		
 		return panel;
 	}
