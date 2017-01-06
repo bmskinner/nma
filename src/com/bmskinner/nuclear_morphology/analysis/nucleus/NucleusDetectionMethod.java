@@ -55,7 +55,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 		run();		
 		IAnalysisResult r = new DefaultAnalysisResult(datasets);
-//		log("Returning new datasets from method");
 		return r;
 	}
 

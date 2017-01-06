@@ -71,8 +71,18 @@ public class DefaultCell
 	 * @param n the template nucleus for the cell
 	 */
 	public DefaultCell(Nucleus n){
-		this(java.util.UUID.randomUUID());
+		this();
 		nucleus = n;
+	}
+	
+	/**
+	 * Create a new cell based on the given nucleus. The 
+	 * nucleus is NOT copied.
+	 * @param n the template nucleus for the cell
+	 */
+	public DefaultCell(ICytoplasm c){
+		this();
+		cytoplasm = c;
 	}
 	
 	/**

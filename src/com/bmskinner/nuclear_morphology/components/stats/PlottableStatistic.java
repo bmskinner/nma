@@ -27,7 +27,33 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
  *
  */
 public interface PlottableStatistic {
+	
+	
+	// Old nucleus statistics
+	static final PlottableStatistic AREA            = new GenericStatistic("Area", StatisticDimension.AREA);
+	static final PlottableStatistic PERIMETER       = new GenericStatistic("Perimeter", StatisticDimension.LENGTH);
+	static final PlottableStatistic MAX_FERET       = new GenericStatistic("Max feret", StatisticDimension.LENGTH);
+	static final PlottableStatistic MIN_DIAMETER    = new GenericStatistic("Min diameter", StatisticDimension.LENGTH);
+	static final PlottableStatistic ASPECT          = new GenericStatistic("Aspect", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic CIRCULARITY     = new GenericStatistic("Circularity", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic VARIABILITY     = new GenericStatistic("Variability", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic BOUNDING_HEIGHT = new GenericStatistic("Bounding height", StatisticDimension.LENGTH);
+	static final PlottableStatistic BOUNDING_WIDTH  = new GenericStatistic("Bounding width", StatisticDimension.LENGTH);
+	static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic("Angle between reference points", StatisticDimension.ANGLE);
+	static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
+	static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
 
+	// Old signal statistics minus overlaps with nucleus stats
+	static final PlottableStatistic ANGLE           = new GenericStatistic("Angle", StatisticDimension.ANGLE);
+	static final PlottableStatistic DISTANCE_FROM_COM      = new GenericStatistic("Distance from CoM", StatisticDimension.LENGTH);
+	static final PlottableStatistic FRACT_DISTANCE_FROM_COM      = new GenericStatistic("Fractional distance from CoM", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic RADIUS          = new GenericStatistic("Radius", StatisticDimension.LENGTH);
+
+	// Old segment statistics
+	static final PlottableStatistic LENGTH          = new GenericStatistic("Length", StatisticDimension.LENGTH);
+	static final PlottableStatistic DISPLACEMENT    = new GenericStatistic("Displacement", StatisticDimension.ANGLE);
+
+	
 	/**
 	 * Get the string representation (name) of the statistic. 
 	 * @return

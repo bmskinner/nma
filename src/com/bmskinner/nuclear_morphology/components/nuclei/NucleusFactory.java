@@ -96,19 +96,7 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 		}
 		  return n;
 	  }
-	
-//	private static Nucleus createRodentSpermNucleus(Roi roi, IPoint centreOfMass, File path, 
-//			int channel, int[] originalPosition, int nucleusNumber	) throws NucleusCreationException{
-//	
-//		
-//		return new DefaultRodentSpermNucleus(roi,
-//						  centreOfMass, 
-//						  path, 
-//						  channel, 
-//						  originalPosition,
-//						  nucleusNumber);
-//	}
-	
+		
 	/**
 	 * Thrown when a profile collection or segmented profile has no assigned
 	 * segments

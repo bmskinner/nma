@@ -62,6 +62,16 @@ public abstract class Detector implements Loggable {
 	private int  threshold;
 
 	private List<Roi> roiList; // the detected ROIs
+	
+	public void setSize(double min, double max){
+		minSize = min;
+		maxSize = max;
+	}
+	
+	public void setCirc(double min, double max){
+		minCirc = min;
+		maxCirc = max;
+	}
 
 	public void setMinSize(double d){
 		this.minSize = d;
@@ -162,22 +172,25 @@ public abstract class Detector implements Loggable {
 	 
 	  // run the particle analyser
 	  ResultsTable rt     = new ResultsTable();
-	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES | ParticleAnalyzer.INCLUDE_HOLES, 
+	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER 
+			  | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES 
+			  | ParticleAnalyzer.INCLUDE_HOLES, 
 			  ParticleAnalyzer.FERET ,
-			  rt, this.minSize, this.maxSize, this.minCirc, this.maxCirc);
+			  rt, minSize, maxSize, minCirc, maxCirc);
 	  
 	  try {
 		  ParticleAnalyzer.setRoiManager(manager);
 		  boolean success = pa.analyze(image);
 		  if(!success){
-			  log(Level.FINEST, "Unable to perform particle analysis");
+			  finest("Unable to perform particle analysis");
 		  }
 	  } catch(Exception e){
-		  error("Error in particle analyser", e);
+		  warn("Error in particle analyser");
+		  stack("Error in particle analyser", e);
 	  } finally {
 		  image.close();
 	  }
-	  return new ArrayList<Roi>(Arrays.asList( manager.getSelectedRoisAsArray()));
+	  return Arrays.asList( manager.getSelectedRoisAsArray());
   }
   
  

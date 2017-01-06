@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusDetectionImageProber.NucleusImageType;
-
 /**
  * Hold a set of detection image types and their position
  * in a table

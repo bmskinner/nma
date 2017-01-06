@@ -38,13 +38,9 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	public static final Integer CANNY_KERNEL_WIDTH_MAX  = Integer.valueOf(50);
 	public static final Integer CANNY_KERNEL_WIDTH_STEP = Integer.valueOf(1);
 	
-	
-	
 	public static final Integer CLOSING_RADIUS_MIN  = Integer.valueOf(1);
 	public static final Integer CLOSING_RADIUS_MAX  = Integer.valueOf(100);
 	public static final Integer CLOSING_RADIUS_STEP = Integer.valueOf(1);
-	
-	
 	
 	private static final String AUTO_THRESHOLD_ACTION        = "CannyAutoThreshold";
 		
@@ -54,7 +50,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	private static final String HIGH_THRESHOLD_LBL       = "Canny high threshold";
 	private static final String KERNEL_RADIUS_LBL        = "Canny kernel radius";
 	private static final String KERNEL_WIDTH_LBL         = "Canny kernel width";
-	private static final String CLOSING_RADIUS_LBL       = "Closing radius";
+	private static final String CLOSING_RADIUS_LBL       = "Gap closing radius";
 
 	private JSpinner cannyLowThreshold;
 	private JSpinner cannyHighThreshold;
@@ -226,7 +222,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		List<JLabel> labelList	   = new ArrayList<JLabel>();
 		List<JComponent> fieldList = new ArrayList<JComponent>();
 		
-		labelList.add(new JLabel(AUTO_THRESHOLD_LBL));
+//		labelList.add(new JLabel(AUTO_THRESHOLD_LBL));
 		labelList.add(new JLabel(LOW_THRESHOLD_LBL));
 		labelList.add(new JLabel(HIGH_THRESHOLD_LBL));
 		labelList.add(new JLabel(KERNEL_RADIUS_LBL));
@@ -236,7 +232,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		
 		JLabel[] labels = labelList.toArray(new JLabel[0]);
 		
-		fieldList.add(cannyAutoThresholdCheckBox);
+//		fieldList.add(cannyAutoThresholdCheckBox);
 		fieldList.add(cannyLowThreshold);
 		fieldList.add(cannyHighThreshold);
 		fieldList.add(cannyKernelRadius);

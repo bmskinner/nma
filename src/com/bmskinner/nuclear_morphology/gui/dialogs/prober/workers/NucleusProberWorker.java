@@ -26,25 +26,22 @@ import java.util.List;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.FluoresentNucleusDetectionPipeline;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
-import ij.ImageStack;
 import ij.process.ImageProcessor;
 
 public class NucleusProberWorker extends ImageProberWorker {
+	
+	private static final double ANGLE_PROPORTION = 0.05; // A value is needed for the nucleus detector, but has no effect here
 
 	public NucleusProberWorker(final File f, final IDetectionOptions options, final ImageSet type, final TableModel model) {
 		super(f, options, type, model);
@@ -57,189 +54,88 @@ public class NucleusProberWorker extends ImageProberWorker {
 			return;
 		}
 		
-		ImageStack imageStack =  new ImageImporter(file).importImage();
-//		finer("Imported image as stack");
-//		
-		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
 		
-		/*
-		 * Insert steps to show each applied filter in the same order as from analysis
-		 * Kuwahara filtering
-		 * Chromocentre flattening
-		 * Edge detector
-		 *    Morphology closing
-		 * Final image
-		 * 
-		 * Make an icon from each
-		 */
+		
+		ICannyOptions cannyOptions = options.getCannyOptions();
+		
+		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
+		ImageProcessor original =  new ImageImporter(file)
+				.toConverter()
+				.convertToGreyscale(stackNumber)
+				.invert()
+				.toProcessor();
+		
+		FluoresentNucleusDetectionPipeline pipe = new FluoresentNucleusDetectionPipeline(options, file, NucleusType.ROUND, ANGLE_PROPORTION);
+		pipe.openSizeParameters();
+		
+		pipe.kuwaharaFilter();
+		ImageProberTableCell iconCell1 = makeIconCell(pipe.getInvertedProcessor(), 
+				cannyOptions.isUseKuwahara(), 
+				DetectionImageType.KUWAHARA);
+		publish(iconCell1);
 		
 		if(this.isCancelled()){
 			return;
 		}
 		
-		ICannyOptions cannyOptions = options.getCannyOptions();
-
-		ImageConverter conv = new ImageConverter(imageStack);
+		pipe.flatten();
+		ImageProberTableCell iconCell2 = makeIconCell(pipe.getInvertedProcessor(), 
+				cannyOptions.isUseFlattenImage(), 
+				DetectionImageType.FLATTENED);
 		
-		conv = conv.convertToGreyscale();
-		
-		if(cannyOptions.isAddBorder()){	
-			conv = conv.addBorder(10);
+		publish(iconCell2);
+		if(this.isCancelled()){
+			return;
 		}
 		
-		ImageProcessor openProcessor = conv.invert()
-				.toProcessor();
-
-					
-		if( cannyOptions.isUseCanny()) { //TODO: Turning off Canny causes error
-			
-			if(cannyOptions.isAddBorder()){
-				imageStack = new ImageConverter(imageStack)
-					.addBorder(10)
-					.toStack();
-
-				finer("Added border");
-			}
-			
-			// Make a copy of the counterstain to use at each processing step
-			ImageProcessor processedImage = imageStack.getProcessor(stackNumber).duplicate();
-			
-			
-			// Run a Kuwahara filter to enhance edges in the image
-			ImageProcessor kuwaharaProcessor = processedImage.duplicate();
-			
-			if(cannyOptions.isUseKuwahara()){
-				finer("Applying Kuwahara filter");
-				kuwaharaProcessor = new ImageFilterer(processedImage)
-					.runKuwaharaFiltering( cannyOptions.getKuwaharaKernel())
-					.toProcessor();
-				processedImage = kuwaharaProcessor.duplicate(); 
-				
-			}
-			kuwaharaProcessor.invert();
-			
-			ImageProberTableCell iconCell = makeIconCell(kuwaharaProcessor, cannyOptions.isUseKuwahara(), DetectionImageType.KUWAHARA);
-			publish(iconCell);
-			if(this.isCancelled()){
-				return;
-			}
-			
-			// Flatten the chromocentres
-			
-			ImageProcessor flattenProcessor = processedImage.duplicate();
-			if(cannyOptions.isUseFlattenImage()){
-				
-				finer("Applying flattening filter");
-				flattenProcessor =  new ImageFilterer(processedImage)
-					.squashChromocentres( cannyOptions.getFlattenThreshold())
-					.toProcessor();
-				
-				processedImage = flattenProcessor.duplicate();
-			} 
-			flattenProcessor.invert();
-			
-			ImageProberTableCell iconCell1 = makeIconCell(flattenProcessor, cannyOptions.isUseFlattenImage(), DetectionImageType.FLATTENED);
-			publish(iconCell1);
-			if(this.isCancelled()){
-				return;
-			}
-			
-			// Run the edge detection
-			
-			finer("Detecting edges");
-			processedImage = new ImageFilterer(processedImage).runEdgeDetector( cannyOptions).toProcessor();
-			ImageProcessor invertedEdges = processedImage.duplicate(); // make a copy for display only
-			invertedEdges.invert();
-			
-			ImageProberTableCell iconCell2 = makeIconCell(invertedEdges, true, DetectionImageType.EDGE_DETECTION);
-			publish(iconCell2);
-			if(this.isCancelled()){
-				return;
-			}
-
-			// Run morhological closing
-			
-			processedImage = new ImageFilterer(processedImage)
-				.morphologyClose(cannyOptions.getClosingObjectRadius()).toProcessor();
-			ImageProcessor closedIP = processedImage.duplicate(); // make a copy for display only
-			closedIP.invert();
-			ImageProberTableCell iconCell3 = makeIconCell(closedIP, true, DetectionImageType.MORPHOLOGY_CLOSED);
-			publish(iconCell3);
-			if(this.isCancelled()){
-				return;
-			}
-
-//			Show the detected objects
-			
-			/*
-			 * Store the size and circularity options, and set them to allow all
-			 * Get the objects in the image
-			 * Restore size and circ options
-			 * Outline the objects that fail 
-			 */
-			List<ICell> cells = getCells(imageStack, file);
+		pipe.edgeDetect();
+		ImageProberTableCell iconCell3 = makeIconCell(pipe.getInvertedProcessor(), 
+				cannyOptions.isUseCanny(), 
+				DetectionImageType.EDGE_DETECTION);
 		
-			for(ICell cell : cells){
-
-				drawNucleus(cell, openProcessor);
-			}
-			
-			ImageProberTableCell iconCell4 = makeIconCell(openProcessor, true, DetectionImageType.DETECTED_OBJECTS);
-			publish(iconCell4);
-			
-			ImageProcessor ap = openProcessor.duplicate();
-			
-			for(ICell cell : cells){
-
-				annotateStats(cell, ap);
-			}
-			
-			ImageProberTableCell iconCell5 = makeIconCell(ap, true, DetectionImageType.ANNOTAED_OBJECTS);
-			publish(iconCell5);
-			
-						
-		} else {
-			// Threshold option selected - do not run edge detection
-			
-			List<ICell> cells = getCells(imageStack, file);
-			
-			for(ICell cell : cells){
-
-				drawNucleus(cell, openProcessor);
-			}
-			
-			for(ImageType key : imageSet.values()){
-				
-				ImageProberTableCell iconCell = makeIconCell(openProcessor, true, key);
-				publish(iconCell );
-			}
+		publish(iconCell3);
+		if(this.isCancelled()){
+			return;
 		}
-	}
 		
-	/**
-	 * Get the cells in the given stack without the 
-	 * size and circularity parameters
-	 * @param imageStack
-	 * @param imageFile
-	 * @return
-	 * @throws Exception 
-	 */
-	private List<ICell> getCells(ImageStack imageStack, File imageFile) {
-
-		IMutableDetectionOptions nucleusOptions = (IMutableDetectionOptions) options.duplicate();
-
-		nucleusOptions.setMinSize(50);
-		nucleusOptions.setMaxSize(imageStack.getWidth()*imageStack.getHeight());// dimensions of the image
-		nucleusOptions.setMinCirc(0);
-		nucleusOptions.setMaxCirc(1);
-		nucleusOptions.getCannyOptions().setAddBorder(false);
-
-		finer("Finding cells");
+		pipe.gapClose();
+		ImageProberTableCell iconCell4 = makeIconCell(pipe.getInvertedProcessor(), 
+				cannyOptions.isUseCanny(), 
+				DetectionImageType.MORPHOLOGY_CLOSED);
 		
-		NucleusDetector finder = new NucleusDetector(nucleusOptions, NucleusType.ROUND, 0.05);
+		publish(iconCell4);
+		if(this.isCancelled()){
+			return;
+		}
 		
-		List<ICell> cells = finder.getDummyCells(imageStack, imageFile);
-		return cells;
+		// Show the detected objects
+		List<ICell> cells = pipe.findInImage();
+
+		for(ICell cell : cells){
+			if(this.isCancelled()){
+				return;
+			}
+			drawNucleus(cell, original);
+		}
+
+		ImageProberTableCell iconCell5 = makeIconCell(original, 
+				true, 
+				DetectionImageType.DETECTED_OBJECTS);
+		publish(iconCell5);
+
+		ImageProcessor ap = original.duplicate();
+
+		for(ICell cell : cells){
+			if(this.isCancelled()){
+				return;
+			}
+			annotateStats(cell, ap);
+		}
+
+		ImageProberTableCell iconCell6 = makeIconCell(ap, 
+				true, 
+				DetectionImageType.ANNOTAED_OBJECTS);
+		publish(iconCell6);
 	}
 	
 	/**
@@ -269,12 +165,9 @@ public class NucleusProberWorker extends ImageProberWorker {
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
-		
 		Nucleus n = cell.getNucleus();
 		// annotate the image processor with the nucleus outline
 		
-		Color colour = options.isValid(n) ? Color.ORANGE : Color.RED;
-
 		ip = new ImageAnnotator(ip)
 				.annotateStats(n, Color.ORANGE, Color.BLUE)
 				.toProcessor();

@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 		
 	private static final String COPY_FROM_OPEN_LBL     = "Copy";
-	private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from open dataset";
+	private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
 	private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
 	private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
 	

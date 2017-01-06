@@ -164,6 +164,15 @@ public class ImageImporter implements Loggable, Importer {
 		image.close();
 		return stack;
 	}
+	  
+	 /**
+	  * Import the image in the defined file as a stack, and return an image converter 
+	 * @return
+	 * @throws ImageImportException
+	 */
+	public com.bmskinner.nuclear_morphology.analysis.image.ImageConverter toConverter() throws ImageImportException {
+		 return new com.bmskinner.nuclear_morphology.analysis.image.ImageConverter(importImage());
+	 }
 	
 	/**
 	 * Import the image in the given file, and return an image processor

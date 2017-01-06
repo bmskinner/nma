@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
  *
  */
 @SuppressWarnings("serial")
-public class ImagePreprocessingSettingsPanel extends SettingsPanel implements ActionListener {
+public class ImagePreprocessingSettingsPanel extends SettingsPanel  {
 	
 	
 	public static final Integer KUWAHARA_WIDTH_MIN  = Integer.valueOf(1);
@@ -35,12 +35,7 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel implements Ac
 	public static final Integer FLATTEN_THRESHOLD_MAX  = Integer.valueOf(255);
 	public static final Integer FLATTEN_THRESHOLD_STEP = Integer.valueOf(1);
 	
-	private static final String USE_KUWAHARA_ACTION          = "UseKuwahara";
-	private static final String FLATTEN_CHROMOCENTRES_ACTION = "FlattenChromocentres";
-	private static final String ADD_BORDER_ACTION            = "AddBorder";
-	
-	
-	private static final String USE_KUWAHARA_LBL           = "Use Kuwahara filter";
+	private static final String USE_KUWAHARA_LBL           = "Kuwahara filter";
 	private static final String FLATTEN_CHROMOCENTRES_LBL  = "Flatten chromocentres";
 	private static final String ADD_BORDER_LBL             = "Add border to images";
 	
@@ -105,17 +100,25 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel implements Ac
 		
 		
 		useKuwaharaCheckBox = new JCheckBox("", options.isUseKuwahara());
-		useKuwaharaCheckBox.setActionCommand(USE_KUWAHARA_ACTION);
-		useKuwaharaCheckBox.addActionListener(this);
+		useKuwaharaCheckBox.addActionListener( e -> {
+			options.setUseKuwahara(useKuwaharaCheckBox.isSelected());
+			kuwaharaRadiusSpinner.setEnabled(useKuwaharaCheckBox.isSelected());
+			fireOptionsChangeEvent();
+		});
 		
 		flattenImageCheckBox = new JCheckBox("", options.isUseKuwahara());
-		flattenImageCheckBox.setActionCommand(FLATTEN_CHROMOCENTRES_ACTION);
-		flattenImageCheckBox.addActionListener(this);
+		flattenImageCheckBox.addActionListener( e-> {
+			options.setFlattenImage(flattenImageCheckBox.isSelected());
+			flattenImageThresholdSpinner.setEnabled(flattenImageCheckBox.isSelected());
+			fireOptionsChangeEvent();
+		});
 		
 		// Add the border adding box
 		addBorderCheckBox = new JCheckBox("", options.isAddBorder());
-		addBorderCheckBox.setActionCommand(ADD_BORDER_ACTION);
-		addBorderCheckBox.addActionListener(this);
+		addBorderCheckBox.addActionListener( e -> {
+			options.setAddBorder(addBorderCheckBox.isSelected());
+			fireOptionsChangeEvent();
+		});
 		
 		flattenImageThresholdSpinner.addChangeListener( e -> {
 			try {
@@ -202,39 +205,5 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel implements Ac
 
 	}
 
-
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-				
-		if(e.getActionCommand().equals(USE_KUWAHARA_ACTION)){
-
-			if(useKuwaharaCheckBox.isSelected()){
-				options.setUseKuwahara(true);
-				kuwaharaRadiusSpinner.setEnabled(true);
-			} else {
-				options.setUseKuwahara(false);
-				kuwaharaRadiusSpinner.setEnabled(false);
-			}
-		}
-		
-		if(e.getActionCommand().equals(FLATTEN_CHROMOCENTRES_ACTION)){
-
-			if(flattenImageCheckBox.isSelected()){
-				options.setFlattenImage(true);
-				flattenImageThresholdSpinner.setEnabled(true);
-			} else {
-				options.setFlattenImage(false);
-				flattenImageThresholdSpinner.setEnabled(false);
-			}
-		}
-		
-		if(e.getActionCommand().equals(ADD_BORDER_ACTION)){
-
-			options.setAddBorder(addBorderCheckBox.isSelected());
-		}
-		
-		fireOptionsChangeEvent();
-	}
 
 }
