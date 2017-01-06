@@ -58,6 +58,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
@@ -442,6 +443,12 @@ public class MainWindow
 			Runnable r = new AddNuclearSignalAction(selectedDataset, this);
 			r.run();
 		}
+		
+		if(event.type().equals("PostFISHRemappingAction")){
+			Runnable r = new FishRemappingAction(getPopulationsPanel().getSelectedDatasets(), this);
+			r.run();
+		}
+		
 		
 		if(event.type().equals("UpdatePanels")){
 			fireDatasetUpdateEvent(populationsPanel.getSelectedDatasets());

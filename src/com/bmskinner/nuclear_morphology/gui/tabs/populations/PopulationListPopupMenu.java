@@ -25,11 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 
 @SuppressWarnings("serial")
 public class PopulationListPopupMenu extends JPopupMenu {
@@ -90,7 +92,15 @@ public class PopulationListPopupMenu extends JPopupMenu {
 			fireSignalChangeEvent("AddNuclearSignalAction");	
 		}
 	});
-		
+	
+	JMenuItem fishRemappinglMenuItem = new JMenuItem( new AbstractAction("Post-FISH mapping"){
+		private static final long serialVersionUID = 1L;
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			fireSignalChangeEvent("PostFISHRemappingAction");	
+		}
+	});
+			
 	private List<Object> listeners = new ArrayList<Object>();
 			
 			
@@ -112,6 +122,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.addSeparator();
 		
 		this.add(saveMenuItem);
+		
+		this.addSeparator();
+		
 		this.add(saveCellsMenuItem);
 		this.add(relocateMenuItem);
 
@@ -122,6 +135,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.addSeparator();
 
 		this.add(addNuclearSignalMenuItem);
+		this.add(fishRemappinglMenuItem);
 
     }
 	
@@ -245,44 +259,20 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	public void disableReplaceFolder(){
 		replaceFolderMenuItem.setEnabled(false);
 	}
+
 	
-//	public void enableExportStats(){
-//		exportStatsMenuItem.setEnabled(true);
-//	}
-//	
-//	public void disableExportStats(){
-//		exportStatsMenuItem.setEnabled(false);
-//	}
-	
-	public void enableRelocateCells(){
-		relocateMenuItem.setEnabled(true);
+	public void setRelocateCellsEnabled(boolean b){
+		relocateMenuItem.setEnabled(b);
 	}
-	
-	public void disableRelocateCells(){
-		relocateMenuItem.setEnabled(false);
-	}
-	
-//	public void enableApplySegmentation(){
-//		applySegmentationMenuItem.setEnabled(true);
-//	}
-//	
-//	public void disableApplySegmentation(){
-//		applySegmentationMenuItem.setEnabled(false);
-//	}
-//		
-//	public void enableAddTailStain(){
-//		addTailStainMenuItem.setEnabled(true);
-//	}
-//	
-//	public void disableAddTailStain(){
-//		addTailStainMenuItem.setEnabled(false);
-//	}
-		
+
+
 	public void setAddNuclearSignalEnabled(boolean b){
 		addNuclearSignalMenuItem.setEnabled(b);
 	}
 	
-	
+	public void setFishRemappingEnabled(boolean b){
+		this.fishRemappinglMenuItem.setEnabled(b);
+	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {
         listeners.add( l );

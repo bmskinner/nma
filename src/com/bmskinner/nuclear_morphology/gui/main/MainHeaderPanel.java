@@ -81,19 +81,6 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 		);
 
 		add(btnSaveWorkspace);
-
-		//---------------
-		// FISH mapping button
-		//---------------
-
-		JButton btnPostanalysisMapping = new JButton("Post-FISH mapping");
-		btnPostanalysisMapping.addActionListener(
-				e ->{
-					Runnable r = new FishRemappingAction(mw.getPopulationsPanel().getSelectedDatasets(), mw);
-					r.run();
-				}
-		);
-		add(btnPostanalysisMapping);
 				
 		JButton optionsButton = new JButton("Options");
 		optionsButton.addActionListener(

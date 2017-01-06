@@ -615,51 +615,20 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.enableBoolean();
 		populationPopup.enableSave();
 		populationPopup.enableCurate();
-		populationPopup.enableRelocateCells();
+		populationPopup.setRelocateCellsEnabled(true);
 		populationPopup.enableSaveCells();
 		
 		if( d instanceof ChildAnalysisDataset){
 			populationPopup.setAddNuclearSignalEnabled(false);
+			populationPopup.setFishRemappingEnabled(false);
 		} else {
 			populationPopup.setAddNuclearSignalEnabled(true);
+			populationPopup.setFishRemappingEnabled(true);
 		}
 		
 		
 		populationPopup.enableMenuUp();
 		populationPopup.enableMenuDown();
-		// check if we can move the dataset
-//		if(d.isRoot()){
-//
-//			if(DatasetListManager.getInstance().count()>1){
-//
-//				// check if the selected dataset is at the top of the list
-//				if(DatasetListManager.getInstance().getRootDatasets().get(0).getUUID().equals(d.getUUID())){
-//					populationPopup.disableMenuUp();
-//				} else {
-//					populationPopup.enableMenuUp();
-//				}
-//
-//				// check if the selected dataset is at the bottom of the list
-//				if(DatasetListManager.getInstance().getRootDatasets().get(DatasetListManager.getInstance().getRootDatasets().size()-1).getUUID().equals(d.getUUID())){
-//					populationPopup.disableMenuDown();
-//				} else {
-//					populationPopup.enableMenuDown();
-//				}
-//
-//			} else { // only one or zero datasets in the pogram 
-//				populationPopup.disableMenuUp();
-//				populationPopup.disableMenuDown();
-//			}
-//
-//			// only root datasets can replace folder mappings
-//			populationPopup.enableReplaceFolder();
-//
-//		} else { // not root
-//						
-//			populationPopup.disableReplaceFolder();
-//			populationPopup.disableMenuUp();
-//			populationPopup.disableMenuDown();
-//		}
 
 	}
 		

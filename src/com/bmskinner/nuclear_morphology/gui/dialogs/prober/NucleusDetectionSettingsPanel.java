@@ -73,14 +73,15 @@ public class NucleusDetectionSettingsPanel extends SettingsPanel {
 		this.addSubPanel(miscPanel);
 		this.addSubPanel(channelPanel);
 		this.addSubPanel(copyPanel);
-				
+			
+		panel.add(copyPanel);
 		panel.add(channelPanel);
 		panel.add(prePanel);
 		panel.add(switchPanel);
-		panel.add(profilePanel);
 		panel.add(sizePanel);
 		panel.add(miscPanel);
-		panel.add(copyPanel);
+		panel.add(profilePanel);
+		
 		
 		return panel;
 	}
