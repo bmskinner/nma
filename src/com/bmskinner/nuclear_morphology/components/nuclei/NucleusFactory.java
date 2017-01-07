@@ -24,40 +24,39 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 import ij.gui.Roi;
 
-public class NucleusFactory implements ComponentFactory<CellularComponent> {
+/**
+ * Constructs nuclei for an image. Tracks the number of nuclei created.
+ * @author ben
+ *
+ */
+public class NucleusFactory implements ComponentFactory<Nucleus> {
 
-	public NucleusFactory(){}
+	private final File file;
+	private int nucleusCount = 0; // store the number of nuclei created by this factory
+	private final NucleusType type;
 	
-	@Override
-	public Nucleus buildInstance(){
-		return null;
+	public NucleusFactory(File imageFile, NucleusType nucleusType){
+		
+		if(nucleusType==null || imageFile==null){
+			throw new IllegalArgumentException("File or type cannot be null in nucleus factory");
+		}
+		file = imageFile;
+		type = nucleusType;
 	}
 	
-	/**
-	 * Create a nucleus of the appropriate class for the given nucleus tyoe
-	 * @param roi
-	 * @param path
-	 * @param channel
-	 * @param nucleusNumber
-	 * @param originalPosition
-	 * @param nucleusType
-	 * @param centreOfMass
-	 * @return
-	 * @throws NucleusCreationException 
-	 */
-	public Nucleus createNucleus(Roi roi, File path, 
-			int channel, int nucleusNumber, 
-			int[] originalPosition, NucleusType nucleusType, 
-			IPoint centreOfMass) throws NucleusCreationException {
+	@Override
+	public Nucleus buildInstance(Roi roi,
+			int channel, 
+			int[] originalPosition, 
+			IPoint centreOfMass) throws ComponentCreationException {
 		
-		if(roi==null || path==null || nucleusType==null || centreOfMass==null){
+		if(roi==null || centreOfMass==null){
 			throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
 		}
 		
@@ -68,47 +67,49 @@ public class NucleusFactory implements ComponentFactory<CellularComponent> {
 			  // The classes for the constructor
 			  Class<?>[] classes = {Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
 			  
-			  Constructor<?> nucleusConstructor = nucleusType.getNucleusClass()
+			  Constructor<?> nucleusConstructor = type.getNucleusClass()
 						  .getConstructor(classes);
 
 				n = (Nucleus) nucleusConstructor.newInstance(roi,
 						  centreOfMass, 
-						  path, 
+						  file, 
 						  channel, 
 						  originalPosition,
-						  nucleusNumber);
+						  nucleusCount);
+				
+				nucleusCount++;
 
 		} catch (InvocationTargetException e) {
 			stack("Invokation error creating nucleus", e.getCause());
-			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
+			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
 		} catch(Error e){
 			stack("Error creating nucleus", e);
-			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
+			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
 		} catch (InstantiationException | IllegalAccessException |
 				IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			stack("Error creating nucleus", e);
-			throw new NucleusCreationException("Error making nucleus:" +e.getMessage(), e);
+			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
 		}
 			  
 
 		if(n==null){
-			throw new NucleusCreationException("Error making nucleus");
+			throw new ComponentCreationException("Error making nucleus");
 		}
 		  return n;
-	  }
-		
-	/**
-	 * Thrown when a profile collection or segmented profile has no assigned
-	 * segments
-	 * @author bms41
-	 *
-	 */
-	public static class NucleusCreationException extends Exception {
-			private static final long serialVersionUID = 1L;
-			public NucleusCreationException() { super(); }
-			public NucleusCreationException(String message) { super(message); }
-			public NucleusCreationException(String message, Throwable cause) { super(message, cause); }
-			public NucleusCreationException(Throwable cause) { super(cause); }
-		
 	}
+			
+//	/**
+//	 * Thrown when a profile collection or segmented profile has no assigned
+//	 * segments
+//	 * @author bms41
+//	 *
+//	 */
+//	public static class ComponentCreationException extends Exception {
+//			private static final long serialVersionUID = 1L;
+//			public ComponentCreationException() { super(); }
+//			public ComponentCreationException(String message) { super(message); }
+//			public ComponentCreationException(String message, Throwable cause) { super(message, cause); }
+//			public ComponentCreationException(Throwable cause) { super(cause); }
+//		
+//	}
 }

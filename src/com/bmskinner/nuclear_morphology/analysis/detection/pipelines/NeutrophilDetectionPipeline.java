@@ -1,15 +1,14 @@
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.CytoplasmDetectionPipeline;
-import com.bmskinner.nuclear_morphology.analysis.detection.DetectionPipeline;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.NucleusCreationException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -25,6 +24,7 @@ import ij.gui.Roi;
 public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 
 	private final CytoplasmDetectionPipeline cyto;
+	private LobedNucleusDetectionPipeline nucl;
 	
 	public NeutrophilDetectionPipeline(IDetectionOptions cytoOptions, 
 			IDetectionOptions nucOptions, 
@@ -34,6 +34,7 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 		super(nucOptions, imageFile, prop);
 		
 		cyto = new CytoplasmDetectionPipeline(cytoOptions, imageFile, prop);
+		
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 				.findInImage();
 		
 		
-//		search for nuclei and lobes within cytoplasm
+
 		
 		for(ICytoplasm cy : cytoplasms){
 			
@@ -57,11 +58,36 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 			
 		}
 		
+//		search for nuclei and lobes within cytoplasm
+		try {
+			nucl = new LobedNucleusDetectionPipeline(options, file, proportion, result);
+		} catch (ImageImportException e) {
+			warn("Cannot detect nuclei");
+			stack("Cannot detect nuclei", e);
+		}
+		
+		List<Nucleus> nuclei = nucl.kuwaharaFilter()
+				.flatten()
+				.edgeDetect()
+				.gapClose()
+				.findInImage();
+		
+		// Add nuclei to cells
+		for(ICell cell : result){
+	
+			for(Nucleus n : nuclei){
+				if( cell.getCytoplasm().containsOriginalPoint(n.getOriginalCentreOfMass())){
+					cell.setNucleus(n);
+				}
+			}
+			
+		}
+		
 		return result;
 	}
 
 	@Override
-	protected ICell makeComponent(Roi roi, int objectNumber) throws NucleusCreationException {
+	protected ICell makeComponent(Roi roi, int objectNumber) throws ComponentCreationException {
 		// TODO Auto-generated method stub
 		return null;
 	}

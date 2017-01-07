@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractProgressAction;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluoresentNucleusDetectionPipeline;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -23,7 +24,7 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 	private File[] files;
 	private static final int THRESHOLD = 5; // number of images to handle per fork
 	final int low, high;
-	private final NucleusDetector finder;
+//	private final NucleusDetector finder;
 	private final String outputFolder;
 	private final IAnalysisOptions analysisOptions;
 	private final File folder;
@@ -36,9 +37,9 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		this.high            = high;
 		this.outputFolder    = outputFolder;
 		this.analysisOptions = analysisOptions;
-		this.finder          = new NucleusDetector( analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS), 
-				analysisOptions.getNucleusType(), 
-				analysisOptions.getProfileWindowProportion());
+//		this.finder          = new NucleusDetector( analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS), 
+//				analysisOptions.getNucleusType(), 
+//				analysisOptions.getProfileWindowProportion());
 	}
 
 	public FileProcessingTask(File folder, File[] files, ICellCollection collection, String outputFolder, IAnalysisOptions analysisOptions) {
@@ -87,21 +88,31 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 		  if(ok){
 			  try {
 
-				  ImageStack imageStack = new ImageImporter(file).importImage();
-
 				  // put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
 				  makeFolder(folder);
 				  
-				  log(Level.INFO, "File:  "+file.getName());
-				  List<ICell> cells = finder.getCells(imageStack, file);
+				  log("File:  "+file.getName());
 				  
+				  FluoresentNucleusDetectionPipeline pipe = new FluoresentNucleusDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
+						  file, analysisOptions.getNucleusType(), analysisOptions.getProfileWindowProportion());
+				  
+				  List<ICell> cells = pipe.kuwaharaFilter()
+						  .flatten()
+						  .edgeDetect()
+						  .gapClose()
+						  .findInImage();
+				  				  
 				  if(cells.isEmpty()){
-					  log(Level.INFO, "  No nuclei detected in image");
+					  log("  No nuclei detected in image");
 				  } else {
-					  int nucleusNumber = 0;
+
 					  for(ICell cell : cells){
-						  addAndProcessCell(cell, imageStack, nucleusNumber++);
+
+						  
+						  collection.addCell(cell);
+						  log("  Added nucleus "+cell.getNucleus().getNucleusNumber());
 					  }
+					  log("  Added "+cells.size()+" nuclei");
 				  }
 
 			  } catch (Exception e) { 
@@ -112,20 +123,6 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 			  
 		  } 
 	   }
-
-
-	private void addAndProcessCell(ICell cell, ImageStack imageStack, int nucleusNumber ) throws Exception{
-		collection.addCell(cell);
-		log("  Added nucleus "+nucleusNumber);
-
-		 
-		  // save out the image stacks rather than hold within the nucleus
-		  Nucleus n 			 = cell.getNucleus();
-		  PolygonRoi nucleus 	 = new PolygonRoi(n.createPolygon(), PolygonRoi.POLYGON);
-		  
-		  int[] position = n.getPosition();
-		  nucleus.setLocation(position[CellularComponent.X_BASE],position[CellularComponent.Y_BASE]); // translate the roi to the image coordinates
-	}
 
 	/**
 	 *  Checks that the given file is suitable for analysis.

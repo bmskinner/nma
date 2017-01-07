@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
@@ -6,11 +6,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalMethodSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalSizeSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ThresholdSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
  * The settings panel for detection nuclear signals. This is designed

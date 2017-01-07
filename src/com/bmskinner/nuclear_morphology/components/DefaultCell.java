@@ -134,7 +134,7 @@ public class DefaultCell
 	public Nucleus getNucleus() {
 		return nucleus;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see components.ICell#setNucleus(components.nuclei.Nucleus)
 	 */

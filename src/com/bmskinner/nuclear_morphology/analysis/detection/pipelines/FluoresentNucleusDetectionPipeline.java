@@ -1,12 +1,8 @@
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Rectangle;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.DetectionPipeline;
-import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -14,13 +10,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.NucleusCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 
-import ij.ImageStack;
 import ij.gui.Roi;
 
 /**
@@ -32,13 +26,11 @@ import ij.gui.Roi;
  */
 public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell> {
 	
-	private NucleusType type;
-
-	private final NucleusFactory factory = new NucleusFactory();
+	private final NucleusFactory factory;
 	
 	public FluoresentNucleusDetectionPipeline(IDetectionOptions op, File imageFile, NucleusType t, double prop) throws ImageImportException {
 		super(op, imageFile, prop);
-		type = t;
+		factory = new NucleusFactory(imageFile, t);
 	}
 		
 	/**
@@ -47,10 +39,10 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 	  *
 	  * @param roi the ROI within the image
 	  * @param nucleusNumber the count of the nuclei in the image
-	  * @throws NucleusCreationException 
+	  * @throws ComponentCreationException 
 	  */
 	protected ICell makeComponent(Roi roi, int nucleusNumber) 
-			throws NucleusCreationException{
+			throws ComponentCreationException{
 
 		ICell result = null;
 		
@@ -68,12 +60,9 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 		// create a Nucleus from the roi
 		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
 
-		Nucleus currentNucleus = factory.createNucleus(roi, 
-				file, 
+		Nucleus currentNucleus = factory.buildInstance(roi, 
 				options.getChannel(),
-				nucleusNumber, 
 				originalPosition, 
-				type, 
 				centreOfMass);
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting

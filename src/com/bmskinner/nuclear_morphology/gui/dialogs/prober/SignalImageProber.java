@@ -18,6 +18,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
 
 /**
  * Show the results of a signal detection with given options

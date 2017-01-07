@@ -56,7 +56,6 @@ public class DefaultImageSet implements ImageSet {
 
 	@Override
 	public int getPosition(ImageType type) {
-		// TODO Auto-generated method stub
 		return values.get(type);
 	}
 	

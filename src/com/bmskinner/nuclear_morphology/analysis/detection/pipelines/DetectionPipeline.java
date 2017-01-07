@@ -1,12 +1,14 @@
-package com.bmskinner.nuclear_morphology.analysis.detection;
+package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.NucleusCreationException;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
@@ -29,7 +31,7 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	protected ImageProcessor ip;
 	protected IDetectionOptions options;
 	protected double proportion;
-	
+		
 	public DetectionPipeline(IDetectionOptions op, File imageFile, double prop) throws ImageImportException {
 		file = imageFile;
 		options = op;
@@ -180,7 +182,7 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 			E cell;
 			try {
 				cell = makeComponent(roi, i); // get the profile data back for the nucleus
-			}catch(NucleusCreationException e){
+			}catch(ComponentCreationException e){
 				stack("Cannot create nucleus from ROI "+i, e);
 				continue;
 			}
@@ -197,10 +199,10 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @param roi the roi
 	 * @param objectNumber the number of this object in the image
 	 * @return
-	 * @throws NucleusCreationException
+	 * @throws ComponentCreationException
 	 */
 	protected abstract E makeComponent(Roi roi, int objectNumber) 
-			throws NucleusCreationException;
+			throws ComponentCreationException;
 	
 	/**
 	 * Detect objects within the current image processor.

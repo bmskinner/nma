@@ -49,6 +49,11 @@ public interface ICell
 	 * @return
 	 */
 	Nucleus getNucleus();
+	
+	/**
+	 * Set the nucleus of the cell
+	 */
+	void setNucleus(Nucleus n);
 
 	
 

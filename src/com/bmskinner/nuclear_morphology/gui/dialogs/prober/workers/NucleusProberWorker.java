@@ -25,8 +25,8 @@ import java.util.List;
 
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluoresentNucleusDetectionPipeline;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.FluoresentNucleusDetectionPipeline;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -65,7 +65,11 @@ public class NucleusProberWorker extends ImageProberWorker {
 				.invert()
 				.toProcessor();
 		
-		FluoresentNucleusDetectionPipeline pipe = new FluoresentNucleusDetectionPipeline(options, file, NucleusType.ROUND, ANGLE_PROPORTION);
+		FluoresentNucleusDetectionPipeline pipe = new FluoresentNucleusDetectionPipeline(options, 
+				file, 
+				NucleusType.ROUND, 
+				ANGLE_PROPORTION);
+		
 		pipe.openSizeParameters();
 		
 		pipe.kuwaharaFilter();

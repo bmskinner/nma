@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 
@@ -9,14 +9,7 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ComponentSizeSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CopyFromOpenDatasetPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.EdgeThresholdSwitchPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImageChannelSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ImagePreprocessingSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.MiscNucleusSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusProfileSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
  * The detection setttings for nuclei. Composed of subpanels that set each type

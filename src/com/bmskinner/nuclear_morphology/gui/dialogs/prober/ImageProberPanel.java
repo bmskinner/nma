@@ -397,17 +397,12 @@ public abstract class ImageProberPanel extends JPanel
 	    	}
 	    	if(value >=0 && value <=100){
 	    		progressBar.setValue(value);
-//	    		finest("Progress: "+value);
-	    		table.repaint();
-	    		repaint();
 	    	}
 	    	
 	    	
 	    	if(evt.getPropertyName().equals("Finished")){
 
 				progressBar.setVisible(false);
-				table.repaint();
-				repaint();
 				firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
 				
 			}

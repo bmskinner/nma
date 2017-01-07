@@ -20,10 +20,48 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public interface ComponentFactory<CellularComponent> extends Loggable {
+import ij.gui.Roi;
+
+/**
+ * The interface for component factories
+ * @author ben
+ *
+ * @param <E> the type of CellularComponent to be created
+ */
+public interface ComponentFactory<E extends CellularComponent> extends Loggable {
 	
-	CellularComponent buildInstance();
+	/**
+	 * Create a component of the appropriate class for the factory
+	 * @param roi the roi to create a nucleus from
+	 * @param channel the image channel
+	 * @param originalPosition the position of the roi in the source image
+	 * @param centreOfMass the centre of mass of the roi
+	 * @return a component of the type for this factory
+	 * @throws NucleusCreationException 
+	 */
+	E buildInstance(Roi roi,
+			int channel, 
+			int[] originalPosition, 
+			IPoint centreOfMass) throws ComponentCreationException;
+	
+	
+	/**
+	 * Thrown when a profile collection or segmented profile has no assigned
+	 * segments
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
+	static class ComponentCreationException extends Exception {
+			private static final long serialVersionUID = 1L;
+			public ComponentCreationException() { super(); }
+			public ComponentCreationException(String message) { super(message); }
+			public ComponentCreationException(String message, Throwable cause) { super(message, cause); }
+			public ComponentCreationException(Throwable cause) { super(cause); }
+		
+	}
 
 }

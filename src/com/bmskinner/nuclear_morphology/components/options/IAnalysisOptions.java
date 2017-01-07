@@ -17,6 +17,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	
 	// Standard detection keys
 	static final String NUCLEUS     = "Nucleus";
+	static final String CYTOPLASM   = "Cytoplasm";
 	static final String SPERM_TAIL  = "SpermTail";
 	
 	static final boolean DEFAULT_REFOLD      = true;

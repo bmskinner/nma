@@ -1,11 +1,13 @@
-package com.bmskinner.nuclear_morphology.analysis.detection;
+package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.awt.Rectangle;
 import java.io.File;
+
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.DefaultCytoplasm;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory.NucleusCreationException;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -19,7 +21,7 @@ public class CytoplasmDetectionPipeline extends DetectionPipeline<ICytoplasm> {
 	}
 
 	@Override
-	protected ICytoplasm makeComponent(Roi roi, int objectNumber) throws NucleusCreationException {
+	protected ICytoplasm makeComponent(Roi roi, int objectNumber) throws ComponentCreationException {
 		
 		  // measure the area, density etc within the nucleus
 		StatsMap values   = measure(roi, ip);
