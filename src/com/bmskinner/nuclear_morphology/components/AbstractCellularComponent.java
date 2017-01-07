@@ -86,7 +86,7 @@ public abstract class AbstractCellularComponent
 	/**
 	 * The centre of the object.
 	 */
-	private IPoint centreOfMass = new FloatPoint(0,0);
+	private IPoint centreOfMass = IPoint.makeNew(0,0);
 	
 	/**
 	 * The statistical values stored for this object, which should
@@ -262,7 +262,7 @@ public abstract class AbstractCellularComponent
 		
 		
 //		this.borderList        = a.getBorderList();
-		this.centreOfMass      = new FloatPoint(a.getCentreOfMass());
+		this.centreOfMass      = IPoint.makeNew(a.getCentreOfMass());
 	}
 	
 
@@ -455,7 +455,7 @@ public abstract class AbstractCellularComponent
 		double diffX = position[CellularComponent.X_BASE] - minX;
 		double diffY = position[CellularComponent.Y_BASE] - minY;
 		
-		IPoint com = new FloatPoint(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
+		IPoint com = IPoint.makeNew(centreOfMass.getX()+diffX, centreOfMass.getY()+diffY);
 		
 		return com;
 	}
@@ -900,7 +900,7 @@ public abstract class AbstractCellularComponent
 				
 				if(this.containsPoint(x, y)){
 //					IJ.log(x+", "+y);
-					result.add(new FloatPoint(x, y));
+					result.add(IPoint.makeNew(x, y));
 				}
 			}
 		}
@@ -1017,7 +1017,7 @@ public abstract class AbstractCellularComponent
 
 			for(int y=-halfY, aY=0; aY<height; y++, aY++ ){
 
-				result[aY][aX] = this.containsPoint( new FloatPoint(x, y) );
+				result[aY][aX] = this.containsPoint( IPoint.makeNew(x, y) );
 
 			}
 			
@@ -1311,7 +1311,7 @@ public abstract class AbstractCellularComponent
 		
 		// Calculate the current angle between the point and a vertical line
 		
-		IPoint currentBottom = new FloatPoint(getCentreOfMass().getX(), getMinY());
+		IPoint currentBottom = IPoint.makeNew(getCentreOfMass().getX(), getMinY());
 //		String state = "";
 		
 		double currentAngle = getCentreOfMass().findAngle(currentBottom, bottomPoint);
@@ -1395,7 +1395,7 @@ public abstract class AbstractCellularComponent
 		 * 
 		 */
 		double oldAngle = this.getCentreOfMass().findAngle( p,
-				new FloatPoint(this.getCentreOfMass().getX(),-10));
+				IPoint.makeNew(this.getCentreOfMass().getX(),-10));
 
 
 		if(p.getX()<this.getCentreOfMass().getX()){
@@ -1405,7 +1405,7 @@ public abstract class AbstractCellularComponent
 		double newAngle = oldAngle + angle;
 		double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
 		double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
-		return new FloatPoint(newX, newY);
+		return IPoint.makeNew(newX, newY);
 	}
 	
 	/**

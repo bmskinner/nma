@@ -342,7 +342,7 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 
 
 		// Check the new point is valid
-		IPoint newPoint = new FloatPoint(newX, newY);
+		IPoint newPoint = IPoint.makeNew(newX, newY);
 		
 		boolean ok = checkPositionIsOK(newPoint, testNucleus, index, minDistance, maxDistance);
 

@@ -263,7 +263,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 		avgX /= 3;
 		avgY /= 3;
 		
-		return new FloatPoint(avgX, avgY);
+		return IPoint.makeNew(avgX, avgY);
 	}
 	
 	

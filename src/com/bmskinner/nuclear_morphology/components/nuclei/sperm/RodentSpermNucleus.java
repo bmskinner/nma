@@ -494,7 +494,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 		if(vertX > verticalNucleus.getCentreOfMass().getX() ){
 			clockwiseRP = true; // this is only set to true, as the default is false, and will become false after the nucleus is flipped
 			verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-			verticalNucleus.moveCentreOfMass(new FloatPoint(0,0));
+			verticalNucleus.moveCentreOfMass(IPoint.makeNew(0,0));
 		} 
 
 		return verticalNucleus;

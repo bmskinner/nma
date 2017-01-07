@@ -65,12 +65,12 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			
 			FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
 			for(int i=0; i<skeletonPolygon.npoints; i++){
-				skeletonPoints.add(new FloatPoint( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
+				skeletonPoints.add(IPoint.makeNew( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
 			}
 			
 			FloatPolygon borderPolygon = border.getInterpolatedPolygon(1, true);
 			for(int i=0; i<borderPolygon.npoints; i++){
-				borderPoints.add(new FloatPoint( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
+				borderPoints.add(IPoint.makeNew( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
 			}
 						
 			this.length = skeleton.getLength();
@@ -96,7 +96,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		public List<IPoint> getOffsetSkeleton(){
 			List<IPoint> result = new ArrayList<IPoint>(0);
 			for(IPoint p : skeletonPoints){
-				result.add(new FloatPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+				result.add(IPoint.makeNew( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}
@@ -109,7 +109,7 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		public List<IPoint> getOffsetBorder(){
 			List<IPoint> result = new ArrayList<IPoint>(0);
 			for(IPoint p : borderPoints){
-				result.add(new FloatPoint( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+				result.add(IPoint.makeNew( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
 			}
 			return result;
 		}

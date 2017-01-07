@@ -970,7 +970,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 				for(int y=-halfY, aY=0; aY<height; y++, aY++ ){
 
-					result[aY][aX] = this.containsPoint( new FloatPoint(x, y) );
+					result[aY][aX] = this.containsPoint( IPoint.makeNew(x, y) );
 
 				}
 				

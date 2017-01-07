@@ -242,7 +242,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			if(activeDataset().getCollection().hasConsensusNucleus()){
 				double x = 0;
 				double y = 0;
-				IPoint point = new FloatPoint(x, y);
+				IPoint point = IPoint.makeNew(x, y);
 				
 				activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 				refreshChartCache(getDatasets());
@@ -552,7 +552,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
 				double x = 0;
 				double y = 0;
-				IPoint point = new FloatPoint(x, y);
+				IPoint point = IPoint.makeNew(x, y);
 				
 				activeDataset().getCollection().getConsensusNucleus().moveCentreOfMass(point);;
 				this.update(activeDatasetToList());

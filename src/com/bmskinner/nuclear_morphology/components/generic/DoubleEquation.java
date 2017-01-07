@@ -141,7 +141,7 @@ public class DoubleEquation implements LineEquation {
 
 		double newX  = distance>0 ? xA + dx : xA - dx;
 		double newY = this.getY(newX);
-		return new FloatPoint(newX, newY);	
+		return IPoint.makeNew(newX, newY);	
 	}
 
 	/* (non-Javadoc)
@@ -191,7 +191,7 @@ public class DoubleEquation implements LineEquation {
 		
 		double x = (eq.getC() - this.c) / (this.m - eq.getM());
 		double y = this.getY(x);
-		return new FloatPoint(x, y);
+		return IPoint.makeNew(x, y);
 	}
 	
 	/* (non-Javadoc)

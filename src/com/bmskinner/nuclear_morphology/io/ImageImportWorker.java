@@ -155,7 +155,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		IPoint upperPoint = topPoint.getY()>btmPoint.getY()? topPoint : btmPoint;
 		IPoint lowerPoint = upperPoint==topPoint ? btmPoint : topPoint;
 
-		IPoint comp = new FloatPoint(lowerPoint.getX(),upperPoint.getY());
+		IPoint comp = IPoint.makeNew(lowerPoint.getX(),upperPoint.getY());
 
 		/*
 		 *      LA             RA        RB         LB         

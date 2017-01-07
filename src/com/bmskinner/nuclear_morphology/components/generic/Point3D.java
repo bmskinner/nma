@@ -39,7 +39,7 @@ public class Point3D extends FloatPoint {
 	 * @return
 	 */
 	public IPoint to2D(){
-		return new FloatPoint(x, y);
+		return IPoint.makeNew(x, y);
 	}
 
 	/**

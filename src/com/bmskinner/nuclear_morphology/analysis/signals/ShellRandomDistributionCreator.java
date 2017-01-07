@@ -174,7 +174,7 @@ public class ShellRandomDistributionCreator implements Loggable {
 		double rx = ThreadLocalRandom.current().nextDouble(r.x, r.width + 1);
 		double ry = ThreadLocalRandom.current().nextDouble(r.y, r.height + 1);
 		
-		IPoint p = new FloatPoint(rx, ry);
+		IPoint p = IPoint.makeNew(rx, ry);
 		
 		if(template.containsPoint(p)){
 			return p;

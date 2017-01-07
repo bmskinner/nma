@@ -577,14 +577,14 @@ public abstract class ProfileableCellularComponent
 			IProfile profile = this.getProfile(type);
 
 			// First previous point is the last point of the profile
-			IPoint prevPoint = new FloatPoint(0,profile.get(this.getBorderLength()-1));
+			IPoint prevPoint = IPoint.makeNew(0,profile.get(this.getBorderLength()-1));
 
 			for (int i=0; i<this.getBorderLength();i++ ) {
 				double normalisedX = ((double)i/(double)this.getBorderLength())*100; // normalise to 100 length
 
 				// We are measuring along the chart of angle vs position
 				// Each median angle value is treated as an XYPoint
-				IPoint thisPoint = new FloatPoint(normalisedX, profile.get(i));
+				IPoint thisPoint = IPoint.makeNew(normalisedX, profile.get(i));
 				pathLength += thisPoint.getLengthTo(prevPoint);
 				prevPoint = thisPoint;
 			}

@@ -413,7 +413,7 @@ public class CellBorderAdjustmentDialog
 		
 		
 		fine("Adding point at "+newX+", "+newY);
-		IPoint newPoint = new FloatPoint(newX, newY);
+		IPoint newPoint = IPoint.makeNew(newX, newY);
 		
 		// Get the border point that is closest to the clicked point
 		IBorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
@@ -673,7 +673,7 @@ public class CellBorderAdjustmentDialog
 						double yVal = ds.getYValue(series, item);
 
 						if(ellipse.contains(xVal,  yVal)){
-							IPoint clickedPoint = new FloatPoint(xVal, yVal);
+							IPoint clickedPoint = IPoint.makeNew(xVal, yVal);
 							selectClickedPoint(clickedPoint);
 						}
 					}

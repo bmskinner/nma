@@ -26,6 +26,7 @@ public class LobedNucleusDetectionPipeline  extends DetectionPipeline<Nucleus> {
 		super(op, imageFile, prop);
 		this.cells = cells;
 		factory = new NucleusFactory(imageFile, NucleusType.NEUTROPHIL);
+		
 	}
 	
 	/**
