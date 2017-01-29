@@ -5,6 +5,12 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+/**
+ * The default implementation of IAnalysisWorker, using a SwingWorker.
+ * @author ben
+ * @since 1.13.4
+ *
+ */
 public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer> implements IAnalysisWorker {
 
 	private int progressTotal; // the maximum value for the progress bar

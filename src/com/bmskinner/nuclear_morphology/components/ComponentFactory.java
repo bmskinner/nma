@@ -49,8 +49,9 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
 	
 	
 	/**
-	 * Thrown when a profile collection or segmented profile has no assigned
-	 * segments
+	 * Thrown when a component cannot be created or initialised (includes
+	 * when profile collection or segmented profile has no assigned
+	 * segments)
 	 * @author bms41
 	 * @since 1.13.4
 	 *

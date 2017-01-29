@@ -35,6 +35,12 @@ import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
 
+/**
+ * Provides easy access to the filters used for nucleus detection,
+ * such as background removal and edge detection.
+ * @author ben
+ *
+ */
 public class ImageFilterer extends AbstractImageFilterer {
 		
 	public ImageFilterer(ImageProcessor ip) {

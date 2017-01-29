@@ -7,6 +7,12 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * The cluster group saves a list of child datasets with a group name and a
+ * Newick tree of the clustered nuclei within the datasets.
+ * @author ben
+ *
+ */
 public interface IClusterGroup extends Serializable, Loggable {
 	
 	static final String CLUSTER_GROUP_PREFIX = "Group";

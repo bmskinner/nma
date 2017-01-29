@@ -25,6 +25,11 @@ import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
+/**
+ * A nucleus imaplementation of the MeshVertex
+ * @author ben
+ *
+ */
 public class NucleusMeshVertex implements MeshVertex {
 	
 	final private String name; // the number in the mesh - use to compare vertexes between nuclei
@@ -33,6 +38,12 @@ public class NucleusMeshVertex implements MeshVertex {
 	
 	Set<MeshEdge> edges = new HashSet<MeshEdge>(); // store the edges attached to the vertex
 	
+	/**
+	 * Create a vertex as a given position
+	 * @param p the position of the vertex
+	 * @param name the name of the vertex
+	 * @param peripheral true if the vertex is on the periphery of the mesh, false otherwise
+	 */
 	public NucleusMeshVertex(IPoint p, String name, boolean peripheral){
 		this.name = name;
 		this.position = p;
@@ -40,12 +51,12 @@ public class NucleusMeshVertex implements MeshVertex {
 	}
 	
 	/**
-	 * Duplicate the vertex.
-	 * @param v
+	 * Construct a duplicate of a vertex.
+	 * @param v the vertex to duplicate
 	 */
 	public NucleusMeshVertex(MeshVertex v){
-		this.name = v.getName();
-		this.position = IPoint.makeNew(v.getPosition());
+		this.name       = v.getName();
+		this.position   = IPoint.makeNew(v.getPosition());
 		this.peripheral = v.isPeripheral();
 	}
 	

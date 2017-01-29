@@ -45,6 +45,10 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	private static final int    DEFAULT_CHANNEL      = 2;
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Construct for a folder with default values
+	 * @param folder the image folder
+	 */
 	public DefaultNucleusDetectionOptions(File folder){
 		super(folder);
 		

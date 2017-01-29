@@ -27,23 +27,46 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ImageProcessor;
 
+/**
+ * Contains methods for manipulating ImageProcessors, and
+ * provides conversion between ImageStacks and ImageIcons
+ * for use in the UI. 
+ * @author ben
+ *
+ */
 public abstract class AbstractImageFilterer implements Loggable {
 	
 	protected ImageProcessor ip = null;
 	protected ImageStack     st = null;
 	
+	/**
+	 * Construct with an image processor
+	 * @param ip the image processor
+	 */
 	public AbstractImageFilterer(final ImageProcessor ip){
 		this.ip = ip;
 	}
 	
+	/**
+	 * Construct with an image processor from an image
+	 * @param img the image
+	 */
 	public AbstractImageFilterer(final ImagePlus img){
-		this.ip = img.getProcessor();
+		this(img.getProcessor());
 	}
 	
+	/**
+	 * Construct from a stack
+	 * @param st the image stack
+	 */
 	public AbstractImageFilterer(final ImageStack st){
 		this.st = st;
 	}
 	
+	/**
+	 * Duplicate the filterer - use the template processor and stack
+	 * @param f the template filterer
+	 */
 	public AbstractImageFilterer(AbstractImageFilterer f){
 		this.ip = f.ip;
 		this.st = f.st;

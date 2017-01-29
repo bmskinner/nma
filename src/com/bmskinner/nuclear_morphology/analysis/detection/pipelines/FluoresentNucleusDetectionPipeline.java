@@ -18,10 +18,9 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 import ij.gui.Roi;
 
 /**
- * Allows intermediate results within the detection pipeline to be sampled in 
- * the image prober.
+ * The default pipline for detecting single nuclei in a fluorescence image.
  * @author ben
- * @aince 1.13.4
+ * @since 1.13.4
  *
  */
 public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell> {

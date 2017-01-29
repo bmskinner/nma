@@ -22,6 +22,11 @@ import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * Run clustering of nuclei in a dataset based on a given set of options
+ * @author ben
+ *
+ */
 public class ClusteringMethod extends TreeBuildingMethod {
 	
 	public static final int EM = 0; // expectation maximisation
@@ -30,6 +35,11 @@ public class ClusteringMethod extends TreeBuildingMethod {
 	private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
 
 		
+	/**
+	 * Construct from a dataset and options
+	 * @param dataset the analysis dataset with nuclei to cluster
+	 * @param options the clustering options
+	 */
 	public ClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options){
 		super(dataset, options);		
 	}
