@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This interface defines the detection options available for detecting
@@ -31,13 +32,25 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
  * @since 1.13.3
  *
  */
-public interface IDetectionOptions extends Serializable {
+public interface IDetectionOptions extends Serializable, Loggable {
+	
+	/**
+	 * All sub option classes implement this interface.
+	 * They must be cast appropriately later.
+	 * @author ben
+	 * @since 1.13.4
+	 *
+	 */
+	public interface IDetectionSubOptions extends Loggable {
+		public static final String CANNY_OPTIONS     = "Canny";
+		public static final String HOUGH_OPTIONS     = "Hough";
+	}
 	
 	static final double DEFAULT_SCALE = 1;
 	static final double DEFAULT_MIN_CIRC = 0;
 	static final double DEFAULT_MAX_CIRC = 1;
 	
-	
+	IMutableDetectionOptions unlock();
 	/**
 	 * Create a copy of these options
 	 * @return
@@ -105,10 +118,16 @@ public interface IDetectionOptions extends Serializable {
 	boolean hasCannyOptions();
 	
 	/**
+	 * Should a Hough circle detection be run?
+	 * @return
+	 */
+	boolean isUseHoughTransform();
+	
+	/**
 	 * Get the Canny edge detection options for this object. 
 	 * @return the Canny options, or null if none have been set
 	 */
-	IMutableCannyOptions getCannyOptions();
+	IMutableCannyOptions getCannyOptions() throws MissingOptionException;
 	
 	/**
 	 * Test if the given component meets the criteria within

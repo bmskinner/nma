@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -523,13 +524,24 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				date = times[0];
 				time = times[1];
 			}
-			folder  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath();
+			folder  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getFolder()
+					.getAbsolutePath();
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 
-		ICannyOptions nucleusCannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions();
+		ICannyOptions nucleusCannyOptions = null;
+		try {
+			nucleusCannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getCannyOptions();
+		} catch (MissingOptionException e) {
+			warn("Missing Canny options");
+		}
 
-		String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
+		String detectionMethod = nucleusCannyOptions.isUseCanny() 
+							   ? "Canny edge detection"
+							   : "Thresholding";
+		
 		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold());
 		
 		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";

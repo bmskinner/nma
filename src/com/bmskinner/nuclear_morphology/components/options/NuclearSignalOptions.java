@@ -274,6 +274,28 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public IMutableDetectionOptions unlock() {
+		return this;
+	}
+
+	@Override
+	public boolean isUseHoughTransform() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public IDetectionOptions lock() {
+		return this;
+	}
+
+	@Override
+	public void setHoughOptions(IHoughDetectionOptions hough) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 }

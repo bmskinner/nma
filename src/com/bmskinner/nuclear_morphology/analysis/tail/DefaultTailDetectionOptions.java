@@ -22,6 +22,8 @@ package com.bmskinner.nuclear_morphology.analysis.tail;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.options.AbstractDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 public class DefaultTailDetectionOptions
@@ -41,6 +43,30 @@ public class DefaultTailDetectionOptions
 	public IMutableDetectionOptions duplicate() {
 		// TODO Auto-generated method stub
 		return new DefaultTailDetectionOptions(this);
+	}
+
+	@Override
+	public IDetectionOptions lock() {
+		// TODO Auto-generated method stub
+		return this;
+	}
+
+	@Override
+	public void setHoughOptions(IHoughDetectionOptions hough) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public IMutableDetectionOptions unlock() {
+		// TODO Auto-generated method stub
+		return this;
+	}
+
+	@Override
+	public boolean isUseHoughTransform() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	

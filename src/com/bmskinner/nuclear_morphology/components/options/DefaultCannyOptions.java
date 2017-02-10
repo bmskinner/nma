@@ -27,8 +27,9 @@ import java.io.IOException;
  * A default implementation of the ICannyOptions interface
  * @author bms41
  * @since 1.13.3
- *
+ * 
  */
+@Deprecated
 public class DefaultCannyOptions implements IMutableCannyOptions {
 
 		private static final long serialVersionUID = 1L;
@@ -91,6 +92,14 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
 			kernelWidth          = template.getKernelWidth();
 			closingObjectRadius  = template.getClosingObjectRadius();
 			isAddBorder          = template.isAddBorder();
+		}
+		
+		public IMutableCannyOptions unlock(){
+			return this;
+		}
+		
+		public ICannyOptions lock(){
+			return this;
 		}
 		
 		

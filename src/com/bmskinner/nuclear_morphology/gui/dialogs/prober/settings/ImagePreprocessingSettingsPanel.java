@@ -16,6 +16,7 @@ import javax.swing.SpinnerNumberModel;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * Holds the Kuwahara and flattening settings for nucleus detection
@@ -53,7 +54,11 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel  {
 	private IMutableCannyOptions options;
 	
 	public ImagePreprocessingSettingsPanel(final IMutableDetectionOptions options){
-		this.options = options.getCannyOptions();
+		try {
+			this.options = options.getCannyOptions();
+		} catch (MissingOptionException e) {
+			warn("missing Canny options");
+		}
 		createSpinners();
 		createPanel();
 	}

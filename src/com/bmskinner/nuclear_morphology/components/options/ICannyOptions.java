@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
 
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -11,11 +12,22 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface ICannyOptions extends Serializable, Loggable{
+public interface ICannyOptions extends IDetectionSubOptions, Serializable, Loggable{
 
 	// The default values below work for our mouse sperm images
 	// pretty well.
-	
+	static final String CANNY_LOW_THRESHOLD = "Canny low threshold";
+	static final String CANNY_HIGH_THRESHOLD = "Canny high threshold";
+	static final String CANNY_KERNEL_RADIUS = "Canny kernel radius";
+	static final String CANNY_KERNEL_WIDTH  = "Canny kernel width";
+	static final String CLOSING_RADIUS = "Closing radius";
+	static final String KUWAHARA_RADIUS = "Kuwahara radius";
+	static final String IS_USE_KUWAHARA = "Use Kuwahara";
+	static final String IS_FLATTEN_CHROMOCENTRE = "Use chromocentre flattening";
+	static final String FLATTEN_THRESHOLD = "Flattening threshold";
+	static final String IS_AUTO_THRESHOLD = "Use auto threshold";
+	static final String IS_ADD_BORDER = "Add border";
+	static final String IS_USE_CANNY = "Use Canny";
 	
 	static final float   DEFAULT_CANNY_LOW_THRESHOLD       = 0.5f;
 	static final float   DEFAULT_CANNY_HIGH_THRESHOLD      = 1.5f;
@@ -35,6 +47,12 @@ public interface ICannyOptions extends Serializable, Loggable{
 
 	
 	/**
+	 * Make the options mutable
+	 * @return
+	 */
+	IMutableCannyOptions unlock();
+	
+	/**
 	 * Create a copy of this options
 	 * @return
 	 */
@@ -46,8 +64,11 @@ public interface ICannyOptions extends Serializable, Loggable{
 	 */
 	boolean isUseCanny();
 
-	
 
+	/**
+	 * Should chromocentres be flattened?
+	 * @return
+	 */
 	boolean isUseFlattenImage();
 
 	
