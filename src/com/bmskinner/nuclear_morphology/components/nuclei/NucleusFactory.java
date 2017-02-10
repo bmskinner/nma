@@ -41,6 +41,11 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	private int nucleusCount = 0; // store the number of nuclei created by this factory
 	private final NucleusType type;
 	
+	/**
+	 * Create a factory for nuclei of the given type
+	 * @param imageFile
+	 * @param nucleusType
+	 */
 	public NucleusFactory(File imageFile, NucleusType nucleusType){
 		
 		if(nucleusType==null || imageFile==null){

@@ -164,7 +164,7 @@ public class DefaultCannyHashOptions
 	}
 	@Override
 	public void setKernelWidth(int kernelWidth) {
-		setFloat(CANNY_KERNEL_WIDTH, kernelWidth);
+		setInt(CANNY_KERNEL_WIDTH, kernelWidth);
 	}
 	@Override
 	public void setAddBorder(boolean b) {

@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * A replacement for the AbstractDetectionOptions providing more

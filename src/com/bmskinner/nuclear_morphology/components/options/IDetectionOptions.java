@@ -41,7 +41,7 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	 * @since 1.13.4
 	 *
 	 */
-	public interface IDetectionSubOptions extends Loggable {
+	public interface IDetectionSubOptions extends Serializable, Loggable {
 		public static final String CANNY_OPTIONS     = "Canny";
 		public static final String HOUGH_OPTIONS     = "Hough";
 	}
@@ -50,7 +50,12 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	static final double DEFAULT_MIN_CIRC = 0;
 	static final double DEFAULT_MAX_CIRC = 1;
 	
+	/**
+	 * Unlock the options to allow modification
+	 * @return
+	 */
 	IMutableDetectionOptions unlock();
+	
 	/**
 	 * Create a copy of these options
 	 * @return

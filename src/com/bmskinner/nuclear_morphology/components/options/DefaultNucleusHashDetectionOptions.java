@@ -21,6 +21,7 @@ public class DefaultNucleusHashDetectionOptions
 	public static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
 	private static final double    DEFAULT_SCALE = 1.0;
 	private static final int    DEFAULT_CHANNEL      = 2;
+	private static final boolean DEFAULT_NORMALISE_CONTRAST = false;
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -35,9 +36,10 @@ public class DefaultNucleusHashDetectionOptions
 		this.setThreshold(DEFAULT_NUCLEUS_THRESHOLD);
 		this.setScale(DEFAULT_SCALE);
 		this.setChannel(DEFAULT_CHANNEL);
+		this.setNormaliseContrast(DEFAULT_NORMALISE_CONTRAST);
 		
-		this.setCannyOptions( new DefaultCannyHashOptions());
-		this.setHoughOptions( new DefaultHoughOptions());
+		this.setCannyOptions( OptionsFactory.makeCannyOptions());
+		this.setHoughOptions( OptionsFactory.makeHoughOptions());
 	}
 	
 	public DefaultNucleusHashDetectionOptions(IDetectionOptions template){
