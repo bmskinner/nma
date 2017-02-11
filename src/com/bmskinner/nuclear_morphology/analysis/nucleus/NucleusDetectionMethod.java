@@ -17,9 +17,9 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
@@ -140,7 +140,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 				if(analysisOptions.isKeepFailedCollections()){
 					log("Keeping failed nuclei as new collection");
 					IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-					IMutableAnalysisOptions failedOptions = new DefaultAnalysisOptions(analysisOptions);
+					IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
 					failedOptions.setNucleusType(NucleusType.ROUND);
 					failed.setAnalysisOptions(failedOptions);
 					failed.setRoot(true);

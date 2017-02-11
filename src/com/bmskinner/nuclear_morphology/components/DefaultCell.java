@@ -41,11 +41,12 @@ public class DefaultCell
 
 	protected UUID uuid;
 	
-	protected Nucleus nucleus = null;
+	protected Nucleus nucleus = null; // depractated, use the list
 	protected List<IMitochondrion> mitochondria; // unknown staining patterns so far
 	protected List<Flagellum> tails;	
 	protected List<IAcrosome> acrosomes;
 	protected ICytoplasm cytoplasm = null;
+	protected List<Nucleus> nuclei;
 	
 	/**
 	 * Create a new cell with a random ID
@@ -60,6 +61,7 @@ public class DefaultCell
 	 */
 	public DefaultCell(UUID id){
 		this.uuid    = id;
+		nuclei       = new ArrayList<Nucleus>(0);
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		tails        = new ArrayList<Flagellum>(0);
 		acrosomes    = new ArrayList<IAcrosome>(0);
@@ -72,7 +74,7 @@ public class DefaultCell
 	 */
 	public DefaultCell(Nucleus n){
 		this();
-		nucleus = n;
+		nuclei.add(n);
 	}
 	
 	/**
@@ -92,12 +94,11 @@ public class DefaultCell
 	public DefaultCell(ICell c){
 
 		this.uuid = c.getId();
-//		try {
-			nucleus   = c.getNucleus().duplicate();//new DefaultNucleus(c.getNucleus());
-//		} catch (UnprofilableObjectException e) {
-//			warn("Unable to make cell from template");
-//			stack("Cannot profile the nucleus", e);
-//		}
+			
+		nuclei = new ArrayList<Nucleus>(0);
+		for(Nucleus m : c.getNuclei()){
+			nuclei.add(m.duplicate());
+		}
 		
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		for(IMitochondrion m : c.getMitochondria()){
@@ -132,15 +133,30 @@ public class DefaultCell
 	 */
 	@Override
 	public Nucleus getNucleus() {
-		return nucleus;
+		return nuclei.get(0);
 	}
+	
+	public List<Nucleus> getNuclei(){
+		return nuclei;
+	}
+	
+	
 	
 	/* (non-Javadoc)
 	 * @see components.ICell#setNucleus(components.nuclei.Nucleus)
 	 */
 	@Override
 	public void setNucleus(Nucleus nucleus) {
-		this.nucleus = nucleus;
+		if(nuclei.isEmpty()){
+			nuclei.add(nucleus);
+		} else {
+			nuclei.set(0,nucleus);
+		}
+	}
+	
+	@Override
+	public void addNucleus(Nucleus nucleus){
+		nuclei.add(nucleus);
 	}
 
 	/* (non-Javadoc)
@@ -213,7 +229,7 @@ public class DefaultCell
 	 */
 	@Override
 	public boolean hasNucleus(){
-		return this.nucleus!=null;
+		return !nuclei.isEmpty();
 	}
 	
 	/* (non-Javadoc)
@@ -284,7 +300,8 @@ public class DefaultCell
 			return -1;
 		}
 		
-		return this.nucleus.compareTo(o.getNucleus());
+		return this.getNucleus().compareTo(o.getNucleus());
+//		return this.nucleus.compareTo(o.getNucleus());
 	}
 	
 	
@@ -308,49 +325,22 @@ public class DefaultCell
 		result = prime * result + ((nucleus == null) ? 0 : nucleus.hashCode());
 		result = prime * result + ((tails == null) ? 0 : tails.hashCode());
 		result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+		result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
 		return result;
 	}
 
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		Cell other = (Cell) obj;
-//		if (acrosomes == null) {
-//			if (other.acrosomes != null)
-//				return false;
-//		} else if (!acrosomes.equals(other.acrosomes))
-//			return false;
-//		if (mitochondria == null) {
-//			if (other.mitochondria != null)
-//				return false;
-//		} else if (!mitochondria.equals(other.mitochondria))
-//			return false;
-//		if (nucleus == null) {
-//			if (other.nucleus != null)
-//				return false;
-//		} else if (!nucleus.equals(other.nucleus))
-//			return false;
-//		if (tails == null) {
-//			if (other.tails != null)
-//				return false;
-//		} else if (!tails.equals(other.tails))
-//			return false;
-//		if (uuid == null) {
-//			if (other.uuid != null)
-//				return false;
-//		} else if (!uuid.equals(other.uuid))
-//			return false;
-//		return true;
-//	}
-
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 //		finest("Reading cell");
+//		warn("Reading cell");
 		in.defaultReadObject();
+		
+//		warn("Read cell");
+		
+		// Replacce old single nucleus fields
+		if(nuclei==null){
+			nuclei= new ArrayList<Nucleus>(0);
+			nuclei.add(nucleus);
+		}
 //		finest("Read cell"); 
 	}
 

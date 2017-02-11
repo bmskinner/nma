@@ -1009,9 +1009,9 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 	public IMutableDetectionOptions getDetectionOptions(String key) {
 		if(key.equals(IAnalysisOptions.NUCLEUS)){
 			
-			IMutableDetectionOptions op = new DefaultNucleusHashDetectionOptions(this.folder);
+			IMutableDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
 			
-			op.setCannyOptions( new DefaultCannyHashOptions (this.getCannyOptions("nucleus")));
+			op.setCannyOptions( OptionsFactory.makeCannyOptions(this.getCannyOptions("nucleus")));
 			op.setChannel(channel);
 			op.setThreshold(nucleusThreshold);
 			op.setScale(scale);

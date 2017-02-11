@@ -83,7 +83,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 				error("Missing Canny options", e);
 			}
 		} else {
-			cannyOptions = new DefaultCannyHashOptions();
+			cannyOptions = OptionsFactory.makeCannyOptions();
 			cannyOptions.setUseCanny(false);
 		}
 		

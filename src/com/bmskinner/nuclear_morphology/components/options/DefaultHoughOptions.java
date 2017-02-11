@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
+
 /**
  * The default implementation of the IHoughDetectionOptions
  * interface.
@@ -9,8 +11,9 @@ package com.bmskinner.nuclear_morphology.components.options;
  */
 public class DefaultHoughOptions 
 	extends AbstractHashOptions
-	implements IHoughDetectionOptions {
+	implements IMutableHoughDetectionOptions {
 
+	private static final long serialVersionUID = 1L;
 	public static final double DEFAULT_MIN_RADIUS = 5;
 	public static final double DEFAULT_MAX_RADIUS = 50;
 	public static final int    DEFAULT_NUM_CIRCLES = 6;
@@ -52,6 +55,11 @@ public class DefaultHoughOptions
 	
 	public void setNumberOfCircles(int i){
 		setInt(NUM_CIRCLES, i);
+	}
+
+	@Override
+	public IHoughDetectionOptions lock() {
+		return this;
 	}
 
 }

@@ -5,8 +5,6 @@ import java.io.File;
 
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultNucleusHashDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;

@@ -13,7 +13,8 @@ public class DefaultCannyHashOptions
 	private static final long serialVersionUID = 1L;
 	
 	public DefaultCannyHashOptions(){
-		setUseCanny( DEFAULT_USE_CANNY);
+		setBoolean(IS_USE_CANNY, DEFAULT_USE_CANNY);
+
 		setCannyAutoThreshold( DEFAULT_AUTO_THRESHOLD);
 		this.setFlattenImage(DEFAULT_FLATTEN_CHROMOCENTRES);
 		this.setFlattenThreshold( DEFAULT_FLATTEN_THRESHOLD);

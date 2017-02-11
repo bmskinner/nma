@@ -10,6 +10,22 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
  *
  */
 public interface IHoughDetectionOptions extends IDetectionSubOptions {
+	
+	/**
+	 * Adds the mutable settings to the options
+	 * @author ben
+	 *
+	 */
+	public interface IMutableHoughDetectionOptions extends IHoughDetectionOptions {
+		
+		IHoughDetectionOptions lock();
+		
+		void setMinRadius(double d);
+		
+		void setMaxRadius(double d);
+		
+		void setNumberOfCircles(int i);
+	}
 
 	public static final String MIN_RADIUS = "Min radius";
 	public static final String MAX_RADIUS = "Max radius";

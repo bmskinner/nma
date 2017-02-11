@@ -75,7 +75,7 @@ public abstract class AbstractHashDetectionOptions
 			}
 		} else {
 			
-			IMutableCannyOptions cannyOptions = new DefaultCannyHashOptions();
+			IMutableCannyOptions cannyOptions = OptionsFactory.makeCannyOptions();
 			cannyOptions.setUseCanny(false);
 			subMap.put(IDetectionSubOptions.CANNY_OPTIONS, cannyOptions);
 		}

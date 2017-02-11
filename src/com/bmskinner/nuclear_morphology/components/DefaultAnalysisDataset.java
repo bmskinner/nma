@@ -47,7 +47,9 @@ import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
  * @since 1.13.3
  *
  */
-public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
+public class DefaultAnalysisDataset 
+	extends AbstractAnalysisDataset 
+	implements IAnalysisDataset {
 	
 	private static final long serialVersionUID = 1L;
 		
@@ -799,7 +801,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	    in.defaultReadObject();
+	    
+//		warn("Reading dataset");
+		
+		in.defaultReadObject();
 	    
 	    int length = cellCollection.getProfileCollection().length();
 	    // Update all children to have the same profile lengths and offsets
