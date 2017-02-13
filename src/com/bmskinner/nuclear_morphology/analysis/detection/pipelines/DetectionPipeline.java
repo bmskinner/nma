@@ -14,7 +14,6 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -207,7 +206,12 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 */
 	public DetectionPipeline<E> subtractBackground(){
 		
-			IDetectionSubOptions bkg = options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			try {
+				IDetectionSubOptions bkg = options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			} catch (MissingOptionException e) {
+				warn("Missing background options");
+				return this;
+			}
 			
 //			if(bkg.getBoolean(PreprocessingOptions.USE_ROLLING_BALL)){
 				BackgroundSubtracter bg = new BackgroundSubtracter();

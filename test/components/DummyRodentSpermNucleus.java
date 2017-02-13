@@ -692,4 +692,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		
 	}
 
+	@Override
+	public double getDistanceFromCoMToBorderAtAngle(double angle) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

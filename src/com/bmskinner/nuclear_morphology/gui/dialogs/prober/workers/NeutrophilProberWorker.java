@@ -202,7 +202,7 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		// annotate the image processor with the nucleus outline
 		
 		Color colour     = nucleusOptions.isValid(n) ? Color.ORANGE : Color.RED;
-		Color cytoColour = options.isValid(n) ? Color.ORANGE : Color.RED;
+		Color cytoColour = options.isValid(n) ? Color.GREEN : Color.PINK;
 
 		ip = new ImageAnnotator(ip)
 				.annotateBorder(n, colour)

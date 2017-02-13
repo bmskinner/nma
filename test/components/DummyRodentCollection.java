@@ -22,8 +22,11 @@ package components;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfiler;
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -62,19 +65,21 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		
 		
 		DummyRodentCollection collection = new DummyRodentCollection(10000);
-		IAnalysisDataset d = new AnalysisDataset(collection);
+		IAnalysisDataset d = new DefaultAnalysisDataset(collection);
 //		System.out.println(collection.toString());
 		
 //		for(Nucleus n : collection.getNuclei()){
 //			System.out.println(n.toString());
 //		}
 		
-		DatasetProfiler profiler = new DatasetProfiler(d);
-		profiler.execute();
+		IAnalysisMethod profiler = new DatasetProfilingMethod(d);
+		
+		IAnalysisWorker w = new DefaultAnalysisWorker(profiler);
+		w.run();
 		
 		System.out.println("Waiting for profiler...");
 		try {
-			profiler.get();
+			w.get();
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

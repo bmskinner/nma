@@ -136,7 +136,7 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	 * @param s
 	 * @return
 	 */
-	IDetectionSubOptions getSubOptions(String s);
+	IDetectionSubOptions getSubOptions(String s) throws MissingOptionException;
 	
 	/**
 	 * Get the Canny edge detection options for this object. 

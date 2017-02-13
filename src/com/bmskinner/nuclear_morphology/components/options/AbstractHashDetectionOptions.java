@@ -95,8 +95,12 @@ public abstract class AbstractHashDetectionOptions
 		return this;
 	}
 	
-	public IDetectionSubOptions getSubOptions(String s){
-		return subMap.get(s);
+	public IDetectionSubOptions getSubOptions(String s) throws MissingOptionException {
+		if(subMap.containsKey(s)){
+			return subMap.get(s);
+		} else {
+			throw new MissingOptionException("Options not present: "+s);
+		}
 	}
 	
 	public void setSubOptions(String s, IDetectionSubOptions op){

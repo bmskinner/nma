@@ -2,6 +2,8 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+
 /**
  * Provides default options types.
  * @author ben
@@ -60,6 +62,14 @@ public interface OptionsFactory {
 	 */
 	static IHoughDetectionOptions makeHoughOptions(IHoughDetectionOptions template){
 		return new DefaultHoughOptions(template);
+	}
+	
+	/**
+	 * Create the default options type for image preprocessing
+	 * @return
+	 */
+	static IDetectionSubOptions makePreprocessingOptions(){
+		return new PreprocessingOptions();
 	}
 	
 	/**

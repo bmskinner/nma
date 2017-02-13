@@ -37,9 +37,9 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 	private static final String DIALOG_TITLE_BAR_LBL = "Neutrophil detection settings";
 
 	public NeutrophilImageProber(final File folder){
+		
 		try {
-			
-			fine("Creating neutrophil prober");
+
 			options = OptionsFactory.makeAnalysisOptions();
 
 			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
@@ -47,10 +47,20 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			
 			options.setNucleusType(NucleusType.NEUTROPHIL);
 			
+			cytoOptions.setMinCirc(0);
+			cytoOptions.setMaxCirc(1);
+			cytoOptions.setMinSize(500);
+			cytoOptions.setMaxSize(5000);
+			cytoOptions.getCannyOptions().setFlattenThreshold(130);
+			
+			nucleusOptions.setMinCirc(0);
+			nucleusOptions.setMaxCirc(1);
+			nucleusOptions.setMinSize(500);
+			nucleusOptions.setMaxSize(1000);
+			
 			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 			options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
 
-			fine("Making neutrophil prober panel");
 			// make the panel
 			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
 			imageProberPanel     = new NeutrophilImageProberPanel(this, cytoOptions, nucleusOptions, ImageSet.NEUTROPHIL_IMAGE_SET);
@@ -71,7 +81,7 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			stack(e.getMessage(), e);
 			this.dispose();
 		}	
-		fine("Displaying neutrophil prober");
+
 		this.pack();
 		this.setModal(true);
 		this.setLocationRelativeTo(null); // centre on screen
