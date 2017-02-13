@@ -21,7 +21,11 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 /**
- * The abstract pipeline implementing common methods.
+ * The abstract pipeline implementing common methods. Extending classes
+ * detect the various nuclei and cells for the program by chaining the 
+ * image filtering and analysis methods. Since we want to be able to
+ * sample intermediate results for e.g. the ImageProber, the pipeline
+ * returns itself after each operation.
  * @author ben
  * @since 1.13.4
  *
