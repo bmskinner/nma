@@ -24,8 +24,9 @@ import java.io.File;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.AbstractDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultCannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.DefaultCannyHashOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
@@ -45,6 +46,10 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	private static final int    DEFAULT_CHANNEL      = 2;
 	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * Construct for a folder with default values
+	 * @param folder the image folder
+	 */
 	public DefaultNucleusDetectionOptions(File folder){
 		super(folder);
 		
@@ -54,7 +59,7 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 		this.setScale(DEFAULT_SCALE);
 		this.setChannel(DEFAULT_CHANNEL);
 		
-		this.setCannyOptions( new DefaultCannyOptions());
+		this.setCannyOptions( new DefaultCannyHashOptions());
 	}
 	
 	public DefaultNucleusDetectionOptions(IDetectionOptions template){
@@ -87,6 +92,29 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 	@Override
 	public IMutableDetectionOptions duplicate() {
 		return new DefaultNucleusDetectionOptions(this);
+	}
+
+	@Override
+	public IDetectionOptions lock() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setHoughOptions(IHoughDetectionOptions hough) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public IMutableDetectionOptions unlock() {
+		return this;
+	}
+
+	@Override
+	public boolean isUseHoughTransform() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	

@@ -70,11 +70,11 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 			
 			signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
+			signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
 			signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
 			signalsTabPane.addTab(HISTOGRAM_TAB_LBL, histogramPanel);
-			signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
-			signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
 			signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
+			signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
 			signalsTabPane.addTab(COLOCAL_TAB_LBL, colocalistionPanel);
 
 			this.addSubPanel(overviewPanel);
@@ -91,19 +91,6 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 			error("Error making signal panel", e);
 		}
 	}
-
-//	@Override
-//	public void actionPerformed(ActionEvent e) {
-//
-//		if(e.getActionCommand().startsWith("GroupVisble_")){
-//			
-//			for(TabPanel p : this.getSubPanels()){
-//				p.update(getDatasets());
-//			}			
-//		}
-//		
-//	}
-	
 	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {

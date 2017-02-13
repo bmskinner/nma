@@ -32,6 +32,9 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.CannySettingsPanel;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
@@ -76,7 +79,15 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 		channelSelection.addActionListener(this);
 		contentPanel.add(channelSelection);
 		
-		cannyPanel = new CannySettingsPanel(options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions());
+		IMutableCannyOptions canny = null;
+		try {
+			canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL)
+					.getCannyOptions().unlock();
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
+		}
+		
+		cannyPanel = new CannySettingsPanel(canny);
 		contentPanel.add(cannyPanel);
 		
 		getContentPane().add(contentPanel, BorderLayout.CENTER);

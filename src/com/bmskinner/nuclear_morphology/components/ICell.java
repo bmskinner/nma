@@ -45,10 +45,16 @@ public interface ICell
 	UUID getId();
 
 	/**
-	 * Get the nucleus of the cell
+	 * Get the first nucleus of the cell
 	 * @return
 	 */
 	Nucleus getNucleus();
+	
+	/**
+	 * Get the nuclei of the cell
+	 * @return
+	 */
+	List<Nucleus> getNuclei();
 	
 	/**
 	 * Set the nucleus of the cell

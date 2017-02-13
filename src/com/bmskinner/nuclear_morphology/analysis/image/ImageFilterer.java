@@ -22,9 +22,11 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
+import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
 import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import mmorpho.MorphoProcessor;
@@ -35,6 +37,12 @@ import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
 
+/**
+ * Provides easy access to the filters used for nucleus detection,
+ * such as background removal and edge detection.
+ * @author ben
+ *
+ */
 public class ImageFilterer extends AbstractImageFilterer {
 		
 	public ImageFilterer(ImageProcessor ip) {
@@ -477,6 +485,21 @@ public class ImageFilterer extends AbstractImageFilterer {
 		converted = null;
 
 		return new ImageFilterer(result);
+	}
+	
+	/**
+	 * Run circle detection using given Hough transform options
+	 * @param options the detection options
+	 * @return
+	 */
+	public ImageFilterer runHoughCircleDetection(IHoughDetectionOptions options){
+		
+		Hough_Circles circ = new Hough_Circles();
+		circ.maxCircles = options.getNumberOfCircles();
+		circ.radiusMin = (int) options.getMinRadius();
+		circ.radiusMax = (int) options.getMaxRadius();
+		circ.run(ip);
+		return this;
 	}
 	
 	/**

@@ -7,11 +7,12 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -72,16 +73,23 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> addBorder(int border){
-		ICannyOptions cannyOptions = options.getCannyOptions();
-
-		ImageConverter conv = new ImageConverter(ip);
 		
-		conv = conv.convertToGreyscale();
-		
-		if(cannyOptions.isAddBorder()){	
-			conv = conv.addBorder(border);
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			ImageConverter conv = new ImageConverter(ip);
+			
+			conv = conv.convertToGreyscale();
+			
+			if(canny.isAddBorder()){	
+				conv = conv.addBorder(border);
+			}
+			ip = conv.invert().toProcessor();
+			
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
 		}
-		ip = conv.invert().toProcessor();
+		
 		return this;
 	}
 	
@@ -90,12 +98,18 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> openSizeParameters(){
-		IMutableDetectionOptions nucleusOptions = (IMutableDetectionOptions) options.duplicate();
+		IMutableDetectionOptions nucleusOptions = options.duplicate().unlock();
 		nucleusOptions.setMinSize(50);
 		nucleusOptions.setMaxSize(ip.getWidth()*ip.getHeight());// dimensions of the image
 		nucleusOptions.setMinCirc(0);
 		nucleusOptions.setMaxCirc(1);
-		nucleusOptions.getCannyOptions().setAddBorder(false);
+		try {
+			IMutableCannyOptions canny = options.getCannyOptions().unlock();
+			canny.setAddBorder(false);
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
+		}
+		
 		options = nucleusOptions;
 		return this;
 	}
@@ -106,12 +120,18 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> kuwaharaFilter(){
-		
-		if(options.getCannyOptions().isUseKuwahara()){
-			ip = new ImageFilterer(ip)
-					.runKuwaharaFiltering( options.getCannyOptions().getKuwaharaKernel())
-					.toProcessor();
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			if(canny.isUseKuwahara()){
+				ip = new ImageFilterer(ip)
+						.runKuwaharaFiltering( canny.getKuwaharaKernel())
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
 		}
+		
 		return this;
 	}
 	
@@ -121,10 +141,17 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> flatten(){
-		if(options.getCannyOptions().isUseFlattenImage()){
-			ip = new ImageFilterer(ip)
-					.squashChromocentres( options.getCannyOptions().getFlattenThreshold())
-					.toProcessor();
+		
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			if(canny.isUseFlattenImage()){
+				ip = new ImageFilterer(ip)
+						.squashChromocentres( canny.getFlattenThreshold())
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
 		}
 		return this;
 	}
@@ -135,11 +162,17 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> edgeDetect(){
-		if(options.getCannyOptions().isUseCanny()){
-
-			ip = new ImageFilterer(ip)
-					.runEdgeDetector( options.getCannyOptions() )
-					.toProcessor();
+		
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			if(canny.isUseCanny()){
+				ip = new ImageFilterer(ip)
+						.runEdgeDetector( canny )
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
 		}
 		return this;
 	}
@@ -150,11 +183,28 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 * @return
 	 */
 	public DetectionPipeline<E> gapClose(){
-		if(options.getCannyOptions().isUseCanny()){
-			ip = new ImageFilterer(ip)
-					.morphologyClose( options.getCannyOptions().getClosingObjectRadius() )
-					.toProcessor();
+		
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			if(canny.isUseCanny()){
+				ip = new ImageFilterer(ip)
+						.morphologyClose( canny.getClosingObjectRadius() )
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
 		}
+		return this;
+	}
+	
+	/**
+	 * Run a gap closing with the closing radius specified in the options.
+	 * If the options specify edge detecion is disabled, this has no effect.
+	 * @return
+	 */
+	public DetectionPipeline<E> houghCircles(){
+		warn("Hough not implemented");
 		return this;
 	}
 	

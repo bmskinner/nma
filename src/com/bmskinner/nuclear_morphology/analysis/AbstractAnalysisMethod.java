@@ -6,6 +6,11 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
+/**
+ * Stores the basic methods for an IAnalysisMethod
+ * @author ben
+ *
+ */
 public abstract class AbstractAnalysisMethod implements IAnalysisMethod, ProgressListener {
 		
 		protected IAnalysisDataset dataset;

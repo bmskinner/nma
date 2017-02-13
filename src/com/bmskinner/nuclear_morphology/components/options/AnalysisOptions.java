@@ -26,7 +26,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -107,7 +106,12 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 		maxNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc();
 		
 		edgeDetection    = new HashMap<String, ICannyOptions>(0);
-		edgeDetection.put(IAnalysisOptions.NUCLEUS, template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
+		try {
+			edgeDetection.put(IAnalysisOptions.NUCLEUS, template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
+		} catch (MissingOptionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 
         signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
@@ -989,6 +993,12 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 			// TODO Auto-generated method stub
 			
 		}
+
+		@Override
+		public IMutableCannyOptions unlock() {
+			// TODO Auto-generated method stub
+			return this;
+		}
 	}
 
 
@@ -999,9 +1009,9 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 	public IMutableDetectionOptions getDetectionOptions(String key) {
 		if(key.equals(IAnalysisOptions.NUCLEUS)){
 			
-			IMutableDetectionOptions op = new DefaultNucleusDetectionOptions(this.folder);
+			IMutableDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
 			
-			op.setCannyOptions( new DefaultCannyOptions (this.getCannyOptions("nucleus")));
+			op.setCannyOptions( OptionsFactory.makeCannyOptions(this.getCannyOptions("nucleus")));
 			op.setChannel(channel);
 			op.setThreshold(nucleusThreshold);
 			op.setScale(scale);

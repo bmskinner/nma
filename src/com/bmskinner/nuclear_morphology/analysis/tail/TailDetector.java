@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
@@ -166,7 +167,7 @@ public class TailDetector extends Detector {
 		ImagePlus binaryImage = new ImagePlus("binary image", binaryProcessor);
 //		binaryImage.show();
 		
-		IMutableAnalysisOptions options = new DefaultAnalysisOptions(); 
+		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions(); 
 		IMutableDetectionOptions op = new DefaultTailDetectionOptions((File)null);
 		op.getCannyOptions().setClosingObjectRadius(5);
 		options.setDetectionOptions(IAnalysisOptions.SPERM_TAIL, op);

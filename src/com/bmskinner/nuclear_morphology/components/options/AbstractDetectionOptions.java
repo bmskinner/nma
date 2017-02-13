@@ -77,9 +77,13 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 		isNormaliseContrast = template.isNormaliseContrast();
 		
 		if(template.hasCannyOptions()){
-			cannyOptions = template.getCannyOptions().duplicate();
+			try {
+				cannyOptions = template.getCannyOptions().duplicate();
+			} catch (MissingOptionException e) {
+				error("Missing Canny options", e);
+			}
 		} else {
-			cannyOptions = new DefaultCannyOptions();
+			cannyOptions = OptionsFactory.makeCannyOptions();
 			cannyOptions.setUseCanny(false);
 		}
 		
@@ -255,7 +259,12 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 	@Override
 	public void set(IDetectionOptions options){
 		
-		this.cannyOptions.set(options.getCannyOptions());
+		try {
+			this.cannyOptions.set(options.getCannyOptions());
+		} catch (MissingOptionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		channel = options.getChannel();
 		maxCirc = options.getMaxCirc();
 		minCirc = options.getMinCirc();
@@ -351,8 +360,13 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 		if(isNormaliseContrast!=other.isNormaliseContrast())
 			return false;
 		
-		if(! cannyOptions.equals(other.getCannyOptions())){
-			return false;
+		try {
+			if(! cannyOptions.equals(other.getCannyOptions())){
+				return false;
+			}
+		} catch (MissingOptionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 				
 		return true;

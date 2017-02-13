@@ -31,10 +31,16 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 public interface IMutableCell extends ICell {
 	
 	/**
-	 * Set the nucleus of the cell
+	 * Set the first nucleus of the cell
 	 * @param nucleus
 	 */
 	void setNucleus(Nucleus nucleus);
+	
+	/**
+	 * Add a nucleus to the cell
+	 * @param nucleus
+	 */
+	void addNucleus(Nucleus nucleus);
 	
 	/**
 	 * Add a new mitochondrion to the cell

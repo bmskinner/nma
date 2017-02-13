@@ -27,7 +27,6 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
@@ -58,13 +57,12 @@ import com.bmskinner.nuclear_morphology.components.nuclei.DefaultNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -113,11 +111,12 @@ public class DatasetConverter implements Loggable, Importer {
 			IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions();
 			
 			if(oldOptions != null){
-				IMutableAnalysisOptions newOptions = new DefaultAnalysisOptions();
+
+				IMutableAnalysisOptions newOptions= OptionsFactory.makeAnalysisOptions();
 
 				IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
-				IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(oldNucleusOptions);
+				IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
 				newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
 				for(UUID id : oldOptions.getNuclearSignalGroups()){
@@ -126,7 +125,7 @@ public class DatasetConverter implements Loggable, Importer {
 					int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
 
 
-					IMutableNuclearSignalOptions newSignalOptions = new DefaultNuclearSignalOptions(oldSignalOptions);
+					IMutableNuclearSignalOptions newSignalOptions = OptionsFactory.makeNuclearSignalOptions(oldSignalOptions);
 					newSignalOptions.setFolder(folder);
 					newSignalOptions.setChannel(channel);		
 

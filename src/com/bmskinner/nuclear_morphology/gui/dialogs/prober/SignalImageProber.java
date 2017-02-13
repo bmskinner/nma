@@ -8,15 +8,12 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.components.options.DefaultNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
 
@@ -44,8 +41,10 @@ public class SignalImageProber extends IntegratedImageProber {
 	 */
 	public SignalImageProber(final IAnalysisDataset dataset, final File folder){
 		this.dataset = dataset;
-		options = new DefaultNuclearSignalOptions(folder);
-		double scale = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale();
+		options = OptionsFactory.makeNuclearSignalOptions(folder);
+		double scale = dataset.getAnalysisOptions()
+				.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+				.getScale();
 		options.setScale(scale);
 		
 		try {

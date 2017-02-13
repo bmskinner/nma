@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractProgressAction;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.DetectionPipeline;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluoresentNucleusDetectionPipeline;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -93,9 +94,11 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 				  
 				  log("File:  "+file.getName());
 				  
-				  FluoresentNucleusDetectionPipeline pipe = new FluoresentNucleusDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
+				  // Build a pipline for the image
+				  DetectionPipeline<ICell> pipe = new FluoresentNucleusDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
 						  file, analysisOptions.getNucleusType(), analysisOptions.getProfileWindowProportion());
 				  
+				  // Run each step of the pipeline without sampling intermediate results
 				  List<ICell> cells = pipe.kuwaharaFilter()
 						  .flatten()
 						  .edgeDetect()
@@ -116,7 +119,8 @@ public class FileProcessingTask  extends AbstractProgressAction  {
 				  }
 
 			  } catch (Exception e) { 
-				  error("Error in image processing: "+e.getMessage(), e);
+				  warn("Error processing file");
+				  stack("Error in image processing: "+e.getMessage(), e);
 			  } 
 			  
 			  fireProgressEvent();

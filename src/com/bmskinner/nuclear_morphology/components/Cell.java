@@ -311,4 +311,18 @@ public class Cell
 	@Override
 	public void setCytoplasm(ICytoplasm cytoplasm) {
 	}
+
+	@Override
+	public List<Nucleus> getNuclei() {
+		// TODO Auto-generated method stub
+		List<Nucleus> result = new ArrayList<Nucleus>();
+		result.add(nucleus);
+		return result;
+	}
+
+	@Override
+	public void addNucleus(Nucleus nucleus) {
+		this.nucleus = nucleus;
+		
+	}
 }

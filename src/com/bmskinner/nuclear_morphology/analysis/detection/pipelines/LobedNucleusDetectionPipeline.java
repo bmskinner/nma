@@ -17,6 +17,12 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 
 import ij.gui.Roi;
 
+/**
+ * Take a list of detected cells (defined by cytoplasm borders) and 
+ * find lobed nuclei within them. Returns the cells with nuclei added
+ * @author ben
+ *
+ */
 public class LobedNucleusDetectionPipeline  extends DetectionPipeline<Nucleus> {
 
 	private final List<ICell> cells;

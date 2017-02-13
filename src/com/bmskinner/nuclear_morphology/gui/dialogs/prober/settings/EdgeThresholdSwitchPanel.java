@@ -13,8 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * Holds a canny settings panel and a threshold settings panel. Uses
@@ -57,18 +59,27 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 	}
 	
 	private JPanel makeCardPanel(){
-		
-		SettingsPanel cannyPanel     = new CannySettingsPanel(options.getCannyOptions());
-		SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
-		
-		this.addSubPanel(cannyPanel);
-		this.addSubPanel(thresholdPanel);
-		
 		JPanel cardPanel = new JPanel(new CardLayout());
-		cardPanel.add(cannyPanel,     EDGE_LBL);
-		cardPanel.add(thresholdPanel, THRESHOLD_LBL);
-		CardLayout cl = (CardLayout)(cardPanel.getLayout());
-	    cl.show(cardPanel, EDGE_LBL);
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			SettingsPanel cannyPanel     = new CannySettingsPanel(canny.unlock());
+			SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
+			
+			this.addSubPanel(cannyPanel);
+			this.addSubPanel(thresholdPanel);
+			
+			
+			cardPanel.add(cannyPanel,     EDGE_LBL);
+			cardPanel.add(thresholdPanel, THRESHOLD_LBL);
+			CardLayout cl = (CardLayout)(cardPanel.getLayout());
+		    cl.show(cardPanel, EDGE_LBL);
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
+		}
+		
+		
+		
 	    return cardPanel;
 	}
 	
@@ -103,7 +114,12 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals(THRESHOLD_LBL)){
-			options.getCannyOptions().setUseCanny(false);
+			try {
+				options.getCannyOptions().setUseCanny(false);
+			} catch (MissingOptionException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, THRESHOLD_LBL);
@@ -111,7 +127,12 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 		}
 		
 		if(e.getActionCommand().equals(EDGE_LBL)){
-			options.getCannyOptions().setUseCanny(true);
+			try {
+				options.getCannyOptions().setUseCanny(true);
+			} catch (MissingOptionException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, EDGE_LBL);
 		}
@@ -123,7 +144,12 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
 	@Override
 	public void update() {
 		super.update();
-		boolean showCanny = options.getCannyOptions().isUseCanny();
+		boolean showCanny;
+		try {
+			showCanny = options.getCannyOptions().isUseCanny();
+		} catch (MissingOptionException e) {
+			showCanny = false;
+		}
 		
 		CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		

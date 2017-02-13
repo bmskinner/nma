@@ -5,12 +5,10 @@ import java.io.File;
 
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
 
 /**
@@ -27,9 +25,9 @@ public class NucleusImageProber extends IntegratedImageProber {
 	public NucleusImageProber(final File folder){
 
 		try {
-			options = new DefaultAnalysisOptions();
+			options = OptionsFactory.makeAnalysisOptions();
 
-			IMutableDetectionOptions nucleusOptions = new DefaultNucleusDetectionOptions(folder);
+			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
 //			IMutableDetectionOptions cytoOptions = new DefaultNucleusDetectionOptions(folder);
 			
 			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);

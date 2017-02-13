@@ -32,6 +32,12 @@ public interface IMutableDetectionOptions extends IDetectionOptions {
 	IMutableDetectionOptions duplicate();
 	
 	/**
+	 * Lock the options from editing
+	 * @return
+	 */
+	IDetectionOptions lock();
+	
+	/**
 	 * Set the RGB channel to detect the object in
 	 * @param channel
 	 */
@@ -93,5 +99,11 @@ public interface IMutableDetectionOptions extends IDetectionOptions {
 	 * @param options
 	 */
 	void set(IDetectionOptions options);
+
+	/**
+	 * Set the hough options
+	 * @param hough
+	 */
+	void setHoughOptions(IHoughDetectionOptions hough);
 
 }

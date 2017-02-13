@@ -41,6 +41,11 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	private int nucleusCount = 0; // store the number of nuclei created by this factory
 	private final NucleusType type;
 	
+	/**
+	 * Create a factory for nuclei of the given type
+	 * @param imageFile
+	 * @param nucleusType
+	 */
 	public NucleusFactory(File imageFile, NucleusType nucleusType){
 		
 		if(nucleusType==null || imageFile==null){
@@ -65,7 +70,14 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 		try {
 
 			  // The classes for the constructor
-			  Class<?>[] classes = {Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
+			  Class<?>[] classes = { 
+					  Roi.class, 
+					  IPoint.class, 
+					  File.class, 
+					  int.class, 
+					  int[].class, 
+					  int.class 
+			  };
 			  
 			  Constructor<?> nucleusConstructor = type.getNucleusClass()
 						  .getConstructor(classes);
@@ -97,19 +109,5 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 		}
 		  return n;
 	}
-			
-//	/**
-//	 * Thrown when a profile collection or segmented profile has no assigned
-//	 * segments
-//	 * @author bms41
-//	 *
-//	 */
-//	public static class ComponentCreationException extends Exception {
-//			private static final long serialVersionUID = 1L;
-//			public ComponentCreationException() { super(); }
-//			public ComponentCreationException(String message) { super(message); }
-//			public ComponentCreationException(String message, Throwable cause) { super(message, cause); }
-//			public ComponentCreationException(Throwable cause) { super(cause); }
-//		
-//	}
+
 }
