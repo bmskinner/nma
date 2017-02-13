@@ -32,7 +32,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @return
 	 */
-	protected double getDouble(String s){
+	public double getDouble(String s){
 		return dblMap.get(s).doubleValue();
 	}
 	
@@ -42,7 +42,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @return
 	 */
-	protected int getInt(String s){
+	public int getInt(String s){
 		return intMap.get(s).intValue();
 	}
 	
@@ -51,7 +51,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @return
 	 */
-	protected boolean getBoolean(String s){
+	public boolean getBoolean(String s){
 		return boolMap.get(s).booleanValue();
 	}
 	
@@ -60,7 +60,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @param d
 	 */
-	protected void setDouble(String s, double d){
+	public void setDouble(String s, double d){
 		dblMap.put(s, d);
 	}
 	
@@ -69,7 +69,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @param i
 	 */
-	protected void setInt(String s, int i){
+	public void setInt(String s, int i){
 		intMap.put(s, i);
 	}
 	
@@ -78,7 +78,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @param b
 	 */
-	protected void setBoolean(String s, boolean b){
+	public void setBoolean(String s, boolean b){
 		boolMap.put(s, b);
 	}
 	
@@ -87,7 +87,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @return
 	 */
-	protected float getFloat(String s){
+	public float getFloat(String s){
 		return fltMap.get(s).floatValue();
 	}
 	
@@ -96,7 +96,7 @@ public abstract class AbstractHashOptions implements Serializable {
 	 * @param s
 	 * @param f
 	 */
-	protected void setFloat(String s, float f){
+	public void setFloat(String s, float f){
 		fltMap.put(s, f);
 	}
 	

@@ -60,6 +60,12 @@ public interface ICell
 	 * Set the nucleus of the cell
 	 */
 	void setNucleus(Nucleus n);
+	
+	/**
+	 * Add a nucleus to the cell
+	 * @param n
+	 */
+	void addNucleus(Nucleus n);
 
 	
 

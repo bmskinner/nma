@@ -68,6 +68,12 @@ public class DefaultTailDetectionOptions
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+	@Override
+	public IDetectionSubOptions getSubOptions(String s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 

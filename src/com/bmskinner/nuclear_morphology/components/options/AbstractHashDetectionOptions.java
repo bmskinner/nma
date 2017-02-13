@@ -95,7 +95,13 @@ public abstract class AbstractHashDetectionOptions
 		return this;
 	}
 	
+	public IDetectionSubOptions getSubOptions(String s){
+		return subMap.get(s);
+	}
 	
+	public void setSubOptions(String s, IDetectionSubOptions op){
+		subMap.put(s, op);
+	}
 		
 	
 	/* (non-Javadoc)

@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -1461,7 +1462,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				if(group.isVisible()){ // only add the groups that are set to visible
 
 
-					ComponentOutlineDataset groupDataset = new ComponentOutlineDataset();
+					ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<CellularComponent>();
 					int signalNumber = 0;
 
 					for(INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
@@ -1470,7 +1471,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						finest("Adding signal to dataset: "+seriesKey);
 						OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
 						try {
-							dc.createOutline(groupDataset, seriesKey, false);
+							dc.addOutline(groupDataset, seriesKey, false);
 
 						} catch (ChartDatasetCreationException e) {
 							error("Unable to add signal "+seriesKey+" to dataset", e);

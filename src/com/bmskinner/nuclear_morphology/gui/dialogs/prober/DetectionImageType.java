@@ -12,7 +12,11 @@ public enum DetectionImageType implements ImageType {
 	MORPHOLOGY_CLOSED 	("Gap closing"),
 	FISH_IMAGE      	("FISH image"),
 	DETECTED_OBJECTS 	("Detected objects"),
-	ANNOTAED_OBJECTS    ("Annotated objects");
+	ANNOTAED_OBJECTS    ("Annotated objects"),
+	CYTOPLASM           ("Cytoplasm"),
+	NUCLEUS             ("Nucleus"),
+	CYTO_FLATTENED      ("Cytoplasm flattened"),
+	NUCLEUS_FLATTENED   ("Nucleus flattened"),;
 
 	private String name;
 

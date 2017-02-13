@@ -42,8 +42,10 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	 *
 	 */
 	public interface IDetectionSubOptions extends Serializable, Loggable {
-		public static final String CANNY_OPTIONS     = "Canny";
-		public static final String HOUGH_OPTIONS     = "Hough";
+		public static final String CANNY_OPTIONS      = "Canny";
+		public static final String HOUGH_OPTIONS      = "Hough";
+		public static final String BACKGROUND_OPTIONS = "Background";
+		
 	}
 	
 	static final double DEFAULT_SCALE = 1;
@@ -127,6 +129,14 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	 * @return
 	 */
 	boolean isUseHoughTransform();
+	
+	
+	/**
+	 * Get the sub options specified by the given key
+	 * @param s
+	 * @return
+	 */
+	IDetectionSubOptions getSubOptions(String s);
 	
 	/**
 	 * Get the Canny edge detection options for this object. 

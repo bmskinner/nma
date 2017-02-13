@@ -13,12 +13,15 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 import ij.gui.Roi;
+import ij.plugin.filter.BackgroundSubtracter;
 import ij.process.ImageProcessor;
 
 /**
@@ -157,6 +160,27 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	}
 	
 	/**
+	 * Run a raising with the flattening threshold in the options.
+	 * If the options specify the flattening is disabled, this has no effect.
+	 * @return
+	 */
+	public DetectionPipeline<E> raise(){
+		
+		try {
+			ICannyOptions canny = options.getCannyOptions();
+			
+			if(canny.isUseFlattenImage()){
+				ip = new ImageFilterer(ip)
+						.raise( canny.getFlattenThreshold())
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing canny options");
+		}
+		return this;
+	}
+	
+	/**
 	 * Run a Canny edge detection with the specified options.
 	 * If the options specify the edge detecion is disabled, this has no effect.
 	 * @return
@@ -174,6 +198,28 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 		} catch (MissingOptionException e) {
 			warn("Missing canny options");
 		}
+		return this;
+	}
+	
+	/**
+	 * Run theImageJ rolling ball background removal with the radius specified in the options.
+	 * @return
+	 */
+	public DetectionPipeline<E> subtractBackground(){
+		
+			IDetectionSubOptions bkg = options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			
+//			if(bkg.getBoolean(PreprocessingOptions.USE_ROLLING_BALL)){
+				BackgroundSubtracter bg = new BackgroundSubtracter();
+				boolean presmooth = false;
+				boolean correctCorners = false;
+				boolean parabaloid = false;
+				boolean lightBackground = true;
+				boolean createBackground = false;
+				double radius = 200;
+				
+				bg.rollingBallBackground(ip, radius, createBackground, lightBackground, parabaloid, presmooth, correctCorners);
+
 		return this;
 	}
 	

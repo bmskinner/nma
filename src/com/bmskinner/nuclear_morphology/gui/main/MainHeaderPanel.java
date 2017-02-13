@@ -6,8 +6,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
+import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
@@ -15,6 +15,13 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainHeaderPanel extends JPanel implements Loggable {
+	
+	private static final String NEW_ANALYSIS_LBL   = "New analysis";
+	private static final String NEW_NEUTRO_LBL     = "Neutrophil";
+	private static final String LOAD_DATASET_LBL   = "Load analysis dataset";
+	private static final String SAVE_ALL_LBL       = "Save all";
+	private static final String SAVE_WORKSPACE_LBL = "Save workspace";
+	private static final String OPTIONS_LBL        = "Options";
 	
 	private MainWindow mw;
 	
@@ -32,7 +39,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 	private void createHeaderButtons(){
 
 
-		JButton btnNewAnalysis = new JButton("New analysis");
+		JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
 		btnNewAnalysis.addActionListener(
 				e ->{
 					Runnable r = new NewAnalysisAction(mw);
@@ -40,12 +47,23 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 				}
 		);
 		add(btnNewAnalysis);
+		
+		
+		JButton btnNeutrophil = new JButton(NEW_NEUTRO_LBL);
+		btnNeutrophil.addActionListener(
+				e ->{
+					Runnable r = new NeutrophilAnalysisAction(mw);
+					r.run();
+				}
+		);
+		add(btnNeutrophil);
+		
 
 		//---------------
 		// load saved dataset button
 		//---------------
 
-		JButton btnLoadSavedDataset = new JButton("Load analysis dataset");
+		JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 		
 		btnLoadSavedDataset.addActionListener(	
 			e -> {
@@ -61,7 +79,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 		// save button
 		//---------------
 
-		JButton btnSavePopulation = new JButton("Save all");
+		JButton btnSavePopulation = new JButton(SAVE_ALL_LBL);
 		btnSavePopulation.addActionListener( e -> {
 					log("Saving root populations...");
 					mw.saveRootDatasets();
@@ -74,7 +92,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 		// save workspace button
 		//---------------
 
-		JButton btnSaveWorkspace = new JButton("Save workspace");
+		JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
 		btnSaveWorkspace.addActionListener( e -> {
 					mw.saveWorkspace();
 			}
@@ -82,7 +100,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		add(btnSaveWorkspace);
 				
-		JButton optionsButton = new JButton("Options");
+		JButton optionsButton = new JButton(OPTIONS_LBL);
 		optionsButton.addActionListener(
 				
 				e -> { 

@@ -5,7 +5,6 @@ import java.awt.Window;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.NucleusProberWorker;
 
 

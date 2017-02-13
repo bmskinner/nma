@@ -1,3 +1,22 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.io.File;
@@ -22,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
-public class NucleusDetectionMethod extends AbstractAnalysisMethod {
+public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 	private static final String spacerString = "---------";
 
@@ -42,7 +61,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 * @param debugFile the dataset log file
 	 * @param options the options to detect with
 	 */
-	public NucleusDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options){
+	public NeutrophilDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options){
 		super(null);
 		this.outputFolder 	= outputFolder;
 		this.analysisOptions 	= options;
@@ -271,7 +290,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		this.collectionGroup.put(folder, folderCollection);
 
 
-		NucleusDetectionTask task = new NucleusDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
+		NeutrophilDetectionTask task = new NeutrophilDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
 		task.addProgressListener(this);
 		task.invoke();
 

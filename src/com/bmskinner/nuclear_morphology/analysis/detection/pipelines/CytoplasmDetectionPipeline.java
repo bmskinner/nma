@@ -4,7 +4,7 @@ import java.awt.Rectangle;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
-import com.bmskinner.nuclear_morphology.components.DefaultCytoplasm;
+import com.bmskinner.nuclear_morphology.components.CytoplasmFactory;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -37,7 +37,7 @@ public class CytoplasmDetectionPipeline extends DetectionPipeline<ICytoplasm> {
 		// create a Nucleus from the roi
 		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
 
-		ICytoplasm result = new DefaultCytoplasm(roi, centreOfMass, file, options.getChannel(), originalPosition);
+		ICytoplasm result = new CytoplasmFactory(file).buildInstance(roi, options.getChannel(), originalPosition, centreOfMass); 
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
 		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );

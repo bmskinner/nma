@@ -28,13 +28,10 @@ public class NucleusImageProber extends IntegratedImageProber {
 			options = OptionsFactory.makeAnalysisOptions();
 
 			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-//			IMutableDetectionOptions cytoOptions = new DefaultNucleusDetectionOptions(folder);
 			
 			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-//			options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
 
 			// make the panel
-//			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
 			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
 			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, ImageSet.NUCLEUS_IMAGE_SET);
 			JPanel footerPanel   = createFooter();

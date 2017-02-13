@@ -26,6 +26,9 @@ import ij.process.ImageProcessor;
  */
 public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProberTableCell> implements Loggable{
 	
+	public static final double ANGLE_PROPORTION = 0.05; // A value needed for the nucleus detector; has no effect here
+
+	
 	protected File file;
 	protected IDetectionOptions options;
 	

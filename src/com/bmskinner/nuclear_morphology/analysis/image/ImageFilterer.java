@@ -124,6 +124,26 @@ public class ImageFilterer extends AbstractImageFilterer {
 	}
 	
 	/**
+	 * Make any pixel below the threshold equal the threshold.
+	 * @param ip the image processor to raise
+	 * @param threshold the maximum intensity to allow
+	 * @return a copy of the image processor, with raising applied
+	 */
+	public ImageFilterer raise( int threshold){	
+				
+		ImageProcessor result = ip.duplicate();
+		
+		for(int i=0; i<result.getPixelCount(); i++){
+			
+			if(result.get(i)< threshold){
+				result.set(i, threshold);
+			}
+		}
+
+		return new ImageFilterer(result);
+	}
+	
+	/**
 	 * Bridges unconnected pixels, that is, sets 0-valued pixels to 1 
 	 * if they have two nonzero neighbors that are not connected. For example:
 

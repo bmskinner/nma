@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
  * @since 1.13.4
  *
  */
+@SuppressWarnings("serial")
 public class CytoplasmDetectionSettingsPanel extends SettingsPanel {
 	
 	private IMutableDetectionOptions options;

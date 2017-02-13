@@ -21,13 +21,9 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.List;
 
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -38,6 +34,11 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
+/**
+ * The chart dataset creator for outlines of cellular components
+ * @author bms41
+ *
+ */
 public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
 	private final CellularComponent component;
@@ -57,20 +58,31 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return an XYDataset with the outline. Segments will be as separate series if segmented is true.
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createOutline(boolean segmented) throws ChartDatasetCreationException {
+	public OutlineDataset<CellularComponent> createOutline(boolean segmented) throws ChartDatasetCreationException {
 		
 		if(segmented){
 			return createSegmentedOutline();
 		} else {
 			return createNonSegmentedOutline();
 		}
+				
+	}
+	
+	/**
+	 * Add the outline of the current object to the given dataset. 
+	 * @param segmented should the outline be segmented (where segments are available)
+	 * @return an XYDataset with the outline. Segments will be as separate series if segmented is true.
+	 * @throws ChartDatasetCreationException
+	 */
+	public void addOutline(ComponentOutlineDataset<CellularComponent> ds, boolean segmented) throws ChartDatasetCreationException {
 		
-//		if(component instanceof Nucleus ){
-//			return createNucleusOutline((Nucleus) component, segmented);
-//		}
-//		
-//		throw new ChartDatasetCreationException("Cannot make outline for this component type");
-		
+		String seriesKey = chooseSeriesKey();
+		if(segmented){
+			addSegmentedOutline(ds);
+		} else {
+			addNonSegmentedOutline(ds, seriesKey);
+		}
+						
 	}
 	
 	/**
@@ -80,42 +92,16 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return an XYDataset with the outline. Segments will be as separate series if segmented is true.
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createOutline(ComponentOutlineDataset ds, Comparable seriesKey, boolean segmented) throws ChartDatasetCreationException {
+	public void addOutline(ComponentOutlineDataset<CellularComponent> ds, Comparable seriesKey, boolean segmented) throws ChartDatasetCreationException {
 
 		if(segmented){
-			return createSegmentedOutline(ds);
+			addSegmentedOutline(ds);
 		} else {
-			ds = (ComponentOutlineDataset) createNonSegmentedOutline(ds, seriesKey);
-			return ds;
-		}
-//		
-//		
-//		
-//		throw new ChartDatasetCreationException("Cannot make outline for this component type");
-		
-	}
+			addNonSegmentedOutline(ds, seriesKey);
 			
-	/**
-	 * Get the outline for a specific nucleus in a dataset. Sets the position
-	 * to the original coordinates in the image 
-	 * @param cell
-	 * @param segmented true to include each segment separately, false for an unsegmented outline
-	 * @return
-	 * @throws ChartDatasetCreationException 
-	 */
-	private XYDataset createNucleusOutline(Nucleus nucleus, boolean segmented) throws ChartDatasetCreationException {
-		ComponentOutlineDataset<Nucleus> ds = new ComponentOutlineDataset<Nucleus>();
-		finest("Creating nucleus outline");
-		if(segmented){
-			createSegmentedOutline();
-
-		} else {
-			return createNonSegmentedOutline();
-
-		}		
-		return ds;
+		}
 	}
-	
+				
 	/**
 	 * Get the outline for a specific nucleus in a dataset. Sets the position
 	 * to the original coordinates in the image 
@@ -124,9 +110,10 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException 
 	 */
-	private XYDataset createSegmentedOutline() throws ChartDatasetCreationException {
+	private OutlineDataset<CellularComponent> createSegmentedOutline() throws ChartDatasetCreationException {
 		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
-		return createSegmentedOutline(ds);
+		addSegmentedOutline(ds);
+		return ds;
 	}
 	
 	/**
@@ -136,7 +123,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws ChartDatasetCreationException 
 	 */
-	private XYDataset createSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds) throws ChartDatasetCreationException {
+	private void addSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds) throws ChartDatasetCreationException {
 				
 		if( ! (component instanceof Taggable)){
 			throw new ChartDatasetCreationException("Component is not segmentable");
@@ -156,7 +143,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 
 		if(!segmentList.isEmpty()){ // only draw if there are segments
-			finest("Nucleus has "+segmentList.size()+" segments");
+			finest("Component has "+segmentList.size()+" segments");
 
 			for(IBorderSegment seg  : segmentList){
 
@@ -193,25 +180,24 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 		} else {
 			finest("Component does not have segments; falling back to bare outline");
-			return createNonSegmentedOutline();
+			addNonSegmentedOutline(ds, chooseSeriesKey());
 		}
 
-
-		return ds;
 	}
 	
 	
 	/**
-	 * Create a non-segmented outline and add it to a new dataset
-	 * @param ds
+	 * Create a non-segmented outline for the current cellular component and add it to a new dataset
 	 * @return
 	 */
-	private XYDataset createNonSegmentedOutline(){
+	private OutlineDataset<CellularComponent> createNonSegmentedOutline(){
 		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
 		
 		String seriesKey = chooseSeriesKey();
 		
-		return createNonSegmentedOutline(ds, seriesKey);
+		addNonSegmentedOutline(ds, seriesKey);
+		
+		return ds;
 	}
 	
 	
@@ -220,7 +206,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param ds
 	 * @return
 	 */
-	private XYDataset createNonSegmentedOutline(ComponentOutlineDataset ds, Comparable seriesKey){
+	private OutlineDataset<CellularComponent> addNonSegmentedOutline(ComponentOutlineDataset<CellularComponent> ds, Comparable seriesKey){
 		finest("Creating non-segmented outline from component");
 		
 		double[] xpoints = new double[component.getOriginalBorderList().size()];
@@ -242,6 +228,12 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		return ds;
 	}
 	
+	/**
+	 * Choose the string to use a a series key for the component.
+	 * This defaults to the UUID unless the component is a nucleus,
+	 * in which case the key will be name and number.
+	 * @return
+	 */
 	private String chooseSeriesKey(){
 		String seriesKey = component.getID().toString();
 		
@@ -252,42 +244,4 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	}
 	
 	
-//	/**
-//	 * Create a dataset with the hook and hump rois for a rodent sperm nucleus. If the
-//	 * given cell does not contain a rodent sperm nucleus, the returned dataset is empty
-//	 * @param cell
-//	 * @return
-//	 * @throws ChartDatasetCreationException 
-//	 */
-//	public XYDataset createNucleusHookHumpOutline() throws ChartDatasetCreationException {
-//		
-//		DefaultXYDataset ds = new DefaultXYDataset();
-//		
-//		if(  ! (component instanceof Nucleus) ){
-//			throw new ChartDatasetCreationException("Component is not a Nucleus");
-//		}
-//		
-//		if(  ! (component instanceof RodentSpermNucleus) ){
-//			throw new ChartDatasetCreationException("Component is not a rodent sperm nucleus");
-//		}
-//					
-//		RodentSpermNucleus nucleus = (RodentSpermNucleus) component;
-//
-//		double[] xpoints = new double[nucleus.getHookRoi().size()];
-//		double[] ypoints = new double[nucleus.getHookRoi().size()];
-//
-//		int i =0;
-//		for(IPoint p : nucleus.getHookRoi()){
-//			xpoints[i] = p.getX()-0.5;
-//			ypoints[i] = p.getY()-0.5;
-//			i++;
-//		}
-//
-//		double[][] data = { xpoints, ypoints };
-//		ds.addSeries("Hook", data);
-//
-//
-//		return ds;
-//	}
-
 }

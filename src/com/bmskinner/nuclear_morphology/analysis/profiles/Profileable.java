@@ -40,6 +40,10 @@ public interface Profileable extends CellularComponent {
 	static final double DEFAULT_PROFILE_WINDOW_PROPORTION = 0.05;
 		
 	
+	/**
+	 * Calculate profiles based on the desired window proportion
+	 * @param proportion
+	 */
 	void initialise(double proportion);
 	
 	/**

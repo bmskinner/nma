@@ -17,50 +17,48 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.charting.datasets;
+package com.bmskinner.nuclear_morphology.components;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
 
-import org.jfree.data.xy.DefaultXYDataset;
+import ij.gui.Roi;
 
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
- * Holds the outline of a cellular component
- * @author ben
+ * A factory to create cytoplasms
+ * @author bms41
+ * @since 1.13.4
  *
- * @param <E> the component class to be drawn
  */
-@SuppressWarnings("serial")
-public class ComponentOutlineDataset<E extends CellularComponent> 
-	extends DefaultXYDataset
-	implements OutlineDataset<E> {
-	
-	Map<Comparable, E> components = new HashMap<Comparable, E>();
-		
-	/**
-	 * Set the component for the given series
-	 * @param i
-	 * @param n
-	 */
-	public void setComponent(Comparable seriesKey, E n){
-		components.put(seriesKey, n);
-	}
-	
-	/**
-	 * Get the component for the given series
-	 * @param i
-	 * @return
-	 */
-	public E getComponent(Comparable seriesKey){
-		return components.get(seriesKey);
-	}
-	
+public class CytoplasmFactory implements ComponentFactory<ICytoplasm> {
 
-	public boolean hasComponent(Comparable seriesKey){
-		return components.containsKey(seriesKey);
+	private final File file;
+	
+	/**
+	 * Create a factory for nuclei of the given type
+	 * @param imageFile
+	 * @param nucleusType
+	 */
+	public CytoplasmFactory(File imageFile){
+		
+		if(imageFile==null){
+			throw new IllegalArgumentException("File cannot be null in factory");
+		}
+		file = imageFile;
+
 	}
+	
+	
+	@Override
+	public ICytoplasm buildInstance(Roi roi, int channel,
+			int[] originalPosition, IPoint centreOfMass)
+			throws ComponentCreationException {
+		
+		ICytoplasm result = new DefaultCytoplasm(roi, centreOfMass, file, channel, originalPosition);
+		return result;
+	}
+	
 	
 
 }

@@ -40,7 +40,7 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 	@Override
 	public List<ICell> findInImage() {
 		
-		List<ICell> result = new ArrayList<ICell>(0);
+		List<ICell> cells = new ArrayList<ICell>(0);
 		List<ICytoplasm> cytoplasms = cyto.kuwaharaFilter()
 				.flatten()
 				.edgeDetect()
@@ -54,13 +54,13 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 			
 			ICell cell = new DefaultCell(cy);
 			
-			result.add(cell);
+			cells.add(cell);
 			
 		}
 		
-//		search for nuclei and lobes within cytoplasm
+//		search for nuclei within cytoplasm
 		try {
-			nucl = new LobedNucleusDetectionPipeline(options, file, proportion, result);
+			nucl = new LobedNucleusDetectionPipeline(options, file, proportion, cells);
 		} catch (ImageImportException e) {
 			warn("Cannot detect nuclei");
 			stack("Cannot detect nuclei", e);
@@ -73,14 +73,22 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 				.findInImage();
 		
 		// Add nuclei to cells
-		for(ICell cell : result){
+		for(ICell cell : cells){
 	
 			for(Nucleus n : nuclei){
 				if( cell.getCytoplasm().containsOriginalPoint(n.getOriginalCentreOfMass())){
-					cell.setNucleus(n);
+					cell.addNucleus(n);
 				}
 			}
 			
+		}
+		
+		// Only consider cells with detected nuclei and cytoplasm
+		List<ICell> result = new ArrayList<ICell>(0);
+		for(ICell cell : cells){
+			if(cell.hasCytoplasm() && cell.hasNucleus()){
+				result.add(cell);
+			}
 		}
 		
 		return result;

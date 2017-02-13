@@ -25,8 +25,10 @@ import java.io.File;
  * The default implementation of the nuclear signal options
  * interface
  * @author ben
+ * @deprecated since 1.13.4
  *
  */
+@Deprecated
 public class DefaultNuclearSignalOptions 
 	extends AbstractDetectionOptions 
 	implements IMutableNuclearSignalOptions {
@@ -156,6 +158,12 @@ public class DefaultNuclearSignalOptions
 	public void setHoughOptions(IHoughDetectionOptions hough) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public IDetectionSubOptions getSubOptions(String s) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

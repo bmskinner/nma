@@ -20,7 +20,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
-import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
 import java.awt.BasicStroke;
@@ -85,6 +84,12 @@ import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
+/**
+ * Factory for creating outlines of cellular components
+ * and signals
+ * @author bms41
+ *
+ */
 public class OutlineChartFactory extends AbstractChartFactory {
 	
 	public OutlineChartFactory(ChartOptions o){
@@ -395,15 +400,42 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			return ConsensusNucleusChartFactory.makeEmptyChart();
 		}
 		
-		
 		JFreeChart chart = createBaseXYChart();
-		XYDataset ds;
-		try {
-			ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getCell().getNucleus());
-		} catch (ChartDatasetCreationException e) {
-			fine("Error making outline", e);
-			return makeErrorChart();
+		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
+		
+		ICell cell = options.getCell();
+		
+		if(cell.hasCytoplasm()){
+			
+			try {
+				new OutlineDatasetCreator(options, cell.getCytoplasm()).addOutline(ds, false);
+			} catch (ChartDatasetCreationException e) {
+				fine("Error making cytoplasm outline", e);
+				return makeErrorChart();
+			}
+			
 		}
+		
+		if(cell.hasNucleus()){
+			
+			try {
+				new OutlineDatasetCreator(options, cell.getNucleus()).addOutline(ds, false);
+			} catch (ChartDatasetCreationException e) {
+				fine("Error making nucleus outline", e);
+				return makeErrorChart();
+			}
+			
+//			try {
+//				ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getCell().getNucleus());
+//			} catch (ChartDatasetCreationException e) {
+//				fine("Error making nucleus outline", e);
+//				return makeErrorChart();
+//			}
+			
+		}
+		
+		
+		
 
 
 		XYPlot plot = chart.getXYPlot();

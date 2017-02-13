@@ -11,6 +11,9 @@ import java.util.Set;
 public interface ImageSet {
 	
 	
+	/**
+	 * The set of prober images for standard nucleus detection
+	 */
 	static final ImageSet NUCLEUS_IMAGE_SET = new DefaultImageSet()
 			.add(DetectionImageType.KUWAHARA)
 			.add(DetectionImageType.FLATTENED)
@@ -19,10 +22,27 @@ public interface ImageSet {
 			.add(DetectionImageType.DETECTED_OBJECTS)
 			.add(DetectionImageType.ANNOTAED_OBJECTS);
 	
+	/**
+	 * The set of images for neutrophil detection
+	 */
+	static final ImageSet NEUTROPHIL_IMAGE_SET = new DefaultImageSet()
+			.add(DetectionImageType.CYTO_FLATTENED)
+			.add(DetectionImageType.CYTOPLASM)
+			.add(DetectionImageType.NUCLEUS_FLATTENED)
+			.add(DetectionImageType.NUCLEUS)
+			.add(DetectionImageType.DETECTED_OBJECTS)
+			.add(DetectionImageType.ANNOTAED_OBJECTS);
+	
+	/**
+	 * The set of images for FISH signal detection
+	 */
 	static final ImageSet SIGNAL_IMAGE_SET = new DefaultImageSet()
 			.add(DetectionImageType.DETECTED_OBJECTS)
 			.add(DetectionImageType.ANNOTAED_OBJECTS);
 	
+	/**
+	 * The set of images for FISH remapping
+	 */
 	static final ImageSet FISH_REMAPPING_IMAGE_SET = new DefaultImageSet()
 			.add(DetectionImageType.ORIGINAL)
 			.add(DetectionImageType.FISH_IMAGE);

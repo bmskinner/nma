@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -21,22 +22,23 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class NeutrophilDetectionSettingsPanel extends SettingsPanel {
 	
-private IMutableAnalysisOptions options;
+	private IMutableAnalysisOptions options;
 	
 	private static final String CYTO_SETTINGS_LBL = "Cytoplasm";
 	private static final String NUCL_SETTINGS_LBL = "Nucleus";
-
+	private static final String RELOAD_LBL        = "Reload";
 	
 	public NeutrophilDetectionSettingsPanel(IMutableAnalysisOptions options){
 		this.options = options;
 		
+		this.setLayout(new BorderLayout());
 		this.add(createPanel(), BorderLayout.CENTER);
-		
+		this.add(createFooter(), BorderLayout.SOUTH);
 	}
 	
 	private JPanel createPanel(){
 		IMutableDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-		
+				
 				
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
@@ -56,20 +58,32 @@ private IMutableAnalysisOptions options;
 			
 		panel.add(cytoPanel);
 		panel.add(nuclPanel);
-
 		
 		return panel;
+	}
+	
+	private JPanel createFooter(){
+		JPanel panel = new JPanel();
+		JButton reloadBtn = new JButton(RELOAD_LBL);
+		reloadBtn.addActionListener( e->{
+			fireProberReloadEvent(); 
+		});
+		
+		panel.add(reloadBtn);
+		return panel;
+		
 	}
 	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
 		
-		if(this.hasSubPanel((SettingsPanel) e.getSource())){
-			update();
-
-			fireProberReloadEvent(); 
-			
-		}
+		fireProberReloadEvent(); 
+//		if(this.hasSubPanel((SettingsPanel) e.getSource())){
+//			update();
+//
+//			
+//			
+//		}
 
 		
 		

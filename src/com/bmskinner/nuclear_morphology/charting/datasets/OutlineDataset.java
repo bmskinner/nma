@@ -19,48 +19,36 @@
 
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
- * Holds the outline of a cellular component
- * @author ben
+ * Adds storage of cellular components to an XYDataset
+ * @author bms41
  *
- * @param <E> the component class to be drawn
+ * @param <E> A cellular component to be drawn
  */
-@SuppressWarnings("serial")
-public class ComponentOutlineDataset<E extends CellularComponent> 
-	extends DefaultXYDataset
-	implements OutlineDataset<E> {
+public interface OutlineDataset<E extends CellularComponent>  extends XYDataset {
 	
-	Map<Comparable, E> components = new HashMap<Comparable, E>();
-		
 	/**
 	 * Set the component for the given series
-	 * @param i
+	 * @param seriesKey
 	 * @param n
 	 */
-	public void setComponent(Comparable seriesKey, E n){
-		components.put(seriesKey, n);
-	}
+	void setComponent(Comparable seriesKey, E n);
 	
 	/**
 	 * Get the component for the given series
-	 * @param i
+	 * @param seriesKey the series
 	 * @return
 	 */
-	public E getComponent(Comparable seriesKey){
-		return components.get(seriesKey);
-	}
+	E getComponent(Comparable seriesKey);
 	
-
-	public boolean hasComponent(Comparable seriesKey){
-		return components.containsKey(seriesKey);
-	}
-	
-
+	/**
+	 * Check if the given series has a component
+	 * @param seriesKey
+	 * @return
+	 */
+	boolean hasComponent(Comparable seriesKey);
 }
