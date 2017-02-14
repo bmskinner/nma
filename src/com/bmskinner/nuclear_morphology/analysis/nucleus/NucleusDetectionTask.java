@@ -18,7 +18,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 public class NucleusDetectionTask extends AbstractDetectionTask  {
 		
 	private NucleusDetectionTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, IAnalysisOptions analysisOptions) {
-		super(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
+		super(folder, files, collection, low, high, outputFolder, analysisOptions);
 	}
 
 	public NucleusDetectionTask(File folder, File[] files, ICellCollection collection, String outputFolder, IAnalysisOptions analysisOptions) {

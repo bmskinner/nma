@@ -280,6 +280,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	 */
 	protected void processFolder(File folder){
 
+		finest("Processing folder "+folder.getAbsolutePath());
 		File[] listOfFiles = folder.listFiles();
 
 		ICellCollection folderCollection = new DefaultCellCollection(folder, 
@@ -289,7 +290,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 		this.collectionGroup.put(folder, folderCollection);
 
-
+		finest("Invoking recursive detection task");
 		NeutrophilDetectionTask task = new NeutrophilDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
 		task.addProgressListener(this);
 		task.invoke();

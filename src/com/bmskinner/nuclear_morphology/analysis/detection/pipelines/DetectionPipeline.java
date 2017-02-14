@@ -377,14 +377,14 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 			try {
 				cell = makeComponent(roi, i); // get the profile data back for the nucleus
 			}catch(ComponentCreationException e){
-				stack("Cannot create nucleus from ROI "+i, e);
+				finer("Cannot create nucleus from ROI "+i);
 				continue;
 			}
 			result.add(cell);
 			finer("Cell created");
 
 		} 
-		fine("Returning list of "+result.size()+" cells");
+		fine("Returning list of "+result.size()+" cells with nuclei");
 		return result;
 	}
 	

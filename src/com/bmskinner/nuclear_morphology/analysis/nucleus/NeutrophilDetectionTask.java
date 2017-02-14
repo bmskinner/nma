@@ -39,8 +39,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 public class NeutrophilDetectionTask extends AbstractDetectionTask  {
 		
 	private NeutrophilDetectionTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, IAnalysisOptions analysisOptions) {
-		
-		super(folder, files, collection, 0, files.length, outputFolder, analysisOptions);
+		super(folder, files, collection, low, high, outputFolder, analysisOptions);
 	}
 
 	public NeutrophilDetectionTask(File folder, File[] files, ICellCollection collection, String outputFolder, IAnalysisOptions analysisOptions) {
@@ -55,6 +54,8 @@ public class NeutrophilDetectionTask extends AbstractDetectionTask  {
 			analyseFiles();
 			
 		} else {
+			
+			finest("Splitting task");
 			
 			int mid = (low + high) >>> 1;
 
@@ -76,6 +77,8 @@ public class NeutrophilDetectionTask extends AbstractDetectionTask  {
 	
 
 	protected void analyseFile(File file){
+		
+		finest("Analysing file "+file.getAbsolutePath());
 		boolean ok = checkFile(file);
 
 		  if(ok){

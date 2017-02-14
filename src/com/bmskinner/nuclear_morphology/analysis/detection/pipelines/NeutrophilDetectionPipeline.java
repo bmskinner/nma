@@ -33,6 +33,8 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 		
 		super(nucOptions, imageFile, prop);
 		
+		finest("Constructing neutrophil detection pipline");
+		
 		cyto = new CytoplasmDetectionPipeline(cytoOptions, imageFile, prop);
 		
 	}
@@ -47,7 +49,7 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 				.findInImage();
 		
 		
-
+		fine("Found "+cytoplasms.size()+" cytoplasms");
 		
 		for(ICytoplasm cy : cytoplasms){
 			
@@ -70,9 +72,11 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 				.invert()
 				.findInImage();
 		
+		fine("Found "+nuclei.size()+" possible nuclei");
+		
 		// Add nuclei to cells
 		for(ICell cell : cells){
-	
+			
 			for(Nucleus n : nuclei){
 				if( cell.getCytoplasm().containsOriginalPoint(n.getOriginalCentreOfMass())){
 					cell.addNucleus(n);
@@ -88,6 +92,8 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 				result.add(cell);
 			}
 		}
+		
+		fine("Found "+result.size()+" cells with nuclei");
 		
 		return result;
 	}
