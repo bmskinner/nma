@@ -63,13 +63,21 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 	
 	public void updateCell(ICell c) throws Exception {
 		this.cell = c;
-		importNucleusImage();
+		importCellImage();
 		
 	}
 	
-	private void importNucleusImage() throws Exception {
+	private void importCellImage() throws Exception {
 		
-		ImageProcessor openProcessor = cell.getNucleus().getImage();
+		boolean useRGB = false;
+
+		if(cell.hasCytoplasm()){
+			useRGB = true;
+		}
+		
+		
+		
+		ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNucleus().getImage();
 		
 		openProcessor = new ImageAnnotator(openProcessor)
 				.annotateSegments(cell.getNucleus())

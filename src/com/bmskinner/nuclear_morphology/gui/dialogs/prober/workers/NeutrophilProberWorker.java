@@ -178,18 +178,21 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
-		
-		Nucleus n = cell.getNucleus();
 		ICytoplasm c = cell.getCytoplasm();
 		// annotate the image processor with the nucleus outline
 		
-		Color colour     = nucleusOptions.isValid(n) ? Color.ORANGE : Color.RED;
-		Color cytoColour = options.isValid(n) ? Color.GREEN : Color.PINK;
+		
+		Color cytoColour = options.isValid(c) ? Color.GREEN : Color.PINK;
 
-		ip = new ImageAnnotator(ip)
-				.annotateBorder(n, colour)
-				.annotateBorder(c, cytoColour)
-				.toProcessor();
+		ImageAnnotator an = new ImageAnnotator(ip)
+				.annotateBorder(c, cytoColour);
+		
+		for(Nucleus n : cell.getNuclei()){
+			Color colour     = nucleusOptions.isValid(n) ? Color.ORANGE : Color.RED;
+			an.annotateBorder(n, colour);
+		}
+				
+		ip = an.toProcessor();
 
 	}	
 	

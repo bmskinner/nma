@@ -37,32 +37,46 @@ public class CellImageDialog extends LoadingIconDialog {
 	public CellImageDialog(ICell cell) {
 		super();
 		
-		if(!cell.getNucleus().getSourceFile().exists()){
-			warn("Cannot load image: source file not present");
-			this.dispose();
-		} else {
+		// Assume cytoplasm==RGB for now
+		if(cell.hasCytoplasm()){
 
-
-			this.panel = new AnnotatedNucleusPanel();
-
-			this.setLayout(new BorderLayout());
-			this.add(panel, BorderLayout.CENTER);
-			this.setTitle(cell.getNucleus().getNameAndNumber());
-
-			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-
-			try{
-				panel.updateCell(cell);
-
-			} catch(Exception e){
-				error("Error making dialog", e);
+			if(!cell.getCytoplasm().getSourceFile().exists()){
+				warn("Cannot load image: source file not present");
+				this.dispose();
 			}
-			this.setModal(false);
-			this.pack();
-			this.centerOnScreen();
-			this.setVisible(true);
+
 		}
+
+		if(cell.hasNucleus()){
+			if(!cell.getNucleus().getSourceFile().exists()){
+				warn("Cannot load image: source file not present");
+				this.dispose();
+			} 
+		}
+		
+
+		this.panel = new AnnotatedNucleusPanel();
+
+		this.setLayout(new BorderLayout());
+		this.add(panel, BorderLayout.CENTER);
+		this.setTitle(cell.getNucleus().getNameAndNumber());
+
+		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+
+		try{
+			panel.updateCell(cell);
+
+		} catch(Exception e){
+			warn("Cannot make cell image dialog");
+			stack("Error making dialog", e);
+		}
+		this.setModal(false);
+		this.pack();
+		this.centerOnScreen();
+		this.setVisible(true);
 	}
+
+	
 
 }

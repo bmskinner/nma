@@ -67,16 +67,16 @@ public class LobedNucleusDetectionPipeline  extends DetectionPipeline<Nucleus> {
 				originalPosition, 
 				centreOfMass);
 		
-		boolean present = false;
-		for(ICell cell : cells){
-			if (cell.getCytoplasm().containsOriginalPoint(centreOfMass)){
-				present = true;
-			}
-		}
-		
-		if( ! present){
-			throw new ComponentCreationException("Roi is not within a cell");
-		}
+//		boolean present = false;
+//		for(ICell cell : cells){
+//			if (cell.getCytoplasm().containsOriginalPoint(centreOfMass)){
+//				present = true;
+//			}
+//		}
+//		
+//		if( ! present){
+//			throw new ComponentCreationException("Roi is not within a cell");
+//		}
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
 		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );

@@ -371,7 +371,7 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 
 			Roi roi = roiList.get(i);
 
-			finest( "Acquiring nucleus "+i+" in "+file.getAbsolutePath());
+			finest( "Acquiring element "+i+" in "+file.getAbsolutePath());
 
 			E cell;
 			try {
@@ -384,7 +384,7 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 			finer("Cell created");
 
 		} 
-		fine("Returning list of "+result.size()+" cells with nuclei");
+		fine("Returning list of "+result.size()+" elements");
 		return result;
 	}
 	
