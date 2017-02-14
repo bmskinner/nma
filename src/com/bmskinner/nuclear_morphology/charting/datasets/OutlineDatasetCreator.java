@@ -165,7 +165,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					int index = seg.getStartIndex()+j;
 					int offsetIndex = t.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
 
-					IBorderPoint p = t.getBorderPoint(offsetIndex); // get the border points in the segment
+					IBorderPoint p = t.getOriginalBorderPoint(offsetIndex); // get the border points in the segment
 
 					xpoints[j] = p.getX()-0.5;
 					ypoints[j] = p.getY()-0.5;
@@ -213,7 +213,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		double[] ypoints = new double[component.getOriginalBorderList().size()];
 
 		int i =0;
-		for(IPoint p : component.getBorderList()){
+		for(IPoint p : component.getOriginalBorderList()){
 						
 			xpoints[i] = p.getX()-0.5;
 			ypoints[i] = p.getY()-0.5;

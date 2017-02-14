@@ -87,6 +87,17 @@ public interface Imageable {
 	 */
 	ImageProcessor getImage() throws UnloadableImageException;
 	
+	
+	/**
+	 * Get the image from which the component was detected. Opens
+	 * the image via the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}.
+	 * The complete image is returned; no cropping is performed.
+	 * Use when an RGB image needs to be displayed, such as H&E
+	 * @return
+	 * @throws UnloadableImageException
+	 */
+	ImageProcessor getRGBImage() throws UnloadableImageException;
+	
 	/**
 	 * Get the image from which the component was detected, and crops
 	 * it to only the region containing the component

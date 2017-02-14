@@ -68,12 +68,14 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusMeshXYDataset;
+import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.OutlineDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -455,7 +457,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		clearShapeAnnotations(plot);
 
 		if(options.hasComponent()){
-			drawImageAsAnnotation(plot, options.getCell(), options.getComponent());
+			drawImageAsAnnotation(plot, options.getCell(), options.getComponent(), true);
 		}
 		applyAxisOptions(chart);
 		return chart;
@@ -484,6 +486,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		ICell cell = options.getCell();
 		IAnalysisDataset dataset = options.firstDataset();
+		
+		
 		
 		JFreeChart chart = createBaseXYChart();
 		XYPlot plot = chart.getXYPlot();
@@ -516,6 +520,26 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				warn("Cannot create vertical nucleus");
 				fine("Cannot create vertical nucleus", e);
 				return makeErrorChart();
+			}
+		}
+		
+		/*
+		 * Get the cytoplasm outline dataset
+		 */
+		if(cell.hasCytoplasm()){
+			try {
+
+				OutlineDatasetCreator dc = new OutlineDatasetCreator(options, cell.getCytoplasm());
+
+				OutlineDataset<CellularComponent> cytoDataset = dc.createOutline(false);
+				hash.put(hash.size(), "Cytoplasm"); // add to the first free entry
+				datasetHash.put(datasetHash.size(), cytoDataset);
+				finest("Created cytoplasm outline");
+
+			} catch (ChartDatasetCreationException e) {
+
+				throw new ChartCreationException("Unable to get cytoplasm outline", e);
+
 			}
 		}
 
@@ -614,6 +638,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					Paint colour = ColourSelecter.getColor(colourIndex);
 					plot.getRenderer(key).setSeriesPaint(i, colour);					
 				}
+				
+				/*
+				 * Cytoplasm outline
+				 */
+				if(hash.get(key).equals("Cytoplasm")){
+//					String name = plot.getDataset(key).getSeriesKey(i).toString();
+//					int colourIndex = getIndexFromLabel(name);
+//					Paint colour = ColourSelecter.getColor(colourIndex);
+					plot.getRenderer(key).setSeriesPaint(i, Color.CYAN);					
+				}
 								
 				/*
 				 * Border tags
@@ -687,7 +721,13 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			clearShapeAnnotations(plot);
 			
 			if(options.getRotateMode().equals(RotationMode.ACTUAL)){
-				drawImageAsAnnotation(plot, cell, options.getComponent());
+				
+				if(cell.hasCytoplasm()){ // if there is a cytoplasm, probably H&E for now. Otherwise fluorescence
+					drawImageAsAnnotation(plot, cell, cell.getCytoplasm(), true);
+				} else {
+					drawImageAsAnnotation(plot, cell, options.getComponent(), false);
+				}
+				
 			}
 			
 
@@ -810,7 +850,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	 * @param imageFile
 	 * @param channel
 	 */
-	private static void drawImageAsAnnotation(XYPlot plot, ICell cell, CellularComponent component){
+	private static void drawImageAsAnnotation(XYPlot plot, ICell cell, CellularComponent component, boolean isRGB){
 		
 		if(component==null || cell==null || plot==null){
 			return;
@@ -818,24 +858,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		ImageProcessor openProcessor;
 		try {
-			openProcessor = component.getImage();
+			openProcessor = isRGB ? component.getRGBImage() : component.getImage();
 		} catch (UnloadableImageException e) {
 			return;
 		}
 
-		int[] positions = cell.getNucleus().getPosition();
+		int[] positions = component.getPosition();
 
 		XYItemRenderer rend = plot.getRenderer(0); // index zero should be the nucleus outline dataset
 
+		int xBase = positions[CellularComponent.X_BASE];
+		int yBase = positions[CellularComponent.Y_BASE];
+		
 		int padding = 10; // a border of pixels beyond the cell boundary
 		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
 		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
-		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
-		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+		int wideX = (int) (xBase-padding);
+		int wideY = (int) (yBase-padding);
 
 		wideX = wideX<0 ? 0 : wideX;
 		wideY = wideY<0 ? 0 : wideY;
-
+		
 		openProcessor.setRoi(wideX, wideY, wideW, wideH);
 		openProcessor = openProcessor.crop();
 
@@ -848,7 +891,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				//				Color col = new Color(pixel, pixel, pixel, 255);
 
 				// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-				Rectangle2D r = new Rectangle2D.Double(x-padding-0.6, y-padding-0.6, 1.2, 1.2);
+				Rectangle2D r = new Rectangle2D.Double(xBase+x-padding-0.6, yBase+y-padding-0.6, 1.2, 1.2);
 				XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 				rend.addAnnotation(a, Layer.BACKGROUND);

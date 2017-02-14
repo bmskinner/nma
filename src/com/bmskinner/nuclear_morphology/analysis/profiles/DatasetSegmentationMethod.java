@@ -344,7 +344,7 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 		map.put(Tag.ORIENTATION_POINT, opIndex);
 		
 		List<IBorderSegment> segments;
-		if( ! collection.getNucleusType().equals(NucleusType.ROUND)){
+		if( ! collection.getNucleusType().equals(NucleusType.ROUND) && ! collection.getNucleusType().equals(NucleusType.NEUTROPHIL)){
 			
 			ProfileSegmenter segmenter = new ProfileSegmenter(median, map);		
 			segments = segmenter.segment();

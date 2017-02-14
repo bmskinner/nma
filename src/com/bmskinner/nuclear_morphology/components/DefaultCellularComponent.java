@@ -426,6 +426,33 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 	}
 	
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		
+		ImageProcessor ip = imageRef.get();
+		if(ip !=null){
+			return ip;
+		}
+
+		if(getSourceFile().exists()){
+						
+			try {
+				ip = new ImageImporter(getSourceFile()).importToColorProcessor();
+
+				imageRef = new SoftReference<ImageProcessor>(ip);
+				
+				return ip;
+				
+			} catch (ImageImportException e) {
+				stack("Error importing source image "+this.getSourceFile().getAbsolutePath(), e);
+				throw new UnloadableImageException("Source image is not available");
+			}
+			
+		} else {
+			throw new UnloadableImageException("Source image is not available");
+		}
+	}
+	
 
 	public ImageProcessor getComponentImage() throws UnloadableImageException{
 		ImageProcessor ip = getImage().duplicate();

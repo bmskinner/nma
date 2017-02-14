@@ -1401,14 +1401,15 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(Tag tag : nucleus.getBorderTags().keySet()){
 			IBorderPoint tagPoint;
-			try {
-				tagPoint = nucleus.getBorderPoint(tag);
-			} catch (UnavailableBorderTagException e) {
-				fine("Tag is not present: "+tag);
-				throw new ChartDatasetCreationException("Cannot get border tag");
-			}
-			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getCentreOfMass().getX()-0.5 };
-			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getCentreOfMass().getY()-0.5 };
+//			try {
+				int tagIndex = nucleus.getBorderIndex(tag);
+				tagPoint = nucleus.getOriginalBorderPoint(tagIndex);
+//			} catch (UnavailableBorderTagException e) {
+//				fine("Tag is not present: "+tag);
+//				throw new ChartDatasetCreationException("Cannot get border tag");
+//			}
+			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getOriginalCentreOfMass().getX()-0.5 };
+			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getOriginalCentreOfMass().getY()-0.5 };
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries("Tag_"+tag, data);
 		}
