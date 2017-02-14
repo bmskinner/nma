@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+
 /**
  * Adds setters to the IDetectionOptions interface
  * @author bms41
@@ -105,5 +107,19 @@ public interface IMutableDetectionOptions extends IDetectionOptions {
 	 * @param hough
 	 */
 	void setHoughOptions(IHoughDetectionOptions hough);
+
+	
+	/**
+	 * Set arbitrary sub options
+	 * @param s the options key
+	 * @param sub
+	 */
+	void setSubOptions(String s, IDetectionSubOptions sub);
+
+	/**
+	 * Set if the image is RGB or greyscale
+	 * @param b
+	 */
+	void setRGB(boolean b);
 
 }

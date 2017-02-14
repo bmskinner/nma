@@ -36,13 +36,18 @@ import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+/**
+ * A prober for testing neutrophil detection options
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public class NeutrophilProberWorker extends ImageProberWorker {
 	
 	private IDetectionOptions nucleusOptions;
@@ -61,76 +66,53 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		
 		// Detect the cytoplasm
 		
-		ICannyOptions cannyOptions = options.getCannyOptions();
-		
-		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
 		ImageProcessor original =  new ImageImporter(file)
-				.toConverter()
-				.convertToGreyscale(stackNumber)
-//				.invert()
-				.toProcessor();
-				
-		
+			.importToColorProcessor();
+						
 		DetectionPipeline<ICytoplasm> cyto = new CytoplasmDetectionPipeline(options, file, ANGLE_PROPORTION);
-		cyto.kuwaharaFilter()
-			.raise();
+
+		
+		cyto.colourThreshold()
+			.convertToByteProcessor()
+			.invert();
 		
 		
-		ImageProberTableCell iconCell1 = makeIconCell(cyto.getInvertedProcessor(), 
+		ImageProberTableCell iconCell1 = makeIconCell(cyto.getProcessor(), 
 				true, 
-				DetectionImageType.CYTO_FLATTENED);
+				DetectionImageType.CYTOPLASM);
 		publish(iconCell1);
 		
 		if(this.isCancelled()){
 			return;
 		}
-			
-			
-			
-		cyto.edgeDetect()
-			.gapClose();
-			
-		ImageProberTableCell iconCell2 = makeIconCell(cyto.getInvertedProcessor(), 
-				true, 
-				DetectionImageType.CYTOPLASM);
-		publish(iconCell2);
-		
-		if(this.isCancelled()){
-			return;
-		}
+
 			
 		List<ICell> cells = new ArrayList<ICell>(0);
+		
 		List<ICytoplasm> cytoplasms =	cyto.findInImage();
 		for(ICytoplasm cy : cytoplasms){
 			
 			ICell cell = new DefaultCell(cy);
 			
 			cells.add(cell);
-			
 		}	
 		
 		DetectionPipeline<Nucleus> nucl = new LobedNucleusDetectionPipeline(nucleusOptions, file, ANGLE_PROPORTION, cells);
 		
 		
-		nucl.kuwaharaFilter()
-				.flatten();
+		nucl.colourThreshold()
+			.convertToByteProcessor()
+			.invert();
+
 				
-		ImageProberTableCell iconCell3 = makeIconCell(nucl.getInvertedProcessor(), 
+		ImageProberTableCell iconCell3 = makeIconCell(nucl.getProcessor(), 
 				true, 
-				DetectionImageType.NUCLEUS_FLATTENED);
+				DetectionImageType.NUCLEUS);
 		publish(iconCell3);
 
 		if(this.isCancelled()){
 			return;
 		}	
-		
-		nucl.edgeDetect()
-			.gapClose();
-		
-		ImageProberTableCell iconCell4 = makeIconCell(nucl.getInvertedProcessor(), 
-				true, 
-				DetectionImageType.NUCLEUS);
-		publish(iconCell4);
 		
 		if(this.isCancelled()){
 			return;

@@ -101,7 +101,7 @@ public class SignalDetectionWorker extends AnalysisWorker {
 				
 				try {
 					
-					ImageStack stack = new ImageImporter(imageFile).importImage();
+					ImageStack stack = new ImageImporter(imageFile).importToStack();
 
 					List<INuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					

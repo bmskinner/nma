@@ -122,6 +122,24 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public void setSubOptions(String s, IDetectionSubOptions sub) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isRGB() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setRGB(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 

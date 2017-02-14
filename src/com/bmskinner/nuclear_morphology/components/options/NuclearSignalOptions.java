@@ -4,6 +4,11 @@ import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
+/**
+ * An early implementation of nuclear signal options. Use a hash version instead
+ * @author bms41
+ *
+ */
 @Deprecated
 public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	
@@ -301,6 +306,24 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	public IDetectionSubOptions getSubOptions(String s) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public boolean isRGB() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void setSubOptions(String s, IDetectionSubOptions sub) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setRGB(boolean b) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

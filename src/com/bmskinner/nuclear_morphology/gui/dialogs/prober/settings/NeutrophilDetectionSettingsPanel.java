@@ -37,14 +37,27 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel {
 	}
 	
 	private JPanel createPanel(){
-		IMutableDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 				
 				
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+				
+		SettingsPanel cytoPanel = new ConstructableSettingsPanel(options)
+			.addImageChannelPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.CHANNEL_LBL)
+			.addColorThresholdPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
+			.addSizePanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+			.build();
 		
-		SettingsPanel cytoPanel = new CytoplasmDetectionSettingsPanel(cytoOptions);
-		SettingsPanel nuclPanel = new NucleusDetectionSettingsPanel(options);
+		
+		SettingsPanel nuclPanel = new ConstructableSettingsPanel(options)
+			.addImageChannelPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.CHANNEL_LBL)
+			.addColorThresholdPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.THRESHOLDING_LBL)
+			.addSizePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+			.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
+			.build();
+			
+				
+
 
 		
 

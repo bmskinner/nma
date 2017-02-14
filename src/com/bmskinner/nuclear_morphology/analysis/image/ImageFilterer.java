@@ -29,10 +29,12 @@ import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
+
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import ij.ImagePlus;
 import ij.ImageStack;
+
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
@@ -139,6 +141,24 @@ public class ImageFilterer extends AbstractImageFilterer {
 				result.set(i, threshold);
 			}
 		}
+
+		return new ImageFilterer(result);
+	}
+	
+	/**
+	 * Threshold based on HSV
+	 * @return a copy of the image processor, with thresholding applied
+	 */
+	public ImageFilterer colorThreshold(int minHue, int maxHue, int minSat, int maxSat, int minBri, int maxBri){	
+				
+		
+		ColourThresholder ct = new ColourThresholder();
+		
+		ct.setHue(minHue, maxHue);
+		ct.setBri(minBri, maxBri);
+		ct.setSat(minSat, maxSat);
+		
+		ImageProcessor result = ct.threshold(ip);
 
 		return new ImageFilterer(result);
 	}

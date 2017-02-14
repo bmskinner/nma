@@ -41,7 +41,7 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 
 		ImageStack stack;
 		try {
-			stack = new ImageImporter(file).importImage();
+			stack = new ImageImporter(file).importToStack();
 		} catch (ImageImportException e) {
 			error("Error importing file "+file.getAbsolutePath(), e);
 			return;
@@ -77,7 +77,7 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 			
 		ImageStack fishStack;
 		try {
-			fishStack = new ImageImporter(fishImageFile).importImage();
+			fishStack = new ImageImporter(fishImageFile).importToStack();
 		} catch (ImageImportException e) {
 			error("Error importing FISH image file "+fishImageFile.getAbsolutePath(), e);
 			return;

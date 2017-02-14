@@ -21,12 +21,16 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Color;
 
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
+import ij.process.TypeConverter;
 
 /**
  * This class handles the flattening of the image stacks used
@@ -43,10 +47,79 @@ public class ImageConverter extends AbstractImageFilterer {
 	public ImageConverter(ImageStack st) {
 		super(st);
 	}
+	
+	/**
+	 * Test if the image is a 32-bit RGB processor
+	 * @return
+	 */
+	public boolean isColorProcessor(){
+		return ip instanceof ColorProcessor;
+	}
+	
+	/**
+	 * Test if the image is an 8-bit processor
+	 * @return
+	 */
+	public boolean isByteProcessor(){
+		return ip instanceof ByteProcessor;
+	}
+	
+	/**
+	 * Test if the image is a 16-bit unsigned processor
+	 * @return
+	 */
+	public boolean isShortProcessor(){
+		return ip instanceof ShortProcessor;
+	}
+	
+	/**
+	 * Convert the processor into a ByteProcessor. Has no effect
+	 * if the processor is already a ByteProcessor
+	 * @return
+	 */
+	public ImageConverter convertToByteProcessor(){
+		if(isByteProcessor()){
+			return this;
+		} 
+		
+		TypeConverter tc = new TypeConverter(ip, false);
+		ImageProcessor conv = tc.convertToByte();
+		return new ImageConverter(conv);
+	}
+	
+	/**
+	 * Convert the processor into a ShortProcessor (16-bit unsigned). Has no effect
+	 * if the processor is already a ShortProcessor
+	 * @return
+	 */
+	public ImageConverter convertToShortProcessor(){
+		if(isShortProcessor()){
+			return this;
+		} 
+		
+		TypeConverter tc = new TypeConverter(ip, false);
+		ImageProcessor conv = tc.convertToShort();
+		return new ImageConverter(conv);
+	}
+	
+	/**
+	 * Convert the processor into a ColorProcessor. Has no effect
+	 * if the processor is already a ColorProcessor
+	 * @return
+	 */
+	public ImageConverter convertToColorProcessor(){
+		if(isColorProcessor()){
+			return this;
+		} 
+		
+		TypeConverter tc = new TypeConverter(ip, false);
+		ImageProcessor conv = tc.convertToRGB();
+		return new ImageConverter(conv);
+	}
 		
 	
 	/**
-	 * Create a blank image of the specified dimensions
+	 * Create a blank byte processor image of the specified dimensions
 	 * @param w the width
 	 * @param h the height
 	 * @return an image converter
@@ -284,7 +357,7 @@ public class ImageConverter extends AbstractImageFilterer {
 	 * @return an RGB image
 	 */
 	private ImageConverter mergeStack(){
-
+		
 		ImagePlus[] images = new ImagePlus[3];
 		images[ImageImporter.RGB_RED]   = new ImagePlus("red",   st.getProcessor(ImageImporter.FIRST_SIGNAL_CHANNEL));  
 		images[ImageImporter.RGB_GREEN] = new ImagePlus("green", st.getProcessor(3));  

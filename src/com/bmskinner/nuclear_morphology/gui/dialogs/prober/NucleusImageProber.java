@@ -9,7 +9,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
+//import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
 
 /**
  * An image prober for detecting nuclei
@@ -32,7 +33,18 @@ public class NucleusImageProber extends IntegratedImageProber {
 			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
 			// make the panel
-			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
+			
+			optionsSettingsPanel = new ConstructableSettingsPanel(options)
+				.addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS)
+				.addImageChannelPanel(IAnalysisOptions.NUCLEUS)
+				.addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
+				.addSwitchPanel(IAnalysisOptions.NUCLEUS)
+				.addSizePanel(IAnalysisOptions.NUCLEUS)
+				.addMiscNucleusSettingsPanel(IAnalysisOptions.NUCLEUS)
+				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
+				.build();
+			
+//			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
 			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, ImageSet.NUCLEUS_IMAGE_SET);
 			JPanel footerPanel   = createFooter();
 			

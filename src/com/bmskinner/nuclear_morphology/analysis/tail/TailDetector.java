@@ -84,7 +84,7 @@ public class TailDetector extends Detector {
 		// import image with tubulin in  channel
 		ImageStack stack = null;
 		try{
-			stack = new ImageImporter(tubulinFile).importImage();
+			stack = new ImageImporter(tubulinFile).importToStack();
 		} catch (Exception e){
 			
 			log(Level.SEVERE, "Error importing image as stack", e);
@@ -731,7 +731,7 @@ public class TailDetector extends Detector {
 		
 		ImageStack baseStack;
 		try {
-			baseStack = new ImageImporter(baseFile).importImage();
+			baseStack = new ImageImporter(baseFile).importToStack();
 		} catch (ImageImportException e) {
 			error("Error importing image source file "+baseFile.getAbsolutePath(), e);
 			return false;

@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,11 +30,15 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	private static final double  SCALE_MIN = 1;
 	private static final double  SCALE_MAX = 100000;
 
+	private static final String H_AND_E_LBL = "H&E";
 	private static final String CHANNEL_LBL = "Channel";
 	private static final String SCALE_LBL   = "Scale (pixels/micron)";
+	
+	private static final boolean DEFAULT_H_AND_E = false;
 
 	private JComboBox<String> channelBox = new JComboBox<String>(channelOptionStrings);
 	private JSpinner scaleSpinner;
+	private JCheckBox hAndECheckBox = new JCheckBox("", DEFAULT_H_AND_E);
 
 
 	public ImageChannelSettingsPanel(final IMutableDetectionOptions options){
@@ -47,6 +52,14 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	 */
 	private void createSpinners(){
 
+		
+		hAndECheckBox.addActionListener( e ->{
+			options.setRGB(hAndECheckBox.isSelected());
+			channelBox.setEnabled(!hAndECheckBox.isSelected());
+			fireOptionsChangeEvent();
+		});
+		hAndECheckBox.setSelected(options.isRGB());
+
 
 		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
 		channelBox.addActionListener( e -> {
@@ -57,6 +70,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 									: ImageImporter.RGB_BLUE);
 			fireOptionsChangeEvent();
 		});
+		channelBox.setEnabled( ! options.isRGB());
 		
 		scaleSpinner    = new JSpinner(new SpinnerNumberModel(
 				options.getScale(),	
@@ -93,12 +107,14 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 
 		List<JLabel> labels = new ArrayList<JLabel>();
 
+		labels.add(new JLabel(H_AND_E_LBL));
 		labels.add(new JLabel(CHANNEL_LBL));
 		labels.add(new JLabel(SCALE_LBL));
 
 
 		List<Component> fields = new ArrayList<Component>();
-
+		
+		fields.add(hAndECheckBox);
 		fields.add(channelBox);
 		fields.add(scaleSpinner);
 
@@ -113,14 +129,21 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	@Override
 	protected void update(){
 		super.update();
+		hAndECheckBox.setSelected(options.isRGB());
 		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
+		channelBox.setEnabled( ! options.isRGB());
 		scaleSpinner.setValue(options.getScale());
 	}
 	
 	@Override
 	public void setEnabled(boolean b){
 		super.setEnabled(b);
-		channelBox.setEnabled(b);
+		hAndECheckBox.setEnabled(b);
+		if(hAndECheckBox.isSelected()){
+			channelBox.setEnabled(false);
+		} else{
+			channelBox.setEnabled(b);
+		}
 		scaleSpinner.setEnabled(b);
 
 	}

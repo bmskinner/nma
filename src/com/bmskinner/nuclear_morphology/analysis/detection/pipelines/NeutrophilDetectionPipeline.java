@@ -41,10 +41,9 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 	public List<ICell> findInImage() {
 		
 		List<ICell> cells = new ArrayList<ICell>(0);
-		List<ICytoplasm> cytoplasms = cyto.kuwaharaFilter()
-				.flatten()
-				.edgeDetect()
-				.gapClose()
+		List<ICytoplasm> cytoplasms = cyto.colourThreshold()
+				.convertToByteProcessor()
+				.invert()
 				.findInImage();
 		
 		
@@ -66,10 +65,9 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 			stack("Cannot detect nuclei", e);
 		}
 		
-		List<Nucleus> nuclei = nucl.kuwaharaFilter()
-				.flatten()
-				.edgeDetect()
-				.gapClose()
+		List<Nucleus> nuclei = nucl.colourThreshold()
+				.convertToByteProcessor()
+				.invert()
 				.findInImage();
 		
 		// Add nuclei to cells

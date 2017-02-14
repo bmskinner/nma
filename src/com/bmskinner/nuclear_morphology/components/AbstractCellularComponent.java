@@ -315,7 +315,7 @@ public abstract class AbstractCellularComponent
 			int stack = ImageImporter.rgbToStack(getChannel());
 			
 			try {
-				ImageStack imageStack = new ImageImporter(getSourceFile()).importImage();
+				ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
 				ip = new ImageConverter(imageStack).convertToGreyscale(stack).toProcessor();
 				ip.invert();	
 				

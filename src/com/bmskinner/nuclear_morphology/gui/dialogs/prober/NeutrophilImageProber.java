@@ -26,9 +26,11 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
 
 @SuppressWarnings("serial")
@@ -47,17 +49,37 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			
 			options.setNucleusType(NucleusType.NEUTROPHIL);
 			
+			
+			cytoOptions.setRGB(true);
+			
 			cytoOptions.setMinCirc(0);
 			cytoOptions.setMaxCirc(1);
 			cytoOptions.setMinSize(500);
-			cytoOptions.setMaxSize(5000);
-			cytoOptions.getCannyOptions().setFlattenThreshold(130);
+			cytoOptions.setMaxSize(2000);
+			PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			pre.setUseColourThreshold(true);
+			pre.setHueThreshold(0, 104);
+			pre.setSaturationThreshold(0, 50);
+			pre.setBrightnessThreshold(142, 255);
+			cytoOptions.getCannyOptions().setUseKuwahara(false);;
+			cytoOptions.getCannyOptions().setFlattenImage(false);		
+			cytoOptions.getCannyOptions().setUseCanny(false);
+			
+			nucleusOptions.setRGB(true);
 			
 			nucleusOptions.setMinCirc(0);
 			nucleusOptions.setMaxCirc(1);
 			nucleusOptions.setMinSize(500);
-			nucleusOptions.setMaxSize(1000);
-			
+			nucleusOptions.setMaxSize(2000);
+			PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			preN.setUseColourThreshold(true);
+			preN.setHueThreshold(0, 255);
+			preN.setSaturationThreshold(4, 58);
+			preN.setBrightnessThreshold(90, 250);
+			nucleusOptions.getCannyOptions().setUseKuwahara(false);;
+			nucleusOptions.getCannyOptions().setFlattenImage(false);
+			nucleusOptions.getCannyOptions().setUseCanny(false);
+
 			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 			options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
 

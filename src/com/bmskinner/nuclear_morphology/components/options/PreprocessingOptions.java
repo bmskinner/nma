@@ -38,28 +38,76 @@ public class PreprocessingOptions
 	public static final String USE_ROLLING_BALL = "Use Rolling ball";
 	public static final String USE_FLATTENING   = "Use flattening";
 	public static final String USE_RAISING      = "Use raising";
-	
+	public static final String USE_COLOUR_THRESHOLD = "Use colour threshold";
+		
 	public static final String GAUSSIAN_RADIUS = "Gaussian radius";
 	public static final String KUWAHARA_RADIUS = "Kuwahara radius";
 	public static final String ROLLING_BALL_RADIUS = "Rolling ball radius";
 	public static final String FLATTENING_THRESHOLD = "Flattening threshold";
 	public static final String RAISING_THRESHOLD = "Raising threshold";
 	
+	public static final String MIN_HUE = "Min hue";
+	public static final String MAX_HUE = "Max hue";
+	public static final String MIN_SAT = "Min saturation";
+	public static final String MAX_SAT = "Max saturation";
+	public static final String MIN_BRI = "Min brightness";
+	public static final String MAX_BRI = "Max brightness";
+	
 	public static final int     DEFAULT_KUWAHARA_KERNEL_RADIUS    = 3;
+	public static final boolean DEFAULT_USE_GAUSSIAN              = false;
 	public static final boolean DEFAULT_USE_KUWAHARA              = true;
+	public static final boolean DEFAULT_USE_ROLLING_BALL          = false;
 	public static final boolean DEFAULT_FLATTEN_CHROMOCENTRES     = true;
 	public static final int     DEFAULT_FLATTEN_THRESHOLD         = 100;
 	public static final boolean DEFAULT_RAISE_CHROMOCENTRES     = false;
 	public static final int     DEFAULT_RAISE_THRESHOLD         = 100;
+	public static final boolean DEFAULT_USE_COLOUR_THRESHOLD    = false;
 	
+	public static final int     DEFAULT_MIN_HUE         = 0;
+	public static final int     DEFAULT_MAX_HUE         = 255;
+	public static final int     DEFAULT_MIN_SAT         = 0;
+	public static final int     DEFAULT_MAX_SAT         = 255;
+	public static final int     DEFAULT_MIN_BRI         = 0;
+	public static final int     DEFAULT_MAX_BRI         = 255;
+	
+	/**
+	 * Create options with default values
+	 * 
+	 */
 	public PreprocessingOptions(){
 		
-		setBoolean(USE_GAUSSIAN, false);
+		setBoolean(USE_GAUSSIAN, DEFAULT_USE_GAUSSIAN);
 		setBoolean(USE_KUWAHARA, DEFAULT_USE_KUWAHARA);
-		setBoolean(USE_ROLLING_BALL, false);
-		setBoolean(USE_ROLLING_BALL, false);
+		setBoolean(USE_ROLLING_BALL, DEFAULT_USE_ROLLING_BALL);
 		setBoolean(USE_FLATTENING, DEFAULT_FLATTEN_CHROMOCENTRES);
 		setBoolean(USE_RAISING, DEFAULT_RAISE_CHROMOCENTRES);
+		setBoolean(USE_COLOUR_THRESHOLD, DEFAULT_USE_COLOUR_THRESHOLD);
+		
+		setInt(MIN_HUE, DEFAULT_MIN_HUE);
+		setInt(MAX_HUE, DEFAULT_MAX_HUE);
+		setInt(MIN_SAT, DEFAULT_MIN_SAT);
+		setInt(MAX_SAT, DEFAULT_MAX_SAT);
+		setInt(MIN_BRI, DEFAULT_MIN_BRI);
+		setInt(MAX_BRI, DEFAULT_MAX_BRI);
+	}
+	
+	public void setUseColourThreshold(boolean b){
+		setBoolean(USE_COLOUR_THRESHOLD, b);
+	}
+	
+	public void setHueThreshold(int min, int max){
+		setInt(MIN_HUE, min);
+		setInt(MAX_HUE, max);
+	}
+	
+	public void setSaturationThreshold(int min, int max){
+		setInt(MIN_SAT, min);
+		setInt(MAX_SAT, max);
+	}
+	
+	public void setBrightnessThreshold(int min, int max){
+		setInt(MIN_BRI, min);
+		setInt(MAX_BRI, max);
 	}
 	 
 

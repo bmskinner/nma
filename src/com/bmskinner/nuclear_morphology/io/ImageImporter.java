@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
+import ij.process.ColorProcessor;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 
@@ -154,7 +155,7 @@ public class ImageImporter implements Loggable, Importer {
 	   * Import and convert the image in the given file to an ImageStack
 	   * @return the ImageStack
 	   */
-	  public ImageStack importImage() throws ImageImportException {
+	  public ImageStack importToStack() throws ImageImportException {
 
 		ImageStack stack = null;
 
@@ -165,13 +166,23 @@ public class ImageImporter implements Loggable, Importer {
 		return stack;
 	}
 	  
+	  /**
+	   * Import and convert the image in the given file to a ColorProcessor
+	   * @return the processor
+	   */
+	  public ImageProcessor importToColorProcessor() throws ImageImportException {
+
+		ImagePlus image = new ImagePlus(f.getAbsolutePath());
+		return image.getProcessor();
+	}
+	  
 	 /**
 	  * Import the image in the defined file as a stack, and return an image converter 
 	 * @return
 	 * @throws ImageImportException
 	 */
 	public com.bmskinner.nuclear_morphology.analysis.image.ImageConverter toConverter() throws ImageImportException {
-		 return new com.bmskinner.nuclear_morphology.analysis.image.ImageConverter(importImage());
+		 return new com.bmskinner.nuclear_morphology.analysis.image.ImageConverter(importToStack());
 	 }
 	
 	/**
@@ -182,7 +193,7 @@ public class ImageImporter implements Loggable, Importer {
 	 * @return
 	 */
 	public ImageProcessor importImage(int channel) throws ImageImportException {
-		ImageStack s = importImage();
+		ImageStack s = importToStack();
 		int stack = rgbToStack(channel);
 		ImageProcessor ip = s.getProcessor(stack);
 		ip.invert();

@@ -14,6 +14,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -21,6 +22,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.filter.BackgroundSubtracter;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -40,14 +43,24 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	protected double proportion;
 		
 	public DetectionPipeline(IDetectionOptions op, File imageFile, double prop) throws ImageImportException {
-		file = imageFile;
-		options = op;
-		proportion = prop;
-		ImageStack st =  new ImageImporter(file).importImage();
+		file          = imageFile;
+		options       = op;
+		proportion    = prop;
 		
-		int stackNumber = ImageImporter.rgbToStack(options.getChannel());
+		ImageImporter im = new ImageImporter(file);
 		
-		ip =  st.getProcessor(stackNumber);
+		if(op.isRGB()){
+			
+			ip = im.importToColorProcessor();
+			
+		} else{
+			ImageStack st =  im.importToStack();
+		
+			int stackNumber = ImageImporter.rgbToStack(options.getChannel());
+
+			ip =  st.getProcessor(stackNumber);
+		}
+		
 		
 	}
 	
@@ -67,6 +80,54 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 		ImageProcessor result = ip.duplicate();
 		result.invert();
 		return result;
+	}
+	
+	/**
+	 * Invert the image processor
+	 * @return
+	 */
+	public DetectionPipeline<E> invert(){
+		
+		ImageConverter conv = new ImageConverter(ip);
+		ip = conv.invert().toProcessor();
+		
+		return this;
+	}
+	
+	/**
+	 * Change the image processor to 8-bit greyscale
+	 * @return
+	 */
+	public DetectionPipeline<E> convertToByteProcessor(){
+		
+		ImageConverter conv = new ImageConverter(ip);
+		ip = conv.convertToByteProcessor().toProcessor();
+		
+		return this;
+	}
+	
+	/**
+	 * Change the image processor to 8-bit greyscale
+	 * @return
+	 */
+	public DetectionPipeline<E> convertToShortProcessor(){
+		
+		ImageConverter conv = new ImageConverter(ip);
+		ip = conv.convertToShortProcessor().toProcessor();
+		
+		return this;
+	}
+	
+	/**
+	 * Change the image processor to 32-bit RGB
+	 * @return
+	 */
+	public DetectionPipeline<E> convertToColorProcessor(){
+		
+		ImageConverter conv = new ImageConverter(ip);
+		ip = conv.convertToColorProcessor().toProcessor();
+		
+		return this;
 	}
 	
 	/**
@@ -175,6 +236,35 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 			}
 		} catch (MissingOptionException e) {
 			warn("Missing canny options");
+		}
+		return this;
+	}
+	
+	/**
+	 * Run a colour thresholding on HSV
+	 * If the options specify thresholding is disabled, this has no effect.
+	 * @return
+	 */
+	public DetectionPipeline<E> colourThreshold(){
+		
+		try {
+			PreprocessingOptions op = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			
+			if(op.getBoolean(PreprocessingOptions.USE_COLOUR_THRESHOLD)){
+				
+				int minHue = op.getInt(PreprocessingOptions.MIN_HUE);
+				int maxHue = op.getInt(PreprocessingOptions.MAX_HUE);
+				int minSat = op.getInt(PreprocessingOptions.MIN_SAT);
+				int maxSat = op.getInt(PreprocessingOptions.MAX_SAT);
+				int minBri = op.getInt(PreprocessingOptions.MIN_BRI);
+				int maxBri = op.getInt(PreprocessingOptions.MAX_BRI);
+				
+				ip = new ImageFilterer(ip)
+						.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
+						.toProcessor();
+			}
+		} catch (MissingOptionException e) {
+			warn("Missing preprocessing options");
 		}
 		return this;
 	}

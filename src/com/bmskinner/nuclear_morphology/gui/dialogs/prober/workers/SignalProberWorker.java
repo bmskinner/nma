@@ -54,7 +54,7 @@ public class SignalProberWorker  extends ImageProberWorker {
 		finer("Importing image "+file.getAbsolutePath());
 		
 		// Import the image as a stack
-		ImageStack stack = new ImageImporter(file).importImage();
+		ImageStack stack = new ImageImporter(file).importToStack();
 
 		// Find the processor number in the stack to use
 		int stackNumber = ImageImporter.rgbToStack(options.getChannel());

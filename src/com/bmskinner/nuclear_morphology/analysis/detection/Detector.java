@@ -31,7 +31,9 @@ import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -155,6 +157,10 @@ public abstract class Detector implements Loggable {
   
   private void findInImage(ImageProcessor image){
 
+	  if( ! (image instanceof ByteProcessor  || image instanceof ShortProcessor) ){
+		  throw new IllegalArgumentException("Processor must be byte or short");
+	  }
+	  
 	  ImageProcessor searchProcessor = image.duplicate();
 
 	  searchProcessor.threshold(this.threshold);

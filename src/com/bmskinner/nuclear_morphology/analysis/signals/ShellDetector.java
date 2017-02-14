@@ -629,7 +629,7 @@ public class ShellDetector extends Detector {
 			ImageStack st;
 			try {
 				
-				st = new ImageImporter(s.getSourceFile()).importImage();
+				st = new ImageImporter(s.getSourceFile()).importToStack();
 				
 			} catch (ImageImportException e) {
 				stack("Error importing component image", e);

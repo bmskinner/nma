@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,9 @@ import java.util.List;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEventListener;
@@ -212,4 +216,53 @@ public abstract class SettingsPanel extends JPanel implements Loggable, OptionsC
 		}
 
 	}
+	
+//	public class MinMaxIntSpinnerChangeListener implements ChangeListener {
+//		
+//		private JSpinner min, max;
+//		boolean isMin;
+//		
+//		/**
+//		 * Create a listener allowing a min and max settings spinner to interact
+//		 * @param minSpinner
+//		 * @param maxSpinner
+//		 * @param isMin
+//		 */
+//		public MinMaxIntSpinnerChangeListener(JSpinner minSpinner, JSpinner maxSpinner){
+//			min = minSpinner;
+//			max = maxSpinner;
+//		}
+//		
+//
+//
+//		@Override
+//		public void stateChanged(ChangeEvent e) {
+//			// TODO Auto-generated method stub
+//			try {
+//				
+//				if(isMin){
+//					
+//					
+//					
+//				} else {
+//				
+//				JSpinner j = (JSpinner) e.getSource();
+//				j.commitEdit();
+//				Integer value = (Integer) j.getValue();
+//				
+//				if(value.intValue() <= (int) minSatSpinner.getValue()){ 
+//					j.setValue(value.intValue() + 1); // Cannot be above max 
+//
+//				} 
+//								
+//				options.setHueThreshold( (int) minSatSpinner.getValue(), (int) j.getValue());
+//				fireOptionsChangeEvent();
+//			} catch(ParseException e1){
+//				warn("Parsing exception");
+//				stack("Parsing error in JSpinner", e1);
+//			}
+//		}
+//		
+//	}
+	
 }

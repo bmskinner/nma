@@ -111,7 +111,7 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel  {
 			fireOptionsChangeEvent();
 		});
 		
-		flattenImageCheckBox = new JCheckBox("", options.isUseKuwahara());
+		flattenImageCheckBox = new JCheckBox("", options.isUseFlattenImage());
 		flattenImageCheckBox.addActionListener( e-> {
 			options.setFlattenImage(flattenImageCheckBox.isSelected());
 			flattenImageThresholdSpinner.setEnabled(flattenImageCheckBox.isSelected());

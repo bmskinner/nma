@@ -26,9 +26,7 @@ public interface ImageSet {
 	 * The set of images for neutrophil detection
 	 */
 	static final ImageSet NEUTROPHIL_IMAGE_SET = new DefaultImageSet()
-			.add(DetectionImageType.CYTO_FLATTENED)
 			.add(DetectionImageType.CYTOPLASM)
-			.add(DetectionImageType.NUCLEUS_FLATTENED)
 			.add(DetectionImageType.NUCLEUS)
 			.add(DetectionImageType.DETECTED_OBJECTS)
 			.add(DetectionImageType.ANNOTAED_OBJECTS);

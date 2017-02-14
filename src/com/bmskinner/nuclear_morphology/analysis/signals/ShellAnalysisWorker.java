@@ -131,7 +131,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 		
 		try {
 		
-		ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importImage();
+		ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
 
 		for(UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()){
 
@@ -152,7 +152,7 @@ public class ShellAnalysisWorker extends AnalysisWorker {
 					warn("Cannot find signal image for "+n.getNameAndNumber());
 					continue;
 				}
-				ImageStack signalStack = new ImageImporter(sourceFile).importImage();
+				ImageStack signalStack = new ImageImporter(sourceFile).importToStack();
 				
 				ShellCounter counter = counters.get(signalGroup);
 

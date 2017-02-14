@@ -22,6 +22,7 @@ public class DefaultNucleusHashDetectionOptions
 	private static final double    DEFAULT_SCALE = 1.0;
 	private static final int    DEFAULT_CHANNEL      = 2;
 	private static final boolean DEFAULT_NORMALISE_CONTRAST = false;
+	private static final boolean DEFAULT_IS_RGB = false;
 	private static final long serialVersionUID = 1L;
 	
 	/**
@@ -37,9 +38,11 @@ public class DefaultNucleusHashDetectionOptions
 		this.setScale(DEFAULT_SCALE);
 		this.setChannel(DEFAULT_CHANNEL);
 		this.setNormaliseContrast(DEFAULT_NORMALISE_CONTRAST);
+		this.setRGB(DEFAULT_IS_RGB);
 		
 		this.setCannyOptions( OptionsFactory.makeCannyOptions());
 		this.setHoughOptions( OptionsFactory.makeHoughOptions());
+		this.setSubOptions(  IDetectionSubOptions.BACKGROUND_OPTIONS, OptionsFactory.makePreprocessingOptions());
 	}
 	
 	public DefaultNucleusHashDetectionOptions(IDetectionOptions template){

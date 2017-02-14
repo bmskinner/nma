@@ -26,6 +26,13 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
+/**
+ * Early implementation of tail detection options. Use a hash version instead.
+ * @author bms41
+ * @deprecated since 1.13.4
+ *
+ */
+@Deprecated
 public class DefaultTailDetectionOptions
 	extends AbstractDetectionOptions {
 
@@ -73,6 +80,24 @@ public class DefaultTailDetectionOptions
 	public IDetectionSubOptions getSubOptions(String s) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void setSubOptions(String s, IDetectionSubOptions sub) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setRGB(boolean b) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isRGB() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 	
 	

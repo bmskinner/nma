@@ -23,6 +23,7 @@ public abstract class AbstractHashDetectionOptions
 	
 	public static final String THRESHOLD = "Threshold";
 	public static final String CHANNEL   = "Channel";
+	public static final String IS_RGB    = "Is RGB";
 	public static final String MIN_CIRC  = "Min circ";
 	public static final String MAX_CIRC  = "Max circ";
 	public static final String MIN_SIZE  = "Min size";
@@ -65,6 +66,7 @@ public abstract class AbstractHashDetectionOptions
 		dblMap.put(SCALE,    template.getScale());
 		
 		boolMap.put(IS_NORMALISE_CONTRAST, template.isNormaliseContrast());
+		boolMap.put(IS_RGB, template.isRGB());
 		
 		
 		if(template.hasCannyOptions()){
@@ -171,6 +173,11 @@ public abstract class AbstractHashDetectionOptions
 	public void setMinSize(double minSize) {
 		dblMap.put(MIN_SIZE, minSize);
 	}
+	
+	@Override
+	public void setRGB(boolean b){
+		boolMap.put(IS_RGB, b);
+	}
 
 	@Override
 	public File getFolder() {
@@ -190,6 +197,11 @@ public abstract class AbstractHashDetectionOptions
 	@Override
 	public int getChannel() {
 		return intMap.get(CHANNEL);
+	}
+	
+	@Override
+	public boolean isRGB(){
+		return boolMap.get(IS_RGB);
 	}
 
 	@Override
@@ -215,7 +227,6 @@ public abstract class AbstractHashDetectionOptions
 		} else {
 			throw new MissingOptionException("Canny options not present");
 		}
-		
 		
 	}
 
@@ -272,7 +283,7 @@ public abstract class AbstractHashDetectionOptions
 	public void setHoughOptions(IHoughDetectionOptions hough) {
 		subMap.put(IDetectionSubOptions.HOUGH_OPTIONS, hough);	
 	}
-	
+		
 	@Override
 	public void setNormaliseContrast(boolean b) {
 		boolMap.put(IS_NORMALISE_CONTRAST, b);

@@ -113,6 +113,13 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	int getChannel();
 	
 	/**
+	 * Test if the image is to be RGB colour or greyscale. Use the 
+	 * channel option to select a greyscale channel if this is false
+	 * @return
+	 */
+	boolean isRGB();
+	
+	/**
 	 * Test if constrasts should be normalised when detecting this object
 	 * @return
 	 */
