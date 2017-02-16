@@ -454,7 +454,7 @@ public class MainWindow
 		
 		if(event.type().equals("ExportStatsAction")){
 
-
+			//TODO - select exact stats / components to be exported
 			if(selectedDatasetCount>0){
 
 				if(selectedDatasetCount==1){

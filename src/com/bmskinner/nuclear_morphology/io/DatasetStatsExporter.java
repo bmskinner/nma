@@ -7,6 +7,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -98,7 +100,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 				outLine.append(cell.getId()+"\t");
 				outLine.append("Cytoplasm\t");
 				outLine.append(c.getSourceFileName()+"\t");
-				appendNucleusStats(outLine, c);
+				appendNucleusStats(outLine, d, cell, c);
 				outLine.append(NEWLINE);
 			}
 			
@@ -110,7 +112,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 					outLine.append(cell.getId()+"\t");
 					outLine.append("Nucleus_"+n.getNameAndNumber()+"\t");
 					outLine.append(n.getSourceFileName()+"\t");
-					appendNucleusStats(outLine, n);
+					appendNucleusStats(outLine, d, cell, n);
 					outLine.append(NEWLINE);
 				}
 				
@@ -119,12 +121,25 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		}
 	}
 	
-	private void appendNucleusStats(StringBuilder outLine, CellularComponent c){
+	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, ICell cell, CellularComponent c){
 		
 		for(NucleusStatistic s : NucleusStatistic.values()){
+			double var = 0;
 			
-			outLine.append(c.getStatistic(s)+"\t");
+			if(s.equals(NucleusStatistic.VARIABILITY)){
+				
+				try {
+					var = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cell);
+				} catch (UnavailableBorderTagException e) {
+					stack("Tag not present in component", e);
+					var = -1;
+				}
+			} else {
+				var = c.getStatistic(s);
+				
+			}
 			
+			outLine.append(var+"\t");
 		}		
 	}
 	
