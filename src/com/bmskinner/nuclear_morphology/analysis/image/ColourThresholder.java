@@ -72,6 +72,9 @@ public class ColourThresholder {
 	private ImageStack stack;
 	private int width, height, numPixels;
 	
+	/**
+	 * Create with default parameters (no thresholding)
+	 */
 	public ColourThresholder(){	}
 	
 	private void checkArgs(int min, int max){

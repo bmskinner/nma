@@ -32,6 +32,8 @@ public class DefaultNuclearSignalHashOptions
 		setChannel(DEFAULT_CHANNEL);
 		setThreshold(DEFAULT_SIGNAL_THRESHOLD);
 		setScale(DEFAULT_SCALE);
+		setBoolean(IS_RGB, DEFAULT_IS_RGB);
+		setBoolean(IS_NORMALISE_CONTRAST, DEFAULT_IS_NORMALISE);
 		
 	}
 	

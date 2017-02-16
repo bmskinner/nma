@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -51,6 +52,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
@@ -84,6 +86,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
+import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
@@ -384,7 +387,7 @@ public class MainWindow
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
 		finer("Heard signal change event: "+event.type());
-		
+		final int selectedDatasetCount = populationsPanel.getSelectedDatasets().size();
 		final IAnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 
 				: populationsPanel.getSelectedDatasets().get(0);
@@ -447,6 +450,23 @@ public class MainWindow
 		if(event.type().equals("PostFISHRemappingAction")){
 			Runnable r = new FishRemappingAction(getPopulationsPanel().getSelectedDatasets(), this);
 			r.run();
+		}
+		
+		if(event.type().equals("ExportStatsAction")){
+
+
+			if(selectedDatasetCount>0){
+
+				if(selectedDatasetCount==1){
+					new DatasetStatsExporter(selectedDataset.getSavePath().getParentFile()).export(selectedDataset);
+				} else {
+					// Choose a folder
+					File folder = chooseExportDirectory();
+					if(folder !=null){ // null if user cancels
+						new DatasetStatsExporter(folder).export(getPopulationsPanel().getSelectedDatasets());
+					}
+				}
+			}
 		}
 		
 		
@@ -1081,5 +1101,28 @@ public class MainWindow
     	log("Exported workspace file to "+f.getAbsolutePath());
     	
     }
+    
+    private File chooseExportDirectory(){
+		
+//		File defaultDir = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		
+		JFileChooser fc = new JFileChooser( (File) null); // if null, will be home dir
+
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0)	{
+			return null; // user cancelled
+		}
+		
+		File file = fc.getSelectedFile();
+
+		if( ! file.isDirectory()){
+			return null;
+		}
+
+		return file;
+	}
  
 }

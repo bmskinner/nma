@@ -51,6 +51,8 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	static final double DEFAULT_SCALE = 1;
 	static final double DEFAULT_MIN_CIRC = 0;
 	static final double DEFAULT_MAX_CIRC = 1;
+	static final boolean DEFAULT_IS_RGB = false;
+	static final boolean DEFAULT_IS_NORMALISE = false;
 	
 	/**
 	 * Unlock the options to allow modification

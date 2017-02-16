@@ -21,6 +21,9 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
@@ -80,6 +83,12 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 	public int compareTo(IMitochondrion o) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

@@ -25,7 +25,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
+import ij.process.TypeConverter;
 
 /**
  * Contains methods for manipulating ImageProcessors, and
@@ -81,6 +85,71 @@ public abstract class AbstractImageFilterer implements Loggable {
 			throw new NullPointerException("Filterer does not contain an image processor");
 		}
 		return ip;
+	}
+	
+	/**
+	 * Test if the image is a 32-bit RGB processor
+	 * @return
+	 */
+	public boolean isColorProcessor(){
+		return ip instanceof ColorProcessor;
+	}
+	
+	/**
+	 * Test if the image is an 8-bit processor
+	 * @return
+	 */
+	public boolean isByteProcessor(){
+		return ip instanceof ByteProcessor;
+	}
+	
+	/**
+	 * Test if the image is a 16-bit unsigned processor
+	 * @return
+	 */
+	public boolean isShortProcessor(){
+		return ip instanceof ShortProcessor;
+	}
+	
+	/**
+	 * Convert the processor into a ByteProcessor. Has no effect
+	 * if the processor is already a ByteProcessor
+	 * @return
+	 */
+	public AbstractImageFilterer convertToByteProcessor(){
+		if( ! isByteProcessor()){
+			TypeConverter tc = new TypeConverter(ip, false);
+			ip = tc.convertToByte();
+		}
+		return this;
+	}
+	
+	/**
+	 * Convert the processor into a ShortProcessor (16-bit unsigned). Has no effect
+	 * if the processor is already a ShortProcessor
+	 * @return
+	 */
+	public AbstractImageFilterer convertToShortProcessor(){
+		if(! isShortProcessor()){
+			TypeConverter tc = new TypeConverter(ip, false);
+			ip = tc.convertToShort();
+		}
+		return this;
+	}
+	
+	/**
+	 * Convert the processor into a ColorProcessor. Has no effect
+	 * if the processor is already a ColorProcessor
+	 * @return
+	 */
+	public AbstractImageFilterer convertToColorProcessor(){
+		if(!isColorProcessor()){
+
+
+			TypeConverter tc = new TypeConverter(ip, false);
+			ip = tc.convertToRGB();
+		}
+		return this;
 	}
 	
 	/**

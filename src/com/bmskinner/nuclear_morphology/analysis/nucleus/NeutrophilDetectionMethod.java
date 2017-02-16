@@ -41,6 +41,13 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+/**
+ * This is a cell detection method for neutrophils, separate from the fluorescence
+ * nucleus method. It mostly duplicates the NucleusDetectionMethod though.
+ * @author ben
+ * @since 1.13.4
+ *
+ */
 public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 	private static final String spacerString = "---------";

@@ -17,22 +17,32 @@ public class DefaultHoughOptions
 	public static final double DEFAULT_MIN_RADIUS = 5;
 	public static final double DEFAULT_MAX_RADIUS = 50;
 	public static final int    DEFAULT_NUM_CIRCLES = 6;
+	public static final int    DEFAULT_HOUGH_THRESHOLD = -1;
 	
+	/**
+	 * Construct with default options
+	 */
 	public DefaultHoughOptions(){
 		this.setMinRadius(DEFAULT_MIN_RADIUS);
 		this.setMaxRadius(DEFAULT_MAX_RADIUS);
 		this.setNumberOfCircles(DEFAULT_NUM_CIRCLES);
+		this.setHoughThreshold(DEFAULT_HOUGH_THRESHOLD);
 	}
 	
+	/**
+	 * Construct using a template
+	 * @param template
+	 */
 	public DefaultHoughOptions(IHoughDetectionOptions template){
 		this.setMinRadius(template.getMinRadius());
 		this.setMaxRadius(template.getMaxRadius());
 		this.setNumberOfCircles(template.getNumberOfCircles());
+		this.setHoughThreshold(template.getHoughThreshold());
 	}
 	
 	@Override
 	public double getMinRadius() {
-		return dblMap.get(MIN_RADIUS);
+		return getDouble(MIN_RADIUS);
 	}
 	
 	public void setMinRadius(double d){
@@ -41,7 +51,7 @@ public class DefaultHoughOptions
 
 	@Override
 	public double getMaxRadius() {
-		return dblMap.get(MAX_RADIUS);
+		return getDouble(MAX_RADIUS);
 	}
 	
 	public void setMaxRadius(double d){
@@ -50,7 +60,7 @@ public class DefaultHoughOptions
 
 	@Override
 	public int getNumberOfCircles() {
-		return intMap.get(NUM_CIRCLES);
+		return getInt(NUM_CIRCLES);
 	}
 	
 	public void setNumberOfCircles(int i){
@@ -60,6 +70,18 @@ public class DefaultHoughOptions
 	@Override
 	public IHoughDetectionOptions lock() {
 		return this;
+	}
+
+	@Override
+	public int getHoughThreshold() {
+		return getInt(HOUGH_THRESHOLD);
+
+	}
+
+	@Override
+	public void setHoughThreshold(int i) {
+		setInt(HOUGH_THRESHOLD, i);
+		
 	}
 
 }

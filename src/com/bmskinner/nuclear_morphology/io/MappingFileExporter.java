@@ -37,9 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  *
  */
 public class MappingFileExporter implements Exporter {
-	
-	private static final String NEWLINE = System.getProperty("line.separator"); 
-	
+		
 	public static boolean exportCellLocations(IAnalysisDataset d){
 		
 		File exportFile = new File(d.getCollection().getOutputFolder()

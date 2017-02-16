@@ -71,7 +71,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
-	
+	JMenuItem exportStatsMenuItem;
 	
 	JMenuItem moveUpMenuItem;
 	
@@ -131,6 +131,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		this.addSeparator();
 		
 		this.add(replaceFolderMenuItem);
+		this.add(exportStatsMenuItem);
 
 		this.addSeparator();
 
@@ -175,6 +176,11 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		booleanMenuItem = new JMenuItem("Boolean");
 		booleanMenuItem.addActionListener( e -> {
 			fireSignalChangeEvent("DatasetArithmeticAction");	
+		});
+		
+		exportStatsMenuItem = new JMenuItem("Export stats");
+		exportStatsMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent("ExportStatsAction");	
 		});
 		
 		
@@ -272,6 +278,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	
 	public void setFishRemappingEnabled(boolean b){
 		this.fishRemappinglMenuItem.setEnabled(b);
+	}
+	
+	public void setExportStatsEnabled(boolean b){
+		this.exportStatsMenuItem.setEnabled(b);
 	}
 	
 	public synchronized void addSignalChangeListener( SignalChangeListener l ) {

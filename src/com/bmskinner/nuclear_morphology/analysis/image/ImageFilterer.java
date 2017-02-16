@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
@@ -535,10 +536,15 @@ public class ImageFilterer extends AbstractImageFilterer {
 	public ImageFilterer runHoughCircleDetection(IHoughDetectionOptions options){
 		
 		Hough_Circles circ = new Hough_Circles();
+		circ.threshold  = options.getHoughThreshold();
 		circ.maxCircles = options.getNumberOfCircles();
 		circ.radiusMin = (int) options.getMinRadius();
 		circ.radiusMax = (int) options.getMaxRadius();
 		circ.run(ip);
+		Point[] centres = circ.centerPoint;
+		for(Point p : centres){
+			log(p.toString());
+		}
 		return this;
 	}
 	

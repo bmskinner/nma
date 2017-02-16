@@ -14,6 +14,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -297,22 +298,27 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	public DetectionPipeline<E> subtractBackground(){
 		
 			try {
-				IDetectionSubOptions bkg = options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+				PreprocessingOptions bkg = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+				
+				if(bkg.getBoolean(PreprocessingOptions.USE_ROLLING_BALL)){
+					
+					//TODO: these parameters must be modifiable 
+					BackgroundSubtracter bg = new BackgroundSubtracter();
+					boolean presmooth = false;
+					boolean correctCorners = false;
+					boolean parabaloid = false;
+					boolean lightBackground = true;
+					boolean createBackground = false;
+					double radius = 200;
+					
+					bg.rollingBallBackground(ip, radius, createBackground, lightBackground, parabaloid, presmooth, correctCorners);
+				}
 			} catch (MissingOptionException e) {
 				warn("Missing background options");
 				return this;
 			}
 			
-//			if(bkg.getBoolean(PreprocessingOptions.USE_ROLLING_BALL)){
-				BackgroundSubtracter bg = new BackgroundSubtracter();
-				boolean presmooth = false;
-				boolean correctCorners = false;
-				boolean parabaloid = false;
-				boolean lightBackground = true;
-				boolean createBackground = false;
-				double radius = 200;
-				
-				bg.rollingBallBackground(ip, radius, createBackground, lightBackground, parabaloid, presmooth, correctCorners);
+			
 
 		return this;
 	}
@@ -339,12 +345,29 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	}
 	
 	/**
-	 * Run a gap closing with the closing radius specified in the options.
-	 * If the options specify edge detecion is disabled, this has no effect.
+	 * Run hough circle detection with parameters specified in the options.
+	 * Experimental, will likely be removed from detection pipeline
 	 * @return
 	 */
 	public DetectionPipeline<E> houghCircles(){
 		warn("Hough not implemented");
+		try {
+			IDetectionSubOptions op = options.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+			
+			if( op instanceof IHoughDetectionOptions){
+			
+				
+			ip = new ImageFilterer(ip)
+					.runHoughCircleDetection((IHoughDetectionOptions) op)
+					.toProcessor();
+			
+			} else {
+				throw new IllegalArgumentException("Sub option is not a Hough options");
+			}
+			
+		} catch (MissingOptionException e) {
+			warn("Missing Hough options");
+		}
 		return this;
 	}
 	

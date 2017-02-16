@@ -30,8 +30,8 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
 	
 	private static final String MIN_SIZE_LBL = "Min area (pixels)";
 	private static final String MAX_SIZE_LBL = "Max area (pixels)";
-	private static final String MIN_CIRC_LBL = "Min circ (pixels)";
-	private static final String MAX_CIRC_LBL = "Min circ (pixels)";
+	private static final String MIN_CIRC_LBL = "Min circ";
+	private static final String MAX_CIRC_LBL = "Max circ";
 			
 	private static final Integer MIN_RANGE_SIZE = 1;
 	private static final double  MIN_RANGE_CIRC = 0;

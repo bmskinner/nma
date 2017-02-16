@@ -20,6 +20,10 @@ package com.bmskinner.nuclear_morphology.components;
 
 import java.io.IOException;
 
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
+
 @Deprecated
 public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 
@@ -78,6 +82,12 @@ public class Acrosome extends  AbstractCellularComponent implements IAcrosome {
 	public int compareTo(IAcrosome o) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

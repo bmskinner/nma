@@ -27,11 +27,15 @@ import java.awt.*;
 import ij.gui.*;
 
 /**
-*   This ImageJ plugin shows the Hough Transform Space and search for
-*   circles in a binary image. The image must have been passed through
-*   an edge detection module and have edges marked in white (background
-*   must be in black).
-*/
+ *  Modified from the Hough_Circles plugin by Hemerson Pistori (pistori at ec.ucdb.br)
+ *  and Eduardo Rocha Costa (eduardo.rocha at poli.usp.br).
+ *  https://imagej.nih.gov/ij/plugins/hough-circles.html
+ *  
+ *   This ImageJ plugin shows the Hough Transform Space and search for
+ *   circles in a binary image. The image must have been passed through
+ *   an edge detection module and have edges marked in white (background
+ *   must be in black).
+ */
 public class Hough_Circles implements PlugInFilter {
 
     public int radiusMin;  // Find circles with radius grater or equal radiusMin
@@ -49,7 +53,7 @@ public class Hough_Circles implements PlugInFilter {
     public int offset; // Image Width
     public int offx;   // ROI x offset
     public int offy;   // ROI y offset
-    Point centerPoint[]; // Center Points of the Circles Found.
+    public Point centerPoint[]; // Center Points of the Circles Found.
     private int vectorMaxSize = 500;
     boolean useThreshold = false;
     int lut[][][]; // LookUp Table for rsin e rcos values
@@ -75,9 +79,10 @@ public class Hough_Circles implements PlugInFilter {
         height = r.height;
         offset = ip.getWidth();
 
-
-        if( readParameters() ) { // Show a Dialog Window for user input of
-            // radius and maxCircles.
+        if( true ) { // Replace the GUI parts
+        	
+//        if( readParameters() ) { // Show a Dialog Window for user input of
+//            // radius and maxCircles.
 
 
             houghTransform();
@@ -96,10 +101,10 @@ public class Hough_Circles implements PlugInFilter {
                 getCenterPointsByThreshold(threshold);
             else
                 getCenterPoints(maxCircles);
-            drawCircles(circlespixels);
+//            drawCircles(circlespixels);
 
-            new ImagePlus("Hough Space [r="+radiusMin+"]", newip).show(); // Shows only the hough space for the minimun radius
-            new ImagePlus(maxCircles+" Circles Found", circlesip).show();
+//            new ImagePlus("Hough Space [r="+radiusMin+"]", newip).show(); // Shows only the hough space for the minimun radius
+//            new ImagePlus(maxCircles+" Circles Found", circlesip).show();
         }
     }
 

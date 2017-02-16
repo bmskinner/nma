@@ -561,6 +561,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 								populationPopup.enableMerge();
 								populationPopup.enableDelete();
 								populationPopup.enableBoolean();
+								populationPopup.setExportStatsEnabled(true);
 							
 
 						} else { // single population
@@ -617,6 +618,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 		populationPopup.enableCurate();
 		populationPopup.setRelocateCellsEnabled(true);
 		populationPopup.enableSaveCells();
+		populationPopup.setExportStatsEnabled(true);
 		
 		if( d instanceof ChildAnalysisDataset){
 			populationPopup.setAddNuclearSignalEnabled(false);

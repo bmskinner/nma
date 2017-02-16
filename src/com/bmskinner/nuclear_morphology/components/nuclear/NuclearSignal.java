@@ -21,11 +21,14 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import ij.gui.Roi;
+import ij.process.ImageProcessor;
+
 import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * A NuclearSignal is a region within a nucleus of interest, such as a chromosome paint. 
@@ -109,6 +112,12 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 	public boolean isSmoothByDefault() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 //	@Override

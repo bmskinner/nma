@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * The sperm tail is a specialised type of flagellum. It is anchored at
@@ -161,6 +163,12 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		public boolean isSmoothByDefault() {
 			// TODO Auto-generated method stub
 			return false;
+		}
+
+		@Override
+		public ImageProcessor getRGBImage() throws UnloadableImageException {
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 

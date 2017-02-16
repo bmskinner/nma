@@ -48,74 +48,7 @@ public class ImageConverter extends AbstractImageFilterer {
 		super(st);
 	}
 	
-	/**
-	 * Test if the image is a 32-bit RGB processor
-	 * @return
-	 */
-	public boolean isColorProcessor(){
-		return ip instanceof ColorProcessor;
-	}
 	
-	/**
-	 * Test if the image is an 8-bit processor
-	 * @return
-	 */
-	public boolean isByteProcessor(){
-		return ip instanceof ByteProcessor;
-	}
-	
-	/**
-	 * Test if the image is a 16-bit unsigned processor
-	 * @return
-	 */
-	public boolean isShortProcessor(){
-		return ip instanceof ShortProcessor;
-	}
-	
-	/**
-	 * Convert the processor into a ByteProcessor. Has no effect
-	 * if the processor is already a ByteProcessor
-	 * @return
-	 */
-	public ImageConverter convertToByteProcessor(){
-		if(isByteProcessor()){
-			return this;
-		} 
-		
-		TypeConverter tc = new TypeConverter(ip, false);
-		ImageProcessor conv = tc.convertToByte();
-		return new ImageConverter(conv);
-	}
-	
-	/**
-	 * Convert the processor into a ShortProcessor (16-bit unsigned). Has no effect
-	 * if the processor is already a ShortProcessor
-	 * @return
-	 */
-	public ImageConverter convertToShortProcessor(){
-		if(isShortProcessor()){
-			return this;
-		} 
-		
-		TypeConverter tc = new TypeConverter(ip, false);
-		ImageProcessor conv = tc.convertToShort();
-		return new ImageConverter(conv);
-	}
-	
-	/**
-	 * Convert the processor into a ColorProcessor. Has no effect
-	 * if the processor is already a ColorProcessor
-	 * @return
-	 */
-	public ImageConverter convertToColorProcessor(){
-		if(isColorProcessor()){
-			return this;
-		} 
-		
-		TypeConverter tc = new TypeConverter(ip, false);
-		ImageProcessor conv = tc.convertToRGB();
-		return new ImageConverter(conv);
-	}
 		
 	
 	/**
