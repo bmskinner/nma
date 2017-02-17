@@ -25,8 +25,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -48,7 +46,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class MainOptionsDialog extends SettingsDialog implements ActionListener {
 	
-//	private MainWindow mw;
+	private static final String DIALOG_TITLE = "Options";
 	
 	private JComboBox<Level> levelBox;
 	private JComboBox<ColourSwatch> colourBox;
@@ -62,7 +60,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
 //		this.mw = mw;
 		this.setLayout(new BorderLayout());
-		this.setTitle("Options");
+		this.setTitle(DIALOG_TITLE);
 		
 		// The date and time the program was built
 //		this.add( new JLabel(Constants.BUILD), BorderLayout.NORTH);
@@ -89,12 +87,9 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 		JButton okButton = new JButton("Close");
-		okButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
+		okButton.addActionListener( e -> {
 				setVisible(false);	
 				dispose();
-			}
 		});
 		panel.add(okButton);
 
@@ -171,7 +166,6 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 		if(!level.equals(Logger.getLogger(PROGRAM_LOGGER).getLevel())){
 			Logger.getLogger(PROGRAM_LOGGER).setLevel(level);
 			GlobalOptions.getInstance().setLogLevel(level);
-//			log(Level.INFO, "Set the logging level to "+level.toString());
 		}
 		
 		

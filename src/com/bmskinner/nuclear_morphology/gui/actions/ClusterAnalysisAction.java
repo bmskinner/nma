@@ -25,11 +25,11 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 
 
@@ -49,7 +49,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 	public void run(){
 
 		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
-		ClusteringOptions options = clusterSetup.getOptions();
+		IClusteringOptions options = clusterSetup.getOptions();
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 			IAnalysisMethod m = new ClusteringMethod(dataset, options);

@@ -19,17 +19,12 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusTreeBuilder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.TreeBuildingMethod;
-import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
@@ -49,13 +44,12 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 	@Override
 	public void run(){
 		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
-		ClusteringOptions options = clusterSetup.getOptions();
-//		Map<String, Object> options = clusterSetup.getOptions();
+		IClusteringOptions options = clusterSetup.getOptions();
+
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
 			IAnalysisMethod m = new TreeBuildingMethod(dataset, options);
-//			worker = new NucleusTreeBuilder( dataset , options);
-//			worker = new NeighbourJoiningTreeBuilder( dataset , mw.getProgramLogger());
+
 			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size() * 2);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);

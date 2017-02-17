@@ -61,6 +61,7 @@ import ij.io.DirectoryChooser;
  * @author bms41
  *
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class FishRemappingDialog extends ImageProber {
 

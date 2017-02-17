@@ -11,6 +11,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
+@SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
 	
 	private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";

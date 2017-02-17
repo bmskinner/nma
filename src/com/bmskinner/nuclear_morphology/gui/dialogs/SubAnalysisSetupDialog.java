@@ -23,40 +23,38 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 /**
- * The setup for lobe detection in neutrophils
+ * A base class for the sub analyses setup options
  * @author bms41
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
-public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
+public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	
-	private static final String DIALOG_TITLE = "Lobe detection options";
+	final protected IAnalysisDataset dataset;
 	
 	/**
 	 * Construct with a main program window to listen for actions, and a dataset to operate on
 	 * @param mw
 	 * @param dataset
 	 */
-	public LobeDetectionSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
+	public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
 
 		// modal dialog
-		super( mw, dataset, DIALOG_TITLE);
+		super( mw, true);
+		this.dataset = dataset;
+		this.setTitle(title);
+
+		createUI();
+		
+		this.pack();
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
 
 	}
 
-	@Override
-	protected void createUI() {
-		
-		
-	}
-
-	@Override
-	protected void runAnalysis() {
-		// TODO Auto-generated method stub
-		
-	}
+	protected abstract void createUI();
 	
-	
+	protected abstract void runAnalysis();
 
 }
