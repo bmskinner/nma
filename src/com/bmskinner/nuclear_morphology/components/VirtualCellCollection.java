@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
@@ -862,23 +863,23 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public synchronized double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception {
+	public synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception {
 		if(this.size()==0){
 			return 0;
 		}
-		return getMedianStatistic(stat, scale, null, null);
+		return getMedianStatistic(stat, component, scale, null, null);
 	}
 
 	@Override
-	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale) {
-		return getMedianStatistics(stat, scale, null);
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale) {
+		return getMedianStatistics(stat, component, scale, null);
 	}
 
 	@Override
-	public synchronized double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
+	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 		try {
-			if(stat instanceof NucleusStatistic){
-				return getNuclearStatistics((NucleusStatistic) stat, scale);
+			if(CellularComponent.NUCLEUS.equals(component) || stat instanceof NucleusStatistic){
+				return getNuclearStatistics(stat, scale);
 			}
 
 			if(stat instanceof SegmentStatistic){
@@ -900,7 +901,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a list of segment lengths
 	 * @throws Exception
 	 */
-	private synchronized double[] getSegmentStatistics(SegmentStatistic stat, MeasurementScale scale, UUID id) throws Exception{
+	private synchronized double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
 		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
 				stat,
@@ -916,26 +917,19 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private synchronized double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
+	private synchronized double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
 		double[] result = null;
-		switch (stat) {
-
-		case VARIABILITY:{
+		// Keep the nucleus statistic for legacy comparability. Changing to GenericStatistics from 1.13.4
+		if(stat.equals(PlottableStatistic.VARIABILITY) || stat.equals(NucleusStatistic.VARIABILITY)){
 			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-			break;
-		}
-
-		default: {
+		} else{
 			finest("Making statistic fetching task for "+stat);
 			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
 					stat,
 					scale);
 			result = task.invoke();
 			finest("Fetched statistic result for "+stat);
-			break;
-		}
-
 		}
 		return result;
 	}
@@ -991,16 +985,16 @@ public class VirtualCellCollection implements ICellCollection {
 		return result;
 	}
 	
-	private double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
-		if(stat instanceof NucleusStatistic){
+	private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
+		if(CellularComponent.NUCLEUS.equals(component) || stat instanceof NucleusStatistic){
 			return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
 		}
 
-		if(stat instanceof SignalStatistic){
-			return getSignalManager().getMedianSignalStatistic((SignalStatistic) stat, scale, signalGroup);
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat instanceof SignalStatistic){
+			return getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
 		}
 
-		if(stat instanceof SegmentStatistic){
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat instanceof SegmentStatistic){
 			return getMedianSegmentStatistic((SegmentStatistic) stat, scale, segId);
 		}
 
@@ -1015,7 +1009,7 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	private double getMedianSegmentStatistic(SegmentStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
+	private double getMedianSegmentStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
 
 		if(cellIDs.isEmpty()){
 			return 0;
@@ -1032,10 +1026,10 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	private double getMedianNucleusStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
+	private double getMedianNucleusStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
 
-		if(this.statsCache.hasStatistic(stat, scale)){
-			return(this.statsCache.getStatistic(stat, scale));
+		if(this.statsCache.hasStatistic(stat, CellularComponent.NUCLEUS, scale)){
+			return(this.statsCache.getStatistic(stat, CellularComponent.NUCLEUS, scale));
 		} else {
 
 			double median = 0;
@@ -1044,7 +1038,7 @@ public class VirtualCellCollection implements ICellCollection {
 				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 			}
 
-			statsCache.setStatistic(stat, scale, median);
+			statsCache.setStatistic(stat, CellularComponent.NUCLEUS, scale, median);
 			return median;
 		}
 
@@ -1091,81 +1085,6 @@ public class VirtualCellCollection implements ICellCollection {
 		// after reading has finished.
 
 
-	}
-	
-	/**
-	 * Store plottable statistics for the collection
-	 * @author bms41
-	 *
-	 */
-	private class StatsCache {
-
-		private Map<PlottableStatistic, Map<MeasurementScale, Double>> cache = new HashMap<PlottableStatistic,  Map<MeasurementScale, Double>>();
-
-		public StatsCache(){
-
-		}
-
-		/**
-		 * Store the given statistic
-		 * @param stat
-		 * @param scale
-		 * @param d
-		 */
-		public void setStatistic(PlottableStatistic stat, MeasurementScale scale, double d){
-
-			Map<MeasurementScale, Double> map;
-
-			if(cache.containsKey(stat)){
-
-				map = cache.get(stat);
-
-			} else {
-
-				map = new HashMap<MeasurementScale, Double>();
-				cache.put(stat, map);
-
-			}
-
-			map.put(scale, d);
-
-		}
-
-		public double getStatistic(PlottableStatistic stat, MeasurementScale scale){
-
-			if(this.hasStatistic(stat, scale)){
-
-				finest("Fetching cached stat: "+stat);
-				return cache.get(stat).get(scale);
-
-
-			} else  {
-				return 0;
-
-			}
-		}
-
-		public boolean hasStatistic(PlottableStatistic stat, MeasurementScale scale){
-			Map<MeasurementScale, Double> map;
-
-			if(cache.containsKey(stat)){
-
-				map = cache.get(stat);
-
-			} else {
-
-				return false;
-
-			}
-
-			if(map.containsKey(scale)){
-
-				return true;
-			} else {
-				return false;
-			}
-
-		}
 	}
 
 }

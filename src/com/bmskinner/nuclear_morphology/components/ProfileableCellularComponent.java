@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 import ij.gui.Roi;
 
@@ -175,6 +176,21 @@ public abstract class ProfileableCellularComponent
 	 * @throws Exception
 	 */
 	public abstract boolean isProfileOrientationOK();
+	
+	
+	
+	@Override
+	protected double calculateStatistic(PlottableStatistic stat) {
+		
+		double result = super.calculateStatistic(stat);
+				
+		if(PlottableStatistic.MIN_DIAMETER.equals(stat)  || stat.equals(NucleusStatistic.MIN_DIAMETER)){
+			return this.getNarrowestDiameter();
+		}
+	
+		return result;
+	}
+	
 	
 	/*
 	 * #############################################

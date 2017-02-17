@@ -18,6 +18,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
+import ij.process.FloatPolygon;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,12 +32,11 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import weka.estimators.KernelEstimator;
+
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshEdge;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshEdge;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -45,11 +46,11 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -62,19 +63,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.KruskalTester;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
-
-import ij.process.FloatPolygon;
-import weka.estimators.KernelEstimator;
 
 public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
@@ -947,15 +942,15 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public BoxAndWhiskerCategoryDataset createBoxplotDataset() throws ChartDatasetCreationException {
 		List<IAnalysisDataset> datasets = options.getDatasets();
-		NucleusStatistic stat = (NucleusStatistic) options.getStat();
-		MeasurementScale scale = options.getScale();
+		PlottableStatistic stat = options.getStat();
+		MeasurementScale scale  = options.getScale();
 		ExportableBoxAndWhiskerCategoryDataset ds = new ExportableBoxAndWhiskerCategoryDataset();
 
 		for (int i=0; i < datasets.size(); i++) {
 			ICellCollection c = datasets.get(i).getCollection();
 
 			List<Double> list = new ArrayList<Double>();
-			double[] stats = c.getMedianStatistics(stat, scale);
+			double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 
 			for (double d : stats) {
 				list.add(new Double(d));
@@ -973,16 +968,19 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public BoxAndWhiskerCategoryDataset createSegmentStatDataset() throws ChartDatasetCreationException {
 		
-		SegmentStatistic stat = (SegmentStatistic) options.getStat();
+		PlottableStatistic stat = options.getStat();
 		
-		switch(stat){
-		case DISPLACEMENT:
-			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
-		case LENGTH:
+		if(stat.equals(PlottableStatistic.LENGTH)){
 			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
-		default:
-			return null;
 		}
+		
+		if(stat.equals(PlottableStatistic.DISPLACEMENT)){
+			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
+		}
+		
+		
+		return null;
+		
 	}
 	
 	/**
@@ -1025,7 +1023,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					if(seg!=null){
 						int indexLength = seg.length();
 						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-						length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+						length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
 						
 					}
 					

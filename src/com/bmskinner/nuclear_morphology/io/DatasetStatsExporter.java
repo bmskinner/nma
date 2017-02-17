@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.io;
 
+import ij.IJ;
+
 import java.io.File;
 import java.util.List;
 
@@ -10,10 +12,8 @@ import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.IJ;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -82,7 +82,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		
 		outLine.append("Dataset\tCellID\tComponent\tImage\t");
 		
-		for(NucleusStatistic s : NucleusStatistic.values()){
+		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
 			outLine.append(s+"\t");
 		}
 		outLine.append(NEWLINE);
@@ -123,10 +123,10 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	
 	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, ICell cell, CellularComponent c){
 		
-		for(NucleusStatistic s : NucleusStatistic.values()){
+		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
 			double var = 0;
 			
-			if(s.equals(NucleusStatistic.VARIABILITY)){
+			if(s.equals(PlottableStatistic.VARIABILITY)){
 				
 				try {
 					var = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cell);

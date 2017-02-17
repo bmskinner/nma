@@ -18,6 +18,14 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
@@ -37,17 +45,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-
-import ij.ImageStack;
-import ij.gui.Roi;
-import ij.measure.Calibration;
-import ij.measure.Measurements;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
 
 public class SignalDetector extends Detector {
 	
@@ -133,7 +132,7 @@ public class SignalDetector extends Detector {
 		// choose the right stack number for the channel
 		int stackNumber = ImageImporter.rgbToStack(channel);
 		
-		setMaxSize(n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
+		setMaxSize(n.getStatistic(PlottableStatistic.AREA) * options.getMaxFraction());
 		setMinSize(options.getMinSize());
 		setMinCirc(options.getMinCirc());
 		setMaxCirc(options.getMaxCirc());
@@ -176,15 +175,15 @@ public class SignalDetector extends Detector {
 					
 					s.setScale(n.getScale()); // copy scaling information from source nucleus
 
-					s.setStatistic(SignalStatistic.AREA,      values.get("Area"));
-					s.setStatistic(SignalStatistic.MAX_FERET, values.get("Feret"));
-					s.setStatistic(SignalStatistic.PERIMETER, values.get("Perim"));
+					s.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
+					s.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
+					s.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
 
 					/*
 			    Assuming the signal were a perfect circle of area equal
 			    to the measured area, get the radius for that circle
 					 */
-					s.setStatistic(SignalStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
+					s.setStatistic(PlottableStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
 
 
 
@@ -266,7 +265,7 @@ public class SignalDetector extends Detector {
 //		}
 		
 		// find the threshold from the bins
-		int area = (int) ( n.getStatistic(NucleusStatistic.AREA) * options.getMaxFraction());
+		int area = (int) ( n.getStatistic(PlottableStatistic.AREA) * options.getMaxFraction());
 		int total = 0;
 		int threshold = 0; // the value to threshold at
 		

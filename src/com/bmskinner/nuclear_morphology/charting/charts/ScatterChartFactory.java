@@ -38,11 +38,10 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.ScatterChartDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 public class ScatterChartFactory extends AbstractChartFactory {
@@ -67,7 +66,7 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	public JFreeChart createScatterChart(){
+	public JFreeChart createScatterChart(String component){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyChart();
@@ -85,12 +84,12 @@ public class ScatterChartFactory extends AbstractChartFactory {
 				return makeEmptyChart();
 			}
 		}
-		
-		if(firstStat instanceof NucleusStatistic){
+				
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusStatisticScatterChart();
 		}
-		
-		if(firstStat instanceof SignalStatistic){
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalStatisticScatterChart();
 		}
 		
@@ -103,11 +102,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart createNucleusStatisticScatterChart(){
+	public JFreeChart createNucleusStatisticScatterChart(){
 				
 		XYDataset ds;
 		try {
-			ds = new ScatterChartDatasetCreator(options).createScatterDataset();
+			ds = new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEUS);
 		} catch (ChartDatasetCreationException e) {
 			stack("Error creating scatter dataset", e);
 			return makeErrorChart();
@@ -136,11 +135,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 	 * @param options
 	 * @return
 	 */
-	private JFreeChart createSignalStatisticScatterChart(){
+	public JFreeChart createSignalStatisticScatterChart(){
 				
 		SignalXYDataset ds;
 		try {
-			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options).createScatterDataset();
+			ds = (SignalXYDataset) new ScatterChartDatasetCreator(options).createScatterDataset(CellularComponent.NUCLEAR_SIGNAL);
 		} catch (ChartDatasetCreationException e) {
 			stack("Error creating scatter dataset", e);
 			return makeErrorChart();

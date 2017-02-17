@@ -841,10 +841,10 @@ public abstract class DetailPanel
     				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {
-				warn("Interruption to charting");
+				warn("Interruption to charting in "+DetailPanel.this.getClass().getName());
 				stack("Error in chart worker", e);
 			} catch (ExecutionException e) {
-				warn("Interruption to charting");
+				warn("Excecution error in charting in "+DetailPanel.this.getClass().getName());
 				stack("Error in chart worker", e);
 			}
         }
@@ -911,10 +911,10 @@ public abstract class DetailPanel
     				options.getTarget().setCursor(Cursor.getDefaultCursor());
     			}
 			} catch (InterruptedException e) {
-				warn("Interruption to table creation");
+				warn("Interruption to table creation in "+DetailPanel.this.getClass().getName());
 				stack("Error in table worker", e);
 			} catch (ExecutionException e) {
-				warn("Interruption to table creation");
+				warn("Excecution error in table creation in "+DetailPanel.this.getClass().getName());
 				stack("Error in table worker", e);
 			}
         } 

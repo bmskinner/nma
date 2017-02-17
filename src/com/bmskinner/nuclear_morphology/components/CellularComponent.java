@@ -46,9 +46,16 @@ public interface CellularComponent
 				Loggable, 
 				Rotatable {
 	
+	// Standard components
+	static final String ACROSOME    = "Acrosome";
+	static final String NUCLEUS     = "Nucleus";
+	static final String CYTOPLASM   = "Cytoplasm";
+	static final String SPERM_TAIL  = "SpermTail";
+	static final String NUCLEAR_SIGNAL  = "NuclearSignal";
+	static final String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";	
 	
-	public static final double ERROR_CALCULATING_STAT   = -1d;
-	public static final double STAT_NOT_CALCULATED      = -3d;
+	static final double ERROR_CALCULATING_STAT   = -1d;
+	static final double STAT_NOT_CALCULATED      = -3d;
 			
 	/**
 	 * Get the UUID of the object
@@ -99,19 +106,19 @@ public interface CellularComponent
 	
 	
 	/**
-	 * Get the value of the given statistic for this nucleus.
-	 * Note that NucleusStatistic.VARIABILILTY returns zero, 
+	 * Get the value of the given statistic for this component.
+	 * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, 
 	 * as this must be calculated at the collection level
 	 * @param stat the statistic to fetch
 	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals(NucleusStatistic.VARIABILILTY)==true
+	 * @return the value or zero if stat.equals(PlottableStatistic.VARIABILILTY)==true
 	 * @throws Exception 
 	 */
 	double getStatistic(PlottableStatistic stat, MeasurementScale scale);
 	
 	/**
 	 * Get the value of the given {@link PlottableStatistic} for this nucleus.
-	 * Note that {@link NucleusStatistic.VARIABILILTY} returns zero, 
+	 * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, 
 	 * as this must be calculated at the collection level, not the object level. 
 	 * This method converts exceptions from {@link CellularComponent#getStatistic()} into RuntimeExceptions,
 	 *  so the method can be used in streams

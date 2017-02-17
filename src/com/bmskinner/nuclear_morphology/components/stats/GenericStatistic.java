@@ -56,10 +56,10 @@ public class GenericStatistic implements PlottableStatistic {
 		return PlottableStatistic.units(scale, dim);
 	}
 
-	@Override
-	public PlottableStatistic[] getValues() {
-		return null;
-	}
+////	@Override
+//	public PlottableStatistic[] getValues() {
+//		return null;
+//	}
 	
 	public String toString(){
 		return name;

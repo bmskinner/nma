@@ -20,11 +20,11 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
+import ij.process.ImageProcessor;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -36,13 +36,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-
-import ij.process.ImageProcessor;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * The default implementation of the {@link ISignalCollection} interface
@@ -347,7 +343,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @see components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic, components.generic.MeasurementScale, java.util.UUID)
 	 */
 	@Override
-	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
+	public List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
 		List<INuclearSignal> list = getSignals(signalGroup);
 		List<Double> result = new ArrayList<Double>(0);
 		for(int i=0;i<list.size();i++){
@@ -405,7 +401,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 							for(INuclearSignal col : signalsCol){
 								IPoint bCoM = col.getCentreOfMass();
 								double value = aCoM.getLengthTo(bCoM);
-								value = SignalStatistic.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
+								value = PlottableStatistic.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
 								matrix[matrixRow][matrixCol] = value;
 								matrixCol++;
 							}
@@ -470,7 +466,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 				}
 
 				// Use arbitrary distance measure to convert scale
-				smallest = SignalStatistic.DISTANCE_FROM_COM.convert(smallest, scaleFactor, scale);
+				smallest = PlottableStatistic.DISTANCE_FROM_COM.convert(smallest, scaleFactor, scale);
 				
 				
 				// Assign the pairwise distance

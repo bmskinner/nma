@@ -18,21 +18,13 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
-import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
@@ -40,35 +32,27 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import weka.estimators.KernelEstimator;
+
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
-import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.gui.Labels;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
-
-import weka.estimators.KernelEstimator;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions>  {
 	
@@ -86,7 +70,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	 * @throws Exception 
 	 */
 	public List<HistogramDataset> createSignalStatisticHistogramDataset(List<IAnalysisDataset> list, 
-			SignalStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
+			PlottableStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		List<HistogramDataset> result = new ArrayList<HistogramDataset>();
 		
@@ -129,8 +113,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	public List<DefaultXYDataset> createSignalDensityHistogramDataset() throws ChartDatasetCreationException {
 		
 		List<IAnalysisDataset> list = options.getDatasets();
-		SignalStatistic stat = (SignalStatistic) options.getStat();
-		MeasurementScale scale = options.getScale();
+		PlottableStatistic stat = options.getStat();
+		MeasurementScale scale  = options.getScale();
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
 		
@@ -148,7 +132,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                 String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
                 
                 // If the angle is always zero, the estimator will fail
-                if(collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(SignalStatistic.ANGLE)){
+                if(collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(PlottableStatistic.ANGLE)){
                 	
                 	// Add an empty series
                 	double[] xData = { 0 };
@@ -236,7 +220,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, SignalStatistic stat, 
+	private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, PlottableStatistic stat, 
 			MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		int[] result = new int[2];
@@ -264,7 +248,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	 * @return the array of values
 	 * @throws Exception
 	 */
-	public double[] findSignalDatasetValues(IAnalysisDataset dataset, SignalStatistic stat, 
+	public double[] findSignalDatasetValues(IAnalysisDataset dataset, PlottableStatistic stat, 
 			MeasurementScale scale, UUID signalGroup) throws ChartDatasetCreationException {
 		
 		ICellCollection collection = dataset.getCollection();			
@@ -283,9 +267,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 	 */
 	public IPoint getXYCoordinatesForSignal(INuclearSignal n, Nucleus outline) throws ChartDatasetCreationException {
 
-		double angle = n.getStatistic(SignalStatistic.ANGLE);
+		double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
-		double fractionalDistance = n.getStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM);
+		double fractionalDistance = n.getStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM);
 
 		// determine the distance to the border at this angle
 		double distanceToBorder = outline.getDistanceFromCoMToBorderAtAngle(angle);
@@ -365,7 +349,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
 
 						// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
-						double offset = n.getStatistic(SignalStatistic.RADIUS);
+						double offset = n.getStatistic(PlottableStatistic.RADIUS);
 
 
 						result.add(new Ellipse2D.Double(p.getX()-offset, p.getY()-offset, offset*2, offset*2));
@@ -405,7 +389,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 
     	ExportableBoxAndWhiskerCategoryDataset result = new ExportableBoxAndWhiskerCategoryDataset();
-		SignalStatistic stat = (SignalStatistic) options.getStat();
+    	PlottableStatistic stat = options.getStat();
 		
  
         for(IAnalysisDataset d : options.getDatasets()){
@@ -418,7 +402,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         		/*
         		 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
         		 */
-        		if(stat.equals(SignalStatistic.ANGLE)){
+        		if(stat.equals(PlottableStatistic.ANGLE)){
         			values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
         		}
 

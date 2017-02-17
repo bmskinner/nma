@@ -1667,4 +1667,25 @@ public class CellCollection implements ICellCollection {
 		return this.getCellIDs().contains(cellID);
 	}
 
+	@Override
+	public double getMedianStatistic(PlottableStatistic stat, String component,
+			MeasurementScale scale) throws Exception {
+		warn("Unimplemented method in "+this.getClass().getName());
+		return 0;
+	}
+
+	@Override
+	public double[] getMedianStatistics(PlottableStatistic stat,
+			String component, MeasurementScale scale) {
+		warn("Unimplemented method in "+this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public double[] getMedianStatistics(PlottableStatistic stat,
+			String component, MeasurementScale scale, UUID id) {
+		warn("Unimplemented method in "+this.getClass().getName());
+		return null;
+	}
+
 }

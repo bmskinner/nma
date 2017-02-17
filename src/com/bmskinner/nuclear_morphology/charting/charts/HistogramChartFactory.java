@@ -42,15 +42,18 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 
+/**
+ * Methods for creating histograms from chart options
+ * @author bms41
+ *
+ */
 public class HistogramChartFactory extends AbstractChartFactory {
 
 	public HistogramChartFactory(ChartOptions o){
@@ -101,27 +104,26 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		return chart;
 	}
 	
-	public JFreeChart createStatisticHistogram(){
+	public JFreeChart createStatisticHistogram(String component){
+		
+		finest("Creating stats histogram for "+component+": "+options.getStat());
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
 		}
 		
-		PlottableStatistic stat = options.getStat();
-		
-		
-		if(stat instanceof NucleusStatistic){
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNuclearStatsHistogram();
 		}
-		
-		if(stat instanceof SignalStatistic){
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalStatisticHistogram();
 		}
-		
-		if(stat instanceof SegmentStatistic){
+
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return createSegmentStatisticHistogram();
 		}
-		
+				
 		return makeEmptyChart();
 		
 	}
@@ -184,7 +186,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			return createSignalDensityStatsChart();
 		}
 		
-		SignalStatistic stat = (SignalStatistic) options.getStat();
+		PlottableStatistic stat = options.getStat();
 		
 		
 		List<HistogramDataset> list;
@@ -205,7 +207,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		if(list!=null && options.hasDatasets()){
 			
 			XYPlot plot = chart.getXYPlot();
-			if(stat.equals(SignalStatistic.ANGLE)){
+			if(stat.equals(PlottableStatistic.ANGLE)){
 				plot.getDomainAxis().setRange(0,360);
 			}
 			
@@ -269,11 +271,9 @@ public class HistogramChartFactory extends AbstractChartFactory {
 	private JFreeChart createSignalDensityStatsChart(){
 	
 		if( ! options.hasDatasets()){
-			return this.makeEmptyChart();
+			return makeEmptyChart();
 		}
-		
-		SignalStatistic stat = (SignalStatistic) options.getStat();
-		
+				
 		List<DefaultXYDataset> list;
 		try {
 			list = new NuclearSignalDatasetCreator(options).createSignalDensityHistogramDataset();

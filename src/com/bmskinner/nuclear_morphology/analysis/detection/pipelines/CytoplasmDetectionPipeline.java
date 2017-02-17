@@ -9,7 +9,7 @@ import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 import ij.gui.Roi;
@@ -46,9 +46,9 @@ public class CytoplasmDetectionPipeline extends DetectionPipeline<ICytoplasm> {
 
 		result.moveCentreOfMass(offsetCoM);
 
-		result.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
-		result.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
-		result.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+		result.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
+		result.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
+		result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
 
 		result.setScale(options.getScale());
 

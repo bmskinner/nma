@@ -11,7 +11,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 
@@ -71,9 +71,9 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 
 		currentNucleus.moveCentreOfMass(offsetCoM);
 
-		currentNucleus.setStatistic(NucleusStatistic.AREA,      values.get("Area"));
-		currentNucleus.setStatistic(NucleusStatistic.MAX_FERET, values.get("Feret"));
-		currentNucleus.setStatistic(NucleusStatistic.PERIMETER, values.get("Perim"));
+		currentNucleus.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
+		currentNucleus.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
+		currentNucleus.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
 
 		currentNucleus.setScale(options.getScale());
 

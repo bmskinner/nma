@@ -1,5 +1,8 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers;
 
+import ij.ImageStack;
+import ij.process.ImageProcessor;
+
 import java.awt.Color;
 import java.io.File;
 import java.util.HashMap;
@@ -17,15 +20,11 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DetectionImageType;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberTableCell;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageSet;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-
-import ij.ImageStack;
-import ij.process.ImageProcessor;
 
 /**
  * Detect signals within nuclei in a given image
@@ -162,12 +161,12 @@ public class SignalProberWorker  extends ImageProberWorker {
 		
 		boolean result = true;
 		
-		if(s.getStatistic(SignalStatistic.AREA) < testOptions.getMinSize()){
+		if(s.getStatistic(PlottableStatistic.AREA) < testOptions.getMinSize()){
 			
 			result = false;
 		}
 		
-		if(s.getStatistic(SignalStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(NucleusStatistic.AREA) )   ){
+		if(s.getStatistic(PlottableStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA) )   ){
 			
 			result = false;
 		}		

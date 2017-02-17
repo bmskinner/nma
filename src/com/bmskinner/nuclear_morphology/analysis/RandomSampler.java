@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.Cell;
-import com.bmskinner.nuclear_morphology.components.CellCollection;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * The purpose of this class is to validate observed differences in nuclear statistics
@@ -25,11 +25,11 @@ public class RandomSampler extends AnalysisWorker {
 	
 	private List<Double> magnitudes = new ArrayList<Double>();
 	private int iterations;
-	private NucleusStatistic stat;
+	private PlottableStatistic stat;
 	private int first; // the number of cells in the first subset
 	private int second;// the number of cells in the second subset
 	
-	public RandomSampler(IAnalysisDataset dataset, NucleusStatistic stat, int iterations, int first, int second){
+	public RandomSampler(IAnalysisDataset dataset, PlottableStatistic stat, int iterations, int first, int second){
 		super(dataset);
 		this.stat = stat;
 		this.iterations = iterations;
@@ -70,8 +70,8 @@ public class RandomSampler extends AnalysisWorker {
 			finest("Made collection");
 			
 			// get the stat magnitude
-			double value1 =  collections[0].getMedianStatistic(stat, MeasurementScale.PIXELS);
-			double value2 =  collections[1].getMedianStatistic(stat, MeasurementScale.PIXELS);
+			double value1 =  collections[0].getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			double value2 =  collections[1].getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 						
 			double magnitude = value2 / value1;
 			finest("Found value");

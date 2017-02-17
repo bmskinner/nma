@@ -54,11 +54,10 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
@@ -74,7 +73,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 
@@ -468,7 +466,7 @@ public class RoundNucleus extends AbstractCellularComponent
 
 
 	public void updateSignalAngle(UUID channel, int signal, double angle){
-		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
+		signalCollection.getSignals(channel).get(signal).setStatistic(PlottableStatistic.ANGLE, angle);
 	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
@@ -484,7 +482,7 @@ public class RoundNucleus extends AbstractCellularComponent
 				for(INuclearSignal s : signals){
 
 					double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
-					s.setStatistic(SignalStatistic.ANGLE, angle);
+					s.setStatistic(PlottableStatistic.ANGLE, angle);
 
 				}
 			}

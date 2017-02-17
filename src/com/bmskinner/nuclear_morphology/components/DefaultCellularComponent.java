@@ -32,8 +32,11 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
@@ -43,9 +46,13 @@ import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -539,42 +546,70 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 	}
 
+
+	protected double calculateStatistic(PlottableStatistic stat){
+		double result = 0;
+
+		if(PlottableStatistic.AREA.equals(stat) || stat.equals(NucleusStatistic.AREA)){
+			return this.getStatistic(stat);
+		}
+
+		if(PlottableStatistic.CIRCULARITY.equals(stat) || stat.equals(NucleusStatistic.CIRCULARITY)){
+			return this.getCircularity();
+		}
+
+		if(PlottableStatistic.MAX_FERET.equals(stat) || stat.equals(NucleusStatistic.MAX_FERET)){
+			return this.getStatistic(stat);
+		}
+
+		if(PlottableStatistic.PERIMETER.equals(stat) || stat.equals(NucleusStatistic.PERIMETER)){
+			return this.getStatistic(stat);
+		}
+		
+		return result;
+	}
 	
-	// For subclasses to override
-		protected double calculateStatistic(PlottableStatistic stat){
-			return 0;
+	private double getCircularity() {
+		if(this.hasStatistic(PlottableStatistic.PERIMETER)){
+			double perim2 = Math.pow(this.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
+			return (4 * Math.PI) * (this.getStatistic(PlottableStatistic.AREA, MeasurementScale.PIXELS) / perim2);
+		} else {
+			double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
+			return (4 * Math.PI) * (this.getStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS) / perim2);
 		}
 		
-		@Override
-		public synchronized double getStatistic(PlottableStatistic stat) {
-			return this.getStatistic(stat, MeasurementScale.PIXELS);
-		}
-
-
-		@Override
-		public synchronized void setStatistic(PlottableStatistic stat, double d) {
-			this.statistics.put(stat, d);
-		}
-
-
-		@Override
-		public PlottableStatistic[] getStatistics() {
-			return this.statistics.keySet().toArray(new PlottableStatistic[0]);
-		}
+	}
 		
-		/**
-		 * If any stats are listed as uncalcualted, attempt to calculate them
-		 */
-		public void updateDependentStats(){
-			
-			for(PlottableStatistic stat : this.getStatistics()){
-				
-				if(this.getStatistic(stat)==STAT_NOT_CALCULATED){
-					this.setStatistic(stat, calculateStatistic(stat));
-				}
+	@Override
+	public synchronized double getStatistic(PlottableStatistic stat) {
+		return this.getStatistic(stat, MeasurementScale.PIXELS);
+	}
+
+
+	@Override
+	public synchronized void setStatistic(PlottableStatistic stat, double d) {
+		this.statistics.put(stat, d);
+	}
+
+
+	@Override
+	public PlottableStatistic[] getStatistics() {
+		return this.statistics.keySet().toArray(new PlottableStatistic[0]);
+	}
+
+	/**
+	 * If any stats are listed as uncalcualted, attempt to calculate them
+	 */
+	public void updateDependentStats(){
+
+		for(PlottableStatistic stat : this.getStatistics()){
+
+			if(this.getStatistic(stat)==STAT_NOT_CALCULATED){
+				this.setStatistic(stat, calculateStatistic(stat));
 			}
-			
 		}
+
+	}
 		
 		public IPoint getCentreOfMass() {
 			return centreOfMass;
@@ -1119,7 +1154,88 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 //			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 						
 			makeBorderList(); // This will update the border to the original CoM saved
-//			this.moveCentreOfMass(getCentreOfMass()); // update border to the  saved CoM
+
+			Set<PlottableStatistic> set = new HashSet<PlottableStatistic>(statistics.keySet());
+			Iterator<PlottableStatistic> it = set.iterator();
+			
+//			 Update any old stats to generic plottable statistics
+			while(it.hasNext()){
+				PlottableStatistic stat = it.next();
+				double value = statistics.get(stat);
+				
+				if(stat.equals(NucleusStatistic.AREA)){
+					statistics.put(PlottableStatistic.AREA, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.PERIMETER)){
+					statistics.put(PlottableStatistic.PERIMETER, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.MAX_FERET)){
+					statistics.put(PlottableStatistic.MAX_FERET, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.MIN_DIAMETER)){
+					statistics.put(PlottableStatistic.MIN_DIAMETER, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.ASPECT)){
+					statistics.put(PlottableStatistic.ASPECT, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.BOUNDING_HEIGHT)){
+					statistics.put(PlottableStatistic.BOUNDING_HEIGHT, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.BOUNDING_WIDTH)){
+					statistics.put(PlottableStatistic.BOUNDING_WIDTH, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.OP_RP_ANGLE)){
+					statistics.put(PlottableStatistic.OP_RP_ANGLE, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.HOOK_LENGTH)){
+					statistics.put(PlottableStatistic.HOOK_LENGTH, value);
+				}
+				
+				if(stat.equals(NucleusStatistic.BODY_WIDTH)){
+					statistics.put(PlottableStatistic.BODY_WIDTH, value);
+				}
+				
+				if(stat.equals(SignalStatistic.ANGLE)){
+					statistics.put(PlottableStatistic.ANGLE, value);
+				}
+				
+				if(stat.equals(SignalStatistic.AREA)){
+					statistics.put(PlottableStatistic.AREA, value);
+				}
+				
+				if(stat.equals(SignalStatistic.DISTANCE_FROM_COM)){
+					statistics.put(PlottableStatistic.DISTANCE_FROM_COM, value);
+				}
+				
+				if(stat.equals(SignalStatistic.FRACT_DISTANCE_FROM_COM)){
+					statistics.put(PlottableStatistic.FRACT_DISTANCE_FROM_COM, value);
+				}
+				
+				if(stat.equals(SignalStatistic.MAX_FERET)){
+					statistics.put(PlottableStatistic.MAX_FERET, value);
+				}
+				
+				if(stat.equals(SignalStatistic.MIN_DIAMETER)){
+					statistics.put(PlottableStatistic.MIN_DIAMETER, value);
+				}
+				
+				if(stat.equals(SignalStatistic.PERIMETER)){
+					statistics.put(PlottableStatistic.PERIMETER, value);
+				}
+				
+				if(stat.equals(SignalStatistic.RADIUS)){
+					statistics.put(PlottableStatistic.RADIUS, value);
+				}
+				
+			}
 			
 		}
 

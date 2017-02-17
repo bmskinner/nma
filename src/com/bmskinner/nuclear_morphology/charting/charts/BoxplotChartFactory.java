@@ -34,12 +34,10 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationEx
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
@@ -69,28 +67,24 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 		return boxplot;
 	}
 	
-	public JFreeChart createStatisticBoxplot() {
+	public JFreeChart createStatisticBoxplot(String component) {
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
 		}
 		
-		PlottableStatistic stat = options.getStat();
-		
-		finest("Creating boxplot for "+stat);
-		
-		if(stat.getClass()==NucleusStatistic.class){
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusStatisticBoxplot();
 		}
-		
-		if(stat.getClass()==SignalStatistic.class){
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalStatisticBoxplot();
 		}
-		
-		if(stat.getClass()==SegmentStatistic.class){
+
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return createSegmentBoxplot();
 		}
-		
+				
 		return makeEmptyChart();
 		
 	}
@@ -130,7 +124,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart createSegmentBoxplot() {
 
-		SegmentStatistic stat = (SegmentStatistic) options.getStat();
+		PlottableStatistic stat = options.getStat();
 		
 		BoxAndWhiskerCategoryDataset ds;
 		try {

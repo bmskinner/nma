@@ -22,7 +22,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanc
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -332,7 +332,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		rowNames.add("Signals");
 		rowNames.add("Signals per nucleus");
 
-		for(SignalStatistic stat : SignalStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 			rowNames.add(  stat.label(MeasurementScale.PIXELS) );
 		}
 
@@ -398,7 +398,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
 				temp.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
 
-				for(SignalStatistic stat : SignalStatistic.values()){
+				for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 					double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
 
 

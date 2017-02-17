@@ -12,6 +12,7 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -20,9 +21,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class ScatterTableDatasetCreator extends AbstractTableCreator {
@@ -36,7 +35,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 	 * selected statisics
 	 * @return
 	 */
-	public TableModel createSpearmanCorrlationTable(){
+	public TableModel createSpearmanCorrlationTable(String component){
 		
 		if( ! options.hasDatasets()){
 			return AnalysisDatasetTableCreator.createBlankTable();
@@ -55,11 +54,11 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 			}
 		}
 		
-		if(firstStat instanceof NucleusStatistic){
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusSpearmanCorrlationTable();
 		}
-		
-		if(firstStat instanceof SignalStatistic){
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalSpearmanCorrlationTable();
 		}
 		
@@ -96,8 +95,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
 		MeasurementScale scale = options.getScale();
 
-		NucleusStatistic statA = (NucleusStatistic) stats.get(0);
-		NucleusStatistic statB = (NucleusStatistic) stats.get(1);
+		PlottableStatistic statA =stats.get(0);
+		PlottableStatistic statB =stats.get(1);
 		
 		for (int i=0; i < datasets.size(); i++) {
 
@@ -116,13 +115,13 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 				
 				try {
 					
-					if(statA.equals(NucleusStatistic.VARIABILITY)){
+					if(statA.equals(PlottableStatistic.VARIABILITY)){
 						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 					} else {
 						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
 					}
 					
-					if(statB.equals(NucleusStatistic.VARIABILITY)){
+					if(statB.equals(PlottableStatistic.VARIABILITY)){
 						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 					} else {
 						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
@@ -169,8 +168,8 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
 		MeasurementScale scale = options.getScale();
 
-		SignalStatistic statA = (SignalStatistic) stats.get(0);
-		SignalStatistic statB = (SignalStatistic) stats.get(1);
+		PlottableStatistic statA = stats.get(0);
+		PlottableStatistic statB = stats.get(1);
 				
 		for (int i=0; i < datasets.size(); i++) {
 			

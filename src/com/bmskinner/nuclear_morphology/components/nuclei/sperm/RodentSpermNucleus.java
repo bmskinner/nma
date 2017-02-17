@@ -38,10 +38,9 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -51,7 +50,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 @Deprecated
 public class RodentSpermNucleus extends SpermNucleus {
@@ -665,7 +664,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 					   * Angle begins from the orientation point 
 					   */
 
-					  double angle = n.getStatistic(SignalStatistic.ANGLE);
+					  double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
 					  try{
 						  // This com is offset, not original
@@ -681,7 +680,7 @@ public class RodentSpermNucleus extends SpermNucleus {
 						  // IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 					  } finally {
 
-						  n.setStatistic(SignalStatistic.ANGLE, angle);
+						  n.setStatistic(PlottableStatistic.ANGLE, angle);
 
 					  }
 				  }

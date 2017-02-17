@@ -24,8 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -57,9 +55,11 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
 		protected JScrollPane scrollPane; // hold the main panel
 		
-		public BoxplotsTabPanel(){
+		protected String component;
+		
+		public BoxplotsTabPanel(String component){
 			super();
-
+			this.component = component;
 			this.setLayout(new BorderLayout());
 
 			try {
@@ -76,7 +76,7 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 				
 				this.setEnabled(false);
 			} catch(Exception e){
-				log(Level.SEVERE, "Error creating panel", e);
+				error("Error creating panel", e);
 			}
 
 		}
@@ -93,9 +93,9 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 		@Override
 		protected JFreeChart createPanelChartType(ChartOptions options){
 			if(GlobalOptions.getInstance().isViolinPlots()){
-				return new ViolinChartFactory(options).createStatisticPlot();
+				return new ViolinChartFactory(options).createStatisticPlot(component);
 			} else {
-				return new BoxplotChartFactory(options).createStatisticBoxplot();
+				return new BoxplotChartFactory(options).createStatisticBoxplot(component);
 			}
 		}
 		
@@ -109,10 +109,10 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 	     public void actionPerformed(ActionEvent e) {
 
 	         try {
-	        	 log(Level.FINEST, "Updating abstract boxplot tab panel");
+	        	 finest("Updating abstract boxplot tab panel");
 	             this.update(getDatasets());
 	         } catch (Exception e1) {
-	         	log(Level.SEVERE, "Error updating boxplot panel from action listener", e1);
+	         	error("Error updating boxplot panel from action listener", e1);
 	         }
 	         
 	         

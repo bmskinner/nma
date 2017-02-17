@@ -4,9 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.Attribute;
+import weka.core.EuclideanDistance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
@@ -21,17 +28,9 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.Attribute;
-import weka.core.EuclideanDistance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class TreeBuildingMethod extends AbstractAnalysisMethod {
 	
@@ -160,7 +159,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 			attributeCount += profileAttributeCount;
 		}
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			if(options.isIncludeStatistic(stat)){
 				finest("Including "+stat.toString());
 				attributeCount++;
@@ -189,7 +188,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 			}
 		}
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			if(options.isIncludeStatistic(stat)){
 				Attribute a = new Attribute(stat.toString()); 
 				attributes.addElement(a);
@@ -267,7 +266,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 					}
 				}
 				
-				for(NucleusStatistic stat : NucleusStatistic.values()){
+				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 					if(options.isIncludeStatistic(stat)){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));

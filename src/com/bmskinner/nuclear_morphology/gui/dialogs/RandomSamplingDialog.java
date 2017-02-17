@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 
 @SuppressWarnings("serial")
@@ -69,7 +69,7 @@ public class RandomSamplingDialog
 	private JSpinner set1SizeSpinner;
 	private JSpinner set2SizeSpinner;
 	private JSpinner iterattionsSpinner;
-	private JComboBox<NucleusStatistic> statsBox = new JComboBox<NucleusStatistic>(NucleusStatistic.values());
+	private JComboBox<PlottableStatistic> statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getNucleusStats().toArray(new PlottableStatistic[0]));
 	private JButton  runButton;
 	private JCheckBox showDensity;
 	private RandomSampler sampler;
@@ -216,7 +216,7 @@ public class RandomSamplingDialog
 		int iterations = (Integer) iterattionsSpinner.getValue();
 		int firstCount = (Integer) set1SizeSpinner.getValue();
 		int secondCount = (Integer) set2SizeSpinner.getValue();
-		NucleusStatistic stat = (NucleusStatistic) statsBox.getSelectedItem();
+		PlottableStatistic stat = (PlottableStatistic) statsBox.getSelectedItem();
 		
 		try {
 			setStatusLoading();

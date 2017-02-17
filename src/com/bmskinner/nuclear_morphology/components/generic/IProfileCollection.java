@@ -32,6 +32,10 @@ public interface IProfileCollection extends Serializable, Loggable{
 
 	static final int ZERO_INDEX = 0;
 	
+	static IProfileCollection makeNew(){
+		return new DefaultProfileCollection();
+	}
+	
 	/**
 	 * Get the offset needed to transform a profile to start from the given 
 	 * point type. Returns -1 if the border tag is not found

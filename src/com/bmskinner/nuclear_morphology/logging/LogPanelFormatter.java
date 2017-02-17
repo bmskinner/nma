@@ -81,9 +81,9 @@ public class LogPanelFormatter extends Formatter {
 			
 			for(int i=0; i< array.length; i++){
 				StackTraceElement e = array[i];
-				if(e.getClassName().equals("logging.Loggable")){
-					sourceMethod = array[++i].getMethodName();
-					sourceClass  = array[i].getClassName();
+				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
+					sourceMethod = array[i+1].getMethodName();
+					sourceClass  = array[i+1].getClassName();
 					break;
 				}
 			}

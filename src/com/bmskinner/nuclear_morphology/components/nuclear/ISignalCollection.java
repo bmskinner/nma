@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
+import ij.process.ImageProcessor;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.List;
@@ -27,11 +29,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.process.ImageProcessor;
 
 /**
  * The collection of nuclear signals that can be found within a single 
@@ -178,7 +178,7 @@ public interface ISignalCollection extends Serializable, Loggable {
 	 * @param signalGroup the signal group ID
 	 * @return the values from each signal in the group
 	 */
-	List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup);
+	List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup);
 
 	/**
 	 * Get the ImageJ image processor for the source image for signals in the given group 

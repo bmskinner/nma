@@ -22,17 +22,14 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -56,7 +53,7 @@ public class SignalAnalyser implements Loggable {
 			if(!signals.isEmpty()){
 				for(INuclearSignal s : signals){
 					double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
-					s.setStatistic(SignalStatistic.DISTANCE_FROM_COM, distance);
+					s.setStatistic(PlottableStatistic.DISTANCE_FROM_COM, distance);
 				}
 			}
 		}
@@ -105,7 +102,7 @@ public class SignalAnalyser implements Loggable {
 					double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
 					double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
 					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-					signal.setStatistic(SignalStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
+					signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
 				}
 			}
 		}
@@ -124,7 +121,7 @@ public class SignalAnalyser implements Loggable {
 				for(INuclearSignal s : signals){
 
 					int minIndex = 0;
-					double minDistance = n.getStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
+					double minDistance = n.getStatistic(PlottableStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
 					for(int j = 0; j<n.getBorderLength();j++){
 						IPoint p = n.getBorderPoint(j);

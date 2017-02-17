@@ -22,6 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.Attribute;
+import weka.core.EuclideanDistance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -37,15 +45,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.Attribute;
-import weka.core.EuclideanDistance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 @Deprecated
 public class NucleusTreeBuilder extends AnalysisWorker {
@@ -170,7 +170,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			attributeCount += profileAttributeCount;
 		}
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			if(options.isIncludeStatistic(stat)){
 				finest("Including "+stat.toString());
 				attributeCount++;
@@ -199,7 +199,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 		}
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			if(options.isIncludeStatistic(stat)){
 				Attribute a = new Attribute(stat.toString()); 
 				attributes.addElement(a);
@@ -277,7 +277,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					}
 				}
 				
-				for(NucleusStatistic stat : NucleusStatistic.values()){
+				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 					if(options.isIncludeStatistic(stat)){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));

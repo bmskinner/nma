@@ -20,6 +20,9 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,9 +33,9 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -45,10 +48,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
 
 /**
  * The standard rodent sperm nucleus
@@ -94,22 +93,19 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	}
 
 	@Override
-	protected double calculateStatistic(NucleusStatistic stat){
+	protected double calculateStatistic(PlottableStatistic stat){
 		double result = super.calculateStatistic(stat);
 		
-		switch(stat){
-
-		case HOOK_LENGTH:
-			result = getHookOrBodyLength(true);
-			break;
-		case BODY_WIDTH:
-			result = getHookOrBodyLength(false);
-			break;
-		default:
-			return result;
-
+		
+		if(PlottableStatistic.HOOK_LENGTH.equals(stat) || stat.equals(NucleusStatistic.HOOK_LENGTH)){
+			return getHookOrBodyLength(true);
+			
 		}
-		//		finest("Calculated stat in rodent sperm nucleus: "+stat);
+		
+		if(PlottableStatistic.BODY_WIDTH.equals(stat) || stat.equals(NucleusStatistic.BODY_WIDTH) ){
+			return getHookOrBodyLength(false);
+		}
+
 		return result;
 
 	}
@@ -714,7 +710,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 						 * Angle begins from the orientation point 
 						 */
 
-						double angle = n.getStatistic(SignalStatistic.ANGLE);
+						double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
 						try{
 							// This com is offset, not original
@@ -730,7 +726,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 							// IJ.log(this.getNameAndNumber()+": Error detected: falling back on default angle: "+e.getMessage());
 						} finally {
 
-							n.setStatistic(SignalStatistic.ANGLE, angle);
+							n.setStatistic(PlottableStatistic.ANGLE, angle);
 
 						}
 					}

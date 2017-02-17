@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -18,9 +20,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 
 /**
  * Create scatter chart datasets
@@ -42,19 +42,17 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 	 * @return a charting dataset
 	 * @throws ChartDatasetCreationException
 	 */
-	public XYDataset createScatterDataset() throws ChartDatasetCreationException{
+	public XYDataset createScatterDataset(String component) throws ChartDatasetCreationException{
 		
-		PlottableStatistic stat = options.getStat();
-		
-		if(stat instanceof NucleusStatistic){
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusScatterDataset();
 		}
-		
-		if(stat instanceof SignalStatistic){
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalScatterDataset();
 		}
-		
-		throw new ChartDatasetCreationException("Stat not recognised: "+stat);
+
+		throw new ChartDatasetCreationException("Component not recognised: "+component);
 		
 	}
 	
@@ -80,21 +78,13 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		if( ! options.hasDatasets()){
 			return ds;
 		}
-		
-		if( ! (options.getStat(0) instanceof NucleusStatistic)){
-			throw new ChartDatasetCreationException("Stat 0 cannot be cast to NucleusStatistic");
-		}
-		
-		if( ! (options.getStat(1) instanceof NucleusStatistic)){
-			throw new ChartDatasetCreationException("Stat 1 cannot be cast to NucleusStatistic");
-		}
-		
+				
 		List<IAnalysisDataset> datasets = options.getDatasets();
 				
 		MeasurementScale scale = options.getScale();
 		
-		NucleusStatistic statA = (NucleusStatistic) options.getStat(0);
-		NucleusStatistic statB = (NucleusStatistic) options.getStat(1);
+		PlottableStatistic statA = options.getStat(0);
+		PlottableStatistic statB = options.getStat(1);
 
 		
 
@@ -115,13 +105,13 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 				
 				try {
 					
-					if(statA.equals(NucleusStatistic.VARIABILITY)){
+					if(statA.equals(PlottableStatistic.VARIABILITY)){
 						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 					} else {
 						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
 					}
 					
-					if(statB.equals(NucleusStatistic.VARIABILITY)){
+					if(statB.equals(PlottableStatistic.VARIABILITY)){
 						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
 					} else {
 						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
@@ -161,8 +151,8 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		
 		MeasurementScale scale = options.getScale();
 		
-		SignalStatistic statA = (SignalStatistic) stats.get(0);
-		SignalStatistic statB = (SignalStatistic) stats.get(1);
+		PlottableStatistic statA = stats.get(0);
+		PlottableStatistic statB = stats.get(1);
 
 		SignalXYDataset ds = new SignalXYDataset();
 

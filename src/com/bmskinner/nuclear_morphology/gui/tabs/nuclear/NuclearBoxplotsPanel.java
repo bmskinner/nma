@@ -24,21 +24,19 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
 
 import javax.swing.JScrollPane;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
@@ -46,11 +44,11 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
 		public NuclearBoxplotsPanel() {
-			super();
+			super(CellularComponent.NUCLEUS);
 
 			Dimension preferredSize = new Dimension(200, 300);
 			
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				
 				JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
 				ViolinChartPanel panel = new ViolinChartPanel(chart);
@@ -85,7 +83,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		protected void updateMultiple() {
 			super.updateMultiple();
 
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				
@@ -114,7 +112,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		@Override
 		public void setChartsAndTablesLoading(){
 			super.setChartsAndTablesLoading();
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());
 				

@@ -145,7 +145,7 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 			if(this.isCancelled()){
 				return;
 			}
-			drawNucleus(cell, original);
+			drawOutline(cell, original);
 		}
 
 		ImageProberTableCell iconCell5 = makeIconCell(original, 
@@ -173,7 +173,7 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 	 * @param cell
 	 * @param ip
 	 */
-	private void drawNucleus(ICell cell, ImageProcessor ip) {
+	private void drawOutline(ICell cell, ImageProcessor ip) {
 		if(cell==null){
 			throw new IllegalArgumentException("Input cell is null");
 		}
@@ -202,7 +202,6 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		}
 		
 		Nucleus n = cell.getNucleus();
-		// annotate the image processor with the nucleus outline
 		
 		ip = new ImageAnnotator(ip)
 				.annotateStats(n, Color.ORANGE, Color.BLUE)

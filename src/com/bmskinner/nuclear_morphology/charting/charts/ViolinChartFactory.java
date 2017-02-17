@@ -14,14 +14,10 @@ import com.bmskinner.nuclear_morphology.charting.datasets.SignalViolinDatasetCre
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ViolinChartFactory extends AbstractChartFactory {
 		
@@ -34,31 +30,38 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		return BoxplotChartFactory.makeEmptyChart(); 
 	}
 	
-	public JFreeChart createStatisticPlot() {
+	/**
+	 * Create a statistic plot for the given component.
+	 * @param component the component. Specified defaults are in {@link CellularComponent}
+	 * @return
+	 */
+	public JFreeChart createStatisticPlot(String component) {
+		finest("Making violin plot for "+component);
 		
 		if(!options.hasDatasets()){
 			return makeEmptyChart();
 		}
-		
-		PlottableStatistic stat = options.getStat();
-		
+			
 		try {
 		
-			if(stat instanceof NucleusStatistic){
+			if(CellularComponent.NUCLEUS.equals(component)){
 				return createNucleusStatisticPlot();
 			}
 
-			if(stat instanceof SignalStatistic){
+			if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 				return createSignalStatisticPlot();
 			}
 
-			if(stat instanceof SegmentStatistic){
+			if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 				return createSegmentPlot();
 			}
+			
 		} catch(Exception e){
 			stack("Error making violin chart", e);
 			return makeErrorChart();
 		}
+		
+		fine("No chart of type "+component);
 		
 		return makeEmptyChart();
 		
@@ -135,7 +138,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
 			try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
 			} catch (ChartDatasetCreationException e) {
 				stack("Error making chart dataset", e);
 				return makeErrorChart();
@@ -185,7 +188,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
 			try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
 			} catch (ChartDatasetCreationException e) {
 				stack("Error making chart dataset", e);
 				return makeErrorChart();
@@ -271,7 +274,7 @@ public class ViolinChartFactory extends AbstractChartFactory {
 		ViolinCategoryDataset ds = null;
 		if(options.hasDatasets()){
 			 try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(options.getStat());
+				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 			} catch (ChartDatasetCreationException e) {
 				fine("Error creating volin dataset", e);
 				return makeErrorChart();

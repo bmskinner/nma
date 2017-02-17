@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class ClusteringOptions implements IClusteringOptions {
@@ -54,7 +53,7 @@ public class ClusteringOptions implements IClusteringOptions {
 	 */
 	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
     		statMap.put(stat, false);
     	}
 	}
@@ -69,7 +68,7 @@ public class ClusteringOptions implements IClusteringOptions {
 		this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
 		this.includeProfile      = oldOptions.isIncludeProfile();
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
     		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
     	}
 		
@@ -306,7 +305,7 @@ public class ClusteringOptions implements IClusteringOptions {
 	    in.defaultReadObject();
 	    if(statMap==null){
 	    	statMap = new HashMap<PlottableStatistic, Boolean>();
-	    	for(NucleusStatistic stat : NucleusStatistic.values()){
+	    	for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 	    		statMap.put(stat, false);
 	    	}
 	    }
@@ -354,6 +353,7 @@ public class ClusteringOptions implements IClusteringOptions {
 		public String code(){
 			return this.code;
 		}
+
 	}
 	
 	/**

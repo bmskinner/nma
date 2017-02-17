@@ -42,8 +42,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
@@ -244,13 +243,13 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		
 		if(n instanceof INuclearSignal){
 
-			area = n.getStatistic(SignalStatistic.AREA);
-			double perim2 = Math.pow(n.getStatistic(SignalStatistic.PERIMETER), 2);
+			area = n.getStatistic(PlottableStatistic.AREA);
+			double perim2 = Math.pow(n.getStatistic(PlottableStatistic.PERIMETER), 2);
 			circ = (4 * Math.PI) * (area / perim2);
 
 		} else {
-			area =  n.getStatistic(NucleusStatistic.AREA);
-			circ =  n.getStatistic(NucleusStatistic.CIRCULARITY);
+			area =  n.getStatistic(PlottableStatistic.AREA);
+			circ =  n.getStatistic(PlottableStatistic.CIRCULARITY);
 		}
 		
 		areaLbl  = "Area: " + df.format( area);
@@ -281,13 +280,13 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		
 		if(signal instanceof INuclearSignal){
 
-			area = signal.getStatistic(SignalStatistic.AREA);
-			double perim2 = Math.pow(signal.getStatistic(SignalStatistic.PERIMETER), 2);
+			area = signal.getStatistic(PlottableStatistic.AREA);
+			double perim2 = Math.pow(signal.getStatistic(PlottableStatistic.PERIMETER), 2);
 			circ = (4 * Math.PI) * (area / perim2);
 
 		} 
 		
-		fraction  = area / parent.getStatistic(NucleusStatistic.AREA);
+		fraction  = area / parent.getStatistic(PlottableStatistic.AREA);
 		
 		areaLbl  = "Area: " + df.format( area);
 		perimLbl = "Circ: " + df.format( circ);

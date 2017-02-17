@@ -29,7 +29,6 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -42,8 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
@@ -259,9 +257,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 
-			if( ! stat.equals(NucleusStatistic.VARIABILITY)){
+			if( ! stat.equals(PlottableStatistic.VARIABILITY)){
 
 				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
 
@@ -338,7 +336,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		
 //		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
-		for(SignalStatistic stat : SignalStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 
 			fieldNames.add(    stat.label(   GlobalOptions.getInstance().getScale() )  );
 

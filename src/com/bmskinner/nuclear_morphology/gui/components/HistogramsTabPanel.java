@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -61,9 +62,11 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
 	protected JScrollPane scrollPane; // hold the main panel
 	
-	public HistogramsTabPanel(){
+	protected String component;
+	
+	public HistogramsTabPanel(String component){
 		super();
-
+		this.component = component;
 		this.setLayout(new BorderLayout());
 
 		try {
@@ -101,7 +104,7 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 	
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options){
-		return new HistogramChartFactory(options).createStatisticHistogram();
+		return new HistogramChartFactory(options).createStatisticHistogram(component);
 	}
 	
 	@Override

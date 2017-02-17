@@ -26,36 +26,33 @@ import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
-import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.components.CellCollection;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 
 @SuppressWarnings("serial")
 public class NuclearHistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
 		
 		public NuclearHistogramsPanel(){
-			super();
+			super(CellularComponent.NUCLEUS);
 
 			try {
 
 				Dimension preferredSize = new Dimension(400, 150);
-				for(NucleusStatistic stat : NucleusStatistic.values()){
+				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 					
 					JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 					
@@ -83,7 +80,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 			boolean useDensity = useDensityPanel.isSelected();
 
 
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				SelectableChartPanel panel = chartPanels.get(stat.toString());
 
 				ChartOptionsBuilder builder = new ChartOptionsBuilder();
@@ -107,7 +104,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		@Override
 		public void setChartsAndTablesLoading(){
 			super.setChartsAndTablesLoading();
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());
 				
@@ -126,9 +123,14 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
 		}
 
-		private NucleusStatistic getPanelStatisticFromName(String name){
-			NucleusStatistic stat = null;
-			for (NucleusStatistic n : NucleusStatistic.values()){
+		/**
+		 * Get a statistic from its name.
+		 * @param name
+		 * @return
+		 */
+		private PlottableStatistic getPanelStatisticFromName(String name){
+			PlottableStatistic stat = null;
+			for(PlottableStatistic n : PlottableStatistic.getNucleusStats()){
 				if(n.toString().equals(name)){
 					stat = n;
 				}
@@ -150,7 +152,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 			DecimalFormat df = new DecimalFormat("#.##");
 
 			// check the boxplot that fired
-			NucleusStatistic stat = getPanelStatisticFromName(panel.getName());
+			PlottableStatistic stat = getPanelStatisticFromName(panel.getName());
 
 			if(    !lower.isNaN() && !upper.isNaN()     ){
 				

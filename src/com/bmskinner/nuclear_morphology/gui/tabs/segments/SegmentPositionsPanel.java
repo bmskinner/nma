@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -58,7 +59,7 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 	private Dimension preferredSize = new Dimension(300, 300);
 			
 	public SegmentPositionsPanel(){
-		super();
+		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 		
 		try {
 			this.updateNull();

@@ -32,7 +32,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
@@ -40,7 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 	public SignalsBoxplotPanel(){
-		super();
+		super(CellularComponent.NUCLEAR_SIGNAL);
 		createUI();
 	}
 
@@ -49,7 +50,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 		this.setLayout(new BorderLayout());
 		Dimension preferredSize = new Dimension(200, 300);
 
-		for(SignalStatistic stat : SignalStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 
 			ChartOptions options = new ChartOptionsBuilder()
 					.addStatistic(stat)
@@ -59,7 +60,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
 			JFreeChart chart = null;
 			try {
-				chart = new ViolinChartFactory(options).createStatisticPlot();
+				chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
 			} catch (Exception e) {
 				log(Level.SEVERE, "Error creating boxplots panel", e);
 			}
@@ -92,7 +93,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 	@Override
 	protected void updateMultiple() {
 
-		for(SignalStatistic stat : SignalStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 
 			ExportableChartPanel panel = chartPanels.get(stat.toString());
 

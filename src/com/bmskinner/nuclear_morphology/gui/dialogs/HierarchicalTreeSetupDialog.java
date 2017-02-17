@@ -45,6 +45,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -52,8 +53,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
@@ -81,7 +81,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected JCheckBox includeMeshCheckBox;
 	
-	protected Map<NucleusStatistic, JCheckBox> statBoxMap = new HashMap<NucleusStatistic, JCheckBox>();
+	protected Map<PlottableStatistic, JCheckBox> statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
 	
 	protected Map<UUID, JCheckBox> segmentBoxMap =  new HashMap<UUID, JCheckBox>();
 	
@@ -221,7 +221,10 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 		
-		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+		
+		HierarchicalClusterMethod[] v = HierarchicalClusterMethod.values();
+		
+		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(v);
 		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
@@ -276,11 +279,11 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		fields.add(includeMeshCheckBox);
 		
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getComponentStats()){
 			
 			String pval = "";
 			try {
-				double[] stats = dataset.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS);
+				double[] stats = dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
@@ -304,7 +307,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			
 			String pval = "";
 			try {
-				double[] stats = dataset.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, s.getID());
+				double[] stats = dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, s.getID());
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
@@ -353,7 +356,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	public void stateChanged(ChangeEvent e) {
 //		try {
 			
-			for(NucleusStatistic stat : NucleusStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				JCheckBox box = statBoxMap.get(stat);
 				options.setIncludeStatistic(stat, box.isSelected());
 			}

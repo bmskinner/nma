@@ -26,8 +26,11 @@ import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import weka.estimators.KernelEstimator;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -38,15 +41,12 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
-
-import weka.estimators.KernelEstimator;
 
 public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	
@@ -71,13 +71,9 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 		for(IAnalysisDataset dataset : options.getDatasets()){
 
 			ICellCollection collection = dataset.getCollection();
-			
-			if( ! (options.getStat() instanceof NucleusStatistic)){
-				throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
-			}
 
-			NucleusStatistic stat = (NucleusStatistic) options.getStat();
-			double[] values = collection.getMedianStatistics(stat, options.getScale());
+			PlottableStatistic stat =  options.getStat();
+			double[] values = collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, options.getScale());
 
 			double[] minMaxStep = findMinAndMaxForHistogram(values);
 			int minRounded = (int) minMaxStep[0];
@@ -177,21 +173,18 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 			return ds;
 		}
 		
-		if( ! (options.getStat() instanceof NucleusStatistic)){
-			throw new ChartDatasetCreationException("Cannot cast stat to NucleusStatistic");
-		}
 		
 		List<IAnalysisDataset> list = options.getDatasets();
-		NucleusStatistic stat      = (NucleusStatistic) options.getStat();
+		PlottableStatistic stat    = options.getStat();
 		MeasurementScale scale     = options.getScale();
 		
-		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
+		int[] minMaxRange = calculateMinAndMaxRange(list, stat, CellularComponent.NUCLEUS, scale);
 
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
 			
 			String groupLabel = stat.toString();
-			double[] values = collection.getMedianStatistics(stat, scale);
+			double[] values = collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 			
 			KernelEstimator est;
 			try {
@@ -244,7 +237,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 	 * @return an array with the min and max of the range
 	 * @throws Exception
 	 */
-	private static int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, NucleusStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
+	private static int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, PlottableStatistic stat, String component, MeasurementScale scale) throws ChartDatasetCreationException {
 		
 		int[] result = new int[2];
 		result[0] = Integer.MAX_VALUE; // holds min
@@ -252,7 +245,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 
 		for(IAnalysisDataset dataset : list){
 			
-			double[] values = dataset.getCollection().getMedianStatistics(stat, scale);
+			double[] values = dataset.getCollection().getMedianStatistics(stat, component, scale);
 			
 			updateMinMaxRange(result, values);
 		}
@@ -322,7 +315,8 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 			
 			double[] values;
 
-			values = collection.getMedianStatistics(SegmentStatistic.LENGTH, 
+			values = collection.getMedianStatistics(PlottableStatistic.LENGTH, 
+					CellularComponent.NUCLEAR_BORDER_SEGMENT,
 					options.getScale(), 
 					medianSeg.getID());
 	
@@ -384,7 +378,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 							.getSegment(medianSeg.getID());
 					int indexLength = seg.length();
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+					double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
 				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					fine("Error getting segment length");
@@ -435,7 +429,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 					
 					int indexLength = seg.length();
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-					double length = n.getStatistic(NucleusStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
+					double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
 				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					fine("Error getting segment length");

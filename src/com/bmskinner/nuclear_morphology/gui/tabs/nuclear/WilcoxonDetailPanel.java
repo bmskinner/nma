@@ -24,12 +24,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.WilcoxonTableCellRenderer;
@@ -60,7 +60,7 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	protected void updateMultiple() {
 		scrollPane.setColumnHeaderView(null);
 		tablePanel = createTablePanel();
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 
 			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 			
@@ -97,6 +97,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
+		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEUS);
 	}
 }

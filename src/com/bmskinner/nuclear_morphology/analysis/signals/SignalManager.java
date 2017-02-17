@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanc
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -374,7 +374,7 @@ public class SignalManager implements Loggable {
        * @return the median
      * @throws Exception 
        */
-      public double getMedianSignalStatistic(SignalStatistic stat, MeasurementScale scale, UUID signalGroup){
+      public double getMedianSignalStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup){
           
           double[] values = null;
           double median;
@@ -406,7 +406,7 @@ public class SignalManager implements Loggable {
              
       }
       
-      public double[] getSignalStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
+      public double[] getSignalStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
 
           Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
           List<Double> a = new ArrayList<Double>(0);
@@ -438,7 +438,7 @@ public class SignalManager implements Loggable {
        */
       public double getMeanSignalAngle(UUID signalGroup) {
 
-          double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
+          double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
           
           double sumSin = 0;
           double sumCos = 0;
@@ -466,7 +466,7 @@ public class SignalManager implements Loggable {
      */
     public double[] getOffsetSignalAngles(UUID signalGroup) {
 
-          double[] values = getSignalStatistics(SignalStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
+          double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
                     
           if(values.length==0){
         	  return new double[0];

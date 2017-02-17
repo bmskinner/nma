@@ -36,8 +36,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.XYPoint;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -581,15 +580,15 @@ public class SignalCollection implements ISignalCollection {
 	/* (non-Javadoc)
 	 * @see components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic, components.generic.MeasurementScale, java.util.UUID)
 	 */
-	@Override
-	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
-		List<INuclearSignal> list = getSignals(signalGroup);
-		List<Double> result = new ArrayList<Double>(0);
-		for(int i=0;i<list.size();i++){
-			result.add(list.get(i).getStatistic(stat, scale));
-		}
-		return result;
-	}
+//	@Override
+//	public List<Double> getStatistics(SignalStatistic stat, MeasurementScale scale, UUID signalGroup) {
+//		List<INuclearSignal> list = getSignals(signalGroup);
+//		List<Double> result = new ArrayList<Double>(0);
+//		for(int i=0;i<list.size();i++){
+//			result.add(list.get(i).getStatistic(stat, scale));
+//		}
+//		return result;
+//	}
 	
 	
 	/* (non-Javadoc)
@@ -764,5 +763,13 @@ public class SignalCollection implements ISignalCollection {
 		
 		
 		return result;
+	}
+
+	@Override
+	public List<Double> getStatistics(PlottableStatistic stat,
+			MeasurementScale scale, UUID signalGroup) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method in "+this.getClass().getName());
+		return null;
 	}
 }

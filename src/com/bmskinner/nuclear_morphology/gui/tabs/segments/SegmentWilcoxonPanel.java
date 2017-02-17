@@ -31,10 +31,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.WilcoxonTableCellRenderer;
@@ -80,7 +81,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 				return;
 			}
 
-			for(SegmentStatistic stat : SegmentStatistic.values()){
+			for(PlottableStatistic stat : PlottableStatistic.getSegmentStats()){
 
 				// Get each segment as a boxplot
 				for(IBorderSegment seg : segments){
@@ -137,7 +138,7 @@ public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable();
+		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 	}
 			
 }

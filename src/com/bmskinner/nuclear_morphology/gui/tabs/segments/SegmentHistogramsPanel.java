@@ -3,7 +3,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -17,11 +16,12 @@ import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.SelectableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
@@ -32,7 +32,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 	private Dimension preferredSize = new Dimension(200, 100);
 	
 	public SegmentHistogramsPanel(){
-		super();
+		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 		
 		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
 		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
@@ -56,7 +56,7 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 
 		boolean useDensity = this.useDensityPanel.isSelected();
 		
-		log(Level.FINEST, "Dataset list is not empty");
+		finest("Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
 		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
@@ -77,20 +77,24 @@ public class SegmentHistogramsPanel extends HistogramsTabPanel  {
 			// Get each segment as a boxplot
 			for(IBorderSegment seg : segments){
 				
+				// Create a new chart panel with a loading state, and add it to this panel
 				JFreeChart chart = AbstractChartFactory.createLoadingChart();
 				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
 				chartPanel.setPreferredSize(preferredSize);
 				mainPanel.add(chartPanel);	
 				
+				// Make the options for the chart, and render it in the background
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.addStatistic(SegmentStatistic.LENGTH)
+					.addStatistic(PlottableStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setUseDensity(useDensity)
 					.setSegPosition(seg.getPosition())
 					.setTarget(chartPanel)
 					.build();
+				
+				finest("Made options for segment histogram "+seg.getName());
 				
 				setChart(options);
 						

@@ -18,9 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;

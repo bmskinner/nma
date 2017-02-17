@@ -6,9 +6,11 @@ import java.util.UUID;
 
 import org.jfree.data.Range;
 
+import weka.estimators.KernelEstimator;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -20,16 +22,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.stats.Max;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Sum;
-
-import weka.estimators.KernelEstimator;
 
 /**
  * Creator for violin datasets
@@ -53,21 +50,23 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	 * @return a violin dataset
 	 * @throws ChartDatasetCreationException if any error occurs or the statistic was not recognised
 	 */
-	public ViolinCategoryDataset createPlottableStatisticViolinDataset(PlottableStatistic stat) throws ChartDatasetCreationException {
+	public ViolinCategoryDataset createPlottableStatisticViolinDataset(String component) throws ChartDatasetCreationException {
 
-		if(stat instanceof NucleusStatistic){
+		finest("Creating violin dataset for "+component );
+		
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusStatisticViolinDataset();
 		}
 
-		if(stat instanceof SignalStatistic){
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return createSignalStatisticViolinDataset();
 		}
-
-		if(stat instanceof SegmentStatistic){
+		
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return createSegmentStatisticDataset();
 		}
-		
-		throw new ChartDatasetCreationException("Stat not recognised: "+stat);
+				
+		throw new ChartDatasetCreationException("Component not recognised: "+component);
 
 	}
 	
@@ -86,8 +85,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	 */
 	private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
 		List<IAnalysisDataset> datasets = options.getDatasets();
-		NucleusStatistic stat = (NucleusStatistic) options.getStat();
-		MeasurementScale scale = options.getScale();
+		PlottableStatistic stat = options.getStat();
+		MeasurementScale scale  = options.getScale();
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
 		
@@ -99,7 +98,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 			// Add the boxplot values
 
-			double[] stats = c.getMedianStatistics(stat, scale);
+			double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 			List<Number> list = new ArrayList<Number>();
 			for (double d : stats) {
 				list.add(new Double(d));
@@ -122,7 +121,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
     private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
     	List<IAnalysisDataset> datasets = options.getDatasets();
-    	SignalStatistic stat = (SignalStatistic) options.getStat();
+    	PlottableStatistic stat = options.getStat();
 		MeasurementScale scale = options.getScale();
 		ViolinCategoryDataset ds = new ViolinCategoryDataset();
 				
@@ -142,7 +141,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         			/*
         			 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
         			 */
-        			if(stat.equals(SignalStatistic.ANGLE)){
+        			if(stat.equals(PlottableStatistic.ANGLE)){
         				values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
         			}
 
@@ -172,16 +171,20 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	 */
     private ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
 		
-		SegmentStatistic stat = (SegmentStatistic) options.getStat();
+    	finest("Making segment statistic dataset" );
+    	
+		PlottableStatistic stat = options.getStat();
 		
-		switch(stat){
-		case DISPLACEMENT:
-			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
-		case LENGTH:
+		if(stat.equals(PlottableStatistic.LENGTH)){
 			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
-		default:
-			return null;
 		}
+		
+		if(stat.equals(PlottableStatistic.DISPLACEMENT)){
+			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
+		}
+			
+		return null;
+		
 	}
 	
 
@@ -222,11 +225,11 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 					if(seg!=null){
 						int indexLength = seg.length();
 						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-						length = n.getStatistic(NucleusStatistic.PERIMETER, scale) * proportionPerimeter;
+						length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
 
 					}
 					list.add(length);
-
+					finest("Added length "+length+" to segment dataset "+seg.getName() );
 				}
 				
 				String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;

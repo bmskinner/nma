@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -57,12 +58,15 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
 	protected ExportableTable rhoTable;
 	
-	public AbstractScatterChartPanel(PlottableStatistic stat){
+	protected String component;
+	
+	public AbstractScatterChartPanel(String component){
 		super();
+		this.component = component;
 		
 		this.setLayout(new BorderLayout());
 		
-		headerPanel = createHeader(stat);
+		headerPanel = createHeader();
 		
 		this.add(headerPanel, BorderLayout.NORTH);
 		
@@ -89,9 +93,9 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		this.add(scrollPane, BorderLayout.WEST);
 	}
 	
-	private JPanel createHeader(PlottableStatistic stat){
-		statABox = new JComboBox<PlottableStatistic>(stat.getValues());
-		statBBox = new JComboBox<PlottableStatistic>(stat.getValues());
+	private JPanel createHeader(){
+		statABox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
+		statBBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
 		
 		statABox.addActionListener(this);
 		statBBox.addActionListener(this);
@@ -169,12 +173,12 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 	
 	@Override
 	protected TableModel createPanelTableType(TableOptions options) {
-		return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable();
+		return new ScatterTableDatasetCreator(options).createSpearmanCorrlationTable(component);
 	}
 
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options){
-		return new ScatterChartFactory(options).createScatterChart();
+		return new ScatterChartFactory(options).createScatterChart(component);
 	}
 	
 	private void gateOnVisible(){

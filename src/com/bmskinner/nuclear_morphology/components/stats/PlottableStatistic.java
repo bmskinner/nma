@@ -18,6 +18,10 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
 /**
@@ -53,6 +57,67 @@ public interface PlottableStatistic {
 	static final PlottableStatistic LENGTH          = new GenericStatistic("Length", StatisticDimension.LENGTH);
 	static final PlottableStatistic DISPLACEMENT    = new GenericStatistic("Displacement", StatisticDimension.ANGLE);
 
+	
+	static PlottableStatistic[] getStats(String component){
+		if(CellularComponent.NUCLEUS.equals(component)){
+			return getNucleusStats().toArray(new PlottableStatistic[0]);
+		}
+
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
+			return getSignalStats().toArray(new PlottableStatistic[0]);
+		}
+
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
+			return getSegmentStats().toArray(new PlottableStatistic[0]);
+		}
+		return null;
+	}
+	
+	/**
+	 * ~Get stats for generic cellular components.
+	 * @return
+	 */
+	static List<PlottableStatistic> getComponentStats(){
+		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(12);
+		list.add(AREA);
+		list.add(PERIMETER);
+		list.add(MAX_FERET);
+		list.add(CIRCULARITY);
+		list.add(VARIABILITY);
+		return list;
+	}
+	
+	/**
+	 * Get stats for nuclei 
+	 * @return
+	 */
+	static List<PlottableStatistic> getNucleusStats(){
+		List<PlottableStatistic> list = getComponentStats();
+		list.add(MIN_DIAMETER);
+		list.add(ASPECT);
+		list.add(BOUNDING_HEIGHT);
+		list.add(BOUNDING_WIDTH);
+		list.add(OP_RP_ANGLE);
+		list.add(HOOK_LENGTH);
+		list.add(BODY_WIDTH);
+		return list;
+	}
+	
+	static List<PlottableStatistic> getSignalStats(){
+		List<PlottableStatistic> list = getComponentStats();
+		list.add(ANGLE);
+		list.add(DISTANCE_FROM_COM);
+		list.add(FRACT_DISTANCE_FROM_COM);
+		list.add(RADIUS);
+		return list;
+	}
+	
+	static List<PlottableStatistic> getSegmentStats(){
+		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(2);
+		list.add(LENGTH);
+		list.add(DISPLACEMENT);
+		return list;
+	}
 	
 	/**
 	 * Get the string representation (name) of the statistic. 
@@ -194,6 +259,6 @@ public interface PlottableStatistic {
 	 * iteration access via the interface
 	 * @return
 	 */
-	PlottableStatistic[] getValues();
+//	PlottableStatistic[] getValues();
 }
 

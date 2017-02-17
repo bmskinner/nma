@@ -18,13 +18,11 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import org.jfree.data.Range;
-
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.IMutableCell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -62,11 +60,11 @@ public class CollectionFilterer implements Loggable {
 	
 	private void refilterNuclei(ICellCollection collection, ICellCollection failCollection) throws Exception{
 
-	    double medianArea = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-	    double medianPerimeter = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
+	    double medianArea = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+	    double medianPerimeter = collection.getMedianStatistic(PlottableStatistic.PERIMETER, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    double medianPathLength = collection.getMedianPathLength();
 	    double medianArrayLength = collection.getMedianArrayLength();
-	    double medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
+	    double medianFeretLength = collection.getMedianStatistic(PlottableStatistic.MAX_FERET, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
 	    int beforeSize = collection.size();
 
@@ -92,11 +90,11 @@ public class CollectionFilterer implements Loggable {
 	      Nucleus n = c.getNucleus();
 	      int failureCode = 0;
 	      
-	      if(n.getStatistic(NucleusStatistic.AREA) > maxArea || n.getStatistic(NucleusStatistic.AREA) < minArea ){
+	      if(n.getStatistic(NucleusStatistic.AREA) > maxArea || n.getStatistic(PlottableStatistic.AREA) < minArea ){
 	        failureCode = failureCode | FAILURE_AREA;
 	        area++;
 	      }
-	      if(n.getStatistic(NucleusStatistic.PERIMETER) > maxPerim || n.getStatistic(NucleusStatistic.PERIMETER) < minPerim ){
+	      if(n.getStatistic(NucleusStatistic.PERIMETER) > maxPerim || n.getStatistic(PlottableStatistic.PERIMETER) < minPerim ){
 	        failureCode = failureCode | FAILURE_PERIM;
 	        perim++;
 	      }
@@ -109,7 +107,7 @@ public class CollectionFilterer implements Loggable {
 	    	  arraylength++;
 	      }
 
-	      if(n.getStatistic(NucleusStatistic.MAX_FERET) < minFeret){
+	      if(n.getStatistic(PlottableStatistic.MAX_FERET) < minFeret){
 	    	  failureCode = failureCode | FAILURE_FERET;
 	    	  feretlength++;
 	      }
@@ -132,11 +130,11 @@ public class CollectionFilterer implements Loggable {
 	    newFailCollection = null; // clean up temp collection
 
 
-	    medianArea        = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
-	    medianPerimeter   = collection.getMedianStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS);
+	    medianArea        = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+	    medianPerimeter   = collection.getMedianStatistic(PlottableStatistic.PERIMETER, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    medianPathLength  = collection.getMedianPathLength();
 	    medianArrayLength = collection.getMedianArrayLength();
-	    medianFeretLength = collection.getMedianStatistic(NucleusStatistic.MAX_FERET, MeasurementScale.PIXELS);
+	    medianFeretLength = collection.getMedianStatistic(PlottableStatistic.MAX_FERET, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
 //	    int afterSize = collection.getNucleusCount();
 //	    int removed = beforeSize - afterSize;

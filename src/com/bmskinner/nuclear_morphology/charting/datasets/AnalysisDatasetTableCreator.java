@@ -34,8 +34,9 @@ import javax.swing.table.TableModel;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
@@ -47,13 +48,12 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
@@ -183,7 +183,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				rowData.add(segment.getStartIndex());
 				rowData.add(segment.getEndIndex());
 							
-				double[] meanLengths = collection.getMedianStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+				double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
 
 				double mean = new Mean(meanLengths).doubleValue(); 
 
@@ -284,7 +284,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 			for(IBorderSegment segment : segs) {
 
-				double[] meanLengths = collection.getMedianStatistics(SegmentStatistic.LENGTH, scale, segment.getID());
+				double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
 
 				double mean = new Mean(meanLengths).doubleValue(); 
 
@@ -601,7 +601,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 		List<Object> columnData = new ArrayList<Object>();	
 		columnData.add("Nuclei");
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			columnData.add(stat.toString()+" median");
 			columnData.add(stat.toString()+" mean");
 			columnData.add(stat.toString()+" S.E.M.");
@@ -632,18 +632,18 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	private List<Object> createDatasetStatsTableColumn(IAnalysisDataset dataset, MeasurementScale scale){
 		
 		// format the numbers and make into a tablemodel
-//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		DecimalFormat pf = new DecimalFormat("#0.000"); 
 		
 		ICellCollection collection = dataset.getCollection();
 
 		List<Object> datasetData = new ArrayList<Object>();			
-//		double signalPerNucleus = (double) collection.getSignalManager().getSignalCount()/  (double) collection.getNucleusCount();
 
 		datasetData.add(collection.size());
 
-		for(NucleusStatistic stat : NucleusStatistic.values()){
-			double[] stats 	= collection.getMedianStatistics(stat, scale);
+
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+//			log("Getting stats for "+stat);
+			double[] stats 	= collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 			
 			double mean     = new Mean(stats).doubleValue(); 
 			double sem      = Stats.stderr(stats);
@@ -889,17 +889,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createWilcoxonStatisticTable(){
+	public TableModel createWilcoxonStatisticTable(String component){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
 		
-		if(options.getStat() instanceof NucleusStatistic){
+		if(CellularComponent.NUCLEUS.equals(component)){
 			return createWilcoxonNuclearStatTable();
 		}
 		
-		if(options.getStat() instanceof SegmentStatistic){
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return createWilcoxonSegmentStatTable();
 		}
 		
@@ -921,7 +921,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 		
-		NucleusStatistic stat = (NucleusStatistic) options.getStat();
+		PlottableStatistic stat =  options.getStat();
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
@@ -938,8 +938,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					getPValue = true;
 				} else {
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS), 
-							dataset2.getCollection().getMedianStatistics(stat, MeasurementScale.PIXELS), 
+							dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS), 
+							dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS), 
 							getPValue) );
 				}
 				i++;
@@ -1001,9 +1001,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					}
 					
 					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg1.getID()),
+							dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg1.getID()),
 
-							dataset2.getCollection().getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, medianSeg2.getID()),
+							dataset2.getCollection().getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg2.getID()),
 							
 							getPValue) );
 				}
@@ -1019,17 +1019,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * @param options the table options
 	 * @return a tablemodel for display
 	 */	
-	public TableModel createMagnitudeStatisticTable(){
+	public TableModel createMagnitudeStatisticTable(String component){
 		
 		if( ! options.hasDatasets()){
 			return makeEmptyWilcoxonTable(null);
 		}
 		
-		if(options.getStat() instanceof NucleusStatistic){
+		if( CellularComponent.NUCLEUS.equals(component)){
 			return createMagnitudeNuclearStatTable();
 		}
 		
-		if(options.getStat() instanceof SegmentStatistic){
+		if( CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return createMagnitudeSegmentStatTable();
 		}
 		
@@ -1051,7 +1051,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 		DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 		
-		NucleusStatistic stat = (NucleusStatistic) options.getStat();
+		PlottableStatistic stat = options.getStat();
 
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
@@ -1059,7 +1059,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 			double value1;
 			try {
-				value1 = dataset.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
+				value1 = dataset.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			} catch (Exception e) {
 				fine("Error getting median statistic", e);
 				return createBlankTable();
@@ -1079,7 +1079,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					
 					double value2;
 					try {
-						value2 = dataset2.getCollection().getMedianStatistic(stat, MeasurementScale.PIXELS);
+						value2 = dataset2.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 					} catch (Exception e) {
 						fine("Error getting median statistic", e);
 						return createBlankTable();
@@ -1127,7 +1127,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 			
 			double value1 =  new Quartile( dataset.getCollection()
-					.getMedianStatistics(SegmentStatistic.LENGTH, MeasurementScale.PIXELS, 
+					.getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, 
 							medianSeg1.getID()), 
 							Quartile.MEDIAN).doubleValue();
 
@@ -1154,7 +1154,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					}
 					
 					double value2 = new Quartile( dataset2.getCollection()
-							.getMedianStatistics(SegmentStatistic.LENGTH,
+							.getMedianStatistics(PlottableStatistic.LENGTH, 
+									CellularComponent.NUCLEAR_BORDER_SEGMENT,
 									MeasurementScale.PIXELS, 
 									medianSeg2.getID()),
 									Quartile.MEDIAN).doubleValue();
@@ -1208,7 +1209,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		columnList.add("Profile type");
 		columnList.add("Include mesh");
 
-		for(NucleusStatistic stat : NucleusStatistic.values()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 			columnList.add("Include "+stat.toString());
 		}
 		
@@ -1257,7 +1258,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 										dataList.add(op.isIncludeMesh());
 
-										for(NucleusStatistic stat : NucleusStatistic.values()){
+										for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 											try{
 												dataList.add(op.isIncludeStatistic(stat));
 											} catch(NullPointerException e){

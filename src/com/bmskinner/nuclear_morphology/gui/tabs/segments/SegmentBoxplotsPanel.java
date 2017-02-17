@@ -40,11 +40,12 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
@@ -57,7 +58,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	private Dimension preferredSize = new Dimension(200, 300);
 			
 	public SegmentBoxplotsPanel(){
-		super();
+		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
 		JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
 		
@@ -89,7 +90,7 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 	protected void updateMultiple() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-				
+
 		finest("Dataset list is not empty");
 
 		// Check that all the datasets have the same number of segments
@@ -118,14 +119,13 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				ChartOptions options = new ChartOptionsBuilder()
 					.setDatasets(getDatasets())
-					.addStatistic(SegmentStatistic.LENGTH)
+					.addStatistic(PlottableStatistic.LENGTH)
 					.setScale(GlobalOptions.getInstance().getScale())
 					.setSwatch(GlobalOptions.getInstance().getSwatch())
 					.setSegPosition(seg.getPosition())
 					.setTarget(chartPanel)
 					.build();
 
-				
 				setChart(options);
 			}
 
@@ -153,11 +153,6 @@ public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		scrollPane.setViewportView(mainPanel);
 	}
 	
-//	@Override
-//	public void setChartsAndTablesLoading(){
-//		chartPanel.setChart(AbstractChartFactory.createLoadingChart());			
-//	}
-
 	@Override
 	public void chartSetEventReceived(ChartSetEvent e) {
 		((ViolinChartPanel) e.getSource()).restoreAutoBounds();

@@ -426,11 +426,11 @@ public interface ICellCollection
 	
 	double getMedianPathLength();
 	
-	double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception;
+	double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
 
-	double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale);
+	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale);
 	
-	double[] getMedianStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id);
+	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
 	
 	/**
 	 * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the

@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,10 +36,9 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -51,9 +52,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-
-import ij.gui.Roi;
 
 /**
  * The standard round nucleus, implementing {@link Nucleus}. All 
@@ -176,16 +174,6 @@ public class DefaultNucleus
 		return this.getSourceFile()+File.separator+this.nucleusNumber;
 	}
 	
-	@Override
-	protected double calculateStatistic(PlottableStatistic stat) {
-		
-		if(stat instanceof NucleusStatistic){
-			return calculateStatistic( (NucleusStatistic) stat);
-		} else {
-			throw new IllegalArgumentException("Statistic type inappropriate for nucleus: "+stat.getClass().getName());
-		}
-		
-	}
 	
 	@Override
 	public void setScale(double scale){
@@ -197,56 +185,40 @@ public class DefaultNucleus
 		
 	}
 
-	protected double calculateStatistic(NucleusStatistic stat) {
+	@Override
+	protected double calculateStatistic(PlottableStatistic stat) {
 		
-		double result = 0;
-		switch(stat){
+		double result = super.calculateStatistic(stat);
 		
-		case AREA:
-			result = this.getStatistic(stat);
-			break;
-		case ASPECT:
-			result = this.getAspectRatio();
-			break;
-		case CIRCULARITY:
-			result = this.getCircularity();
-			break;
-		case MAX_FERET:
-			result = this.getStatistic(stat);
-			break;
-		case MIN_DIAMETER:
-			result = this.getNarrowestDiameter();
-			break;
-		case PERIMETER:
-			result = this.getStatistic(stat);
-			break;
-		case VARIABILITY:
-			break;
-		case BOUNDING_HEIGHT:
-			result = this.getVerticallyRotatedNucleus().getBounds().getHeight();
-			break;
-		case BOUNDING_WIDTH:
-			result = this.getVerticallyRotatedNucleus().getBounds().getWidth();
-			break;
-		case OP_RP_ANGLE:
+		// Note - variability will remain zero here
+		
+		// These stats are specific to nuclei
+		
+		if(PlottableStatistic.ASPECT.equals(stat) || stat.equals(NucleusStatistic.ASPECT)){
+			return this.getAspectRatio();
+		}
+			
+		
+		if(PlottableStatistic.BOUNDING_HEIGHT.equals(stat) || stat.equals(NucleusStatistic.BOUNDING_HEIGHT)){
+			return this.getVerticallyRotatedNucleus().getBounds().getHeight();
+		}
+		
+		if(PlottableStatistic.BOUNDING_WIDTH.equals(stat) || stat.equals(NucleusStatistic.BOUNDING_WIDTH)){
+			return this.getVerticallyRotatedNucleus().getBounds().getWidth();
+		}
+		
+		if(PlottableStatistic.OP_RP_ANGLE.equals(stat) || stat.equals(NucleusStatistic.OP_RP_ANGLE)){
 			try {
 				result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
 			} catch (UnavailableBorderTagException e) {
 				stack("Cannot get border tag", e);
 				result = 0;
 			}
-			break;
-		default: // result stays zero
-			break;
-	
 		}
+
 		return result;
 	}
 	
-	private double getCircularity() {
-		double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
-		return (4 * Math.PI) * (this.getStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS) / perim2);
-	}
 	
 	private double getAspectRatio() {
 		double h = this.getVerticallyRotatedNucleus().getBounds().getHeight();
@@ -271,7 +243,7 @@ public class DefaultNucleus
 
 
 	public void updateSignalAngle(UUID channel, int signal, double angle){
-		signalCollection.getSignals(channel).get(signal).setStatistic(SignalStatistic.ANGLE, angle);
+		signalCollection.getSignals(channel).get(signal).setStatistic(PlottableStatistic.ANGLE, angle);
 	}
 
 	// do not move this into SignalCollection - it is overridden in RodentSpermNucleus
@@ -287,7 +259,7 @@ public class DefaultNucleus
 				for(INuclearSignal s : signals){
 
 					double angle = this.getCentreOfMass().findAngle(p, s.getCentreOfMass());
-					s.setStatistic(SignalStatistic.ANGLE, angle);
+					s.setStatistic(PlottableStatistic.ANGLE, angle);
 
 				}
 			}
