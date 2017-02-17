@@ -728,7 +728,7 @@ public class MainWindow
 					error("Interruption to thread", e);
 				}
 			}
-			log("All root datasets saved");
+			fine("All root datasets attempted to be saved");
 		};
 			
 		threadManager.execute(r);

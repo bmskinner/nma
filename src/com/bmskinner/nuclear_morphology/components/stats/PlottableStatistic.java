@@ -18,6 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.stats;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
  * @author ben
  *
  */
-public interface PlottableStatistic {
+public interface PlottableStatistic extends Serializable {
 	
 	
 	// Old nucleus statistics
@@ -58,6 +59,11 @@ public interface PlottableStatistic {
 	static final PlottableStatistic DISPLACEMENT    = new GenericStatistic("Displacement", StatisticDimension.ANGLE);
 
 	
+	/**
+	 * Get stats for the given component. Use the keys in {@link CellularComponent}
+	 * @param component the component to get stats for
+	 * @return applicable stats, or null if the component was not recognised
+	 */
 	static PlottableStatistic[] getStats(String component){
 		if(CellularComponent.NUCLEUS.equals(component)){
 			return getNucleusStats().toArray(new PlottableStatistic[0]);
@@ -83,7 +89,6 @@ public interface PlottableStatistic {
 		list.add(PERIMETER);
 		list.add(MAX_FERET);
 		list.add(CIRCULARITY);
-		list.add(VARIABILITY);
 		return list;
 	}
 	
@@ -95,6 +100,7 @@ public interface PlottableStatistic {
 		List<PlottableStatistic> list = getComponentStats();
 		list.add(MIN_DIAMETER);
 		list.add(ASPECT);
+		list.add(VARIABILITY);
 		list.add(BOUNDING_HEIGHT);
 		list.add(BOUNDING_WIDTH);
 		list.add(OP_RP_ANGLE);
@@ -103,6 +109,10 @@ public interface PlottableStatistic {
 		return list;
 	}
 	
+	/**
+	 * Get stats for nuclear signals
+	 * @return
+	 */
 	static List<PlottableStatistic> getSignalStats(){
 		List<PlottableStatistic> list = getComponentStats();
 		list.add(ANGLE);
@@ -112,6 +122,10 @@ public interface PlottableStatistic {
 		return list;
 	}
 	
+	/**
+	 * Get stats for nuclear border segments
+	 * @return
+	 */
 	static List<PlottableStatistic> getSegmentStats(){
 		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>(2);
 		list.add(LENGTH);
@@ -254,11 +268,5 @@ public interface PlottableStatistic {
 		  return result;
 	  }
 	  	
-	/**
-	 * Calls the values() method of the underlying enum, allowing
-	 * iteration access via the interface
-	 * @return
-	 */
-//	PlottableStatistic[] getValues();
 }
 

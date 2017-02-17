@@ -528,17 +528,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	public synchronized boolean hasStatistic(PlottableStatistic stat){
 		return this.statistics.containsKey(stat);
 	}
+	
+	@Override
+	public synchronized double getStatistic(PlottableStatistic stat) {
+		return this.getStatistic(stat, MeasurementScale.PIXELS);
+	}
 
 	@Override
 	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+		
+//		fine("Fetching stat "+stat);
+		
 		if(this.statistics.containsKey(stat)){
-			
+//			fine("Stat present: "+stat);
 			double result = statistics.get(stat);	
 		
 			result = stat.convert(result, this.scale, scale);
 			return result;
 		} else {
-
+//			fine("Stat not present: "+stat);
 			double result = calculateStatistic(stat);
 //
 			setStatistic(stat, result);
@@ -548,47 +556,40 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 
 	protected double calculateStatistic(PlottableStatistic stat){
-		double result = 0;
-
-		if(PlottableStatistic.AREA.equals(stat) || stat.equals(NucleusStatistic.AREA)){
-			return this.getStatistic(stat);
-		}
-
-		if(PlottableStatistic.CIRCULARITY.equals(stat) || stat.equals(NucleusStatistic.CIRCULARITY)){
+		double result = ERROR_CALCULATING_STAT;
+		
+//		fine("Calculating stat "+stat);
+		
+		// Do not add getters for values added at creation time
+		// or you'll get infinite loops when things break
+		
+		if(PlottableStatistic.CIRCULARITY.equals(stat)){
 			return this.getCircularity();
-		}
-
-		if(PlottableStatistic.MAX_FERET.equals(stat) || stat.equals(NucleusStatistic.MAX_FERET)){
-			return this.getStatistic(stat);
-		}
-
-		if(PlottableStatistic.PERIMETER.equals(stat) || stat.equals(NucleusStatistic.PERIMETER)){
-			return this.getStatistic(stat);
 		}
 		
 		return result;
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	private double getCircularity() {
-		if(this.hasStatistic(PlottableStatistic.PERIMETER)){
+//		fine("Calculating circularity");
+		if(this.hasStatistic(PlottableStatistic.PERIMETER) && this.hasStatistic(PlottableStatistic.AREA) ){
 			double perim2 = Math.pow(this.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
 			return (4 * Math.PI) * (this.getStatistic(PlottableStatistic.AREA, MeasurementScale.PIXELS) / perim2);
 		} else {
-			double perim2 = Math.pow(this.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS), 2);
-			return (4 * Math.PI) * (this.getStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS) / perim2);
+			return ERROR_CALCULATING_STAT;
 		}
 		
 	}
 		
-	@Override
-	public synchronized double getStatistic(PlottableStatistic stat) {
-		return this.getStatistic(stat, MeasurementScale.PIXELS);
-	}
-
 
 	@Override
 	public synchronized void setStatistic(PlottableStatistic stat, double d) {
 		this.statistics.put(stat, d);
+//		log("Set "+stat+" to "+d);
 	}
 
 
@@ -601,7 +602,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * If any stats are listed as uncalcualted, attempt to calculate them
 	 */
 	public void updateDependentStats(){
-
+//		fine("Updating dependent stats");
 		for(PlottableStatistic stat : this.getStatistics()){
 
 			if(this.getStatistic(stat)==STAT_NOT_CALCULATED){
@@ -1159,6 +1160,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			Iterator<PlottableStatistic> it = set.iterator();
 			
 //			 Update any old stats to generic plottable statistics
+//			TODO - this should be removed for 1.14.0, as it was added in 1.13.4 for compatibility
 			while(it.hasNext()){
 				PlottableStatistic stat = it.next();
 				double value = statistics.get(stat);

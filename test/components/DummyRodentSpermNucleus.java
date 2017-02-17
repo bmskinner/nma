@@ -698,4 +698,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return 0;
 	}
 
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -26,7 +26,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -90,11 +89,11 @@ public class CollectionFilterer implements Loggable {
 	      Nucleus n = c.getNucleus();
 	      int failureCode = 0;
 	      
-	      if(n.getStatistic(NucleusStatistic.AREA) > maxArea || n.getStatistic(PlottableStatistic.AREA) < minArea ){
+	      if(n.getStatistic(PlottableStatistic.AREA) > maxArea || n.getStatistic(PlottableStatistic.AREA) < minArea ){
 	        failureCode = failureCode | FAILURE_AREA;
 	        area++;
 	      }
-	      if(n.getStatistic(NucleusStatistic.PERIMETER) > maxPerim || n.getStatistic(PlottableStatistic.PERIMETER) < minPerim ){
+	      if(n.getStatistic(PlottableStatistic.PERIMETER) > maxPerim || n.getStatistic(PlottableStatistic.PERIMETER) < minPerim ){
 	        failureCode = failureCode | FAILURE_PERIM;
 	        perim++;
 	      }

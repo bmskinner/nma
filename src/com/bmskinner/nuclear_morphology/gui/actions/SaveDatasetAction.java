@@ -88,10 +88,6 @@ public class SaveDatasetAction extends ProgressableAction {
 	
 	@Override
 	public void run(){
-//		worker = new PopulationExporter(dataset, saveFile);
-//		worker.addPropertyChangeListener(this);
-//		
-//		ThreadManager.getInstance().submit(worker);
 		
 		if(saveFile!=null){
 			log("Saving as "+saveFile.getAbsolutePath()+"...");
@@ -99,8 +95,6 @@ public class SaveDatasetAction extends ProgressableAction {
 			IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
 			worker = new DefaultAnalysisWorker(m);
 			
-			
-//			worker = new PopulationExporter(dataset, saveFile);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 		} else {

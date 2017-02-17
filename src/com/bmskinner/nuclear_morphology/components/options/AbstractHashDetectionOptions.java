@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * A replacement for the AbstractDetectionOptions providing more
@@ -236,17 +236,17 @@ public abstract class AbstractHashDetectionOptions
 		if(c==null){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.AREA) < this.getMinSize()){
+		if(c.getStatistic(PlottableStatistic.AREA) < this.getMinSize()){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.AREA) > this.getMaxSize()){
+		if(c.getStatistic(PlottableStatistic.AREA) > this.getMaxSize()){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) < this.getMinCirc()){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) < this.getMinCirc()){
 			return false;
 		}
 		
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) > this.getMaxCirc()){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) > this.getMaxCirc()){
 			return false;
 		}
 		return true;

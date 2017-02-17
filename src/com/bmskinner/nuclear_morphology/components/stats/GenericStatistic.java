@@ -3,13 +3,15 @@ package com.bmskinner.nuclear_morphology.components.stats;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
 /**
- * Allows for arbitrary statistics, moving away from the enums prviously
- * used
+ * Allows for arbitrary statistics, moving away from the enums previously
+ * used. 
  * @author ben
  * @since 1.13.4
  *
  */
 public class GenericStatistic implements PlottableStatistic {
+
+	private static final long serialVersionUID = 1L;
 	private final String name;
 	private final StatisticDimension dim;
 	
@@ -55,15 +57,39 @@ public class GenericStatistic implements PlottableStatistic {
 	public String units(MeasurementScale scale) {
 		return PlottableStatistic.units(scale, dim);
 	}
-
-////	@Override
-//	public PlottableStatistic[] getValues() {
-//		return null;
-//	}
 	
 	public String toString(){
 		return name;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((dim == null) ? 0 : dim.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GenericStatistic other = (GenericStatistic) obj;
+		if (dim != other.dim)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
+	
 	
 	
 

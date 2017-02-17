@@ -53,8 +53,7 @@ public class NucleusProberWorker extends ImageProberWorker {
 			return;
 		}
 		
-		
-		
+
 		ICannyOptions cannyOptions = options.getCannyOptions();
 		
 		int stackNumber = ImageImporter.rgbToStack(options.getChannel());

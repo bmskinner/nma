@@ -2,7 +2,9 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 
 /**
  * Provides default options types.
@@ -105,5 +107,9 @@ public interface OptionsFactory {
 	 */
 	static IMutableAnalysisOptions makeAnalysisOptions(IAnalysisOptions template){
 		return new DefaultAnalysisOptions(template);
+	}
+	
+	static IMutableClusteringOptions makeClusteringOptions(){
+		return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
 	}
 }

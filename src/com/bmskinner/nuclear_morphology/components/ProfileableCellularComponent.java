@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -44,8 +43,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 import ij.gui.Roi;
@@ -151,7 +148,7 @@ public abstract class ProfileableCellularComponent
 
 		this.angleWindowProportion = proportion;
 		
-		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
 		double angleWindow = perimeter * proportion;
 		
 		
@@ -184,7 +181,7 @@ public abstract class ProfileableCellularComponent
 		
 		double result = super.calculateStatistic(stat);
 				
-		if(PlottableStatistic.MIN_DIAMETER.equals(stat)  || stat.equals(NucleusStatistic.MIN_DIAMETER)){
+		if(PlottableStatistic.MIN_DIAMETER.equals(stat)){
 			return this.getNarrowestDiameter();
 		}
 	
@@ -474,7 +471,7 @@ public abstract class ProfileableCellularComponent
 			
 			this.angleWindowProportion = d;
 			
-			double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+			double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
 			double angleWindow = perimeter * d;
 			
 			
@@ -694,7 +691,7 @@ public abstract class ProfileableCellularComponent
 		in.defaultReadObject();
 		
 		// set transient fields
-		double perimeter = this.getStatistic(NucleusStatistic.PERIMETER);
+		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
 		double angleWindow = perimeter * angleWindowProportion;
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
 

@@ -51,8 +51,10 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -61,6 +63,8 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
 @SuppressWarnings("serial")
 public class HierarchicalTreeSetupDialog extends SettingsDialog implements ActionListener, ChangeListener {
 
+	private static final String DIALOG_TITLE = "Tree building options";
+	
 	protected final JPanel contentPanel = new JPanel();
 	
 	protected JPanel headingPanel;
@@ -85,14 +89,14 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	
 	protected Map<UUID, JCheckBox> segmentBoxMap =  new HashMap<UUID, JCheckBox>();
 	
-	protected ClusteringOptions options;
+	protected IMutableClusteringOptions options;
 	
 	public HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
 		
 		// modal dialog
 		super( mw, true);
 		this.dataset = dataset;
-		this.setTitle("Tree building options");
+		this.setTitle(DIALOG_TITLE);
 		setSize(450, 300);
 		initialise();
 		this.pack();
@@ -123,7 +127,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 			createGUI();
 
 		} catch (Exception e) {
-			log(Level.SEVERE, "Error making dialog", e);
+			error("Error making dialog", e);
 		}
 	}
 	
@@ -131,7 +135,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * Get the options saved in this panel
 	 * @return
 	 */
-	public ClusteringOptions getOptions(){
+	public IClusteringOptions getOptions(){
 		return this.options;
 	}
 			
@@ -139,14 +143,14 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 	 * Set the default options
 	 */
 	protected void setDefaults(){
-		options = new ClusteringOptions(ClusteringSetupDialog.DEFAULT_CLUSTER_METHOD);
-		options.setClusterNumber(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER);
-		options.setHierarchicalMethod(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
-		options.setIterations(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS);
-		options.setUseSimilarityMatrix(ClusteringSetupDialog.DEFAULT_USE_SIMILARITY_MATRIX);
-		options.setIncludeProfile(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+		options = OptionsFactory.makeClusteringOptions();
+		options.setClusterNumber(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
+		options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
+		options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
+		options.setUseSimilarityMatrix(IClusteringOptions.DEFAULT_USE_SIMILARITY_MATRIX);
+		options.setIncludeProfile(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
 		options.setProfileType(DEFAULT_PROFILE_TYPE);
-		options.setIncludeMesh(ClusteringSetupDialog.DEFAULT_INCLUDE_MESH);
+		options.setIncludeMesh(IClusteringOptions.DEFAULT_INCLUDE_MESH);
 	}
 		
 	protected JPanel createHeader(){
@@ -225,7 +229,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		HierarchicalClusterMethod[] v = HierarchicalClusterMethod.values();
 		
 		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(v);
-		hierarchicalClusterMethodCheckBox.setSelectedItem(ClusteringSetupDialog.DEFAULT_HIERARCHICAL_METHOD);
+		hierarchicalClusterMethodCheckBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
 		JLabel clusterLabel = new JLabel("Cluster method");
@@ -247,7 +251,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 
 
 		includeProfilesCheckBox = new JCheckBox("");
-		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
+		includeProfilesCheckBox.setSelected(IClusteringOptions.DEFAULT_INCLUDE_PROFILE);
 		includeProfilesCheckBox.addChangeListener(this);
 		JLabel profileLabel = new JLabel("Include profiles");
 		labels.add(profileLabel);
@@ -270,7 +274,7 @@ public class HierarchicalTreeSetupDialog extends SettingsDialog implements Actio
 		
 		
 		includeMeshCheckBox = new JCheckBox("");
-		includeMeshCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_MESH);
+		includeMeshCheckBox.setSelected(IClusteringOptions.DEFAULT_INCLUDE_MESH);
 		includeMeshCheckBox.addChangeListener(this);
 		includeMeshCheckBox.setToolTipText("Requires consensus nucleus");
 		JLabel meshLabel = new JLabel("Include mesh faces");

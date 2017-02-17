@@ -50,7 +50,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -194,20 +193,20 @@ public class DefaultNucleus
 		
 		// These stats are specific to nuclei
 		
-		if(PlottableStatistic.ASPECT.equals(stat) || stat.equals(NucleusStatistic.ASPECT)){
+		if(PlottableStatistic.ASPECT.equals(stat)){
 			return this.getAspectRatio();
 		}
 			
 		
-		if(PlottableStatistic.BOUNDING_HEIGHT.equals(stat) || stat.equals(NucleusStatistic.BOUNDING_HEIGHT)){
+		if(PlottableStatistic.BOUNDING_HEIGHT.equals(stat)){
 			return this.getVerticallyRotatedNucleus().getBounds().getHeight();
 		}
 		
-		if(PlottableStatistic.BOUNDING_WIDTH.equals(stat) || stat.equals(NucleusStatistic.BOUNDING_WIDTH)){
+		if(PlottableStatistic.BOUNDING_WIDTH.equals(stat)){
 			return this.getVerticallyRotatedNucleus().getBounds().getWidth();
 		}
 		
-		if(PlottableStatistic.OP_RP_ANGLE.equals(stat) || stat.equals(NucleusStatistic.OP_RP_ANGLE)){
+		if(PlottableStatistic.OP_RP_ANGLE.equals(stat)){
 			try {
 				result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT), this.getBorderTag(Tag.ORIENTATION_POINT));
 			} catch (UnavailableBorderTagException e) {
@@ -359,14 +358,14 @@ public class DefaultNucleus
 		verticalNucleus.alignVertically();	
 
 
-		this.setStatistic(NucleusStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
-		this.setStatistic(NucleusStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
+		this.setStatistic(PlottableStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
+		this.setStatistic(PlottableStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
 
 		double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
-		this.setStatistic(NucleusStatistic.ASPECT,  aspect);
+		this.setStatistic(PlottableStatistic.ASPECT,  aspect);
 
-		this.setStatistic(NucleusStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
-		this.setStatistic(NucleusStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
+		this.setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
+		this.setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
 
 		return verticalNucleus;
 	}

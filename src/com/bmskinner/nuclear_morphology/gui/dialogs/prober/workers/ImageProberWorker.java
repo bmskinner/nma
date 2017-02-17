@@ -60,7 +60,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 			analyseImages();
 		} catch(Exception e){
 			warn("Error in image probing");
-			stack("Error in signal image probing", e);
+			stack("Error in image prober worker", e);
 			return Boolean.FALSE;
 		}
 		return Boolean.TRUE;
@@ -68,7 +68,7 @@ public abstract class ImageProberWorker extends SwingWorker<Boolean, ImageProber
 	
 	
 	/**
-	 * Carry out the analysis
+	 * Carry out the analysis. For subclasses to override
 	 */
 	protected abstract void analyseImages() throws Exception;
 	

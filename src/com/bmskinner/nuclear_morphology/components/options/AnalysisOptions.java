@@ -28,7 +28,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * The old implementation of the IAnalysisOptions interface. 
@@ -526,22 +526,22 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 	public boolean isValid(Nucleus c){
 		boolean result = true;
 		
-		if(c.getStatistic(NucleusStatistic.AREA) < getMinNucleusSize()){
+		if(c.getStatistic(PlottableStatistic.AREA) < getMinNucleusSize()){
 			
 			result = false;
 		}
 		
-		if(c.getStatistic(NucleusStatistic.AREA) > getMaxNucleusSize()){
+		if(c.getStatistic(PlottableStatistic.AREA) > getMaxNucleusSize()){
 			
 			result = false;
 		}
 		
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) < getMinNucleusCirc()){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) < getMinNucleusCirc()){
 			
 			result = false;
 		}
 		
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) > getMaxNucleusCirc()){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) > getMaxNucleusCirc()){
 			
 			result = false;
 		}

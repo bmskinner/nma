@@ -57,7 +57,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
@@ -665,22 +664,22 @@ public class VirtualCellCollection implements ICellCollection {
 		return newCollection;
 	}
 
-	@Override
-	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
-			double upper) {
-		if(stat instanceof NucleusStatistic){
-			return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
-		} 
-
-		if(stat.getClass()==SignalStatistic.class){
-			return null;
-		} 
-
-		if(stat.getClass()==SegmentStatistic.class){
-			return null;
-		}
-		return null;
-	}
+	
+//	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
+//			double upper) {
+//		if(stat instanceof NucleusStatistic){
+//			return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
+//		} 
+//
+//		if(stat.getClass()==SignalStatistic.class){
+//			return null;
+//		} 
+//
+//		if(stat.getClass()==SegmentStatistic.class){
+//			return null;
+//		}
+//		return null;
+//	}
 	
 	/**
 	 * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
@@ -692,14 +691,15 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a new collection
 	 * @throws Exception 
 	 */
-	private ICellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) {
+	@Override
+	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
 				
 		DecimalFormat df = new DecimalFormat("#.##");
 		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
 		List<ICell> filteredCells;
 
-		if(stat.equals(NucleusStatistic.VARIABILITY)){
+		if(stat.equals(PlottableStatistic.VARIABILITY)){
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
 				//			  Nucleus n = c.getNucleus();
@@ -878,12 +878,12 @@ public class VirtualCellCollection implements ICellCollection {
 	@Override
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 		try {
-			if(CellularComponent.NUCLEUS.equals(component) || stat instanceof NucleusStatistic){
+			if(CellularComponent.NUCLEUS.equals(component)){
 				return getNuclearStatistics(stat, scale);
 			}
 
-			if(stat instanceof SegmentStatistic){
-				return getSegmentStatistics((SegmentStatistic) stat, scale, id);
+			if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
+				return getSegmentStatistics( stat, scale, id);
 
 			}
 		} catch (Exception e){
@@ -921,7 +921,7 @@ public class VirtualCellCollection implements ICellCollection {
 
 		double[] result = null;
 		// Keep the nucleus statistic for legacy comparability. Changing to GenericStatistics from 1.13.4
-		if(stat.equals(PlottableStatistic.VARIABILITY) || stat.equals(NucleusStatistic.VARIABILITY)){
+		if(stat.equals(PlottableStatistic.VARIABILITY)){
 			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
 		} else{
 			finest("Making statistic fetching task for "+stat);
@@ -970,7 +970,7 @@ public class VirtualCellCollection implements ICellCollection {
 				
 				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 				double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-				diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 				result[i] = rootDiff;
 
@@ -986,8 +986,8 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 	
 	private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
-		if(CellularComponent.NUCLEUS.equals(component) || stat instanceof NucleusStatistic){
-			return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
+		if(CellularComponent.NUCLEUS.equals(component) ){
+			return getMedianNucleusStatistic( stat, scale);
 		}
 
 		if(CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat instanceof SignalStatistic){
@@ -1052,7 +1052,7 @@ public class VirtualCellCollection implements ICellCollection {
 			IProfile medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
 			IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
 		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){

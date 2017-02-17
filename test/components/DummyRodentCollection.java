@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
@@ -35,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 public class DummyRodentCollection extends DefaultCellCollection {
 	
@@ -92,7 +94,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		double area;
 		try {
 			System.out.println("Fetching areas");
-			area = collection.getMedianStatistic(NucleusStatistic.AREA, MeasurementScale.PIXELS);
+			area = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			System.out.println("Median area: "+area);
 		} catch (Exception e) {
 			e.printStackTrace();

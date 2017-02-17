@@ -35,6 +35,53 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 public interface IClusteringOptions extends Serializable {
+	
+	static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
+	static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
+	static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
+	static final int DEFAULT_EM_ITERATIONS = 100;
+	static final int DEFAULT_MODALITY_REGIONS = 2;
+	static final boolean DEFAULT_USE_MODALITY = true;
+	static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
+	static final boolean DEFAULT_INCLUDE_AREA = false;
+	static final boolean DEFAULT_INCLUDE_ASPECT = false;
+	static final boolean DEFAULT_INCLUDE_PROFILE = true;
+	static final boolean DEFAULT_INCLUDE_MESH    = false;
+	
+	
+	/**
+	 * The mutable options with setters
+	 * @author bms41
+	 *
+	 */
+	public interface IMutableClusteringOptions extends IClusteringOptions {
+
+		void setClusterNumber(int defaultManualClusterNumber);
+
+		void setHierarchicalMethod(
+				HierarchicalClusterMethod defaultHierarchicalMethod);
+
+		void setIterations(int defaultEmIterations);
+
+		void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
+
+		void setIncludeProfile(boolean defaultIncludeProfile);
+
+		void setProfileType(ProfileType defaultProfileType);
+
+		void setIncludeMesh(boolean defaultIncludeMesh);
+
+		void setIncludeStatistic(PlottableStatistic stat, boolean selected);
+
+		void setIncludeSegment(UUID id, boolean selected);
+		
+		IClusteringOptions lock();
+
+		void setType(ClusteringMethod hierarchical);
+		
+	}
+	
+	IMutableClusteringOptions unlock();
 
 	/**
 	 * Check if the given segment is to be included in the clustering

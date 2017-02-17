@@ -717,7 +717,7 @@ public class CellCollection implements ICellCollection {
 			
 				IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 				double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-				diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 				result[i] = rootDiff;
 			
@@ -750,7 +750,7 @@ public class CellCollection implements ICellCollection {
 			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
 
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
 		} catch (ProfileException | UnavailableComponentException e) {
@@ -902,7 +902,7 @@ public class CellCollection implements ICellCollection {
 	 * @return
 	 * @throws Exception
 	 */
-	private double getMedianNucleusStatistic(NucleusStatistic stat, MeasurementScale scale)  throws Exception {
+	private double getMedianNucleusStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
 
 		if(this.statsCache.hasStatistic(stat, scale)){
 			return(this.statsCache.getStatistic(stat, scale));
@@ -956,12 +956,11 @@ public class CellCollection implements ICellCollection {
 	 * @return a list of values
 	 * @throws Exception
 	 */
-	private double[] getNuclearStatistics(NucleusStatistic stat, MeasurementScale scale) {
+	private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
 		double[] result = null;
-		switch (stat) {
-
-		case VARIABILITY:{
+		
+		if(PlottableStatistic.VARIABILITY.equals(stat)){
 			try {
 				result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
 			} catch (UnavailableBorderTagException e) {
@@ -970,20 +969,17 @@ public class CellCollection implements ICellCollection {
 					result[i] = Double.MAX_VALUE;
 				}
 			}
-			break;
-		}
-
-		default: {
+		} else {
+			
 			finest("Making statistic fetching task for "+stat);
 			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
 					stat,
 					scale);
 			result = task.invoke();
 			finest("Fetched statistic result for "+stat);
-			break;
-		}
 
 		}
+
 		return result;
 	}
 
@@ -1021,24 +1017,6 @@ public class CellCollection implements ICellCollection {
 		return task.invoke();
 	}
 
-	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
-
-		if(stat.getClass()==NucleusStatistic.class){
-			return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
-		} 
-
-		if(stat.getClass()==SignalStatistic.class){
-			return null;
-		} 
-
-		if(stat.getClass()==SegmentStatistic.class){
-			return null;
-		}
-		return null;
-
-	}
-
-
 
 	/**
 	 * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
@@ -1050,13 +1028,13 @@ public class CellCollection implements ICellCollection {
 	 * @return a new collection
 	 * @throws Exception 
 	 */
-	private ICellCollection filterCollection(NucleusStatistic stat, MeasurementScale scale, double lower, double upper) {
+	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
 		DecimalFormat df = new DecimalFormat("#.##");
 		CellCollection subCollection = new CellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
 		List<ICell> filteredCells;
 
-		if(stat.equals(NucleusStatistic.VARIABILITY)){
+		if(stat.equals(PlottableStatistic.VARIABILITY)){
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
 

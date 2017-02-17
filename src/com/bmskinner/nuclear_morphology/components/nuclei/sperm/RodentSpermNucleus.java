@@ -49,7 +49,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 @Deprecated
@@ -82,28 +81,28 @@ public class RodentSpermNucleus extends SpermNucleus {
 //	}
 	
 	@Override
-	protected double calculateStatistic(NucleusStatistic stat){
+	protected double calculateStatistic(PlottableStatistic stat){
 		double result = super.calculateStatistic(stat);
 //		finest("Calculating stat in rodent sperm nucleus: "+stat);
 		
-		try {
-			
-		
-		switch(stat){
-			
-			case HOOK_LENGTH:
-				result = getHookOrBodyLength(true);
-				break;
-			case BODY_WIDTH:
-				result = getHookOrBodyLength(false);
-				break;
-			default:
-				return result;
-		
-		}
-		} catch (UnavailableBorderTagException e) {
-			return 0;
-		}
+//		try {
+//			
+//		
+//		switch(stat){
+//			
+//			case HOOK_LENGTH:
+//				result = getHookOrBodyLength(true);
+//				break;
+//			case BODY_WIDTH:
+//				result = getHookOrBodyLength(false);
+//				break;
+//			default:
+//				return result;
+//		
+//		}
+//		} catch (UnavailableBorderTagException e) {
+//			return 0;
+//		}
 		
 //		finest("Calculated stat in rodent sperm nucleus: "+stat);
 		return result;
@@ -134,9 +133,9 @@ public class RodentSpermNucleus extends SpermNucleus {
 	private double getHookOrBodyLength(boolean useHook) throws UnavailableBorderTagException {
 
 		// check stat is present before calling a getStatistic
-		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
+		if(hasStatistic(PlottableStatistic.HOOK_LENGTH) || hasStatistic(PlottableStatistic.BODY_WIDTH)){
 
-			if(getStatistic(NucleusStatistic.HOOK_LENGTH) == -1 || getStatistic(NucleusStatistic.BODY_WIDTH) ==-1){
+			if(getStatistic(PlottableStatistic.HOOK_LENGTH) == -1 || getStatistic(PlottableStatistic.BODY_WIDTH) ==-1){
 				calculateHookAndBodyLength();
 			}
 
@@ -147,8 +146,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 		}
 			
 		double stat = useHook 
-				? getStatistic(NucleusStatistic.HOOK_LENGTH) 
-				: getStatistic(NucleusStatistic.BODY_WIDTH);
+				? getStatistic(PlottableStatistic.HOOK_LENGTH) 
+				: getStatistic(PlottableStatistic.BODY_WIDTH);
 
 		stat = stat == -2d ? 0 : stat; // -2 is the error code when TV and BV are not present. Using -1 will cause infinite loop.
 
@@ -199,8 +198,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 			
 			if(vertX < minBoundingX || vertX > maxBoundingX ){
 				finer("Error calculating hook and body: vertical is out of bounds" );
-				setStatistic(NucleusStatistic.HOOK_LENGTH, -1);
-				setStatistic(NucleusStatistic.BODY_WIDTH,  -1);
+				setStatistic(PlottableStatistic.HOOK_LENGTH, -1);
+				setStatistic(PlottableStatistic.BODY_WIDTH,  -1);
 				return;
 			}
 			
@@ -240,8 +239,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 				distanceHump = distanceLower;
 			}
 			
-			setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, distanceHook);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  distanceHump);
 						
 			finer("Hook length is "+ distanceHook);
 			finer("Body width is "+ distanceHump);
@@ -250,8 +249,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 		} else {
 			finest("Top and bottom vertical not assigned, skipping");
 
-			setStatistic(NucleusStatistic.HOOK_LENGTH, -2);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  -2);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, -2);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  -2);
 		}
 		testNucleus = null;
 	}
@@ -554,7 +553,7 @@ public class RodentSpermNucleus extends SpermNucleus {
     // For a position in teh roi, draw a line through the CoM to the intersection point
     // Measure the length; if < min length..., store equation and border(s)
 
-    double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
+    double minDistance = this.getStatistic(PlottableStatistic.MAX_FERET);
     IBorderPoint reference = this.getBorderTag(Tag.REFERENCE_POINT);
 
     for(int i=0;i<this.getBorderLength();i++){
@@ -618,7 +617,7 @@ public class RodentSpermNucleus extends SpermNucleus {
         double distanceToTail = this.getBorderPoint(i).getLengthTo(this.getBorderTag(Tag.ORIENTATION_POINT));
 
         double deltaY = Math.abs(y - yOnLine);
-        if(deltaY < minDeltaY && distanceToTail > this.getStatistic(NucleusStatistic.MAX_FERET)/2){ // exclude points too close to the tail
+        if(deltaY < minDeltaY && distanceToTail > this.getStatistic(PlottableStatistic.MAX_FERET)/2){ // exclude points too close to the tail
           minDeltaY = deltaY;
           minDeltaYIndex = i;
         }

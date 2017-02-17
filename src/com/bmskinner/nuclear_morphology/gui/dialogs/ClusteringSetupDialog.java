@@ -45,26 +45,15 @@ import javax.swing.event.ChangeListener;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 @SuppressWarnings("serial")
 public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
 	
-	static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
-	static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
-	static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
-	static final int DEFAULT_EM_ITERATIONS = 100;
-	static final int DEFAULT_MODALITY_REGIONS = 2;
-	static final boolean DEFAULT_USE_MODALITY = true;
-	static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
-	static final boolean DEFAULT_INCLUDE_AREA = false;
-	static final boolean DEFAULT_INCLUDE_ASPECT = false;
-	static final boolean DEFAULT_INCLUDE_PROFILE = true;
-	static final boolean DEFAULT_INCLUDE_MESH    = false;
-	
+	private static final String DIALOG_TITLE = "Clustering options";
 	
 	private JPanel 		cardPanel;
-	
 	private JSpinner clusterNumberSpinner;
 	
 	private JRadioButton clusterHierarchicalButton;
@@ -75,7 +64,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	
 	public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
 
-		super(mw, dataset, "Clustering options");
+		super(mw, dataset, DIALOG_TITLE);
 		this.initialise();
 		this.pack();
 		this.setLocationRelativeTo(null);
@@ -103,14 +92,14 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		List<Component> fields = new ArrayList<Component>();
 
 		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
-		hierarchicalClusterMethodCheckBox.setSelectedItem(DEFAULT_HIERARCHICAL_METHOD);
+		hierarchicalClusterMethodCheckBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
 		hierarchicalClusterMethodCheckBox.addActionListener(this);
 		
 		labels.add(new JLabel("Cluster method"));
 		fields.add(hierarchicalClusterMethodCheckBox);
 
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
+				new SpinnerNumberModel(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
 						1, //min
 						100, //max
 						1); //step
@@ -140,7 +129,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		
 
 		SpinnerModel model =
-				new SpinnerNumberModel(ClusteringSetupDialog.DEFAULT_EM_ITERATIONS, //initial value
+				new SpinnerNumberModel(IClusteringOptions.DEFAULT_EM_ITERATIONS, //initial value
 						1, //min
 						1000, //max
 						1); //step

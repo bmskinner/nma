@@ -51,7 +51,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentStatisticFetchi
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -65,7 +64,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
@@ -727,7 +725,7 @@ implements ICellCollection {
 			try {
 				angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
 				double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-				diff /= n.getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+				diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 				double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 				result[i] = rootDiff;
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
@@ -763,7 +761,7 @@ implements ICellCollection {
 			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
 
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(NucleusStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
 		} catch (ProfileException | UnavailableComponentException e) {
@@ -859,15 +857,15 @@ implements ICellCollection {
 
 	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 
-		if(CellularComponent.NUCLEUS.equals(component) || stat.getClass()==NucleusStatistic.class){
-			return getMedianNucleusStatistic((NucleusStatistic) stat, scale);
+		if(CellularComponent.NUCLEUS.equals(component)){
+			return getMedianNucleusStatistic(stat, scale);
 		}
 
-		if(CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass()==SignalStatistic.class){
+		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
 			return getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
 		}
 
-		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass()==SegmentStatistic.class){
+		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 			return getMedianSegmentStatistic(stat, scale, segId);
 		}
 
@@ -953,11 +951,11 @@ implements ICellCollection {
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
 		try {
-			if(CellularComponent.NUCLEUS.equals(component) || stat instanceof NucleusStatistic){
+			if(CellularComponent.NUCLEUS.equals(component)){
 				return getNuclearStatistics(stat, scale);
 			}
 
-			if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat instanceof SegmentStatistic){
+			if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
 				return getSegmentStatistics(stat, scale, id);
 
 			}
@@ -981,7 +979,7 @@ implements ICellCollection {
 		double[] result = null;
 		
 		// Keep the nucleus statistic for legacy comparability. Changing to GenericStatistics from 1.13.4
-		if(stat.equals(PlottableStatistic.VARIABILITY) || stat.equals(NucleusStatistic.VARIABILITY)){
+		if(stat.equals(PlottableStatistic.VARIABILITY)){
 			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
 		} else{
 			finest("Making statistic fetching task for "+stat);

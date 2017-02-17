@@ -25,9 +25,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class ClusteringOptions implements IClusteringOptions {
+public class ClusteringOptions implements IMutableClusteringOptions {
 
 	private static final long serialVersionUID = 1L;
 	private ClusteringMethod type;
@@ -380,5 +381,15 @@ public class ClusteringOptions implements IClusteringOptions {
 		public int code(){
 			return this.code;
 		}
+	}
+
+	@Override
+	public IMutableClusteringOptions unlock() {
+		return this;
+	}
+
+	@Override
+	public IClusteringOptions lock() {
+		return this;
 	}
 }

@@ -22,7 +22,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * The abstract implementation of IMutableDetectionOptions, which is extended
@@ -208,17 +208,17 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 		if(c==null){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.AREA) < this.minSize){
+		if(c.getStatistic(PlottableStatistic.AREA) < this.minSize){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.AREA) > this.maxSize){
+		if(c.getStatistic(PlottableStatistic.AREA) > this.maxSize){
 			return false;
 		}
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) < this.minCirc){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) < this.minCirc){
 			return false;
 		}
 		
-		if(c.getStatistic(NucleusStatistic.CIRCULARITY) > this.maxCirc){
+		if(c.getStatistic(PlottableStatistic.CIRCULARITY) > this.maxCirc){
 			return false;
 		}
 		return true;

@@ -16,11 +16,21 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 
+/**
+ * Export the dataset to an nmd file
+ * @author bms41
+ *
+ */
 public class DatasetExportMethod extends AbstractAnalysisMethod {
 	
 	private File   saveFile = null;
 //	private boolean useHDF5 = false;
 	
+	/**
+	 * Construct with a dataset to export and the file location
+	 * @param dataset the dataset to be exported
+	 * @param saveFile the file to export to
+	 */
 	public DatasetExportMethod(IAnalysisDataset dataset, File saveFile) {
 		super(dataset);		
 		this.saveFile = saveFile;

@@ -67,14 +67,15 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
 		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );
 
-		fine("Offsetting CoM to point "+offsetCoM.toString());
+//		fine("Offsetting CoM to point "+offsetCoM.toString());
 
 		currentNucleus.moveCentreOfMass(offsetCoM);
 
+//		fine("Setting basic stats");
 		currentNucleus.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
 		currentNucleus.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
 		currentNucleus.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
-
+//		finer("Setting scale");
 		currentNucleus.setScale(options.getScale());
 
 		currentNucleus.initialise(proportion);

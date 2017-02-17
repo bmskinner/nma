@@ -46,7 +46,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.AbstractAsymmetricNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
-import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -97,12 +96,12 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		double result = super.calculateStatistic(stat);
 		
 		
-		if(PlottableStatistic.HOOK_LENGTH.equals(stat) || stat.equals(NucleusStatistic.HOOK_LENGTH)){
+		if(PlottableStatistic.HOOK_LENGTH.equals(stat)){
 			return getHookOrBodyLength(true);
 			
 		}
 		
-		if(PlottableStatistic.BODY_WIDTH.equals(stat) || stat.equals(NucleusStatistic.BODY_WIDTH) ){
+		if(PlottableStatistic.BODY_WIDTH.equals(stat)){
 			return getHookOrBodyLength(false);
 		}
 
@@ -129,10 +128,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 	private double getHookOrBodyLength(boolean useHook) {
 
 		// check stat is present before calling a getStatistic
-		if(hasStatistic(NucleusStatistic.HOOK_LENGTH) || hasStatistic(NucleusStatistic.BODY_WIDTH)){
+		if(hasStatistic(PlottableStatistic.HOOK_LENGTH) || hasStatistic(PlottableStatistic.BODY_WIDTH)){
 
-			if(    getStatistic(NucleusStatistic.HOOK_LENGTH) == STAT_NOT_CALCULATED 
-			    || getStatistic(NucleusStatistic.BODY_WIDTH)  == STAT_NOT_CALCULATED){
+			if(    getStatistic(PlottableStatistic.HOOK_LENGTH) == STAT_NOT_CALCULATED 
+			    || getStatistic(PlottableStatistic.BODY_WIDTH)  == STAT_NOT_CALCULATED){
 				calculateHookAndBodyLength();
 			}
 
@@ -141,8 +140,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		}
 
 		double stat = useHook 
-				? getStatistic(NucleusStatistic.HOOK_LENGTH) 
-				: getStatistic(NucleusStatistic.BODY_WIDTH);
+				? getStatistic(PlottableStatistic.HOOK_LENGTH) 
+				: getStatistic(PlottableStatistic.BODY_WIDTH);
 
 		stat = stat == BORDER_POINT_NOT_PRESENT ? 0 : stat; // -2 is the error code when TV and BV are not present. Using -1 will cause infinite loop.
 
@@ -165,16 +164,16 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		if(testNucleus==null){
 			
 			fine("Vertical nucleus is not present");
-			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 			return;
 		}
 		
 		if( !testNucleus.hasBorderTag(Tag.TOP_VERTICAL) 
 				|| !testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 			fine("TV or BV is not present in vertical nucleus");
-			setStatistic(NucleusStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
 			return;
 		}
 
@@ -187,8 +186,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			vertX = testNucleus.getBorderTag(Tag.TOP_VERTICAL).getX();
 		} catch (UnavailableBorderTagException e) {
 			stack("Cannot get border tag", e);
-			setStatistic(NucleusStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  BORDER_POINT_NOT_PRESENT);
 			return;
 
 		}
@@ -205,8 +204,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 			IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical is out of bounds");
 			stack("Vertical "+vertX+" is out of bounds "+minBoundingX+" - "+maxBoundingX, e );
-			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 			return;
 		}
 
@@ -234,8 +233,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
 		} catch (UnavailableBorderTagException e) {
 			stack("Cannot get border tag", e);
-			setStatistic(NucleusStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-			setStatistic(NucleusStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+			setStatistic(PlottableStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 			return;
 		}
 
@@ -254,8 +253,8 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			distanceHump = distanceLower;
 		}
 
-		setStatistic(NucleusStatistic.HOOK_LENGTH, distanceHook);
-		setStatistic(NucleusStatistic.BODY_WIDTH,  distanceHump);
+		setStatistic(PlottableStatistic.HOOK_LENGTH, distanceHook);
+		setStatistic(PlottableStatistic.BODY_WIDTH,  distanceHump);
 
 		fine("Hook length is "+ distanceHook);
 		fine("Body width is "+ distanceHump);
@@ -587,7 +586,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		// For a position in teh roi, draw a line through the CoM to the intersection point
 		// Measure the length; if < min length..., store equation and border(s)
 
-		double minDistance = this.getStatistic(NucleusStatistic.MAX_FERET);
+		double minDistance = this.getStatistic(PlottableStatistic.MAX_FERET);
 		IBorderPoint reference;
 
 		reference = this.getBorderTag(Tag.REFERENCE_POINT);
@@ -658,7 +657,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 
 			double deltaY = Math.abs(y - yOnLine);
-			if(deltaY < minDeltaY && distanceToTail > this.getStatistic(NucleusStatistic.MAX_FERET)/2){ // exclude points too close to the tail
+			if(deltaY < minDeltaY && distanceToTail > this.getStatistic(PlottableStatistic.MAX_FERET)/2){ // exclude points too close to the tail
 				minDeltaY = deltaY;
 				minDeltaYIndex = i;
 			}
