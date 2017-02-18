@@ -36,6 +36,8 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
@@ -82,6 +84,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 		@Override
 		protected void updateMultiple() {
 			super.updateMultiple();
+			
 
 			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 
@@ -106,12 +109,12 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 			super.updateNull();
 			finest("Passing to update multiple in "+this.getClass().getName());
 			updateMultiple();
-//			measurementUnitSettingsPanel.setEnabled(false);
 		}
 		
 		@Override
 		public void setChartsAndTablesLoading(){
 			super.setChartsAndTablesLoading();
+
 			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());

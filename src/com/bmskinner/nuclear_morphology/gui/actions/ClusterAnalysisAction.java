@@ -23,14 +23,13 @@ import java.util.concurrent.ExecutionException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
 
 /**
@@ -40,21 +39,22 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
  */
 public class ClusterAnalysisAction extends ProgressableAction {
 
+	private static final String PROGRESS_BAR_LABEL = "Clustering cells";
+	
 	public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Cluster analysis", mw);
-
+		super(dataset, PROGRESS_BAR_LABEL, mw);
 	}
 	
 	@Override
 	public void run(){
 
-		ClusteringSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
-		IClusteringOptions options = clusterSetup.getOptions();
+		SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-			IAnalysisMethod m = new ClusteringMethod(dataset, options);
-
-			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size() * 2);
+			IAnalysisMethod m = clusterSetup.getMethod();
+			
+			int maxProgress = dataset.getCollection().size() * 2;
+			worker = new DefaultAnalysisWorker(m, maxProgress);
 			
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);

@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
@@ -595,13 +596,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			return createBlankTable();
 		} 
 		
+		NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets()); // default, applies to everything
+
 		DefaultTableModel model = new DefaultTableModel();
 		
 		List<IAnalysisDataset> list = options.getDatasets();
 		
 		List<Object> columnData = new ArrayList<Object>();	
 		columnData.add("Nuclei");
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
 			columnData.add(stat.toString()+" median");
 			columnData.add(stat.toString()+" mean");
 			columnData.add(stat.toString()+" S.E.M.");
@@ -639,9 +642,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		List<Object> datasetData = new ArrayList<Object>();			
 
 		datasetData.add(collection.size());
+		NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
 
 
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
 //			log("Getting stats for "+stat);
 			double[] stats 	= collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 			
@@ -1209,7 +1213,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		columnList.add("Profile type");
 		columnList.add("Include mesh");
 
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		
+		NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
+		
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
 			columnList.add("Include "+stat.toString());
 		}
 		
@@ -1258,7 +1265,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 										dataList.add(op.isIncludeMesh());
 
-										for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+										for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
 											try{
 												dataList.add(op.isIncludeStatistic(stat));
 											} catch(NullPointerException e){

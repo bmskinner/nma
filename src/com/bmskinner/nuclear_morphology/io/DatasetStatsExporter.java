@@ -1,7 +1,5 @@
 package com.bmskinner.nuclear_morphology.io;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.List;
 
@@ -14,6 +12,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.IJ;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -48,7 +48,6 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		File exportFile = makeFile(d.getName());
 		
 		StringBuilder outLine = new StringBuilder();
-		
 		writeHeader(outLine);
 		export(d, outLine, exportFile);
 		IJ.append(  outLine.toString(), exportFile.getAbsolutePath());
@@ -64,6 +63,9 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		File exportFile = makeFile(DEFAULT_MULTI_FILE_NAME);
 		
 		StringBuilder outLine = new StringBuilder();
+		
+//		NucleusType type = IAnalysisDataset.getBroadestNucleusType(list);
+
 		
 		writeHeader(outLine);
 		

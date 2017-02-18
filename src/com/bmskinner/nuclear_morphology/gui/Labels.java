@@ -25,6 +25,9 @@ package com.bmskinner.nuclear_morphology.gui;
  */
 public class Labels {
 
+	
+	public static final String REQUIRES_CONSENSUS_LBL = "Requires consensus nucleus";
+	
 	/*
 	 * signal detection
 	 */

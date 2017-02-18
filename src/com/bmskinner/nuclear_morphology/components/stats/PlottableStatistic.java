@@ -24,6 +24,7 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
  * This interface is implemented by the enums describing statistical measures
@@ -93,21 +94,60 @@ public interface PlottableStatistic extends Serializable {
 	}
 	
 	/**
-	 * Get stats for nuclei 
+	 * Get stats for round nuclei 
 	 * @return
 	 */
 	static List<PlottableStatistic> getNucleusStats(){
+		return getRodentSpermNucleusStats();
+	}
+	
+	/**
+	 * Get stats for round nuclei 
+	 * @return
+	 */
+	static List<PlottableStatistic> getNucleusStats(NucleusType type){
+		
+		switch(type){
+		
+		case ROUND:{
+			return getRoundNucleusStats();
+		}
+		case NEUTROPHIL:
+			return getRoundNucleusStats();
+		case PIG_SPERM:
+			return getRoundNucleusStats();
+		case RODENT_SPERM:
+			return getRodentSpermNucleusStats();
+		default:
+			return getRoundNucleusStats();
+		
+		}
+	}
+	
+	static List<PlottableStatistic> getRoundNucleusStats(){
+
 		List<PlottableStatistic> list = getComponentStats();
 		list.add(MIN_DIAMETER);
 		list.add(ASPECT);
 		list.add(VARIABILITY);
 		list.add(BOUNDING_HEIGHT);
 		list.add(BOUNDING_WIDTH);
+		return list;
+	}
+	
+	/**
+	 * Get stats for rodent sperm nuclei 
+	 * @return
+	 */
+	static List<PlottableStatistic> getRodentSpermNucleusStats(){
+		List<PlottableStatistic> list = getRoundNucleusStats();
 		list.add(OP_RP_ANGLE);
 		list.add(HOOK_LENGTH);
 		list.add(BODY_WIDTH);
 		return list;
 	}
+	
+	
 	
 	/**
 	 * Get stats for nuclear signals

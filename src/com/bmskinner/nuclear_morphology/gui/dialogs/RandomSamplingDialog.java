@@ -69,7 +69,7 @@ public class RandomSamplingDialog
 	private JSpinner set1SizeSpinner;
 	private JSpinner set2SizeSpinner;
 	private JSpinner iterattionsSpinner;
-	private JComboBox<PlottableStatistic> statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getNucleusStats().toArray(new PlottableStatistic[0]));
+	private JComboBox<PlottableStatistic> statsBox;
 	private JButton  runButton;
 	private JCheckBox showDensity;
 	private RandomSampler sampler;
@@ -93,6 +93,8 @@ public class RandomSamplingDialog
 	private void createUI(){
 		this.setTitle("Random sampling: "+dataset.getName());
 		this.setLayout(new BorderLayout());
+		
+		statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getNucleusStats(dataset.getCollection().getNucleusType()).toArray(new PlottableStatistic[0]));
 		
 		int cellCount = dataset.getCollection().size();
 		int halfCellCount = cellCount >>1;

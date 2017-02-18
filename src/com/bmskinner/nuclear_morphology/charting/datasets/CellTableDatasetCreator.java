@@ -255,9 +255,9 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 */
 	private void addNuclearStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n){
 		
-//		DecimalFormat df = new DecimalFormat("#0.00"); 
+		NucleusType type = options.firstDataset().getCollection().getNucleusType();
 		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
 
 			if( ! stat.equals(PlottableStatistic.VARIABILITY)){
 

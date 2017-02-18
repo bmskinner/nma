@@ -23,9 +23,7 @@ import java.util.concurrent.ExecutionException;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.TreeBuildingMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
@@ -34,23 +32,31 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
+/**
+ * Action for constructing hierarchical trees based on dataset parameters
+ * @author ben
+ *
+ */
 public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener, InterfaceEventListener {
 
+	private static final String PROGRESS_BAR_LABEL = "Building tree";
+	
 	public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Building tree", mw);
+		super(dataset, PROGRESS_BAR_LABEL, mw);
 	}
 	
 	@Override
 	public void run(){
-		HierarchicalTreeSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
-		IClusteringOptions options = clusterSetup.getOptions();
-
+		
+		SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-			IAnalysisMethod m = new TreeBuildingMethod(dataset, options);
+			IAnalysisMethod m = clusterSetup.getMethod();//new TreeBuildingMethod(dataset, options);
 
-			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size() * 2);
+			int maxProgress = dataset.getCollection().size() * 2;
+			worker = new DefaultAnalysisWorker(m, maxProgress);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 

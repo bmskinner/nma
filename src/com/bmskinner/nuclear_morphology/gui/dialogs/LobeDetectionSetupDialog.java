@@ -19,6 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
@@ -46,17 +47,25 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 	}
 
 	@Override
-	protected void createUI() {
-		
-		
+	public IAnalysisMethod getMethod() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	protected void runAnalysis() {
-		// TODO Auto-generated method stub
-		
+	protected void createUI() {
+
+
 	}
-	
+
+
+
+	@Override
+	protected void setDefaults() {
+		// TODO Auto-generated method stub
+
+	}
+
 	
 
 }

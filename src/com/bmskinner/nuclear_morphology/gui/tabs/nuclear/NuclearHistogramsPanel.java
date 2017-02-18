@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -79,7 +80,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 //			MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
 			boolean useDensity = useDensityPanel.isSelected();
 
-
+//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
 			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				SelectableChartPanel panel = chartPanels.get(stat.toString());
 
@@ -104,6 +105,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		@Override
 		public void setChartsAndTablesLoading(){
 			super.setChartsAndTablesLoading();
+//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
 			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
 				ExportableChartPanel panel = chartPanels.get(stat.toString());
 				panel.setChart(MorphologyChartFactory.createLoadingChart());
@@ -130,6 +132,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 		 */
 		private PlottableStatistic getPanelStatisticFromName(String name){
 			PlottableStatistic stat = null;
+//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
 			for(PlottableStatistic n : PlottableStatistic.getNucleusStats()){
 				if(n.toString().equals(name)){
 					stat = n;

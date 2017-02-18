@@ -159,7 +159,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 			attributeCount += profileAttributeCount;
 		}
 		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())){
 			if(options.isIncludeStatistic(stat)){
 				finest("Including "+stat.toString());
 				attributeCount++;
@@ -188,7 +188,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 			}
 		}
 		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())){
 			if(options.isIncludeStatistic(stat)){
 				Attribute a = new Attribute(stat.toString()); 
 				attributes.addElement(a);
@@ -266,7 +266,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 					}
 				}
 				
-				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())){
 					if(options.isIncludeStatistic(stat)){
 						Attribute att = (Attribute) attributes.elementAt(attNumber++);
 						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));

@@ -19,11 +19,16 @@
 
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
+import javax.swing.JPanel;
+
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 /**
- * A base class for the sub analyses setup options
+ * A base class for the sub analyses setup options. It contains a reference to 
+ * the main analysis window to make the dialog modal
+ * TODO - make these return an IAnalysisMethod preconfigured for running
  * @author bms41
  * @since 1.13.4
  *
@@ -31,7 +36,9 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 @SuppressWarnings("serial")
 public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	
-	final protected IAnalysisDataset dataset;
+	protected final JPanel contentPanel = new JPanel();
+	
+	protected final IAnalysisDataset dataset;
 	
 	/**
 	 * Construct with a main program window to listen for actions, and a dataset to operate on
@@ -39,22 +46,37 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	 * @param dataset
 	 */
 	public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-
-		// modal dialog
 		super( mw, true);
 		this.dataset = dataset;
-		this.setTitle(title);
-
-		createUI();
 		
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
+		try {
+			// modal dialog
+			this.setTitle(title);
+			setDefaults();
+			createUI();
+			this.pack();
+			this.setLocationRelativeTo(null);
+			this.setVisible(true);
+		} catch (Exception e){
+			error("Error making setup dialog", e);
+		}
 
 	}
 
+	/**
+	 * Get the method for the analysis to be run
+	 * @return
+	 */
+	public abstract IAnalysisMethod getMethod();
+	
+	/**
+	 * Make the UI for the dialog
+	 */
 	protected abstract void createUI();
 	
-	protected abstract void runAnalysis();
+	/**
+	 * Set the default options for the dialog 
+	 */
+	protected abstract void setDefaults();
 
 }

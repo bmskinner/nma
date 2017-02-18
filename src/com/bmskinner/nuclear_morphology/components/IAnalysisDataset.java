@@ -29,6 +29,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -406,6 +407,39 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Test if all the datasets have the same type of nucleus
+	 * @param list
+	 * @return
+	 */
+	static boolean areSameNucleusType(List<IAnalysisDataset> list){
+		
+		NucleusType type = list.get(0).getCollection().getNucleusType();
+		
+		for(IAnalysisDataset d : list){
+			NucleusType next = d.getCollection().getNucleusType();
+			if(! next.equals(type)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Get the nucleus type that is applicable to all datasets in the list
+	 * @param list
+	 * @return
+	 */
+	static NucleusType getBroadestNucleusType(List<IAnalysisDataset> list){
+		
+		NucleusType type = list.get(0).getCollection().getNucleusType();
+		if(areSameNucleusType(list)){
+			return type;
+		}
+		
+		return NucleusType.ROUND;
 	}
 
 }

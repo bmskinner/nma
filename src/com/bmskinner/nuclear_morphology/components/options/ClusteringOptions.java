@@ -54,7 +54,7 @@ public class ClusteringOptions implements IMutableClusteringOptions {
 	 */
 	public ClusteringOptions(ClusteringMethod type){
 		this.type = type;
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()){
     		statMap.put(stat, false);
     	}
 	}
@@ -69,7 +69,7 @@ public class ClusteringOptions implements IMutableClusteringOptions {
 		this.useSimilarityMatrix = oldOptions.isUseSimilarityMatrix();
 		this.includeProfile      = oldOptions.isIncludeProfile();
 		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+		for(PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()){
     		statMap.put(stat, oldOptions.isIncludeStatistic(stat));
     	}
 		
@@ -306,7 +306,7 @@ public class ClusteringOptions implements IMutableClusteringOptions {
 	    in.defaultReadObject();
 	    if(statMap==null){
 	    	statMap = new HashMap<PlottableStatistic, Boolean>();
-	    	for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+	    	for(PlottableStatistic stat : PlottableStatistic.getRoundNucleusStats()){
 	    		statMap.put(stat, false);
 	    	}
 	    }

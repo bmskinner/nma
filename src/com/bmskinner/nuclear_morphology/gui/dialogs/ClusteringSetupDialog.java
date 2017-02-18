@@ -27,10 +27,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.UUID;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,10 +44,12 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 @SuppressWarnings("serial")
@@ -65,22 +69,13 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
 
 		super(mw, dataset, DIALOG_TITLE);
-		this.initialise();
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
-
 	}
+
 	
 	@Override
-	protected void initialise(){
-		try {
-			setDefaults();
-			createGUI();
-
-		} catch (Exception e) {
-			log(Level.SEVERE, "Error making dialog", e);
-		}
+	public IAnalysisMethod getMethod() {
+		IAnalysisMethod m = new com.bmskinner.nuclear_morphology.analysis.nucleus.ClusteringMethod(dataset, options);
+		return m;
 	}
 		
 	private JPanel createHierarchicalPanel(){
@@ -91,12 +86,12 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		List<JLabel> labels = new ArrayList<JLabel>();
 		List<Component> fields = new ArrayList<Component>();
 
-		hierarchicalClusterMethodCheckBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
-		hierarchicalClusterMethodCheckBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
-		hierarchicalClusterMethodCheckBox.addActionListener(this);
+		clusterMethodBox = new JComboBox<HierarchicalClusterMethod>(HierarchicalClusterMethod.values());
+		clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
+		clusterMethodBox.addActionListener(this);
 		
 		labels.add(new JLabel("Cluster method"));
-		fields.add(hierarchicalClusterMethodCheckBox);
+		fields.add(clusterMethodBox);
 
 		SpinnerModel model =
 				new SpinnerNumberModel(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER, //initial value
@@ -146,12 +141,16 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	
 	
 	@Override
-	protected void createGUI(){
+	protected void createUI(){
 		
 		setBounds(100, 100, 450, 300);
 		contentPanel.setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPanel);
+		
+		profileButtonGroup = new ButtonGroup();
+		statBoxMap = new HashMap<PlottableStatistic, JCheckBox>();
+		segmentBoxMap =  new HashMap<UUID, JCheckBox>();
 		
 		//---------------
 		// panel for text labels
@@ -201,8 +200,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		try {
 			includePanel = createIncludePanel();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			error("Error making incluude panel", e);
 		}
 
 	    optionsPanel.add(methodPanel, BorderLayout.NORTH);
@@ -212,50 +210,6 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	    
 	    contentPanel.add(optionsPanel, BorderLayout.CENTER);
 	}
-//	
-//	private JPanel createOptionsPanel(){
-//		JPanel panel = new JPanel();
-//		GridBagLayout layout = new GridBagLayout();
-//		panel.setLayout(layout);
-//		
-//		List<JLabel> labels = new ArrayList<JLabel>();
-//		List<Component> fields = new ArrayList<Component>();
-//		
-//
-//		includeProfilesCheckBox = new JCheckBox("");
-//		includeProfilesCheckBox.setSelected(ClusteringSetupDialog.DEFAULT_INCLUDE_PROFILE);
-//		includeProfilesCheckBox.addChangeListener(this);
-//		JLabel profileLabel = new JLabel("Include profiles");
-//		labels.add(profileLabel);
-//		fields.add(includeProfilesCheckBox);
-//		
-//		DecimalFormat pf = new DecimalFormat("#0.000"); 
-//		for(NucleusStatistic stat : NucleusStatistic.values()){
-//			
-//			String pval = "";
-//			try {
-//				double[] stats = dataset.getCollection().getNuclearStatistics(stat, MeasurementScale.PIXELS);
-//				double diptest 	= DipTester.getDipTestPValue(stats);
-//				pval = pf.format(diptest);		
-//			} catch (Exception e) {
-//				programLogger.log(Level.SEVERE, "Error getting p-value", e);
-//			}
-//			
-//			JCheckBox box = new JCheckBox("  p(uni) = "+pval);
-//			box.setForeground(Color.DARK_GRAY);
-//			box.setSelected(false);
-//			box.addChangeListener(this);
-//			JLabel label = new JLabel(stat.toString());
-//			labels.add(label);
-//			fields.add(box);
-//			statBoxMap.put(stat, box);
-//		}
-//		
-//		this.addLabelTextRows(labels, fields, layout, panel);
-//		return panel;
-//		
-//	}
-
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
@@ -271,7 +225,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 			
 			clusterNumberSpinner.setEnabled(true);
 			options.setClusterNumber( (Integer) clusterNumberSpinner.getValue());
-			options.setHierarchicalMethod((HierarchicalClusterMethod) hierarchicalClusterMethodCheckBox.getSelectedItem());
+			options.setHierarchicalMethod((HierarchicalClusterMethod) clusterMethodBox.getSelectedItem());
 		} 
 		
 		if(clusterEMButton.isSelected()){
@@ -303,7 +257,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 			} 
 			
 		}catch (ParseException e1) {
-			log(Level.SEVERE, "Error in spinners for Clustering options", e1);
+			error("Error in spinners for Clustering options", e1);
 		}	
 		
 	}
