@@ -62,6 +62,10 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 		}
 
 	}
+	
+//	protected JPanel createFooter(){
+//		
+//	}
 
 	/**
 	 * Get the method for the analysis to be run

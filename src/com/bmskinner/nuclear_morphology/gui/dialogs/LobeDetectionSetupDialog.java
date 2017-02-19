@@ -19,9 +19,18 @@
 
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
+import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
+
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.LobeDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 /**
  * The setup for lobe detection in neutrophils
@@ -33,6 +42,8 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 	
 	private static final String DIALOG_TITLE = "Lobe detection options";
+	
+	private IMutableHoughDetectionOptions options;
 	
 	/**
 	 * Construct with a main program window to listen for actions, and a dataset to operate on
@@ -48,14 +59,20 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 
 	@Override
 	public IAnalysisMethod getMethod() {
-		// TODO Auto-generated method stub
-		return null;
+		return new LobeDetectionMethod(dataset, options);
 	}
 
 	@Override
 	protected void createUI() {
 
-
+		options = OptionsFactory.makeHoughOptions().unlock();
+		JPanel contentPanel = new JPanel(new BorderLayout());
+		SettingsPanel panel =  new HoughSettingsPanel(options); 
+		
+		contentPanel.add(panel, BorderLayout.CENTER);
+		contentPanel.add(createFooter(), BorderLayout.SOUTH);
+		
+		this.add(contentPanel, BorderLayout.CENTER);
 	}
 
 
@@ -63,6 +80,7 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 	@Override
 	protected void setDefaults() {
 		// TODO Auto-generated method stub
+		
 
 	}
 

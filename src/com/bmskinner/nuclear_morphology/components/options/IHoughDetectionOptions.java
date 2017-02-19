@@ -44,6 +44,8 @@ public interface IHoughDetectionOptions extends IDetectionSubOptions {
 	public static final String NUM_CIRCLES = "Number of circles";
 	public static final String HOUGH_THRESHOLD = "Hough threshold";
 	
+	
+	IMutableHoughDetectionOptions unlock();
 	/**
 	 * Get the minimum radius circle detected
 	 * @return
@@ -68,5 +70,7 @@ public interface IHoughDetectionOptions extends IDetectionSubOptions {
 	 * @return
 	 */
 	int getHoughThreshold();
+	
+	
 	
 }

@@ -49,6 +49,8 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 		// print
 		for(ICell cell : dataset.getCollection().getCells()){
 			
+			log("Running on cell "+cell.getId());
+			
 			ImageProcessor ip;
 			try {
 				

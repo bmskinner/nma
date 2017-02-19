@@ -84,4 +84,9 @@ public class DefaultHoughOptions
 		
 	}
 
+	@Override
+	public IMutableHoughDetectionOptions unlock() {
+		return this;
+	}
+
 }

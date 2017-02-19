@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
+import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
@@ -467,6 +468,11 @@ public class MainWindow
 					}
 				}
 			}
+		}
+		
+		if(event.type().equals(SignalChangeEvent.LOBE_DETECTION)){
+			Runnable r = new LobeDetectionAction(selectedDataset, this);
+			r.run();
 		}
 		
 		

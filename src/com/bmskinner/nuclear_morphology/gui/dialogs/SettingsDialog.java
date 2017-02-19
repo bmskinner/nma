@@ -53,6 +53,10 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
 		
 	protected static final String EMPTY_STRING = "";
+	protected static final String OK_LBL       = "OK";
+	protected static final String CANCEL_LBL   = "Cancel";
+	
+	
 	protected String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
 	/**
@@ -88,25 +92,21 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JButton okButton = new JButton("OK");
-		okButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				readyToRun = true;
-				setVisible(false);			
-			}
+		JButton okButton = new JButton(OK_LBL);
+		okButton.addActionListener(e->{
+			readyToRun = true;
+			setVisible(false);	
 		});
 
 		panel.add(okButton);
+		
 
-		JButton cancelButton = new JButton("Cancel");
-		cancelButton.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				readyToRun = false;
-				dispose();			
-			}
+		JButton cancelButton = new JButton(CANCEL_LBL);
+		cancelButton.addActionListener(e->{
+			readyToRun = false;
+			dispose();
 		});
+		
 		panel.add(cancelButton);
 		return panel;
 	}
