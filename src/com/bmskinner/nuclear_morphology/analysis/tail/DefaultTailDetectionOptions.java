@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.analysis.tail;
 
 import java.io.File;
+import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.options.AbstractDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
@@ -98,6 +99,12 @@ public class DefaultTailDetectionOptions
 	public boolean isRGB() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public List<String> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	
