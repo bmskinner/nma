@@ -19,64 +19,39 @@
 
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
+import java.util.List;
+
+import ij.gui.Roi;
+import ij.process.ImageProcessor;
+
 /**
- * A mask that describes whether a value is present or
- * not within each pixel
+ * A generic use of the detector with no filtering on size or
+ * shape by default
  * @author bms41
- * @since 1.13.3
+ * @since 1.13.4
  *
  */
-public interface Mask {
+public class GenericDetector extends Detector {
 	
-	int getWidth();
-	
-	int getHeight();
+	public GenericDetector(){
+		
+		this.setMinCirc(0);
+		this.setMaxCirc(1);
+		this.setMinSize(1);
+		
+		
+	}
 	
 	/**
-	 * Offset the mask by the given amount. Empty values are filled in
-	 * with false
-	 * @param x
-	 * @param y
+	 * Detect rois in the image with no size or circularity parameters
+	 * set
+	 * @param ip
 	 * @return
 	 */
-	Mask offset(int x, int y);
-	
-	/**
-	 * Calculate the logical AND of the two masks
-	 * @param m
-	 * @return
-	 */
-	Mask and(Mask m);
-	
-	/**
-	 * Get the value at the given position
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	boolean get(int x, int y);
-	
-	
-	/**
-	 * Set all the values in the mask to false
-	 * @return
-	 */
-	Mask setFalse();
-	
-	/**
-	 * Set all the values in the mask to true
-	 * @return
-	 */
-	Mask setTrue();
-	
-	/**
-	 * Set the value at the given point
-	 * @param x
-	 * @param y
-	 * @param b
-	 */
-	void set(int x, int y, boolean b);
-	
-	boolean[][] toArray();
+	public List<Roi> getRois(ImageProcessor ip){
+		this.setMaxSize(  ip.getWidth()*ip.getHeight()  );
+		
+		return this.detectRois(ip);
+	}
 
 }

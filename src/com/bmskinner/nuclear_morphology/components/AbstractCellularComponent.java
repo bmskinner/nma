@@ -276,6 +276,10 @@ public abstract class AbstractCellularComponent
 		return this.position;
 	}
 	
+	public IPoint getOriginalBase(){
+		return IPoint.makeNew(position[X_BASE], position[Y_BASE]);
+	}
+	
 	public Rectangle getBounds() {
 		return this.toShape().getBounds();
 	}

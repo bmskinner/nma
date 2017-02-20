@@ -56,6 +56,9 @@ public abstract class Detector implements Loggable {
 	public static final int CLOSED_OBJECTS = 0; // Flags to allow detection of open or closed objects
 	public static final int OPEN_OBJECTS   = 1;
 	
+	public static final String COM_X = "XM";
+	public static final String COM_Y = "YM";
+	
 	private double minSize;
 	private double maxSize;
 	private double minCirc;
@@ -143,8 +146,8 @@ public abstract class Detector implements Loggable {
 	  values.add("Area", rt.getValue("Area",0)); 
 	  values.add("Feret", rt.getValue("Feret",0)); 
 	  values.add("Perim", rt.getValue("Perim.",0)); 
-	  values.add("XM", rt.getValue("XM",0)); 
-	  values.add("YM", rt.getValue("YM",0)); 
+	  values.add(COM_X, rt.getValue(COM_X,0)); 
+	  values.add(COM_Y, rt.getValue(COM_Y,0)); 
 	  return values;
   }
   

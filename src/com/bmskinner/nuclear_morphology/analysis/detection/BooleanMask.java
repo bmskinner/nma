@@ -132,10 +132,40 @@ public class BooleanMask implements Mask {
 		}
 
 	}
+	
+	private void trueArray(boolean[][] array){
+		int height = array.length;
+		int width  = array[0].length;
+		for(int y=0; y<height; y++){
+			for(int x=0; x<width; x++){
+
+				array[y][x] = true;
+			}
+		}
+
+	}
 
 	@Override
 	public boolean[][] toArray() {
 		return array;
+	}
+
+	@Override
+	public Mask setFalse() {
+		zeroArray(array);
+		return this;
+	}
+
+	@Override
+	public Mask setTrue() {
+		trueArray(array);
+		return this;
+	}
+
+	@Override
+	public void set(int x, int y, boolean b) {
+		// TODO - add bounds check
+		array[y][x] = b;
 	}
 
 

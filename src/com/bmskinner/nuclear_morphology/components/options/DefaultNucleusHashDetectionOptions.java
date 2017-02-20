@@ -73,11 +73,7 @@ public class DefaultNucleusHashDetectionOptions
 
 	@Override
 	public boolean isValid(CellularComponent c) {
-		if(c instanceof Nucleus){
-			return super.isValid(c);
-		} else {
-			return false;
-		}
+		return super.isValid(c);
 	}
 
 	@Override

@@ -380,6 +380,13 @@ public interface CellularComponent
 	 */
 	Mask getBooleanMask(int height, int width);
 	
+	/**
+	 * Create a boolean mask, in which true is within the nucleus and false is outside
+	 * the component, for the original source image of the component
+	 * @return a mask
+	 */
+	Mask getSourceBooleanMask();
+	
 	/*
     For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them
     Used for obtaining a consensus between potential tail positions

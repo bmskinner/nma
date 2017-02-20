@@ -1070,6 +1070,38 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return new BooleanMask(result);
 		}
 		
+		/**
+		 * Create a boolean mask, in which true is within the nucleus and false is outside
+		 * the component, for the original source image of the component
+		 * @return a mask
+		 */
+		public Mask getSourceBooleanMask(){
+			boolean[][] result;
+			try {
+				
+				int width  = this.getImage().getWidth();
+				int height = this.getImage().getHeight();
+
+				result = new boolean[height][width];
+
+				for(int x=0; x<width; x++ ){
+
+					for(int y=0; x<height; y++ ){
+
+						result[x][y] = this.containsPoint( x, y );
+
+					}
+
+				}
+
+			} catch (UnloadableImageException e) {
+				warn("Cannot load source image");
+				
+				result = new boolean[10][10];
+			}
+			return new BooleanMask(result);
+		}
+		
 		
 		/*
 		For two NucleusBorderPoints in a Nucleus, find the point that lies halfway between them

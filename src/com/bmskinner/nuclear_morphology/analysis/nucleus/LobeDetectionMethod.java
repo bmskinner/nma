@@ -1,5 +1,8 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import ij.ImagePlus;
+import ij.gui.Roi;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 import java.util.List;
@@ -7,6 +10,9 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
+import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -130,7 +136,7 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 //		log("Adding "+points.size()+" points to nuclei");
 		
 		
-		int[] position = cell.getCytoplasm().getPosition();
+		IPoint base = cell.getCytoplasm().getOriginalBase();
 		
 		
 		
@@ -140,22 +146,72 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 			
 			if(n instanceof LobedNucleus){
 				LobedNucleus l = (LobedNucleus) n;
-				for(IPoint p : points){
-					
-					int oX = p.getXAsInt() + position[CellularComponent.X_BASE];
-					int oY = p.getYAsInt() + position[CellularComponent.Y_BASE];
-					
-					IPoint oP = IPoint.makeNew(oX, oY);
-					// Offset the points to the position of the nucleus
-					if(l.containsOriginalPoint(oP)){
-						l.addLobeCentre(oP);
-//						log("\tAdded lobe "+p.toString());
-					}
-				}
 				
-//				log(l.getLobeCount()+" lobes");
-				// Copy stat for charting
-				l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
+				// Trim the points so that the centre of a point cluster is chosen, 
+				// rather than the whole cloud
+				
+				// make a binary mask over the points
+				// get the ROIs encompassing them
+				// Add the CoM of each ROI
+				
+				try {
+					// This is just to get the dimensions of the original image
+					// TODO - use the component size and apply an offset
+					ImageProcessor ip = l.getImage();
+				
+				
+					int w = ip.getWidth();
+					int h = ip.getHeight();
+					ByteProcessor bp = new ByteProcessor(w, h ); 
+					
+
+					for(int i=0; i<w*h; i++){
+						bp.set(i, 0);
+					}
+
+
+					for(IPoint p : points){
+
+						int oX = p.getXAsInt() + base.getXAsInt();
+						int oY = p.getYAsInt() + base.getYAsInt();
+
+//						IPoint oP = IPoint.makeNew(oX, oY);
+
+						bp.set(oX, oY, 255);
+
+
+
+						// Offset the points to the position of the nucleus
+						//					if(l.containsOriginalPoint(oP)){
+						//						l.addLobeCentre(oP);
+						////						log("\tAdded lobe "+p.toString());
+						//					}
+					}
+
+//					new ImagePlus(l.getNameAndNumber(), bp).show();
+					// Now look for ROIs in the byte processor
+					GenericDetector dt = new GenericDetector();
+					List<Roi> rois = dt.getRois(bp);
+					for(Roi roi : rois){
+						StatsMap m = dt.measure(roi, bp);
+						int x = m.get(GenericDetector.COM_X).intValue();
+						int y = m.get(GenericDetector.COM_Y).intValue();
+
+						IPoint com = IPoint.makeNew(x, y);
+//						if(l.containsOriginalPoint(com)){
+							l.addLobeCentre(com);
+//						}
+
+					}
+
+
+					//				log(l.getLobeCount()+" lobes");
+					// Copy stat for charting
+					l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
+				} catch (UnloadableImageException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 			

@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -371,6 +372,12 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 				
 		return true;
 		
+	}
+	
+	@Override
+	public List<String> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
