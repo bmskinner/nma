@@ -1387,5 +1387,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public ImageProcessor getComponentRGBImage()
+			throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

@@ -74,7 +74,7 @@ public class Cell
 		
 		acrosomes = new ArrayList<IAcrosome>(0);
 		for(IAcrosome a : c.getAcrosomes()){
-			acrosomes.add(new Acrosome(a));
+//			acrosomes.add(new Acrosome(a));
 		}
 	}
 	
@@ -324,5 +324,17 @@ public class Cell
 	public void addNucleus(Nucleus nucleus) {
 		this.nucleus = nucleus;
 		
+	}
+
+	@Override
+	public int getNucleusCount() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int getLobeCount() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

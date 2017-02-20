@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
+import com.bmskinner.nuclear_morphology.charting.datasets.CellDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
@@ -81,6 +82,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -385,7 +387,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					return makeEmptyChart();
 				}
 			}
-			finest("Making standart cell outline chart");
+			finest("Making standard cell outline chart");
 			return makeStandardCellOutlineChart();
 		} catch(ChartCreationException e){
 			warn("Error creating cell outline chart");
@@ -420,20 +422,17 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		if(cell.hasNucleus()){
 			
-			try {
-				new OutlineDatasetCreator(options, cell.getNucleus()).addOutline(ds, false);
-			} catch (ChartDatasetCreationException e) {
-				fine("Error making nucleus outline", e);
-				return makeErrorChart();
+			for(Nucleus n : cell.getNuclei()){
+				
+				try {
+					new OutlineDatasetCreator(options, n).addOutline(ds, false);
+				} catch (ChartDatasetCreationException e) {
+					fine("Error making nucleus outline", e);
+					return makeErrorChart();
+				}
+
 			}
-			
-//			try {
-//				ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getCell().getNucleus());
-//			} catch (ChartDatasetCreationException e) {
-//				fine("Error making nucleus outline", e);
-//				return makeErrorChart();
-//			}
-			
+		
 		}
 		
 		
@@ -487,41 +486,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		ICell cell = options.getCell();
 		IAnalysisDataset dataset = options.firstDataset();
 		
-		
-		
-		JFreeChart chart = createBaseXYChart();
-		XYPlot plot = chart.getXYPlot();
-		
-		plot.getRangeAxis().setInverted(true);
-		
-		
-		// make a hash to track the contents of each dataset produced
-		Map<Integer, String>    hash        = new HashMap<Integer, String>(0); 
-		Map<Integer, XYDataset> datasetHash = new HashMap<Integer, XYDataset>(0); 
-
 		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
-
-			try {
-				finest("Rotation mode is vertical");
-				// duplicate the cell
-				
-				finest("Cell segments    :"+ cell.getNucleus().getProfile(ProfileType.ANGLE).toString());
-
-				Nucleus verticalNucleus = cell.getNucleus().getVerticallyRotatedNucleus();
-
-				finest("Vertical segments:"+verticalNucleus.getProfile(ProfileType.ANGLE).toString());
-
-				cell = new DefaultCell(verticalNucleus);
+				cell = new DefaultCell(cell.getNucleus().getVerticallyRotatedNucleus());
 				finest("Fetched vertical nucleus");
-
-				// Need to have top point at the top of the image
-				plot.getRangeAxis().setInverted(false);
-			} catch(UnavailableProfileTypeException e){
-				warn("Cannot create vertical nucleus");
-				fine("Cannot create vertical nucleus", e);
-				return makeErrorChart();
-			}
 		}
+				
+		CellDataset cellDataset = new CellDataset(cell);
+		
+		
 		
 		/*
 		 * Get the cytoplasm outline dataset
@@ -529,12 +501,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		if(cell.hasCytoplasm()){
 			try {
 
-				OutlineDatasetCreator dc = new OutlineDatasetCreator(options, cell.getCytoplasm());
+				OutlineDataset<CellularComponent> cytoDataset = new OutlineDatasetCreator(options, cell.getCytoplasm())
+					.createOutline(false);
+				cellDataset.addOutline(CellularComponent.CYTOPLASM, cytoDataset);
 
-				OutlineDataset<CellularComponent> cytoDataset = dc.createOutline(false);
-				hash.put(hash.size(), "Cytoplasm"); // add to the first free entry
-				datasetHash.put(datasetHash.size(), cytoDataset);
-				finest("Created cytoplasm outline");
 
 			} catch (ChartDatasetCreationException e) {
 
@@ -548,12 +518,54 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		 */
 		try {
 			
-			OutlineDatasetCreator dc = new OutlineDatasetCreator(options, cell.getNucleus());
-			
-			XYDataset nucleusDataset = dc.createOutline(true);
-			hash.put(hash.size(), "Nucleus"); // add to the first free entry
-			datasetHash.put(datasetHash.size(), nucleusDataset);
-			finest("Created nucleus outline");
+			for(Nucleus n : cell.getNuclei()){
+				
+				
+				OutlineDataset<CellularComponent> nDataset = new OutlineDatasetCreator(options, n)
+					.createOutline(true);
+				cellDataset.addOutline(CellularComponent.NUCLEUS+"_"+n.getID(), nDataset);
+				
+				if(options.isShowBorderTags()){
+					XYDataset tags = new NucleusDatasetCreator(options).createNucleusIndexTags(n);
+					cellDataset.addTags("Tags_"+n.getID(), tags);
+				}
+				
+				if(n instanceof LobedNucleus){
+					
+					XYDataset lobes = new NucleusDatasetCreator(options).createNucleusLobeDataset((LobedNucleus) n);
+					cellDataset.addLobes("Lobes_"+n.getID(), lobes);
+				}
+				
+				
+				if(options.isShowSignals()){
+					finest("Displaying signals on chart");
+					if(cell.getNucleus().getSignalCollection().hasSignal()){
+
+						List<ComponentOutlineDataset> signalsDatasets = new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset);
+	
+
+						finest("Fetched signal outline datasets for "+cell.getNucleus().getNameAndNumber());
+						
+						if(signalsDatasets.size()==0){
+							finest("No signal datasets returned");
+						}
+						
+						for(OutlineDataset d : signalsDatasets){
+
+							for(int series=0; series<d.getSeriesCount(); series++){
+								String seriesKey = d.getSeriesKey(series).toString();
+								
+								finest("Adding outline for "+seriesKey+" to dataset hash");
+								
+								cellDataset.addOutline(seriesKey, d);
+							}
+						}
+					}
+				}
+				
+
+				finest("Created nucleus outline");
+			}
 			
 		} catch (ChartDatasetCreationException e) {
 			
@@ -561,165 +573,139 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 		}
 				
-		// get the index tags
-
-		if(options.isShowBorderTags()){
-			XYDataset tags;
-			try {
-				tags = new NucleusDatasetCreator(options).createNucleusIndexTags(cell);
-			} catch (ChartDatasetCreationException e) {
-				throw new ChartCreationException("Cannot get tags for nucleus", e);
-			}
-			hash.put(hash.size(), "Tags"); // add to the first free entry
-			datasetHash.put(datasetHash.size(), tags);
-			finest("Created border index tags");
-		}
-
-		// get the signals datasets and add each group to the hash
 		
-		if(options.isShowSignals()){
-			finest("Displaying signals on chart");
-			if(cell.getNucleus().getSignalCollection().hasSignal()){
-				List<ComponentOutlineDataset> signalsDatasets;
-				try {
-					signalsDatasets = new NucleusDatasetCreator(options).createSignalOutlines(cell, dataset);
-				} catch (ChartDatasetCreationException e) {
-					return makeErrorChart();
-				}
+		return renderCellDataset(cellDataset, options);
+		
 
-				finest("Fetched signal outline datasets for "+cell.getNucleus().getNameAndNumber());
-				
-				if(signalsDatasets.size()==0){
-					finest("No signal datasets returned");
-				}
-				
-				for(ComponentOutlineDataset d : signalsDatasets){
 
-					for(int series=0; series<d.getSeriesCount(); series++){
-						String seriesKey = d.getSeriesKey(series).toString();
-						
-						finest("Adding outline for "+seriesKey+" to dataset hash");
-						
+	}
+	
+	/**
+	 * Render the given cell dataset according to the chart options
+	 * @param cellDataset
+	 * @param options
+	 * @return
+	 */
+	private JFreeChart renderCellDataset(CellDataset cellDataset, ChartOptions options){
+		
+		JFreeChart chart = createBaseXYChart();
+		XYPlot plot = chart.getXYPlot();
+		
+		plot.getRangeAxis().setInverted(true);
 
-//						IPoint com = d.getComponent(seriesKey).getCentreOfMass();
-//						
-//						Ellipse2D.Double e = new Ellipse2D.Double(com.getX(), com.getY(), 1, 1);
-//						XYShapeAnnotation a = new XYShapeAnnotation(e, null, null, Color.BLUE);
-//						plot.getRenderer(0).addAnnotation(a, Layer.FOREGROUND);
-						hash.put(hash.size(), seriesKey); // add to the first free entry	
-						datasetHash.put(datasetHash.size(), d);
-					}
-				}
-			}
+		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
+			// Need to have top point at the top of the image
+			plot.getRangeAxis().setInverted(false);
 		}
-
+		
 		// set the rendering options for each dataset type
 		finest("Rendering chart");
-		for(int key : hash.keySet()){
-
-			plot.setDataset(key, datasetHash.get(key));
+		
+		
+		int i=0;
+		for(String key : cellDataset.getKeys()){
 			
-			plot.setRenderer(key, new XYLineAndShapeRenderer(options.isShowLines(), options.isShowPoints()));
+//			log("Dataset "+key);
 
-			int seriesCount = plot.getDataset(key).getSeriesCount();
+			XYDataset ds = cellDataset.getDataset(key);
+			plot.setDataset( i, ds);
+			
+			
+			boolean showLines  = key.startsWith("Lobes_") ? false : options.isShowLines();
+			boolean showPoints = key.startsWith("Lobes_") ? true : options.isShowPoints();
+			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer(showLines, showPoints);
+			plot.setRenderer(i, rend);
+			
+			
 			// go through each series in the dataset
-			for(int i=0; i<seriesCount;i++){
+			
+			int seriesCount = ds.getSeriesCount();
+			
+			for(int series=0; series<seriesCount;series++){
 
 				// all datasets use the same stroke
-				plot.getRenderer(key).setSeriesStroke(i, new BasicStroke(2));
-				plot.getRenderer(key).setSeriesVisibleInLegend(i, false);
-
+				rend.setSeriesStroke(         series, ChartComponents.MARKER_STROKE);
+				rend.setSeriesVisibleInLegend(series, true);
+				
+				String name = ds.getSeriesKey(series).toString();
+//				log("\t"+name);
+				
 				/*
 				 * Segmented nucleus outline
 				 */
-				if(hash.get(key).equals("Nucleus")){
-					String name = (String) plot.getDataset(key).getSeriesKey(i);
+				if(key.startsWith(CellularComponent.NUCLEUS)){
 					int colourIndex = getIndexFromLabel(name);
 					Paint colour = ColourSelecter.getColor(colourIndex);
-					plot.getRenderer(key).setSeriesPaint(i, colour);					
+					rend.setSeriesPaint(series, colour);					
 				}
 				
 				/*
 				 * Cytoplasm outline
 				 */
-				if(hash.get(key).equals("Cytoplasm")){
-//					String name = plot.getDataset(key).getSeriesKey(i).toString();
-//					int colourIndex = getIndexFromLabel(name);
-//					Paint colour = ColourSelecter.getColor(colourIndex);
-					plot.getRenderer(key).setSeriesPaint(i, Color.CYAN);					
+				if(key.startsWith(CellularComponent.CYTOPLASM)){
+					rend.setSeriesPaint(series, Color.CYAN);					
+				}
+				
+				if(key.startsWith("Lobes_")){
+					rend.setSeriesPaint(series, Color.RED);				
 				}
 								
 				/*
 				 * Border tags
 				 */
 				
-				if(hash.get(key).equals("Tags")){
-					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
+				if(key.startsWith("Tags_")){
+					rend.setSeriesPaint(i, Color.BLACK);
 
-					String name = plot.getDataset(key).getSeriesKey(i).toString().replace("Tag_", "");
+					String tagName = name.replace("Tag_", "");
 					
 					
-					if(name.equals(BorderTag.ORIENTATION_POINT.toString())){
-						plot.getRenderer(key).setSeriesPaint(i, Color.BLUE);
+					if(tagName.equals(BorderTag.ORIENTATION_POINT.toString())){
+						rend.setSeriesPaint(series, Color.BLUE);
 					}
-					if(name.equals(BorderTag.REFERENCE_POINT.toString())){
-						plot.getRenderer(key).setSeriesPaint(i, Color.ORANGE);
+					if(tagName.equals(BorderTag.REFERENCE_POINT.toString())){
+						rend.setSeriesPaint(series, Color.ORANGE);
 					}
-					if(name.equals(BorderTag.INTERSECTION_POINT.toString())){
-						plot.getRenderer(key).setSeriesPaint(i, Color.CYAN);
+					if(tagName.equals(BorderTag.INTERSECTION_POINT.toString())){
+						rend.setSeriesPaint(series, Color.CYAN);
 					}
-					if(name.equals(BorderTag.TOP_VERTICAL.toString())){
-						plot.getRenderer(key).setSeriesPaint(i, Color.GRAY);
+					if(tagName.equals(BorderTag.TOP_VERTICAL.toString())){
+						rend.setSeriesPaint(series, Color.GRAY);
 					}
-					if(name.equals(BorderTag.BOTTOM_VERTICAL.toString())){
-						plot.getRenderer(key).setSeriesPaint(i, Color.GRAY);
+					if(tagName.equals(BorderTag.BOTTOM_VERTICAL.toString())){
+						rend.setSeriesPaint(series, Color.GRAY);
 					}
 						
 				}
 
 				/*
-				 * Nuclear signals
+				 * Nuclear signals - TODO - reenable this
 				 */
-				if(hash.get(key).startsWith("SignalGroup_")){
+//				if(key.startsWith("SignalGroup_")){
+//
+//					UUID seriesGroup = getSignalGroupFromLabel(key);
+//					
+//					Paint colour = ColourSelecter.getColor(i);
+//					try {
+//
+//						colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
+//								? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
+//								: colour;
+//
+//					
+//					} catch (UnavailableSignalGroupException e){
+//	        			fine("Signal group "+seriesGroup+" is not present in collection", e);
+//	        		} finally {
+//	        			plot.getRenderer(key).setSeriesPaint(i, colour);
+//	        		}
+//				}
 
-					UUID seriesGroup = getSignalGroupFromLabel(hash.get(key));
-					
-					Paint colour = ColourSelecter.getColor(i);
-					try {
-
-						colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
-								? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
-								: colour;
-
-					
-					} catch (UnavailableSignalGroupException e){
-	        			fine("Signal group "+seriesGroup+" is not present in collection", e);
-	        		} finally {
-	        			plot.getRenderer(key).setSeriesPaint(i, colour);
-	        		}
-				}
-
-				/*
-				 * Sperm tail  / flagellum border
-				 */
-				if(hash.get(key).equals("TailBorder")){
-
-					plot.getRenderer(key).setSeriesPaint(i, Color.GREEN);
-				}
-
-
-				/*
-				 * Sperm tail  / flagellum skeleton
-				 */
-				if(hash.get(key).equals("TailSkeleton")){
-
-					plot.getRenderer(key).setSeriesPaint(i, Color.BLACK);
-				}
 			}
 			
 			// Add a background image to the plot
 			clearShapeAnnotations(plot);
 			
+			ICell cell = cellDataset.getCell();
 			if(options.getRotateMode().equals(RotationMode.ACTUAL)){
 				
 				if(cell.hasCytoplasm()){ // if there is a cytoplasm, probably H&E for now. Otherwise fluorescence
@@ -730,6 +716,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 			}
 			
+			i++;
 
 		}
 		applyAxisOptions(chart);

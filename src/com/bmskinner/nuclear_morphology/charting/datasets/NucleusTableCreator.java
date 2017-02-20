@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * This is for tables about nuclei at the dataset level
@@ -78,11 +79,12 @@ public class NucleusTableCreator extends AbstractTableCreator {
 			List<IAnalysisDataset> datasets = options.getDatasets();
 
 			for (int i=0; i < datasets.size(); i++) {
-
+				
 
 				IAnalysisDataset d = datasets.get(i);
 				Vector<Object> values  	= new Vector<Object>();
 
+			
 				IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
 						.getDetectionOptions(CellularComponent.NUCLEUS)
 						.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
@@ -90,6 +92,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
 				for(String s : op.getKeys()){
 					values.add(hough.getValue(s));
 				}
+				
 
 				model.addColumn(d.getName(), values);
 			}
@@ -99,6 +102,9 @@ public class NucleusTableCreator extends AbstractTableCreator {
 			warn("Missing hough detection options in dataset");
 			stack(e.getMessage(), e);
 			return createBlankTable();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return model;
 	}

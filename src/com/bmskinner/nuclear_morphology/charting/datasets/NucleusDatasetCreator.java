@@ -62,6 +62,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -1392,11 +1393,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createNucleusIndexTags(ICell cell) throws ChartDatasetCreationException {
+	public XYDataset createNucleusIndexTags(Nucleus nucleus) throws ChartDatasetCreationException {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
 
-		Nucleus nucleus = cell.getNucleus();// draw the index points on the nucleus border
 		for(Tag tag : nucleus.getBorderTags().keySet()){
 			IBorderPoint tagPoint;
 //			try {
@@ -1412,6 +1412,32 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			ds.addSeries("Tag_"+tag, data);
 		}
 
+		return ds;
+	}
+	
+	
+	/**
+	 * Create a dataset with lines from each of the BorderTags within the nucleus
+	 * to the centre of mass of the nucleus
+	 * @param cell
+	 * @return
+	 * @throws Exception
+	 */
+	public XYDataset createNucleusLobeDataset(LobedNucleus nucleus) throws ChartDatasetCreationException {
+
+		DefaultXYDataset ds = new DefaultXYDataset();
+
+		int i=0;
+		for(IPoint p : nucleus.getLobeCoMs()){
+			
+			double[] xpoints = { p.getX()  };
+			double[] ypoints = { p.getY()  };
+			double[][] data = { xpoints, ypoints };
+			
+			ds.addSeries("Lobe_"+i, data);
+			i++;
+		}
+		
 		return ds;
 	}
 		

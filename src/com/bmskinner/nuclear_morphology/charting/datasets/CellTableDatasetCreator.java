@@ -82,79 +82,18 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 						
 		// find the collection with the most channels
 		// this defines  the number of rows
+		
+		fieldNames.add("Number of nuclei (lobes)");
+		rowData.add(cell.getNucleusCount()+" ("+cell.getLobeCount()+")");
+		
+		int nucleusNumber = 0;
+		for(Nucleus n : cell.getNuclei()){
+			nucleusNumber++;
+			fieldNames.add("Nucleus " +nucleusNumber);
+			rowData.add("");
+			addNuclearDataToTable(fieldNames, rowData, n, d);
 			
-		Nucleus n = cell.getNucleus();
-
-		fieldNames.add("Source image file");
-		rowData.add(n.getPathAndNumber());
-
-		fieldNames.add("Source image name");
-		rowData.add(n.getSourceFileName());
-
-		fieldNames.add("Source channel");
-		rowData.add(n.getChannel());
-		
-		fieldNames.add("Angle window prop.");
-		rowData.add(n.getWindowProportion(ProfileType.ANGLE));
-		
-		fieldNames.add("Angle window size");
-		rowData.add(n.getWindowSize(ProfileType.ANGLE));
-
-		fieldNames.add("Scale (pixels/um)");
-		rowData.add(n.getScale());
-
-		addNuclearStatisticsToTable(fieldNames, rowData, n);
-		
-		fieldNames.add("Original bounding width");
-		rowData.add(n.getBounds().getWidth());
-		
-		fieldNames.add("Original bounding height");
-		rowData.add(n.getBounds().getHeight());
-
-		fieldNames.add("Nucleus CoM");
-		rowData.add(n.getCentreOfMass().toString());
-		
-		fieldNames.add("Original CoM");
-		rowData.add(n.getOriginalCentreOfMass().toString());
-
-		fieldNames.add("Original nucleus position");
-		rowData.add("x: "+n.getPosition()[0]+" : y: "+n.getPosition()[1]);
-
-		fieldNames.add("Current nucleus position");
-		rowData.add("x: "+n.getMinX()+" : y: "+n.getMinY());
-
-		NucleusType type = NucleusType.getNucleusType(n);
-
-		if(type!=null){
-						
-			for(Tag tag : n.getBorderTags().keySet()){
-				fieldNames.add(tag);
-				if(n.hasBorderTag(tag)){
-
-					IBorderPoint p;
-					try {
-						p = n.getBorderPoint(tag);
-					} catch (UnavailableBorderTagException e) {
-						fine("Tag not present: "+tag);
-						return AbstractTableCreator.createBlankTable();
-					}
-					
-					int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
-					
-					rowData.add(p.toString()+" at profile index "+index);
-				} else {
-					rowData.add("N/A");
-				}
-			}
-		} 
-		
-		
-//		for(int i=0; i<n.getBorderLength(); i++){
-//			fieldNames.add("Border index "+i);
-//			rowData.add("x: "+n.getBorderPoint(i).getX()+" : y: "+n.getBorderPoint(i).getY());
-//		}
-		
-		addNuclearSignalsToTable(fieldNames, rowData, n, d);
+		}
 
 		model.addColumn("", fieldNames.toArray(new Object[0])); 
 		model.addColumn("Info", rowData.toArray(new Object[0]));
@@ -246,6 +185,75 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * PRIVATE METHODS
 	 * 
 	 */
+	
+	private void addNuclearDataToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, IAnalysisDataset d){
+					
+		fieldNames.add("Source image file");
+		rowData.add(n.getPathAndNumber());
+
+		fieldNames.add("Source image name");
+		rowData.add(n.getSourceFileName());
+
+		fieldNames.add("Source channel");
+		rowData.add(n.getChannel());
+		
+		fieldNames.add("Angle window prop.");
+		rowData.add(n.getWindowProportion(ProfileType.ANGLE));
+		
+		fieldNames.add("Angle window size");
+		rowData.add(n.getWindowSize(ProfileType.ANGLE));
+
+		fieldNames.add("Scale (pixels/um)");
+		rowData.add(n.getScale());
+		
+		
+		addNuclearStatisticsToTable(fieldNames, rowData, n);
+		
+		fieldNames.add("Original bounding width");
+		rowData.add(n.getBounds().getWidth());
+		
+		fieldNames.add("Original bounding height");
+		rowData.add(n.getBounds().getHeight());
+
+		fieldNames.add("Nucleus CoM");
+		rowData.add(n.getCentreOfMass().toString());
+		
+		fieldNames.add("Original CoM");
+		rowData.add(n.getOriginalCentreOfMass().toString());
+
+		fieldNames.add("Original nucleus position");
+		rowData.add("x: "+n.getPosition()[0]+" : y: "+n.getPosition()[1]);
+
+		fieldNames.add("Current nucleus position");
+		rowData.add("x: "+n.getMinX()+" : y: "+n.getMinY());
+
+		NucleusType type = NucleusType.getNucleusType(n);
+
+		if(type!=null){
+						
+			for(Tag tag : n.getBorderTags().keySet()){
+				fieldNames.add(tag);
+				if(n.hasBorderTag(tag)){
+
+					
+					try {
+						IBorderPoint p = n.getBorderPoint(tag);
+						int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
+						rowData.add(p.toString()+" at profile index "+index);
+					} catch (UnavailableBorderTagException e) {
+						fine("Tag not present: "+tag);
+						rowData.add("Missing tag");
+					}
+
+				} else {
+					rowData.add("N/A");
+				}
+			}
+		} 
+		
+					
+		addNuclearSignalsToTable(fieldNames, rowData, n, d);
+	}
 	
 	/**
 	 * Add the nuclear statistic information to a cell table

@@ -173,7 +173,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 				double[][] data = { xpoints, ypoints };
 
-				String seriesKey = "Seg_"+segmentPosition;
+				String seriesKey = "Seg_"+segmentPosition+"_"+t.getID();
 				ds.addSeries(seriesKey, data);
 				ds.setComponent(seriesKey, component);
 				finest("Added segment data to chart dataset");

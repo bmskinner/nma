@@ -171,5 +171,12 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 			return null;
 		}
 
+		@Override
+		public ImageProcessor getComponentRGBImage()
+				throws UnloadableImageException {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
 
 }

@@ -71,6 +71,14 @@ public interface Imageable {
 	 * @return the array with the position 
 	 */
 	int[] getPosition();
+	
+	/**
+	 * Get the base X and Y position of the component in 
+	 * the original image. Corresponds to the points in 
+	 * getPosition() {@link #X_BASE} and {@link #Y_BASE}
+	 * @return the base coordinate in the original image
+	 */
+	IPoint getOriginalBase();
 			
 	/**
 	 * Get the RGB channel the object was detected in

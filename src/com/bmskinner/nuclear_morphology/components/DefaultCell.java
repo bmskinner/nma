@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -140,6 +141,19 @@ public class DefaultCell
 		return nuclei;
 	}
 	
+	public int getNucleusCount(){
+		return nuclei.size();
+	}
+	
+	public int getLobeCount(){
+		int i = 0;
+		for(Nucleus n : nuclei){
+			if(n instanceof LobedNucleus){
+				i += ((LobedNucleus) n).getLobeCount();
+			}
+		}
+		return i;
+	}
 	
 	
 	/* (non-Javadoc)

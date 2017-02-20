@@ -56,6 +56,16 @@ public interface ICell
 	 */
 	List<Nucleus> getNuclei();
 	
+	
+	int getNucleusCount();
+	
+	/**
+	 * Get the number of lobes across all nuclei
+	 * (only applies to lobed nuclei)
+	 * @return
+	 */
+	int getLobeCount();
+	
 	/**
 	 * Set the nucleus of the cell
 	 */

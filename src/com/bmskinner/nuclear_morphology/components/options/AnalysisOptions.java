@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -998,6 +999,18 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 		public IMutableCannyOptions unlock() {
 			// TODO Auto-generated method stub
 			return this;
+		}
+
+		@Override
+		public List<String> getKeys() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object getValue(String key) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	}
 

@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.IOException;
+import java.util.List;
 
 
 
@@ -411,6 +412,18 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
 			closingObjectRadius  = template.getClosingObjectRadius();
 			isAddBorder          = template.isAddBorder();
 			
+		}
+
+		@Override
+		public List<String> getKeys() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Object getValue(String key) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	
 

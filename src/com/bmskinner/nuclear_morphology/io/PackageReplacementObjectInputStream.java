@@ -40,7 +40,6 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("analysis.signals.NuclearSignalOptions", com.bmskinner.nuclear_morphology.components.options.NuclearSignalOptions.class);
                 
         MIGRATION_MAP.put("components.AbstractCellularComponent", com.bmskinner.nuclear_morphology.components.AbstractCellularComponent.class);
-        MIGRATION_MAP.put("components.Acrosome", com.bmskinner.nuclear_morphology.components.Acrosome.class);
         MIGRATION_MAP.put("components.CellCollection", com.bmskinner.nuclear_morphology.components.CellCollection.class);
         MIGRATION_MAP.put("components.CellCollection$StatsCache", com.bmskinner.nuclear_morphology.components.CellCollection.StatsCache.class);
         MIGRATION_MAP.put("components.Cell", com.bmskinner.nuclear_morphology.components.Cell.class);

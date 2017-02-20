@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * The default implementation of the nuclear signal options
@@ -182,6 +183,12 @@ public class DefaultNuclearSignalOptions
 	public void setRGB(boolean b) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<String> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

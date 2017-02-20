@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
@@ -324,6 +325,12 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
 	public void setRGB(boolean b) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public List<String> getKeys() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

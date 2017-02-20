@@ -91,4 +91,11 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 		return null;
 	}
 
+	@Override
+	public ImageProcessor getComponentRGBImage()
+			throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
