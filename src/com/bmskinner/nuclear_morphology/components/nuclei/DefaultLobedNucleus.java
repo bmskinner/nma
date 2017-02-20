@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 import ij.gui.Roi;
 
@@ -32,16 +33,33 @@ import ij.gui.Roi;
 		return lobeCoMs;
 	}
 
+
+	@Override
+	public void addLobeCentre(IPoint com) {
+		lobeCoMs.add(com);
+	}
+
 	@Override
 	public int getLobeCount() {
 		return lobeCoMs.size();
 	}
+	
+	@Override
+	protected double calculateStatistic(PlottableStatistic stat){
+		double result = super.calculateStatistic(stat);
+		
+		if(PlottableStatistic.LOBE_COUNT.equals(stat)){
+			return lobeCoMs.size();
+		}
+		
+		return result;
+
+	}
 
 	@Override
-	public void addLobe(IPoint com) {
-		lobeCoMs.add(com);
+	public void removeAllLobes() {
+		lobeCoMs = new HashSet<IPoint>();
 	}
-	
 	
 
 }

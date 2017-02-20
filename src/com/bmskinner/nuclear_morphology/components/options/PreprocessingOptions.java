@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 
 /**
  * Store options for background removal in images
@@ -29,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
  */
 public class PreprocessingOptions 
 	extends AbstractHashOptions 
-	implements IDetectionSubOptions {
+	implements IPreprocessingOptions {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -91,6 +92,8 @@ public class PreprocessingOptions
 		setInt(MAX_BRI, DEFAULT_MAX_BRI);
 	}
 	
+	
+	
 	public void setUseColourThreshold(boolean b){
 		setBoolean(USE_COLOUR_THRESHOLD, b);
 	}
@@ -108,6 +111,55 @@ public class PreprocessingOptions
 	public void setBrightnessThreshold(int min, int max){
 		setInt(MIN_BRI, min);
 		setInt(MAX_BRI, max);
+	}
+
+
+
+	@Override
+	public boolean isUseColourThreshold() {
+		return getBoolean(USE_COLOUR_THRESHOLD);
+	}
+
+
+
+	@Override
+	public int getMinHue() {
+		return getInt(MIN_HUE);
+	}
+
+
+
+	@Override
+	public int getMaxHue() {
+		return getInt(MAX_HUE);
+	}
+
+
+
+	@Override
+	public int getMinSaturation() {
+		return getInt(MIN_SAT);
+	}
+
+
+
+	@Override
+	public int getMaxSaturation() {
+		return getInt(MAX_SAT);
+	}
+
+
+
+	@Override
+	public int getMinBrightness() {
+		return getInt(MIN_BRI);
+	}
+
+
+
+	@Override
+	public int getMaxBrightness() {
+		return getInt(MAX_BRI);
 	}
 	 
 

@@ -14,10 +14,10 @@ public class DefaultHoughOptions
 	implements IMutableHoughDetectionOptions {
 
 	private static final long serialVersionUID = 1L;
-	public static final double DEFAULT_MIN_RADIUS = 5;
-	public static final double DEFAULT_MAX_RADIUS = 50;
-	public static final int    DEFAULT_NUM_CIRCLES = 6;
-	public static final int    DEFAULT_HOUGH_THRESHOLD = -1;
+	public static final int DEFAULT_MIN_RADIUS = 5;
+	public static final int DEFAULT_MAX_RADIUS = 30;
+	public static final int DEFAULT_NUM_CIRCLES = 0;
+	public static final int DEFAULT_HOUGH_THRESHOLD = 20;
 	
 	/**
 	 * Construct with default options
@@ -41,21 +41,21 @@ public class DefaultHoughOptions
 	}
 	
 	@Override
-	public double getMinRadius() {
-		return getDouble(MIN_RADIUS);
+	public int getMinRadius() {
+		return getInt(MIN_RADIUS);
 	}
 	
-	public void setMinRadius(double d){
-		setDouble(MIN_RADIUS, d);
+	public void setMinRadius(int i){
+		setInt(MIN_RADIUS, i);
 	}
 
 	@Override
-	public double getMaxRadius() {
-		return getDouble(MAX_RADIUS);
+	public int getMaxRadius() {
+		return getInt(MAX_RADIUS);
 	}
 	
-	public void setMaxRadius(double d){
-		setDouble(MAX_RADIUS, d);
+	public void setMaxRadius(int i ){
+		setInt(MAX_RADIUS, i);
 	}
 
 	@Override
@@ -87,6 +87,11 @@ public class DefaultHoughOptions
 	@Override
 	public IMutableHoughDetectionOptions unlock() {
 		return this;
+	}
+	
+	public String toString(){
+		
+		return "Hough options:"+IDetectionOptions.NEWLINE + super.toString();		
 	}
 
 }

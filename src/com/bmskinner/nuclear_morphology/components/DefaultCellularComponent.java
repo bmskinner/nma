@@ -485,6 +485,30 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		return ip;
 	}
 	
+	public ImageProcessor getComponentRGBImage() throws UnloadableImageException{
+		ImageProcessor ip = getRGBImage().duplicate();
+
+		if(ip==null){	
+			throw new UnloadableImageException("Source image is not available");
+		}
+		
+		int[] positions = getPosition();
+		
+		int padding = CellularComponent.COMPONENT_BUFFER; // a border of pixels beyond the cell boundary
+		int wideW = (int) (positions[CellularComponent.WIDTH]+(padding*2));
+		int wideH = (int) (positions[CellularComponent.HEIGHT]+(padding*2));
+		int wideX = (int) (positions[CellularComponent.X_BASE]-padding);
+		int wideY = (int) (positions[CellularComponent.Y_BASE]-padding);
+
+		wideX = wideX<0 ? 0 : wideX;
+		wideY = wideY<0 ? 0 : wideY;
+
+		ip.setRoi(wideX, wideY, wideW, wideH);
+		ip = ip.crop();
+
+		return ip;
+	}
+	
 //	public void setSourceFileName(String name) {
 //		this.sourceFileName = name;
 //	}

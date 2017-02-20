@@ -106,7 +106,14 @@ public interface Imageable {
 	 */
 	ImageProcessor getComponentImage() throws UnloadableImageException;
 
-	
+	/**
+	 * Get the image from which the component was detected, and crops
+	 * it to only the region containing the component.
+	 * Use when an RGB image needs to be displayed, such as H&E
+	 * @return an ImageJ image processor cropped to size
+	 * @throws UnloadableImageException if the image can't be loaded
+	 */
+	ImageProcessor getComponentRGBImage()throws UnloadableImageException;
 	
 	/**
 	 * Get the pixels within this object as a list of points

@@ -21,11 +21,14 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
 import com.bmskinner.nuclear_morphology.analysis.detection.Kuwahara_Filter;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
@@ -35,7 +38,6 @@ import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 import ij.ImagePlus;
 import ij.ImageStack;
-
 import ij.process.ByteProcessor;
 import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
@@ -533,19 +535,35 @@ public class ImageFilterer extends AbstractImageFilterer {
 	 * @param options the detection options
 	 * @return
 	 */
-	public ImageFilterer runHoughCircleDetection(IHoughDetectionOptions options){
+	public List<IPoint> runHoughCircleDetection(IHoughDetectionOptions options){
+		
+		fine("Running hough detection");
 		
 		Hough_Circles circ = new Hough_Circles();
+
 		circ.threshold  = options.getHoughThreshold();
 		circ.maxCircles = options.getNumberOfCircles();
-		circ.radiusMin = (int) options.getMinRadius();
-		circ.radiusMax = (int) options.getMaxRadius();
+		circ.radiusMin  = (int) options.getMinRadius();
+		circ.radiusMax  = (int) options.getMaxRadius();
+		circ.radiusInc  = 1;
+		
+		// Repeat the nucleus detection parameters
+
 		circ.run(ip);
-		Point[] centres = circ.centerPoint;
-		for(Point p : centres){
-			log(p.toString());
+		
+		List<IPoint> list = new ArrayList<IPoint>();
+		Point[] points = circ.centerPoint;
+
+		if(points!=null){
+		
+			for(Point p : points){
+				if(p!=null){
+
+					list.add(IPoint.makeNew(p.getX(), p.getY()));
+				}
+			}
 		}
-		return this;
+		return list;
 	}
 	
 	/**

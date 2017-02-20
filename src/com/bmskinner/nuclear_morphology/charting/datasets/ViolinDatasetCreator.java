@@ -69,7 +69,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		throw new ChartDatasetCreationException("Component not recognised: "+component);
 
 	}
-	
+		
 	/*
 	 * 
 	 * PRIVATE METHODS

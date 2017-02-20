@@ -48,6 +48,7 @@ public interface PlottableStatistic extends Serializable {
 	static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic("Angle between reference points", StatisticDimension.ANGLE);
 	static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
 	static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
+	static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Lobe count", StatisticDimension.DIMENSIONLESS);
 
 	// Old signal statistics minus overlaps with nucleus stats
 	static final PlottableStatistic ANGLE           = new GenericStatistic("Angle", StatisticDimension.ANGLE);
@@ -101,6 +102,8 @@ public interface PlottableStatistic extends Serializable {
 		return getRodentSpermNucleusStats();
 	}
 	
+	
+	
 	/**
 	 * Get stats for round nuclei 
 	 * @return
@@ -113,7 +116,7 @@ public interface PlottableStatistic extends Serializable {
 			return getRoundNucleusStats();
 		}
 		case NEUTROPHIL:
-			return getRoundNucleusStats();
+			return getLobedNucleusStats();
 		case PIG_SPERM:
 			return getRoundNucleusStats();
 		case RODENT_SPERM:
@@ -132,6 +135,16 @@ public interface PlottableStatistic extends Serializable {
 		list.add(VARIABILITY);
 		list.add(BOUNDING_HEIGHT);
 		list.add(BOUNDING_WIDTH);
+		return list;
+	}
+	
+	/**
+	 * Get stats for round nuclei 
+	 * @return
+	 */
+	static List<PlottableStatistic> getLobedNucleusStats(){
+		List<PlottableStatistic> list = getRoundNucleusStats();
+		list.add(LOBE_COUNT);
 		return list;
 	}
 	

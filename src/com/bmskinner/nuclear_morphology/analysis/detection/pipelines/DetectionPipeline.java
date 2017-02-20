@@ -10,6 +10,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -249,16 +250,16 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	public DetectionPipeline<E> colourThreshold(){
 		
 		try {
-			PreprocessingOptions op = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			IPreprocessingOptions op = (IPreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 			
-			if(op.getBoolean(PreprocessingOptions.USE_COLOUR_THRESHOLD)){
+			if(op.isUseColourThreshold()){
 				
-				int minHue = op.getInt(PreprocessingOptions.MIN_HUE);
-				int maxHue = op.getInt(PreprocessingOptions.MAX_HUE);
-				int minSat = op.getInt(PreprocessingOptions.MIN_SAT);
-				int maxSat = op.getInt(PreprocessingOptions.MAX_SAT);
-				int minBri = op.getInt(PreprocessingOptions.MIN_BRI);
-				int maxBri = op.getInt(PreprocessingOptions.MAX_BRI);
+				int minHue = op.getMinHue();
+				int maxHue = op.getMaxHue();
+				int minSat = op.getMinSaturation();
+				int maxSat = op.getMaxSaturation();
+				int minBri = op.getMinBrightness();
+				int maxBri = op.getMaxBrightness();
 				
 				ip = new ImageFilterer(ip)
 						.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
@@ -351,23 +352,23 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 	 */
 	public DetectionPipeline<E> houghCircles(){
 		warn("Hough not implemented");
-		try {
-			IDetectionSubOptions op = options.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
-			
-			if( op instanceof IHoughDetectionOptions){
-			
-				
-			ip = new ImageFilterer(ip)
-					.runHoughCircleDetection((IHoughDetectionOptions) op)
-					.toProcessor();
-			
-			} else {
-				throw new IllegalArgumentException("Sub option is not a Hough options");
-			}
-			
-		} catch (MissingOptionException e) {
-			warn("Missing Hough options");
-		}
+//		try {
+//			IDetectionSubOptions op = options.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+//			
+//			if( op instanceof IHoughDetectionOptions){
+//			
+//				
+//			ip = new ImageFilterer(ip)
+//					.runHoughCircleDetection((IHoughDetectionOptions) op)
+//					.toProcessor();
+//			
+//			} else {
+//				throw new IllegalArgumentException("Sub option is not a Hough options");
+//			}
+//			
+//		} catch (MissingOptionException e) {
+//			warn("Missing Hough options");
+//		}
 		return this;
 	}
 	

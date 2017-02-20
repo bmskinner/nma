@@ -16,7 +16,7 @@ public interface LobedNucleus extends Nucleus {
 	 * Add a lobe centre of mass
 	 * @param com
 	 */
-	void addLobe(IPoint com);
+	void addLobeCentre(IPoint com);
 	
 	/**
 	 * Get the centres of mass of all lobes
@@ -24,12 +24,15 @@ public interface LobedNucleus extends Nucleus {
 	 */
 	Set<IPoint> getLobeCoMs();
 	
-	
 	/**
-	 * Get the number of lobes in this nucleus
-	 * @return the number of lobes
+	 * Get the number of lobes detected in the nucleus
+	 * @return
 	 */
 	int getLobeCount();
 	
+	/**
+	 * Remove all lobes from the nucleus
+	 */
+	void removeAllLobes();
 
 }

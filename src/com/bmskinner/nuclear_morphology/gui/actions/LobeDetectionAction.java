@@ -58,9 +58,8 @@ public class LobeDetectionAction extends ProgressableAction {
 			stack(e.getMessage(), e);
 		}
 		
-
 //		fireDatasetEvent(DatasetEvent.SAVE, dataset);
-		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 		super.finished();
 		
 

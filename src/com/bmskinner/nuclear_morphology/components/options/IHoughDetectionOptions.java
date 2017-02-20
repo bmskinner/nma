@@ -20,9 +20,9 @@ public interface IHoughDetectionOptions extends IDetectionSubOptions {
 		
 		IHoughDetectionOptions lock();
 		
-		void setMinRadius(double d);
+		void setMinRadius(int d);
 		
-		void setMaxRadius(double d);
+		void setMaxRadius(int d);
 		
 		/**
 		 * Set the maximum number of circles to return. This will have no effect
@@ -50,13 +50,13 @@ public interface IHoughDetectionOptions extends IDetectionSubOptions {
 	 * Get the minimum radius circle detected
 	 * @return
 	 */
-	double getMinRadius();
+	int getMinRadius();
 	
 	/**
 	 * Get the maximum radius circle detected
 	 * @return
 	 */
-	double getMaxRadius();
+	int getMaxRadius();
 	
 	/**
 	 * Get the number of circles to be detected

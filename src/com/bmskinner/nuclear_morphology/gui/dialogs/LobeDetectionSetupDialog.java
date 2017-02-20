@@ -25,8 +25,11 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.LobeDetectionMethod;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
@@ -59,6 +62,12 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 
 	@Override
 	public IAnalysisMethod getMethod() {
+		
+		// Assign the options to the dataset
+		dataset.getAnalysisOptions()
+				.getDetectionOptions(CellularComponent.NUCLEUS)
+				.setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
+		
 		return new LobeDetectionMethod(dataset, options);
 	}
 

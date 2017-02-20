@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -34,6 +35,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IDetectionOptions extends Serializable, Loggable {
 	
+	static final String NEWLINE = System.getProperty("line.separator"); 
+	
 	/**
 	 * All sub option classes implement this interface.
 	 * They must be cast appropriately later.
@@ -45,6 +48,43 @@ public interface IDetectionOptions extends Serializable, Loggable {
 		public static final String CANNY_OPTIONS      = "Canny";
 		public static final String HOUGH_OPTIONS      = "Hough";
 		public static final String BACKGROUND_OPTIONS = "Background";
+		
+		List<String> getKeys();
+		
+		Object getValue(String key);
+		
+		/**
+		 * Interface for image preprocessing, such as colour thresholding
+		 * and background removal
+		 * @author bms41
+		 *
+		 */
+		public interface IPreprocessingOptions extends IDetectionSubOptions {
+			
+			boolean isUseColourThreshold();
+			
+			int getMinHue();
+			
+			int getMaxHue();
+			
+			int getMinSaturation();
+			
+			int getMaxSaturation();
+			
+			int getMinBrightness();
+			
+			int getMaxBrightness();
+			
+			void setUseColourThreshold(boolean b);
+			
+			void setHueThreshold(int min, int max);
+			
+			void setSaturationThreshold(int min, int max);
+			
+			void setBrightnessThreshold(int min, int max);
+			
+			
+		}
 		
 	}
 	
@@ -161,5 +201,7 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	 * @return true if the component would be detected with these options, false otherwise
 	 */
 	boolean isValid(CellularComponent c);
+	
+	List<String> getKeys();
 
 }
