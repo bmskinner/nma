@@ -717,4 +717,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
+	@Override
+	public Mask getSourceBooleanMask() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -18,6 +18,8 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAcrosome;
+import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NuclearSignal;
@@ -64,11 +66,28 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
 			
 			Nucleus n = getCellModel().getCell().getNucleus();
 			// Every cell has a nucleus
-			ComponentListCell nucleusCell = new ComponentListCell("Nucleus", n);
+			ComponentListCell nucleusCell = new ComponentListCell(CellularComponent.NUCLEUS, n);
 			
 			model.addElement(nucleusCell);
 			
+			// Cytoplasm
+			if(getCellModel().getCell().hasCytoplasm()){
+				ICytoplasm cyto = getCellModel().getCell().getCytoplasm();
+				ComponentListCell cytoCell = new ComponentListCell(CellularComponent.CYTOPLASM, cyto);
+				model.addElement(cytoCell);
+			}
+			
+			// Acrosomes
+			if(getCellModel().getCell().hasAcrosome()){
+				IAcrosome a = getCellModel().getCell().getAcrosomes().get(0);
+				ComponentListCell cell = new ComponentListCell(CellularComponent.ACROSOME, a);
+				model.addElement(cell);
+			}
+			
 			ISignalCollection signalCollection = n.getSignalCollection();
+			
+			
+			
 			
 			// Add signals groups present
 			for(UUID signalGroupId : signalCollection.getSignalGroupIDs()){

@@ -154,6 +154,9 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 				// get the ROIs encompassing them
 				// Add the CoM of each ROI
 				
+				//TODO - the hough points are offset against the nuclei. Check the hough transform probability image
+				// to see where this is occurring.
+				
 				try {
 					// This is just to get the dimensions of the original image
 					// TODO - use the component size and apply an offset
@@ -198,9 +201,9 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 						int y = m.get(GenericDetector.COM_Y).intValue();
 
 						IPoint com = IPoint.makeNew(x, y);
-//						if(l.containsOriginalPoint(com)){
+						if(cell.getCytoplasm().containsOriginalPoint(com)){
 							l.addLobeCentre(com);
-//						}
+						}
 
 					}
 

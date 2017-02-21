@@ -1439,5 +1439,24 @@ public abstract class AbstractCellularComponent
 		}
 		return bestDistance;
 	}
+	
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ImageProcessor getComponentRGBImage()
+			throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Mask getSourceBooleanMask() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 		
 }

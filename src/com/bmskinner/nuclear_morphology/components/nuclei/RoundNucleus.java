@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
@@ -1382,17 +1383,5 @@ public class RoundNucleus extends AbstractCellularComponent
 		return true;
 	}
 
-	@Override
-	public ImageProcessor getRGBImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ImageProcessor getComponentRGBImage()
-			throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 }
