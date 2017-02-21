@@ -704,4 +704,17 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
+	@Override
+	public IPoint getOriginalBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ImageProcessor getComponentRGBImage()
+			throws UnloadableImageException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
