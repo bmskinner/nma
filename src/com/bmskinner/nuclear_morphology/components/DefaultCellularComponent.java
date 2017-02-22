@@ -630,7 +630,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * If any stats are listed as uncalcualted, attempt to calculate them
 	 */
 	public void updateDependentStats(){
-//		fine("Updating dependent stats");
 		for(PlottableStatistic stat : this.getStatistics()){
 
 			if(this.getStatistic(stat)==STAT_NOT_CALCULATED){

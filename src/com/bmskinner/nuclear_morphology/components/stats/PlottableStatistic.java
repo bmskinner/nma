@@ -48,8 +48,8 @@ public interface PlottableStatistic extends Serializable {
 	static final PlottableStatistic OP_RP_ANGLE     = new GenericStatistic("Angle between reference points", StatisticDimension.ANGLE);
 	static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
 	static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
-	static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Lobes per nucleus", StatisticDimension.DIMENSIONLESS);
-	static final PlottableStatistic NUCLEUS_COUNT   = new GenericStatistic("Nuclei per cell", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Number of lobes", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic CELL_NUCLEUS_COUNT   = new GenericStatistic("Nuclei per cell", StatisticDimension.DIMENSIONLESS);
 
 	// Old signal statistics minus overlaps with nucleus stats
 	static final PlottableStatistic ANGLE           = new GenericStatistic("Angle", StatisticDimension.ANGLE);
@@ -97,7 +97,8 @@ public interface PlottableStatistic extends Serializable {
 	
 	static List<PlottableStatistic> getCellStats(){
 		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>();
-		list.add(NUCLEUS_COUNT);
+		list.add(CELL_NUCLEUS_COUNT);
+		list.add(LOBE_COUNT);
 		return list;
 	}
 	
@@ -152,7 +153,6 @@ public interface PlottableStatistic extends Serializable {
 	static List<PlottableStatistic> getLobedNucleusStats(){
 		List<PlottableStatistic> list = getRoundNucleusStats();
 		list.add(LOBE_COUNT);
-//		list.add(NUCLEUS_COUNT);
 		return list;
 	}
 	

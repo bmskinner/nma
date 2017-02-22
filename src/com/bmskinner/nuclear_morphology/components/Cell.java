@@ -24,7 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * The cell is the highest level of analysis here. Cells we can analyse
@@ -326,15 +328,44 @@ public class Cell
 		
 	}
 
-	@Override
 	public int getNucleusCount() {
+		// TODO Auto-generated method stub
+		return 1;
+	}
+
+
+	public int getLobeCount() {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public int getLobeCount() {
+	public boolean hasStatistic(PlottableStatistic stat) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public double getStatistic(PlottableStatistic stat) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void setStatistic(PlottableStatistic stat, double d) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public PlottableStatistic[] getStatistics() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

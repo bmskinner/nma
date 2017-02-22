@@ -84,7 +84,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		// this defines  the number of rows
 		
 		fieldNames.add("Number of nuclei (lobes)");
-		rowData.add(cell.getNucleusCount()+" ("+cell.getLobeCount()+")");
+		rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT)+" ("+cell.getStatistic(PlottableStatistic.LOBE_COUNT)+")");
 		
 		int nucleusNumber = 0;
 		for(Nucleus n : cell.getNuclei()){

@@ -1018,18 +1018,14 @@ implements ICellCollection {
 
 		double[] result = null;
 		
-		if(stat.equals(PlottableStatistic.NUCLEUS_COUNT)){
-			
-			result = new double[cells.size()];
-			
-			int i=0;
-			for(ICell c : cells){
-				result[i] = c.getNucleusCount();
-				i++;
-			}
+		result = new double[cells.size()];
 
-		} 
-				
+		int i=0;
+		for(ICell c : cells){
+			result[i] = c.getStatistic(stat);
+			i++;
+		}
+
 		return result;
 	}
 

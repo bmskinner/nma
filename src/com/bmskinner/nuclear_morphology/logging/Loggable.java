@@ -11,10 +11,6 @@ import ij.IJ;
  * @author bms41
  *
  */
-/**
- * @author bms41
- *
- */
 public interface Loggable {
 	
 	public static final String ROOT_LOGGER = "";

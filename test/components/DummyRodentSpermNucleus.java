@@ -723,4 +723,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
+	@Override
+	public boolean hasStatistic(PlottableStatistic stat) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

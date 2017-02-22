@@ -26,8 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * The cell is the highest level of analysis here. Cells we can analyse
@@ -141,11 +143,59 @@ public class DefaultCell
 		return nuclei;
 	}
 	
-	public int getNucleusCount(){
-		return nuclei.size();
+	/*
+	 * 
+	 *  METHODS IMPLEMENTING THE STATISTICAL INTERFACE
+	 * 
+	 */
+	
+	@Override
+	public synchronized boolean hasStatistic(PlottableStatistic stat){
+		return PlottableStatistic.getCellStats().contains(stat);
 	}
 	
-	public int getLobeCount(){
+	@Override
+	public synchronized double getStatistic(PlottableStatistic stat) {
+		return this.getStatistic(stat, MeasurementScale.PIXELS);
+	} 
+	
+	@Override
+	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+		
+		double result =  calculateStatistic(stat);
+		return result;
+	}
+	
+	protected double calculateStatistic(PlottableStatistic stat){
+		double result = ERROR_CALCULATING_STAT;
+				
+		// Do not add getters for values added at creation time
+		// or you'll get infinite loops when things break
+		
+		if(PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat)){
+			return nuclei.size();
+		}
+		
+		if(PlottableStatistic.LOBE_COUNT.equals(stat)){
+			return getLobeCount();
+		}
+		
+		return result;
+	}
+	
+	@Override
+	public void setStatistic(PlottableStatistic stat, double d) {
+		// TODO Auto-generated method stub
+		// Nothing to set here yet
+	}
+
+	@Override
+	public PlottableStatistic[] getStatistics() {
+		return PlottableStatistic.getCellStats().toArray(new PlottableStatistic[0]);
+	}
+	
+	
+	private int getLobeCount(){
 		int i = 0;
 		for(Nucleus n : nuclei){
 			if(n instanceof LobedNucleus){
@@ -155,6 +205,12 @@ public class DefaultCell
 		return i;
 	}
 	
+	
+	/*
+	 * 
+	 *  METHODS IMPLEMENTING THE ICELL INTERFACE
+	 * 
+	 */
 	
 	/* (non-Javadoc)
 	 * @see components.ICell#setNucleus(components.nuclei.Nucleus)
@@ -357,8 +413,5 @@ public class DefaultCell
 		}
 //		finest("Read cell"); 
 	}
-
-
-
 
 }

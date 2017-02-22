@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public interface ICell 
 	extends Serializable, 
 			Loggable,
+			Statistical,
 			Comparable<ICell> {
 
 	/**
@@ -55,16 +56,7 @@ public interface ICell
 	 * @return
 	 */
 	List<Nucleus> getNuclei();
-	
-	
-	int getNucleusCount();
-	
-	/**
-	 * Get the number of lobes across all nuclei
-	 * (only applies to lobed nuclei)
-	 * @return
-	 */
-	int getLobeCount();
+
 	
 	/**
 	 * Set the nucleus of the cell
