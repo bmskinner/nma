@@ -151,7 +151,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 				log("Population: "+collection.getName());
 				log("Passed: "+collection.size()+" nuclei");
-				log("Failed: "+failedNuclei.size()+" nuclei");
+//				log("Failed: "+failedNuclei.size()+" nuclei");
 
 				log(spacerString);
 

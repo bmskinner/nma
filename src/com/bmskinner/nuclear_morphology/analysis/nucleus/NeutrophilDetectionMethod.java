@@ -151,13 +151,13 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 						collection.getNucleusType());
 
 
-				log("Filtering collection...");
-				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
-				if(ok){
-					log("Filtered OK");
-				} else {
-					log("Filtering error");
-				}
+//				log("Filtering collection...");
+//				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
+//				if(ok){
+//					log("Filtered OK");
+//				} else {
+//					log("Filtering error");
+//				}
 
 				/*
 				 * Keep the failed nuclei - they can be manually assessed later
