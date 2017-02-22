@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.gui.tabs.cells;
+package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;

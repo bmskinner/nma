@@ -647,6 +647,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				}
 				
 				if(key.startsWith("Lobes_")){
+					rend.setSeriesShape(series, ChartComponents.DEFAULT_POINT_SHAPE);
 					rend.setSeriesPaint(series, Color.RED);				
 				}
 								

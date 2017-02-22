@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
-import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -48,7 +47,7 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 					return result;
 				} catch (Exception e) {
 					 warn("Error fetching statistic "+stat);
-					 log(Level.FINE, "Error fetching statistic "+stat, e);
+					 stack("Error fetching statistic "+stat, e);
 				}
 		     else {
 		    	 int mid = (low + high) >>> 1; // Unsigned bit shift (0 to leftmost position)
@@ -72,7 +71,7 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 		    		 
 		    	 } catch (Exception e) {
 		    		 warn("Error fetching statistic "+stat);
-		    		 log(Level.FINE, "Error fetching statistic "+stat, e);
+		    		 stack("Error fetching statistic "+stat, e);
 		    	 }
 
 		     }
@@ -86,7 +85,7 @@ public class NucleusStatisticFetchingTask extends AbstractStatisticFetchingTask 
 	   * @return
 	 * @throws Exception 
 	   */
-	  private double[] getStatistics() throws Exception{
+	  private double[] getStatistics() throws Exception {
 		  double[] result = new double[high-low];
 
 		  finest("Fetching statistic "+stat+" for "+result.length+" nuclei");

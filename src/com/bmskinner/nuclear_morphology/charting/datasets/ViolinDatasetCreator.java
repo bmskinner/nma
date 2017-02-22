@@ -54,6 +54,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 		finest("Creating violin dataset for "+component );
 		
+		if(CellularComponent.WHOLE_CELL.equals(component)){
+			return createCellStatisticViolinDataset();
+		}
+		
 		if(CellularComponent.NUCLEUS.equals(component)){
 			return createNucleusStatisticViolinDataset();
 		}
@@ -76,6 +80,41 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 	 * 
 	 * 
 	 */
+	
+	/**
+	 * Get a boxplot dataset for the given statistic for each collection
+	 * @param options the charting options
+	 * @return
+	 * @throws Exception
+	 */
+	private ViolinCategoryDataset createCellStatisticViolinDataset() {
+		List<IAnalysisDataset> datasets = options.getDatasets();
+		PlottableStatistic stat = options.getStat();
+		MeasurementScale scale  = options.getScale();
+		ViolinCategoryDataset ds = new ViolinCategoryDataset();
+
+		
+		for (int i=0; i < datasets.size(); i++) {
+			ICellCollection c = datasets.get(i).getCollection();
+			
+			String rowKey = c.getName()+"_"+i;
+			String colKey = stat.toString();
+
+			// Add the boxplot values
+
+			double[] stats = c.getMedianStatistics(stat, CellularComponent.WHOLE_CELL, scale);
+			List<Number> list = new ArrayList<Number>();
+			for (double d : stats) {
+				list.add(new Double(d));
+			}
+			
+			ds.add(list, rowKey, colKey);
+			
+			addProbabilities(ds, list, rowKey, colKey);  
+		}
+
+		return ds;
+	}
 	
 	/**
 	 * Get a boxplot dataset for the given statistic for each collection

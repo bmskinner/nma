@@ -86,6 +86,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.NucleusProfilesPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Importer;
@@ -120,6 +121,7 @@ public class MainWindow
 	private NucleusProfilesPanel 	nucleusProfilesPanel; 	// the angle profiles
 	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
+	private CellsDetailPanel      	cellsDetailPanel;	    // cells stats - areas, perimeters etc
 	private NuclearStatisticsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
@@ -283,6 +285,13 @@ public class MainWindow
 			detailPanels.add(analysisDetailPanel);
 			tabbedPane.addTab("Analysis info", analysisDetailPanel);
 
+			//---------------
+			// Create panel for split boxplots
+			//---------------
+			cellsDetailPanel  = new CellsDetailPanel();
+			detailPanels.add(cellsDetailPanel);
+			tabbedPane.addTab("Cell charts", cellsDetailPanel);
+			
 			//---------------
 			// Create panel for split boxplots
 			//---------------

@@ -109,7 +109,7 @@ public interface Imageable {
 	/**
 	 * Get the image from which the component was detected, and crops
 	 * it to only the region containing the component
-	 * @return an ImageJ image processor cropped to size
+	 * @return an ImageJ image processor cropped to size, with a padding of n pixels specified in {@link CellularComponent.COMPONENT_BUFFER}
 	 * @throws UnloadableImageException if the image can't be loaded
 	 */
 	ImageProcessor getComponentImage() throws UnloadableImageException;
@@ -118,7 +118,7 @@ public interface Imageable {
 	 * Get the image from which the component was detected, and crops
 	 * it to only the region containing the component.
 	 * Use when an RGB image needs to be displayed, such as H&E
-	 * @return an ImageJ image processor cropped to size
+	 * @return an ImageJ image processor cropped to size, with a padding of n pixels specified in {@link CellularComponent.COMPONENT_BUFFER}
 	 * @throws UnloadableImageException if the image can't be loaded
 	 */
 	ImageProcessor getComponentRGBImage()throws UnloadableImageException;

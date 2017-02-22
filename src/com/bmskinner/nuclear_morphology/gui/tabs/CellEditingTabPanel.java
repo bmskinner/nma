@@ -19,7 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellViewModel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
 
 public interface CellEditingTabPanel extends EditingTabPanel {
 	

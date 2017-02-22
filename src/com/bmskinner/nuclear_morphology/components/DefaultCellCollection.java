@@ -491,7 +491,7 @@ implements ICellCollection {
 	}
 
 	public int getNucleusCount(){
-		return this.size();
+		return this.getNuclei().size();
 	}
 
 	public Iterator<ICell> getCellIterator(){
@@ -545,9 +545,10 @@ implements ICellCollection {
 	 * @return
 	 */
 	public Set<Nucleus> getNuclei(){
+		
 		Set<Nucleus> result = new HashSet<Nucleus>(cells.size());
 		for(ICell c : cells){
-			result.add(c.getNucleus());
+			result.addAll(c.getNuclei());
 		}
 
 		return result;
@@ -857,6 +858,10 @@ implements ICellCollection {
 
 	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 
+		if(CellularComponent.WHOLE_CELL.equals(component)){
+			return getMedianCellStatistic(stat, scale);
+		}
+		
 		if(CellularComponent.NUCLEUS.equals(component)){
 			return getMedianNucleusStatistic(stat, scale);
 		}
@@ -879,6 +884,10 @@ implements ICellCollection {
 	}
 
 	public double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)  throws Exception {
+		
+		if(CellularComponent.WHOLE_CELL.equals(component)){
+			return getMedianCellStatistic(stat, scale);
+		}
 		
 		if(CellularComponent.NUCLEUS.equals(component)){
 			
@@ -911,6 +920,33 @@ implements ICellCollection {
 		return 0;
 	}
 
+	
+	/**
+	 * Get the median value of the given statistic
+	 * @param stat
+	 * @param scale
+	 * @return
+	 * @throws Exception
+	 */
+	private synchronized double getMedianCellStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
+
+		
+		if(this.statsCache.hasStatistic(stat, CellularComponent.WHOLE_CELL, scale)){
+			return(this.statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale));
+		} else {
+
+			double median = 0;
+			if(this.getNucleusCount()>0){
+				double[] values = this.getCellStatistics(stat, scale);
+				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
+			}
+
+			statsCache.setStatistic(stat, CellularComponent.WHOLE_CELL, scale, median);
+			return median;
+		}
+
+
+	}
 
 	/**
 	 * Get the median value of the given statistic
@@ -951,6 +987,11 @@ implements ICellCollection {
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
 		try {
+			
+			if(CellularComponent.WHOLE_CELL.equals(component)){
+				return getCellStatistics(stat, scale);
+			}
+			
 			if(CellularComponent.NUCLEUS.equals(component)){
 				return getNuclearStatistics(stat, scale);
 			}
@@ -964,6 +1005,32 @@ implements ICellCollection {
 		}
 			
 		return null;
+	}
+	
+	/**
+	 * Get a list of the given statistic values for each nucleus in the collection
+	 * @param stat the statistic to use
+	 * @param scale the measurement scale
+	 * @return a list of values
+	 * @throws Exception
+	 */
+	private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+
+		double[] result = null;
+		
+		if(stat.equals(PlottableStatistic.NUCLEUS_COUNT)){
+			
+			result = new double[cells.size()];
+			
+			int i=0;
+			for(ICell c : cells){
+				result[i] = c.getNucleusCount();
+				i++;
+			}
+
+		} 
+				
+		return result;
 	}
 
 

@@ -51,7 +51,7 @@ import ij.gui.Roi;
 		if(PlottableStatistic.LOBE_COUNT.equals(stat)){
 			return lobeCoMs.size();
 		}
-		
+				
 		return result;
 
 	}

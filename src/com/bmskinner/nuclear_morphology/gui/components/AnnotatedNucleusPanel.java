@@ -23,6 +23,7 @@ import ij.ImageStack;
 import ij.process.ImageProcessor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.io.File;
 
 import javax.swing.ImageIcon;
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -79,9 +81,17 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 		
 		ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNucleus().getImage();
 		
-		openProcessor = new ImageAnnotator(openProcessor)
-				.annotateSegments(cell.getNucleus())
-				.toProcessor();
+		ImageAnnotator an = new ImageAnnotator(openProcessor);
+		
+		if(cell.hasCytoplasm()){
+			an.annotateBorder(cell.getCytoplasm(), Color.CYAN);
+		}
+		
+		for(Nucleus n : cell.getNuclei()){
+			an.annotateBorder(n, Color.ORANGE);
+		}
+		
+		openProcessor = an.toProcessor();
 
 		
 		ImageIcon icon = null;

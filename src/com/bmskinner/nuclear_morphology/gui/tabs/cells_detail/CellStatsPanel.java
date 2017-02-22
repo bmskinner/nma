@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.gui.tabs.cells;
+package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

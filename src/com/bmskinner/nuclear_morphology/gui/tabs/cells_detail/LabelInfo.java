@@ -17,24 +17,45 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.gui.tabs.cells;
+package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
-import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
+import javax.swing.ImageIcon;
 
-public class CellBorderDualPanel extends DualChartPanel {
+import com.bmskinner.nuclear_morphology.components.Cell;
+import com.bmskinner.nuclear_morphology.components.ICell;
+
+public class LabelInfo {
+	private ImageIcon icon;
+	private boolean isSelected = false;
+	private ICell cell;
 	
-	public static final int DEFAULT_OVERLAY_PERCENT = 25;
-	
-	public CellBorderDualPanel(){
-		super();
-
-		chartPanel.setFixedAspectRatio(true);
-				
-		rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
-		rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
-
-		updateChartPanelRange();
-
+	public LabelInfo(ImageIcon icon, ICell cell){
+		this.icon = icon;
+		this.cell = cell;
 	}
 
+	public ImageIcon getIcon() {
+		return icon;
+	}
+	
+	public ICell getCell(){
+		return cell;
+	}
+	
+	public String toString(){
+		return cell==null ? "" : cell.getNucleus().getNameAndNumber();
+	}
+
+	public boolean isSelected() {
+		return isSelected;
+	}
+
+	public void setSelected(boolean isSelected) {
+		this.isSelected = isSelected;
+	}
+	
+	public String state(){
+		return this.toString()+": "+isSelected;
+	}
+	
 }

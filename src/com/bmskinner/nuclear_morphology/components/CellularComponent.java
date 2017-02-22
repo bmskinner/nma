@@ -47,6 +47,7 @@ public interface CellularComponent
 				Rotatable {
 	
 	// Standard components
+	static final String WHOLE_CELL  = "Cell";
 	static final String ACROSOME    = "Acrosome";
 	static final String NUCLEUS     = "Nucleus";
 	static final String CYTOPLASM   = "Cytoplasm";

@@ -33,17 +33,17 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellBorderTagPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellOutlinePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellProfilePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellSignalStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellViewModel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsListPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells.ComponentListPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellBorderTagPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellOutlinePanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellProfilePanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellSignalStatsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellStatsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.ComponentListPanel;
 
 @SuppressWarnings("serial")
-public class CellDetailPanel extends DetailPanel implements SignalChangeListener {
+public class IndividualCellDetailPanel extends DetailPanel implements SignalChangeListener {
 		
 	private JTabbedPane tabPane; 
 	
@@ -63,7 +63,7 @@ public class CellDetailPanel extends DetailPanel implements SignalChangeListener
 
 	private CellViewModel model   = new CellViewModel(null, null);
 	
-	public CellDetailPanel() {
+	public IndividualCellDetailPanel() {
 
 		super();
 

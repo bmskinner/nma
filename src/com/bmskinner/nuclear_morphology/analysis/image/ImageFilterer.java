@@ -57,6 +57,19 @@ public class ImageFilterer extends AbstractImageFilterer {
 	public ImageFilterer(ImageStack st) {
 		super(st);
 	}
+	
+	/**
+	 * Apply a thresholding on a greyscale processor.
+	 * Has no effect if the processor is not greyscale
+	 * @param threshold
+	 * @return
+	 */
+	public ImageFilterer threshold(int threshold){
+		if(ip.isGrayscale()){
+			ip.threshold(threshold);
+		}
+		return this;
+	}
 
 	/**
 	 * Run a Kuwahara filter to enhance edges in the image
@@ -529,6 +542,7 @@ public class ImageFilterer extends AbstractImageFilterer {
 
 		return new ImageFilterer(result);
 	}
+	
 	
 	/**
 	 * Run circle detection using given Hough transform options

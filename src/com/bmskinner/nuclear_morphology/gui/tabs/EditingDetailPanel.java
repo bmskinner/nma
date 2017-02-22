@@ -50,7 +50,7 @@ public class EditingDetailPanel
 		JTabbedPane tabPane = new JTabbedPane();
 		this.add(tabPane, BorderLayout.CENTER);
 		
-		DetailPanel cellDetailPanel = new CellDetailPanel();
+		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
 		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel();
 		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel();
 		

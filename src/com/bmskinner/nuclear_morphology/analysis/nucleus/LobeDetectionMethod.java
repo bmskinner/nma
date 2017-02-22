@@ -5,6 +5,7 @@ import ij.gui.Roi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
+import java.awt.Color;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
@@ -22,11 +23,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -101,18 +104,22 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 					int maxHue = op.getMaxHue();
 					int minSat = op.getMinSaturation();
 					int maxSat = op.getMaxSaturation();
-					int minBri = op.getMinBrightness();
-					int maxBri = op.getMaxBrightness();
+					int minBri = 73;// op.getMinBrightness();
+					int maxBri = 255;//op.getMaxBrightness();
 					
 					ImageProcessor test = new ImageFilterer(ip)
 							.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
 							.convertToByteProcessor()
 							.toProcessor();
 					
-//					new ImagePlus("Byte processor", test).show();
+//					
+//					ICannyOptions canny = OptionsFactory.makeCannyOptions();
 					
+					ImageFilterer imf =  new ImageFilterer(test);
+					//.runEdgeDetector(canny);
 					
-					List<IPoint> lobes = new ImageFilterer(test).runHoughCircleDetection(options);
+//					new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny", imf.toProcessor()).show();
+					List<IPoint> lobes = imf.runHoughCircleDetection(options);
 					addPointsToNuclei(cell, lobes);
 				}
 				
@@ -138,8 +145,6 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 		
 		IPoint base = cell.getCytoplasm().getOriginalBase();
 		
-		
-		
 		List<Nucleus> nuclei = cell.getNuclei();
 		
 		for(Nucleus n : nuclei){
@@ -154,14 +159,11 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 				// get the ROIs encompassing them
 				// Add the CoM of each ROI
 				
-				//TODO - the hough points are offset against the nuclei. Check the hough transform probability image
-				// to see where this is occurring.
-				
 				try {
-					// This is just to get the dimensions of the original image
-					// TODO - use the component size and apply an offset
+//					// This is just to get the dimensions of the original image
+//					// TODO - use the component size and apply an offset
 					ImageProcessor ip = l.getImage();
-				
+					
 				
 					int w = ip.getWidth();
 					int h = ip.getHeight();
@@ -175,23 +177,14 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 
 					for(IPoint p : points){
 
-						int oX = p.getXAsInt() + base.getXAsInt();
-						int oY = p.getYAsInt() + base.getYAsInt();
+						int oX = p.getXAsInt() + base.getXAsInt() - CellularComponent.COMPONENT_BUFFER;
+						int oY = p.getYAsInt() + base.getYAsInt() - CellularComponent.COMPONENT_BUFFER;
 
-//						IPoint oP = IPoint.makeNew(oX, oY);
+						IPoint oP = IPoint.makeNew(oX, oY);
 
 						bp.set(oX, oY, 255);
-
-
-
-						// Offset the points to the position of the nucleus
-						//					if(l.containsOriginalPoint(oP)){
-						//						l.addLobeCentre(oP);
-						////						log("\tAdded lobe "+p.toString());
-						//					}
 					}
 
-//					new ImagePlus(l.getNameAndNumber(), bp).show();
 					// Now look for ROIs in the byte processor
 					GenericDetector dt = new GenericDetector();
 					List<Roi> rois = dt.getRois(bp);
@@ -201,7 +194,7 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 						int y = m.get(GenericDetector.COM_Y).intValue();
 
 						IPoint com = IPoint.makeNew(x, y);
-						if(cell.getCytoplasm().containsOriginalPoint(com)){
+						if(l.containsOriginalPoint(com)){
 							l.addLobeCentre(com);
 						}
 

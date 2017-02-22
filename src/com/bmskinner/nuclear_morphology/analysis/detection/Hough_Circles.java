@@ -20,15 +20,16 @@
 
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
-import ij.*;
+import ij.IJ;
+import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
-import ij.process.*;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.gui.*;
 
 /**
  *  Modified from the Hough_Circles plugin by Hemerson Pistori (pistori at ec.ucdb.br)
@@ -61,6 +62,8 @@ public class Hough_Circles implements PlugInFilter, Loggable {
     private int vectorMaxSize = 500;
     boolean useThreshold = false;
     int lut[][][]; // LookUp Table for rsin e rcos values
+    
+    public String imageName = ""; // Store the name of the image for debugging
 
 
     public int setup(String arg, ImagePlus imp) {
@@ -98,8 +101,8 @@ public class Hough_Circles implements PlugInFilter, Loggable {
     			createHoughPixels(newpixels);
 
     			// Create image View for Marked Circles.
-    			ImageProcessor circlesip = new ByteProcessor(width, height);
-    			byte[] circlespixels = (byte[])circlesip.getPixels();
+//    			ImageProcessor circlesip = new ByteProcessor(width, height);
+//    			byte[] circlespixels = (byte[])circlesip.getPixels();
 
     			// Mark the center of the found circles in a new image
     			if(useThreshold)
@@ -108,8 +111,8 @@ public class Hough_Circles implements PlugInFilter, Loggable {
     				getCenterPoints(maxCircles);
 //    			            drawCircles(circlespixels);
 //
-//    			            new ImagePlus("Hough Space [r="+radiusMin+"]", newip).show(); // Shows only the hough space for the minimun radius
-//    			            new ImagePlus(maxCircles+" Circles Found", circlesip).show();
+//    			            new ImagePlus(imageName+" Hough Space [r="+radiusMin+"]", newip).show(); // Shows only the hough space for the minimun radius
+//    			            new ImagePlus(imageName+":  "+maxCircles+" Circles Found", circlesip).show();
     		}
     	} catch(Exception e){
     		warn("Error in hough transform");
