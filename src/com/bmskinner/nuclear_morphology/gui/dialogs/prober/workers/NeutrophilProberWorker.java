@@ -135,9 +135,9 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		// Only consider cells with detected nuclei and cytoplasm
 		List<ICell> result = new ArrayList<ICell>(0);
 		for(ICell cell : cells){
-			if(cell.hasCytoplasm() && cell.hasNucleus()){
+//			if(cell.hasCytoplasm() && cell.hasNucleus()){
 				result.add(cell);
-			}
+//			}
 		}
 		
 
@@ -182,7 +182,7 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		// annotate the image processor with the nucleus outline
 		
 		
-		Color cytoColour = options.isValid(c) ? Color.GREEN : Color.PINK;
+		Color cytoColour = options.isValid(c) && cell.hasNucleus() ? Color.GREEN : Color.PINK;
 
 		ImageAnnotator an = new ImageAnnotator(ip)
 				.annotateBorder(c, cytoColour);
@@ -201,11 +201,12 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 			throw new IllegalArgumentException("Input cell is null");
 		}
 		
-		Nucleus n = cell.getNucleus();
-		
-		ip = new ImageAnnotator(ip)
-				.annotateStats(n, Color.ORANGE, Color.BLUE)
-				.toProcessor();
+		for(Nucleus n : cell.getNuclei()){
+			ip = new ImageAnnotator(ip)
+			.annotateStats(n, Color.ORANGE, Color.BLUE)
+			.toProcessor();
+		}
+				
 	}
 
 }

@@ -55,7 +55,7 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			cytoOptions.setMinCirc(0);
 			cytoOptions.setMaxCirc(1);
 			cytoOptions.setMinSize(100);
-			cytoOptions.setMaxSize(2000);
+			cytoOptions.setMaxSize(10000); // for 20x images
 			PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 			pre.setUseColourThreshold(true);
 			pre.setHueThreshold(0, 104);
@@ -70,7 +70,7 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			nucleusOptions.setMinCirc(0);
 			nucleusOptions.setMaxCirc(1);
 			nucleusOptions.setMinSize(100);
-			nucleusOptions.setMaxSize(2000);
+			nucleusOptions.setMaxSize(3000);
 			PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 			preN.setUseColourThreshold(true);
 			preN.setHueThreshold(0, 255);
