@@ -49,7 +49,11 @@ public interface PlottableStatistic extends Serializable {
 	static final PlottableStatistic HOOK_LENGTH     = new GenericStatistic("Length of hook", StatisticDimension.LENGTH);
 	static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
 	static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Number of lobes", StatisticDimension.DIMENSIONLESS);
+	
+	// Stats for the whole cell, aggregated across sub-components
 	static final PlottableStatistic CELL_NUCLEUS_COUNT   = new GenericStatistic("Nuclei per cell", StatisticDimension.DIMENSIONLESS);
+	static final PlottableStatistic CELL_NUCLEAR_AREA    = new GenericStatistic("Nuclear area", StatisticDimension.AREA);
+
 
 	// Old signal statistics minus overlaps with nucleus stats
 	static final PlottableStatistic ANGLE           = new GenericStatistic("Angle", StatisticDimension.ANGLE);
@@ -98,6 +102,7 @@ public interface PlottableStatistic extends Serializable {
 	static List<PlottableStatistic> getCellStats(){
 		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>();
 		list.add(CELL_NUCLEUS_COUNT);
+		list.add(CELL_NUCLEAR_AREA);
 		list.add(LOBE_COUNT);
 		return list;
 	}

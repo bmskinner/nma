@@ -180,6 +180,10 @@ public class DefaultCell
 			return getLobeCount();
 		}
 		
+		if(PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat)){
+			return getNuclearArea();
+		}
+		
 		return result;
 	}
 	
@@ -201,6 +205,14 @@ public class DefaultCell
 			if(n instanceof LobedNucleus){
 				i += ((LobedNucleus) n).getLobeCount();
 			}
+		}
+		return i;
+	}
+	
+	private int getNuclearArea(){
+		int i = 0;
+		for(Nucleus n : nuclei){
+			i += n.getStatistic(PlottableStatistic.AREA);
 		}
 		return i;
 	}
