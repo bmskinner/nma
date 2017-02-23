@@ -53,7 +53,7 @@ public class CellsDetailPanel extends DetailPanel {
 	
 	private JTabbedPane 	tabPane;
 
-	public CellsDetailPanel() throws Exception {
+	public CellsDetailPanel()  {
 		super();
 		
 		this.setLayout(new BorderLayout());

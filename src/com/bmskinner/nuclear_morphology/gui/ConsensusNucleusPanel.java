@@ -41,7 +41,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusC
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -119,7 +118,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		/*
 		 * Used for debugging only - do not include in releases
 		 */
-		JPanel meshPanel = createMeshPanel();
+//		JPanel meshPanel = createMeshPanel();
 //		panel.add(meshPanel, BorderLayout.CENTER);
 		
 		

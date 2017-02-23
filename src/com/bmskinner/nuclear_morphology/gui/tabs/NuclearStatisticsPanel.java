@@ -45,7 +45,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 	
 	private JTabbedPane 	tabPane;
 
-	public NuclearStatisticsPanel() throws Exception {
+	public NuclearStatisticsPanel() {
 		super();
 		
 		this.setLayout(new BorderLayout());

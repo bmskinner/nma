@@ -177,7 +177,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				 * Hence, put a latch on the refold to make this thread wait 
 				 * until the refolding is complete.
 				 */
-				if(  (downFlag & MainWindow.CURVE_REFOLD) == MainWindow.CURVE_REFOLD){
+				if(  (downFlag & CURVE_REFOLD) == CURVE_REFOLD){
 					finest( "Preparing to hold thread while refolding datast");
 					final CountDownLatch latch = new CountDownLatch(1);
 					Runnable r = new RefoldNucleusAction(dataset, mw, latch);
@@ -211,7 +211,7 @@ public class RunSegmentationAction extends ProgressableAction {
 				
 				
 
-				if(  (downFlag & MainWindow.ADD_POPULATION) == MainWindow.ADD_POPULATION){
+				if(  (downFlag & ADD_POPULATION) == ADD_POPULATION){
 					finest("Adding dataset to list manager");
 					DatasetListManager.getInstance().addDataset(dataset);
 					finest("Firing add dataset signal");

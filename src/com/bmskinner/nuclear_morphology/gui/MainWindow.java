@@ -65,6 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ProgressableAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
@@ -149,19 +150,11 @@ public class MainWindow
 	
 	private List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 	
-	// Flags to pass to ProgressableActions to determine the analyses
-	// to carry out in subsequently
-	public static final int ADD_POPULATION		 = 1;
-	public static final int STATS_EXPORT 		 = 2;
-	public static final int NUCLEUS_ANNOTATE	 = 4;
-	public static final int CURVE_REFOLD 		 = 8;
-	public static final int EXPORT_COMPOSITE	 = 16;
-	public static final int SAVE_DATASET		 = 32;
-	public static final int ASSIGN_SEGMENTS		 = 64;
 	
 	
 	
-	private boolean standalone = false;
+	
+	private boolean isStandalone = false;
 	
 	/*
 	 * Keep a strong reference to the program logger so it can be accessed
@@ -177,8 +170,24 @@ public class MainWindow
 	 */
 	public MainWindow(boolean standalone) {
 				
-		this.standalone = standalone;
+		isStandalone = standalone;
 
+		
+		
+		createWindowListeners();
+		
+		createUI();
+		
+
+		
+	}
+	
+	/**
+	 * Create the listeners that handle dataset saving when the main window is closed
+	 * 
+	 */
+	private void createWindowListeners(){
+		
 		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		
 		this.addWindowListener(new MainWindowCloseAdapter(this));
@@ -210,8 +219,12 @@ public class MainWindow
 		
 		
 		this.setDropTarget(  new MainDragAndDropTarget(this) );
-		
-		
+	}
+	
+	/**
+	 * Create the main UI
+	 */
+	private void createUI(){
 		try {
 			setTitle(PROGRAM_TITLE_BAR_LBL);
 			
@@ -319,10 +332,12 @@ public class MainWindow
 		} catch (Exception e) {
 			logToImageJ("Error initialising Main: "+e.getMessage(), e);
 		}
-		
 	}
 	
-	private void createTabs() throws Exception{
+	/**
+	 * Create the individual analysis tabs
+	 */
+	private void createTabs()  {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
 		analysisDetailPanel  = new AnalysisDetailPanel();
@@ -370,7 +385,7 @@ public class MainWindow
 	 * @return
 	 */
 	public boolean isStandalone(){
-		return this.standalone;
+		return isStandalone;
 	}
 			
 	public PopulationsPanel getPopulationsPanel(){
@@ -521,13 +536,13 @@ public class MainWindow
 				fine("Creating new profiling and segmentation");
 
 				int flag = 0; // set the downstream analyses to run
-				flag |= MainWindow.ADD_POPULATION;
-				flag |= MainWindow.STATS_EXPORT;
-				flag |= MainWindow.NUCLEUS_ANNOTATE;
-				flag |= MainWindow.ASSIGN_SEGMENTS;
+				flag |= ProgressableAction.ADD_POPULATION;
+				flag |= ProgressableAction.STATS_EXPORT;
+				flag |= ProgressableAction.NUCLEUS_ANNOTATE;
+				flag |= ProgressableAction.ASSIGN_SEGMENTS;
 
 				if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-					flag |= MainWindow.CURVE_REFOLD;
+					flag |= ProgressableAction.CURVE_REFOLD;
 				}
 				// begin a recursive morphology analysis
 				Runnable task = new RunProfilingAction(list, flag, MainWindow.this);
@@ -538,7 +553,7 @@ public class MainWindow
 						
 			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
 				log("Running new morphology analysis");
-				final int flag = ADD_POPULATION;
+				final int flag = ProgressableAction.ADD_POPULATION;
 				
 				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 				task.run();

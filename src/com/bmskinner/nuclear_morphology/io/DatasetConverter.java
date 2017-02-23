@@ -93,7 +93,6 @@ public class DatasetConverter implements Loggable, Importer {
 	 * and ChildAnalysisDatasets from children.
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public IAnalysisDataset convert() throws DatasetConversionException {
 
 		try{

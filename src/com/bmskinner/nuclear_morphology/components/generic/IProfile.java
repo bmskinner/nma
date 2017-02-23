@@ -24,6 +24,8 @@ import java.io.Serializable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
+import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * A profile contains an array of values, and this interface details
@@ -40,6 +42,19 @@ public interface IProfile
 	static final int ARRAY_AFTER  = 1;
 	static final int ZERO_INDEX   = 0;
 
+	
+	static IProfile makeNew(float[] array){
+		return new FloatProfile(array);
+	}
+	
+	static IProfile makeNew(double[] array){
+		try {
+			return new FloatProfile(new ArrayConverter(array).toFloatArray());
+		} catch (ArrayConversionException e) {
+			return null;
+		}
+	}
+	
 	/**
 	 * Get the length of the array in the profile
 	 * @return the size of the profile

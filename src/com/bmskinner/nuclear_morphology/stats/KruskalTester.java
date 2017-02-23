@@ -18,22 +18,20 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.stats;
 
+import jdistlib.disttest.DistributionTest;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentFitter;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Profile;
+//import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import jdistlib.disttest.DistributionTest;
 
 public class KruskalTester implements Loggable, SignificanceTest {
 	
@@ -68,7 +66,7 @@ public class KruskalTester implements Loggable, SignificanceTest {
 				}
 			}
 //			
-			resultProfile = new Profile(pvals);
+			resultProfile = IProfile.makeNew(pvals);
 
 			
 			
@@ -77,7 +75,7 @@ public class KruskalTester implements Loggable, SignificanceTest {
 			for(int i=0; i<sampleNumber; i++){
 				pvals[i] = 1;
 			}
-			resultProfile = new Profile(pvals);
+			resultProfile = IProfile.makeNew(pvals);
 		}
 		return resultProfile;
 	}
@@ -152,7 +150,7 @@ public class KruskalTester implements Loggable, SignificanceTest {
 			for(int i=0; i<sampleNumber; i++){
 				pvals[i] = 1;
 			}
-			resultProfile = new Profile(pvals);
+			resultProfile = IProfile.makeNew(pvals);
 		}
 		return resultProfile;
 	}

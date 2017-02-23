@@ -28,6 +28,8 @@ import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionExc
  * @since 1.13.4
  *
  */
+
+@SuppressWarnings("deprecation")
 public class DatasetImportMethod extends AbstractAnalysisMethod implements Importer {
 	
 	private final File file;
@@ -265,6 +267,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		return true;
 	}
 	
+
 	private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException  {
 
 		

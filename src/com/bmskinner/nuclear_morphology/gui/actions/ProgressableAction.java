@@ -29,16 +29,15 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JProgressBar;
 
-import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -51,6 +50,16 @@ public abstract class ProgressableAction
 	           Loggable, 
 	           MouseListener,
 	           Runnable {
+	
+	// Flags to pass to ProgressableActions to determine the analyses
+	// to carry out in subsequently
+	public static final int ADD_POPULATION		 = 1;
+	public static final int STATS_EXPORT 		 = 2;
+	public static final int NUCLEUS_ANNOTATE	 = 4;
+	public static final int CURVE_REFOLD 		 = 8;
+	public static final int EXPORT_COMPOSITE	 = 16;
+	public static final int SAVE_DATASET		 = 32;
+	public static final int ASSIGN_SEGMENTS		 = 64;
 
 	protected IAnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;

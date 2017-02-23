@@ -18,7 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
@@ -133,15 +132,12 @@ public class DatasetArithmeticAction extends ProgressableAction {
 				newDataset.setRoot(true);
 			}
 			
-//			Runnable task = () -> {
 
-				int flag = MainWindow.ADD_POPULATION;
-				flag |= MainWindow.SAVE_DATASET;
-				flag |= MainWindow.ASSIGN_SEGMENTS;
-				RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
-//				pr.run();
-//			};
-//			task.run();
+
+			int flag = ProgressableAction.ADD_POPULATION;
+			flag |= ProgressableAction.SAVE_DATASET;
+			flag |= ProgressableAction.ASSIGN_SEGMENTS;
+			RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
 			
 			ThreadManager.getInstance().execute(pr);
 								

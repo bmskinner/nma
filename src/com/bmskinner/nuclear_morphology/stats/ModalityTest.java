@@ -23,8 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.generic.DoubleProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Profile;
 import com.bmskinner.nuclear_morphology.stats.ModalityTest.BinnedData.Bin;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
@@ -50,7 +50,7 @@ public class ModalityTest implements SignificanceTest {
 	 */
 	public ModalityTest(double[] data, double minBinWidth, double maxBinWidth, double stepSize){
 		double[] cleanedData = trimOutliers(data);
-		this.profile = new Profile(cleanedData);
+		this.profile = new DoubleProfile(cleanedData);
 		
 //		http://www.brendangregg.com/FrequencyTrails/modes.html
 
@@ -252,7 +252,7 @@ public class ModalityTest implements SignificanceTest {
 			
 
 			
-			IProfile profile = new Profile(  temp  );
+			IProfile profile = new DoubleProfile(  temp  );
 			BooleanProfile maxima = profile.smooth(DEFAULT_SMOOTHING_WINDOW).smooth(DEFAULT_SMOOTHING_WINDOW).getLocalMaxima(3);
 			
 			List<Double> result = new ArrayList<Double>();

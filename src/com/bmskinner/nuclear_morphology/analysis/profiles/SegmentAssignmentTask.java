@@ -23,18 +23,13 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ForkJoinTask;
-import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractProgressAction;
-import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Profile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.SegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")

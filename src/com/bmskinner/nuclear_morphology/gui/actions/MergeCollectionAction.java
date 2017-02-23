@@ -160,9 +160,9 @@ public class MergeCollectionAction extends ProgressableAction {
 			return;
 		}
 
-		int flag = MainWindow.ADD_POPULATION;
-		flag |= MainWindow.ASSIGN_SEGMENTS;
-		flag |= MainWindow.SAVE_DATASET;
+		int flag = ProgressableAction.ADD_POPULATION;
+		flag |= ProgressableAction.ASSIGN_SEGMENTS;
+		flag |= ProgressableAction.SAVE_DATASET;
 		RunProfilingAction pr = new RunProfilingAction(datasets, flag, mw);
 		ThreadManager.getInstance().execute(pr);
 

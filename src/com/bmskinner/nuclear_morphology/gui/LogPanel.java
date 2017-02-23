@@ -137,7 +137,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	 * Create the log panel for updates
 	 * @return a scrollable panel
 	 */
-	@SuppressWarnings("serial")
 	private JPanel createLogPanel(){
 		JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout());
@@ -319,7 +318,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		progressPanel.remove(progressBar);
 	}
 	
-	@SuppressWarnings("serial")
+
 	class ShowConsoleAction extends AbstractAction {
 
 		public ShowConsoleAction() {

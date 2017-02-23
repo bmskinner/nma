@@ -18,21 +18,17 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import ij.io.DirectoryChooser;
+
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.dialogs.FishRemappingDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
-
-import ij.io.DirectoryChooser;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
@@ -57,14 +53,6 @@ public class FishRemappingAction extends ProgressableAction {
 	@Override
 	public void run(){
 		try{
-//			
-//			if(datasets.size()>1){
-//				log( "Multiple datasets selected, cancelling");
-//				cancel();
-//				return;
-//			}
-//	
-//			final IAnalysisDataset dataset = datasets.get(0);
 
 			if(dataset.hasMergeSources()){
 				warn("Cannot remap merged datasets");
@@ -85,7 +73,6 @@ public class FishRemappingAction extends ProgressableAction {
 			}
 
 			FishRemappingProber fishMapper = new FishRemappingProber(dataset, fishDir);
-//			FishRemappingDialog fishMapper = new FishRemappingDialog(mw, dataset);
 
 			if(fishMapper.isOk()){
 
@@ -100,7 +87,7 @@ public class FishRemappingAction extends ProgressableAction {
 					
 				log("Reapplying morphology...");
 
-				new RunSegmentationAction(newList, dataset, MainWindow.ADD_POPULATION, mw);
+				new RunSegmentationAction(newList, dataset, ADD_POPULATION, mw);
 				finished();
 
 

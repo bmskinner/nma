@@ -29,8 +29,6 @@ import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCr
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
@@ -40,7 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 @SuppressWarnings("serial")
 public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 		
-	public WilcoxonDetailPanel() throws Exception {
+	public WilcoxonDetailPanel() {
 		super();
 	}
 	

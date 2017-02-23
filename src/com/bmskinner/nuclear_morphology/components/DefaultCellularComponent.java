@@ -20,6 +20,12 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -42,12 +48,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -58,12 +61,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
-
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
 
 /**
  * An abstract implementation of {@link CellularComponent}, which is extended

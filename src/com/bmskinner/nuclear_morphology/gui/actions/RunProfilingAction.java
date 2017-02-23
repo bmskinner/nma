@@ -90,7 +90,7 @@ public class RunProfilingAction extends ProgressableAction {
 
 //			public void run(){
 
-				if(  (downFlag & MainWindow.ASSIGN_SEGMENTS) == MainWindow.ASSIGN_SEGMENTS){
+				if(  (downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS){
 					
 					final CountDownLatch latch = new CountDownLatch(1);
 					Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
