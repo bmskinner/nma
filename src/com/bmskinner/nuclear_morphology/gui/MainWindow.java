@@ -116,17 +116,31 @@ public class MainWindow
 	private PopulationsPanel 		populationsPanel; 		// holds and selects open datasets
 	private ConsensusNucleusPanel	consensusNucleusPanel; 	// show refolded nuclei if present
 	
+	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"+Version.currentVersion().toString();
+	
+	private static final String ANALYSIS_SETUP_TAB_LBL= "Analysis info";
+	private static final String CLUSTERS_TAB_LBL      = "Clusters";
+	private static final String MERGES_TAB_LBL        = "Merges";
+	private static final String CELLS_TAB_LBL         = "Cell charts";
+	private static final String NUCLEI_TAB_LBL        = "Nuclear charts";
+	private static final String PROFILES_TAB_LBL      = "Nuclear profiles";
+	private static final String SIGNALS_TAB_LBL       = "Nuclear signals";
+	private static final String SEGMENTS_TAB_LBL      = "Nuclear segments";
+	private static final String COMPARISONS_TAB_LBL   = "Comparisons";
+	private static final String EDITING_TAB_LBL       = "Editing";
+	
+	
 	private JTabbedPane 			tabbedPane;				// bottom panel tabs. Contains:
 	
 	private NucleusProfilesPanel 	nucleusProfilesPanel; 	// the angle profiles
 	private AnalysisDetailPanel		analysisDetailPanel;	// nucleus detection parameters and stats
 	private SignalsDetailPanel 		signalsDetailPanel;		// nuclear signals
 	private CellsDetailPanel      	cellsDetailPanel;	    // cells stats - areas, perimeters etc
-	private NuclearStatisticsPanel 	nuclearBoxplotsPanel;	// nuclear stats - areas, perimeters etc
+	private NuclearStatisticsPanel 	nuclearChartsPanel;	// nuclear stats - areas, perimeters etc
 	private SegmentsDetailPanel 	segmentsDetailPanel;	// segmented profiles
 	private ClusterDetailPanel		clusterDetailPanel;		// clustering within populations
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
-	private InterDatasetComparisonDetailPanel interdatasetDetailPanel;
+	private InterDatasetComparisonDetailPanel comparisonsPanel;
 	private EditingDetailPanel		editingDetailPanel; 	// for altering data
 	
 	private List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
@@ -144,6 +158,8 @@ public class MainWindow
 	public static final int EXPORT_COMPOSITE	 = 16;
 	public static final int SAVE_DATASET		 = 32;
 	public static final int ASSIGN_SEGMENTS		 = 64;
+	
+	
 	
 	private boolean standalone = false;
 	
@@ -197,7 +213,7 @@ public class MainWindow
 		
 		
 		try {
-			setTitle("Nuclear Morphology Analysis v"+Version.currentVersion().toString());
+			setTitle(PROGRAM_TITLE_BAR_LBL);
 			
 			Dimension preferredSize = new Dimension(1012, 804);
 			this.setPreferredSize(preferredSize);
@@ -269,78 +285,8 @@ public class MainWindow
 			c.fill = GridBagConstraints.BOTH;      		// fill to bounds where possible
 			topRow.add(consensusNucleusPanel, c);
 
-			tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-
-			//---------------
-			// Create the profiles
-			//---------------
-			nucleusProfilesPanel = new NucleusProfilesPanel();
-			detailPanels.add(nucleusProfilesPanel);
-			tabbedPane.addTab("Profiles", null, nucleusProfilesPanel, null);
-
-			//---------------
-			// Create the general stats page
-			//---------------
-			analysisDetailPanel = new AnalysisDetailPanel();
-			detailPanels.add(analysisDetailPanel);
-			tabbedPane.addTab("Analysis info", analysisDetailPanel);
-
-			//---------------
-			// Create panel for split boxplots
-			//---------------
-			cellsDetailPanel  = new CellsDetailPanel();
-			detailPanels.add(cellsDetailPanel);
-			tabbedPane.addTab("Cell charts", cellsDetailPanel);
+			createTabs();	
 			
-			//---------------
-			// Create panel for split boxplots
-			//---------------
-			nuclearBoxplotsPanel  = new NuclearStatisticsPanel();
-			detailPanels.add(nuclearBoxplotsPanel);
-			tabbedPane.addTab("Nuclear charts", nuclearBoxplotsPanel);
-				
-			
-			//---------------
-			// Create the signals tab panel
-			//---------------
-			signalsDetailPanel  = new SignalsDetailPanel();
-			detailPanels.add(signalsDetailPanel);
-			tabbedPane.addTab("Signals", signalsDetailPanel);
-			
-
-			//---------------
-			// Create the clusters panel
-			//---------------
-			clusterDetailPanel = new ClusterDetailPanel();
-			detailPanels.add(clusterDetailPanel);
-			tabbedPane.addTab("Clusters", clusterDetailPanel);
-			
-			//---------------
-			// Create the merges panel
-			//---------------
-			mergesDetailPanel = new MergesDetailPanel();
-			detailPanels.add(mergesDetailPanel);
-			tabbedPane.addTab("Merges", mergesDetailPanel);
-
-			//---------------
-			// Create the segments boxplot panel
-			//---------------
-			segmentsDetailPanel = new SegmentsDetailPanel();
-			detailPanels.add(segmentsDetailPanel);
-			tabbedPane.addTab("Segments", null, segmentsDetailPanel, null);
-
-			
-			//---------------
-			// Create the inter-dataset panel
-			//---------------
-			interdatasetDetailPanel = new InterDatasetComparisonDetailPanel();
-			detailPanels.add(interdatasetDetailPanel);
-			tabbedPane.addTab("Inter-dataset comparisons", null, interdatasetDetailPanel, null);
-			
-			
-			editingDetailPanel = new EditingDetailPanel();
-			detailPanels.add(editingDetailPanel);
-			tabbedPane.addTab("Editing", null, editingDetailPanel, null);
 			
 			//---------------
 			// Register change listeners
@@ -374,6 +320,48 @@ public class MainWindow
 			logToImageJ("Error initialising Main: "+e.getMessage(), e);
 		}
 		
+	}
+	
+	private void createTabs() throws Exception{
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+
+		analysisDetailPanel  = new AnalysisDetailPanel();
+		nucleusProfilesPanel = new NucleusProfilesPanel();
+		cellsDetailPanel     = new CellsDetailPanel();
+		nuclearChartsPanel   = new NuclearStatisticsPanel();	
+		signalsDetailPanel   = new SignalsDetailPanel();	
+		clusterDetailPanel   = new ClusterDetailPanel();
+		mergesDetailPanel    = new MergesDetailPanel();
+		segmentsDetailPanel  = new SegmentsDetailPanel();
+		comparisonsPanel     = new InterDatasetComparisonDetailPanel();
+		editingDetailPanel   = new EditingDetailPanel();
+		
+		detailPanels.add(analysisDetailPanel);
+		detailPanels.add(clusterDetailPanel);
+		detailPanels.add(mergesDetailPanel);
+		detailPanels.add(cellsDetailPanel);		
+		detailPanels.add(nuclearChartsPanel);
+		detailPanels.add(nucleusProfilesPanel);
+		detailPanels.add(signalsDetailPanel);
+		detailPanels.add(segmentsDetailPanel);
+		detailPanels.add(comparisonsPanel);
+		detailPanels.add(editingDetailPanel);
+		
+		tabbedPane.addTab(ANALYSIS_SETUP_TAB_LBL, analysisDetailPanel);
+
+		tabbedPane.addTab(CELLS_TAB_LBL, cellsDetailPanel);
+		
+		tabbedPane.addTab(NUCLEI_TAB_LBL, nuclearChartsPanel);
+		tabbedPane.addTab(PROFILES_TAB_LBL, null, nucleusProfilesPanel, null);
+		tabbedPane.addTab(SIGNALS_TAB_LBL, signalsDetailPanel);
+		tabbedPane.addTab(SEGMENTS_TAB_LBL, null, segmentsDetailPanel, null);
+		
+		tabbedPane.addTab(COMPARISONS_TAB_LBL, null, comparisonsPanel, null);
+		
+		tabbedPane.addTab(CLUSTERS_TAB_LBL, clusterDetailPanel);
+		tabbedPane.addTab(MERGES_TAB_LBL, mergesDetailPanel);
+		
+		tabbedPane.addTab(EDITING_TAB_LBL, null, editingDetailPanel, null);
 	}
 	
 	/**
@@ -692,7 +680,7 @@ public class MainWindow
 			final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 			list.add(dataset);
 			segmentsDetailPanel.clearChartCache(list);  // segment positions charts need updating
-			nuclearBoxplotsPanel.clearChartCache(list); // overlaid nuclei need updating
+			nuclearChartsPanel.clearChartCache(list); // overlaid nuclei need updating
 			signalsDetailPanel.clearChartCache(list);   // signal consensus needs updating
 			consensusNucleusPanel.clearChartCache(list);    // consensus panel needs updating
 
