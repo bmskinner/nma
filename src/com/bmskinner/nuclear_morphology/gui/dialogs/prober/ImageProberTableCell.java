@@ -5,10 +5,6 @@ import java.awt.Image;
 
 import javax.swing.ImageIcon;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-
-import ij.process.ImageProcessor;
-
 public class ImageProberTableCell {
 	private ImageIcon smallIcon;
 	private ImageIcon largeIcon;

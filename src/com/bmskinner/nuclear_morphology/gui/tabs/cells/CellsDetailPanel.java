@@ -24,14 +24,6 @@ import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearBoxplotsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearHistogramsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearLobesPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearOverlaysPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearScatterChartPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NucleusMagnitudePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.WilcoxonDetailPanel;
 
 /**
  * Shows aggregate stats for the cells in datasets

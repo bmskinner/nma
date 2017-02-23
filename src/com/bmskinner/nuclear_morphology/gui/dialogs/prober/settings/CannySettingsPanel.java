@@ -12,6 +12,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 
@@ -44,7 +45,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	
 	private static final String AUTO_THRESHOLD_ACTION        = "CannyAutoThreshold";
 		
-	private static final String AUTO_THRESHOLD_LBL         = "Canny auto threshold";
+//	private static final String AUTO_THRESHOLD_LBL         = "Canny auto threshold";
 	
 	private static final String LOW_THRESHOLD_LBL        = "Canny low threshold";
 	private static final String HIGH_THRESHOLD_LBL       = "Canny high threshold";

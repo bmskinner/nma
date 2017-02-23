@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
-import java.awt.Paint;
 
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 

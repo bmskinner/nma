@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.swing.JComboBox;
 
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**

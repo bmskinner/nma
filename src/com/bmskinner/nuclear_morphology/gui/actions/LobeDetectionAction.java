@@ -1,10 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.util.concurrent.ExecutionException;
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -50,13 +47,13 @@ public class LobeDetectionAction extends ProgressableAction {
 		this.setProgressBarVisible(false);
 		
 		
-		try {
-			IAnalysisResult r = worker.get();
-	
-		} catch (InterruptedException | ExecutionException e) {
-			warn("Error in lobe detection");
-			stack(e.getMessage(), e);
-		}
+//		try {
+//			IAnalysisResult r = worker.get();
+//	
+//		} catch (InterruptedException | ExecutionException e) {
+//			warn("Error in lobe detection");
+//			stack(e.getMessage(), e);
+//		}
 		
 //		fireDatasetEvent(DatasetEvent.SAVE, dataset);
 		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

@@ -19,9 +19,9 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import java.io.File;
-
 import ij.gui.Roi;
+
+import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 

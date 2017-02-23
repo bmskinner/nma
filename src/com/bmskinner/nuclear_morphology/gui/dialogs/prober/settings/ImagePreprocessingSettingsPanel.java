@@ -1,8 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +36,7 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel  {
 	
 	private static final String USE_KUWAHARA_LBL           = "Kuwahara filter";
 	private static final String FLATTEN_CHROMOCENTRES_LBL  = "Flatten chromocentres";
-	private static final String ADD_BORDER_LBL             = "Add border to images";
+//	private static final String ADD_BORDER_LBL             = "Add border to images";
 	
 	private static final String KUWAHARA_KERNEL_LBL      = "Kuwahara kernel";
 	private static final String FLATTENING_THRESHOLD_LBL = "Flattening threshold";

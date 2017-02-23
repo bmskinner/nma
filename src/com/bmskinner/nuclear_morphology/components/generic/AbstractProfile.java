@@ -22,6 +22,12 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
+/**
+ * Abstract base class for profiles
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public abstract class AbstractProfile implements IProfile {
 
 	private static final long serialVersionUID = 1L;

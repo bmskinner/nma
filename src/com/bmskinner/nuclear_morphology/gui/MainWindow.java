@@ -18,6 +18,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui;
 
+import ij.io.SaveDialog;
+
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -52,7 +54,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
@@ -96,8 +97,6 @@ import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
-
-import ij.io.SaveDialog;
 
 /**
  * This is the core of the program UI. All display panels are contained here. 

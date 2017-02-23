@@ -20,15 +20,11 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.logging.Level;
-
-import javax.swing.SwingUtilities;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmenter;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;

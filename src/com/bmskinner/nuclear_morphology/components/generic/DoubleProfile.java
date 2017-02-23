@@ -26,6 +26,12 @@ import java.util.logging.Level;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 
+/**
+ * A profile with double precision
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public class DoubleProfile extends AbstractProfile implements IProfile {
 	
 	private static final long serialVersionUID = 1L;

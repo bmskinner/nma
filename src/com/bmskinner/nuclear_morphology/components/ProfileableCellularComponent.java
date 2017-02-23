@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,8 +46,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-
-import ij.gui.Roi;
 
 /**
  * This is the class of objects that can have angle profiles applied to them.

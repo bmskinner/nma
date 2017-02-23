@@ -20,10 +20,10 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import ij.gui.Roi;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.gui.Roi;
 
 /**
  * The interface for component factories

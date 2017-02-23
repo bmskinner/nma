@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import javax.swing.ImageIcon;
 
-import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 
 public class LabelInfo {

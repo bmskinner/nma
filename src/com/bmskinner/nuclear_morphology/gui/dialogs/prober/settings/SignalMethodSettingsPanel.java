@@ -2,7 +2,6 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +9,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -60,7 +60,7 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 		List<JLabel> labels = new ArrayList<JLabel>();
 		labels.add( new JLabel(METHOD_LBL));
 		
-		List<JComboBox> fields = new ArrayList<JComboBox>();
+		List<JComboBox<SignalDetectionMode>> fields = new ArrayList<JComboBox<SignalDetectionMode>>();
 		fields.add( box );
 
 		addLabelTextRows(labels, fields, panel );

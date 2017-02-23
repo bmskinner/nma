@@ -28,9 +28,7 @@
  package com.bmskinner.nuclear_morphology.stats;
 
  import org.apache.commons.math3.distribution.TDistribution;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

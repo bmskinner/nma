@@ -19,7 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
