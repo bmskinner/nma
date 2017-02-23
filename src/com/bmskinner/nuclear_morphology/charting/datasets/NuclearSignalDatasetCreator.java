@@ -315,7 +315,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 						int signalCount = 0;
 						for(INuclearSignal n : collection.getSignalManager().getSignals(group)){
 
-							IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+							IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
 							xpoints[signalCount] = p.getX();
 							ypoints[signalCount] = p.getY();
@@ -346,7 +346,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 				if(collection.getSignalManager().hasSignals(signalGroup)){
 
 					for(INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)){
-						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensusNucleus());
+						IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
 						// ellipses are drawn starting from x y at upper left. Provide an offset from the centre
 						double offset = n.getStatistic(PlottableStatistic.RADIUS);
@@ -473,7 +473,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 				throw new ChartDatasetCreationException("Cannot make dataset for zero shells");
 			}
 			
-			c = new ShellDetector(options.firstDataset().getCollection().getConsensusNucleus(), shellCount);
+			c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount);
 		} catch (ShellAnalysisException e) {
 			stack("Error making shells in consensus", e);
 			throw new ChartDatasetCreationException("Error making shells", e);

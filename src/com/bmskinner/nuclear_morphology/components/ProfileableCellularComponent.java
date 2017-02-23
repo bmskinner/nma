@@ -184,6 +184,10 @@ public abstract class ProfileableCellularComponent
 		if(PlottableStatistic.MIN_DIAMETER.equals(stat)){
 			return this.getNarrowestDiameter();
 		}
+		
+		if(PlottableStatistic.PATH_LENGTH.equals(stat)){
+			return this.getPathLength(ProfileType.ANGLE);
+		}
 	
 		return result;
 	}
@@ -582,7 +586,7 @@ public abstract class ProfileableCellularComponent
 	}
 
 
-	public double getPathLength(ProfileType type) {
+	private double getPathLength(ProfileType type) {
 		double pathLength = 0;
 
 		try {

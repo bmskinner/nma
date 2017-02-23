@@ -140,7 +140,7 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 				}
 			}
 //			
-			collection.setConsensusNucleus(refoldNucleus);
+			collection.setConsensus(refoldNucleus);
 			
 			fine("Updated "+pointUpdateCounter+" border points");
 

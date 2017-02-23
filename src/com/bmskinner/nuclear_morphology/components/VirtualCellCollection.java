@@ -294,17 +294,17 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public boolean hasConsensusNucleus() {
+	public boolean hasConsensus() {
 		return this.consensusNucleus!=null;
 	}
 
 	@Override
-	public void setConsensusNucleus(Nucleus n) {
+	public void setConsensus(Nucleus n) {
 		consensusNucleus = n;
 	}
 
 	@Override
-	public Nucleus getConsensusNucleus() {
+	public Nucleus getConsensus() {
 		return consensusNucleus;
 	}
 
@@ -829,38 +829,38 @@ public class VirtualCellCollection implements ICellCollection {
 		return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
 	}
 
-	@Override
-	public double getMedianPathLength() {
-		if(size()==0){
-			return 0;
-		}
-
-		double[] p = this.getPathLengths();
-		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-		return median;
-	}
+//	@Override
+//	public double getMedianPathLength() {
+//		if(size()==0){
+//			return 0;
+//		}
+//
+//		double[] p = this.getPathLengths();
+//		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
+//		return median;
+//	}
 	
 	/**
 	 * Get the path lengths of the nuclei in this collection as
 	 * an array
 	 * @return
 	 */
-	private double[] getPathLengths() {
-
-		int count = size();
-		double[] result = new double[count];
-		int i=0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			try {
-				result[i] =  n.getPathLength(ProfileType.ANGLE);
-			} catch (UnavailableProfileTypeException e) {
-				fine("Cannot get path lengths", e);
-			}
-			i++;
-		}
-		return result;
-	}
+//	private double[] getPathLengths() {
+//
+//		int count = size();
+//		double[] result = new double[count];
+//		int i=0;
+//		for(ICell cell : getCells() ){ 
+//			Nucleus n = cell.getNucleus();
+//			try {
+//				result[i] =  n.getPathLength(ProfileType.ANGLE);
+//			} catch (UnavailableProfileTypeException e) {
+//				fine("Cannot get path lengths", e);
+//			}
+//			i++;
+//		}
+//		return result;
+//	}
 
 	@Override
 	public synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception {
@@ -891,6 +891,17 @@ public class VirtualCellCollection implements ICellCollection {
 		}
 			
 		return new double[0];
+	}
+	
+	@Override
+	public double getMedianStatistic(PlottableStatistic stat, String component,
+			MeasurementScale scale, UUID id) throws Exception {
+		if(cellIDs.isEmpty()){
+			return 0;
+		}
+
+		double[] values = this.getMedianStatistics(stat, component, scale, id);
+		return new Quartile(values, Quartile.MEDIAN).doubleValue();
 	}
 	
 	/**

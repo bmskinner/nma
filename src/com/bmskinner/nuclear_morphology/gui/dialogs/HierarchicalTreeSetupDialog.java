@@ -325,7 +325,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		
-		boolean hasConsensus = dataset.getCollection().hasConsensusNucleus();
+		boolean hasConsensus = dataset.getCollection().hasConsensus();
 		includeMeshCheckBox.setEnabled(hasConsensus); // using consensus for building attributes and template mesh
 		meshLabel.setEnabled(hasConsensus);
 		

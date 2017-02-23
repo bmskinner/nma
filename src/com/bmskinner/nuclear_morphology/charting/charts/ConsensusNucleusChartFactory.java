@@ -82,7 +82,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	public boolean hasConsensusNucleus(){
 		for (IAnalysisDataset dataset : options.getDatasets()){
-			if(dataset.getCollection().hasConsensusNucleus()){
+			if(dataset.getCollection().hasConsensus()){
 				return true;
 			}
 		}
@@ -138,7 +138,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		IAnalysisDataset dataset = options.firstDataset();
 		
-		if( ! dataset.getCollection().hasConsensusNucleus()){
+		if( ! dataset.getCollection().hasConsensus()){
 			return makeEmptyChart();
 		}
 
@@ -176,8 +176,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	private double getconsensusChartRange(IAnalysisDataset dataset){
 		ICellCollection collection = dataset.getCollection();
-		double maxX = Math.max( Math.abs(collection.getConsensusNucleus().getMinX()) , Math.abs(collection.getConsensusNucleus().getMaxX() ));
-		double maxY = Math.max( Math.abs(collection.getConsensusNucleus().getMinY()) , Math.abs(collection.getConsensusNucleus().getMaxY() ));
+		double maxX = Math.max( Math.abs(collection.getConsensus().getMinX()) , Math.abs(collection.getConsensus().getMaxX() ));
+		double maxY = Math.max( Math.abs(collection.getConsensus().getMinY()) , Math.abs(collection.getConsensus().getMaxY() ));
 
 		// ensure that the scales for each axis are the same
 		double max = Math.max(maxX, maxY);
@@ -197,7 +197,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		
 		double max = 1;
 		for (IAnalysisDataset dataset : options.getDatasets()){
-			if(dataset.getCollection().hasConsensusNucleus()){
+			if(dataset.getCollection().hasConsensus()){
 				double datasetMax = getconsensusChartRange(dataset);
 				max = datasetMax > max ? datasetMax : max;
 			}
@@ -212,7 +212,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 	 */
 	private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
 		
-		if( ! dataset.getCollection().hasConsensusNucleus()){
+		if( ! dataset.getCollection().hasConsensus()){
 			return makeEmptyChart();
 		}
 		XYDataset ds = null;
@@ -354,7 +354,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 			
 			boolean oneHasConsensus = false;
 			for(IAnalysisDataset d : options.getDatasets()){
-				if (d.getCollection().hasConsensusNucleus()){
+				if (d.getCollection().hasConsensus()){
 					oneHasConsensus= true;
 				}
 			}
@@ -375,7 +375,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 				try {
 					Mesh<Nucleus> mesh = new NucleusMesh(options.firstDataset()
 							.getCollection()
-							.getConsensusNucleus(), options.getMeshSize());
+							.getConsensus(), options.getMeshSize());
 
 
 					if(options.isStraightenMesh()){

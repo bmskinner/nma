@@ -23,7 +23,9 @@ package com.bmskinner.nuclear_morphology.components;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -51,6 +53,8 @@ public class DefaultCell
 	protected ICytoplasm cytoplasm = null;
 	protected List<Nucleus> nuclei;
 	
+	private Map<PlottableStatistic, Double> statistics; // The statistical values stored for this object
+	
 	/**
 	 * Create a new cell with a random ID
 	 */
@@ -68,6 +72,7 @@ public class DefaultCell
 		mitochondria = new ArrayList<IMitochondrion>(0);
 		tails        = new ArrayList<Flagellum>(0);
 		acrosomes    = new ArrayList<IAcrosome>(0);
+		statistics   = new HashMap<PlottableStatistic, Double>();
 	}
 	
 	/**
@@ -151,7 +156,7 @@ public class DefaultCell
 	
 	@Override
 	public synchronized boolean hasStatistic(PlottableStatistic stat){
-		return PlottableStatistic.getCellStats().contains(stat);
+		return statistics.containsKey(stat);
 	}
 	
 	@Override
@@ -162,8 +167,13 @@ public class DefaultCell
 	@Override
 	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		
-		double result =  calculateStatistic(stat);
-		return result;
+		if(hasStatistic(stat)){
+			return statistics.get(stat);
+		} else {
+			double result =  calculateStatistic(stat);
+			statistics.put(stat, result);
+			return result;
+		}
 	}
 	
 	protected double calculateStatistic(PlottableStatistic stat){
@@ -415,15 +425,19 @@ public class DefaultCell
 //		finest("Reading cell");
 //		warn("Reading cell");
 		in.defaultReadObject();
-		
-//		warn("Read cell");
-		
+				
 		// Replacce old single nucleus fields
 		if(nuclei==null){
 			nuclei= new ArrayList<Nucleus>(0);
 			nuclei.add(nucleus);
 		}
-//		finest("Read cell"); 
+		
+		// Add stats if missing
+		if(statistics==null){
+			statistics   = new HashMap<PlottableStatistic, Double>();
+		}
+		
+
 	}
 
 }

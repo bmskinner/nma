@@ -402,7 +402,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 */
 	static boolean haveConsensusNuclei(List<IAnalysisDataset> list){
 		for(IAnalysisDataset d : list){
-			if( ! d.getCollection().hasConsensusNucleus()){
+			if( ! d.getCollection().hasConsensus()){
 				return false;
 			}
 		}

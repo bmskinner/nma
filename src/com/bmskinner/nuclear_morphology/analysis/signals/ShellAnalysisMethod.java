@@ -245,7 +245,7 @@ private final int shells;
 		ICellCollection collection = dataset.getCollection();
 		
 		// Create a random sample distibution
-		if(collection.hasConsensusNucleus()){
+		if(collection.hasConsensus()){
 			
 			ISignalGroup random = new SignalGroup();
 			random.setGroupName("Random distribution");
@@ -257,7 +257,7 @@ private final int shells;
 			// Calculate random positions of pixels 
 			fine("Creating random sample of "+totalPixels+" pixels");
 			
-			ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensusNucleus(), 
+			ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensus(), 
 					shells,
 					totalPixels);
 

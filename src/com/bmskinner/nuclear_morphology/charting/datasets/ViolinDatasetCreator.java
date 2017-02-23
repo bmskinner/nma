@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Max;
+import com.bmskinner.nuclear_morphology.stats.Mean;
 import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Sum;
@@ -346,15 +347,15 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		List<Number> pdfValues = new ArrayList<Number>();
 		
 		Number total = new Sum(list); // Stats.sum(list);
+		double min = new Min(list).doubleValue();
+		double max = new Max(list).doubleValue();
 
-		if(list.size()>2 && total.doubleValue()>0){ // don't bother with a dataset of a single cell, or if the stat is not present
+		// If all values are the same, min==max, and there will be a step error calculating values between them for pdf
+		if(list.size()>2 && total.doubleValue()>0 && min!=max){ // don't bother with a dataset of a single cell, or if the stat is not present
+			
+			double stepSize = ( max - min ) / 100;
 			
 			KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(  list , 0.001 );
-//			double min = Stats.min(list).doubleValue();
-			double min = new Min(list).doubleValue();
-			double max = new Max(list).doubleValue();
-
-			double stepSize = ( max - min ) / 100;
 
 			for(double v=min; v<=max; v+=stepSize){
 

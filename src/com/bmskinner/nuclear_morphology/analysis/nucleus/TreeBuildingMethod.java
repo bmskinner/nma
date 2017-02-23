@@ -167,8 +167,8 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		}
 		
 		Mesh<Nucleus> mesh = null;
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){	
-			mesh = new NucleusMesh(collection.getConsensusNucleus());
+		if(options.isIncludeMesh() && collection.hasConsensus()){	
+			mesh = new NucleusMesh(collection.getConsensus());
 			attributeCount+= mesh.getFaces().size();
 		}
 		
@@ -204,7 +204,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 			}
 		}
 		
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+		if(options.isIncludeMesh() && collection.hasConsensus()){
 			
 			for(MeshFace face : mesh.getFaces()){
 				finer("Including face "+face.toString());
@@ -241,8 +241,8 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		int profilePointsToCount = profileSize/windowSize;
 		
 		Mesh<Nucleus> template = null;
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
-			template = new NucleusMesh(collection.getConsensusNucleus());
+		if(options.isIncludeMesh() && collection.hasConsensus()){
+			template = new NucleusMesh(collection.getConsensus());
 		}
 
 		try{
@@ -282,7 +282,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 					}
 				}
 				
-				if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+				if(options.isIncludeMesh() && collection.hasConsensus()){
 					
 					
 					Mesh<Nucleus> mesh = new NucleusMesh(n1, template);

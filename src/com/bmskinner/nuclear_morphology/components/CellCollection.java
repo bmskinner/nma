@@ -266,7 +266,7 @@ public class CellCollection implements ICellCollection {
 		return mappedCollection.size();
 	}
 
-	public boolean hasConsensusNucleus(){
+	public boolean hasConsensus(){
 		if(this.consensusNucleus==null){
 			return false;
 		} else {
@@ -301,7 +301,7 @@ public class CellCollection implements ICellCollection {
 		}
 	}
 
-	public void setConsensusNucleus(Nucleus n){
+	public void setConsensus(Nucleus n){
 		this.consensusNucleus = n;
 	}
 
@@ -337,7 +337,7 @@ public class CellCollection implements ICellCollection {
 		return null;
 	}
 
-	public Nucleus getConsensusNucleus(){
+	public Nucleus getConsensus(){
 		return this.consensusNucleus;
 	}
 
@@ -443,22 +443,22 @@ public class CellCollection implements ICellCollection {
 	 * @return
 	 * @throws Exception 
 	 */
-	private double[] getPathLengths() {
-
-		int count = this.getNucleusCount();
-		double[] result = new double[count];
-		int i=0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			try {
-				result[i] =  n.getPathLength(ProfileType.ANGLE);
-			} catch (UnavailableProfileTypeException e) {
-				result[i] = 0;
-			}
-			i++;
-		}
-		return result;
-	}
+//	private double[] getPathLengths() {
+//
+//		int count = this.getNucleusCount();
+//		double[] result = new double[count];
+//		int i=0;
+//		for(ICell cell : getCells() ){ 
+//			Nucleus n = cell.getNucleus();
+//			try {
+//				result[i] =  n.getPathLength(ProfileType.ANGLE);
+//			} catch (UnavailableProfileTypeException e) {
+//				result[i] = 0;
+//			}
+//			i++;
+//		}
+//		return result;
+//	}
 
 	/**
 	 * Get the array lengths of the nuclei in this collection as
@@ -620,16 +620,16 @@ public class CellCollection implements ICellCollection {
 		return new ProfileManager(this);
 	}
 
-	public double getMedianPathLength() {
-
-		if(size()==0){
-			return 0;
-		}
-
-		double[] p = this.getPathLengths();
-		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-		return median;
-	}
+//	public double getMedianPathLength() {
+//
+//		if(size()==0){
+//			return 0;
+//		}
+//
+//		double[] p = this.getPathLengths();
+//		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
+//		return median;
+//	}
 
 	public int getMedianArrayLength(){
 		if(size()==0){
@@ -1664,6 +1664,13 @@ public class CellCollection implements ICellCollection {
 			String component, MeasurementScale scale, UUID id) {
 		warn("Unimplemented method in "+this.getClass().getName());
 		return null;
+	}
+
+	@Override
+	public double getMedianStatistic(PlottableStatistic stat, String component,
+			MeasurementScale scale, UUID id) throws Exception {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

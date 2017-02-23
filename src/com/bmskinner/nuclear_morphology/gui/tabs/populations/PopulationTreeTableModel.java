@@ -16,14 +16,18 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class PopulationTreeTableModel extends DefaultTreeTableModel implements Loggable{
 		
+	private static final String DATASET_COLUMN_LBL = "Dataset";
+	private static final String CELL_COLUMN_LBL    = "Cells";
+	private static final String COLOUR_COLUMN_LBL  = "";
+	
 	public PopulationTreeTableModel(){
 		super();
 		
 		// Populations columns
 		List<String> columns = new ArrayList<String>();
-		columns.add("Population");
-		columns.add("Nuclei");
-		columns.add("");
+		columns.add(DATASET_COLUMN_LBL);
+		columns.add(CELL_COLUMN_LBL);
+		columns.add(COLOUR_COLUMN_LBL);
 
 		PopulationTreeTableNode  root = new PopulationTreeTableNode ();
 		this.setRoot(root);

@@ -165,7 +165,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		}
 		
 		// Check for consensus nucleus
-		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+		if( ! options.firstDataset().getCollection().hasConsensus()){
 			return makeEmptyChart();
 		}
 		
@@ -226,7 +226,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 		}
 		
 		// Check for consensus nucleus
-		if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+		if( ! options.firstDataset().getCollection().hasConsensus()){
 			finer("No consensus for signal outline chart");
 			return makeEmptyChart();
 		}

@@ -98,8 +98,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	private final IPoint originalCentreOfMass;
 	
 	/**
-	 * The statistical values stored for this object, which should
-	 * be an enum implementing {@link PlottableStatistic}
+	 * The statistical values stored for this object
 	 */
 	private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
 			

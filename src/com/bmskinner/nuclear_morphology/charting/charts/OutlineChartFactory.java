@@ -124,7 +124,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				return makeEmptyChart();
 			}
 			
-			if( ! options.firstDataset().getCollection().hasConsensusNucleus()){
+			if( ! options.firstDataset().getCollection().hasConsensus()){
 				finer("No consensus for signal outline chart");
 				return makeEmptyChart();
 			}
@@ -159,7 +159,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		Mesh<Nucleus> meshConsensus;
 		try {
-			meshConsensus = new NucleusMesh( dataset.getCollection().getConsensusNucleus());
+			meshConsensus = new NucleusMesh( dataset.getCollection().getConsensus());
 		} catch (MeshCreationException e1) {
 			fine("Cannot make consensus mesh");
 			stack("Error creating mesh", e1);
@@ -219,15 +219,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		// Get consensus mesh.
 		NucleusMesh meshConsensus;
 		try {
-			meshConsensus = new NucleusMesh(dataset.getCollection().getConsensusNucleus());
+			meshConsensus = new NucleusMesh(dataset.getCollection().getConsensus());
 		} catch (MeshCreationException e) {
 			stack("Error creating consensus mesh", e);
 			return makeErrorChart();
 		}
 		
 		// Get the bounding box size for the consensus, to find the offsets for the images created
-		Rectangle r = dataset.getCollection().getConsensusNucleus().getBounds(); //.createPolygon().getBounds();
-		r = r==null ? dataset.getCollection().getConsensusNucleus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
+		Rectangle r = dataset.getCollection().getConsensus().getBounds(); //.createPolygon().getBounds();
+		r = r==null ? dataset.getCollection().getConsensus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
 		int w = (int) ( (double) r.width*1.2);
 		int h = (int) ( (double) r.height*1.2);
 		
@@ -316,7 +316,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowMesh()){
 				finest("Making mesh chart");
-				if(options.firstDataset().getCollection().hasConsensusNucleus()){
+				if(options.firstDataset().getCollection().hasConsensus()){
 					
 					try{
 
@@ -327,7 +327,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 						Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset()
 								.getCollection()
-								.getConsensusNucleus(), mesh1);
+								.getConsensus(), mesh1);
 
 						Mesh<Nucleus> result = mesh1.comparison(mesh2);				
 						return createMeshChart(result, 0.5);
@@ -346,14 +346,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			
 			if(options.isShowWarp()){
 				finest("Making warp chart");
-				if(options.firstDataset().getCollection().hasConsensusNucleus()){
+				if(options.firstDataset().getCollection().hasConsensus()){
 					
 					try {
 
 						Mesh<Nucleus> mesh1 = new NucleusMesh(options.getCell().getNucleus());
 						Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset()
 								.getCollection()
-								.getConsensusNucleus(), mesh1);
+								.getConsensus(), mesh1);
 
 						//
 						ImageProcessor nucleusIP = options.getCell().getNucleus().getImage();
@@ -932,14 +932,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		r.setSeriesPaint(0, Color.LIGHT_GRAY);
 		r.setBaseToolTipGenerator(new StandardXYToolTipGenerator());
 				
-		boolean hasConsensus = options.firstDataset().getCollection().hasConsensusNucleus();
+		boolean hasConsensus = options.firstDataset().getCollection().hasConsensus();
 		Mask reference = null;
 		BooleanAligner aligner = null;
 		
 		if(options.isNormalised()){
 			if(hasConsensus){
 
-				reference = options.firstDataset().getCollection().getConsensusNucleus().getBooleanMask(200, 200);
+				reference = options.firstDataset().getCollection().getConsensus().getBooleanMask(200, 200);
 				aligner = new BooleanAligner(reference);
 			}
 		}
@@ -952,7 +952,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				finest("Creating consensus nucleus dataset");
 				
-				Nucleus consensus = options.firstDataset().getCollection().getConsensusNucleus();
+				Nucleus consensus = options.firstDataset().getCollection().getConsensus();
 				
 				OutlineDatasetCreator dc = new OutlineDatasetCreator(options, consensus);
 

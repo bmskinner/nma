@@ -178,8 +178,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		}
 		
 		Mesh<Nucleus> mesh = null;
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){	
-			mesh = new NucleusMesh(collection.getConsensusNucleus());
+		if(options.isIncludeMesh() && collection.hasConsensus()){	
+			mesh = new NucleusMesh(collection.getConsensus());
 			attributeCount+= mesh.getFaces().size();
 		}
 		
@@ -215,7 +215,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 			}
 		}
 		
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+		if(options.isIncludeMesh() && collection.hasConsensus()){
 			
 			for(MeshFace face : mesh.getFaces()){
 				finer("Including face "+face.toString());
@@ -252,8 +252,8 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 		int profilePointsToCount = profileSize/windowSize;
 		
 		NucleusMesh template = null;
-		if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
-			template = new NucleusMesh(collection.getConsensusNucleus());
+		if(options.isIncludeMesh() && collection.hasConsensus()){
+			template = new NucleusMesh(collection.getConsensus());
 		}
 
 		try{
@@ -293,7 +293,7 @@ public class NucleusTreeBuilder extends AnalysisWorker {
 					}
 				}
 				
-				if(options.isIncludeMesh() && collection.hasConsensusNucleus()){
+				if(options.isIncludeMesh() && collection.hasConsensus()){
 					
 					
 					Mesh<Nucleus> mesh = new NucleusMesh(n1, template);

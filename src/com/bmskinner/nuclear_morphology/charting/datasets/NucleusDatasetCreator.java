@@ -1179,7 +1179,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public XYDataset createBareNucleusOutline(IAnalysisDataset dataset) throws ChartDatasetCreationException{
 
-		return createBareNucleusOutline(dataset.getCollection().getConsensusNucleus());
+		return createBareNucleusOutline(dataset.getCollection().getConsensus());
 
 	}
 	
@@ -1208,7 +1208,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
 		// get the consensus nucleus for the population
-		Nucleus n = collection.getConsensusNucleus();
+		Nucleus n = collection.getConsensus();
 		
 		Tag pointType = Tag.REFERENCE_POINT;
 		
@@ -1535,8 +1535,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			
 			String seriesKey = "Nucleus_"+i+"_"+collection.getName();
 			
-			if(collection.hasConsensusNucleus()){
-				Nucleus n = collection.getConsensusNucleus();
+			if(collection.hasConsensus()){
+				Nucleus n = collection.getConsensus();
 				
 				
 				double[] xpoints = new double[n.getBorderLength()];
@@ -1738,7 +1738,6 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param values the array of values
 	 * @param binWidth the precision of the KernelEstimator 
 	 * @return
-	 * @throws Exception
 	 */
 	public KernelEstimator createProbabililtyKernel(List<Number> values, double binWidth) {
 		KernelEstimator est = new KernelEstimator(binWidth);

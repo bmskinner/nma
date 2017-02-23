@@ -61,7 +61,7 @@ public class CollectionFilterer implements Loggable {
 
 	    double medianArea = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    double medianPerimeter = collection.getMedianStatistic(PlottableStatistic.PERIMETER, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-	    double medianPathLength = collection.getMedianPathLength();
+	    double medianPathLength = collection.getMedianStatistic(PlottableStatistic.PATH_LENGTH, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    double medianArrayLength = collection.getMedianArrayLength();
 	    double medianFeretLength = collection.getMedianStatistic(PlottableStatistic.MAX_FERET, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
@@ -97,7 +97,7 @@ public class CollectionFilterer implements Loggable {
 	        failureCode = failureCode | FAILURE_PERIM;
 	        perim++;
 	      }
-	      if(n.getPathLength(ProfileType.ANGLE) > maxPathLength){ // only filter for values too big here - wibbliness detector
+	      if(n.getStatistic(PlottableStatistic.PATH_LENGTH) > maxPathLength){ // only filter for values too big here - wibbliness detector
 	    	  failureCode = failureCode | FAILURE_THRESHOLD;
 	    	  pathlength++;
 	      }
@@ -131,7 +131,7 @@ public class CollectionFilterer implements Loggable {
 
 	    medianArea        = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    medianPerimeter   = collection.getMedianStatistic(PlottableStatistic.PERIMETER, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-	    medianPathLength  = collection.getMedianPathLength();
+	    medianPathLength  = collection.getMedianStatistic(PlottableStatistic.PATH_LENGTH, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 	    medianArrayLength = collection.getMedianArrayLength();
 	    medianFeretLength = collection.getMedianStatistic(PlottableStatistic.MAX_FERET, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 

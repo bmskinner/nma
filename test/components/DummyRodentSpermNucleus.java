@@ -548,11 +548,6 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 
 	}
 
-	@Override
-	public double getPathLength(ProfileType type) {
-		// TODO Auto-generated method stub
-		return 400;
-	}
 
 	@Override
 	public int getBorderIndex(Tag tag) {

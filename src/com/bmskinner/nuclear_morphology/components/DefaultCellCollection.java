@@ -78,7 +78,7 @@ import com.bmskinner.nuclear_morphology.stats.Quartile;
  *
  */
 public class DefaultCellCollection 
-implements ICellCollection {
+	implements ICellCollection {
 
 	private static final long serialVersionUID = 1L;
 
@@ -184,13 +184,6 @@ implements ICellCollection {
 				);
 	}
 
-	/*
-    -----------------------
-    Define adders for all
-    types of nucleus eligable
-    -----------------------
-	 */
-
 	public void setName(String s){
 		this.name = s;
 	}
@@ -280,14 +273,6 @@ implements ICellCollection {
 		return cells.size();
 	}
 
-	public boolean hasConsensusNucleus(){
-		if(this.consensusNucleus==null){
-			return false;
-		} else {
-			return true;
-		}
-	}
-
 	/**
 	 * Check if the collection contains cells
 	 * @return
@@ -310,10 +295,8 @@ implements ICellCollection {
 			n.setLocked(b); 
 		}
 	}
+	
 
-	public void setConsensusNucleus(Nucleus n){
-		this.consensusNucleus = n;
-	}
 
 
 	/**
@@ -336,27 +319,36 @@ implements ICellCollection {
 		return this.nucleusType;
 	}
 
-	/**
-	 * Get the cell with the given path
-	 * @param path the path to the cell (uses the path-and-number format)
-	 * @return
-	 * @see Nucleus.getPathAndNumber()
+	
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE REFOLDABLE INTERFACE
+	 * 
 	 */
-	public ICell getCell(String path){
-		Iterator<ICell> it = cells.iterator();
-
-		while(it.hasNext()){
-			ICell c = it.next();
-			Nucleus n = c.getNucleus();
-			if(n.getPathAndNumber().equals(path)){
-				return c;
-			}
-		}
-		return null;
+	
+	@Override
+	public boolean hasConsensus(){
+		return this.consensusNucleus!=null;
 	}
 
-	public Nucleus getConsensusNucleus(){
+	@Override
+	public void setConsensus(Nucleus n){
+		this.consensusNucleus = n;
+	}
+
+	@Override
+	public Nucleus getConsensus(){
 		return this.consensusNucleus;
+	}
+	
+	@Override
+	public synchronized boolean isRefolding(){
+		return this.isRefolding;
+	}
+
+	@Override
+	public synchronized void setRefolding(boolean b){
+		this.isRefolding = b;
 	}
 
 	/**
@@ -366,11 +358,6 @@ implements ICellCollection {
 	 */
 	public IProfileCollection getProfileCollection(){
 		return profileCollection;
-//		if(this.profileCollections.containsKey(type)){
-//			return this.profileCollections.get(type);
-//		} else {
-//			throw new IllegalArgumentException("ProfileCollection key "+type.toString()+" not present");
-//		}
 	}
 
 
@@ -390,10 +377,10 @@ implements ICellCollection {
 	 */
 	public File getOutputFolder(){
 		File result = null;
-		if(this.getOutputFolderName()==null){
+		if(outputFolder==null){
 			result = this.getFolder();
 		} else {
-			result = new File(this.getFolder()+File.separator+this.getOutputFolderName());
+			result = new File(this.getFolder(), outputFolder);
 		}
 		return result;
 	}
@@ -411,29 +398,6 @@ implements ICellCollection {
 		return result;
 	}
 
-	/**
-	 * Get the path lengths of the nuclei in this collection as
-	 * an array
-	 * @return
-	 * @throws Exception 
-	 */
-	private double[] getPathLengths() {
-
-		int count = this.getNucleusCount();
-		double[] result = new double[count];
-		int i=0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			try {
-				result[i] =  n.getPathLength(ProfileType.ANGLE);
-			} catch (UnavailableProfileTypeException e) {
-				fine("Error getting path length", e);
-				result[i] = 0;
-			}
-			i++;
-		}
-		return result;
-	}
 
 	/**
 	 * Get the array lengths of the nuclei in this collection as
@@ -466,39 +430,10 @@ implements ICellCollection {
 		return result;
 	}
 
-	public String[] getNucleusImagePaths(){
-
-		int count = this.getNucleusCount();
-		String[] result = new String[count];
-		int i =0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			result[i++] = n.getSourceFile().getAbsolutePath();
-		}
-		return result;
-	}
-
-	public String[] getNucleusPathsAndNumbers(){
-
-		int count = this.getNucleusCount();
-		String[] result = new String[count];
-		int i =0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			result[i++] = n.getPathAndNumber();
-		}
-		return result;
-	}
-
 	public int getNucleusCount(){
 		return this.getNuclei().size();
 	}
-
-	public Iterator<ICell> getCellIterator(){
-		return cells.iterator();
-	}
-
-
+	
 	/**
 	 * Get the cells in this collection
 	 * @return
@@ -520,24 +455,6 @@ implements ICellCollection {
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Fetch all the cells in the collection that are not members of
-	 * the given collection 
-	 * @param collection
-	 * @return
-	 */
-	public List<ICell> getCellsNotIn(ICellCollection collection){
-
-		List<ICell> result = new ArrayList<ICell>(size());
-		for(ICell cell : this.getCells()){
-			if( ! collection.contains(cell)){
-				result.add(cell);
-			}
-		}
-		return result;
-
 	}
 
 	/**
@@ -582,16 +499,6 @@ implements ICellCollection {
 		return profileManager;
 	}
 
-	public double getMedianPathLength() {
-
-		if(size()==0){
-			return 0;
-		}
-
-		double[] p = this.getPathLengths();
-		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-		return median;
-	}
 	
 	public int getMedianArrayLength(){
 		if(size()==0){
@@ -781,18 +688,6 @@ implements ICellCollection {
 	}
 
 
-	public int[] getPointIndexes(Tag pointType){
-
-		int count = this.getNucleusCount();
-		int[] result = new int[count];
-		int i=0;
-
-		for(Nucleus n : this.getNuclei()){
-			result[i++] = n.getBorderIndex(pointType);
-		}
-		return result;
-	}
-
 	/**
 	 * Get the distances between two border tags for each nucleus
 	 * @param pointTypeA
@@ -854,60 +749,23 @@ implements ICellCollection {
 
 		return n;
 	}
-
-
-	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
-
-		if(CellularComponent.WHOLE_CELL.equals(component)){
-			return getMedianCellStatistic(stat, scale);
-		}
-		
-		if(CellularComponent.NUCLEUS.equals(component)){
-			return getMedianNucleusStatistic(stat, scale);
-		}
-
-		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
-			return getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
-		}
-
-		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
-			return getMedianSegmentStatistic(stat, scale, segId);
-		}
-
-
-		return 0;
-
-	}
-
+	
 	private Nucleus[] getNucleusArray(){
-		return this.getNuclei().toArray(new Nucleus[0]);
-	}
+	return this.getNuclei().toArray(new Nucleus[0]);
+}
+	
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
+	 * 
+	 */
 
+	@Override
 	public double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)  throws Exception {
-		
-		if(CellularComponent.WHOLE_CELL.equals(component)){
-			return getMedianCellStatistic(stat, scale);
-		}
-		
-		if(CellularComponent.NUCLEUS.equals(component)){
-			
-			if(this.getNucleusCount()==0){
-				return 0;
-			}
-			
-		}
-		
 		return getMedianStatistic(stat, component, scale, null, null);
 	}
 
-	/**
-	 * Get the median stat for a value with an ID
-	 * @param stat
-	 * @param scale
-	 * @param id
-	 * @return
-	 * @throws Exception
-	 */
+	@Override
 	public synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)  throws Exception {
 
 		if(CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass()==SignalStatistic.class){
@@ -920,78 +778,23 @@ implements ICellCollection {
 		return 0;
 	}
 
-	
-	/**
-	 * Get the median value of the given statistic
-	 * @param stat
-	 * @param scale
-	 * @return
-	 * @throws Exception
-	 */
-	private synchronized double getMedianCellStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
-
-		
-		if(this.statsCache.hasStatistic(stat, CellularComponent.WHOLE_CELL, scale)){
-			return(this.statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale));
-		} else {
-
-			double median = 0;
-			if(this.getNucleusCount()>0){
-				double[] values = this.getCellStatistics(stat, scale);
-				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
-			}
-
-			statsCache.setStatistic(stat, CellularComponent.WHOLE_CELL, scale, median);
-			return median;
-		}
-
-
-	}
-
-	/**
-	 * Get the median value of the given statistic
-	 * @param stat
-	 * @param scale
-	 * @return
-	 * @throws Exception
-	 */
-	private synchronized double getMedianNucleusStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
-
-		
-		if(this.statsCache.hasStatistic(stat, CellularComponent.NUCLEUS, scale)){
-			return(this.statsCache.getStatistic(stat, CellularComponent.NUCLEUS, scale));
-		} else {
-
-			double median = 0;
-			if(this.getNucleusCount()>0){
-				double[] values = this.getNuclearStatistics(stat, scale);
-				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
-			}
-
-			statsCache.setStatistic(stat, CellularComponent.NUCLEUS, scale, median);
-			return median;
-		}
-
-
-	}
-	
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale) {
-		
-		
+
+
 		return getMedianStatistics(stat, component, scale, null);
-		
-		
-		
+
+
+
 	}
-	
+
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
 		try {
-			
+
 			if(CellularComponent.WHOLE_CELL.equals(component)){
 				return getCellStatistics(stat, scale);
 			}
-			
+
 			if(CellularComponent.NUCLEUS.equals(component)){
 				return getNuclearStatistics(stat, scale);
 			}
@@ -1003,9 +806,50 @@ implements ICellCollection {
 		} catch (Exception e){
 			return null;
 		}
-			
+
 		return null;
 	}
+	
+	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
+
+		if(this.statsCache.hasStatistic(stat, component, scale)){
+			
+			return(this.statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale));
+			
+		} else {
+
+				double median = Statistical.ERROR_CALCULATING_STAT;
+				
+				
+				if(this.hasCells()){
+					
+					double[] values = null;
+					
+					if(CellularComponent.WHOLE_CELL.equals(component)){
+						values = getCellStatistics(stat, scale);
+					}
+					
+					if(CellularComponent.NUCLEUS.equals(component)){
+						values = getNuclearStatistics(stat, scale);
+					}
+
+					if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
+						values = getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+					}
+
+					if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
+						values = getSegmentStatistics(stat, scale, segId);
+					}
+					
+
+					median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
+				}
+
+				statsCache.setStatistic(stat, component, scale, median);
+				return median;
+		}
+	}
+	
 	
 	/**
 	 * Get a list of the given statistic values for each nucleus in the collection
@@ -1056,22 +900,6 @@ implements ICellCollection {
 		return result;
 	}
 
-	/**
-	 * Get the median value of the given statistic
-	 * @param stat
-	 * @param scale
-	 * @return
-	 * @throws Exception
-	 */
-	private synchronized double getMedianSegmentStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
-
-		if(cells.isEmpty()){
-			return 0;
-		}
-
-		double[] values = this.getSegmentStatistics(stat, scale, id);
-		return new Quartile(values, Quartile.MEDIAN).doubleValue();
-	}
 
 	/**
 	 * Calculate the length of the segment with the given name in each nucleus
@@ -1090,35 +918,13 @@ implements ICellCollection {
 		return task.invoke();
 	}
 
-//	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
-//
-//		if(stat.getClass()==NucleusStatistic.class){
-//			return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
-//		} 
-//
-//		if(stat.getClass()==SignalStatistic.class){
-//			return null;
-//		} 
-//
-//		if(stat.getClass()==SegmentStatistic.class){
-//			return null;
-//		}
-//		return null;
-//
-//	}
-
-
-
-	/**
-	 * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
-	 * between a lower and upper bound.
-	 * @param stat the statistic to filter on
-	 * @param scale the scale the values are in
-	 * @param lower include values above this
-	 * @param upper include values below this
-	 * @return a new collection
-	 * @throws Exception 
+	/*
+	 * 
+	 * METHODS IMPLEMENTING THE FILTERABLE INTERFACE
+	 * 
 	 */
+
+	@Override
 	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
 		DecimalFormat df = new DecimalFormat("#.##");
 		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
@@ -1169,12 +975,7 @@ implements ICellCollection {
 		return subCollection;
 	}
 
-
-	/**
-	 * Return a collection of cells present in both collections
-	 * @param other the other collection
-	 * @return
-	 */
+	@Override
 	public ICellCollection and(ICellCollection other) {
 
 		ICellCollection newCollection = new DefaultCellCollection(this, "AND operation");
@@ -1189,11 +990,7 @@ implements ICellCollection {
 		return newCollection;
 	}
 
-	/**
-	 * Return a collection of cells present this collection but not the other
-	 * @param other the other collection
-	 * @return
-	 */
+	@Override
 	public ICellCollection not(ICellCollection other) {
 
 		ICellCollection newCollection = new DefaultCellCollection(this, "NOT operation");
@@ -1208,11 +1005,7 @@ implements ICellCollection {
 		return newCollection;
 	}
 
-	/**
-	 * Return a collection of cells present this collection or the other but not both
-	 * @param other the other collection
-	 * @return
-	 */
+	@Override
 	public ICellCollection xor(ICellCollection other) {
 
 		ICellCollection newCollection = new DefaultCellCollection(this, "XOR operation");
@@ -1234,12 +1027,7 @@ implements ICellCollection {
 		return newCollection;
 	}
 	
-	/**
-	 * Return a collection of cells present this collection or the other
-	 * @param other the other collection
-	 * @return
-	 * @throws Exception 
-	 */
+	@Override
 	public ICellCollection or(ICellCollection other) {
 
 		ICellCollection newCollection = new DefaultCellCollection(this, "OR operation");
@@ -1307,13 +1095,6 @@ implements ICellCollection {
 		return ok;
 	}
 
-	public synchronized boolean isRefolding(){
-		return this.isRefolding;
-	}
-
-	public synchronized void setRefolding(boolean b){
-		this.isRefolding = b;
-	}
 
 	/**
 	 * Test if the collection contains a cell with
@@ -1343,7 +1124,7 @@ implements ICellCollection {
 	 * @return
 	 */
 	public boolean containsExact(ICell c){
-		for(ICell cell : this.getCells()){
+		for(ICell cell : cells){
 			if (cell==c){
 				return true;
 			}
@@ -1649,103 +1430,5 @@ implements ICellCollection {
 			return false;
 		return true;
 	}
-
-
-
-
-//	/**
-//	 * Store plottable statistics for the collection
-//	 * @author bms41
-//	 *
-//	 */
-//	private class StatsCache {
-//		
-//		
-//		// Need to be able to store the same stat for different components of the cell.
-//		// This requires keys on component and stat
-//		public class Key {
-//
-//		    private final PlottableStatistic stat;
-//		    private final String component;
-//		    private final MeasurementScale scale;
-//
-//		    public Key(PlottableStatistic stat, String component, MeasurementScale scale) {
-//				this.stat = stat;
-//				this.component = component;
-//				this.scale = scale;
-//			}
-//
-//		    @Override
-//		    public boolean equals(Object o) {
-//		        if (this == o) return true;
-//		        if (!(o instanceof Key)) return false;
-//		        Key key = (Key) o;
-//		        
-//		        if(! stat.equals(key.stat)) return false;
-//		        
-//		        if(! component.equals(key.component)) return false;
-//		        
-//		        if(! scale.equals(key.scale)) return false;
-//		        
-//		        return true;
-//		    }
-//
-//		    @Override
-//		    public int hashCode() {
-//		    	
-//		    	final int prime = 31;
-//				int result = 1;
-//				result = prime * result
-//						+ stat.hashCode();
-//				
-//				result = prime * result
-//						+ component.hashCode();
-//				
-//				result = prime * result
-//						+ scale.hashCode();
-//
-//		        return result;
-//		    }
-//
-//		}
-//		
-//		
-//		private Map<Key, Double> cache = new HashMap<Key, Double>();
-//
-//		public StatsCache(){}
-//
-//		/**
-//		 * Store the given statistic
-//		 * @param stat
-//		 * @param scale
-//		 * @param d
-//		 */
-//		public void setStatistic(PlottableStatistic stat, String component, MeasurementScale scale, double d){
-//
-//			
-//			Key key = new Key(stat, component, scale);
-//			
-//			cache.put(key, d);
-//
-//		}
-//
-//		public double getStatistic(PlottableStatistic stat, String component, MeasurementScale scale){
-//
-//			if(this.hasStatistic(stat, component, scale)){
-//				Key key = new Key(stat, component, scale);
-//				return cache.get(key);
-//			} else {
-//				return 0;
-//			}
-//			
-//		}
-//
-//		public boolean hasStatistic(PlottableStatistic stat, String component, MeasurementScale scale){
-//			
-//			Key key = new Key(stat, component, scale);
-//			return cache.containsKey(key);
-//
-//		}
-//	}
 
 }

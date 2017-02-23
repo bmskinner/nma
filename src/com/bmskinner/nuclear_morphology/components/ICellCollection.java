@@ -10,7 +10,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
@@ -19,7 +18,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -31,7 +29,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface ICellCollection 
 	extends Serializable, 
-			Loggable{
+			Loggable,
+			Filterable,
+			StatisticalCollection,
+			Refoldable<Nucleus> {
 
 
 	/**
@@ -65,7 +66,7 @@ public interface ICellCollection
 	 * @return
 	 */
 	UUID getID();
-
+		
 	/**
 	 * Get the cells in the collection
 	 * @return
@@ -85,15 +86,15 @@ public interface ICellCollection
 	Set<UUID> getCellIDs();
 
 	/**
-	 * Get the nuclei in this collection
-	 * @return
+	 * Get the nuclei in this collection.
+	 * @return the nuclei, or an empty collection if no nuclei are present
 	 */
 	Set<Nucleus> getNuclei();
 
 	/**
 	 * Get the nuclei within the specified image
 	 * @param image the file to search
-	 * @return the list of nuclei
+	 * @return the nuclei, or an empty collection if no nuclei are present
 	 */
 	Set<Nucleus> getNuclei(File imageFile);
 
@@ -106,7 +107,7 @@ public interface ICellCollection
 	/**
 	 * Replace the cell with the same ID as the given cell with
 	 * the new copy
-	 * @param r
+	 * @param c the replacement cell
 	 */
 	void replaceCell(ICell c);
 
@@ -137,37 +138,6 @@ public interface ICellCollection
 	 * @return
 	 */
 	int size();
-
-
-	/**
-	 * Check if the collection has a consensus nucleus
-	 * @return
-	 */
-	boolean hasConsensusNucleus();
-
-	/**
-	 * Set the consensus nucleus for the collection
-	 * @param n
-	 */
-	void setConsensusNucleus(Nucleus n);
-	
-	/**
-	 * Get the consensus nucleus if set
-	 * @return the consensus, or null if not present
-	 */
-	Nucleus getConsensusNucleus();
-	
-	/**
-	 * Set the refolding state
-	 * @param b
-	 */
-	void setRefolding(boolean b);
-	
-	/**
-	 * Test if the consensus is being refolded
-	 * @return
-	 */
-	boolean isRefolding();
 
 	/**
 	 * Check if the collection contains cells
@@ -335,51 +305,6 @@ public interface ICellCollection
 	 * @return
 	 */
 	ProfileManager getProfileManager();
-
-	
-	/*
-	 * METHODS FOR FILTERING AND DIVIDING THE COLLECTION
-	 */
-	
-	/**
-	 * Return a collection of cells present in both collections
-	 * @param other the other collection
-	 * @return
-	 */
-	ICellCollection and(ICellCollection collection);
-	
-	/**
-	 * Return a collection of cells present this collection but not the other
-	 * @param other the other collection
-	 * @return
-	 */
-	ICellCollection not(ICellCollection collection);
-	
-	/**
-	 * Return a collection of cells present this collection or the other but not both
-	 * @param other the other collection
-	 * @return a new collection with cells not shared between datasets
-	 */
-	ICellCollection xor(ICellCollection collection);
-	
-	/**
-	 * Return a collection containing cell in either dataset. 
-	 * Cells in both datasets are not duplicated. 
-	 * @param collection the comparison dataset
-	 * @return a new collection with cells from either dataset
-	 */
-	ICellCollection or(ICellCollection collection);
-	
-	/**
-	 * Filter the collection on the given statistic
-	 * @param stat the stat to filter on
-	 * @param scale the measurement scale of the bounds
-	 * @param lower the lower bound for the stat
-	 * @param upper the upper bound for the stat
-	 * @return a new collection with only cells matching the filter
-	 */
-	ICellCollection filterCollection(PlottableStatistic stat,
-			MeasurementScale scale, double lower, double upper);
 	
 	
 	/**
@@ -424,13 +349,7 @@ public interface ICellCollection
 	 */
 	int getMaxProfileLength();
 	
-	double getMedianPathLength();
-	
-	double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
-
-	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale);
-	
-	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+//	double getMedianPathLength();
 	
 	/**
 	 * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the

@@ -176,8 +176,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 					for(Nucleus n : activeDataset().getCollection().getNuclei()){
 						n.setScale(scale);
 					}
-					if(activeDataset().getCollection().hasConsensusNucleus()){
-						activeDataset().getCollection().getConsensusNucleus().setScale(scale);
+					if(activeDataset().getCollection().hasConsensus()){
+						activeDataset().getCollection().getConsensus().setScale(scale);
 					}
 					
 					activeDataset().getAnalysisOptions()

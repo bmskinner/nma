@@ -350,8 +350,8 @@ public class ProfileManager implements Loggable {
 		/*
 		 * Set the border tag in the consensus median profile 
 		 */
-		if(collection.hasConsensusNucleus()){
-			Nucleus n = collection.getConsensusNucleus();
+		if(collection.hasConsensus()){
+			Nucleus n = collection.getConsensus();
 			int oldNIndex = n.getBorderIndex(tag);
 			int newIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
 			n.setBorderTag(tag, newIndex);
@@ -899,8 +899,8 @@ public class ProfileManager implements Loggable {
 			/*
 			 * Update the consensus if present
 			 */
-			if(collection.hasConsensusNucleus()){
-				Nucleus n = collection.getConsensusNucleus();
+			if(collection.hasConsensus()){
+				Nucleus n = collection.getConsensus();
 				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 				IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
 				IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
@@ -1001,8 +1001,8 @@ public class ProfileManager implements Loggable {
 				/*
 				 * Update the consensus if present
 				 */
-				if(collection.hasConsensusNucleus()){
-					Nucleus n = collection.getConsensusNucleus();
+				if(collection.hasConsensus()){
+					Nucleus n = collection.getConsensus();
 					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 					IBorderSegment nSeg1 = profile.getSegment(seg.getID());
 					int targetIndex = nSeg1.getProportionalIndex(proportion);
@@ -1071,8 +1071,8 @@ public class ProfileManager implements Loggable {
 		/*
 		 * Update the consensus if present
 		 */
-		if(collection.hasConsensusNucleus()){
-			Nucleus n = collection.getConsensusNucleus();
+		if(collection.hasConsensus()){
+			Nucleus n = collection.getConsensus();
 			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 			IBorderSegment nSeg1 = profile.getSegment(seg.getID());
 			profile.unmergeSegment(nSeg1);

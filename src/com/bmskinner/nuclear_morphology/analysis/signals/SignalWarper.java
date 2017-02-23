@@ -63,7 +63,7 @@ public class SignalWarper extends AnalysisWorker {
 		try {
 			finer("Running warper");
 			
-			if( ! targetDataset.getCollection().hasConsensusNucleus()){
+			if( ! targetDataset.getCollection().hasConsensus()){
 				warn("No consensus nucleus in dataset");
 				return false;
 			}
@@ -94,7 +94,7 @@ public class SignalWarper extends AnalysisWorker {
 		finest("Fetching consensus nucleus from target dataset");
 		Mesh<Nucleus> meshConsensus;
 		try {
-			meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensusNucleus());
+			meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensus());
 		} catch (MeshCreationException e1) {
 			stack("Error creating mesh", e1);
 			return;

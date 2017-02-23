@@ -231,12 +231,12 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
 		JFreeChart histoChartTwo;
 
 		
-		if(one.getCollection().hasConsensusNucleus() && two.getCollection().hasConsensusNucleus()){
+		if(one.getCollection().hasConsensus() && two.getCollection().hasConsensus()){
 
 			try {
 				
-				Nucleus n1 = one.getCollection().getConsensusNucleus();
-				Nucleus n2 = two.getCollection().getConsensusNucleus();
+				Nucleus n1 = one.getCollection().getConsensus();
+				Nucleus n2 = two.getCollection().getConsensus();
 				
 				NucleusMesh mesh1 = new NucleusMesh(n1, meshSize);
 				NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);

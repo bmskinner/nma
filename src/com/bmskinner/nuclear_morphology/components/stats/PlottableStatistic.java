@@ -50,6 +50,9 @@ public interface PlottableStatistic extends Serializable {
 	static final PlottableStatistic BODY_WIDTH      = new GenericStatistic("Width of body", StatisticDimension.LENGTH);
 	static final PlottableStatistic LOBE_COUNT      = new GenericStatistic("Number of lobes", StatisticDimension.DIMENSIONLESS);
 	
+	
+	static final PlottableStatistic PATH_LENGTH      = new GenericStatistic("Path length", StatisticDimension.DIMENSIONLESS);
+	
 	// Stats for the whole cell, aggregated across sub-components
 	static final PlottableStatistic CELL_NUCLEUS_COUNT   = new GenericStatistic("Nuclei per cell", StatisticDimension.DIMENSIONLESS);
 	static final PlottableStatistic CELL_NUCLEAR_AREA    = new GenericStatistic("Nuclear area", StatisticDimension.AREA);

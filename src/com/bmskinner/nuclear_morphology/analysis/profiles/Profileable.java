@@ -138,7 +138,7 @@ public interface Profileable extends CellularComponent {
 	 * periphery of the nucleus.
 	 * @return
 	 */
-	double getPathLength(ProfileType type) throws UnavailableProfileTypeException;
+//	double getPathLength(ProfileType type) throws UnavailableProfileTypeException;
 	
 	/**
 	 * Go around the border of the object, measuring the angle to the OP. 

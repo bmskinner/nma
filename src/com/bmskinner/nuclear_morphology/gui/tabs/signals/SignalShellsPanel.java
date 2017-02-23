@@ -311,7 +311,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 		
 		if(activeDataset().getCollection().getSignalManager().hasSignals()){
 			setEnabled(true);
-			if( ! activeDataset().getCollection().hasConsensusNucleus()){
+			if( ! activeDataset().getCollection().hasConsensus()){
 				showRandomCheckbox.setEnabled(false);
 			}
 		}

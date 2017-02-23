@@ -100,7 +100,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		int segCount = activeDataset().getCollection().getProfileManager().getSegmentCount();
 		for(IAnalysisDataset d : getDatasets()){
 			
-			if( ! d.getCollection().hasConsensusNucleus()){
+			if( ! d.getCollection().hasConsensus()){
 				ok = false;
 				warn("Dataset "+d.getName()+" does not have a consensus nucleus");
 			}
@@ -140,7 +140,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		compareConsensusButton.setEnabled(false);
 		makeOverlayChartButton.setVisible(false);
 		
-		boolean hasConsensus = activeDataset().getCollection().hasConsensusNucleus();
+		boolean hasConsensus = activeDataset().getCollection().hasConsensus();
 		checkBoxPanel.setEnabled(hasConsensus);
 		
 		
@@ -196,7 +196,7 @@ public class NuclearOverlaysPanel extends DetailPanel {
 		 */
 		boolean setConsensusButton = true;
 		for(IAnalysisDataset d : getDatasets()){
-			if( ! d.getCollection().hasConsensusNucleus()){
+			if( ! d.getCollection().hasConsensus()){
 				setConsensusButton = false;
 			}
 		}

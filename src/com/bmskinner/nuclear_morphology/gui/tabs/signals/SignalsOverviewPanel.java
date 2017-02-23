@@ -210,7 +210,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				JCheckBox box = new JCheckBox(name, visible);
 
 				// Don't enable when the consensus is missing
-                if(activeDataset().getCollection().hasConsensusNucleus()){
+                if(activeDataset().getCollection().hasConsensus()){
                     box.setEnabled(true);
                 } else {
                     box.setEnabled(false);
@@ -280,7 +280,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			consensusAndCheckboxPanel.repaint();
 			consensusAndCheckboxPanel.setVisible(true);
 			
-			if(activeDataset().getCollection().hasConsensusNucleus()
+			if(activeDataset().getCollection().hasConsensus()
 					&& activeDataset().getCollection().getSignalManager().hasSignals()){
 				warpButton.setEnabled(true);
 			}

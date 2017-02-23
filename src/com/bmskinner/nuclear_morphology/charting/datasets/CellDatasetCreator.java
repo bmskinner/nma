@@ -229,7 +229,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		/*
 		 * Don't worry about changing things if there is not consensus nucleus
 		 */
-		if( ! dataset.getCollection().hasConsensusNucleus()){
+		if( ! dataset.getCollection().hasConsensus()){
 			return result;		
 		} 
 
@@ -238,7 +238,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		 * Find the start point of the segment in the consensus nucleus
 		 */
 		Nucleus consensus = dataset.getCollection()
-				.getConsensusNucleus()
+				.getConsensus()
 				.getVerticallyRotatedNucleus();
 		
 		// Get the segment start position XY coordinates
