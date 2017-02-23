@@ -194,6 +194,10 @@ public class DefaultCell
 			return getNuclearArea();
 		}
 		
+		if(PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)){
+			return getNuclearRatio();
+		}
+		
 		return result;
 	}
 	
@@ -225,6 +229,21 @@ public class DefaultCell
 			i += n.getStatistic(PlottableStatistic.AREA);
 		}
 		return i;
+	}
+	
+	private double getNuclearRatio(){
+		
+		if(hasCytoplasm()){
+			
+			double cy = cytoplasm.getStatistic(PlottableStatistic.AREA);
+			double n  = getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA);
+			
+			return n / cy;
+			
+		} else {
+			return 1;
+		}
+
 	}
 	
 	

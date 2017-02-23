@@ -56,7 +56,7 @@ public interface PlottableStatistic extends Serializable {
 	// Stats for the whole cell, aggregated across sub-components
 	static final PlottableStatistic CELL_NUCLEUS_COUNT   = new GenericStatistic("Nuclei per cell", StatisticDimension.DIMENSIONLESS);
 	static final PlottableStatistic CELL_NUCLEAR_AREA    = new GenericStatistic("Nuclear area", StatisticDimension.AREA);
-
+	static final PlottableStatistic CELL_NUCLEAR_RATIO    = new GenericStatistic("Nucleus : Cytoplasm area ratio", StatisticDimension.DIMENSIONLESS);
 
 	// Old signal statistics minus overlaps with nucleus stats
 	static final PlottableStatistic ANGLE           = new GenericStatistic("Angle", StatisticDimension.ANGLE);
@@ -106,6 +106,7 @@ public interface PlottableStatistic extends Serializable {
 		List<PlottableStatistic> list = new ArrayList<PlottableStatistic>();
 		list.add(CELL_NUCLEUS_COUNT);
 		list.add(CELL_NUCLEAR_AREA);
+		list.add(CELL_NUCLEAR_RATIO);
 		list.add(LOBE_COUNT);
 		return list;
 	}

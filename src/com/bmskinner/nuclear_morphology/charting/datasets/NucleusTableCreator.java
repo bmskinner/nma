@@ -71,6 +71,11 @@ public class NucleusTableCreator extends AbstractTableCreator {
 					.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
 
 
+			if(op==null){
+				return createBlankTable();
+			}
+			
+			
 			rowNames.addAll(op.getKeys());
 
 
@@ -88,6 +93,10 @@ public class NucleusTableCreator extends AbstractTableCreator {
 				IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
 						.getDetectionOptions(CellularComponent.NUCLEUS)
 						.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+				
+				if(hough==null){
+					return createBlankTable();
+				}
 
 				for(String s : op.getKeys()){
 					values.add(hough.getValue(s));
@@ -102,9 +111,6 @@ public class NucleusTableCreator extends AbstractTableCreator {
 			warn("Missing hough detection options in dataset");
 			stack(e.getMessage(), e);
 			return createBlankTable();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return model;
 	}
