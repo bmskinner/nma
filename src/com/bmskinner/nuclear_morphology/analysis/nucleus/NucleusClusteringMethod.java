@@ -21,6 +21,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 
 /**
@@ -28,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
  * @author ben
  *
  */
-public class ClusteringMethod extends TreeBuildingMethod {
+public class NucleusClusteringMethod extends TreeBuildingMethod {
 	
 	public static final int EM = 0; // expectation maximisation
 	public static final int HIERARCHICAL = 1;
@@ -41,7 +42,7 @@ public class ClusteringMethod extends TreeBuildingMethod {
 	 * @param dataset the analysis dataset with nuclei to cluster
 	 * @param options the clustering options
 	 */
-	public ClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options){
+	public NucleusClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options){
 		super(dataset, options);		
 	}
 	
@@ -107,38 +108,6 @@ public class ClusteringMethod extends TreeBuildingMethod {
 		fine("Returning "+ok);
 	}
 	
-//	/**
-//	 * Fetch the cluster with the given number
-//	 * @param cluster
-//	 * @return
-//	 */
-//	public ICellCollection getCluster(int cluster){
-//		return this.clusterMap.get(cluster);
-//	}
-	
-	
-	/**
-	 * If a tree is present (i.e clustering was hierarchical),
-	 * return the string of the tree, otherwise return null
-	 * @return
-	 */
-//	@Override
-//	public String getNewickTree(){
-//		if(options.getType() == ClusteringMethod.HIERARCHICAL){
-//			return super.getNewickTree();
-//		} else{
-//			return null;
-//		}
-//	}
-	
-//	/**
-//	 * Get the number of cluster found by the clusterer
-//	 * @return
-//	 */
-//	public int getNumberOfClusters(){
-//		return clusterMap.size();
-//	}
-
 	/**
 	 * Run the clustering on a collection
 	 * @param collection
@@ -156,52 +125,46 @@ public class ClusteringMethod extends TreeBuildingMethod {
 
 			// create the clusterer to run on the Instances
 			String[] optionArray = this.options.getOptions();
-
-			try {
 				
 
-				finer("Clusterer is type "+options.getType());
-				for(String s : optionArray){
-//					fileLogger.log(Level.FINE, "Clusterer options: "+s);
-					finest("Clusterer options: "+s);
-				}
-				
-				
-				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					HierarchicalClusterer clusterer = new HierarchicalClusterer();
-					
-					clusterer.setOptions(optionArray);     // set the options
-					clusterer.setDistanceFunction(new EuclideanDistance());
-					clusterer.setDistanceIsBranchLength(true);
-					clusterer.setNumClusters(1);
-					
-					finest( "Building clusterer for tree");
-//					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
-					clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
-					clusterer.setPrintNewick(true);
-					
-					this.newickTree = clusterer.graph();
-					
-					clusterer.setNumClusters(options.getClusterNumber());
-
-					finest("Building clusterer for clustering");
-					clusterer.buildClusterer(instances);    // build the clusterer
-					assignClusters(clusterer, collection);		
-					
-				}
-				
-				if(options.getType().equals(ClusteringMethod.EM)){
-					EM clusterer = new EM();   // new instance of clusterer
-					clusterer.setOptions(optionArray);     // set the options
-					clusterer.buildClusterer(instances);    // build the clusterer
-					
-					assignClusters(clusterer, collection);		
-				}
-
-			} catch (Exception e) {
-				error("Error in clustering", e);
-				return false;
+			finer("Clusterer is type "+options.getType());
+			for(String s : optionArray){
+				finest("Clusterer options: "+s);
 			}
+
+
+			if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+				HierarchicalClusterer clusterer = new HierarchicalClusterer();
+
+				clusterer.setOptions(optionArray);     // set the options
+				clusterer.setDistanceFunction(new EuclideanDistance());
+				clusterer.setDistanceIsBranchLength(true);
+				clusterer.setNumClusters(1);
+
+				finest( "Building clusterer for tree");
+				//					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
+				clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
+				clusterer.setPrintNewick(true);
+
+				this.newickTree = clusterer.graph();
+
+				clusterer.setNumClusters(options.getClusterNumber());
+
+				finest("Building hierarchical clusterer");
+				clusterer.buildClusterer(instances);    // build the clusterer
+				assignClusters(clusterer, collection);		
+
+			}
+
+			if(options.getType().equals(ClusteringMethod.EM)){
+				EM clusterer = new EM();   // new instance of clusterer
+				clusterer.setOptions(optionArray);     // set the options
+				clusterer.buildClusterer(instances);    // build the clusterer
+				finest("Assigning clusters via EM");
+				assignClusters(clusterer, collection);		
+			}
+
+
 		} catch (Exception e) {
 			error("Error in assignments", e);
 			return false;

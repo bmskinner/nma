@@ -74,7 +74,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	
 	@Override
 	public IAnalysisMethod getMethod() {
-		IAnalysisMethod m = new com.bmskinner.nuclear_morphology.analysis.nucleus.ClusteringMethod(dataset, options);
+		IAnalysisMethod m = new com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusClusteringMethod(dataset, options);
 		return m;
 	}
 		
