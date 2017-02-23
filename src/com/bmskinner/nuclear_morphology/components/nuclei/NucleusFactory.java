@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -27,8 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-
-import ij.gui.Roi;
 
 /**
  * Constructs nuclei for an image. Tracks the number of nuclei created.

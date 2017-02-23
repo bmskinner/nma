@@ -22,6 +22,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.Attribute;
+import weka.core.EuclideanDistance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+
 import com.bmskinner.nuclear_morphology.analysis.AnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
@@ -38,14 +46,6 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.Attribute;
-import weka.core.EuclideanDistance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
 
 @Deprecated
 public class NucleusTreeBuilder extends AnalysisWorker {

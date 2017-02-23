@@ -19,7 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 
 /**

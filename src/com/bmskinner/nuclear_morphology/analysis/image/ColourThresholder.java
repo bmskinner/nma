@@ -19,18 +19,14 @@
 
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
-import ij.Undo;
-import ij.process.AutoThresholder;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 

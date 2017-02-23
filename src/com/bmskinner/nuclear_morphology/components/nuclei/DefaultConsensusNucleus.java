@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import ij.process.FloatPolygon;
+
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.io.IOException;
@@ -33,8 +35,6 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-
-import ij.process.FloatPolygon;
 
 /**
  * This describes a consensus shape for a population of cells.

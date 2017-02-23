@@ -19,7 +19,7 @@ extends DefaultBoxAndWhiskerCategoryDataset{
 	/**
 	 * The raw chart data, stored under the row and column keys
 	 */
-	private Map<Comparable, Map<Comparable, List>> rawData = new HashMap<Comparable, Map<Comparable, List>>();
+	private Map<Comparable<?>, Map<Comparable<?>, List<?>>> rawData = new HashMap<Comparable<?>, Map<Comparable<?>, List<?>>>();
 	
 	public ExportableBoxAndWhiskerCategoryDataset(){
 		super();
@@ -28,9 +28,9 @@ extends DefaultBoxAndWhiskerCategoryDataset{
 	@Override
 	public void add(List list, Comparable rowKey, Comparable columnKey){
 		super.add(list, rowKey, columnKey);
-		Map<Comparable, List> row;
+		Map<Comparable<?>, List<?>> row;
 		if(rawData.get(rowKey)==null){
-			row = new HashMap<Comparable, List>();
+			row = new HashMap<Comparable<?>, List<?>>();
 			rawData.put(rowKey, row);
 		} 
 		row = rawData.get(rowKey);

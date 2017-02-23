@@ -18,13 +18,13 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import ij.IJ;
+
 import java.io.IOException;
 import java.io.Serializable;
 
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.IJ;
 
 /**
  * Use to hold boolean results from a Profile

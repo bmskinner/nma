@@ -19,7 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.awt.geom.Point2D;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;

@@ -18,19 +18,16 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import java.awt.Color;
-
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.RGBStackMerge;
 import ij.process.Blitter;
 import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
-import ij.process.TypeConverter;
+
+import java.awt.Color;
+
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
  * This class handles the flattening of the image stacks used

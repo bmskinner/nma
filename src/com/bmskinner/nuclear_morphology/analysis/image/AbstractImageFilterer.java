@@ -19,10 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import javax.swing.ImageIcon;
-
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.process.ByteProcessor;
@@ -30,6 +26,10 @@ import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import ij.process.TypeConverter;
+
+import javax.swing.ImageIcon;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Contains methods for manipulating ImageProcessors, and

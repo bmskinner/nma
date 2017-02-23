@@ -19,10 +19,10 @@
 
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
-import java.util.List;
-
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
+
+import java.util.List;
 
 /**
  * A generic use of the detector with no filtering on size or

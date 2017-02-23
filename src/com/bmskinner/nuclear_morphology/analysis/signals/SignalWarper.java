@@ -1,5 +1,8 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
+
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,9 +18,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
 
 public class SignalWarper extends AnalysisWorker {
 	

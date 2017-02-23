@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import ij.ImageStack;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +27,6 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignal
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-
-import ij.ImageStack;
 
 public class SignalDetectionMethod extends AbstractAnalysisMethod {
 	

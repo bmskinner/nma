@@ -4,7 +4,6 @@ import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 
 /**
  * Provides default options types.

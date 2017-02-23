@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
-
 /**
  * A hash based replacement for the nuclear signal detection options
  * @author ben

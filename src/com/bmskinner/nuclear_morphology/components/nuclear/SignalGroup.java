@@ -23,6 +23,8 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.awt.Color;
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.ICellCollection;
+
 /**
  * This contains information about nuclear signals within an {@link ICellCollection},
  * @author bms41

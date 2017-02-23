@@ -20,6 +20,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,8 +30,6 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-
-import ij.gui.Roi;
 
 /**
  * The class of non-round nuclei from which all other assymetric nuclei derive

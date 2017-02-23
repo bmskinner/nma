@@ -21,8 +21,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-
 /**
  * Adds setters to the IDetectionOptions interface
  * @author bms41

@@ -20,8 +20,8 @@
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 
 /**
  * An implementation of the MeshFaceCoordinate, which stores a pixel

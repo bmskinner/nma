@@ -20,13 +20,13 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
+import ij.gui.Roi;
+
 import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-
-import ij.gui.Roi;
 
 /**
  * An implementation of {@link INuclearSignal}.

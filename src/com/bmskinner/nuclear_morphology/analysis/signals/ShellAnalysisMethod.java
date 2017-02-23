@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
+import ij.ImageStack;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +28,6 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
-
-import ij.ImageStack;
 
 /**
  * Detect signal proportions within concentric shells of a nucleus

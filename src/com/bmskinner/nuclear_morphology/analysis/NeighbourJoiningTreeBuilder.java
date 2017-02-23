@@ -3,11 +3,11 @@ package com.bmskinner.nuclear_morphology.analysis;
 import java.util.Collection;
 import java.util.HashSet;
 
+import jebl.evolution.taxa.Taxon;
+import jebl.evolution.trees.Tree;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-
-import jebl.evolution.trees.Tree;
-import jebl.evolution.taxa.Taxon;
 
 public class NeighbourJoiningTreeBuilder extends AnalysisWorker {
 	
