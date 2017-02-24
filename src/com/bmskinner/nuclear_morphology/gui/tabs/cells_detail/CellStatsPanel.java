@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -179,9 +180,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 						activeDataset().getCollection().getConsensus().setScale(scale);
 					}
 					
-					activeDataset().getAnalysisOptions()
-						.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-						.setScale(scale);
+					try {
+						activeDataset().getAnalysisOptions()
+							.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+							.setScale(scale);
+					} catch (MissingOptionException e) {
+						warn("Unable to update scale");
+						stack(e.getMessage(), e);
+					}
 					
 
 				} else {

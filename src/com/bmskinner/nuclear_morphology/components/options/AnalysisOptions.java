@@ -100,37 +100,40 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
 	 * @param template
 	 */
 	public AnalysisOptions(IAnalysisOptions template){
-		nucleusThreshold = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold();
-		minNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize();
-		maxNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize();
-		minNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc();
-		maxNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc();
-		
-		edgeDetection    = new HashMap<String, ICannyOptions>(0);
 		try {
+			nucleusThreshold = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold();
+
+			minNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize();
+			maxNucleusSize   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize();
+			minNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc();
+			maxNucleusCirc   = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc();
+
+			edgeDetection    = new HashMap<String, ICannyOptions>(0);
+
 			edgeDetection.put(IAnalysisOptions.NUCLEUS, template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
+
+
+
+			signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
+
+			for(UUID s : template.getNuclearSignalGroups()){
+				signalDetection.put(s, template.getNuclearSignalOptions(s));
+			}
+
+			normaliseContrast      = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).isNormaliseContrast(); 
+			angleWindowProportion  = template.getProfileWindowProportion();
+			scale                  = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale(); 
+			nucleusType            = template.getNucleusType();
+
+			refoldNucleus          = template.refoldNucleus();
+			folder                 = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+
+			keepFailedCollections  = template.isKeepFailedCollections();
+			channel                = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getChannel();
 		} catch (MissingOptionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
-        signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
-        
-        for(UUID s : template.getNuclearSignalGroups()){
-			signalDetection.put(s, template.getNuclearSignalOptions(s));
-		}
-		
-		normaliseContrast      = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).isNormaliseContrast(); 
-		angleWindowProportion  = template.getProfileWindowProportion();
-		scale                  = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale(); 
-		nucleusType            = template.getNucleusType();
-
-		refoldNucleus          = template.refoldNucleus();
-		folder                 = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-
-		keepFailedCollections  = template.isKeepFailedCollections();
-		channel                = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getChannel();
 	}
 
 

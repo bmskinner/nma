@@ -346,6 +346,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 		
 		List<Number> pdfValues = new ArrayList<Number>();
 		
+		if(list.isEmpty()){
+			Range r = new Range(0, 0);
+			dataset.addProbabilityRange(r, rowKey, colKey);
+			dataset.addProbabilities(pdfValues, rowKey, colKey);
+			return;
+		}
+		
 		Number total = new Sum(list); // Stats.sum(list);
 		double min = new Min(list).doubleValue();
 		double max = new Max(list).doubleValue();
@@ -366,14 +373,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 			Range r = new Range(min, max);
 			dataset.addProbabilityRange(r, rowKey, colKey);
 		} else {
-			
-			if(list.isEmpty()){
-				Range r = new Range(0, 0);
-				dataset.addProbabilityRange(r, rowKey, colKey);
-			} else {
 				Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
 				dataset.addProbabilityRange(r, rowKey, colKey);
-			}
 		}
 		dataset.addProbabilities(pdfValues, rowKey, colKey);
 		

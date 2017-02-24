@@ -28,6 +28,8 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -63,12 +65,16 @@ public class NucleusTableCreator extends AbstractTableCreator {
 		
 		
 		// Make the row names for the options
-		IDetectionSubOptions op;
+		IDetectionSubOptions op = null;
 		try {
-			op = options.firstDataset()
-					.getAnalysisOptions()
-					.getDetectionOptions(CellularComponent.NUCLEUS)
-					.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+			
+			if(options.firstDataset().hasAnalysisOptions()){
+				IAnalysisOptions an = options.firstDataset().getAnalysisOptions();
+				
+				IDetectionOptions ido = an.getDetectionOptions(CellularComponent.NUCLEUS);
+				
+				op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+			}
 
 
 			if(op==null){
@@ -108,7 +114,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
 
 
 		} catch (MissingOptionException e) {
-			warn("Missing hough detection options in dataset");
+			warn("Missing detection options in dataset");
 			stack(e.getMessage(), e);
 			return createBlankTable();
 		}

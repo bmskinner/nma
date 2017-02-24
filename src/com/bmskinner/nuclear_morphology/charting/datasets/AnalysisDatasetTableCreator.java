@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.Clu
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -400,10 +401,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 						// Show the first options from the first source
 
 						List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
-						IAnalysisOptions op = l.get(0).getAnalysisOptions();
+
+						try {
+							IAnalysisOptions op = l.get(0).getAnalysisOptions();
+							collectionData = formatAnalysisOptionsForTable(dataset, op);
+						} catch (MissingOptionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 
 						// Provide an options to be used
-						collectionData = formatAnalysisOptionsForTable(dataset, op);
+						
 
 					} else {
 						// Merge sources have different options
@@ -465,20 +473,26 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 					finest( "Checking equality of options in "+d1.getName()+" vs "+d2.getName() );
 					
-					IAnalysisOptions a1 = d1.getAnalysisOptions();
-					IAnalysisOptions a2 = d2.getAnalysisOptions();
+					try{
+						IAnalysisOptions a1 = d1.getAnalysisOptions();
+						IAnalysisOptions a2 = d2.getAnalysisOptions();
+
 					
-					if(a1==null || a2==null){
-						finest( "Found null analysis options; comparison is false" );
+
+						if(a1==null || a2==null){
+							finest( "Found null analysis options; comparison is false" );
+							ok = false;
+							continue;
+						}
+
+						if( ! a1.equals(a2) ){
+							finest( "Found unequal options in "+d1.getName()+" vs "+d2.getName() );
+							ok = false;
+						} else {
+							finest( "Found equal options in "+d1.getName()+" vs "+d2.getName() );
+						}
+					} catch (MissingOptionException e) {
 						ok = false;
-						continue;
-					}
-					
-					if( ! a1.equals(a2) ){
-						finest( "Found unequal options in "+d1.getName()+" vs "+d2.getName() );
-						ok = false;
-					} else {
-						finest( "Found equal options in "+d1.getName()+" vs "+d2.getName() );
 					}
 					finest( "Done comparing to merge source "+d2.getName() );
 				}
@@ -497,12 +511,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * @return
 	 */
 	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, IAnalysisOptions options){
-		options = options == null ? dataset.getAnalysisOptions() : options;
+		try {
+			options = options == null ? dataset.getAnalysisOptions() : options;
+		} catch (MissingOptionException e1) {
+			warn("Could not get analysis options");
+			stack(e1.getMessage(), e1);
+		}
 		
-		// only display refold mode if nucleus was refolded
-//		String refoldMode = options.refoldNucleus() 
-//				? options.getRefoldMode()
-//						: "N/A";
+
 		String refoldMode = "Fast";
 
 		String date;
@@ -525,25 +541,33 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				date = times[0];
 				time = times[1];
 			}
-			folder  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-					.getFolder()
-					.getAbsolutePath();
+			try {
+				folder  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+						.getFolder()
+						.getAbsolutePath();
+			} catch (MissingOptionException e) {
+				folder = "Missing data";
+			}
 			logFile = dataset.getDebugFile().getAbsolutePath();
 		}
 
 		ICannyOptions nucleusCannyOptions = null;
+		IDetectionOptions nucleusOptions  = null;
 		try {
+			nucleusOptions      = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+
 			nucleusCannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
 					.getCannyOptions();
 		} catch (MissingOptionException e) {
-			warn("Missing Canny options");
+			warn("Missing options");
+			stack(e.getMessage(), e);
 		}
 
 		String detectionMethod = nucleusCannyOptions.isUseCanny() 
 							   ? "Canny edge detection"
 							   : "Thresholding";
 		
-		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold());
+		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf( nucleusOptions.getThreshold() );
 		
 		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
 		
@@ -568,10 +592,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				cannyKernelRadius,
 				cannyKernelWidth,
 				cannyClosingRadius,
-				options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize(),
-				options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize(),
-				DEFAULT_DECIMAL_FORMAT.format(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc()),
-				DEFAULT_DECIMAL_FORMAT.format(options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc()),
+				nucleusOptions.getMinSize(),
+				nucleusOptions.getMaxSize(),
+				DEFAULT_DECIMAL_FORMAT.format(nucleusOptions.getMinCirc()),
+				DEFAULT_DECIMAL_FORMAT.format(nucleusOptions.getMaxCirc()),
 				options.refoldNucleus(),
 				refoldMode,
 				date,

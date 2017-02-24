@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -105,7 +106,12 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		
 		double windowSizeActual = 0.05d; // default if analysis options are not present - e.g. a merge
 		if(dataset.hasAnalysisOptions()){
-			windowSizeActual = dataset.getAnalysisOptions().getProfileWindowProportion();
+			try {
+				windowSizeActual = dataset.getAnalysisOptions().getProfileWindowProportion();
+			} catch (MissingOptionException e) {
+				warn("Error getting analyis options");
+				stack(e.getMessage(), e);
+			}
 		}
 		
 		Dimension dim = new Dimension(80, 20);

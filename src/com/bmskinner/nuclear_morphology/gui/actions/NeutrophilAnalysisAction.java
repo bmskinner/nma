@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMeth
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -94,7 +95,17 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 
 
 			options = analysisSetup.getOptions();
-			File directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+			
+			File directory = null;
+			try {
+				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+						.getFolder();
+			} catch (MissingOptionException e) {
+				warn("Missing nucleus options");
+				this.cancel();
+			}
+			
+
 
 			log("Directory: "+directory.getName());
 

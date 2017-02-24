@@ -79,15 +79,12 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 
 
 		// make an entirely new nucleus to play with
-		finest("Fetching best refold candiate");
-
 		Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);	
-		
-		finest("Creating consensus nucleus template");
+
 		refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
 
-		finest("Refolding nucleus of class: "+collection.getNucleusType().toString());
-		finest("Subject: "+refoldNucleus.getSourceFileName()+"-"+refoldNucleus.getNucleusNumber());
+		finer("Refolding nucleus of class: "+collection.getNucleusType().toString());
+		fine("Subject: "+refoldNucleus.getSourceFile().getAbsolutePath()+"-"+refoldNucleus.getNucleusNumber());
 
 		IProfile targetProfile 	= collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 		IProfile q25 			= collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.LOWER_QUARTILE);
@@ -119,7 +116,11 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 
 		try{ 
 
+			finer("Moving CoM of template to 0,0");
+			
 			refoldNucleus.moveCentreOfMass( IPoint.makeNew(0, 0));
+			
+			finer("Result: template at "+refoldNucleus.getCentreOfMass());
 
 			if(collection.size()>1){
 				
@@ -284,6 +285,7 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 			
 			testNucleus = new DefaultConsensusNucleus( refoldNucleus, NucleusType.ROUND);
 			
+			finer("Test nucleus COM: "+testNucleus.getCentreOfMass());
 			finest("Beginning border tests");
 			for(int i=0; i<refoldNucleus.getBorderLength(); i++){
 				similarityScore = improveBorderPoint(i, minDistance, maxDistance, similarityScore, testNucleus);

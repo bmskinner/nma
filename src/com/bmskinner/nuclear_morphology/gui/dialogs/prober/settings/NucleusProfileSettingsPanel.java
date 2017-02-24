@@ -57,27 +57,34 @@ public class NucleusProfileSettingsPanel extends SettingsPanel  {
 		typeBox.setSelectedItem(options.getNucleusType());
 		
 		typeBox.addActionListener( e ->{
-			
-			IMutableDetectionOptions nucleusOptions  = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-			NucleusType type = (NucleusType) typeBox.getSelectedItem();
-			options.setNucleusType(type);
 
-			if(type.equals(NucleusType.ROUND)){
-				nucleusOptions.setMinCirc(  0.0 );
-				nucleusOptions.setMaxCirc(  1.0 );				
+			IMutableDetectionOptions nucleusOptions;
+			try {
+				nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+
+				NucleusType type = (NucleusType) typeBox.getSelectedItem();
+				options.setNucleusType(type);
+
+				if(type.equals(NucleusType.ROUND)){
+					nucleusOptions.setMinCirc(  0.0 );
+					nucleusOptions.setMaxCirc(  1.0 );				
+				}
+
+				if(type.equals(NucleusType.RODENT_SPERM)){
+					nucleusOptions.setMinCirc(  0.2 );
+					nucleusOptions.setMaxCirc(  0.8 );
+				}
+
+				if(type.equals(NucleusType.PIG_SPERM)){
+					nucleusOptions.setMinCirc(  0.2 );
+					nucleusOptions.setMaxCirc(  0.8 );
+				}
+
+				fireOptionsChangeEvent();
+			} catch (Exception e1) {
+				warn("Error getting options");
+				stack(e1.getMessage(), e1);
 			}
-
-			if(type.equals(NucleusType.RODENT_SPERM)){
-				nucleusOptions.setMinCirc(  0.2 );
-				nucleusOptions.setMaxCirc(  0.8 );
-			}
-
-			if(type.equals(NucleusType.PIG_SPERM)){
-				nucleusOptions.setMinCirc(  0.2 );
-				nucleusOptions.setMaxCirc(  0.8 );
-			}
-
-			fireOptionsChangeEvent();
 		});
 
 		

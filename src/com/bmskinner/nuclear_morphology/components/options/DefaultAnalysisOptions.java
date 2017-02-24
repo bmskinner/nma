@@ -49,8 +49,14 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 		
 		for(String key : template.getDetectionOptionTypes()){
 			
-			IMutableDetectionOptions op = template.getDetectionOptions(key);
-			this.setDetectionOptions(key, op.duplicate());
+			IMutableDetectionOptions op;
+			try {
+				op = template.getDetectionOptions(key);
+				this.setDetectionOptions(key, op.duplicate());
+			} catch (MissingOptionException e) {
+				stack("Missing expected option type", e);
+			}
+			
 		}
 		
 		this.profileWindowProportion = template.getProfileWindowProportion();
@@ -61,8 +67,13 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 	}
 
 	@Override
-	public IMutableDetectionOptions getDetectionOptions(String key) {
-		return detectionOptions.get(key);
+	public IMutableDetectionOptions getDetectionOptions(String key) throws MissingOptionException{
+		if(detectionOptions.containsKey(key)){
+			return detectionOptions.get(key);
+		} else {
+			throw new MissingOptionException(key+" not present in options");
+		}
+		
 	}
 
 	@Override
@@ -139,9 +150,13 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
 	@Override
 	public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup) {
-		if(hasSignalDetectionOptions(signalGroup)){
+
+		try {
 			return (INuclearSignalOptions) getDetectionOptions(signalGroup.toString());
+		} catch (MissingOptionException e) {
+			stack(e.getMessage(), e);
 		}
+		
 		return null;
 	}
 	
@@ -180,9 +195,13 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 		
 		for(String s : detectionOptions.keySet()){
 			IDetectionOptions d = detectionOptions.get(s);
-			
-			if( ! d.equals(other.getDetectionOptions(s)))
+			try {
+				if( ! d.equals(other.getDetectionOptions(s)))
+					return false;
+			} catch (MissingOptionException e) {
 				return false;
+			}
+			
 		}
 		
 		if(Double.doubleToLongBits(profileWindowProportion)!=

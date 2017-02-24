@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.HoughSettingsPanel;
@@ -63,9 +64,14 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
 	public IAnalysisMethod getMethod() {
 		
 		// Assign the options to the dataset
-		dataset.getAnalysisOptions()
-				.getDetectionOptions(CellularComponent.NUCLEUS)
-				.setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
+		try {
+			dataset.getAnalysisOptions()
+					.getDetectionOptions(CellularComponent.NUCLEUS)
+					.setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
+		} catch (MissingOptionException e) {
+			warn("Unable to create method");
+			stack(e.getMessage(), e);
+		}
 		
 		return new LobeDetectionMethod(dataset, options);
 	}

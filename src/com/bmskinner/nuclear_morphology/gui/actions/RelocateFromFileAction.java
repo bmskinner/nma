@@ -11,6 +11,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -70,8 +71,17 @@ public class RelocateFromFileAction extends ProgressableAction {
 	private File selectFile(){
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
-		File defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-//		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+		File defaultDir = null;
+		try {
+			defaultDir = dataset.getAnalysisOptions()
+					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getFolder();
+		} catch (MissingOptionException e) {
+			warn("No nucleus options available");
+			return null;
+		}
+
+
 		JFileChooser fc = new JFileChooser("Select a file...");
 		if(defaultDir.exists()){
 			fc = new JFileChooser(defaultDir);

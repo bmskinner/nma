@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+
 import javax.swing.JFileChooser;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
@@ -27,6 +28,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -98,9 +100,15 @@ public class AddNuclearSignalAction extends ProgressableAction {
 	
 	private boolean getImageDirectory(){
 		
-		File defaultDir = dataset.getAnalysisOptions()
-				.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-				.getFolder();
+		File defaultDir = null;
+		try {
+			defaultDir = dataset.getAnalysisOptions()
+					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getFolder();
+		} catch (MissingOptionException e) {
+			warn("No nucleus options available");
+			return false;
+		}
 		
 		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
 

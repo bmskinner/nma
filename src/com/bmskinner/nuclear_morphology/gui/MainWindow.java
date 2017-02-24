@@ -55,6 +55,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
@@ -540,8 +541,14 @@ public class MainWindow
 				flag |= ProgressableAction.NUCLEUS_ANNOTATE;
 				flag |= ProgressableAction.ASSIGN_SEGMENTS;
 
-				if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-					flag |= ProgressableAction.CURVE_REFOLD;
+				try {
+					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
+						flag |= ProgressableAction.CURVE_REFOLD;
+					}
+				} catch (MissingOptionException e) {
+					warn("Missing analysis options");
+					stack(e.getMessage(), e);
+					return;
 				}
 				// begin a recursive morphology analysis
 				Runnable task = new RunProfilingAction(list, flag, MainWindow.this);
@@ -709,9 +716,17 @@ public class MainWindow
 				fine("Latch has released from refolding");
 				if(dataset.hasAnalysisOptions()){
 					
-					IMutableAnalysisOptions op = (IMutableAnalysisOptions) dataset.getAnalysisOptions();
-					op.setRefoldNucleus(true);
-					fine("Set refold status in options");
+					IMutableAnalysisOptions op;
+					try {
+						op = (IMutableAnalysisOptions) dataset.getAnalysisOptions();
+						op.setRefoldNucleus(true);
+						fine("Set refold status in options");
+					} catch (MissingOptionException e) {
+						warn("Missing analysis options");
+						stack(e.getMessage(), e);
+
+					}
+					
 				} else {
 					fine("Dataset has no analysis options, cannot set refold state");
 				}

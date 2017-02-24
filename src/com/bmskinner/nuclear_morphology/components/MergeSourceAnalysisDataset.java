@@ -33,6 +33,7 @@ import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * This provides a virtual dataset view for merge sources. 
@@ -66,7 +67,11 @@ public class MergeSourceAnalysisDataset
 		);
 
 		this.parent          = merged;
-		this.analysisOptions = mergeSource.getAnalysisOptions();
+		try {
+			this.analysisOptions = mergeSource.getAnalysisOptions();
+		} catch (MissingOptionException e1) {
+			stack(e1.getMessage(), e1);
+		}
 		this.datasetColour   = mergeSource.getDatasetColour();
 		
 		this.getCollection().createProfileCollection();

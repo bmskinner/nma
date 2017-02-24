@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
 
@@ -118,8 +119,18 @@ public class FishRemappingAction extends ProgressableAction {
 	 * @return true if the directory is valid, false otherwise
 	 */
 	private boolean getPostFISHDirectory(){
-		DirectoryChooser.setDefaultDirectory(dataset.getAnalysisOptions()
-				.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
+		
+		File defaultDir = null;
+		try {
+			defaultDir = dataset.getAnalysisOptions()
+					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getFolder();
+		} catch (MissingOptionException e) {
+			warn("No nucleus options available");
+			return false;
+		}
+		
+		DirectoryChooser.setDefaultDirectory(defaultDir.getAbsolutePath());
 		DirectoryChooser dc = new DirectoryChooser(SELECT_FOLDER_LBL);
 				
 	    String folderName = dc.getDirectory();

@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
@@ -42,10 +43,19 @@ public class SignalImageProber extends IntegratedImageProber {
 	public SignalImageProber(final IAnalysisDataset dataset, final File folder){
 		this.dataset = dataset;
 		options = OptionsFactory.makeNuclearSignalOptions(folder);
-		double scale = dataset.getAnalysisOptions()
-				.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-				.getScale();
-		options.setScale(scale);
+		
+		double scale;
+		try {
+			scale = dataset.getAnalysisOptions()
+					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+					.getScale();
+			
+			options.setScale(scale);
+		} catch (MissingOptionException e1) {
+			warn("Cannot set scale");
+			stack(e1.getMessage(), e1);
+		}
+		
 		
 		try {
 			
@@ -111,7 +121,12 @@ public class SignalImageProber extends IntegratedImageProber {
         group.setGroupColour(colour);
         
         
-        dataset.getAnalysisOptions().setDetectionOptions(signalGroup.toString(), options);
+        try {
+			dataset.getAnalysisOptions().setDetectionOptions(signalGroup.toString(), options);
+		} catch (MissingOptionException e) {
+			warn("Error getting dataset options");
+			stack(e.getMessage(), e);
+		}
 
 	}
 

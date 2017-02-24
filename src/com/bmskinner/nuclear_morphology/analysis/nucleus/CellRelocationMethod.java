@@ -18,6 +18,9 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * Find cells from a .cell file and assign them to child datasets. 
@@ -29,6 +32,11 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	
 	private File inputFile = null;
 	
+	/**
+	 * Construct with a dataset and a file containing cell locations
+	 * @param dataset
+	 * @param file
+	 */
 	public CellRelocationMethod(final IAnalysisDataset dataset, final File file){
 		super(dataset);
 		this.inputFile = file;
@@ -151,7 +159,16 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	    		c.createProfileCollection();
 	    		
 	    		IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
-	    		d.setAnalysisOptions(dataset.getAnalysisOptions());
+	    		
+				try {
+					IMutableAnalysisOptions op = dataset.getAnalysisOptions();
+					d.setAnalysisOptions(op);
+				} catch (MissingOptionException e) {
+					warn("Error copying options");
+					stack(e.getMessage(), e);
+				}
+	    		
+	    		
 	    		map.put(activeID, d);
 	    		continue;
 	    	}

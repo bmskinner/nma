@@ -33,6 +33,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
@@ -152,7 +153,13 @@ public class DefaultAnalysisDataset
 		} else {
 			childDataset = new DefaultAnalysisDataset(collection, this.savePath);
 			childDataset.setRoot(false);
-			childDataset.setAnalysisOptions(this.getAnalysisOptions());
+			
+			try {
+				childDataset.setAnalysisOptions(this.getAnalysisOptions());
+			} catch (MissingOptionException e) {
+				warn("Missing analysis options");
+				stack(e.getMessage(), e);
+			}
 		}
 
 		this.childDatasets.add( childDataset);
@@ -502,7 +509,7 @@ public class DefaultAnalysisDataset
 	 * @see analysis.IAnalysisDataset#getAnalysisOptions()
 	 */
 	@Override
-	public IMutableAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
 		return analysisOptions;
 	}
 	

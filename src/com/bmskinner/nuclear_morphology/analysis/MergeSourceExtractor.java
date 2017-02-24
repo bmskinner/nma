@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -141,7 +142,12 @@ public class MergeSourceExtractor implements Loggable {
 				
 				
 				
-				newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
+				try {
+					newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
+				} catch (MissingOptionException e) {
+					warn("Missing analysis options");
+					stack(e.getMessage(), e);
+				}
 
 
 				fireDatasetEvent(DatasetEvent.ADD_DATASET, newDataset);

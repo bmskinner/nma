@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
@@ -117,9 +118,18 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 	private void getTotalImagesToAnalyse(){
 		log("Calculating number of images to analyse");
-		int totalImages = countSuitableImages(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
-		fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-		log("Analysing "+totalImages+" images");
+		try {
+			
+			File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+			int totalImages = countSuitableImages(folder);
+			fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
+			log("Analysing "+totalImages+" images");
+			
+		} catch (MissingOptionException e) {
+			warn("No folder to analyse");
+			stack(e.getMessage(), e);
+		}
+		
 	}
 
 

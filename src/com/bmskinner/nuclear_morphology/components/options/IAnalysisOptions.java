@@ -31,7 +31,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	 * @param key the component to detect
 	 * @return the detection options for the component
 	 */
-	IMutableDetectionOptions getDetectionOptions(String key);
+	IMutableDetectionOptions getDetectionOptions(String key) throws MissingOptionException;
 	
 	/**
 	 * Get the type of detection options stored

@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
@@ -41,35 +42,40 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel {
 		JPanel panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 				
-		SettingsPanel cytoPanel = new ConstructableSettingsPanel(options)
-			.addImageChannelPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.CHANNEL_LBL)
-			.addColorThresholdPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
-			.addSizePanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
-			.build();
-		
-		
-		SettingsPanel nuclPanel = new ConstructableSettingsPanel(options)
-			.addImageChannelPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.CHANNEL_LBL)
-			.addColorThresholdPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.THRESHOLDING_LBL)
-			.addSizePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
-			.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
-			.build();
+
+		try {
+			SettingsPanel cytoPanel = new ConstructableSettingsPanel(options)
+				.addImageChannelPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.CHANNEL_LBL)
+				.addColorThresholdPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
+				.addSizePanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+				.build();
+
+
+
+			SettingsPanel nuclPanel = new ConstructableSettingsPanel(options)
+				.addImageChannelPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.CHANNEL_LBL)
+				.addColorThresholdPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.THRESHOLDING_LBL)
+				.addSizePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
+				.build();
 			
+			cytoPanel.setBorder( BorderFactory.createTitledBorder(CYTO_SETTINGS_LBL));
+			nuclPanel.setBorder( BorderFactory.createTitledBorder(NUCL_SETTINGS_LBL));
+
+			
+			this.addSubPanel(cytoPanel);
+			this.addSubPanel(nuclPanel);
+
 				
+			panel.add(cytoPanel);
+			panel.add(nuclPanel);
 
+				
+		} catch (MissingOptionException e) {
+			warn("Cannot make panels; missing options");
+			stack(e.getMessage(), e);
+		}
 
-		
-
-		cytoPanel.setBorder( BorderFactory.createTitledBorder(CYTO_SETTINGS_LBL));
-		nuclPanel.setBorder( BorderFactory.createTitledBorder(NUCL_SETTINGS_LBL));
-
-		
-		this.addSubPanel(cytoPanel);
-		this.addSubPanel(nuclPanel);
-
-			
-		panel.add(cytoPanel);
-		panel.add(nuclPanel);
 		
 		return panel;
 	}

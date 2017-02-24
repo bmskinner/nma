@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * This is the virtual child dataset, which retains only the pointer
@@ -225,7 +226,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 	}
 
 	@Override
-	public IMutableAnalysisOptions getAnalysisOptions() {
+	public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
 		return parent.getAnalysisOptions();
 	}
 

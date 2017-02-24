@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanc
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -218,14 +219,23 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 						colour);
 
 
-				INuclearSignalOptions ns = dataset.getAnalysisOptions()
-						.getNuclearSignalOptions(signalGroup);
-
-				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
+				INuclearSignalOptions ns=null;
+				try {
+					ns = dataset.getAnalysisOptions()
+							.getNuclearSignalOptions(signalGroup);
+					
+					
+				} catch (MissingOptionException e) {
 					for(int i=0; i<rowsPerSignalGroup;i++){
 						rowData.add("");
 					}
+				}
 
+				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
+					
+					for(int i=0; i<rowsPerSignalGroup;i++){
+						rowData.add("");
+					}
 
 				} else {
 					Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)

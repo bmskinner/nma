@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -57,7 +58,12 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 			if(sourceDataset!=null){
 
 				fine("Copying options from dataset: "+sourceDataset.getName());
-				options.set(sourceDataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS));
+				try {
+					options.set(sourceDataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS));
+				} catch (Exception e1) {
+					warn("Cannot get options");
+					stack(e1.getMessage(), e1);
+				}
 				fireOptionsChangeEvent();
 			}
 		});

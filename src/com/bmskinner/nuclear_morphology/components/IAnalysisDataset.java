@@ -31,6 +31,7 @@ import java.util.logging.Handler;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -242,7 +243,7 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 	 * Get the analysis options from this dataset
 	 * @return
 	 */
-	IMutableAnalysisOptions getAnalysisOptions();
+	IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException;
 
 	/**
 	 * Test if the dataset has analysis options set.

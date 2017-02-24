@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -97,21 +98,28 @@ public class NewAnalysisAction extends ProgressableAction {
 //		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
-			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+			File directory = null;
+			try {
+				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+						.getFolder();
+			} catch (MissingOptionException e) {
+				warn("Missing nucleus options");
+				this.cancel();
+			}
 
-			log("Directory: "+nucleusOptions.getFolder().getName());
+			log("Directory: "+directory.getName());
 
 			this.startTime = Calendar.getInstance().getTime();
 			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
 			// craete the analysis folder early. Did not before in case folder had no images
-			File analysisFolder = new File(nucleusOptions.getFolder(), outputFolderName);
+			File analysisFolder = new File(directory, outputFolderName);
 			if(!analysisFolder.exists()){
 				analysisFolder.mkdir();
 			}
 //			
 			File logFile = new File(analysisFolder, 
-					nucleusOptions.getFolder().getName() + Importer.LOG_FILE_EXTENSION);
+					directory.getName() + Importer.LOG_FILE_EXTENSION);
 
 			
 			IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);
@@ -181,7 +189,13 @@ public class NewAnalysisAction extends ProgressableAction {
 		}
 		fine("Selected directory: "+file.getAbsolutePath());
 		folder = file;
-		options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
+		try {
+			options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
+		} catch (MissingOptionException e) {
+			warn("Missing nucleus options");
+			stack(e.getMessage(), e);
+			return false;
+		}
 
 		return true;
 	}
