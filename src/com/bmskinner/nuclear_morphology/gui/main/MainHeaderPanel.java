@@ -8,14 +8,13 @@ import java.awt.event.MouseEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JToolBar;
 
+import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
+import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.gui.components.panels.MeasurementUnitSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
@@ -47,31 +46,41 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 	 * Create the panel of primary buttons
 	 */
 	private void createHeaderButtons(){
-
-
+		
 		JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
 
-        final JPopupMenu popup = new JPopupMenu();
-        popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
-            public void actionPerformed(ActionEvent e) {
-            	Runnable r = new NewAnalysisAction(mw);
-				r.run();
-            }
-        }));
-        popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
-            public void actionPerformed(ActionEvent e) {
-            	Runnable r = new NeutrophilAnalysisAction(mw);
-				r.run();
-            }
-        }));
-
-
-        btnNewAnalysis.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) {
-            	popup.show(btnNewAnalysis, 0, btnNewAnalysis.getBounds().height);
-
-            }
-        });
+		if(Version.currentVersion().isNewerThan(Version.v_1_13_4)){
+			
+			// TODO: Enable this when neutrophil analysis is ready to go
+	        final JPopupMenu popup = new JPopupMenu();
+	        popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
+	            public void actionPerformed(ActionEvent e) {
+	            	Runnable r = new NewAnalysisAction(mw);
+					r.run();
+	            }
+	        }));
+	        popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
+	            public void actionPerformed(ActionEvent e) {
+	            	Runnable r = new NeutrophilAnalysisAction(mw);
+					r.run();
+	            }
+	        }));
+	
+	
+	        btnNewAnalysis.addMouseListener(new MouseAdapter() {
+	            public void mousePressed(MouseEvent e) {
+	            	popup.show(btnNewAnalysis, 0, btnNewAnalysis.getBounds().height);
+	
+	            }
+	        });
+		} else {
+			btnNewAnalysis.addActionListener(	
+					e -> {
+						Runnable r = new NewAnalysisAction(mw);
+						r.run();
+					}
+				);
+		}
 
         add(btnNewAnalysis);
 		

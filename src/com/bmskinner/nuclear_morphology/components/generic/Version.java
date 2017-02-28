@@ -44,7 +44,10 @@ public class Version implements Serializable {
 	
 	private static final String SEPARATOR = "."; 
 	
+	// Some versions to compare features against
 	public static final Version v_1_13_2 = new Version(1,13,2);
+	public static final Version v_1_13_3 = new Version(1,13,3);
+	public static final Version v_1_13_4 = new Version(1,13,4);
 	
 	public Version(final int major, final int minor, final int revision ){
 		this.major = major;
@@ -52,6 +55,10 @@ public class Version implements Serializable {
 		this.revision = revision;
 	}
 	
+	/**
+	 * Get the current software version
+	 * @return
+	 */
 	public static Version currentVersion(){
 		return new Version(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION);
 	}
