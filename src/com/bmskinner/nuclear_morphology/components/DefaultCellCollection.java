@@ -407,12 +407,15 @@ public class DefaultCellCollection
 	private int[] getArrayLengths(){
 
 
-		int[] result = new int[size()];
+		int[] result = new int[this.getNuclei().size()];
 
 		int i=0;
 		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			result[i++] =  n.getBorderLength();
+			
+			for(Nucleus n : cell.getNuclei()){
+//			Nucleus n = cell.getNucleus();
+				result[i++] =  n.getBorderLength();
+			}
 		}
 		return result;
 	}
@@ -812,9 +815,9 @@ public class DefaultCellCollection
 	
 	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 
-		if(this.statsCache.hasStatistic(stat, component, scale)){
+		if(statsCache.hasStatistic(stat, component, scale)){
 			
-			return(this.statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale));
+			return statsCache.getStatistic(stat, component, scale);
 			
 		} else {
 

@@ -236,8 +236,9 @@ public class VirtualCellCollection implements ICellCollection {
 		
 		for(UUID id : cellIDs){
 			ICell c = parentCollection.getCell(id);
-			Nucleus n = c.getNucleus();
-			result.add(n);
+			for(Nucleus n : c.getNuclei()){
+				result.add(n);
+			}
 		}
 
 		return result;
@@ -797,13 +798,22 @@ public class VirtualCellCollection implements ICellCollection {
 		return (int) median;
 	}
 	
+	/**
+	 * Get the array lengths of the nuclei in this collection as
+	 * an array
+	 * @return
+	 */
 	private int[] getArrayLengths(){
-		int[] result = new int[size()];
+
+
+		int[] result = new int[this.getNuclei().size()];
 
 		int i=0;
 		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
-			result[i++] =  n.getBorderLength();
+			
+			for(Nucleus n : cell.getNuclei()){
+				result[i++] =  n.getBorderLength();
+			}
 		}
 		return result;
 	}
@@ -975,7 +985,7 @@ public class VirtualCellCollection implements ICellCollection {
 	private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 		
 		if(this.statsCache.hasStatistic(stat, component, scale)){
-			return statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale);
+			return statsCache.getStatistic(stat, component, scale);
 
 		} else {
 
