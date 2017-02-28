@@ -459,13 +459,11 @@ public class VirtualCellCollection implements ICellCollection {
 
 	@Override
 	public Collection<ISignalGroup> getSignalGroups() {
-//		return signalGroups.values();
 		return parent.getCollection().getSignalGroups();
 	}
 
 	@Override
 	public void addSignalGroup(UUID newID, ISignalGroup newGroup) {
-//		signalGroups.put(newID, newGroup);
 		parent.getCollection().addSignalGroup(newID, newGroup);
 	}
 
@@ -664,23 +662,7 @@ public class VirtualCellCollection implements ICellCollection {
 		return newCollection;
 	}
 
-	
-//	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower,
-//			double upper) {
-//		if(stat instanceof NucleusStatistic){
-//			return filterCollection(  (NucleusStatistic) stat, scale, lower, upper);
-//		} 
-//
-//		if(stat.getClass()==SignalStatistic.class){
-//			return null;
-//		} 
-//
-//		if(stat.getClass()==SegmentStatistic.class){
-//			return null;
-//		}
-//		return null;
-//	}
-	
+		
 	/**
 	 * Create a new CellCollection based on this as a template. Filter the nuclei by the given statistic
 	 * between a lower and upper bound.
@@ -712,6 +694,8 @@ public class VirtualCellCollection implements ICellCollection {
 			}
 
 		} else {
+			
+			// TODO: multiple nuclei
 			filteredCells = getCells()
 					.parallelStream()
 					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
@@ -829,38 +813,6 @@ public class VirtualCellCollection implements ICellCollection {
 		return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
 	}
 
-//	@Override
-//	public double getMedianPathLength() {
-//		if(size()==0){
-//			return 0;
-//		}
-//
-//		double[] p = this.getPathLengths();
-//		double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-//		return median;
-//	}
-	
-	/**
-	 * Get the path lengths of the nuclei in this collection as
-	 * an array
-	 * @return
-	 */
-//	private double[] getPathLengths() {
-//
-//		int count = size();
-//		double[] result = new double[count];
-//		int i=0;
-//		for(ICell cell : getCells() ){ 
-//			Nucleus n = cell.getNucleus();
-//			try {
-//				result[i] =  n.getPathLength(ProfileType.ANGLE);
-//			} catch (UnavailableProfileTypeException e) {
-//				fine("Cannot get path lengths", e);
-//			}
-//			i++;
-//		}
-//		return result;
-//	}
 
 	@Override
 	public synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception {
@@ -878,6 +830,12 @@ public class VirtualCellCollection implements ICellCollection {
 	@Override
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 		try {
+			
+			if(CellularComponent.WHOLE_CELL.equals(component)){
+				return getCellStatistics(stat, scale);
+			}
+			
+			
 			if(CellularComponent.NUCLEUS.equals(component)){
 				return getNuclearStatistics(stat, scale);
 			}
@@ -894,15 +852,11 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 	
 	@Override
-	public double getMedianStatistic(PlottableStatistic stat, String component,
-			MeasurementScale scale, UUID id) throws Exception {
-		if(cellIDs.isEmpty()){
-			return 0;
-		}
-
-		double[] values = this.getMedianStatistics(stat, component, scale, id);
-		return new Quartile(values, Quartile.MEDIAN).doubleValue();
+	public double getMedianStatistic(PlottableStatistic stat, String component,	MeasurementScale scale, UUID id) throws Exception {
+		
+		return getMedianStatistic(stat, component, scale, null, id);
 	}
+
 	
 	/**
 	 * Calculate the length of the segment with the given name in each nucleus
@@ -942,6 +896,28 @@ public class VirtualCellCollection implements ICellCollection {
 			result = task.invoke();
 			finest("Fetched statistic result for "+stat);
 		}
+		return result;
+	}
+	
+	/**
+	 * Get a list of the given statistic values for each nucleus in the collection
+	 * @param stat the statistic to use
+	 * @param scale the measurement scale
+	 * @return a list of values
+	 * @throws Exception
+	 */
+	private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+
+		double[] result = null;
+		
+		result = new double[this.size()];
+
+		int i=0;
+		for(ICell c : getCells()){
+			result[i] = c.getStatistic(stat);
+			i++;
+		}
+
 		return result;
 	}
 	
@@ -997,64 +973,46 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 	
 	private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
-		if(CellularComponent.NUCLEUS.equals(component) ){
-			return getMedianNucleusStatistic( stat, scale);
-		}
+		
+		if(this.statsCache.hasStatistic(stat, component, scale)){
+			return statsCache.getStatistic(stat, CellularComponent.WHOLE_CELL, scale);
 
-		if(CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat instanceof SignalStatistic){
-			return getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
-		}
-
-		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat instanceof SegmentStatistic){
-			return getMedianSegmentStatistic((SegmentStatistic) stat, scale, segId);
-		}
-
-
-		return 0;
-	}
-	
-	/**
-	 * Get the median value of the given statistic
-	 * @param stat
-	 * @param scale
-	 * @return
-	 * @throws Exception
-	 */
-	private double getMedianSegmentStatistic(PlottableStatistic stat, MeasurementScale scale, UUID id)  throws Exception {
-
-		if(cellIDs.isEmpty()){
-			return 0;
-		}
-
-		double[] values = this.getSegmentStatistics(stat, scale, id);
-		return new Quartile(values, Quartile.MEDIAN).doubleValue();
-	}
-	
-	/**
-	 * Get the median value of the given statistic
-	 * @param stat
-	 * @param scale
-	 * @return
-	 * @throws Exception
-	 */
-	private double getMedianNucleusStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
-
-		if(this.statsCache.hasStatistic(stat, CellularComponent.NUCLEUS, scale)){
-			return(this.statsCache.getStatistic(stat, CellularComponent.NUCLEUS, scale));
 		} else {
 
-			double median = 0;
-			if(this.size()>0){
-				double[] values = this.getNuclearStatistics(stat, scale);
+			double median = Statistical.ERROR_CALCULATING_STAT;
+
+
+			if(this.hasCells()){
+
+
+				double[] values = null;
+
+				if(CellularComponent.WHOLE_CELL.equals(component)){
+					values = getCellStatistics(stat, scale);
+				}
+
+				if(CellularComponent.NUCLEUS.equals(component)){
+					values = getNuclearStatistics(stat, scale);
+				}
+
+				if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
+					values = getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+				}
+
+				if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
+					values = getSegmentStatistics(stat, scale, segId);
+				}
+
+
 				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 			}
 
-			statsCache.setStatistic(stat, CellularComponent.NUCLEUS, scale, median);
+			statsCache.setStatistic(stat, component, scale, median);
 			return median;
 		}
-
-
+		
 	}
+		
 
 	@Override
 	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) {
