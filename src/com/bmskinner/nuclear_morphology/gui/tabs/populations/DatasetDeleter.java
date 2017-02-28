@@ -70,7 +70,7 @@ public class DatasetDeleter implements Loggable {
 			if(rootHasChanged(list)){
 				warn("A root dataset has changed since last save");
 				
-				Object[] possibleValues = { KEEP_LBL, DELETE_LBL };
+				Object[] buttonLabels = { KEEP_LBL, DELETE_LBL };
 				
 				Object selectedValue = JOptionPane.showOptionDialog(null, 
 						WARNING_LBL, 
@@ -78,10 +78,11 @@ public class DatasetDeleter implements Loggable {
 				        JOptionPane.OK_CANCEL_OPTION, 
 				        JOptionPane.INFORMATION_MESSAGE, 
 				        null, 
-				        possibleValues, // this is the array
-				        KEEP_LBL);
-								
-				if(! selectedValue.equals(DELETE_LBL)){
+				        buttonLabels, 
+				        KEEP_LBL); // default
+							
+				
+				if(! selectedValue.toString().equals("1")){
 					return;
 				}
 				
