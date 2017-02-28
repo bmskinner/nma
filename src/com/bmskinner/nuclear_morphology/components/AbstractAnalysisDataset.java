@@ -22,6 +22,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.awt.Paint;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,19 +33,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This is the most primitive information an analysis dataset requires.
  * This does not implement the IAnalysisDataset interface itself - 
  * it is the responsibility of extending classes to add the remaining
- * fields and methods.
+ * fields and methods.	
  * @author bms41
  * @since 1.13.3
  *
  */
-public abstract class AbstractAnalysisDataset implements Serializable {
+public abstract class AbstractAnalysisDataset implements Serializable, Loggable {
 	
-private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 	
 	protected final Version version;
 	
@@ -195,5 +197,16 @@ private static final long serialVersionUID = 1L;
 	}
 	
 	
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	    
+
+		
+		in.defaultReadObject();
+	    
+		if(cellCollection==null){
+			warn("Missing cell collection");
+		}
+	
+	}
 
 }

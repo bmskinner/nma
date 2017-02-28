@@ -53,7 +53,7 @@ public abstract class ImageProberPanel extends JPanel
 	public static final int     DEFAULT_COLUMN_COUNT = 2;
 	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
 	protected static final int SMALL_ICON_MAX_WIDTH   = 500;
-	protected static final int SMALL_ICON_MAX_HEIGHT = 500;
+	protected static final int SMALL_ICON_MAX_HEIGHT  = 500;
 	
 	protected static final String NULL_FILE_ERROR = "File is null";
 	
@@ -61,6 +61,7 @@ public abstract class ImageProberPanel extends JPanel
 	private static final String FOLDER_LBL = "Probing ";
 	private static final String PREV_IMAGE_BTN = "Prev";
 	private static final String NEXT_IMAGE_BTN = "Next";
+	private static final String WORKING_LBL    = "Working...";
 	
 	private int rowHeight = 200;
 	
@@ -68,7 +69,7 @@ public abstract class ImageProberPanel extends JPanel
 	
 	protected IDetectionOptions options; // the options to detect with
 
-	protected ImageSet imageSet;
+	protected ImageSet imageSet; // the images that will be found within the table
 	
 	protected int rows = 0;
 	protected int cols = 2;
@@ -153,7 +154,7 @@ public abstract class ImageProberPanel extends JPanel
 		panel.add(scrollPane, BorderLayout.CENTER);
 		
 		progressBar = new JProgressBar();
-		progressBar.setString("Working...");
+		progressBar.setString(WORKING_LBL);
 		progressBar.setStringPainted(true);
 		progressBar.setVisible(false);
 		panel.add(progressBar, BorderLayout.SOUTH);

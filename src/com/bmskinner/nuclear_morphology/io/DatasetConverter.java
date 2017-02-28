@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -63,7 +65,10 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.gui.PolygonRoi;
@@ -79,6 +84,40 @@ import ij.gui.Roi;
 public class DatasetConverter implements Loggable, Importer {
 	
 	private IAnalysisDataset oldDataset;
+	
+	
+	/**
+     * Migration table for stats classes
+     */
+    protected static final Map<NucleusStatistic, PlottableStatistic> NUCLEUS_STATS_MAP = new HashMap<NucleusStatistic, PlottableStatistic>();
+    protected static final Map<SignalStatistic, PlottableStatistic>  SIGNAL_STATS_MAP  = new HashMap<SignalStatistic, PlottableStatistic>();
+    protected static final Map<SegmentStatistic, PlottableStatistic> SEGMENT_STATS_MAP = new HashMap<SegmentStatistic, PlottableStatistic>();
+    static {
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.AREA, PlottableStatistic.AREA);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.ASPECT, PlottableStatistic.ASPECT);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.BODY_WIDTH, PlottableStatistic.BODY_WIDTH);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.BOUNDING_HEIGHT, PlottableStatistic.BOUNDING_HEIGHT);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.BOUNDING_WIDTH, PlottableStatistic.BOUNDING_WIDTH);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.CIRCULARITY, PlottableStatistic.CIRCULARITY);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.HOOK_LENGTH, PlottableStatistic.HOOK_LENGTH);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.MAX_FERET, PlottableStatistic.MAX_FERET);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.MIN_DIAMETER, PlottableStatistic.MIN_DIAMETER);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.OP_RP_ANGLE, PlottableStatistic.OP_RP_ANGLE);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.PERIMETER, PlottableStatistic.PERIMETER);
+    	NUCLEUS_STATS_MAP.put(NucleusStatistic.VARIABILITY, PlottableStatistic.VARIABILITY);
+
+    	SIGNAL_STATS_MAP.put(SignalStatistic.ANGLE, PlottableStatistic.ANGLE);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.AREA, PlottableStatistic.AREA);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.DISTANCE_FROM_COM, PlottableStatistic.DISTANCE_FROM_COM);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.FRACT_DISTANCE_FROM_COM, PlottableStatistic.FRACT_DISTANCE_FROM_COM);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.MAX_FERET, PlottableStatistic.MAX_FERET);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.PERIMETER, PlottableStatistic.PERIMETER);
+    	SIGNAL_STATS_MAP.put(SignalStatistic.RADIUS, PlottableStatistic.RADIUS);
+    	
+    	SEGMENT_STATS_MAP.put(SegmentStatistic.DISPLACEMENT, PlottableStatistic.DISPLACEMENT);
+    	SEGMENT_STATS_MAP.put(SegmentStatistic.LENGTH, PlottableStatistic.LENGTH);
+        
+    }
 	
 	/**
 	 * Construct using the old dataset version
@@ -563,14 +602,8 @@ public class DatasetConverter implements Loggable, Importer {
 
 		finer("\tCreated nucleus object");
 
-		for(PlottableStatistic stat : template.getStatistics() ){
-			try {
-				newNucleus.setStatistic(stat, template.getStatistic(stat, MeasurementScale.PIXELS));
-			} catch (Exception e) {
-				fine("Error setting statistic: "+stat, e);
-				newNucleus.setStatistic(stat, 0);
-			}
-		}
+		finer("Converting stats");
+		convertPlottableStatistics(newNucleus, template);
 
 		newNucleus.setScale(template.getScale());
 
@@ -635,6 +668,39 @@ public class DatasetConverter implements Loggable, Importer {
 		fine("Created nucleus "+newNucleus.getNameAndNumber()+"\n");
 
 		return  newNucleus;
+	}
+	
+	
+	/**
+	 * Update all stats to the latest versions
+	 * @param newNucleus
+	 * @param template
+	 */
+	private void convertPlottableStatistics(Nucleus newNucleus, Nucleus template){
+		
+				
+		for(PlottableStatistic stat : template.getStatistics() ){
+			try {
+				PlottableStatistic newStat = stat;
+				
+				if(stat instanceof NucleusStatistic){
+					newStat = NUCLEUS_STATS_MAP.get(stat);
+				}
+				
+				if(stat instanceof SignalStatistic){
+					newStat = SIGNAL_STATS_MAP.get(stat);
+				}
+				
+				if(stat instanceof SegmentStatistic){
+					newStat = SEGMENT_STATS_MAP.get(stat);
+				}
+				
+				newNucleus.setStatistic(newStat, template.getStatistic(stat, MeasurementScale.PIXELS));
+			} catch (Exception e) {
+				fine("Error setting statistic: "+stat, e);
+				newNucleus.setStatistic(stat, 0);
+			}
+		}
 	}
 	
 	private void convertNuclearSegments(Nucleus template, Nucleus newNucleus) throws DatasetConversionException{
@@ -721,7 +787,12 @@ public class DatasetConverter implements Loggable, Importer {
 				oldSignal.getPosition());
 
 		for(PlottableStatistic st : oldSignal.getStatistics()){
-			newSignal.setStatistic(st, oldSignal.getStatistic(st));;
+			
+			PlottableStatistic newStat = st;
+			if(st instanceof SignalStatistic){
+				newStat = SIGNAL_STATS_MAP.get(st);
+			}
+			newSignal.setStatistic(newStat, oldSignal.getStatistic(st));;
 		}
 		return newSignal;
 	}

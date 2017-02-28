@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
+import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -812,8 +813,17 @@ public class DefaultAnalysisDataset
 //		warn("Reading dataset");
 		
 		in.defaultReadObject();
+		
+		if(cellCollection==null){
+			warn("No cell collection could be read in dataset");
+		}
 	    
-	    int length = cellCollection.getProfileCollection().length();
+		IProfileCollection pc = cellCollection.getProfileCollection();
+		if(pc==null){
+			warn("Missing profile collection");
+		}
+		
+	    int length = pc.length();
 	    // Update all children to have the same profile lengths and offsets
 	    
 	    if(! childDatasets.isEmpty()){

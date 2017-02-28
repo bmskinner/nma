@@ -152,6 +152,7 @@ public class DefaultNucleus
 
 		super.initialise(proportion);
 		
+		
 		SignalAnalyser s = new SignalAnalyser();
 		s.calculateSignalDistancesFromCoM(this);
 		s.calculateFractionalSignalDistancesFromCoM(this); 

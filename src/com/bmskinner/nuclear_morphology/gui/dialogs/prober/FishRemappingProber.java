@@ -51,7 +51,7 @@ public class FishRemappingProber extends IntegratedImageProber {
 			
 			
 		} catch (Exception e){
-			warn("Error launching analysis window");
+			warn("Error launching FISH remapping window");
 			stack(e.getMessage(), e);
 			this.dispose();
 		}	

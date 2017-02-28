@@ -65,11 +65,13 @@ public abstract class ProgressableAction
 	private JProgressBar progressBar = null;
 	
 	protected IAnalysisWorker worker = null;
-	protected Integer downFlag = 0; // store flags to tell the action what to do after finishing
+	protected int downFlag = 0; // store flags to tell the action what to do after finishing
+	
 	private LogPanel logPanel;
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
+
 	private List<IAnalysisDataset> processList = new ArrayList<IAnalysisDataset>(0); // list of datasets that need processing after this
 	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
@@ -157,11 +159,7 @@ public abstract class ProgressableAction
 	}
 	
 	protected boolean hasRemainingDatasetsToProcess(){
-		if(this.processList.size()>0){
-			return true;
-		} else {
-			return false;
-		}
+		return processList.size()>0;
 	}
 		
 	/**
@@ -264,9 +262,7 @@ public abstract class ProgressableAction
 	 * available
 	 */
 	public void setProgressBarIndeterminate(){
-		this.progressBar.setIndeterminate(true);
-//		logPanel.revalidate();
-//		logPanel.repaint();
+		progressBar.setIndeterminate(true);
 	}
 	
 	public synchronized boolean isDone(){
