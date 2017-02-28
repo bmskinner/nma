@@ -114,7 +114,7 @@ public class NucleusTableCreator extends AbstractTableCreator {
 
 
 		} catch (MissingOptionException e) {
-			warn("Missing detection options in dataset");
+			fine("Missing detection options in dataset");
 			stack(e.getMessage(), e);
 			return createBlankTable();
 		}

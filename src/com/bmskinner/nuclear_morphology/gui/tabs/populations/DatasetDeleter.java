@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.swing.JOptionPane;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -37,6 +39,12 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class DatasetDeleter implements Loggable {
+	
+	private static final String DELETE_LBL = "Close";
+	private static final String KEEP_LBL   = "Don't close";
+	
+	private static final String TITLE_LBL   = "Close dataset?";
+	private static final String WARNING_LBL = "Dataset not saved. Close without saving?";
 	
 	/**
 	 * Delete or close the given datasets
@@ -53,8 +61,32 @@ public class DatasetDeleter implements Loggable {
 
 			// Now extract the unique UUIDs of all datasets to be deleted (including children)
 			fine("There are "+datasets.size()+" datasets selected");
-
+			
 			Deque<UUID> list = unique(datasets);
+			
+			
+			// Ask before closing, if any root datasets have changed since
+			// last save
+			if(rootHasChanged(list)){
+				warn("A root dataset has changed since last save");
+				
+				Object[] possibleValues = { KEEP_LBL, DELETE_LBL };
+				
+				Object selectedValue = JOptionPane.showOptionDialog(null, 
+						WARNING_LBL, 
+				        TITLE_LBL, 
+				        JOptionPane.OK_CANCEL_OPTION, 
+				        JOptionPane.INFORMATION_MESSAGE, 
+				        null, 
+				        possibleValues, // this is the array
+				        KEEP_LBL);
+								
+				if(! selectedValue.equals(DELETE_LBL)){
+					return;
+				}
+				
+				
+			}
 
 			deleteDatasetsInList(list);
 			DatasetListManager.getInstance().refreshClusters(); // remove unneeded cluster groups from datasets
@@ -66,6 +98,22 @@ public class DatasetDeleter implements Loggable {
 			stack("Error deleting dataset", e);
 		}
 
+	}
+	
+	private boolean rootHasChanged(Deque<UUID> list){
+		
+		for(UUID id : list){
+			
+			IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
+			
+			if(d.isRoot()){
+			
+				if(DatasetListManager.getInstance().hashCodeChanged(d)){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private void deleteDataset(IAnalysisDataset d){
@@ -89,6 +137,7 @@ public class DatasetDeleter implements Loggable {
 		fine("Checking if dataset is root");
 
 		if(d.isRoot()){
+			
 			DatasetListManager.getInstance().removeDataset(d);
 		}
 		
