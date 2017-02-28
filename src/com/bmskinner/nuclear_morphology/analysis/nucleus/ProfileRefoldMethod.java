@@ -285,6 +285,11 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 			
 			testNucleus = new DefaultConsensusNucleus( refoldNucleus, NucleusType.ROUND);
 			
+			// When errors occur, the testNucleus CoM is offset at 0,-15 (may not be constant). 
+			// Probably due to the correction in the DefaultConsensusNucleus constructor.
+			// Hence, put it back again to zero.
+			testNucleus.moveCentreOfMass(IPoint.makeNew(0, 0));
+			
 			finer("Test nucleus COM: "+testNucleus.getCentreOfMass());
 			finest("Beginning border tests");
 			for(int i=0; i<refoldNucleus.getBorderLength(); i++){
@@ -322,12 +327,11 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 		finest("Testing point "+index);
 		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
 
-//		log("3bi testNucleus has "+ testNucleus.getProfile(ProfileType.ANGLE).getSegmentCount());
 		
 		// Get a copy of the point at this index
 		IBorderPoint p = testNucleus.getBorderPoint(index);
 		
-//		log("Test point at index "+index+" at "+p.toString());
+
 
 		// Save the old position
 		double oldX = p.getX();
@@ -350,39 +354,38 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 		if(	ok ){
 
 //			log("\tNew point accepted at index "+index+" at "+newPoint.toString());
-			// Update the test nucleus
+			// Update the test nucleus and recalculate the profiles
 			testNucleus.updateBorderPoint(index, newPoint);
 
 			finer("Testing profiles");
 			try {
-				testNucleus.calculateProfiles();
-			} catch (ProfileException e) {
-				warn("Cannot calculate profiles in test nucleus");
-				fine("Error calculating profiles", e);
-			}
-
-			// Get the new score
-			score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
-
-			// Apply the change if better fit
-			if(score < similarityScore) {
-				refoldNucleus.updateBorderPoint(index, newPoint);
-				pointUpdateCounter++;
 				
-				finer("Re-calculating profiles");
-				try {
-					refoldNucleus.calculateProfiles();
-				} catch (ProfileException e) {
-					warn("Cannot calculate profiles in consensus");
-					fine("Error calculating profiles", e);
-				}
+				testNucleus.calculateProfiles();
 
-				similarityScore = score;
+				// Get the new score
+				score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
+
+				// If the change to the test nucleus improved the score, apply the change to the 
+				// real consensus nucleus
+
+				if(score < similarityScore) {
+					IPoint exisiting = refoldNucleus.getBorderPoint(index);
+					fine("Updating "+exisiting.toString()+" to "+newPoint.toString()+": "+exisiting.getLengthTo(newPoint));
+					refoldNucleus.updateBorderPoint(index, newPoint);
+					pointUpdateCounter++;
+
+					refoldNucleus.calculateProfiles();
+
+					similarityScore = score;
+				}
+			} catch (ProfileException e) {
+				warn("Cannot calculate profiles in either test or consensus");
+				stack("Error calculating profiles", e);
 			}
 		}
 
 		return similarityScore;
-		
+
 	}
 	
 	
