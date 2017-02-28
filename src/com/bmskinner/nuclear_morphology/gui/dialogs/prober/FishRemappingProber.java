@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 public class FishRemappingProber extends IntegratedImageProber {
 	
 	private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";
+	private static final String PROCEED_LBL          = "Finished selection";
 
 	final IAnalysisDataset dataset;
 	final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
@@ -39,6 +40,7 @@ public class FishRemappingProber extends IntegratedImageProber {
 					fishImageDir);
 			
 			JPanel footerPanel   = createFooter();
+			this.setOkButtonText(PROCEED_LBL);
 			
 			this.add(imageProberPanel,     BorderLayout.CENTER);
 			this.add(footerPanel,          BorderLayout.SOUTH);

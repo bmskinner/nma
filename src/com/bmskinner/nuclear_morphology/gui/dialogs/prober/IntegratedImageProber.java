@@ -51,13 +51,15 @@ public abstract class IntegratedImageProber extends LoadingIconDialog {
 		return panel;
 	}
 	
-//	/**
-//	 * Get the current options
-//	 * @return
-//	 */
-//	public IMutableAnalysisOptions getOptions(){
-//		return options;
-//	}
+	/**
+	 * Allow overriding of the "Proceed" button label
+	 * @param s
+	 */
+	protected void setOkButtonText(String s){
+		okButton.setText(s);
+	}
+	
+
 	
 	/**
 	 * Check if the analysis is ready to run

@@ -88,7 +88,8 @@ public class FishRemappingAction extends ProgressableAction {
 					
 				log("Reapplying morphology...");
 
-				new RunSegmentationAction(newList, dataset, ADD_POPULATION, mw);
+				Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, mw);
+				r.run();
 				finished();
 
 
