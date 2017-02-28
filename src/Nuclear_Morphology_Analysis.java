@@ -82,10 +82,28 @@ implements PlugIn, Loggable
 		}
 	}
 	
+	private boolean checkJavaVersion(){
+		
+		if( ! IJ.isJava18() ){
+			IJ.log("Unable to open Nuclear Morphology Analysis");
+			IJ.log("Java version 8 is required");
+			IJ.log("Update ImageJ to a version bundled with Java 8");
+			IJ.log("This is the version called 'bundled with Java 1.8.0_xx' here:");
+			IJ.log("http://rsb.info.nih.gov/ij/download.html");
+			return false;
+		}
+		return true;
+	}
+	
 	/* 
-     * The first method run when the plugin starts.
+     * The first method run when the plugin starts within ImageJ.
 	 */
 	public void run(String paramString){
+		
+		if(!checkJavaVersion()){
+			return;
+		}
+		
 		/*
 		 * Add a splash screen for long load times
 		 */
@@ -144,15 +162,6 @@ implements PlugIn, Loggable
 
 		try {
 			
-			if( ! IJ.isJava18() ){
-				IJ.log("Unable to open Nuclear Morphology Analysis");
-				IJ.log("Java version 8 is required");
-				IJ.log("Update ImageJ to a version bundled with Java 8");
-				IJ.log("This is the version called 'bundled with Java 1.8.0_xx' here:");
-				IJ.log("http://rsb.info.nih.gov/ij/download.html");
-				return;
-			}
-
 			if(checkPlugins()){ 
 
 				loadMainWindow(false);

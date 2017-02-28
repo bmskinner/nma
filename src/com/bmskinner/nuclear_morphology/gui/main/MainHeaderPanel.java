@@ -1,9 +1,17 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JToolBar;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
@@ -17,8 +25,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class MainHeaderPanel extends JPanel implements Loggable {
 	
 	private static final String NEW_ANALYSIS_LBL   = "New analysis";
-	private static final String NEW_NEUTRO_LBL     = "Neutrophil";
-	private static final String LOAD_DATASET_LBL   = "Load analysis dataset";
+	private static final String NEW_STANDARD_LBL   = "Standard analysis";
+	private static final String NEW_NEUTROPHIL_LBL = "Neutrophil analysis";
+
+	private static final String LOAD_DATASET_LBL   = "Load dataset";
 	private static final String SAVE_ALL_LBL       = "Save all";
 	private static final String SAVE_WORKSPACE_LBL = "Save workspace";
 	private static final String OPTIONS_LBL        = "Options";
@@ -40,24 +50,32 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 
 		JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
-		btnNewAnalysis.addActionListener(
-				e ->{
-					Runnable r = new NewAnalysisAction(mw);
-					r.run();
-				}
-		);
-		add(btnNewAnalysis);
+
+        final JPopupMenu popup = new JPopupMenu();
+        popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
+            public void actionPerformed(ActionEvent e) {
+            	Runnable r = new NewAnalysisAction(mw);
+				r.run();
+            }
+        }));
+        popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
+            public void actionPerformed(ActionEvent e) {
+            	Runnable r = new NeutrophilAnalysisAction(mw);
+				r.run();
+            }
+        }));
+
+
+        btnNewAnalysis.addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+            	popup.show(btnNewAnalysis, 0, btnNewAnalysis.getBounds().height);
+
+            }
+        });
+
+        add(btnNewAnalysis);
 		
-		
-		JButton btnNeutrophil = new JButton(NEW_NEUTRO_LBL);
-		btnNeutrophil.addActionListener(
-				e ->{
-					Runnable r = new NeutrophilAnalysisAction(mw);
-					r.run();
-				}
-		);
-		add(btnNeutrophil);
-		
+
 
 		//---------------
 		// load saved dataset button

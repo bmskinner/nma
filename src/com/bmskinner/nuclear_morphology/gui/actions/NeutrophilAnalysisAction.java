@@ -80,7 +80,6 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 			fine("No folder, getting directory");
 			if(! getImageDirectory()){
 				this.cancel();
-				log("User cancelled");
 				return;
 			} else {
 				fine("Got directory");
