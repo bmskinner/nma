@@ -33,6 +33,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	 */
 	IMutableDetectionOptions getDetectionOptions(String key) throws MissingOptionException;
 	
+	
 	/**
 	 * Get the type of detection options stored
 	 * @return

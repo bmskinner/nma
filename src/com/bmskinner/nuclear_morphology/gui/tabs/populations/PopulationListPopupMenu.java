@@ -37,6 +37,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 public class PopulationListPopupMenu extends JPopupMenu {
 	
 	public static final String SOURCE_COMPONENT = "PopupMenu"; 
+	
+	public static final String SAVE_AS_LBL = "Save nmd as..."; 
 
 	JMenuItem mergeMenuItem;
 	JMenuItem curateMenuItem;
@@ -45,8 +47,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	
 	JMenuItem booleanMenuItem;
 	
-	JMenuItem saveMenuItem = new JMenuItem( new AbstractAction("Save nmd as..."){
-		private static final long serialVersionUID = 1L;
+	JMenuItem saveMenuItem = new JMenuItem( new AbstractAction(SAVE_AS_LBL){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			fireSignalChangeEvent("SaveCollectionAction");				
@@ -54,8 +55,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	});
 	
 
-	
-	@SuppressWarnings("serial")
 	JMenuItem saveCellsMenuItem = new JMenuItem( new AbstractAction("Save cell locations"){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -63,7 +62,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 	
-	@SuppressWarnings("serial")
 	JMenuItem relocateMenuItem = new JMenuItem( new AbstractAction("Relocate cells"){
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
@@ -78,7 +76,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	JMenuItem moveDownMenuItem;
 	
 	JMenuItem replaceFolderMenuItem = new JMenuItem( new AbstractAction("Change folder"){
-		private static final long serialVersionUID = 1L;
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
 			fireSignalChangeEvent("ChangeNucleusFolderAction");				
@@ -180,7 +177,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		
 		exportStatsMenuItem = new JMenuItem("Export stats");
 		exportStatsMenuItem.addActionListener( e -> {
-			fireSignalChangeEvent("ExportStatsAction");	
+			fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS);	
 		});
 		
 		

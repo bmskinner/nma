@@ -23,9 +23,15 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+/**
+ * The method for finding nuclei in fluorescence images
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
-	private static final String spacerString = "---------";
+	private static final String SPACER = "---------";
 
 	private final String outputFolder;
 
@@ -92,7 +98,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 	private void getTotalImagesToAnalyse(){
 		
-		log("Calculating number of images to analyse");
+		log("Counting images to analyse");
 		try {
 			
 			File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
@@ -158,13 +164,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 					result.add(failed);
 				}
 
-				log(spacerString);
+				log(SPACER);
 
 				log("Population: "+collection.getName());
 				log("Passed: "+collection.size()+" nuclei");
 //				log("Failed: "+failedNuclei.size()+" nuclei");
 
-				log(spacerString);
+				log(SPACER);
 
 
 				result.add(dataset);

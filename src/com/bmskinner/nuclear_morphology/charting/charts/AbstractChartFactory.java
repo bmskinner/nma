@@ -37,6 +37,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
@@ -116,13 +117,19 @@ public abstract class AbstractChartFactory implements Loggable {
 	}
 	
 	/**
-	 * Find the UUID of a signal group from a label
-	 * @param label
+	 * Get the UUID of a signal group from a label.
+	 * The expected format is CellularComponent.NUCLEAR_SIGNAL+"_"+UUID+"_signal_"+signalNumber
+	 * @param label the charting dataset label
 	 * @return
 	 */
 	public static UUID getSignalGroupFromLabel(String label){
-		String[] names = label.split("_");
-		return UUID.fromString(names[1]);
+		
+		if(label.startsWith(CellularComponent.NUCLEAR_SIGNAL)){
+			String[] names = label.split("_");
+			return UUID.fromString(names[1]);
+		}
+		throw new IllegalArgumentException("Label does not start with CellularComponent.NUCLEAR_SIGNAL");
+		
 	}
 	
 

@@ -545,10 +545,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	
 
 						finest("Fetched signal outline datasets for "+cell.getNucleus().getNameAndNumber());
-						
-						if(signalsDatasets.size()==0){
-							finest("No signal datasets returned");
-						}
+
 						
 						for(OutlineDataset d : signalsDatasets){
 
@@ -680,26 +677,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				}
 
 				/*
-				 * Nuclear signals - TODO - reenable this
+				 * Nuclear signals 
 				 */
-//				if(key.startsWith("SignalGroup_")){
-//
-//					UUID seriesGroup = getSignalGroupFromLabel(key);
-//					
-//					Paint colour = ColourSelecter.getColor(i);
-//					try {
-//
-//						colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
-//								? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
-//								: colour;
-//
-//					
-//					} catch (UnavailableSignalGroupException e){
-//	        			fine("Signal group "+seriesGroup+" is not present in collection", e);
-//	        		} finally {
-//	        			plot.getRenderer(key).setSeriesPaint(i, colour);
-//	        		}
-//				}
+				if(key.startsWith(CellularComponent.NUCLEAR_SIGNAL)){
+
+					UUID seriesGroup = getSignalGroupFromLabel(key);
+					
+					Paint colour = ColourSelecter.getColor(i);
+					try {
+
+						IAnalysisDataset dataset = options.firstDataset();
+						colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
+								? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour()
+								: colour;
+
+					
+					} catch (UnavailableSignalGroupException e){
+	        			fine("Signal group "+seriesGroup+" is not present in collection", e);
+	        		} finally {
+	        			rend.setSeriesPaint(series, colour);
+	        		}
+				}
 
 			}
 			

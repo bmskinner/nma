@@ -145,6 +145,19 @@ public class Profile implements IProfile {
 		return array[index];
 
 	}
+	
+	@Override
+	public double get(double prop) {
+
+		if(prop<0 || prop > 1){
+			throw new IndexOutOfBoundsException("Value "+prop+" must be between 0-1");
+		}
+		
+		int index = this.getProportionalIndex(prop);
+		
+		return array[index];
+
+	}
 
 
 	/* (non-Javadoc)

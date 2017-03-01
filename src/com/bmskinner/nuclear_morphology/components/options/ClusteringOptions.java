@@ -27,8 +27,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public class ClusteringOptions implements IMutableClusteringOptions {
+public class ClusteringOptions implements IMutableClusteringOptions, Loggable {
 
 	private static final long serialVersionUID = 1L;
 	private ClusteringMethod type;
@@ -258,7 +259,8 @@ public class ClusteringOptions implements IMutableClusteringOptions {
 	}
 
 	public void setProfileType(ProfileType profileType) {
-		this.profileType = profileType;
+		log("Setting profile type to "+profileType);
+		this.profileType = profileType;		
 	}
 	
 	
@@ -322,6 +324,14 @@ public class ClusteringOptions implements IMutableClusteringOptions {
 	    if(Boolean.valueOf(includeMesh)==null){ 
 	    	includeMesh = false;
 	    }
+	}
+	
+	
+	
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(profileType);
+		return sb.toString();
 	}
 	
 	

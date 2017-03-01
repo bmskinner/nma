@@ -111,4 +111,8 @@ public interface OptionsFactory {
 	static IMutableClusteringOptions makeClusteringOptions(){
 		return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
 	}
+	
+	static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template){
+		return new ClusteringOptions(template);
+	}
 }

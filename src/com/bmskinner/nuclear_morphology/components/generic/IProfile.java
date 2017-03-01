@@ -68,6 +68,14 @@ public interface IProfile
 	 * @throws Exception 
 	 */
 	double get(int index) throws IndexOutOfBoundsException;
+	
+	
+	/**
+	 * Get the value at the given proportion along the profile
+	 * @param proportion the proportion from 0-1
+	 * @return
+	 */
+	double get(double proportion);
 
 	/**
 	 * Get the maximum value in the profile

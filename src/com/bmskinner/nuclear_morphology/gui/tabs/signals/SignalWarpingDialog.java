@@ -641,11 +641,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		 * @return
 		 */
 		private ImageProcessor combineImages(){
+			
+			
+			// Create an empty white processor of the correct dimensions
+			ImageProcessor mergeProcessor = createBlankProcessor();
+						
 			int w = warpedImages[0].getWidth();
 			int h = warpedImages[0].getHeight();
+
 			
-			// Create an empty white processor
-			ImageProcessor mergeProcessor = createBlankProcessor();
 			
 			int nonNull = 0;
 			

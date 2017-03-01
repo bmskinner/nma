@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -88,7 +89,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 							double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
 
-							ds.addSeries("Group_"+signalGroup+"_"+collection.getName(), values, 12);
+							ds.addSeries(CellularComponent.NUCLEAR_SIGNAL+"_"+signalGroup+"_"+collection.getName(), values, 12);
 						}
 					}
 
@@ -297,23 +298,17 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		if(collection.getSignalManager().hasSignals()){
 			finer("Collection "+collection.getName()+" has signals");
 
-			for(UUID group : collection.getSignalManager().getSignalGroupIDs()){
-				
-				if(group.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-
-				finest("Signal group "+group.toString());
+			for(UUID uuid : collection.getSignalManager().getSignalGroupIDs()){
 
 				try {
 
-					if(dataset.getCollection().getSignalGroup(group).isVisible()){
-						finest("Group "+group.toString()+" is visible");
-						double[] xpoints = new double[collection.getSignalManager().getSignals(group).size()];
-						double[] ypoints = new double[collection.getSignalManager().getSignals(group).size()];
+					if(dataset.getCollection().getSignalGroup(uuid).isVisible()){
+						finest("Group "+uuid.toString()+" is visible");
+						double[] xpoints = new double[collection.getSignalManager().getSignals(uuid).size()];
+						double[] ypoints = new double[collection.getSignalManager().getSignals(uuid).size()];
 
 						int signalCount = 0;
-						for(INuclearSignal n : collection.getSignalManager().getSignals(group)){
+						for(INuclearSignal n : collection.getSignalManager().getSignals(uuid)){
 
 							IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
@@ -323,12 +318,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 						}
 						double[][] data = { xpoints, ypoints };
-						ds.addSeries("Group_"+group, data);
-						finest("Group "+group.toString()+" added "+signalCount+" signals");
+						ds.addSeries(CellularComponent.NUCLEAR_SIGNAL+"_"+uuid, data);
+						finest("Group "+uuid.toString()+" added "+signalCount+" signals");
 					}
 
 				} catch (UnavailableSignalGroupException e){
-					stack("Signal group "+group+" is not present in collection", e);
+					stack("Signal group "+uuid+" is not present in collection", e);
 				}
 			}
 		}
@@ -411,7 +406,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         			list.add(value);
         		}
 
-        		result.add(list, "Group_"+signalGroup, collection.getName());
+        		result.add(list, CellularComponent.NUCLEAR_SIGNAL+"_"+signalGroup, collection.getName());
         	}
         }
 		return result;

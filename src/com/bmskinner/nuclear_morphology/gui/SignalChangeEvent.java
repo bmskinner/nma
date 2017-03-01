@@ -26,6 +26,7 @@ public class SignalChangeEvent extends EventObject {
 	public static final String GROUP_VISIBLE_PREFIX = "GroupVisble_";
 	
 	public static final String LOBE_DETECTION = "LobeDetection";
+	public static final String EXPORT_STATS   = "ExportStatsAction";
 	
 	private static final long serialVersionUID = 1L;
 	private String message;

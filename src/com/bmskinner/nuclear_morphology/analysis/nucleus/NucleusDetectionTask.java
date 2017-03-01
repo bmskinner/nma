@@ -11,8 +11,11 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
- * Recursive task to find nuclei in a folder of images
+ * Recursive task to find nuclei in a folder of images.
+ * Called by the fluorescence nucleus detection method. Replaces the FileProcessingTask
+ * used since 1.12.0
  * @author bms41
+ * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")

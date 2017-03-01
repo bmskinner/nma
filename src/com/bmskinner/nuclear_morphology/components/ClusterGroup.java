@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 
 /**
  * This holds the ids of datasets created by clustering,
@@ -62,7 +63,7 @@ public class ClusterGroup implements IClusterGroup {
 	}
 	
 	public ClusterGroup(IClusterGroup template){
-		this.options    = new ClusteringOptions(template.getOptions());
+		this.options    = OptionsFactory.makeClusteringOptions(template.getOptions());
 		this.name       = template.getName();
 		this.newickTree = template.getTree();
 		this.ids        = template.getUUIDs();

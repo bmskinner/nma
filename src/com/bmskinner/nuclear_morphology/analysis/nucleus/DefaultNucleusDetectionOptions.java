@@ -116,6 +116,11 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public boolean hasSubOptions(String s) {
+		return false;
+	}
 
 	@Override
 	public IDetectionSubOptions getSubOptions(String s) {

@@ -191,4 +191,10 @@ public class DefaultNuclearSignalOptions
 		return null;
 	}
 
+	@Override
+	public boolean hasSubOptions(String key) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

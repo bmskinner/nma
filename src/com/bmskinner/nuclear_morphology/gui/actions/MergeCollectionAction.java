@@ -18,6 +18,8 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import ij.io.SaveDialog;
+
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +37,6 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
-import ij.io.SaveDialog;
-
 /**
  * Carry out a merge of datasets
  * @author ben
@@ -45,6 +45,9 @@ import ij.io.SaveDialog;
 public class MergeCollectionAction extends ProgressableAction {
 	
 	private final List<IAnalysisDataset> datasets;
+	
+	private final String SAVE_DIALOG_TITLE    = "Save merged dataset as...";
+	private final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
 
 	public MergeCollectionAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
 		super("Merging", mw);
@@ -60,13 +63,23 @@ public class MergeCollectionAction extends ProgressableAction {
 			
 		} else {
 
-			SaveDialog saveDialog = new SaveDialog("Save merged dataset as...", "Merge_of_datasets", Importer.SAVE_FILE_EXTENSION);
+			// Try to find a sensible ancestor dir of the datasets as the save dir
+			// Otherwise default to the home dir
+			File dir =  IAnalysisDataset.commonPathOfFiles(datasets);
+			if( ! dir.exists() || ! dir.isDirectory()){
+				dir = new File(System.getProperty("user.home"));
+			}
+	
+			SaveDialog saveDialog = new SaveDialog(SAVE_DIALOG_TITLE, 
+					dir.getAbsolutePath(), 
+					DEFAULT_DATASET_NAME, 
+					Importer.SAVE_FILE_EXTENSION);
 
 			String fileName   = saveDialog.getFileName();
 			String folderName = saveDialog.getDirectory();
 
 			if(fileName!=null && folderName!=null){
-				File saveFile = new File(folderName+File.separator+fileName);
+				File saveFile = new File(folderName, fileName);
 
 				// Check for signals in >1 dataset
 				int signals=0;

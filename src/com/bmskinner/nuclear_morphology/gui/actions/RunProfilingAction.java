@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;

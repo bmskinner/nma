@@ -23,20 +23,21 @@ import ij.IJ;
  */
 public class DatasetStatsExporter implements Exporter, Loggable {
 	
-	private File exportFolder;
-	private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export";
+//	private File exportFolder;
+	private File exportFile;
+	private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export"+Exporter.TAB_FILE_EXTENSION;
 	
 	/**
 	 * Create specifying the folder stats will be exported into
 	 * @param folder
 	 */
-	public DatasetStatsExporter(File folder){
+	public DatasetStatsExporter(File file){
 		
-		if(folder.exists()){
-			this.exportFolder = folder;
-		} else{
-			throw new IllegalArgumentException("Specified folder ("+folder.getAbsolutePath()+") does not exist");
+		if(file.isDirectory()){
+			file = new File(file, DEFAULT_MULTI_FILE_NAME);
 		}
+		exportFile = file;
+		
 	}
 	
 	/**
@@ -45,7 +46,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	 */
 	public void export(IAnalysisDataset d){
 		
-		File exportFile = makeFile(d.getName());
+//		File exportFile = makeFile(d.getName());
 		
 		StringBuilder outLine = new StringBuilder();
 		writeHeader(outLine);
@@ -60,7 +61,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	 */
 	public void export(List<IAnalysisDataset> list){
 		
-		File exportFile = makeFile(DEFAULT_MULTI_FILE_NAME);
+//		File exportFile = makeFile(DEFAULT_MULTI_FILE_NAME);
 		
 		StringBuilder outLine = new StringBuilder();
 		
@@ -145,16 +146,16 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		}		
 	}
 	
-	private File makeFile(String fileName){
-		if(fileName==null){
-			throw new IllegalArgumentException("Filename is null");
-		}
-		File f = new File(exportFolder, fileName+TAB_FILE_EXTENSION);
-		if(f.exists()){
-			f.delete();
-		}
-		return f;
-	}
+//	private File makeFile(String fileName){
+////		if(fileName==null){
+////			throw new IllegalArgumentException("Filename is null");
+////		}
+////		File f = new File(exportFolder, fileName+TAB_FILE_EXTENSION);
+//		if(exportFile.exists()){
+//			exportFile.delete();
+//		}
+////		return f;
+//	}
 	
 
 }

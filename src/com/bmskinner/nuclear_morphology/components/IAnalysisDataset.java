@@ -22,7 +22,10 @@ package com.bmskinner.nuclear_morphology.components;
 import java.awt.Paint;
 import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -441,6 +444,75 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 		}
 		
 		return NucleusType.ROUND;
+	}
+	
+	/**
+	 * Get the most recent common ancestor of the dataset save file paths
+	 * @param datasets the list of datasets. 
+	 * @return a file for the common directory. Check that the path exists and 
+	 * is a directory before using this.
+	 */
+	static File commonPathOfFiles(List<IAnalysisDataset> datasets){
+		
+		List<File> files = new ArrayList<File>(datasets.size());
+		for(IAnalysisDataset d : datasets){
+			files.add( d.getSavePath());
+		}
+		
+		String[][] folders = new String[files.size()][];
+		
+		int k=0;
+		
+		// Split out the path elements to an array
+		for(File f : files){
+
+			Path p = f.toPath();
+			
+			
+			Iterator<Path> it = p.iterator();
+			List<String> s = new ArrayList<String>();
+			s.add(p.getRoot().toString());
+			while(it.hasNext()){
+				Path n = it.next();
+				s.add(n.toString());
+				
+			}
+			folders[k++] = s.toArray(new String[0]);
+			
+		}
+		
+		boolean breakLoop = false;
+		List<String> common = new ArrayList<String>();
+		for(int col=0; col<folders[0].length; col++){
+			
+			if(breakLoop){
+				break;
+			}
+			// Get first row
+			String s = folders[0][col];
+			
+			for(int row=1; row<files.size(); row++){
+				if(!s.equals(folders[row][col])){
+					breakLoop = true;
+					break;
+				}
+			}
+			if(breakLoop==false)
+				common.add(s);
+			
+		}
+		
+		String commonPath = "";
+		for(int i=0; i<common.size(); i++){
+			
+			commonPath += common.get(i);
+			if(i>0 && i<common.size()-1){ // don't add separator after root or at the end
+				commonPath += File.separator;
+			}
+		}
+		
+
+		return new File(commonPath);		
 	}
 
 }

@@ -1492,7 +1492,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 					for(INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)){
 
-						String seriesKey = "SignalGroup_"+signalGroup+"_signal_"+signalNumber;
+						String seriesKey = CellularComponent.NUCLEAR_SIGNAL+"_"+signalGroup+"_signal_"+signalNumber;
 						finest("Adding signal to dataset: "+seriesKey);
 						OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
 						try {

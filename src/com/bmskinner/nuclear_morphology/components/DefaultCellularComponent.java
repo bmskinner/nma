@@ -953,9 +953,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		private Shape toOffsetShape(double xOffset, double yOffset){
 			Path2D.Double path = new Path2D.Double();
 			
-			if(borderList.size()==0 || borderList.size()==1){
-				throw new IllegalArgumentException("Border list is empty or single entry");
+			if( borderList.size()==0 ){
+				throw new IllegalArgumentException("Border list is empty");
 			}
+			
+//			if( borderList.size()==1 ){
+//				throw new IllegalArgumentException("Border list has only a single entry");
+//			}
 			
 			IBorderPoint first = borderList.get(0);
 			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);

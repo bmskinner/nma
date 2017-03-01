@@ -62,6 +62,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
@@ -465,21 +466,10 @@ public class MainWindow
 			r.run();
 		}
 		
-		if(event.type().equals("ExportStatsAction")){
-
-			//TODO - select exact stats / components to be exported
-			if(selectedDatasetCount>0){
-
-				if(selectedDatasetCount==1){
-					new DatasetStatsExporter(selectedDataset.getSavePath().getParentFile()).export(selectedDataset);
-				} else {
-					// Choose a folder
-					File folder = chooseExportDirectory();
-					if(folder !=null){ // null if user cancels
-						new DatasetStatsExporter(folder).export(getPopulationsPanel().getSelectedDatasets());
-					}
-				}
-			}
+		if(event.type().equals(SignalChangeEvent.EXPORT_STATS)){
+			
+			Runnable r = new ExportStatsAction(getPopulationsPanel().getSelectedDatasets(), this);
+			r.run();
 		}
 		
 		if(event.type().equals(SignalChangeEvent.LOBE_DETECTION)){
@@ -1134,27 +1124,6 @@ public class MainWindow
     	
     }
     
-    private File chooseExportDirectory(){
-		
-//		File defaultDir = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-		
-		JFileChooser fc = new JFileChooser( (File) null); // if null, will be home dir
-
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)	{
-			return null; // user cancelled
-		}
-		
-		File file = fc.getSelectedFile();
-
-		if( ! file.isDirectory()){
-			return null;
-		}
-
-		return file;
-	}
+    
  
 }

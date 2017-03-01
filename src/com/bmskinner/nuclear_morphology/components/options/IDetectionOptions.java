@@ -181,6 +181,13 @@ public interface IDetectionOptions extends Serializable, Loggable {
 	
 	
 	/**
+	 * Test if the given sub options type is present
+	 * @param key
+	 * @return
+	 */
+	boolean hasSubOptions(String key);
+	
+	/**
 	 * Get the sub options specified by the given key
 	 * @param s
 	 * @return

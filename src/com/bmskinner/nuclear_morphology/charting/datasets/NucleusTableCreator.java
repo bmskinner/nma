@@ -73,7 +73,10 @@ public class NucleusTableCreator extends AbstractTableCreator {
 				
 				IDetectionOptions ido = an.getDetectionOptions(CellularComponent.NUCLEUS);
 				
-				op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+				
+				if(ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)){
+					op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+				}
 			}
 
 
