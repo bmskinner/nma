@@ -54,6 +54,7 @@ public class AddNuclearSignalAction extends ProgressableAction {
 			
 			if( ! this.getImageDirectory()){
 				cancel();
+				return;
 			}
 			// add dialog for non-default detection options
 			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);

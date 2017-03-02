@@ -58,7 +58,7 @@ public class SaveWorkspaceAction extends ProgressableAction {
 		}
 
 		
-		log("Saving workspace...");
+//		log("Saving workspace...");
 		
     	// Get all datasets
     	IWorkspace w = new DefaultWorkspace(file);

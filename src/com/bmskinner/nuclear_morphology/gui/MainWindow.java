@@ -386,6 +386,187 @@ public class MainWindow
 		return this.logPanel;
 	}
 	
+	/**
+	 * Map events to the actions they should trigger
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
+	private class ActionFactory {
+		final IAnalysisDataset selectedDataset;
+		List<IAnalysisDataset> selectedDatasets;
+		
+		public ActionFactory(){
+						
+			selectedDatasets = populationsPanel.getSelectedDatasets();
+			selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
+					? null 
+					: populationsPanel.getSelectedDatasets().get(0);
+			
+		}
+		
+		/**
+		 * Create a runnable action for the given event 
+		 * @param event
+		 * @return
+		 */
+		public Runnable create(final SignalChangeEvent event){
+			
+			
+			
+			if(event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)){
+				return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), MainWindow.this); 
+			}
+			
+			if(event.type().equals("DatasetArithmeticAction")){
+				return new DatasetArithmeticAction(selectedDatasets, MainWindow.this); 
+			}
+			
+			if(event.type().equals("ChangeNucleusFolderAction")){
+				return new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
+			}
+			
+			if(event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL)){
+				return new AddNuclearSignalAction(selectedDataset,  MainWindow.this);
+			}
+			
+			if(event.type().equals("PostFISHRemappingAction")){
+				return new FishRemappingAction(selectedDatasets, MainWindow.this);
+			}
+			
+			if(event.type().equals(SignalChangeEvent.EXPORT_STATS)){
+				
+				return new ExportStatsAction(selectedDatasets, MainWindow.this);
+			}
+			
+			if(event.type().equals(SignalChangeEvent.LOBE_DETECTION)){
+				return new LobeDetectionAction(selectedDataset, MainWindow.this);
+			}
+			
+			if(event.type().startsWith("Open|")){
+				String s = event.type().replace("Open|", "");
+				File f = new File(s);
+				
+				return new PopulationImportAction(MainWindow.this, f);
+			}
+			
+			
+			if(event.type().startsWith("New|")){
+				String s = event.type().replace("New|", "");
+				File f = new File(s);
+				
+				return new NewAnalysisAction(MainWindow.this, f);
+			}
+			
+			return null;
+		}
+		
+		
+		/**
+		 * Create a runnable action for the given event 
+		 * @param event
+		 * @return
+		 */
+		public Runnable create(final DatasetEvent event){
+			
+			if(event.getDatasets().isEmpty()){
+				return null;
+			}
+			
+			selectedDatasets = event.getDatasets();
+			
+			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
+				fine("Creating new profiling and segmentation");
+
+				int flag = 0; // set the downstream analyses to run
+				flag |= ProgressableAction.ADD_POPULATION;
+				flag |= ProgressableAction.STATS_EXPORT;
+				flag |= ProgressableAction.NUCLEUS_ANNOTATE;
+				flag |= ProgressableAction.ASSIGN_SEGMENTS;
+
+				try {
+					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
+						flag |= ProgressableAction.CURVE_REFOLD;
+					}
+				} catch (MissingOptionException e) {
+					warn("Missing analysis options");
+					stack(e.getMessage(), e);
+					return null;
+				}
+				// begin a recursive morphology analysis
+				return new RunProfilingAction(selectedDatasets, flag, MainWindow.this);
+			}
+			
+			
+			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
+				log("Running new morphology analysis");
+				final int flag = ProgressableAction.ADD_POPULATION;
+				
+				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
+			}
+			
+			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
+				finer("Refreshing segmentation across nuclei using existing border tags");
+				final int flag = 0;
+				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, MainWindow.this);
+			}
+			
+			if(event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)){
+				return new ShellAnalysisAction(event.firstDataset(), MainWindow.this);
+			}
+			
+			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
+				
+				final IAnalysisDataset source = event.secondaryDataset();
+				return new RunSegmentationAction(selectedDatasets, source, null, MainWindow.this);
+			}
+			
+						
+			if(event.method().equals(DatasetEvent.CLUSTER)){
+				log("Clustering dataset");
+				return new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
+			
+			}
+			
+			if(event.method().equals(DatasetEvent.BUILD_TREE)){
+				log("Building a tree from dataset");
+				return new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
+			}
+			
+			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
+				fine("Recalculating the median for the given datasets");
+
+				return new RunProfilingAction(selectedDatasets, ProgressableAction.NO_FLAG, MainWindow.this);
+			}
+			
+			
+			return null;
+		}
+
+		
+		/**
+		 * Create and run an action for the given event
+		 * @param event
+		 */
+		public void run(final SignalChangeEvent event){
+			Runnable r = create(event);
+			if(r!=null){
+				r.run();
+			}
+		}
+		
+		/**
+		 * Create and run an action for the given event
+		 * @param event
+		 */
+		public void run(final DatasetEvent event){
+			Runnable r = create(event);
+			if(r!=null){
+				r.run();
+			}
+		}
+	}
+	
 				
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
@@ -396,22 +577,13 @@ public class MainWindow
 				? null 
 				: populationsPanel.getSelectedDatasets().get(0);
 		
-		
+		// Try to launch via factory
+		new ActionFactory().run(event);
 
 		if(event.type().equals("MergeCollectionAction")){
 			
 			Runnable task = new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
 			threadManager.execute(task);
-		}
-		
-		if(event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)){
-			Runnable task = new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), MainWindow.this); 
-			task.run();
-		}
-		
-		if(event.type().equals("DatasetArithmeticAction")){
-			Runnable task = new DatasetArithmeticAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
-			task.run();
 		}
 
 		
@@ -422,11 +594,6 @@ public class MainWindow
 
 		}
 				
-
-		if(event.type().equals("ChangeNucleusFolderAction")){
-			Runnable r = new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
-			r.run();
-		}
 				
 		if(event.type().equals("SaveCellLocations")){
 			log("Exporting cell locations...");
@@ -450,28 +617,6 @@ public class MainWindow
 			new AddTailStainAction(selectedDataset, this);
 		}
 		
-		if(event.type().equals("AddNuclearSignalAction")){
-			Runnable r = new AddNuclearSignalAction(selectedDataset, this);
-			r.run();
-		}
-		
-		if(event.type().equals("PostFISHRemappingAction")){
-			Runnable r = new FishRemappingAction(getPopulationsPanel().getSelectedDatasets(), this);
-			r.run();
-		}
-		
-		if(event.type().equals(SignalChangeEvent.EXPORT_STATS)){
-			
-			Runnable r = new ExportStatsAction(getPopulationsPanel().getSelectedDatasets(), this);
-			r.run();
-		}
-		
-		if(event.type().equals(SignalChangeEvent.LOBE_DETECTION)){
-			Runnable r = new LobeDetectionAction(selectedDataset, this);
-			r.run();
-		}
-		
-		
 		if(event.type().equals("UpdatePanels")){
 			fireDatasetUpdateEvent(populationsPanel.getSelectedDatasets());
 		}
@@ -488,103 +633,20 @@ public class MainWindow
 			
 			this.saveDataset(selectedDataset, true);
 		}
-		
-		
-		if(event.type().startsWith("Open|")){
-			String s = event.type().replace("Open|", "");
-			File f = new File(s);
-			
-			Runnable task = new PopulationImportAction(this, f);
-			task.run();
-		}
-		
-		
-		if(event.type().startsWith("New|")){
-			String s = event.type().replace("New|", "");
-			File f = new File(s);
-			
-			// Pass to new analysis
-			Runnable task = new NewAnalysisAction(this, f);
-			task.run();
-		}
 				
 	}
 
 	@Override
 	public void datasetEventReceived(final DatasetEvent event) {
-		finest("Heard dataset event: "+event.method().toString());
+
+		// Try to launch via factory
+		new ActionFactory().run(event);
+		
+		// Remaining methods
 		final List<IAnalysisDataset> list = event.getDatasets();
 		if(!list.isEmpty()){
-			
-			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
-				fine("Creating new profiling and segmentation");
-
-				int flag = 0; // set the downstream analyses to run
-				flag |= ProgressableAction.ADD_POPULATION;
-				flag |= ProgressableAction.STATS_EXPORT;
-				flag |= ProgressableAction.NUCLEUS_ANNOTATE;
-				flag |= ProgressableAction.ASSIGN_SEGMENTS;
-
-				try {
-					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-						flag |= ProgressableAction.CURVE_REFOLD;
-					}
-				} catch (MissingOptionException e) {
-					warn("Missing analysis options");
-					stack(e.getMessage(), e);
-					return;
-				}
-				// begin a recursive morphology analysis
-				Runnable task = new RunProfilingAction(list, flag, MainWindow.this);
-				fine("Running new profiling and segmentation");
-				task.run();
-
-			}
 						
-			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
-				log("Running new morphology analysis");
-				final int flag = ProgressableAction.ADD_POPULATION;
-				
-				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-				task.run();
-			}
-			
-			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
-				finer("Refreshing segmentation across nuclei using existing border tags");
-				final int flag = 0;
-				Runnable task = new RunSegmentationAction(list, MorphologyAnalysisMode.REFRESH, flag, MainWindow.this);
-				task.run();
-			}
-			
-
-			if(event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)){
-				Runnable task = new ShellAnalysisAction(event.firstDataset(), MainWindow.this);
-				task.run();
-			}
-			
-			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
-				
-				final IAnalysisDataset source = event.secondaryDataset();
-				Runnable task = new RunSegmentationAction(event.getDatasets(), source, null, MainWindow.this);
-				task.run();
-			}
-			
-						
-			if(event.method().equals(DatasetEvent.CLUSTER)){
-				log("Clustering dataset");
-				Runnable r = new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-				r.run();
-			
-			}
-			
-			if(event.method().equals(DatasetEvent.BUILD_TREE)){
-				log("Building a tree from dataset");
-				Runnable r = new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-				r.run();
-			}
-			
 			if(event.method().equals(DatasetEvent.REFOLD_CONSENSUS)){
-				log("Refolding consensus nucleus");
 				refoldConsensus(event.firstDataset());		
 			}
 			
@@ -620,20 +682,7 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.ADD_DATASET)){
 				addDataset(event.firstDataset());
 			}
-			
-			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
-				fine("Recalculating the median for the given datasets");
-				
-//				Runnable task = () -> { 
-//					int flag = 0; // set the downstream analyses to run
-//					
-				RunProfilingAction p = new RunProfilingAction(list, 0, MainWindow.this);
-				p.run();
-//				
-//				}; 
-//				threadManager.execute(task);
-			}
-			
+						
 		}
 		
 	}

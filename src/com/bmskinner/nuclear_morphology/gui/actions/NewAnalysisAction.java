@@ -79,6 +79,8 @@ public class NewAnalysisAction extends ProgressableAction {
 
 		this.setProgressBarIndeterminate();
 		
+		fine("Creating for "+folder.getAbsolutePath());
+		
 		if(folder==null){
 			if(! getImageDirectory()){
 				this.cancel();

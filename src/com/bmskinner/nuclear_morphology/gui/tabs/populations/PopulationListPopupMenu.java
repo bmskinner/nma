@@ -39,6 +39,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
 	public static final String SOURCE_COMPONENT = "PopupMenu"; 
 	
 	public static final String SAVE_AS_LBL = "Save nmd as..."; 
+	
+	public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal"; 
+	public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only"; 
+
 
 	JMenuItem mergeMenuItem;
 	JMenuItem curateMenuItem;
@@ -82,13 +86,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		}
 	});
 		
-	JMenuItem addNuclearSignalMenuItem = new JMenuItem( new AbstractAction("Add nuclear signal"){
-		private static final long serialVersionUID = 1L;
-		@Override
-		public void actionPerformed(ActionEvent arg0) {
-			fireSignalChangeEvent("AddNuclearSignalAction");	
-		}
-	});
+	JMenuItem addNuclearSignalMenuItem;
 	
 	JMenuItem fishRemappinglMenuItem = new JMenuItem( new AbstractAction("Post-FISH mapping"){
 		private static final long serialVersionUID = 1L;
@@ -179,6 +177,13 @@ public class PopulationListPopupMenu extends JPopupMenu {
 		exportStatsMenuItem.addActionListener( e -> {
 			fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS);	
 		});
+		
+		addNuclearSignalMenuItem = new JMenuItem(ADD_NUCLEAR_SIGNAL_LBL);
+		addNuclearSignalMenuItem.setToolTipText(ADD_NUCLEAR_SIGNAL_TIP);
+		addNuclearSignalMenuItem.addActionListener( e -> {
+			fireSignalChangeEvent(SignalChangeEvent.ADD_NUCLEAR_SIGNAL);	
+		});
+
 		
 		
 		

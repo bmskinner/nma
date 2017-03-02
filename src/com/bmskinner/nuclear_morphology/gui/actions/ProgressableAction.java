@@ -53,6 +53,7 @@ public abstract class ProgressableAction
 	
 	// Flags to pass to ProgressableActions to determine the analyses
 	// to carry out in subsequently
+	public static final int NO_FLAG     		 = 0;
 	public static final int ADD_POPULATION		 = 1;
 	public static final int STATS_EXPORT 		 = 2;
 	public static final int NUCLEUS_ANNOTATE	 = 4;
