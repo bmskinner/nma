@@ -16,8 +16,10 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -27,10 +29,13 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 public class TreeBuildingMethod extends AbstractAnalysisMethod {
 	
@@ -58,7 +63,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 
 		run();		
 		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		IClusterGroup group = new ClusterGroup("ClusterGroup_"+clusterNumber, options, newickTree);
+		IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, newickTree);
 		IAnalysisResult r = new ClusterAnalysisResult(dataset, group);
 		return r;
 	}
@@ -67,10 +72,10 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		boolean ok = makeTree(collection);
 	}
 	
-	public IClusteringOptions getOptions(){
-		return this.options;
-	}
-	
+//	public IClusteringOptions getOptions(){
+//		return this.options;
+//	}
+//	
 	/**
 	 * If a tree is present (i.e clustering was hierarchical),
 	 * return the string of the tree, otherwise return null
@@ -154,8 +159,10 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile, spaced <windowSize> apart
 			finest("Including profile");
-			profileAttributeCount = collection.getProfileCollection().getProfile(options.getProfileType(), Tag.REFERENCE_POINT, 50).size();
-			profileAttributeCount /= windowSize;
+//			profileAttributeCount = collection.getProfileCollection().getProfile(options.getProfileType(), Tag.REFERENCE_POINT, 50).size();
+//			profileAttributeCount /= windowSize;
+			
+			profileAttributeCount = (int) Math.floor(1d/dataset.getAnalysisOptions().getProfileWindowProportion());
 			attributeCount += profileAttributeCount;
 		}
 		
@@ -181,7 +188,7 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		FastVector attributes = new FastVector(attributeCount);
 		
 		if(options.isIncludeProfile()){
-			finer("Including profile");
+			fine("Including profile "+options.getProfileType());
 			for(int i=0; i<profileAttributeCount; i++){
 				Attribute a = new Attribute("att_"+i); 
 				attributes.addElement(a);
@@ -230,15 +237,23 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	 */
 	private Instances makeProfileInstances(ICellCollection collection)throws Exception {
 		
-		int profileSize = collection.getProfileCollection().getProfile(options.getProfileType(), Tag.REFERENCE_POINT, 50).size();
+		
+		double windowProportion = dataset.getAnalysisOptions().getProfileWindowProportion();
+		
+//		// Get the size of the median profile. All profiles will be interpolated to this length
+//		int profileSize = collection.getProfileCollection()
+//				.getProfile(options.getProfileType(), Tag.REFERENCE_POINT, Quartile.MEDIAN).size();
+		
 		int windowSize = collection.getProfileManager().getProfileWindowSize(ProfileType.ANGLE);
 		
+		
+		// Weka clustering uses a table in which columns are attributes and rows are instances
 		
 		FastVector attributes = makeAttributes(collection, windowSize);
 		
 		Instances instances = new Instances(collection.getName(), attributes, collection.size());
 		
-		int profilePointsToCount = profileSize/windowSize;
+//		int profilePointsToCount = profileSize/windowSize;
 		
 		Mesh<Nucleus> template = null;
 		if(options.isIncludeMesh() && collection.hasConsensus()){
@@ -247,63 +262,11 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 
 		try{
 			
-			int i=0;
 			for(ICell c : collection.getCells()){
-				Nucleus n1 = c.getNucleus();
-				Instance inst = new SparseInstance(attributes.size());
-
 				
-				int attNumber=0;
-				
-				
-				if(options.isIncludeProfile()){
-					// Interpolate the profile to the median length
-					IProfile p = n1.getProfile(options.getProfileType(), Tag.REFERENCE_POINT).interpolate(profileSize);
-					
-					for(attNumber=0; attNumber<profilePointsToCount; attNumber++){
-						Attribute att = (Attribute) attributes.elementAt(attNumber);
-						inst.setValue(att, p.get(attNumber*windowSize));
-					}
+				for(Nucleus n : c.getNuclei()){
+					addNucleus(c, n, attributes, instances, template, windowProportion);
 				}
-				
-				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())){
-					if(options.isIncludeStatistic(stat)){
-						Attribute att = (Attribute) attributes.elementAt(attNumber++);
-						inst.setValue(att, n1.getStatistic(stat, MeasurementScale.MICRONS));
-
-					}
-				}
-				
-				for(UUID segID : options.getSegments()){
-					if(options.isIncludeSegment(segID)){
-						Attribute att = (Attribute) attributes.elementAt(attNumber++);
-						double length = n1.getProfile(ProfileType.ANGLE).getSegment(segID).length();
-						inst.setValue(att, length);
-					}
-				}
-				
-				if(options.isIncludeMesh() && collection.hasConsensus()){
-					
-					
-					Mesh<Nucleus> mesh = new NucleusMesh(n1, template);
-					for(MeshFace face : mesh.getFaces()){
-						Attribute att = (Attribute) attributes.elementAt(attNumber++);
-						inst.setValue(att, face.getArea());
-					}
-				}
-				
-				if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-					String uniqueName = c.getId().toString();
-					Attribute att = (Attribute) attributes.elementAt(attNumber++);
-					inst.setValue(att, uniqueName);
-				}
-				
-				
-				
-
-				instances.add(inst);
-				cellToInstanceMap.put(inst, c.getId());
-				fireProgressEvent();
 			}
 
 		} catch(Exception e){
@@ -311,6 +274,68 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		}
 		return instances;
 		
+	}
+	
+	private void addNucleus(ICell c, Nucleus n, FastVector attributes, Instances instances, Mesh<Nucleus> template, double windowProportion) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, MeshCreationException{
+
+		Instance inst = new SparseInstance(attributes.size());
+
+		int attNumber=0;
+		
+		int pointsToSample = (int) Math.floor(1d/windowProportion);
+		
+		
+		if(options.isIncludeProfile()){
+			
+			// Interpolate the profile to the median length
+			IProfile p = n.getProfile(options.getProfileType(), Tag.REFERENCE_POINT);
+
+			for(int profileAtt=0; profileAtt<pointsToSample; profileAtt++){
+				Attribute att = (Attribute) attributes.elementAt(profileAtt);
+				inst.setValue(att, p.get(profileAtt*windowProportion));
+				attNumber++;
+			}
+			
+		}
+		
+		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(collection.getNucleusType())){
+			if(options.isIncludeStatistic(stat)){
+				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+				inst.setValue(att, n.getStatistic(stat, MeasurementScale.MICRONS));
+
+			}
+		}
+		
+		for(UUID segID : options.getSegments()){
+			if(options.isIncludeSegment(segID)){
+				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+				double length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
+				inst.setValue(att, length);
+			}
+		}
+		
+		if(options.isIncludeMesh() && collection.hasConsensus()){
+			
+			
+			Mesh<Nucleus> mesh = new NucleusMesh(n, template);
+			for(MeshFace face : mesh.getFaces()){
+				Attribute att = (Attribute) attributes.elementAt(attNumber++);
+				inst.setValue(att, face.getArea());
+			}
+		}
+		
+		if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
+			String uniqueName = c.getId().toString();
+			Attribute att = (Attribute) attributes.elementAt(attNumber++);
+			inst.setValue(att, uniqueName);
+		}
+		
+		
+		
+
+		instances.add(inst);
+		cellToInstanceMap.put(inst, c.getId());
+		fireProgressEvent();
 	}
 	
 

@@ -25,7 +25,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,10 +40,9 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;
@@ -53,9 +51,19 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 @SuppressWarnings("serial")
-public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener, ChangeListener {
+public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implements ActionListener {
 	
 	private static final String DIALOG_TITLE = "Clustering options";
+	
+	private static final String CLUSTER_METHOD_LBL = "Cluster method";
+	private static final String CLUSTER_NUMBER_LBL = "Cluster number";
+	private static final String EM_ITERATIONS_LBL  = "Iterations";
+	private static final String EM_CLUSTERING_LBL  = "Expectation maximisation";
+	private static final String HC_CLUSTERING_LBL  = "Hierarchical";
+	
+	private static final String HC_PANEL_KEY  = "HierarchicalPanel";
+	private static final String EM_PANEL_KEY  = "EMPanel";
+	
 	
 	private JPanel 		cardPanel;
 	private JSpinner clusterNumberSpinner;
@@ -64,17 +72,21 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	private JRadioButton clusterEMButton;
 		
 	private JSpinner iterationsSpinner;
+	
+//	private final IMutableClusteringOptions options;
 
 	
 	public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
 
 		super(mw, dataset, DIALOG_TITLE);
+		setDefaults();
+		createUI();
+		packAndDisplay();
 	}
-
-	
+		
 	@Override
 	public IAnalysisMethod getMethod() {
-		IAnalysisMethod m = new com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusClusteringMethod(dataset, options);
+		IAnalysisMethod m = new NucleusClusteringMethod(dataset, options);
 		return m;
 	}
 		
@@ -90,7 +102,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		clusterMethodBox.setSelectedItem(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
 		clusterMethodBox.addActionListener(this);
 		
-		labels.add(new JLabel("Cluster method"));
+		labels.add(new JLabel(CLUSTER_METHOD_LBL));
 		fields.add(clusterMethodBox);
 
 		SpinnerModel model =
@@ -102,10 +114,20 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		clusterNumberSpinner = new JSpinner(model);
 		clusterNumberSpinner.setEnabled(true);
 
-		labels.add(new JLabel("Cluster number"));
+		labels.add(new JLabel(CLUSTER_NUMBER_LBL));
 		fields.add(clusterNumberSpinner);
 
-		clusterNumberSpinner.addChangeListener(this);
+		clusterNumberSpinner.addChangeListener( e->{
+			JSpinner j = (JSpinner) e.getSource();
+			try {
+				j.commitEdit();
+				options.setClusterNumber(  (Integer) j.getValue());
+				
+			} catch (Exception e1) {
+				warn("Error reading value in cluster number field");
+				stack(e1.getMessage(), e1);
+			}
+		});
 		
 		this.addLabelTextRows(labels, fields, layout, panel);
 		return panel;
@@ -130,9 +152,18 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 						1); //step
 
 		iterationsSpinner = new JSpinner(model);
-		iterationsSpinner.addChangeListener(this);
+		iterationsSpinner.addChangeListener( e->{
+			JSpinner j = (JSpinner) e.getSource();
+			try {
+				j.commitEdit();
+				options.setIterations(  (Integer) j.getValue());
+			} catch (Exception e1) {
+				warn("Error reading value in iterations field");
+				stack(e1.getMessage(), e1);
+			}
+		});
 		
-		labels.add(new JLabel("Iterations"));
+		labels.add(new JLabel(EM_ITERATIONS_LBL));
 		fields.add(iterationsSpinner);
 
 		this.addLabelTextRows(labels, fields, layout, panel);
@@ -172,10 +203,10 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		JPanel methodPanel = new JPanel(new FlowLayout()); 
 		
 		//Create the radio buttons.
-	    clusterHierarchicalButton = new JRadioButton("Hierarchical");
+	    clusterHierarchicalButton = new JRadioButton(HC_CLUSTERING_LBL);
 	    clusterHierarchicalButton.setSelected(true);
 	    
-	    clusterEMButton = new JRadioButton("Expectation maximisation");
+	    clusterEMButton = new JRadioButton(EM_CLUSTERING_LBL);
 
 	    //Group the radio buttons.
 	    ButtonGroup clusterTypeGroup = new ButtonGroup();
@@ -187,10 +218,10 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 	    
 	    
 	    cardPanel = new JPanel(new CardLayout());
-		cardPanel.add(createHierarchicalPanel(), "HierarchicalPanel");
-		cardPanel.add(createEMPanel(), "EMPanel");
+		cardPanel.add(createHierarchicalPanel(), HC_PANEL_KEY);
+		cardPanel.add(createEMPanel(), EM_PANEL_KEY);
 		CardLayout cl = (CardLayout)(cardPanel.getLayout());
-	    cl.show(cardPanel, "HierarchicalPanel");
+	    cl.show(cardPanel, HC_PANEL_KEY);
 
 
 	    methodPanel.add(clusterHierarchicalButton);
@@ -213,13 +244,12 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		super.actionPerformed(arg0);
-		
-		// Set enabled based on button text (you can use whatever text you prefer)
+			
+		// Set card panel based on selected radio button
 		if(clusterHierarchicalButton.isSelected()){
 			
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		    cl.show(cardPanel, "HierarchicalPanel");
+		    cl.show(cardPanel, HC_PANEL_KEY);
 		    
 			options.setType(ClusteringMethod.HIERARCHICAL);
 			
@@ -231,7 +261,7 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 		if(clusterEMButton.isSelected()){
 			
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		    cl.show(cardPanel, "EMPanel");
+		    cl.show(cardPanel, EM_PANEL_KEY);
 			
 			options.setType(ClusteringMethod.EM);
 
@@ -240,25 +270,4 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 				
 	}
 
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		super.stateChanged(e);
-		
-		try {
-			if(e.getSource()==clusterNumberSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setClusterNumber(  (Integer) j.getValue());
-			} 
-			if(e.getSource()==iterationsSpinner){
-				JSpinner j = (JSpinner) e.getSource();
-				j.commitEdit();
-				options.setIterations(  (Integer) j.getValue());
-			} 
-			
-		}catch (ParseException e1) {
-			error("Error in spinners for Clustering options", e1);
-		}	
-		
-	}
 }

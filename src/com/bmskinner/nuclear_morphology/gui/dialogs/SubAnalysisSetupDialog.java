@@ -48,24 +48,15 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
 		super( mw, true);
 		this.dataset = dataset;
-		
-		try {
-			// modal dialog
-			this.setTitle(title);
-			setDefaults();
-			createUI();
-			this.pack();
-			this.setLocationRelativeTo(null);
-			this.setVisible(true);
-		} catch (Exception e){
-			error("Error making setup dialog", e);
-		}
-
+		this.setTitle(title);
 	}
 	
-//	protected JPanel createFooter(){
-//		
-//	}
+	
+	protected void packAndDisplay(){
+		this.pack();
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
+	}
 
 	/**
 	 * Get the method for the analysis to be run
@@ -77,7 +68,7 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	 * Make the UI for the dialog
 	 */
 	protected abstract void createUI();
-	
+		
 	/**
 	 * Set the default options for the dialog 
 	 */

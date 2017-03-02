@@ -22,8 +22,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -31,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
@@ -68,11 +65,12 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
  *
  */
 @SuppressWarnings("serial")
-public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implements ActionListener, ChangeListener {
+public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implements ChangeListener {
 
 	private static final String DIALOG_TITLE        = "Tree building options";
 	private static final String CLUSTER_METHOD_LBL  = "Cluster method";
 	private static final String INCLUDE_PROFILE_LBL = "Include profiles";
+	private static final String INCLUDE_MESH_LBL    = "Include mesh faces";
 	private static final String P_VALUE_LBL         = "  p(uni) = ";
 		
 	protected static final ProfileType DEFAULT_PROFILE_TYPE = ProfileType.ANGLE;
@@ -93,12 +91,12 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 	
 	protected Map<UUID, JCheckBox> segmentBoxMap;
 	
-	protected IMutableClusteringOptions options;
+	protected final IMutableClusteringOptions options;
 	
 	public HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
 		
 		// modal dialog
-		super( mw, dataset, DIALOG_TITLE);
+		this( mw, dataset, DIALOG_TITLE);
 	}
 	
 	/**
@@ -108,24 +106,24 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 	 */
 	protected HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title){
 		super( mw, dataset, title);
+		options = OptionsFactory.makeClusteringOptions();
 		setDefaults();
-//		setSize(450, 300);
-//		this.setLocationRelativeTo(null);
+		createUI();
+		
+		// Don't display for subclasses
+		if(this.getClass().equals(HierarchicalTreeSetupDialog.class)){
+			packAndDisplay();
+		}
+		
+		
 	}
 		
-	/**
-	 * Get the options saved in this panel
-	 * @return
-	 */
-	public IClusteringOptions getOptions(){
-		return this.options;
-	}
 			
 	/**
 	 * Set the default options
 	 */
 	protected void setDefaults(){
-		options = OptionsFactory.makeClusteringOptions();
+//		options = OptionsFactory.makeClusteringOptions();
 		options.setClusterNumber(IClusteringOptions.DEFAULT_MANUAL_CLUSTER_NUMBER);
 		options.setHierarchicalMethod(IClusteringOptions.DEFAULT_HIERARCHICAL_METHOD);
 		options.setIterations(IClusteringOptions.DEFAULT_EM_ITERATIONS);
@@ -253,8 +251,9 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 			JRadioButton button = new JRadioButton(EMPTY_STRING, type.equals(ProfileType.ANGLE)); // set angle selected
 			JLabel label = new JLabel(type.toString());
 			profileButtonGroup.add(button);
-			button.setActionCommand(type.toString());
-			button.addActionListener(this);
+			button.addActionListener(e->{
+				options.setProfileType(type);
+			});
 			
 			labels.add(label);
 			fields.add(button);
@@ -269,7 +268,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 		includeMeshCheckBox.setToolTipText(Labels.REQUIRES_CONSENSUS_LBL);
 		
 		
-		JLabel meshLabel = new JLabel("Include mesh faces");
+		JLabel meshLabel = new JLabel(INCLUDE_MESH_LBL);
 		meshLabel.setToolTipText(Labels.REQUIRES_CONSENSUS_LBL);
 		labels.add(meshLabel);
 		fields.add(includeMeshCheckBox);
@@ -283,7 +282,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 				double diptest 	= DipTester.getDipTestPValue(stats);
 				pval = pf.format(diptest);		
 			} catch (Exception e) {
-				log(Level.SEVERE, "Error getting p-value", e);
+				warn("Error getting p-value");
+				stack(e.getMessage(), e);
 			}
 
 			JCheckBox box = new JCheckBox(P_VALUE_LBL+pval, false);
@@ -333,14 +333,6 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 		
 	}
 	
-	@Override
-	public void actionPerformed(ActionEvent arg0) {
-
-		String profileCommand = profileButtonGroup.getSelection().getActionCommand();
-		ProfileType type = ProfileType.fromString(profileCommand);
-		options.setProfileType(type);						
-	}
-
 	@Override
 	public void stateChanged(ChangeEvent e) {
 			

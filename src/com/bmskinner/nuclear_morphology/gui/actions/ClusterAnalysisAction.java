@@ -51,6 +51,7 @@ public class ClusterAnalysisAction extends ProgressableAction {
 		SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 
 		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+
 			IAnalysisMethod m = clusterSetup.getMethod();
 			
 			int maxProgress = dataset.getCollection().size() * 2;
