@@ -27,6 +27,7 @@ public class SignalChangeEvent extends EventObject {
 	
 	public static final String LOBE_DETECTION = "LobeDetection";
 	public static final String EXPORT_STATS   = "ExportStatsAction";
+	public static final String EXPORT_WORKSPACE = "ExportWorkspace";
 	
 	private static final long serialVersionUID = 1L;
 	private String message;

@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui;
 
-import ij.io.SaveDialog;
-
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -39,7 +37,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -47,7 +44,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -75,6 +71,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryA
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
+import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
@@ -92,10 +89,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
-import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
-import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
-import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
@@ -152,9 +146,6 @@ public class MainWindow
 	private List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 	
 	
-	
-	
-	
 	private boolean isStandalone = false;
 	
 	/*
@@ -178,9 +169,7 @@ public class MainWindow
 		createWindowListeners();
 		
 		createUI();
-		
-
-		
+	
 	}
 	
 	/**
@@ -396,12 +385,13 @@ public class MainWindow
 	public LogPanel getLogPanel(){
 		return this.logPanel;
 	}
+	
 				
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
 		finer("Heard signal change event: "+event.type());
-		final int selectedDatasetCount = populationsPanel.getSelectedDatasets().size();
+
 		final IAnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
 				? null 
 				: populationsPanel.getSelectedDatasets().get(0);
@@ -414,8 +404,12 @@ public class MainWindow
 			threadManager.execute(task);
 		}
 		
+		if(event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)){
+			Runnable task = new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), MainWindow.this); 
+			task.run();
+		}
+		
 		if(event.type().equals("DatasetArithmeticAction")){
-			
 			Runnable task = new DatasetArithmeticAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
 			task.run();
 		}
@@ -995,6 +989,7 @@ public class MainWindow
     	threadManager.executeAndCancelUpdate(r);
     }
     
+       
     public class PanelUpdater implements CancellableRunnable {
     	private final List<IAnalysisDataset> list;
     	
@@ -1093,37 +1088,4 @@ public class MainWindow
     	updateListeners.remove( l );
     }
     
-    public void saveWorkspace(){
-    	
-    	if(DatasetListManager.getInstance().getRootDatasets().size()==0){
-    		return;
-    	}
-		log("Saving workspace...");
-    	// Choose save file
-    	SaveDialog saveDialog = new SaveDialog("Save workspace as...", "Workspace", Importer.WRK_FILE_EXTENSION);
-
-		String fileName   = saveDialog.getFileName();
-		String folderName = saveDialog.getDirectory();
-
-		if(fileName==null || folderName==null){
-			log("Worskspace save cancelled");
-			return;
-		}
-		File f = new File(folderName+File.separator+fileName);
-		
-    	// Get all datasets
-    	IWorkspace w = new DefaultWorkspace(f);
-    	
-    	for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
-    		w.add(d);
-    	}
-   
-    	WorkspaceExporter exp = new WorkspaceExporter(w);
-    	exp.export();
-    	log("Exported workspace file to "+f.getAbsolutePath());
-    	
-    }
-    
-    
- 
 }

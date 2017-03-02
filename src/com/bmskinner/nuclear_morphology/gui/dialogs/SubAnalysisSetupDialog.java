@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 /**
  * A base class for the sub analyses setup options. It contains a reference to 
  * the main analysis window to make the dialog modal
- * TODO - make these return an IAnalysisMethod preconfigured for running
+ * It can return an IAnalysisMethod preconfigured for running
  * @author bms41
  * @since 1.13.4
  *

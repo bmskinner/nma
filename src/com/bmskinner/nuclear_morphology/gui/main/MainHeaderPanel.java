@@ -13,6 +13,7 @@ import javax.swing.JPopupMenu;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
@@ -121,7 +122,8 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
 		btnSaveWorkspace.addActionListener( e -> {
-					mw.saveWorkspace();
+//					mw.saveWorkspace();
+					mw.signalChangeReceived(new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
 			}
 		);
 
