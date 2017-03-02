@@ -119,7 +119,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		
 		List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
 		
-		
 		int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
 		
 		for(IAnalysisDataset dataset : list){
@@ -128,13 +127,23 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			
 			ICellCollection collection = dataset.getCollection();
 			
-            for( UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
+            for( UUID uuid : collection.getSignalManager().getSignalGroupIDs()){
 								
-                String groupLabel = "Group_"+signalGroup+"_"+stat.toString();
+                String groupLabel = CellularComponent.NUCLEAR_SIGNAL+"_"+uuid+"_"+stat.toString();
+                boolean ignoreSignalGroup = false;
                 
                 // If the angle is always zero, the estimator will fail
                 if(collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(PlottableStatistic.ANGLE)){
-                	
+                	ignoreSignalGroup = true;
+                }
+                
+                // If the group is present but empty, the estimator will fail
+                if( ! collection.getSignalManager().hasSignals(uuid)){
+                	ignoreSignalGroup = true;
+                }
+                
+                // Skip if needed
+                if(ignoreSignalGroup){
                 	// Add an empty series
                 	double[] xData = { 0 };
                 	double[] yData = { 0 };
@@ -143,7 +152,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                 	continue;
                 }
                 
-                double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+                double[] values = findSignalDatasetValues(dataset, stat, scale, uuid); 
                 
                 // Cannot estimate pdf with too few values
                 if(values.length<3){
@@ -159,7 +168,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                 try {
                 	est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
                 } catch (Exception e1) {
-                	fine("Error creating probability kernel",e1);
+                	stack("Error creating probability kernel",e1);
                 	throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
                 }
                 
@@ -232,9 +241,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			
 			for( UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()){
 
-				double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+				if(dataset.getCollection().getSignalManager().hasSignals(signalGroup)){
+				
+					double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup); 
+					NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
+				}
 
-				NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
+				
 			}
 		}
 		

@@ -52,6 +52,10 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
  * @author bms41
  *
  */
+/**
+ * @author bms41
+ *
+ */
 public class SignalManager implements Loggable {
 	
 	private ICellCollection collection;
@@ -406,27 +410,39 @@ public class SignalManager implements Loggable {
              
       }
       
+      /**
+       * Get the signal statistics for the given group
+       * @param stat
+       * @param scale
+       * @param signalGroup
+       * @return
+       */
       public double[] getSignalStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
 
-          Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
-          List<Double> a = new ArrayList<Double>(0);
-          for(ICell c : cells){
-              Nucleus n = c.getNucleus();
-              a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
+    	  if( ! this.hasSignals(signalGroup)){
+    		  return new double[0];
+    	  }
 
-          }
-          
-          double[] values;
+    	  Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
+    	  List<Double> a = new ArrayList<Double>(0);
+    	  for(ICell c : cells){
+    		  for(Nucleus n : c.getNuclei()){
+    			  a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
+    		  }
 
-			try{
-				values = new ArrayConverter(a).toDoubleArray();
+    	  }
 
-			} catch (ArrayConversionException e) {
-				values = new double[0]; 
-			}
-          return values;
+    	  double[] values;
+
+    	  try{
+    		  values = new ArrayConverter(a).toDoubleArray();
+
+    	  } catch (ArrayConversionException e) {
+    		  values = new double[0]; 
+    	  }
+    	  return values;
       }
-      
+
       /**
        * Signal angles wrap, so a mean must be calculated as a zero point for boxplots.
        * Uses http://catless.ncl.ac.uk/Risks/7.44.html#subj4:
