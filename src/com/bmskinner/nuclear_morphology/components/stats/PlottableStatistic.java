@@ -32,6 +32,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  * @author ben
  *
  */
+/**
+ * @author bms41
+ *
+ */
 public interface PlottableStatistic extends Serializable {
 	
 	
@@ -214,6 +218,13 @@ public interface PlottableStatistic extends Serializable {
 	 * @return
 	 */
 	boolean isDimensionless();
+	
+	
+	/**
+	 * Test if the statistic is an angle
+	 * @return
+	 */
+	boolean isAngle();
 
 	/**
 	 * Get the dimension of the statistic (area, length, angle, none)

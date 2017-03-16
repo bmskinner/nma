@@ -569,7 +569,7 @@ public class MainWindow
 	
 				
 	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
+	public void signalChangeReceived(final SignalChangeEvent event) {
 		
 		finer("Heard signal change event: "+event.type());
 
@@ -940,7 +940,7 @@ public class MainWindow
 	
 	
 	@Override
-	public void interfaceEventReceived(InterfaceEvent event) {
+	public void interfaceEventReceived(final InterfaceEvent event) {
 		
 		InterfaceMethod method = event.method();
 		finest("Heard interface event: "+event.method().toString());

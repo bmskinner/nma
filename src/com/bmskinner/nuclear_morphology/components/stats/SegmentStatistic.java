@@ -40,6 +40,11 @@ public enum SegmentStatistic implements PlottableStatistic {
 	public boolean isDimensionless(){
 		return dimension.equals(StatisticDimension.DIMENSIONLESS);
 	}
+	
+	@Override
+	public boolean isAngle() {
+		return StatisticDimension.ANGLE.equals(dimension);
+	}
 
 	/**
 	 * Get the dimension of the statistic (area, length, none)

@@ -22,7 +22,13 @@ public class GenericStatistic implements PlottableStatistic {
 	
 	@Override
 	public boolean isDimensionless() {
-		return dim.equals(StatisticDimension.DIMENSIONLESS);
+		return StatisticDimension.DIMENSIONLESS.equals(dim);
+	}
+	
+	
+	@Override
+	public boolean isAngle() {
+		return StatisticDimension.ANGLE.equals(dim);
 	}
 
 	@Override

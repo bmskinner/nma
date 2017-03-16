@@ -7,6 +7,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -86,7 +87,12 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		outLine.append("Dataset\tCellID\tComponent\tImage\t");
 		
 		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
-			outLine.append(s+"\t");
+			outLine.append(s.label(MeasurementScale.PIXELS)+"\t");
+			
+			if(!s.isDimensionless() && !s.isAngle()){ // only give micron measurements when length or area
+				outLine.append(s.label(MeasurementScale.MICRONS)+"\t");
+			}
+			
 		}
 		outLine.append(NEWLINE);
 	}
@@ -127,22 +133,28 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, ICell cell, CellularComponent c){
 		
 		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
-			double var = 0;
+			double varP = 0;
+			double varM = 0;
 			
 			if(s.equals(PlottableStatistic.VARIABILITY)){
 				
 				try {
-					var = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cell);
+					varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cell);
+					varM = varP;
 				} catch (UnavailableBorderTagException e) {
 					stack("Tag not present in component", e);
-					var = -1;
+					varP = -1;
+					varM = -1;
 				}
 			} else {
-				var = c.getStatistic(s);
-				
+				varP = c.getStatistic(s, MeasurementScale.PIXELS);
+				varM = c.getStatistic(s, MeasurementScale.MICRONS);
 			}
 			
-			outLine.append(var+"\t");
+			outLine.append(varP+"\t");
+			if(!s.isDimensionless() && !s.isAngle()){
+				outLine.append(varM+"\t");
+			}
 		}		
 	}
 	
