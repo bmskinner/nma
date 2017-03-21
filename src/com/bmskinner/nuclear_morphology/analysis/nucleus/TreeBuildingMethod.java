@@ -20,6 +20,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -157,12 +158,17 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		int attributeCount        = 0;
 		int profileAttributeCount = 0;
 		
+		double profileWindow = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+		
 		if(options.isIncludeProfile()){ // An attribute for each angle in the median profile, spaced <windowSize> apart
 			finest("Including profile");
-//			profileAttributeCount = collection.getProfileCollection().getProfile(options.getProfileType(), Tag.REFERENCE_POINT, 50).size();
-//			profileAttributeCount /= windowSize;
 			
-			profileAttributeCount = (int) Math.floor(1d/dataset.getAnalysisOptions().getProfileWindowProportion());
+			if(dataset.hasAnalysisOptions()){
+				profileWindow = dataset.getAnalysisOptions().getProfileWindowProportion();
+			}
+
+			
+			profileAttributeCount = (int) Math.floor(1d/profileWindow);
 			attributeCount += profileAttributeCount;
 		}
 		
@@ -235,10 +241,15 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 	 * @param collection
 	 * @return
 	 */
-	private Instances makeProfileInstances(ICellCollection collection)throws Exception {
+	private Instances makeProfileInstances(ICellCollection collection) throws Exception {
+		
+		double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
+		if(dataset.hasAnalysisOptions()){ // Merged datasets may not have options of their own
+			windowProportion = dataset.getAnalysisOptions().getProfileWindowProportion();
+		}
+				
 		
 		
-		double windowProportion = dataset.getAnalysisOptions().getProfileWindowProportion();
 		
 //		// Get the size of the median profile. All profiles will be interpolated to this length
 //		int profileSize = collection.getProfileCollection()
