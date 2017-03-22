@@ -23,6 +23,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -1002,7 +1003,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		if (segments == null) {
 			if (other.segments != null)
 				return false;
-		} else if (!segments.equals(other.segments))
+		} else if (!Arrays.equals(segments,  other.segments))
 			return false;
 		return true;
 	}

@@ -814,7 +814,8 @@ public abstract class DetailPanel
     				options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
     			}
     			finest("Creating chart type");
-    			JFreeChart chart = createPanelChartType(options);
+    			JFreeChart chart = AbstractChartFactory.createEmptyChart();
+//    			JFreeChart chart = createPanelChartType(options);
     			finest("Adding chart type to cache");
     			chartCache.add(options, chart);
 

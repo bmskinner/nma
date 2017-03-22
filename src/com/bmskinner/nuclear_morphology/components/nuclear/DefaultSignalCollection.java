@@ -123,9 +123,13 @@ public class DefaultSignalCollection implements ISignalCollection {
 		int i=0;
 		for(UUID id : collection.keySet()){
 			i++;
-			if(collection.get(id).equals(signalGroup)){
+			if(id.equals(signalGroup)){
 				return i;
 			}
+			
+//			if(collection.get(id).equals(signalGroup)){
+//				return i;
+//			}
 		}
 		return i;
 	}
