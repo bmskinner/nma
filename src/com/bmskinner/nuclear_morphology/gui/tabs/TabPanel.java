@@ -31,6 +31,11 @@ public interface TabPanel
 	extends DatasetUpdateEventListener {
 	
 	/**
+	 * Update the panel display based on the datasets selected in the global list manager
+	 */
+	void update();
+	
+	/**
 	 * Instruct the panel to update its display based on the
 	 * given datasets
 	 * @param list the datasets with which to update the panel
@@ -195,4 +200,5 @@ public interface TabPanel
 	 * @param list the list of datasets to be redrawn
 	 */
 	void refreshTableCache(List<IAnalysisDataset> list);
+
 }

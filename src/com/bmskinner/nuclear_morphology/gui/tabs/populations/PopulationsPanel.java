@@ -152,7 +152,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 *  Find the populations in memory, and display them in the population chooser. 
 	 *  Root populations are ordered according to position in the treeListOrder map.
 	 */
-	private void update(){
+	public void update(){
 		
 		int nameColWidth   = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).getWidth();
 		int colourColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).getWidth();
@@ -299,7 +299,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	public synchronized List<IAnalysisDataset> getSelectedDatasets(){
 
-		return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
+//		return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
+		return DatasetListManager.getInstance().getSelectedDatasets();
 	}
 
 
@@ -345,14 +346,17 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 	 */
 	public void selectDatasets(List<IAnalysisDataset> list){
 		treeTable.selectDatasets(list);
+		DatasetListManager.getInstance().setSelectedDatasets(list);
 	}
 	
 	public void repaintTreeTable(){
 		treeTable.repaint();
 	}
 	
-	public void selectDataset(UUID id){
-		this.selectDataset(DatasetListManager.getInstance().getDataset(id));
+	public synchronized void selectDataset(UUID id){
+		IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
+		this.selectDataset(d);
+		DatasetListManager.getInstance().setSelectedDataset(d);
 	}
 				
 	/**
@@ -546,6 +550,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 						fixDiscontinuousPositions(selectedIndexes);
 						
 					}
+					
+					// Moving to track selection globally
+					DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 					
 					
 					PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);

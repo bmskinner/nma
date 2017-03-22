@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,6 +29,12 @@ public final class DatasetListManager implements Loggable {
 	 */
 	private final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
+	
+	/**
+	 * The datasets currently selected in the UI. Includes child datasets
+	 */
+	private final List<IAnalysisDataset> selected = new ArrayList<IAnalysisDataset>();
+	
 	/**
 	 * This map stores the UUID of a dataset as a key against the hashcode of the dataset.
 	 * This is used to compare actual and saved hashcodes, and detect whether a dataset has changed
@@ -50,7 +57,45 @@ public final class DatasetListManager implements Loggable {
 	}
 	
 	public synchronized List<IAnalysisDataset> getRootDatasets(){
-		return new ArrayList<IAnalysisDataset>(list);
+		return list;
+	}
+	
+	/**
+	 * Get the first of the selected datasets
+	 * @return
+	 */
+	public synchronized IAnalysisDataset getActiveDataset(){
+		return selected.get(0);
+	}
+	
+	public synchronized List<IAnalysisDataset> getSelectedDatasets(){
+		return selected;
+	}
+	
+	public synchronized boolean isSingleDataset(){
+		return(selected.size()==1);
+	}
+	
+	/**
+	 * Test if multiple datasets are selected
+	 * @return
+	 */
+	public synchronized boolean isMultipleDatasets(){
+		return(this.selected.size()>1);
+	}
+	
+	public synchronized boolean hasSelectedDatasets(){
+		return !selected.isEmpty();
+	}
+	
+	public synchronized void setSelectedDatasets(Collection<IAnalysisDataset> list){
+		selected.clear();
+		selected.addAll(list);
+	}
+	
+	public synchronized void setSelectedDataset(IAnalysisDataset d){
+		selected.clear();
+		selected.add(d);
 	}
 	
 	/**

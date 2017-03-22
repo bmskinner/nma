@@ -112,6 +112,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 					return;
 				} 
 			};
+			//Disable entity collection for profiles - too much data
+			panel.getChartRenderingInfo().setEntityCollection(null);
 			return panel;
 		}
 		

@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
@@ -84,7 +85,7 @@ public abstract class DetailPanel
 	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
 	private final List<Object> updateListeners    = new CopyOnWriteArrayList<Object>();
 	
-	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+//	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 	
 	private final List<TabPanel> subPanels = new  ArrayList<TabPanel>();
 	
@@ -134,7 +135,8 @@ public abstract class DetailPanel
 	 * @return
 	 */
 	public synchronized IAnalysisDataset activeDataset(){
-		return list.get(0);
+//		return list.get(0);
+		return DatasetListManager.getInstance().getActiveDataset();
 	}
 	
 	/**
@@ -153,7 +155,8 @@ public abstract class DetailPanel
 	 * @return
 	 */
 	public synchronized boolean isSingleDataset(){
-		return(this.list.size()==1);
+//		return(this.list.size()==1);
+		return DatasetListManager.getInstance().isSingleDataset();
 	}
 	
 	/**
@@ -161,15 +164,18 @@ public abstract class DetailPanel
 	 * @return
 	 */
 	public synchronized boolean isMultipleDatasets(){
-		return(this.list.size()>1);
+//		return(this.list.size()>1);
+		return DatasetListManager.getInstance().isMultipleDatasets();
 	}
 	
 	public synchronized boolean hasDatasets(){
-		return !list.isEmpty();
+//		return !list.isEmpty();
+		return DatasetListManager.getInstance().hasSelectedDatasets();
 	}
 	
 	protected synchronized List<IAnalysisDataset> getDatasets(){
-		return new ArrayList<IAnalysisDataset>( this.list);
+//		return new ArrayList<IAnalysisDataset>( this.list);
+		return DatasetListManager.getInstance().getSelectedDatasets();
 	}
 	
 	public synchronized Cache getChartCache(){
@@ -273,20 +279,37 @@ public abstract class DetailPanel
 	}
 	
 	@Override
+	public synchronized void update(){
+
+		fine("Preparing to update");
+		
+		setUpdating(true);
+		
+		for(TabPanel t : this.getSubPanels()){
+			t.update();
+		}
+		
+		updateDetail();
+
+	}
+	
+	@Override
 	public synchronized void update(final List<IAnalysisDataset> list){
 
 		fine("Preparing to update");
-		this.list.clear();
 		
-		if(list!=null){
-			
-			this.list.addAll(list);
-		}
+//		List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+//		this.list.clear();
+//		
+//		if(list!=null){
+//			
+//			this.list.addAll(list);
+//		}
 //		fine("Set dataset list of "+this.list.size()+" datasets");
 		setUpdating(true);
 		
 		for(TabPanel t : this.getSubPanels()){
-			t.update(getDatasets());
+			t.update(list);
 		}
 		
 //		finest("Set updating state");
@@ -299,7 +322,7 @@ public abstract class DetailPanel
 	 * are run by extending classes.
 	 */
 	private synchronized void updateDetail(){
-		
+		List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
 		finer("Updating detail panel");
 		try {
 			finest("Checking dataset list");
@@ -814,8 +837,8 @@ public abstract class DetailPanel
     				options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
     			}
     			finest("Creating chart type");
-    			JFreeChart chart = AbstractChartFactory.createEmptyChart();
-//    			JFreeChart chart = createPanelChartType(options);
+//    			JFreeChart chart = AbstractChartFactory.createEmptyChart();
+    			JFreeChart chart = createPanelChartType(options);
     			finest("Adding chart type to cache");
     			chartCache.add(options, chart);
 
