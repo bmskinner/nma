@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ThreadManager implements Loggable {
-	private static ThreadManager instance = null;
+	private static volatile ThreadManager instance = null;
 	
 	/*
 	 * Handle threading

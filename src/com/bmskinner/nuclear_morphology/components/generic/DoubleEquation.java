@@ -199,7 +199,8 @@ public class DoubleEquation implements LineEquation {
 	 */
 	@Override
 	public boolean intersects(DoubleEquation eq){
-		if(m == eq.m){ // they are parallel
+		
+		if(Math.abs(m - eq.m) < 0.000001){// they are parallel within the bounds of FP calculations
 			return c==eq.c; 
 		}
 		return true;

@@ -148,21 +148,21 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * @param position the bounding position of the component in the original image
 	 */
 	public DefaultCellularComponent(Roi roi, IPoint centreOfMass, File source, int channel, int[] position){
+		if(centreOfMass==null){
+			throw new IllegalArgumentException("Centre of mass cannot be null");
+		}
+		
+		if(roi==null){
+			throw new IllegalArgumentException("Roi cannot be null");
+		}
+		
 		this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
 		this.centreOfMass         = IMutablePoint.makeNew(centreOfMass);
 		this.id                   = java.util.UUID.randomUUID();
 		this.sourceFile           = source;
 		this.channel              = channel;
 		this.position             = position;
-		
-		if(roi==null){
-			throw new IllegalArgumentException("Roi cannot be null");
-		}
-		
-		if(centreOfMass==null){
-			throw new IllegalArgumentException("Centre of mass cannot be null");
-		}
-		
+
 		
 		// Store the original points. From these, the smooth polygon can be reconstructed.
 		double epsilon = 1;
@@ -1085,7 +1085,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
 				for(int x=0; x<width; x++ ){
 
-					for(int y=0; x<height; y++ ){
+					for(int y=0; y<height; y++ ){
 
 						result[x][y] = this.containsPoint( x, y );
 

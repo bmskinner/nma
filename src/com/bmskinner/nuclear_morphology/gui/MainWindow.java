@@ -518,6 +518,9 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
 				
 				final IAnalysisDataset source = event.secondaryDataset();
+				if(source==null){
+					return null;
+				}
 				return new RunSegmentationAction(selectedDatasets, source, null, MainWindow.this);
 			}
 			

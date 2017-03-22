@@ -280,9 +280,8 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
 
     		Color tr = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128); // make the pdf transparent version of dataset colour
 
-    		if (p != null) {
-    			g2.setPaint(tr);
-    		}
+    		g2.setPaint(tr);
+
     		Stroke s = getItemStroke(row, column);
     		g2.setStroke(s);
 

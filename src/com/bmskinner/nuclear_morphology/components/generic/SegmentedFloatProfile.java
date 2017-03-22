@@ -984,7 +984,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result
-				+ ((segments == null) ? 0 : segments.hashCode());
+				+ ((segments == null) ? 0 : Arrays.hashCode(segments));
 		return result;
 	}
 

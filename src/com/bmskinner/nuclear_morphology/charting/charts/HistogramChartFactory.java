@@ -198,13 +198,17 @@ public class HistogramChartFactory extends AbstractChartFactory {
 			stack("Error making signal dataset", e);
 			return makeErrorChart();
 		}
-									
+				
+		
+		if(list==null){
+			return makeErrorChart();
+		}
 		// Make a histogram from the first dataset.
 				
 		JFreeChart chart = createHistogram(list.get(0), stat.label(options.getScale()), "Count");
 		
 		
-		if(list!=null && options.hasDatasets()){
+		if(options.hasDatasets()){
 			
 			XYPlot plot = chart.getXYPlot();
 			if(stat.equals(PlottableStatistic.ANGLE)){

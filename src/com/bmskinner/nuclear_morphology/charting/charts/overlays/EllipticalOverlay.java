@@ -101,9 +101,10 @@ public class EllipticalOverlay
      * @param rectangle the rectangle to remove
      */
     public void removeEllipse(EllipticalOverlayObject ellipse) {
-    	ellipse=null;
-        fireOverlayChanged();
-        
+    	if(ellipse==this.ellipse){
+    		this.ellipse=null;
+    		fireOverlayChanged();
+    	}
     }
 
     /**
@@ -235,28 +236,32 @@ public class EllipticalOverlay
             g2.setStroke(savedStroke);
 //        }
     }
- 
-    /**
-     * Tests this overlay for equality with an arbitrary object.
-     *
-     * @param obj  the object (<code>null</code> permitted).
-     *
-     * @return A boolean.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof EllipticalOverlay)) {
-            return false;
-        }
-        EllipticalOverlay that = (EllipticalOverlay) obj;
-        if (!this.ellipse.equals(that.ellipse)) {
-            return false;
-        }
 
-        return true;
-    }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((ellipse == null) ? 0 : ellipse.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EllipticalOverlay other = (EllipticalOverlay) obj;
+		if (ellipse == null) {
+			if (other.ellipse != null)
+				return false;
+		} else if (!ellipse.equals(other.ellipse))
+			return false;
+		return true;
+	}  
 	
 }

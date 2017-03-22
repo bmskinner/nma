@@ -19,7 +19,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public final class DatasetListManager implements Loggable {
 	
-	private static DatasetListManager instance = null;
+	private static volatile DatasetListManager instance = null;
 	
 	/**
 	 * The list of root datasets currently loaded. The order of datasets

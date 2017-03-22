@@ -149,7 +149,7 @@ public class NewAnalysisAction extends ProgressableAction {
 			IAnalysisResult r = worker.get();
 			datasets = r.getDatasets();
 			
-			if(datasets.size()==0 || datasets==null){
+			if(datasets==null || datasets.isEmpty()){
 				log("No datasets returned");
 			} else {
 //				log("Fire profiling");

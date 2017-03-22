@@ -147,7 +147,7 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 			IAnalysisResult r = worker.get();
 			datasets = r.getDatasets();
 
-			if(datasets.size()==0 || datasets==null){
+			if(datasets==null||datasets.size()==0 ){
 				log("No datasets returned");
 			} else {
 				//		log("Fire profiling");

@@ -13,7 +13,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  */
 public class GlobalOptions {
 	
-	private static GlobalOptions instance;
+	private static volatile GlobalOptions instance;
 	
 	private MeasurementScale scale;
 	

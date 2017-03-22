@@ -85,8 +85,11 @@ public class RectangleOverlay
      * @param rectangle the rectangle to remove
      */
     public void removeRectangle(RectangleOverlayObject rectangle) {
-        rectangle=null;
-        fireOverlayChanged();
+    	if(this.rectangle==rectangle){
+    		this.rectangle=null;
+    	        fireOverlayChanged();
+    	}
+       
         
     }
 
@@ -225,31 +228,32 @@ public class RectangleOverlay
             g2.setStroke(savedStroke);
         }
     }
- 
-    /**
-     * Tests this overlay for equality with an arbitrary object.
-     *
-     * @param obj  the object (<code>null</code> permitted).
-     *
-     * @return A boolean.
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof RectangleOverlay)) {
-            return false;
-        }
-        RectangleOverlay that = (RectangleOverlay) obj;
-        if (!this.rectangle.equals(that.rectangle)) {
-            return false;
-        }
-//        if (!this.yRectangle.equals(that.yRectangle)) {
-//            return false;
-//        }
-        return true;
-    }
 
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((rectangle == null) ? 0 : rectangle.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RectangleOverlay other = (RectangleOverlay) obj;
+		if (rectangle == null) {
+			if (other.rectangle != null)
+				return false;
+		} else if (!rectangle.equals(other.rectangle))
+			return false;
+		return true;
+	}
 }
 

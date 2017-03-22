@@ -76,7 +76,7 @@ public class SignalDetector extends Detector {
 		
 		options.setThreshold(minThreshold); // reset to default;
 		
-		if(options==null || options.getDetectionMode().equals(SignalDetectionMode.FORWARD)){
+		if(options.getDetectionMode().equals(SignalDetectionMode.FORWARD)){
 			finest("Running forward detection");
 			return detectForwardThresholdSignal(sourceFile, stack, n);
 		}
