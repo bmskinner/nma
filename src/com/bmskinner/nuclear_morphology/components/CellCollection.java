@@ -43,10 +43,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.analysis.NucleusStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -970,13 +968,20 @@ public class CellCollection implements ICellCollection {
 				}
 			}
 		} else {
-			
-			finest("Making statistic fetching task for "+stat);
-			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
-					stat,
-					scale);
-			result = task.invoke();
-			finest("Fetched statistic result for "+stat);
+
+
+			result = this.getNuclei().parallelStream()
+					.mapToDouble( n -> n.getStatistic(stat, scale)  )
+					.toArray();
+		
+			Arrays.sort(result);
+
+//			finest("Making statistic fetching task for "+stat);
+////			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
+////					stat,
+////					scale);
+////			result = task.invoke();
+//			finest("Fetched statistic result for "+stat);
 
 		}
 
@@ -1010,11 +1015,32 @@ public class CellCollection implements ICellCollection {
 	 */
 	private double[] getSegmentStatistics(SegmentStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
-		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
-				stat,
-				scale, 
-				id);
-		return task.invoke();
+		
+		double[] result = getNuclei().parallelStream()
+				.mapToDouble( n-> {
+						IBorderSegment segment;
+						try {
+							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+							return 0;
+						}
+						double perimeterLength = 0;
+						if(segment!=null){
+							int indexLength = segment.length();
+							double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+							perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+						}
+						return perimeterLength;
+		
+					})
+				.toArray();
+			Arrays.sort(result);
+			return result;
+//		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
+//				stat,
+//				scale, 
+//				id);
+//		return task.invoke();
 	}
 
 

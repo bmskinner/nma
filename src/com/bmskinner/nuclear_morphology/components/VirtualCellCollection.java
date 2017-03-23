@@ -36,10 +36,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.analysis.NucleusStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
@@ -50,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -58,8 +57,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
-import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
@@ -234,27 +231,43 @@ public class VirtualCellCollection implements ICellCollection {
 			warn("Parent collection not restored!");
 		}
 		
-		for(UUID id : cellIDs){
-			ICell c = parentCollection.getCell(id);
-			for(Nucleus n : c.getNuclei()){
-				result.add(n);
-			}
-		}
+		result = cellIDs.stream()
+			.map( id -> parentCollection.getCell(id))
+			.flatMap( c ->  c.getNuclei().stream())
+			.collect(Collectors.toSet());
+		
+//		for(UUID id : cellIDs){
+//			ICell c = parentCollection.getCell(id);
+//			for(Nucleus n : c.getNuclei()){
+//				result.add(n);
+//			}
+//		}
 
 		return result;
 	}
 
 	@Override
 	public synchronized Set<Nucleus> getNuclei(File imageFile) {
-		Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
-		for(UUID id : cellIDs){
-			Nucleus n = parent.getCollection().getCell(id).getNucleus();
-			
-			if(n.getSourceFile().equals(imageFile)){
-				result.add(n);
-			}
+//		Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
+//		for(UUID id : cellIDs){
+//			Nucleus n = parent.getCollection().getCell(id).getNucleus();
+//			
+//			if(n.getSourceFile().equals(imageFile)){
+//				result.add(n);
+//			}
+//		}
+		
+		ICellCollection parentCollection = parent.getCollection();
+		if(parentCollection==null){
+			warn("Parent collection not restored!");
 		}
-
+		
+		Set<Nucleus> result = cellIDs.stream()
+			.map( id -> parentCollection.getCell(id))
+			.flatMap( c ->  c.getNuclei().stream())
+			.filter( n -> n.getSourceFile().equals(imageFile))
+			.collect(Collectors.toSet());
+		
 		return result;
 	}
 
@@ -878,11 +891,36 @@ public class VirtualCellCollection implements ICellCollection {
 	 */
 	private synchronized double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
-		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
-				stat,
-				scale, 
-				id);
-		return task.invoke();
+		double[] result = null;
+		
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
+		
+		} else {
+			
+			result = getNuclei().parallelStream()
+				.mapToDouble( n-> {
+						IBorderSegment segment;
+						try {
+							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+							return 0;
+						}
+						double perimeterLength = 0;
+						if(segment!=null){
+							int indexLength = segment.length();
+							double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+							perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+						}
+						return perimeterLength;
+		
+					})
+				.toArray();
+			Arrays.sort(result);
+			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -894,18 +932,26 @@ public class VirtualCellCollection implements ICellCollection {
 	 */
 	private synchronized double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
+		
 		double[] result = null;
-		// Keep the nucleus statistic for legacy comparability. Changing to GenericStatistics from 1.13.4
-		if(stat.equals(PlottableStatistic.VARIABILITY)){
-			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-		} else{
-			finest("Making statistic fetching task for "+stat);
-			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
-					stat,
-					scale);
-			result = task.invoke();
-			finest("Fetched statistic result for "+stat);
+		
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+		
+		} else {
+			
+			if(PlottableStatistic.VARIABILITY.equals(stat)){
+				result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+			} else{
+
+				result = this.getNuclei().parallelStream()
+						.mapToDouble( n -> n.getStatistic(stat, scale)  )
+						.toArray();
+			}
+			Arrays.sort(result);
+			statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, result);
 		}
+		
 		return result;
 	}
 	
@@ -918,21 +964,27 @@ public class VirtualCellCollection implements ICellCollection {
 	 */
 	private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
+		
+		
 		double[] result = null;
 		
-		result = new double[this.size()];
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+		
+		} else {
+			
 
-		int i=0;
-		for(ICell c : getCells()){
-			result[i] = c.getStatistic(stat);
-			i++;
+
+			result = getCells().parallelStream()
+						.mapToDouble( n -> n.getStatistic(stat)  )
+						.toArray();
+			
+			Arrays.sort(result);
+			statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, result);
 		}
-
+		
 		return result;
-	}
-	
-	private Nucleus[] getNucleusArray(){
-		return this.getNuclei().toArray(new Nucleus[0]);
+		
 	}
 	
 	/**
@@ -984,8 +1036,8 @@ public class VirtualCellCollection implements ICellCollection {
 	
 	private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 		
-		if(this.statsCache.hasStatistic(stat, component, scale)){
-			return statsCache.getStatistic(stat, component, scale);
+		if(this.statsCache.hasMedian(stat, component, scale)){
+			return statsCache.getMedian(stat, component, scale);
 
 		} else {
 
@@ -1013,11 +1065,11 @@ public class VirtualCellCollection implements ICellCollection {
 					values = getSegmentStatistics(stat, scale, segId);
 				}
 
-
-				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
+				median = Quartile.quartile(values, Quartile.MEDIAN);
+//				median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 			}
 
-			statsCache.setStatistic(stat, component, scale, median);
+			statsCache.setMedian(stat, component, scale, median);
 			return median;
 		}
 		

@@ -899,8 +899,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 */
 	private double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
 
-		double result;
-		MannWhitneyUTest test = new MannWhitneyUTest();
+		double result = 0;
+		MannWhitneyUTest test = new MannWhitneyUTest(); // default, NaN's are left in place and ties get the average of applicable ranks
+		
 
 		if(getPValue){ // above diagonal, p-value
 			result = test.mannWhitneyUTest(dataset1, dataset2); // correct for the number of datasets tested
@@ -954,21 +955,26 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		// add columns
 		DecimalFormat df = new DecimalFormat("#0.0000"); 
 		for(IAnalysisDataset dataset : options.getDatasets()){
+			
+			double[] d1Values = dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			
 
 			Object[] popData = new Object[options.datasetCount()];
 
 			int i = 0;
-			boolean getPValue = false;
+			boolean isGetPVal = false;
 			for(IAnalysisDataset dataset2 : options.getDatasets()){
 
 				if(dataset2.getUUID().equals(dataset.getUUID())){
 					popData[i] = "";
-					getPValue = true;
+					isGetPVal = true;
 				} else {
-					popData[i] = df.format( runWilcoxonTest( 
-							dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS), 
-							dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS), 
-							getPValue) );
+					
+					double[] d2Values = dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+					
+					double pValue = runWilcoxonTest( d1Values, d2Values, isGetPVal);
+					
+					popData[i] = df.format( pValue  );
 				}
 				i++;
 			}

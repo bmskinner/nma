@@ -19,7 +19,9 @@
 
 package com.bmskinner.nuclear_morphology.components.stats;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -82,7 +84,8 @@ public class StatsCache {
 	}
 	
 	
-	private Map<Key, Double> cache = new HashMap<Key, Double>();
+	private Map<Key, Double> cache = new HashMap<Key, Double>(); // median values
+	private Map<Key, double[]> values = new HashMap<Key, double[]>(); // individual component values
 
 	public StatsCache(){}
 
@@ -92,7 +95,7 @@ public class StatsCache {
 	 * @param scale
 	 * @param d
 	 */
-	public void setStatistic(PlottableStatistic stat, String component, MeasurementScale scale, double d){
+	public void setMedian(PlottableStatistic stat, String component, MeasurementScale scale, double d){
 
 		
 		Key key = new Key(stat, component, scale);
@@ -100,10 +103,22 @@ public class StatsCache {
 		cache.put(key, d);
 
 	}
+	
+	/**
+	 * Store the given statistic
+	 * @param stat
+	 * @param scale
+	 * @param d
+	 */
+	public void setValues(PlottableStatistic stat, String component, MeasurementScale scale, double[] list){
+		
+		Key key = new Key(stat, component, scale);
+		values.put(key, list);
+	}
 
-	public double getStatistic(PlottableStatistic stat, String component, MeasurementScale scale){
+	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale){
 
-		if(this.hasStatistic(stat, component, scale)){
+		if(this.hasMedian(stat, component, scale)){
 			Key key = new Key(stat, component, scale);
 			return cache.get(key);
 		} else {
@@ -111,11 +126,37 @@ public class StatsCache {
 		}
 		
 	}
+	
+	/**
+	 * Get the raw values from the cache
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @return
+	 */
+	public double[] getValues(PlottableStatistic stat, String component, MeasurementScale scale){
 
-	public boolean hasStatistic(PlottableStatistic stat, String component, MeasurementScale scale){
+		if(this.hasValues(stat, component, scale)){
+			Key key = new Key(stat, component, scale);
+			return values.get(key);
+		} else {
+			return new double[0];
+		}
+		
+	}
+	
+
+	public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale){
 		
 		Key key = new Key(stat, component, scale);
 		return cache.containsKey(key);
+
+	}
+	
+	public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale){
+		
+		Key key = new Key(stat, component, scale);
+		return values.containsKey(key);
 
 	}
 }

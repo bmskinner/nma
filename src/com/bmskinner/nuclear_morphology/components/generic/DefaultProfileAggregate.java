@@ -25,6 +25,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
+import javax.xml.transform.stream.StreamSource;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -47,7 +50,7 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	
 	private int counter = 0; // track the number of profiles added to the aggregate
 	
-	private AggregateCache cache = new AggregateCache();
+//	private AggregateCache cache = new AggregateCache();
 
 	public DefaultProfileAggregate(final int length, final int profileCount){
 		
@@ -91,7 +94,7 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
 	public IProfile getQuartile(float quartile){
 		
-		return calculateQuartile(quartile);
+		return calculateQuartile( (int) quartile);
 	}
 	
 	/**
@@ -187,26 +190,36 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 		return values;
 	}
 	
-	private IProfile calculateQuartile(float quartile) {
+	/**
+	 * Calculate the profile for the given quartile
+	 * @param quartile
+	 * @return
+	 */
+	private IProfile calculateQuartile(int quartile) {
 		
-		if(cache.hasProfile(quartile)){
-			return cache.getProfile(quartile);
-		}
+//		if(cache.hasProfile(quartile)){
+////			log("Aggregate cache used");
+//			return cache.getProfile(quartile);
+//		}
 		
 		float[] medians = new float[length];
+		
+		
+
 		
 		for(int i=0; i<length; i++){
 			
 			float[] values = getValuesAtIndex(i);
 			
-			float q = new Quartile(values, quartile).floatValue();
-			
-			medians[i] = q;
+			medians[i] = Quartile.quartile(values, quartile);
+						
+//			medians[i] = new Quartile(values, quartile).floatValue();
 			
 		}
 		
 		IProfile profile = new FloatProfile(medians);
-		cache.setProfile(quartile, profile);
+//		cache.setProfile(quartile, profile);
+//		log("Aggregate cache set");
 		return profile;
 
 	}
@@ -228,47 +241,47 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 	 * @author bms41
 	 *
 	 */
-	private class AggregateCache {
-
-		private Map<Float, IProfile> cache = new HashMap<Float, IProfile>(5);
-
-		public AggregateCache(){}
-
-		/**
-		 * Set the stored profile
-		 * @param tag
-		 * @param profile
-		 */
-		public void setProfile(Float tag, IProfile profile){			  
-			cache.put(tag, profile);
-		}
-
-		/**
-		 * Get the given profile from the cache, or null if not present
-		 * @param tag
-		 * @param quartile
-		 * @return
-		 */
-		public IProfile getProfile(Float tag){
-			return cache.get(tag);
-		}
-
-		/**
-		 * Check if the given profile is in the cache
-		 * @param tag
-		 * @param quartile
-		 * @return
-		 */
-		public boolean hasProfile(Float tag){
-			return cache.containsKey(tag);
-		}
-
-		/**
-		 * Empty the cache - all values must be recalculated
-		 */
-		public void clear(){
-			cache = new HashMap<Float, IProfile>(5);
-		}
-	}
+//	private class AggregateCache {
+//		
+//		private Map<Float, IProfile> cache = new HashMap<Float, IProfile>(5);
+//
+//		public AggregateCache(){}
+//
+//		/**
+//		 * Set the stored profile
+//		 * @param tag
+//		 * @param profile
+//		 */
+//		public void setProfile(Float tag, IProfile profile){			  
+//			cache.put(tag, profile);
+//		}
+//
+//		/**
+//		 * Get the given profile from the cache, or null if not present
+//		 * @param tag
+//		 * @param quartile
+//		 * @return
+//		 */
+//		public IProfile getProfile(Float tag){
+//			return cache.get(tag);
+//		}
+//
+//		/**
+//		 * Check if the given profile is in the cache
+//		 * @param tag
+//		 * @param quartile
+//		 * @return
+//		 */
+//		public boolean hasProfile(Float tag){
+//			return cache.containsKey(tag);
+//		}
+//
+//		/**
+//		 * Empty the cache - all values must be recalculated
+//		 */
+//		public void clear(){
+//			cache = new HashMap<Float, IProfile>(5);
+//		}
+//	}
 
 }

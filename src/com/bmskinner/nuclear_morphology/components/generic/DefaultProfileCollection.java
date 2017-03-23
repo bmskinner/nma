@@ -58,6 +58,8 @@ public class DefaultProfileCollection implements IProfileCollection {
 	
 	private transient int length;
 	private transient Map<ProfileType, IProfileAggregate> map = new HashMap<ProfileType, IProfileAggregate>();
+	private transient ProfileCache cache = new ProfileCache();
+	
 
 	/**
 	 * Create an empty profile collection
@@ -124,19 +126,28 @@ public class DefaultProfileCollection implements IProfileCollection {
 			throw new UnavailableProfileTypeException("Profile type is not present: "+type.toString());
 		}
 		
-		IProfileAggregate agg = map.get(type);
-		IProfile p;
-		try {
-			p = agg.getQuartile(quartile);
-		} catch (NullPointerException e) {
-			warn("Cannot get profile for "+quartile);
-			stack("Error fetching quartile", e);
-			throw new ProfileException("Null pointer exception getting quartile from aggregate");
+		
+		IProfile p = cache.getProfile(type, quartile, tag);
+		
+		if(p==null){ // profile not yet in cache
+			IProfileAggregate agg = map.get(type);
+
+			try {
+				
+				p = agg.getQuartile(quartile);
+			
+			} catch (NullPointerException e) {
+				warn("Cannot get profile for "+quartile);
+				stack("Error fetching quartile", e);
+				throw new ProfileException("Null pointer exception getting quartile from aggregate");
+			}
+			
+			int offset = indexes.get(tag);
+			p = p.offset(offset);
+			cache.addProfile(type, quartile, tag, p);
 		}
 		
-		int offset = indexes.get(tag);
-		
-		return p.offset(offset);
+		return p;
 	
 		
 	}
@@ -647,14 +658,108 @@ public class DefaultProfileCollection implements IProfileCollection {
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		map = new HashMap<ProfileType, IProfileAggregate>();
-		
-//		if(length != segments[0].getTotalLength()){
-//			log("Segment length "+segments[0].getTotalLength() );
-//		}
+		cache = new ProfileCache();
 	}
 	
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
+	}
+	
+	
+	/**
+	 * The cache for profiles
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
+	private class ProfileCache {
+		
+		/**
+		 * The key used to store values in the cache
+		 * @author bms41
+		 * @since 1.13.4
+		 *
+		 */
+		private class ProfileKey {
+			private final ProfileType type;
+			private final double quartile;
+			private final Tag tag;
+			
+			public ProfileKey(final ProfileType type, final double quartile, final Tag tag) {
+
+				this.type = type;
+				this.quartile = quartile;
+				this.tag = tag;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + getOuterType().hashCode();
+				long temp;
+				temp = Double.doubleToLongBits(quartile);
+				result = prime * result + (int) (temp ^ (temp >>> 32));
+				result = prime * result + ((tag == null) ? 0 : tag.hashCode());
+				result = prime * result + ((type == null) ? 0 : type.hashCode());
+				return result;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				ProfileKey other = (ProfileKey) obj;
+				if (!getOuterType().equals(other.getOuterType()))
+					return false;
+				if (Double.doubleToLongBits(quartile) != Double.doubleToLongBits(other.quartile))
+					return false;
+				if (tag == null) {
+					if (other.tag != null)
+						return false;
+				} else if (!tag.equals(other.tag))
+					return false;
+				if (type != other.type)
+					return false;
+				return true;
+			}
+
+			private DefaultProfileCollection getOuterType() {
+				return DefaultProfileCollection.this;
+			}
+			
+			
+		}
+		
+		private Map<ProfileKey, IProfile> map = new HashMap<ProfileKey, IProfile>();
+		
+		public ProfileCache(){}
+		
+		/**
+		 * Add a profile with the given keys
+		 * @param type the profile type
+		 * @param quartile the quartile of the dataset
+		 * @param tag the tag
+		 * @param profile the profile to save
+		 */
+		public void addProfile(final ProfileType type, final double quartile, final Tag tag, IProfile profile){
+			ProfileKey key = new ProfileKey(type, quartile, tag);
+			map.put(key, profile);
+		}
+		
+		public boolean hasProfile(final ProfileType type, final double quartile, final Tag tag){
+			ProfileKey key = new ProfileKey(type, quartile, tag);
+			return map.containsKey(key);
+		}
+		
+		public IProfile getProfile(final ProfileType type, final double quartile, final Tag tag){
+			ProfileKey key = new ProfileKey(type, quartile, tag);
+			return map.get(key);
+		}
 	}
 
 }

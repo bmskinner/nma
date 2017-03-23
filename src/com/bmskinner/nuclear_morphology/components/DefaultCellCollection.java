@@ -44,10 +44,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.analysis.NucleusStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
-import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentStatisticFetchingTask;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -752,10 +750,7 @@ public class DefaultCellCollection
 
 		return n;
 	}
-	
-	private Nucleus[] getNucleusArray(){
-	return this.getNuclei().toArray(new Nucleus[0]);
-}
+
 	
 	/*
 	 * 
@@ -815,9 +810,9 @@ public class DefaultCellCollection
 	
 	private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID signalGroup, UUID segId)  throws Exception {
 
-		if(statsCache.hasStatistic(stat, component, scale)){
+		if(statsCache.hasMedian(stat, component, scale)){
 			
-			return statsCache.getStatistic(stat, component, scale);
+			return statsCache.getMedian(stat, component, scale);
 			
 		} else {
 
@@ -844,11 +839,11 @@ public class DefaultCellCollection
 						values = getSegmentStatistics(stat, scale, segId);
 					}
 					
-
-					median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
+					median = Quartile.quartile(values, Quartile.MEDIAN);
+//					median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 				}
 
-				statsCache.setStatistic(stat, component, scale, median);
+				statsCache.setMedian(stat, component, scale, median);
 				return median;
 		}
 	}
@@ -863,17 +858,24 @@ public class DefaultCellCollection
 	 */
 	private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
+		
 		double[] result = null;
 		
-		result = new double[cells.size()];
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+		
+		} else {
 
-		int i=0;
-		for(ICell c : cells){
-			result[i] = c.getStatistic(stat);
-			i++;
+			result = getCells().parallelStream()
+						.mapToDouble( n -> n.getStatistic(stat)  )
+						.toArray();
+			
+			Arrays.sort(result);
+			statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, result);
 		}
-
+		
 		return result;
+
 	}
 
 
@@ -888,16 +890,21 @@ public class DefaultCellCollection
 
 		double[] result = null;
 		
-		// Keep the nucleus statistic for legacy comparability. Changing to GenericStatistics from 1.13.4
-		if(stat.equals(PlottableStatistic.VARIABILITY)){
-			result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
-		} else{
-			finest("Making statistic fetching task for "+stat);
-			NucleusStatisticFetchingTask task = new NucleusStatisticFetchingTask(getNucleusArray(),
-					stat,
-					scale);
-			result = task.invoke();
-			finest("Fetched statistic result for "+stat);
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+		
+		} else {
+			
+			if(PlottableStatistic.VARIABILITY.equals(stat)){
+				result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
+			} else{
+
+				result = this.getNuclei().parallelStream()
+						.mapToDouble( n -> n.getStatistic(stat, scale)  )
+						.toArray();
+			}
+			Arrays.sort(result);
+			statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, result);
 		}
 		
 		return result;
@@ -913,12 +920,45 @@ public class DefaultCellCollection
 	 * @throws Exception
 	 */
 	private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) throws Exception{
+			
+		
+		double[] result = null;
+		
+		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
+			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
+		
+		} else {
+			
+			result = getNuclei().parallelStream()
+				.mapToDouble( n-> {
+						IBorderSegment segment;
+						try {
+							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+							return 0;
+						}
+						double perimeterLength = 0;
+						if(segment!=null){
+							int indexLength = segment.length();
+							double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+							perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+						}
+						return perimeterLength;
+		
+					})
+				.toArray();
+			Arrays.sort(result);
+			
+			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
+		}
+		
+		return result;
 
-		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
-				stat,
-				scale, 
-				id);
-		return task.invoke();
+//		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
+//				stat,
+//				scale, 
+//				id);
+//		return task.invoke();
 	}
 
 	/*

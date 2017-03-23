@@ -32,6 +32,67 @@ public class Quartile extends DescriptiveStatistic {
 	public static final int UPPER_QUARTILE = 75;
 	public static final int MEDIAN         = 50;
 	
+	/**
+	 * Get the quartile for a float array
+	 * @param values the values
+	 * @param quartile the quartile to find
+	 * @return the quartile value
+	 */
+	public static float quartile(float[] values, int quartile){
+		
+		if (values == null || values.length == 0) {
+			  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+		  }
+
+		  if(values.length==1){
+			 return values[0];
+		  }
+		  
+		  if(values.length==2){
+			  return quartile < MEDIAN ? values[0] : values[1];
+		  }
+
+		  // Rank order the values
+		  float[] v = new float[values.length];
+		  System.arraycopy(values, 0, v, 0, values.length);
+		  Arrays.sort(v);
+
+		  int n = (int) Math.round(v.length * quartile / 100);
+
+		  return v[n];
+	}
+	
+	
+	/**
+	 * Get the quartile for a double array
+	 * @param values the values
+	 * @param quartile the quartile to find
+	 * @return the quartile value
+	 */
+	public static double quartile(double[] values, int quartile){
+		
+		if (values == null || values.length == 0) {
+			  throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+		  }
+
+		  if(values.length==1){
+			 return values[0];
+		  }
+		  
+		  if(values.length==2){
+			  return quartile < MEDIAN ? values[0] : values[1];
+		  }
+
+		  // Rank order the values
+		  double[] v = new double[values.length];
+		  System.arraycopy(values, 0, v, 0, values.length);
+		  Arrays.sort(v);
+
+		  int n = (int) Math.round(v.length * quartile / 100);
+
+		  return v[n];
+	}
+		
 	public Quartile(List<? extends Number> values, double lowerPercent) {
 		  
 		  Number[] array = values.toArray(new Number[0]);

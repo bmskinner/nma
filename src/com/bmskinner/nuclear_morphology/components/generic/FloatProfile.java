@@ -53,10 +53,11 @@ public class FloatProfile implements IProfile {
 		if(values.length==0){
 			throw new IllegalArgumentException("Input array has zero length in profile constructor");
 		}
-		this.array = new float[values.length];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = values[i];
-		}
+		this.array = values; 
+//		new float[values.length];
+//		for(int i=0; i<this.array.length; i++){
+//			array[i] = values[i];
+//		}
 	}
 
 	/**

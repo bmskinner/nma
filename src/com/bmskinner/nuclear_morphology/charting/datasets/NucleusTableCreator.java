@@ -98,7 +98,10 @@ public class NucleusTableCreator extends AbstractTableCreator {
 				IAnalysisDataset d = datasets.get(i);
 				Vector<Object> values  	= new Vector<Object>();
 
-			
+				if(! d.hasAnalysisOptions()){
+					return createBlankTable();
+				}
+				
 				IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
 						.getDetectionOptions(CellularComponent.NUCLEUS)
 						.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);

@@ -79,7 +79,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 			int minRounded = (int) minMaxStep[0];
 			int maxRounded = (int) minMaxStep[1];
 
-			int bins = findBinSizeForHistogram(values, minMaxStep);
+			int bins = findNumberOfBins(values, minRounded, maxRounded, minMaxStep[2]);
 
 			String groupLabel = stat.toString();
 			
@@ -143,16 +143,16 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 		return result;
 	}
 	
-	private int findBinSizeForHistogram(double[] values, double[] minMaxStep){
-
-		int minRounded = (int) minMaxStep[0];
-		int maxRounded = (int) minMaxStep[1];
-		double stepSize= minMaxStep[2];
+	private int findNumberOfBins(double[] values, int min, int max, double stepSize){
+//
+//		int minRounded = (int) minMaxStep[0];
+//		int maxRounded = (int) minMaxStep[1];
+//		double stepSize= minMaxStep[2];
 		
-		int bins = (int) (( (double) maxRounded - (double) minRounded) / stepSize);
+		int bins = (int) (( (double) max - (double) min) / stepSize);
 		
 		if(stepSize == 1d){
-			bins = maxRounded - minRounded; // set integer steps directly
+			bins = max - min; // set integer steps directly
 		}
 		
 		bins = bins>100 ? 100 : bins; // but don't have too many bins
@@ -304,30 +304,31 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 			
 			try {
 			
-			IBorderSegment medianSeg = collection
-					.getProfileCollection()
-					.getSegmentAt(Tag.REFERENCE_POINT, options.getSegPosition());
-
-			
-			/*
-			 * Use the segment id for this collection to fetch the individual nucleus segments
-			 */
-			
-			double[] values;
-
-			values = collection.getMedianStatistics(PlottableStatistic.LENGTH, 
-					CellularComponent.NUCLEAR_BORDER_SEGMENT,
-					options.getScale(), 
-					medianSeg.getID());
+				IBorderSegment medianSeg = collection
+						.getProfileCollection()
+						.getSegmentAt(Tag.REFERENCE_POINT, options.getSegPosition());
 	
-			
-			double[] minMaxStep = findMinAndMaxForHistogram(values);
-			int minRounded = (int) minMaxStep[0];
-			int maxRounded = (int) minMaxStep[1];
-
-			int bins = findBinSizeForHistogram(values, minMaxStep);
-
-			ds.addSeries(IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
+				
+				/*
+				 * Use the segment id for this collection to fetch the individual nucleus segments
+				 */
+				
+				double[] values;
+	
+				values = collection.getMedianStatistics(PlottableStatistic.LENGTH, 
+						CellularComponent.NUCLEAR_BORDER_SEGMENT,
+						options.getScale(), 
+						medianSeg.getID());
+		
+				
+				double[] minMaxStep = findMinAndMaxForHistogram(values);
+				int minRounded = (int) minMaxStep[0];
+				int maxRounded = (int) minMaxStep[1];
+	
+				int bins = findNumberOfBins(values, minRounded, maxRounded, minMaxStep[2]);
+	//			int bins = findBinSizeForHistogram(values, minMaxStep);
+	
+				ds.addSeries(IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+"_"+collection.getName(), values, bins, minRounded, maxRounded );
 			}catch(UnavailableBorderTagException | ProfileException e){
 				throw new ChartDatasetCreationException("Cannot get segments for "+dataset.getName(), e);
 			}

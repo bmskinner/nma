@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
+import java.io.OptionalDataException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -296,6 +297,16 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		} catch(NullPointerException e1){
 			stack("NPE Error reading dataset", e1);
 			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
+			
+		} catch(OptionalDataException e1){
+			
+			if(e1.eof){
+				stack("End of file reached", e1);
+			} else {
+				stack(e1.length+" remaining in buffer", e1);
+			}
+			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
+			
 			
 		} catch(Exception e1){
 			stack("Error reading dataset", e1);
