@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.stats;
 
+import java.util.stream.DoubleStream;
+
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -19,8 +21,8 @@ public class ConfidenceInterval {
 
 		// Calculate 95% confidence interval
 		ci = calculateConfidenceIntervalSize(data, level);
-		//			  double mean = Stats.mean(data);
-		mean = new Mean(data);
+		mean = DoubleStream.of(data).average().orElse(0);
+
 	}
 	
 	public Number getMean(){

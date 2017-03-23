@@ -22,30 +22,18 @@ package com.bmskinner.nuclear_morphology.stats;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 @SuppressWarnings("serial")
 public class Mean extends DescriptiveStatistic {
-	
+		
 	public Mean(Number[] array){
 		if(array == null || array.length==0){
 			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
 		}
 		List<? extends Number> list = Arrays.asList(array);
 		compareList(list);
-	}
-	
-	public Mean(double[] array){
-		if(array == null || array.length==0){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-		}
-		List<Number> list = new ArrayList<Number>();
-		for(double d : array){
-			list.add(d);
-		}
-		compareList(list);
-
-	}
-		
+	}		
 	
 	/**
 	 * Calculate the mean value in the given list

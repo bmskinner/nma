@@ -197,13 +197,15 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		 * Find the x values in the bounding box of the 
 		 * vertical nucleus.
 		 */
-		double maxBoundingX = testNucleus.createPolygon().getBounds().getMaxX();
-		double minBoundingX = testNucleus.createPolygon().getBounds().getMinX();
+		FloatPolygon p = testNucleus.createPolygon();
+		double maxBoundingX = p.getBounds().getMaxX();
+		double minBoundingX = p.getBounds().getMinX();
 
 		if(vertX < minBoundingX || vertX > maxBoundingX ){
 
-			IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical is out of bounds");
-			stack("Vertical "+vertX+" is out of bounds "+minBoundingX+" - "+maxBoundingX, e );
+			// The chosen vertical points is outside the bounding box of the nucleus
+			IndexOutOfBoundsException e = new IndexOutOfBoundsException("Vertical point x is outside nucleus bounds");
+			stack("Vertical point "+vertX+" is out of bounds "+minBoundingX+" - "+maxBoundingX, e );
 			setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
 			setStatistic(PlottableStatistic.BODY_WIDTH,  ERROR_CALCULATING_STAT);
 			return;

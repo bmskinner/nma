@@ -27,7 +27,9 @@
 
  package com.bmskinner.nuclear_morphology.stats;
 
- import org.apache.commons.math3.distribution.TDistribution;
+ import java.util.stream.DoubleStream;
+
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -84,9 +86,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 	  if(m.length<2){
 		  return 0;
 	  }
-
-	  double mean = new Mean(m).doubleValue();
-//	  double mean = mean(m);
+	  double mean = DoubleStream.of(m).average().orElse(0);
 	  double temp = 0;
 	  for(double d : m)
 		  temp += Math.pow(mean-d, 2);

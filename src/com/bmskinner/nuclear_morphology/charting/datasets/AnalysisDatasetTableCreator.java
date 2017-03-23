@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
+import java.util.stream.DoubleStream;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -187,7 +188,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 							
 				double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
 
-				double mean = new Mean(meanLengths).doubleValue(); 
+				double mean = DoubleStream.of(meanLengths).average().orElse(0);
 
 				double sem  = Stats.stderr(meanLengths);
 				
@@ -287,9 +288,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			for(IBorderSegment segment : segs) {
 
 				double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
-
-				double mean = new Mean(meanLengths).doubleValue(); 
-
+				double mean = DoubleStream.of(meanLengths).average().orElse(0);
+				
 				ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
 				rowData.add(DEFAULT_DECIMAL_FORMAT.format(mean)+" ± "+ DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue()));
 			}
@@ -673,9 +673,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 //			log("Getting stats for "+stat);
 			double[] stats 	= collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
 			
-			double mean     = new Mean(stats).doubleValue(); 
+			double mean = DoubleStream.of(stats).average().orElse(0);
 			double sem      = Stats.stderr(stats);
-			double median 	= new Quartile(stats, Quartile.MEDIAN).doubleValue();
+			double median 	= Quartile.quartile(stats, Quartile.MEDIAN);
 			
 			ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
 			String ciString = DEFAULT_DECIMAL_FORMAT.format(mean)+" ± "+ DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue());

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.DoubleStream;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
@@ -157,8 +158,8 @@ public class ShellCounter implements Loggable {
 					break;
 				}
 			}
-
-			result.add( new Mean(values).doubleValue() );
+			double mean = DoubleStream.of(values).average().orElse(0);
+			result.add( mean );
 
 		}
 		return result;
@@ -179,8 +180,8 @@ public class ShellCounter implements Loggable {
 					break;
 				}
 			}
-
-			result.add( new Mean(values).doubleValue() );
+			double mean = DoubleStream.of(values).average().orElse(0);
+			result.add( mean );
 
 		}
 		return result;

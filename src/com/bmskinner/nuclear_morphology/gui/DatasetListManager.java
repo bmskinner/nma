@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -72,6 +73,11 @@ public final class DatasetListManager implements Loggable {
 		return selected;
 	}
 	
+	public synchronized List<IAnalysisDataset> getDatasets(List<UUID> ids){
+		
+		return ids.stream().map(id -> getDataset(id)).collect(Collectors.toList());
+	}
+		
 	public synchronized boolean isSingleDataset(){
 		return(selected.size()==1);
 	}
@@ -216,7 +222,7 @@ public final class DatasetListManager implements Loggable {
 			if(d.getUUID().equals(id)){
 				return d;
 			}
-			
+						
 			for(IAnalysisDataset child : d.getAllChildDatasets()){
 				if(child.getUUID().equals(id)){
 					return child;

@@ -21,7 +21,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  */
 public abstract class AbstractOptions implements DisplayOptions {
 	
-	private List<IAnalysisDataset> list     = new ArrayList<IAnalysisDataset>();
+	private List<IAnalysisDataset> list     = new ArrayList<IAnalysisDataset>(10);
 	private List<PlottableStatistic> stats  = new ArrayList<PlottableStatistic>();;
 	private UUID segID                      = null; // the id of the segment (not consistent between datasets)
 	private int segPosition                 = 0;    // the position of the segment in the profile (consistent between datasets)
@@ -38,7 +38,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 		if(list==null){
 			return;
 		}
-		this.list = new ArrayList<IAnalysisDataset>(list);
+		this.list.addAll(list);
 	}
 
 	/**
@@ -49,7 +49,8 @@ public abstract class AbstractOptions implements DisplayOptions {
 		if(list==null){
 			return;
 		}
-		this.list = new ArrayList<IAnalysisDataset>(list);
+		this.list.clear();
+		this.list.addAll(list);
 	}
 
 	/**
@@ -57,7 +58,8 @@ public abstract class AbstractOptions implements DisplayOptions {
 	 * @return the stored datasets
 	 */
 	public List<IAnalysisDataset> getDatasets(){
-		return new ArrayList<IAnalysisDataset>(list);
+		return list;
+//		return new ArrayList<IAnalysisDataset>(list);
 	}
 	
 	

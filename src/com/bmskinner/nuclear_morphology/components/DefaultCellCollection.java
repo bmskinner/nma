@@ -66,6 +66,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
+import com.bmskinner.nuclear_morphology.components.stats.VennCache;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
@@ -119,7 +120,8 @@ public class DefaultCellCollection
 	private volatile transient StatsCache statsCache = new StatsCache();
 
 	// cache the number of shared cells with other datasets
-	protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+//	protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
+	protected volatile transient VennCache vennCache = new VennCache();
 
 	private transient SignalManager  signalManager  = new SignalManager(this);
 	private transient ProfileManager profileManager = new ProfileManager(this);
@@ -1253,12 +1255,13 @@ public class DefaultCellCollection
 	 */
 	public int countShared(ICellCollection d2){
 
-		if(this.vennCache.containsKey(d2.getID())){
-			return vennCache.get(d2.getID());
+		if(vennCache.hasCount(d2)){
+			return vennCache.getCount(d2);
 		}
+		
 		int shared  = countSharedNuclei(d2);
 		d2.setSharedCount(this, shared);
-		vennCache.put(d2.getID(), shared);
+		vennCache.addCount(d2, shared);
 		
 		return shared;
 
@@ -1266,7 +1269,7 @@ public class DefaultCellCollection
 	
 	@Override
 	public void setSharedCount(ICellCollection d2, int i){
-		vennCache.put(d2.getID(), i);
+		vennCache.addCount(d2, i);
 	}
 	
 	/**
@@ -1364,7 +1367,7 @@ public class DefaultCellCollection
 
 		in.defaultReadObject();
 		isRefolding = false;
-		vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
+//		vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
 
 		if(ruleSets==null || ruleSets.isEmpty()){
 			log("Creating default ruleset for collection");
@@ -1372,6 +1375,7 @@ public class DefaultCellCollection
 		}
 		
 		statsCache = new StatsCache();
+		vennCache  = new VennCache();
 		
 		signalManager  = new SignalManager(this);
 		profileManager = new ProfileManager(this);
