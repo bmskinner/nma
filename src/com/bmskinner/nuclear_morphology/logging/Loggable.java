@@ -15,6 +15,7 @@ public interface Loggable {
 	
 	public static final String ROOT_LOGGER = "";
 	public static final String PROGRAM_LOGGER = "ProgramLogger";
+	public static final String ERROR_LOGGER   = "ErrorLogger";
 	
 	public static final Level TRACE = new ErrorLevel();
 
@@ -47,23 +48,26 @@ public interface Loggable {
     
 	
 	/**
-     * Log an error to the program log window with Level.SEVERE
+     * Log an error to the program log window and to the error log file
+     * with Level.SEVERE
      * @param message the error messsage
      * @param t the exception
      */
 	default void error(String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
+		Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
 	}
 	
 	/**
-     * Log an error to the program log window with a stack trace. The
-     * TRACE error level has a level value of 600, so will display
-     * ahead of FINE.
+     * Log an error to the program log window and to the error log file
+     * with a stack trace. The TRACE error level has a level value of 
+     * 600, so will display ahead of FINE.
      * @param message the error messsage
      * @param t the exception
      */
 	default void stack(String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
+		Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
 	}
 	
 	

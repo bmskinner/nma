@@ -155,17 +155,18 @@ public class MainWindow
 	private static final Logger programLogger =
 	        Logger.getLogger(Loggable.PROGRAM_LOGGER);
 	
+	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 	
+
 	/**
 	 * Create the frame.
+	 * @param standalone is the frame a standalone app, or launched within ImageJ?
 	 */
 	public MainWindow(boolean standalone) {
 				
 		isStandalone = standalone;
 
-		
-		
 		createWindowListeners();
 		
 		createUI();

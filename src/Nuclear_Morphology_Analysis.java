@@ -21,10 +21,13 @@ import ij.IJ;
 import ij.plugin.PlugIn;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
@@ -34,6 +37,9 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.io.PropertiesReader;
+import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
+import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -50,6 +56,8 @@ implements PlugIn, Loggable
 {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
+	
+	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
 	
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
@@ -95,6 +103,33 @@ implements PlugIn, Loggable
 		return true;
 	}
 	
+	private void loadLogger(){
+		// Add a log file for program errors
+		
+		try {
+			File dir = new File(Nuclear_Morphology_Analysis.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+
+			File errorFile = new File(dir, "error.log");
+			System.out.println(errorFile.getAbsolutePath());
+
+			DebugFileHandler errorHandler = new DebugFileHandler(errorFile);
+			errorHandler.setFormatter(new DebugFileFormatter());
+			System.out.println("Added error log formatter");
+			errorLogger.addHandler(errorHandler);
+			errorLogger.setLevel(Loggable.TRACE);
+			
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/* 
      * The first method run when the plugin starts within ImageJ.
 	 */
@@ -103,6 +138,8 @@ implements PlugIn, Loggable
 		if(!checkJavaVersion()){
 			return;
 		}
+		
+		loadLogger();
 		
 		/*
 		 * Add a splash screen for long load times
@@ -122,10 +159,14 @@ implements PlugIn, Loggable
 	 * Load the program as standalone
 	 */
 	private void runStandalone(){
-				
+		loadLogger();
 		try {
+			
+			// load the config file properties
+			new PropertiesReader();
 			loadMainWindow(true);
 		} catch(Exception e){
+			error("Error loading main window", e);
 			System.err.println("Error loading main window");
 			e.printStackTrace();
 		} 
@@ -163,7 +204,8 @@ implements PlugIn, Loggable
 		try {
 			
 			if(checkPlugins()){ 
-
+				// load the config file properties
+				new PropertiesReader();
 				loadMainWindow(false);
 
 			} else {
