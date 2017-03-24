@@ -429,4 +429,10 @@ public interface IProfile
 
 	String toString();
 
+	/**
+	 * Get the underlying array as a float array
+	 * @return
+	 */
+	float[] toFloatArray();
+
 }

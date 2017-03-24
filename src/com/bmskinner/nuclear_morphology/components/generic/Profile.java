@@ -1274,4 +1274,10 @@ public class Profile implements IProfile {
 		//	    finest("\tRead profile");
 	}
 
+	@Override
+	public float[] toFloatArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

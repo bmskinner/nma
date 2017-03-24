@@ -209,13 +209,15 @@ public class DefaultCellCollection
 	 */
 	public Set<UUID> getCellIDs(){
 
-		Set<UUID> result = new HashSet<UUID>(size());
-
-		for(ICell c : cells){
-			result.add(c.getId());
-		}
-
-		return result;
+		return cells.parallelStream().map(c -> c.getId()).collect(Collectors.toSet());
+//		
+//		Set<UUID> result = new HashSet<UUID>(size());
+//
+//		for(ICell c : cells){
+//			result.add(c.getId());
+//		}
+//
+//		return result;
 	}
 
 	public void addCell(ICell r) {

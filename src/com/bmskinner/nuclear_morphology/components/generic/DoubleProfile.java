@@ -25,6 +25,8 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
+import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * A profile with double precision
@@ -1147,5 +1149,17 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 		}
 
 		return new DoubleProfile(combinedArray);
+	}
+
+	@Override
+	public float[] toFloatArray() {
+		try {
+			return new ArrayConverter(array).toFloatArray();
+		} catch (ArrayConversionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 }

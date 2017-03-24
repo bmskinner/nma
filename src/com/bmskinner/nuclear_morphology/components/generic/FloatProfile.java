@@ -292,6 +292,11 @@ public class FloatProfile implements IProfile {
 		}
 		return result;
 	}
+	
+	@Override
+	public float[] toFloatArray(){
+		return array;
+	}
 
 
 	/* (non-Javadoc)
