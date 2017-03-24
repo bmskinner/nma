@@ -754,14 +754,14 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		//	  finest("\tReading rodent sperm nucleus");
 		in.defaultReadObject();
 		calculateHookAndBodyLength();
 
 	}
 
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		//	  finest("\tWriting rodent sperm nucleus");
 		out.defaultWriteObject();
 

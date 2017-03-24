@@ -65,7 +65,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		run();	
 		
 		if(dataset==null){
-			throw new UnloadableDatasetException("No dataset loaded");
+			throw new UnloadableDatasetException("Could not load file '"+file.getAbsolutePath()+"'");
 		}
 		
 		DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
@@ -160,7 +160,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			
 			
 		} catch (IllegalArgumentException e){
-			warn("Unable to open file: "+e.getMessage());
+			warn("Unable to open file '"+file.getAbsolutePath()+"': "+e.getMessage());
 			stack("Error opening file", e);
 		}
 	}
@@ -295,26 +295,45 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			
 			
 		} catch(NullPointerException e1){
-			stack("NPE Error reading dataset", e1);
+			stack("NPE Error reading '"+file.getAbsolutePath()+"': ", e1);
 			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
 			
 		} catch(OptionalDataException e1){
-			
+			/*
+			 * Exception indicating the failure of an object read operation
+			 *  due to unread primitive data, or the end of data belonging 
+			 *  to a serialized object in the stream. 
+			 */
 			if(e1.eof){
-				stack("End of file reached", e1);
+				
+				/*
+				An attempt was made to read past the end of data consumable by a 
+				class-defined readObject or readExternal method. In this case, 
+				the OptionalDataException's eof field is set to true
+				*/
+				
+				stack("Unexpected end of data '"+file.getAbsolutePath()+"'", e1);
 			} else {
-				stack(e1.length+" remaining in buffer", e1);
+				
+				/*
+				 * An attempt was made to read an object when the next element in
+				 *  the stream is primitive data. In this case, the 
+				 *  OptionalDataException's length field is set to the number of
+				 *   bytes of primitive data immediately readable from the stream, 
+				 *   and the eof field is set to false
+				 */
+				stack(file.getAbsolutePath()+": "+e1.length+" remaining in buffer", e1);
 			}
-			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
+			throw new UnloadableDatasetException("Cannot load '"+file.getAbsolutePath()+"' due to unexpected end of file", e1);
 			
 			
 		} catch(Exception e1){
-			stack("Error reading dataset", e1);
-			throw new UnloadableDatasetException("Cannot load dataset due to "+e1.getClass().getSimpleName(), e1);
+			stack("Error reading '"+file.getAbsolutePath()+"'", e1);
+			throw new UnloadableDatasetException("Cannot load '"+file.getAbsolutePath()+"' due to "+e1.getClass().getSimpleName(), e1);
 			
 		} catch(StackOverflowError e){
 			
-			throw new UnloadableDatasetException("Stack overflow loading dataset", e);
+			throw new UnloadableDatasetException("Stack overflow loading '"+file.getAbsolutePath()+"'", e);
 			
 		} finally {
 			finest("Closing file stream");
@@ -323,7 +342,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 				fis.close();
 			} catch(Exception e){
 				stack("Error closing file stream", e);
-				throw new UnloadableDatasetException("Cannot load dataset due to "+e.getClass().getSimpleName(), e);
+				throw new UnloadableDatasetException("Cannot load '"+file.getAbsolutePath()+"' due to "+e.getClass().getSimpleName(), e);
 			}
 		}
 		

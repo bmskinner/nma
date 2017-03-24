@@ -19,7 +19,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
 	protected IAnalysisMethod method;
 	
 	/**
-	 * Construct with a method. The progress bar total will be set to zero - i.e.
+	 * Construct with a method. The progress bar total will be set to -1 - i.e.
 	 * the bar will remain indeterminate until the method completes
 	 * @param m the method to run
 	 */

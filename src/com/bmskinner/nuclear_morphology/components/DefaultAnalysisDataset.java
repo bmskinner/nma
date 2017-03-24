@@ -808,7 +808,7 @@ public class DefaultAnalysisDataset
 		return true;
 	}
 	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 	    
 //		warn("Reading dataset");
 		
@@ -841,7 +841,7 @@ public class DefaultAnalysisDataset
 	    }
 	}
 	
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
 //		log(this.getName());
 //	    log("Has children: "+this.hasChildren());
 //	    log("Child count : "+childDatasets.size());

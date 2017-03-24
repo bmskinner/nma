@@ -136,7 +136,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		return this.toShape();
 	}
 	
-	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 		
 		in.defaultReadObject();

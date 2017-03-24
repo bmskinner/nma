@@ -645,7 +645,7 @@ public class DefaultNucleus
 		return true;
 	}
 	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		
 		in.defaultReadObject();
 		

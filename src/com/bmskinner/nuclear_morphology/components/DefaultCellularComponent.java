@@ -34,6 +34,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.OptionalDataException;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1200,11 +1201,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 * 
 		 */
 		
-		private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-//			finest("\tReading abstract cellular component");
-			
+		private synchronized void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+
 			in.defaultReadObject();
-			
 			
 			
 			// Fill the transient fields
@@ -1300,7 +1299,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 		}
 
-		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+		private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
 
 			out.defaultWriteObject();
 //			log("CoM : "+this.getCentreOfMass().toString());

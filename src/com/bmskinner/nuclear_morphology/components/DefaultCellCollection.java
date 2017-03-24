@@ -120,7 +120,6 @@ public class DefaultCellCollection
 	private volatile transient StatsCache statsCache = new StatsCache();
 
 	// cache the number of shared cells with other datasets
-//	protected volatile transient Map<UUID, Integer> vennCache = new HashMap<UUID, Integer>();
 	protected volatile transient VennCache vennCache = new VennCache();
 
 	private transient SignalManager  signalManager  = new SignalManager(this);
@@ -1328,16 +1327,14 @@ public class DefaultCellCollection
 	public String toString(){
 
 		String newLine = System.getProperty("line.separator");
-		StringBuilder b = new StringBuilder();
-
-		b.append("Collection:" + getName() + newLine);
-		b.append("Nuclei: "+ this.getNucleusCount() + newLine);
-
-		b.append("Clockwise: "+ this.countClockWiseRPNuclei() + newLine);
-
-		b.append("Source folder: "+this.getFolder().getAbsolutePath()+newLine);
-		b.append("Nucleus type: "+this.nucleusType+newLine);
-		b.append("Profile collections:"+newLine);
+		
+		StringBuilder b = new StringBuilder("Collection:" + getName() + newLine)
+			.append("Collection:" + getName() + newLine)
+			.append("Nuclei: "+ this.getNucleusCount() + newLine)
+			.append("Clockwise: "+ this.countClockWiseRPNuclei() + newLine)
+			.append("Source folder: "+this.getFolder().getAbsolutePath()+newLine)
+			.append("Nucleus type: "+this.nucleusType+newLine)
+			.append("Profile collections:"+newLine);
 		
 		IProfileCollection pc = this.getProfileCollection();
 		b.append( pc.toString()+ newLine);
@@ -1359,11 +1356,11 @@ public class DefaultCellCollection
 		return b.toString();
 	}
 
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 	}
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 		in.defaultReadObject();
 		isRefolding = false;
