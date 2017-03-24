@@ -1,0 +1,89 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+package com.bmskinner.nuclear_morphology.io;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Properties;
+
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+/**
+ * Read the config file and assign values to the global options of the program  
+ * @author bms41
+ * @since 1.13.4
+ *
+ */
+public class PropertiesReader implements Loggable {
+	
+	public static final String INI_FILE = "config.ini";
+	
+	private static final String DEFAULT_DIR_KEY = "DEFAULT_DIR";
+
+	public PropertiesReader() {
+		try {
+
+			// Get the location of the jar file
+			File dir =  new File(PropertiesReader.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			
+			File ini = new File(dir, INI_FILE);
+			System.out.println("ini: "+ini.getAbsolutePath());
+			
+			if(ini.exists()){
+				// Read the properties
+			Properties properties = new Properties();
+
+			properties.load(new FileInputStream(ini));
+
+			assignOptions(properties);
+			} else {
+				System.out.println("No ini file: creating default");
+			}
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	private void assignOptions(Properties properties){
+		
+		GlobalOptions op = GlobalOptions.getInstance();
+		
+		for(String key : properties.stringPropertyNames()) {
+
+			
+			String value = properties.getProperty(key);
+			
+			if(DEFAULT_DIR_KEY.equals(key)){
+				op.setDefaultDir( new File(value));
+			}
+//			System.out.println(key + " => " + value);
+
+		}
+	}
+
+}

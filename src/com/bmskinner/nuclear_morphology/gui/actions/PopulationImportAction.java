@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
@@ -70,12 +71,11 @@ public class PopulationImportAction extends ProgressableAction {
 			
 			IAnalysisMethod m = new DatasetImportMethod(file);
 			worker = new DefaultAnalysisWorker(m);
-					
-//			worker = new PopulationImportWorker(file);
+
 			worker.addPropertyChangeListener(this);
 			
-			this.setProgressMessage("Opening file...");
-			fine("Opening dataset...");
+			setProgressMessage("Opening file...");
+
 			ThreadManager.getInstance().submit(worker);
 		} else {
 			fine("Open cancelled");
@@ -92,7 +92,7 @@ public class PopulationImportAction extends ProgressableAction {
 
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
 		
-		File defaultDir = new File("J:\\Protocols\\Scripts and macros\\");
+		File defaultDir = GlobalOptions.getInstance().getDefaultDir();//new File("J:\\Protocols\\Scripts and macros\\");
 		JFileChooser fc = new JFileChooser("Select a saved dataset...");
 		if(defaultDir.exists()){
 			fc = new JFileChooser(defaultDir);
@@ -129,12 +129,12 @@ public class PopulationImportAction extends ProgressableAction {
 			}
 
 		} catch (InterruptedException e) {
-			warn("Unable to open dataset: "+e.getMessage());
-			stack("Unable to open dataset", e);
+			warn("Unable to open file '"+file.getAbsolutePath()+"': "+e.getMessage());
+			stack("Unable to open '"+file.getAbsolutePath()+"': ", e);
 			return;
 		} catch (ExecutionException e) {
-			warn("Unable to open dataset: "+e.getMessage());
-			stack("Unable to open dataset", e);
+			warn("Unable to open '"+file.getAbsolutePath()+"': "+e.getMessage());
+			stack("Unable to open '"+file.getAbsolutePath()+"': ", e);
 			return;
 		}
 		fine("Opened dataset");

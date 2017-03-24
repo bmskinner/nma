@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui;
 
+import java.io.File;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -14,6 +15,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
 public class GlobalOptions {
 	
 	private static volatile GlobalOptions instance;
+	
+	private File defaultDir; // where to fall back to for finding images or saving files
 	
 	private MeasurementScale scale;
 	
@@ -108,7 +111,13 @@ public class GlobalOptions {
 		this.convertDatasets = convertDatasets;
 	}
 	
+	public synchronized File getDefaultDir() {
+		return this.defaultDir;
+	}
 	
+	public synchronized void setDefaultDir(File f) {
+		this.defaultDir = f;
+	}
 	
 
 }
