@@ -54,7 +54,7 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
 				
 				JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
 				ViolinChartPanel panel = new ViolinChartPanel(chart);
-				
+				panel.getChartRenderingInfo().setEntityCollection(null);
 				panel.setPreferredSize(preferredSize);
 				chartPanels.put(stat.toString(), panel);
 				mainPanel.add(panel);

@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.stats;
 
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.PathIterator;
 
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
@@ -34,7 +35,7 @@ public class Area extends DescriptiveStatistic {
 			throw new IllegalArgumentException("Roi is not an area");
 		}
 		
-		value = calculatePolygonRoi(r);
+		value = calculatePolygonArea(r);
 		
 	}
 	
@@ -74,14 +75,34 @@ public class Area extends DescriptiveStatistic {
 		
 	}
 	
-	private float calculatePolygonRoi(Roi r){
+//	private float calculatePolygonArea(Shape s){
+//		
+//		PathIterator it = s.getPathIterator(null);
+//		float[] coords = new float[2];
+//		while(it.isDone()==false){
+//		    it.currentSegment(coords);
+//		    /* prints points of intersection b.n the 2 polygons */
+//		    System.out.println(Arrays.toString(coords));
+//		    it.next();
+//		}
+//		
+//		FloatPolygon f = r.getFloatPolygon();
+//		
+//		float sum = 0;
+//		for (int i = 0; i < f.npoints -1; i++) {
+//		    sum = sum + f.xpoints[i]*f.ypoints[i+1] - f.ypoints[i]*f.xpoints[i+1];
+//		}
+//		
+//		return Math.abs( sum/2);		
+//	}
+		
+	private float calculatePolygonArea(Roi r){
 		
 		
 		FloatPolygon f = r.getFloatPolygon();
 		
 		float sum = 0;
-		for (int i = 0; i < f.npoints -1; i++)
-		{
+		for (int i = 0; i < f.npoints -1; i++) {
 		    sum = sum + f.xpoints[i]*f.ypoints[i+1] - f.ypoints[i]*f.xpoints[i+1];
 		}
 		

@@ -104,7 +104,7 @@ public class SelectableChartPanel extends ExportableChartPanel implements Signal
 	}
 	
 	@Override
-	public void setChart(JFreeChart chart){
+	public synchronized void setChart(JFreeChart chart){
 		super.setChart(chart);
 		this.removeMouseListener(mouseMarker);
 		mouseMarker = new MouseMarker(this);

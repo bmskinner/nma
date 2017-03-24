@@ -81,6 +81,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		JFreeChart chart = ScatterChartFactory.makeEmptyChart();
 		
 		chartPanel = new ExportableChartPanel(chart);
+		chartPanel.getChartRenderingInfo().setEntityCollection(null);
 		this.add(chartPanel, BorderLayout.CENTER);
 		
 		JScrollPane scrollPane  = new JScrollPane();

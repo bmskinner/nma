@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
+import com.bmskinner.nuclear_morphology.io.Importer;
 
 /**
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset
@@ -41,6 +42,9 @@ import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 public class PopulationImportAction extends ProgressableAction {
 
 	private final File file;
+	private static final String PROGRESS_BAR_LABEL = "Opening file...";
+	private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology datasets";
+	
 	
 	/**
 	 * Create an import action for the given main window.
@@ -48,7 +52,7 @@ public class PopulationImportAction extends ProgressableAction {
 	 * @param mw the main window to which a progress bar will be attached
 	 */
 	public PopulationImportAction(MainWindow mw) {
-		super("Opening file", mw);		
+		super(PROGRESS_BAR_LABEL, mw);		
 		file = selectFile();	
 	}
 	
@@ -59,7 +63,7 @@ public class PopulationImportAction extends ProgressableAction {
 	 * @param file the dataset file to open 
 	 */
 	public PopulationImportAction(MainWindow mw, File file) {
-		super("Opening file", mw);
+		super(PROGRESS_BAR_LABEL, mw);
 		this.file = file;
 	}
 	
@@ -74,7 +78,7 @@ public class PopulationImportAction extends ProgressableAction {
 
 			worker.addPropertyChangeListener(this);
 			
-			setProgressMessage("Opening file...");
+			setProgressMessage(PROGRESS_BAR_LABEL);
 
 			ThreadManager.getInstance().submit(worker);
 		} else {
@@ -90,7 +94,7 @@ public class PopulationImportAction extends ProgressableAction {
 	 */
 	private File selectFile(){
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Nuclear morphology datasets", "nmd");
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE, Importer.SAVE_FILE_EXTENSION_NODOT);
 		
 		File defaultDir = GlobalOptions.getInstance().getDefaultDir();//new File("J:\\Protocols\\Scripts and macros\\");
 		JFileChooser fc = new JFileChooser("Select a saved dataset...");

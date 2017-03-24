@@ -58,6 +58,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 					JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 					
 					SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
+					panel.getChartRenderingInfo().setEntityCollection(null);
 					panel.setPreferredSize(preferredSize);
 					panel.addSignalChangeListener(this);
 					chartPanels.put(stat.toString(), panel);

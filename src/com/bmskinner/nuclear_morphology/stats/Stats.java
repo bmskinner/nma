@@ -39,6 +39,13 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 	 public static final double LOG2 = Math.log(2);
 	 public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
 
+	 static double max(double[] array){
+		 return DoubleStream.of(array).max().orElse(0);
+	 }
+	 
+	 static double min(double[] array){
+		 return DoubleStream.of(array).min().orElse(0);
+	 }
   
   /**
    * Calculate the standard error of an array of values

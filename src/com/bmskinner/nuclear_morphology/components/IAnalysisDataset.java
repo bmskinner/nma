@@ -33,6 +33,7 @@ import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -429,6 +430,67 @@ public interface IAnalysisDataset extends Serializable, Loggable  {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Test if the merge sources of a dataset have the same analysis options
+	 * TODO: make recursive; what happens when two merged datsets are merged?
+	 * @param dataset
+	 * @return the common options, or null if an options is different
+	 */
+	static boolean mergedSourceOptionsAreSame(IAnalysisDataset dataset){
+
+		Set<IAnalysisDataset> list = dataset.getMergeSources();
+		
+		boolean ok = true;
+
+		for(IAnalysisDataset d1 : list){
+			
+			/*
+			 * If the dataset has merge sources, the options are null
+			 * In this case, recursively go through the dataset's merge sources
+			 * until the root datasets are found with analysis options
+			 */
+			if( d1.hasMergeSources() ){
+				ok = mergedSourceOptionsAreSame(d1);
+				
+			} else {
+				
+				for(IAnalysisDataset d2 : list){
+					if(d1==d2){
+						continue; // ignore self self comparisons
+					}
+					
+					// ignore d2 with a merge source - it will be covered in the d1 loop
+					if(d2.hasMergeSources()){
+						continue;
+					}
+
+					
+					try{
+						IAnalysisOptions a1 = d1.getAnalysisOptions();
+						IAnalysisOptions a2 = d2.getAnalysisOptions();
+
+					
+
+						if(a1==null || a2==null){
+							ok = false;
+							continue;
+						}
+
+						if( ! a1.equals(a2) ){
+							ok = false;
+						}
+					} catch (MissingOptionException e) {
+						ok = false;
+					}
+
+				}
+
+			}
+
+		}
+		return ok;
 	}
 	
 	/**

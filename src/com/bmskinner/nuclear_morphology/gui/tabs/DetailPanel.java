@@ -855,7 +855,7 @@ public abstract class DetailPanel
     	
     	
     	@Override
-        public void done() {
+        public synchronized void done() {
    	
     		try {
     			if(options.hasTarget()){

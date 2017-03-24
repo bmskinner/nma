@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.stats;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 /**
  * This is an OO replacement for the static  Stats.max(list) method
@@ -29,9 +30,7 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class Max extends DescriptiveStatistic {
-	
-	
-	
+		
 	/**
 	 * Calculate the maximum value of the two integers
 	 * @param list

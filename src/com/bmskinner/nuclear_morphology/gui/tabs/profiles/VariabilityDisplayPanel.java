@@ -74,7 +74,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 
 		chartPanel = new ExportableChartPanel(chart);
-
+		chartPanel.getChartRenderingInfo().setEntityCollection(null);
 		this.add(chartPanel, BorderLayout.CENTER);
 
 		buttonPanel.add(borderTagOptionsPanel);

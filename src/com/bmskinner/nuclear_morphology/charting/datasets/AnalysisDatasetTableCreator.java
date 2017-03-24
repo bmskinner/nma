@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.stream.DoubleStream;
@@ -60,11 +59,39 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.Mean;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
+	
+	private static final String NA_MERGE = "N/A - merge";
+	private static final String NA       = "N/A";
+	
+	private static final Object[] ANALYSIS_PARAMETERS_ROWS = {
+			"Profile window",
+			"Nucleus detection method",
+			"Nucleus threshold",
+			"Kuwahara filter radius",
+			"Chromocentre flattening threshold",
+			"Canny auto threshold",
+			"Canny low threshold",
+			"Canny high threshold",
+			"Canny kernel radius",
+			"Canny kernel width",
+			"Closing radius",
+			"Nucleus min size",
+			"Nucleus max size",
+			"Nucleus min circ",
+			"Nucleus max circ",
+			"Consensus folded",
+			"Refold mode",
+			"Run date",
+			"Run time",
+			"Collection source",
+			"Log file",
+			"Type",
+			"Version"};
+	
 	
 	/**
 	 * Create with a set of table options
@@ -337,41 +364,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	 * @return
 	 */
 	private TableModel createAnalysisParametersTable() {
-
-		DefaultTableModel model = new DefaultTableModel();
-
-		Object[] columnData = {
-				"Profile window",
-				"Nucleus detection method",
-				"Nucleus threshold",
-				"Kuwahara filter radius",
-				"Chromocentre flattening threshold",
-				"Canny auto threshold",
-				"Canny low threshold",
-				"Canny high threshold",
-				"Canny kernel radius",
-				"Canny kernel width",
-				"Closing radius",
-				"Nucleus min size",
-				"Nucleus max size",
-				"Nucleus min circ",
-				"Nucleus max circ",
-				"Consensus folded",
-				"Refold mode",
-				"Run date",
-				"Run time",
-				"Collection source",
-				"Log file",
-				"Type",
-				"Version"};
-		model.addColumn("", columnData);
 		
 		if( ! options.hasDatasets()){
-			finer("No datasets in options, returning blank parameter table");
-			model.addColumn("No data loaded");
-			return model;
+			return createBlankTable();
 		} 
+		
+		DefaultTableModel model = new DefaultTableModel();
 
+		model.addColumn("", ANALYSIS_PARAMETERS_ROWS);
 
 		List<IAnalysisDataset> list = options.getDatasets();
 
@@ -383,47 +383,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 				// Do not provide an options as an argument here.
 				// This will cause the existing dataset options to be used
-				Object[] collectionData = formatAnalysisOptionsForTable(dataset, null);
+				Object[] collectionData = createAnalysisParametersColumn(dataset, null);
 
 				model.addColumn(dataset.getCollection().getName(), collectionData);
 
 			} else {
 				fine("No analysis options in dataset "+dataset.getName());
-				Object[] collectionData =  new Object[columnData.length];
-				if(dataset.hasMergeSources()){
-
-					fine("Dataset has merge sources");				
-					if( testMergedDatasetOptionsAreSame(dataset)){
-						
-						fine("Merge source options are the same");
-
-						// The options are the same in all merge sources
-						// Show the first options from the first source
-
-						List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
-
-						try {
-							IAnalysisOptions op = l.get(0).getAnalysisOptions();
-							collectionData = formatAnalysisOptionsForTable(dataset, op);
-						} catch (MissingOptionException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-
-						// Provide an options to be used
-						
-
-					} else {
-						// Merge sources have different options
-						Arrays.fill(collectionData, "N/A - merged");
-						fine("Merge source options are different");	
-					}
-
-				} else {
-					// there are no options to use; fill blank
-					Arrays.fill(collectionData, "N/A");
-					fine("No merge sources, and no options");	
-				}
+				Object[] collectionData =  createAnalysisParametersMergeColumn(dataset);
+				
 
 				model.addColumn(dataset.getCollection().getName(), collectionData);
 			}
@@ -433,84 +400,57 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	}
 	
 	/**
-	 * Test if the merge sources of a dataset have the same analysis options
-	 * TODO: make recursive; what happens when two merged datsets are merged?
+	 * Create an analysis parameter column for a dataset with no top level options
 	 * @param dataset
-	 * @return the common options, or null if an options is different
+	 * @return
 	 */
-	private boolean testMergedDatasetOptionsAreSame(IAnalysisDataset dataset){
-		finest( "Testing merged dataset options for "+dataset.getName() );
-		Set<IAnalysisDataset> list = dataset.getMergeSources();
+	private Object[] createAnalysisParametersMergeColumn(IAnalysisDataset dataset){
 		
-		boolean ok = true;
+		Object[] data =  new Object[ANALYSIS_PARAMETERS_ROWS.length];
+		
+		if(dataset.hasMergeSources()){
 
-		for(IAnalysisDataset d1 : list){
-			
-			finest( "Testing merge source "+d1.getName() );
-			/*
-			 * If the dataset has merge sources, the options are null
-			 * In this case, recursively go through the dataset's merge sources
-			 * until the root datasets are found with analysis options
-			 */
-			if( d1.hasMergeSources() ){
-				finest( d1.getName() +" has merge sources");
-				ok = testMergedDatasetOptionsAreSame(d1);
+			fine("Dataset has merge sources");				
+			if( IAnalysisDataset.mergedSourceOptionsAreSame(dataset)){
 				
-			} else {
-				
-				for(IAnalysisDataset d2 : list){
-					finest( "Comparing to merge source "+d2.getName() );
-					if(d1==d2){
-						finest( "Skip self self comparison");
-						continue; // ignore self self comparisons
-					}
-					
-					// ignore d2 with a merge source - it will be covered in the d1 loop
-					if(d2.hasMergeSources()){
-						finest( "Ignoring d2 merge source with merge sources"+d2.getName() );
-						continue;
-					}
+				fine("Merge source options are the same");
 
-					finest( "Checking equality of options in "+d1.getName()+" vs "+d2.getName() );
-					
-					try{
-						IAnalysisOptions a1 = d1.getAnalysisOptions();
-						IAnalysisOptions a2 = d2.getAnalysisOptions();
+				// The options are the same in all merge sources
+				// Show the first options from the first source
 
-					
+				List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
 
-						if(a1==null || a2==null){
-							finest( "Found null analysis options; comparison is false" );
-							ok = false;
-							continue;
-						}
-
-						if( ! a1.equals(a2) ){
-							finest( "Found unequal options in "+d1.getName()+" vs "+d2.getName() );
-							ok = false;
-						} else {
-							finest( "Found equal options in "+d1.getName()+" vs "+d2.getName() );
-						}
-					} catch (MissingOptionException e) {
-						ok = false;
-					}
-					finest( "Done comparing to merge source "+d2.getName() );
+				try {
+					IAnalysisOptions op = l.get(0).getAnalysisOptions();
+					data = createAnalysisParametersColumn(dataset, op);
+				} catch (MissingOptionException e) {
+					fine("No option present for "+l.get(0).getName());
 				}
-				finest( "Done testing list against merge source "+d1.getName() );
+
+				// Provide an options to be used
+				
+
+			} else {
+				// Merge sources have different options
+				Arrays.fill(data, NA_MERGE);
+				fine("Merge source options are different");	
 			}
-			finest( "Done testing merge source "+d1.getName() );
+
+		} else {
+			// there are no options to use; fill blank
+			Arrays.fill(data, NA);
+			fine("No merge sources, and no options");	
 		}
-		finest( "Done testing merged dataset options for "+dataset.getName()+": "+ok );
-		return ok;
+		return data;
 	}
-	
+		
 	/**
 	 * Get an array of formatted info from a dataset analysis options
 	 * @param dataset the dataset to format options for
 	 * @param options an options to use instead of the dataset's own options. Can be null.
 	 * @return
 	 */
-	private Object[] formatAnalysisOptionsForTable(IAnalysisDataset dataset, IAnalysisOptions options){
+	private Object[] createAnalysisParametersColumn(IAnalysisDataset dataset, IAnalysisOptions options){
 		try {
 			options = options == null ? dataset.getAnalysisOptions() : options;
 		} catch (MissingOptionException e1) {
@@ -527,15 +467,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		String logFile;
 				
 		if(dataset.hasMergeSources()){
-			date    = "N/A - merge";
-			time    = "N/A - merge";
-			folder  = "N/A - merge";
-			logFile = "N/A - merge";
+			date    = NA_MERGE;
+			time    = NA_MERGE;
+			folder  = NA_MERGE;
+			logFile = NA_MERGE;
 			
 		} else {
 			if(dataset.getCollection().getOutputFolderName()==null){
-				date = "N/A";
-				time = "N/A";
+				date = NA;
+				time = NA;
 			} else {
 				String[] times = dataset.getCollection().getOutputFolderName().split("_");
 				date = times[0];
@@ -567,18 +507,18 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 							   ? "Canny edge detection"
 							   : "Thresholding";
 		
-		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? "N/A" : String.valueOf( nucleusOptions.getThreshold() );
+		String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? NA : String.valueOf( nucleusOptions.getThreshold() );
 		
-		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : "N/A";
+		String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara() ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : NA;
 		
-		String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage() ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : "N/A";
+		String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage() ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : NA;
 		
-		String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : "N/A";
+		String cannyAutoThreshold = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : NA;
 		String cannyLowThreshold = nucleusCannyOptions.isUseCanny()  && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
 		String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold() ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
-		String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : "N/A";
-		String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : "N/A";
-		String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : "N/A";
+		String cannyKernelRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : NA;
+		String cannyKernelWidth = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : NA;
+		String cannyClosingRadius = nucleusCannyOptions.isUseCanny() ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
 
 		Object[] collectionData = {
 				options.getProfileWindowProportion(),

@@ -59,6 +59,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 			angleDistributionPanel = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
 			pValueChartPanel       = new ExportableChartPanel( MorphologyChartFactory.createEmptyChart());
 			
+			angleDistributionPanel.getChartRenderingInfo().setEntityCollection(null);
+			pValueChartPanel.getChartRenderingInfo().setEntityCollection(null);
 			mainPanel.add(angleDistributionPanel, BorderLayout.WEST);
 			mainPanel.add(pValueChartPanel, BorderLayout.CENTER);
 

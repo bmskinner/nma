@@ -4,7 +4,8 @@ import java.io.File;
 
 public interface Importer {
 	
-	static final String SAVE_FILE_EXTENSION = ".nmd";
+	static final String SAVE_FILE_EXTENSION_NODOT = "nmd";
+	static final String SAVE_FILE_EXTENSION = "."+SAVE_FILE_EXTENSION_NODOT;
 	static final String LOG_FILE_EXTENSION = ".log";
 	static final String LOC_FILE_EXTENSION = "cell"; // locations of cells (in a tsv format)
 	static final String BAK_FILE_EXTENSION = ".bak"; // backup files made in conversions
