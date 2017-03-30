@@ -15,7 +15,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ThreadManager implements Loggable {
 	private static volatile ThreadManager instance = null;
-	
+	private static final Object lockObject = new Object(); // synchronisation
 	/*
 	 * Handle threading
 	 */
@@ -41,10 +41,20 @@ public class ThreadManager implements Loggable {
 	 * @return
 	 */
 	public static ThreadManager getInstance(){
-		if(instance==null){
-			instance = new ThreadManager();
+		
+		if(instance!=null){
+			return instance;
+		} else {
+			
+			synchronized(lockObject){
+				if(instance==null){
+					instance = new ThreadManager();
+				}
+			}
+			
+			return instance;
 		}
-		return instance;
+		
 	}
 	
 	public synchronized Future<?> submit(Runnable r){

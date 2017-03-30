@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
 public class GlobalOptions {
 	
 	private static volatile GlobalOptions instance;
+	private static final Object lockObject = new Object(); // synchronisation
 	
 	private File defaultDir; // where to fall back to for finding images or saving files
 	
@@ -35,11 +36,25 @@ public class GlobalOptions {
 	 */
 	private boolean fillConsensus;
 	
+	/**
+	 * Get the global options for the program.
+	 * @return
+	 */
 	public static GlobalOptions getInstance(){
-		if(instance==null){
-			instance = new GlobalOptions();
+		
+		if(instance!=null){
+			return instance;
+		} else {
+			
+			synchronized(lockObject){
+				if(instance==null){
+					instance = new GlobalOptions();
+				}
+			}
+			
+			return instance;
 		}
-		return instance;
+
 	}
 	
 	private GlobalOptions(){
