@@ -19,6 +19,7 @@
 package components;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Rule;
@@ -32,8 +33,536 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 
 public class ProfileTest {
 	
+	float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
+	
+	public ProfileTest(){
+		
+	}
+	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
+	
+	
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float[])}.
+	 */
+	@Test
+	public void testFloatProfileFloatArray() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testFloatProfileIProfile() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float, int)}.
+	 */
+	@Test
+	public void testFloatProfileFloatInt() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#size()}.
+	 */
+	@Test
+	public void testSize() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#equals(java.lang.Object)}.
+	 */
+	@Test
+	public void testEqualsObject() {
+		fail("Not yet implemented");
+		IProfile p1 = new FloatProfile(data);
+		IProfile p2 = new FloatProfile(data);
+		
+		assertTrue(p1.equals(p2));
+		
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#get(int)}.
+	 */
+	@Test
+	public void testGetInt() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#get(double)}.
+	 */
+	@Test
+	public void testGetDouble() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getMax()}.
+	 */
+	@Test
+	public void testGetMax() {
+		IProfile p1 = new FloatProfile(data);
+		assertEquals( 20d , p1.getMax(), 0);
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMax(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
+	 */
+	@Test
+	public void testGetIndexOfMaxBooleanProfile() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMax()}.
+	 */
+	@Test
+	public void testGetIndexOfMax() {
+		IProfile p1 = new FloatProfile(data);
+		assertEquals( 9 , p1.getIndexOfMax());
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfFraction(double)}.
+	 */
+	@Test
+	public void testGetIndexOfFraction() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getFractionOfIndex(int)}.
+	 */
+	@Test
+	public void testGetFractionOfIndex() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getMin()}.
+	 */
+	@Test
+	public void testGetMin() {
+		IProfile p1 = new FloatProfile(data);
+		assertEquals( 1d , p1.getMin(), 0);
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMin(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
+	 */
+	@Test
+	public void testGetIndexOfMinBooleanProfile() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMin()}.
+	 */
+	@Test
+	public void testGetIndexOfMin() {
+		IProfile p1 = new FloatProfile(data);
+		assertEquals( 2 , p1.getIndexOfMin());
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#toFloatArray()}.
+	 */
+	@Test
+	public void testToFloatArray() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#toDoubleArray()}.
+	 */
+	@Test
+	public void testToDoubleArray() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getPositions(int)}.
+	 */
+	@Test
+	public void testGetPositions() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getRescaledIndex(int, int)}.
+	 */
+	@Test
+	public void testGetRescaledIndex() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#absoluteSquareDifference(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testAbsoluteSquareDifference() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#copy()}.
+	 */
+	@Test
+	public void testCopy() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#offset(int)}.
+	 */
+	@Test
+	public void testOffset() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#smooth(int)}.
+	 */
+	@Test
+	public void testSmooth() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#reverse()}.
+	 */
+	@Test
+	public void testReverse() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#interpolate(int)}.
+	 */
+	@Test
+	public void testInterpolate() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testGetSlidingWindowOffset() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getConsistentRegionBounds(double, double, int)}.
+	 */
+	@Test
+	public void testGetConsistentRegionBounds() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int)}.
+	 */
+	@Test
+	public void testGetLocalMinimaInt() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int, double)}.
+	 */
+	@Test
+	public void testGetLocalMinimaIntDouble() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int, double, double)}.
+	 */
+	@Test
+	public void testGetLocalMinimaIntDoubleDouble() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int)}.
+	 */
+	@Test
+	public void testGetLocalMaximaInt() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int, double)}.
+	 */
+	@Test
+	public void testGetLocalMaximaIntDouble() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int, double, double)}.
+	 */
+	@Test
+	public void testGetLocalMaximaIntDoubleDouble() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getWindow(int, int)}.
+	 */
+	@Test
+	public void testGetWindow() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSubregion(int, int)}.
+	 */
+	@Test
+	public void testGetSubregionIntInt() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSubregion(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 */
+	@Test
+	public void testGetSubregionIBorderSegment() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#calculateDeltas(int)}.
+	 */
+	@Test
+	public void testCalculateDeltas() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#differentiate()}.
+	 */
+	@Test
+	public void testDifferentiate() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#log(double)}.
+	 */
+	@Test
+	public void testLog() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#power(double)}.
+	 */
+	@Test
+	public void testPower() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#absolute()}.
+	 */
+	@Test
+	public void testAbsolute() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#cumulativeSum()}.
+	 */
+	@Test
+	public void testCumulativeSum() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#multiply(double)}.
+	 */
+	@Test
+	public void testMultiplyDouble() {
+		// MyClass is tested
+		float[] data     = {1, 1, 1, 1, 1, 1};
+		double   constant = 2;
+		float[] expected = {2 ,2, 2, 2, 2, 2};
+
+		IProfile tester = new FloatProfile(data);
+		IProfile result = tester.multiply(constant);
+
+		// assert statements
+
+		// there is no assertArrayEquals for float[]
+		for( int i =0;i<data.length; i++){
+			assertEquals("1x2 should be 2", expected[i], result.toFloatArray()[i],0);
+		}
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#multiply(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testMultiplyIProfile() {
+
+		float[] data       = {0, 1, 2, 3,  4,  5 };
+		float[] multiplier = {1, 2, 3, 4,  5,  6 };
+		float[] expected   = {0, 2, 6, 12, 20, 30};
+
+		IProfile tester = new FloatProfile(data);
+		IProfile multiply = new FloatProfile(multiplier);
+		IProfile result = tester.multiply(multiply);
+
+		// there is no assertArrayEquals for float[]
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.toFloatArray()[i],0);
+		}
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#divide(double)}.
+	 */
+	@Test
+	public void testDivideDouble() {
+		float[] data       = {0, 1, 2, 3,  4,  5 };
+		double   constant   = 2;
+		float[] expected   = {0f, 0.5f, 1f, 1.5f, 2f, 2.5f};
+
+		IProfile tester = new FloatProfile(data);
+		IProfile result = tester.divide(constant);
+
+		// there is no assertArrayEquals for float[]
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i]+"/"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
+		}
+		
+		
+		// Check NaN inputs
+		
+		tester = new FloatProfile(data);
+		exception.expect(IllegalArgumentException.class);
+		tester.divide(Double.NaN);
+		
+		exception.expect(IllegalArgumentException.class);
+		tester.divide(Double.POSITIVE_INFINITY);
+		
+		exception.expect(IllegalArgumentException.class);
+		tester.divide(Double.NEGATIVE_INFINITY);
+		
+		// Check negative inputs
+		
+		tester = new FloatProfile(data);
+		constant   = -2;
+		float[] negatives   = {0f, -0.5f, -1f, -1.5f, -2f, -2.5f};
+		result = tester.divide(constant);
+		// there is no assertArrayEquals for float[]
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i]+"/"+constant+" should be "+negatives[i], negatives[i], result.toFloatArray()[i],0);
+		}
+		
+		
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#divide(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testDivideIProfile() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#add(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testAddIProfile() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#add(double)}.
+	 */
+	@Test
+	public void testAddDouble() {
+
+		float[] data       = {0, 1, 2, 3,  4,  5 };
+		double   constant   = 2;
+		float[] expected   = {2, 3, 4, 5, 6, 7};
+
+		IProfile tester = new FloatProfile(data);
+		IProfile result = tester.add(constant);
+
+		// there is no assertArrayEquals for float[]
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
+		}
+		
+		
+		// Check odd inputs
+		
+		tester = new FloatProfile(data);
+		exception.expect(IllegalArgumentException.class);
+		tester.add(Double.NaN);
+		
+		exception.expect(IllegalArgumentException.class);
+		tester.add(Double.POSITIVE_INFINITY);
+		
+		exception.expect(IllegalArgumentException.class);
+		tester.add(Double.NEGATIVE_INFINITY);
+		
+				
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#subtract(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 */
+	@Test
+	public void testSubtract() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getRanks()}.
+	 */
+	@Test
+	public void testGetRanks() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSortedIndexes()}.
+	 */
+	@Test
+	public void testGetSortedIndexes() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#toString()}.
+	 */
+	@Test
+	public void testToString() {
+		fail("Not yet implemented");
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#merge(java.util.List)}.
+	 */
+	@Test
+	public void testMerge() {
+		fail("Not yet implemented");
+	}
+	
 	
 	@Test
 	public void profileShouldNotBeCreatedWithNullData(){
@@ -61,6 +590,7 @@ public class ProfileTest {
 		IProfile tester = new FloatProfile(data);
 		exception.expect(IndexOutOfBoundsException.class);
 		tester.get(-1);
+		
 	}
 	
 	
@@ -96,7 +626,7 @@ public class ProfileTest {
 		IProfile tester = new FloatProfile(data);
 				
 		assertEquals("Min should should be -1", -1, tester.getMin(),0);
-		assertEquals("Max should should be 5" , 5 , tester.getMax(),0);
+		
 		
 		assertEquals("Min index should be 0", 0, tester.getIndexOfMin(),0);
 		assertEquals("Max index should be 5", 5, tester.getIndexOfMax(),0);
@@ -116,61 +646,7 @@ public class ProfileTest {
 		assertEquals("Profile length should be 6", data.length, tester.size(),0);
 	}
 
-	@Test
-	public void multiplicationByConstantShouldReturnConstant() {
-
-		// MyClass is tested
-		float[] data     = {1, 1, 1, 1, 1, 1};
-		double   constant = 2;
-		float[] expected = {2 ,2, 2, 2, 2, 2};
 		
-		IProfile tester = new FloatProfile(data);
-		IProfile result = tester.multiply(constant);
-
-		// assert statements
-		
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals("1x2 should be 2", expected[i], result.toFloatArray()[i],0);
-		}
-
-	}
-	
-	@Test
-	public void multiplicationByProfileShouldReturnVariable() {
-
-		// MyClass is tested
-		float[] data       = {0, 1, 2, 3,  4,  5 };
-		float[] multiplier = {1, 2, 3, 4,  5,  6 };
-		float[] expected   = {0, 2, 6, 12, 20, 30};
-		
-		IProfile tester = new FloatProfile(data);
-		IProfile multiply = new FloatProfile(multiplier);
-		IProfile result = tester.multiply(multiply);
-		
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.toFloatArray()[i],0);
-		}
-	}
-	
-	@Test
-	public void additionByConstantShouldReturnConstant() {
-
-		// MyClass is tested
-		float[] data       = {0, 1, 2, 3,  4,  5 };
-		double   constant   = 2;
-		float[] expected   = {2, 3, 4, 5, 6, 7};
-		
-		IProfile tester = new FloatProfile(data);
-		IProfile result = tester.add(constant);
-		
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
-		}
-	}
-	
 	@Test
 	public void interpolationShouldLinearExtend(){
 		float[] data       = { 10, 11, 12, 13, 14, 15 };
@@ -203,7 +679,7 @@ public class ProfileTest {
 		IProfile result = null;
 		try{
 			result = tester.interpolate(6);
-		} catch(Exception e){
+		} catch(ProfileException e){
 			System.out.println("Error interpolating: "+e.getMessage());
 			fail("Interpolation failed");
 		}
@@ -214,7 +690,7 @@ public class ProfileTest {
 //			System.out.println(output[i]+" should be "+expected[i]);
 			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
 		}
-		
+
 	}
 	
 	@Test
@@ -239,7 +715,7 @@ public class ProfileTest {
 	
 	@Test
 	public void bestFittingReturnsCorrectOffset(){
-		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 };
+
 		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
 
 		int expectedOffset = 5;
@@ -262,7 +738,7 @@ public class ProfileTest {
 	
 	@Test
 	public void squareDiffsAreCalculatedCorrectly(){
-		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 };
+
 		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
 		
 		IProfile dataProfile = new FloatProfile(data);

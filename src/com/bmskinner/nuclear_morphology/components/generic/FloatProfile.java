@@ -1211,6 +1211,11 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public IProfile multiply(double multiplier){
+		
+		if( Double.NaN == multiplier || Double.POSITIVE_INFINITY==multiplier || Double.NEGATIVE_INFINITY==multiplier ){
+			throw new IllegalArgumentException("Cannot add NaN or infinity");
+		}
+		
 		float[] result = new float[this.size()];
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
@@ -1240,6 +1245,11 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public IProfile divide(double divider){
+		
+		if( Double.NaN == divider || Double.POSITIVE_INFINITY==divider || Double.NEGATIVE_INFINITY==divider ){
+			throw new IllegalArgumentException("Cannot add NaN or infinity");
+		}
+		
 		float[] result = new float[this.size()];
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
@@ -1286,7 +1296,11 @@ public class FloatProfile implements IProfile {
 	@Override
 	public IProfile add(double value){
 
-		float[] result = new float[this.size()];
+		if( Double.NaN == value || Double.POSITIVE_INFINITY==value || Double.NEGATIVE_INFINITY==value ){
+			throw new IllegalArgumentException("Cannot add NaN or infinity");
+		}
+		
+		float[] result = new float[array.length];
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
 			result[i] = (float) (array[i] + value);
