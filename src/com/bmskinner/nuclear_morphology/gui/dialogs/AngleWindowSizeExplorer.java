@@ -271,7 +271,7 @@ public class AngleWindowSizeExplorer  extends LoadingIconDialog implements Chang
 		DefaultXYDataset ds = new DefaultXYDataset();
 		
         IProfile xpoints = profile.getPositions(100);
-        double[][] data = { xpoints.asArray(), profile.asArray() };
+        double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
         
         DecimalFormat df = new DecimalFormat("#0.000"); 
         

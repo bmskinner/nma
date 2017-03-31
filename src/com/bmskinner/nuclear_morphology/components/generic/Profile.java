@@ -282,18 +282,6 @@ public class Profile implements IProfile {
 		//		return minIndex;
 	}
 
-	/* (non-Javadoc)
-	 * @see components.generic.IProfile#asArray()
-	 */
-	@Override
-	public double[] asArray(){
-		double[] result = new double[array.length];
-		for(int i=0;i<result.length; i++){
-			result[i] = this.array[i];
-		}
-		return result;
-	}
-
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getPositions(int)
@@ -1162,7 +1150,8 @@ public class Profile implements IProfile {
 
 		int rank = 0;
 
-		double[] sorted = this.asArray();
+		double[] sorted = new double[array.length];
+		System.arraycopy( array, 0, sorted, 0, array.length );
 		Arrays.sort(sorted);
 
 		double[]ranks = new double[this.size()];
@@ -1187,9 +1176,9 @@ public class Profile implements IProfile {
 	 */
 	@Override
 	public IProfile getSortedIndexes(){
-
-
-		double[] sorted = this.asArray();
+		
+		double[] sorted = new double[array.length];
+		System.arraycopy( array, 0, sorted, 0, array.length );
 		Arrays.sort(sorted);
 
 		double[]indexes = new double[sorted.length];
@@ -1276,8 +1265,16 @@ public class Profile implements IProfile {
 
 	@Override
 	public float[] toFloatArray() {
-		// TODO Auto-generated method stub
-		return null;
+		float[] result = new float[array.length];
+		for(int i=0;i<result.length; i++){
+			result[i] = (float) array[i];
+		}
+		return result;	
+	}
+
+	@Override
+	public double[] toDoubleArray() {
+		return array;
 	}
 
 }

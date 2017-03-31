@@ -247,20 +247,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 	}
 
 
-
-	/* (non-Javadoc)
-	 * @see components.generic.IProfile#asArray()
-	 */
-	@Override
-	public double[] asArray(){
-		double[] result = new double[this.size()];
-		for(int i=0;i<result.length; i++){
-			result[i] = this.array[i];
-		}
-		return result;
-	}
-
-
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#getPositions(int)
 	 */
@@ -1153,13 +1139,17 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 
 	@Override
 	public float[] toFloatArray() {
-		try {
-			return new ArrayConverter(array).toFloatArray();
-		} catch (ArrayConversionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		float[] result = new float[array.length];
+		for(int i=0;i<result.length; i++){
+			result[i] = (float) array[i];
 		}
-		return null;
+		return result;	
+	}
 
+	@Override
+	public double[] toDoubleArray() {
+		double[] result = new double[array.length];
+		System.arraycopy( array, 0, result, 0, array.length );
+		return result;
 	}
 }

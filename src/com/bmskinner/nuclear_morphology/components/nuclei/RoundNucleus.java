@@ -1029,7 +1029,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	
 	public double getNarrowestDiameter() {
 		try {
-			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
 		} catch (UnavailableProfileTypeException e) {
 			return 0;
 		}

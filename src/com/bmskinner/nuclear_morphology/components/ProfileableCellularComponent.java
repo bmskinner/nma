@@ -656,7 +656,7 @@ public abstract class ProfileableCellularComponent
 	
 	public double getNarrowestDiameter() {
 		try {
-			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).asArray()).min().orElse(0);
+			return Arrays.stream(this.getProfile(ProfileType.DIAMETER).toDoubleArray()).min().orElse(0);
 		} catch (UnavailableProfileTypeException e) {
 			stack("Error getting diameter profile", e);
 			return 0;

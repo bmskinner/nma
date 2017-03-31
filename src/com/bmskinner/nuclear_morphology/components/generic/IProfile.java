@@ -141,7 +141,7 @@ public interface IProfile
 	 * Get the array from the profile
 	 * @return an array of values
 	 */
-	double[] asArray();
+//	double[] asArray();
 
 	/**
 	 * Get an X-axis; get a position
@@ -430,9 +430,16 @@ public interface IProfile
 	String toString();
 
 	/**
-	 * Get the underlying array as a float array
+	 * Get the underlying array as a float array.
+	 * This may involve loss of precision.
 	 * @return
 	 */
 	float[] toFloatArray();
+	
+	/**
+	 * Get the underlying array as a double array
+	 * @return
+	 */
+	double[] toDoubleArray();
 
 }

@@ -105,7 +105,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					IProfile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size()-1);
 					IProfile subPoints  = xpoints.getSubregion(seg.getStartIndex(), profile.size()-1);
 					
-					double[][] data = { subPoints.asArray(), subProfile.asArray() };
+					double[][] data = { subPoints.toDoubleArray(), subProfile.toDoubleArray() };
 					
 					// check if the series key is taken
 					String seriesName = checkSeriesName(ds, seg.getName());
@@ -121,14 +121,14 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					IProfile subProfileA = profile.getSubregion(0, lowerIndex);
 					IProfile subPointsA  = xpoints.getSubregion(0, lowerIndex);
 
-					double[][] dataA = { subPointsA.asArray(), subProfileA.asArray() };
+					double[][] dataA = { subPointsA.toDoubleArray(), subProfileA.toDoubleArray() };
 					ds.addSeries(seg.getName()+"_A", dataA);
 
 					// end of array
 					IProfile subProfileB = profile.getSubregion(upperIndex, profile.size()-1);
 					IProfile subPointsB  = xpoints.getSubregion(upperIndex, profile.size()-1);
 
-					double[][] dataB = { subPointsB.asArray(), subProfileB.asArray() };
+					double[][] dataB = { subPointsB.toDoubleArray(), subProfileB.toDoubleArray() };
 					ds.addSeries(seg.getName()+"_B", dataB);
 				}
 
@@ -139,7 +139,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			IProfile subProfile = profile.getSubregion(seg);
 			IProfile subPoints  = xpoints.getSubregion(seg);
 
-			double[][] data = { subPoints.asArray(), subProfile.asArray() };
+			double[][] data = { subPoints.toDoubleArray(), subProfile.toDoubleArray() };
 			
 			// check if the series key is taken
 			String seriesName = checkSeriesName(ds, seg.getName());
@@ -201,7 +201,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 				
 				IProfile xpoints = profile.getPositions(100);
-	            double[][] data = { xpoints.asArray(), profile.asArray() };
+	            double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 	            ds.addSeries("Profile_"+i, data);
 	            
 	            List<IBorderSegment> segments = collection.getProfileCollection()
@@ -287,7 +287,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					offset = differenceToMaxLength;
 					xpoints = xpoints.add(differenceToMaxLength);
 				}
-				double[][] data = { xpoints.asArray(), profile.asArray() };
+				double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 				ds.addSeries("Profile_"+i, data);
 				
 				List<IBorderSegment> segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
@@ -355,7 +355,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		}
 
 		// rendering order will be first on top
-		double[][] data = { xpoints.asArray(), profile.asArray() };
+		double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 		ds.addSeries("Profile_"+dataset.getName(), data);
 
 		return ds;
@@ -501,9 +501,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
 		}
 		
-		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+		double[][] data25 = { xpoints.toDoubleArray(), profile25.toDoubleArray() };
 		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+		double[][] data75 = { xpoints.toDoubleArray(), profile75.toDoubleArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
@@ -531,7 +531,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				if(angles==null || x==null){
 					throw new ChartDatasetCreationException("Nucleus profile is null");
 				}
-				double[][] ndata = { x.asArray(), angles.asArray() };
+				double[][] ndata = { x.toDoubleArray(), angles.toDoubleArray() };
 
 				ds.addSeries("Nucleus_"+n.getSourceFileName()+"-"+n.getNucleusNumber(), ndata);
 			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException | IllegalArgumentException e) {
@@ -584,7 +584,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 			
 			
-			double[][] data = { xpoints.asArray(), profile.asArray() };
+			double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 			ds.addSeries("Profile_"+i, data);
 		}
 		return ds;
@@ -619,7 +619,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			}
 			IProfile xpoints = profile.getPositions(100);
 
-			double[][] data = { xpoints.asArray(), profile.asArray() };
+			double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 			ds.addSeries("Profile_"+i, data);
 			i++;
 		}
@@ -799,7 +799,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				throw new ChartDatasetCreationException("Unable to get median profile", e);
 			}
 			IProfile xpoints = profile.getPositions(100);
-			double[][] data = { xpoints.asArray(), profile.asArray() };
+			double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 			ds.addSeries("Profile_"+i+"_"+collection.getName(), data);
 			i++;
 		}
@@ -859,9 +859,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			fine("Error getting upper or lower quartile profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
 		}
-		double[][] data25 = { xpoints.asArray(), profile25.asArray() };
+		double[][] data25 = { xpoints.toDoubleArray(), profile25.toDoubleArray() };
 		ds.addSeries("Q25", data25);
-		double[][] data75 = { xpoints.asArray(), profile75.asArray() };
+		double[][] data75 = { xpoints.toDoubleArray(), profile75.toDoubleArray() };
 		ds.addSeries("Q75", data75);
 
 		// add the individual nuclei
@@ -876,8 +876,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				fine("Error getting franken profile", e);
 				throw new ChartDatasetCreationException("Unable to get quartile profile", e);
 			} // do not offset, the offsets for a nucleus do not match a frankenprofile
-			double[] xArray = xpoints.asArray();
-			double[] yArray = angles.asArray();
+			double[] xArray = xpoints.toDoubleArray();
+			double[] yArray = angles.toDoubleArray();
 			
 			if(xArray.length!=yArray.length){ // ensure length mismatches don't crash the system
 
@@ -1636,8 +1636,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			
 			IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
 			
-			double[] yvalues = pvalues.asArray();
-			double[] xvalues = pvalues.getPositions(100).asArray();
+			double[] yvalues = pvalues.toDoubleArray();
+			double[] xvalues = pvalues.getPositions(100).toDoubleArray();
 			
 			double[][] data = { xvalues, yvalues };
 			ds.addSeries(collection.getName(), data);
@@ -1791,8 +1791,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	
 		IProfile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(), options.getType());
 		
-		double[] yvalues = pvalues.asArray();
-		double[] xvalues = pvalues.getPositions(100).asArray();
+		double[] yvalues = pvalues.toDoubleArray();
+		double[] xvalues = pvalues.getPositions(100).toDoubleArray();
 		
 		double[][] data = { xvalues, yvalues };
 		ds.addSeries(setOne.getCollection().getName(), data);
@@ -1811,8 +1811,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		DefaultXYDataset ds = new DefaultXYDataset();
 		IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
 		
-		double[] yvalues = pvalues.asArray();
-		double[] xvalues = pvalues.getPositions(100).asArray();
+		double[] yvalues = pvalues.toDoubleArray();
+		double[] xvalues = pvalues.getPositions(100).toDoubleArray();
 		
 		double[][] data = { xvalues, yvalues };
 		ds.addSeries(options.firstDataset().getCollection().getName(), data);

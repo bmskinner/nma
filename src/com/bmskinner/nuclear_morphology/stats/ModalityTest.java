@@ -69,7 +69,7 @@ public class ModalityTest implements SignificanceTest {
 		
 		while(binWidth <= maxBinWidth){
 			
-			BinnedData bins = calculateBins(profile.asArray(), binWidth);
+			BinnedData bins = calculateBins(profile.toDoubleArray(), binWidth);
 			
 			int sum = sumDifferencesInBins(bins);
 			
