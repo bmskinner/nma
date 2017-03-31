@@ -127,7 +127,11 @@ public class GlobalOptions {
 	}
 	
 	public synchronized File getDefaultDir() {
-		return this.defaultDir;
+		if(defaultDir.exists()){
+			return defaultDir;
+		} else {
+			return new File(System.getProperty("user.home"));
+		}
 	}
 	
 	public synchronized void setDefaultDir(File f) {

@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
@@ -55,6 +56,8 @@ public class NewAnalysisAction extends ProgressableAction {
 	
 	public static final int NEW_ANALYSIS = 0;
 	
+	private static final String PROGRESS_LABEL = "Nucleus detection";
+	
 	/**
 	 * Create a new analysis. The folder of images to analyse will be
 	 * requested by a dialog.
@@ -70,7 +73,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	 * @param folder the folder of images to analyse
 	 */
 	public NewAnalysisAction(MainWindow mw, final File folder) {
-		super("Nucleus detection", mw);
+		super(PROGRESS_LABEL, mw);
 		this.folder = folder;
 	}
 	
@@ -79,7 +82,6 @@ public class NewAnalysisAction extends ProgressableAction {
 
 		this.setProgressBarIndeterminate();
 		
-		fine("Creating for "+folder.getAbsolutePath());
 		
 		if(folder==null){
 			if(! getImageDirectory()){
@@ -87,16 +89,12 @@ public class NewAnalysisAction extends ProgressableAction {
 				return;
 			}
 		}
-		
-		fine("Making analysis options");
+		fine("Creating for "+folder.getAbsolutePath());
+//		fine("Making analysis options");
 		
 		NucleusImageProber analysisSetup = new NucleusImageProber( folder );
 
-//		NucleusDetectionSetupDialog analysisSetup = new NucleusDetectionSetupDialog(folder);
-		
-//		AnalysisSetupDialog analysisSetup = new AnalysisSetupDialog(DatasetListManager.getInstance().getRootDatasets(), folder);
 		if(analysisSetup.isOk()){
-//		if( analysisSetup.getOptions()!=null){
 
 			options = analysisSetup.getOptions();
 			File directory = null;
@@ -171,9 +169,9 @@ public class NewAnalysisAction extends ProgressableAction {
 	
 	private boolean getImageDirectory(){
 		
-//		File defaultDir = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
 		
-		JFileChooser fc = new JFileChooser( (File) null); // if null, will be home dir
+		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
 
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 

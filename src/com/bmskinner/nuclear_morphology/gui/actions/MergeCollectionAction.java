@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
@@ -67,7 +68,7 @@ public class MergeCollectionAction extends ProgressableAction {
 			// Otherwise default to the home dir
 			File dir =  IAnalysisDataset.commonPathOfFiles(datasets);
 			if( ! dir.exists() || ! dir.isDirectory()){
-				dir = new File(System.getProperty("user.home"));
+				dir = GlobalOptions.getInstance().getDefaultDir();
 			}
 	
 			SaveDialog saveDialog = new SaveDialog(SAVE_DIALOG_TITLE, 
