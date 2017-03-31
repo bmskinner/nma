@@ -21,27 +21,26 @@ package analysis;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileAggregate;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileAggregate;
-import com.bmskinner.nuclear_morphology.components.generic.Profile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileAggregate;
 
 public class ProfileAggregateTest {
-
+	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+	
 	@Test
 	public void profileShouldNotBeCreatedWithNullData(){
 
-		Integer length = null;
-		try {
-			IProfileAggregate tester = new ProfileAggregate(length);
-			fail("ProfileAggregate should not be created with null input");
-		} catch (Exception e) {
-			// expected
-			// could also check for message of exception, etc.
-		} 
+		exception.expect(IllegalArgumentException.class);
+		IProfileAggregate tester = new DefaultProfileAggregate(100, 0); 
 	}
 	
 	@Test
@@ -51,22 +50,22 @@ public class ProfileAggregateTest {
 
 		Integer length = 10;
 
-		IProfileAggregate tester = new ProfileAggregate(length);
+		IProfileAggregate tester = new DefaultProfileAggregate(length, 1);
 		
 		IProfile xPositions = tester.getXPositions();
 		
 		for( int i =0;i<length; i++){
-			assertEquals("Values should be identical", xArray[i], xPositions.asArray()[i],0);
+			assertEquals("Values should be identical", xArray[i], xPositions.toDoubleArray()[i],0);
 		}
 	}
 	
 	@Test
 	public void addAProfileToTheAggregate(){
 		
-		double[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
-		IProfile values = new Profile(array);
+		float[] array   = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+		IProfile values = new FloatProfile(array);
 
-		IProfileAggregate tester = new ProfileAggregate(10);
+		IProfileAggregate tester = new DefaultProfileAggregate(10, 50);
 		
 		for( int i=0;i<50; i++){
 			try {
@@ -74,6 +73,7 @@ public class ProfileAggregateTest {
 			} catch (ProfileException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				fail("Adding profile failed");
 			}
 		}
 		
@@ -83,11 +83,12 @@ public class ProfileAggregateTest {
 			median = tester.getMedian();
 			
 			for( int i =0;i<10; i++){
-				assertEquals("Values should be identical", array[i], median.asArray()[i],0);
+				assertEquals("Values should be identical", array[i], median.toDoubleArray()[i],0);
 			}
 			
 		} catch (ProfileException e) {
 			e.printStackTrace();
+			fail("Adding profile failed");
 		}
 		
 		

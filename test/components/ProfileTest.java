@@ -21,78 +21,97 @@ package components;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Profile;
 
 
 public class ProfileTest {
 	
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+	
 	@Test
 	public void profileShouldNotBeCreatedWithNullData(){
-		double[] data = null;
-
-		try {
-			IProfile tester = new Profile(data);
-			fail("Profile should not be created with null input");
-		} catch (Exception e) {
-			// expected
-			// could also check for message of exception, etc.
-		} 
-
+		float[] data = null;
+		exception.expect(IllegalArgumentException.class);
+		IProfile tester = new FloatProfile(data);
 	}
 	
 	@Test
 	public void profileCanBeCreatedFromProfile(){
-		double[] data   = {0, 1, 2, 3,  4,  5 };
+		float[] data   = {0, 1, 2, 3,  4,  5 };
 
-		Profile tester = new Profile(data);
-		IProfile result = new Profile(tester);
+		IProfile tester = new FloatProfile(data);
+		IProfile result = new FloatProfile(tester);
 		
 		for( int i =0;i<data.length; i++){
-			assertEquals("Values should be identical", data[i], result.asArray()[i],0);
+			assertEquals("Values should be identical", data[i], result.toFloatArray()[i],0);
 		}
 	}
 	
 	
 	@Test
-	public void profileShouldErrorOnOutOfBoundsRequest(){
+	public void profileShouldErrorOnOutOfLowerBoundsRequest(){
+		float[] data   = {0, 1, 2, 3,  4,  5 };
+		IProfile tester = new FloatProfile(data);
+		exception.expect(IndexOutOfBoundsException.class);
+		tester.get(-1);
+	}
+	
+	
+	@Test
+	public void profileShouldErrorOnOutOfUpperBoundsRequest(){
+		float[] data   = {0, 1, 2, 3,  4,  5 };
+		IProfile tester = new FloatProfile(data);
+		exception.expect(IndexOutOfBoundsException.class);
+		tester.get(6);
+	}
+	
+	@Test
+	public void profileShouldGetInBoundsRequest(){
 		
-		double[] data   = {0, 1, 2, 3,  4,  5 };
-		IProfile tester = new Profile(data);
+		float[] data   = {0, 1, 2, 3,  4,  5 };
+		IProfile tester = new FloatProfile(data);
 		
-		double d = tester.get(2);
-		assertEquals("Values should be 2", 2, d,0);
+		double d = tester.get(0);
+		assertEquals("Value should be 0", 0, d,0);
+
+		d = tester.get(1);
+		assertEquals("Value should be 1", 1, d,0);
 		
-		assertEquals("Out of range values should be 0", 0, tester.get(-1),0);
-		assertEquals("Out of range values should be 0", 0, tester.get(6),0);
+		d = tester.get(2);
+		assertEquals("Value should be 2", 2, d,0);
 				
 	}
 	
 	@Test
 	public void profileShouldGetMinAndMax(){
 		
-		double[] data   = {-1, 0, 2, 3,  4,  5 };
-		IProfile tester = new Profile(data);
+		float[] data   = {-1, 0, 2, 3,  4,  5 };
+		IProfile tester = new FloatProfile(data);
 				
-		assertEquals("Min should hould be -1", -1, tester.getMin(),0);
-		assertEquals("Max should hould be 5" , 5 , tester.getMax(),0);
+		assertEquals("Min should should be -1", -1, tester.getMin(),0);
+		assertEquals("Max should should be 5" , 5 , tester.getMax(),0);
 		
-		assertEquals("Min index should hould be 0", 0, tester.getIndexOfMin(),0);
-		assertEquals("Max index should hould be 5", 5, tester.getIndexOfMax(),0);
+		assertEquals("Min index should be 0", 0, tester.getIndexOfMin(),0);
+		assertEquals("Max index should be 5", 5, tester.getIndexOfMax(),0);
 			
 		for( int i =0;i<data.length; i++){
-			assertEquals("Data within array should be identical to input", data[i], tester.asArray()[i],0);
+			assertEquals("Data within array should be identical to input", data[i], tester.toFloatArray()[i],0);
 		}
 	}
 	
 	
 	@Test
 	public void profileSizeShouldBeArrayLength(){
-		double[] data     = {1, 1, 1, 1, 1, 1};
+		float[] data     = {1, 1, 1, 1, 1, 1};
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		
 		assertEquals("Profile length should be 6", data.length, tester.size(),0);
 	}
@@ -101,18 +120,18 @@ public class ProfileTest {
 	public void multiplicationByConstantShouldReturnConstant() {
 
 		// MyClass is tested
-		double[] data     = {1, 1, 1, 1, 1, 1};
+		float[] data     = {1, 1, 1, 1, 1, 1};
 		double   constant = 2;
-		double[] expected = {2 ,2, 2, 2, 2, 2};
+		float[] expected = {2 ,2, 2, 2, 2, 2};
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		IProfile result = tester.multiply(constant);
 
 		// assert statements
 		
-		// there is no assertArrayEquals for double[]
+		// there is no assertArrayEquals for float[]
 		for( int i =0;i<data.length; i++){
-			assertEquals("1x2 should be 2", expected[i], result.asArray()[i],0);
+			assertEquals("1x2 should be 2", expected[i], result.toFloatArray()[i],0);
 		}
 
 	}
@@ -121,17 +140,17 @@ public class ProfileTest {
 	public void multiplicationByProfileShouldReturnVariable() {
 
 		// MyClass is tested
-		double[] data       = {0, 1, 2, 3,  4,  5 };
-		double[] multiplier = {1, 2, 3, 4,  5,  6 };
-		double[] expected   = {0, 2, 6, 12, 20, 30};
+		float[] data       = {0, 1, 2, 3,  4,  5 };
+		float[] multiplier = {1, 2, 3, 4,  5,  6 };
+		float[] expected   = {0, 2, 6, 12, 20, 30};
 		
-		IProfile tester = new Profile(data);
-		IProfile multiply = new Profile(multiplier);
+		IProfile tester = new FloatProfile(data);
+		IProfile multiply = new FloatProfile(multiplier);
 		IProfile result = tester.multiply(multiply);
 		
-		// there is no assertArrayEquals for double[]
+		// there is no assertArrayEquals for float[]
 		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.asArray()[i],0);
+			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.toFloatArray()[i],0);
 		}
 	}
 	
@@ -139,34 +158,34 @@ public class ProfileTest {
 	public void additionByConstantShouldReturnConstant() {
 
 		// MyClass is tested
-		double[] data       = {0, 1, 2, 3,  4,  5 };
+		float[] data       = {0, 1, 2, 3,  4,  5 };
 		double   constant   = 2;
-		double[] expected   = {2, 3, 4, 5, 6, 7};
+		float[] expected   = {2, 3, 4, 5, 6, 7};
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		IProfile result = tester.add(constant);
 		
-		// there is no assertArrayEquals for double[]
+		// there is no assertArrayEquals for float[]
 		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.asArray()[i],0);
+			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
 		}
 	}
 	
 	@Test
 	public void interpolationShouldLinearExtend(){
-		double[] data       = { 10, 11, 12, 13, 14, 15 };
-		double[] expected   = { 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 12.5 };
+		float[] data       = { 10, 11, 12, 13, 14, 15 };
+		float[] expected   = { 10, 10.5f, 11, 11.5f, 12, 12.5f, 13, 13.5f, 14, 14.5f, 15, 12.5f };
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		IProfile result = null;
 		try {
 			result = tester.interpolate(12);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println("Error interpolating: "+e.getMessage());
+			fail("Interpolation failed");
 		}
 		
-		double[] output = result.asArray();	
+		float[] output = result.toFloatArray();	
 		
 		for( int i =0;i<expected.length; i++){
 			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
@@ -176,10 +195,10 @@ public class ProfileTest {
 	
 	@Test
 	public void interpolationShouldShrinkWhenGivenLowerLength(){
-		double[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
-		double[] expected   = { 10, 12, 14, 16, 18, 20 };
+		float[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
+		float[] expected   = { 10, 12, 14, 16, 18, 20 };
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		
 		IProfile result = null;
 		try{
@@ -189,7 +208,7 @@ public class ProfileTest {
 			fail("Interpolation failed");
 		}
 		
-		double[] output = result.asArray();	
+		float[] output = result.toFloatArray();	
 		
 		for( int i =0;i<expected.length; i++){
 //			System.out.println(output[i]+" should be "+expected[i]);
@@ -200,21 +219,15 @@ public class ProfileTest {
 	
 	@Test
 	public void sortedValuesShouldReturnCorrectOrder(){
-		double[] data       = { 10, 5, 1, 2, 7, 19, 12, 3 };
-		double[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
+		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3 };
+		float[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
 		
-		IProfile tester = new Profile(data);
+		IProfile tester = new FloatProfile(data);
 		System.out.println(tester.toString());
 		
-		IProfile result = null;
-		try{
-			result = tester.getSortedIndexes();
-		} catch(Exception e){
-			System.out.println("Error getting sorted values: "+e.getMessage());
-			fail("Interpolation failed");
-		}
-		
-		double[] output = result.asArray();	
+		IProfile result = tester.getSortedIndexes();
+
+		float[] output = result.toFloatArray();	
 		
 		for( int i =0;i<expected.length; i++){
 //			System.out.println(output[i]+" should be "+expected[i]);
@@ -223,14 +236,51 @@ public class ProfileTest {
 		
 	}
 	
+	
 	@Test
-	public void rodentProfileShouldGiveCorrectVertical(){
+	public void bestFittingReturnsCorrectOffset(){
+		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 };
+		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+
+		int expectedOffset = 5;
 		
-//		SegmentedProfile p = IndividualNuclei.rodentSpermMedianProfile();
-//		int[] i = p.getConsistentRegionBounds(180, 2, 5);
-//		System.out.println("Start: "+i[0]);
-//		System.out.println("End  : "+i[1]);
+		IProfile dataProfile = new FloatProfile(data);
+		IProfile templateProfile = new FloatProfile(test);
+
+		
+		int offset = 0;
+		try {
+			offset = dataProfile.getSlidingWindowOffset(templateProfile);
+		} catch (ProfileException e) {
+			System.out.println("Error offsetting profile: "+e.getMessage());
+			fail("Offsetting failed");
+		}
+
+		assertEquals(offset+" should be "+expectedOffset, expectedOffset, offset,0);
 		
 	}
+	
+	@Test
+	public void squareDiffsAreCalculatedCorrectly(){
+		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 };
+		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+		
+		IProfile dataProfile = new FloatProfile(data);
+		IProfile templateProfile = new FloatProfile(test);
+				
+		// 1+15+12+4+3+9+7+2+7+13+6+6+1 
+		double expectedDiff = 820;
+		double value = Double.NaN;
+		try {
+			value = dataProfile.absoluteSquareDifference(templateProfile);
+		} catch (ProfileException e) {
+			System.out.println("Error calculating difference: "+e.getMessage());
+			fail("Difference failed");
+		}
+		
+		assertEquals(value+" should be "+expectedDiff, expectedDiff, value,0);
+		
+	}
+
 
 }

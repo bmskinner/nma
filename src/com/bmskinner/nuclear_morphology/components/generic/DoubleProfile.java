@@ -293,52 +293,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 		return difference;
 	}
 
-	/* (non-Javadoc)
-	 * @see components.generic.IProfile#weightedSquareDifference(components.generic.IProfile)
-	 */
-	@Override
-	public double weightedSquareDifference(IProfile testProfile) throws Exception {
-
-		if(testProfile==null){
-			throw new IllegalArgumentException("Test profile is null");
-		}
-
-		// Ensure both profiles have the same length, to allow
-		// point by point comparisons. The shorter is interpolated.
-		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
-		IProfile profile2 = equaliseLengths(testProfile, this.copy());
-
-		double result = 0;
-
-		for(int j=0; j<profile1.size(); j++){ // for each point round the array
-
-			double value1 = profile1.get(j);
-			double value2 = profile2.get(j);
-
-			// get the difference away from 180 degrees for the test profile
-			double normalised2 = Math.abs(  value2 - 180  );
-
-			/*
-				Set the weighting to 1/180 multiplied by the difference	of the 
-				test profile to 180. Hence, a difference of 180 degrees from
-				the 180 degree baseline will get a weighting of 1, and a difference 
-				of 0 degrees from the 180 degree baseline will get a weighting of 0
-				(i.e. does not count if it is perfectly straight)
-			 */
-			double weight = (double) ( 1.0/180.0) * normalised2;
-
-			// the difference between the two profiles at this point
-			double difference = value1 - value2;
-
-			// apply the weighting
-			double weightedDifference = difference * weight;
-
-			// add the square difference - highlights extremes
-			result += Math.pow(weightedDifference, 2); 
-		}
-
-		return result;
-	}
 
 	/*
     --------------------

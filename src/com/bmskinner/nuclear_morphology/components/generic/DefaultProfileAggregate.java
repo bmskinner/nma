@@ -53,7 +53,9 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 //	private AggregateCache cache = new AggregateCache();
 
 	public DefaultProfileAggregate(final int length, final int profileCount){
-		
+		if(profileCount==0){
+			throw new IllegalArgumentException("Must have >0 profiles in aggregate");
+		}
 		this.length = length;
 		this.profileCount = profileCount;
 		

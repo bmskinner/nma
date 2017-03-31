@@ -171,17 +171,6 @@ public interface IProfile
 	 */
 	double absoluteSquareDifference(IProfile testProfile) throws ProfileException;
 
-	/**
-	 * Calculate the sum of squares difference between this profile and
-	 * a given profile. Unlike the absolute difference, this value is weighted
-	 * to the difference from 180 degrees. That is, a difference of 5 degrees at
-	 * 170 (to 175) will count less than a difference of 5 degrees at 30 (to 35).
-	 * This promotes differences at regions of profile maxima, and minimises them at
-	 * constant straight regions.
-	 * @param testProfile the profile to compare
-	 * @return
-	 */
-	double weightedSquareDifference(IProfile testProfile) throws Exception;
 
 	/**
 	 * Alternative to the constructor from profile
@@ -219,10 +208,13 @@ public interface IProfile
 	 */
 	IProfile interpolate(int newLength) throws ProfileException;
 
-	/*
-	    Interpolate another profile to match this, and move this profile
-	    along it one index at a time. Find the point of least difference, 
-	    and return this offset. Returns the positive offset to this profile
+	/**
+	 * Interpolate another profile to match this, and move this profile
+	 * along it one index at a time. Find the point of least difference, 
+	 * and return this offset. 
+	 * @param testProfile
+	 * @return the offset to this profile that must be applied to match the test profile
+	 * @throws ProfileException
 	 */
 	int getSlidingWindowOffset(IProfile testProfile) throws ProfileException;
 
@@ -235,11 +227,14 @@ public interface IProfile
 	 */
 	int[] getConsistentRegionBounds(double value, double tolerance, int points);
 
-	/*
-	    For each point in the array, test for a local minimum.
-	    The values of the points <minimaLookupDistance> ahead and behind are checked.
-	    Each should be greater than the value before.
-	    One exception is allowed, to account for noisy data. Returns the indexes of minima
+
+	/**
+	 * For each point in the array, test for a local minimum.
+	 * The values of the points <i>windowSize</i> ahead and behind
+	 * are checked. Each should be greater than the value before.
+	 * One exception is allowed, to account for noisy data.
+	 * @param windowSize
+	 * @return a boolean profile with the indexes of local minima as true and all other indexes false
 	 */
 	BooleanProfile getLocalMinima(int windowSize);
 

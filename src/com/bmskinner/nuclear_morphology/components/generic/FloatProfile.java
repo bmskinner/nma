@@ -50,14 +50,10 @@ public class FloatProfile implements IProfile {
 	 */
 	public FloatProfile(final float[] values){
 
-		if(values.length==0){
+		if(values==null || values.length==0){
 			throw new IllegalArgumentException("Input array has zero length in profile constructor");
 		}
 		this.array = values; 
-//		new float[values.length];
-//		for(int i=0; i<this.array.length; i++){
-//			array[i] = values[i];
-//		}
 	}
 
 	/**
@@ -152,7 +148,7 @@ public class FloatProfile implements IProfile {
 			throw new IndexOutOfBoundsException("Value "+prop+" must be between 0-1");
 		}
 		
-		int index = this.getProportionalIndex(prop);
+		int index = this.getIndexOfFraction(prop);
 		
 		return array[index];
 
@@ -303,7 +299,7 @@ public class FloatProfile implements IProfile {
 	public IProfile getPositions(int length){
 		float [] result = new float[array.length];
 		for(int i=0;i<array.length;i++){
-			result[i] = (float) (getIndexProportion(i) * length);
+			result[i] = (float) (this.getFractionOfIndex(i) * length);
 		}
 		return new FloatProfile(result);
 	}
@@ -348,20 +344,21 @@ public class FloatProfile implements IProfile {
 	 * @return
 	 * @throws ProfileException
 	 */
-	private float[] equaliseLengths(float[] profile1, float[] profile2) throws ProfileException {
-		if(profile1==null || profile2==null){
-			throw new IllegalArgumentException("Input profile is null when equilising lengths");
-		}
-		
-		// profile 2 is smaller or the same length
-		// return profile 1 unchanged
-		if(profile2.length <= profile1.length ){
-			return profile1;
-		} else {
-			// profile 1 is smaller; interpolate to profile 2 length
-			return interpolate(profile1, profile2.length);// profile1 = profile1.interpolate(profile2.size());
-		}
-	}
+//	private float[] equaliseLengths(float[] profile1, float[] profile2) throws ProfileException {
+//		if(profile1==null || profile2==null){
+//			throw new IllegalArgumentException("Input profile is null when equilising lengths");
+//		}
+//		
+//		// profile 2 is smaller or the same length
+//		// return profile 1 unchanged
+//		if(profile2.length <= profile1.length ){
+//			return profile1;
+//		} else {
+//			// profile 1 is smaller; interpolate to profile 2 length
+////			return interpolate(profile1, profile2.length);
+////			profile1.interpolate(profile2.size());
+//		}
+//	}
 	
 
 	/* (non-Javadoc)
@@ -369,24 +366,56 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public double absoluteSquareDifference(IProfile testProfile) throws ProfileException {
+		
 
+		/*
+		 * NEW CODE VERSION - WORKING
+		 */
+	        
 		if(testProfile==null){
 			throw new IllegalArgumentException("Test profile is null");
 		}
-		// the test profile needs to be matched to this profile
-		// whichever is smaller must be interpolated 
-		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
-		IProfile profile2 = equaliseLengths(testProfile, this.copy());
 
-		double difference = 0;
 
-		for(int j=0; j<profile1.size(); j++){ // for each point round the array
+		float[] arr2 = testProfile.toFloatArray();
 
-			double thisValue = profile1.get(j);
-			double testValue = profile2.get(j);
-			difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
+		if(array.length==arr2.length){
+			return squareDifference(array, arr2);
 		}
-		return difference;
+
+
+		if(array.length>arr2.length){
+			arr2 = interpolate(arr2, array.length);
+			return squareDifference(array, arr2);
+		} else {
+			float[] arr1 = this.toFloatArray();
+			arr1 = interpolate(arr1, arr2.length);
+			return squareDifference(arr1, arr2);
+		}
+			
+	        
+		/*
+		 * OLD CODE VERSION
+		 */
+
+
+//		if(testProfile==null){
+//			throw new IllegalArgumentException("Test profile is null");
+//		}
+//		// the test profile needs to be matched to this profile
+//		// whichever is smaller must be interpolated 
+//		IProfile profile1 = equaliseLengths(this.copy(), testProfile);
+//		IProfile profile2 = equaliseLengths(testProfile, this.copy());
+//
+//		double difference = 0;
+//
+//		for(int j=0; j<profile1.size(); j++){ // for each point round the array
+//
+//			double thisValue = profile1.get(j);
+//			double testValue = profile2.get(j);
+//			difference += Math.pow(thisValue - testValue, 2); // square difference - highlights extremes
+//		}
+//		return difference;
 	}
 	
 	/**
@@ -427,11 +456,25 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public IProfile offset(int j) throws ProfileException {
-		float[] newArray = new float[this.size()];
-		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ DefaultCellularComponent.wrapIndex( i+j , this.size() ) ];
+		float[] newArray = new float[array.length];
+		for(int i=0;i<array.length;i++){
+			newArray[i] = array[ DefaultCellularComponent.wrapIndex( i+j , array.length ) ];
 		}
 		return new FloatProfile(newArray);
+	}
+	
+	/**
+	 * Offset the array by the given amount
+	 * @param arr
+	 * @param j
+	 * @return
+	 */
+	private static float[] offset(float[] arr, int j) {
+		float[] newArray = new float[arr.length];
+		for(int i=0;i<arr.length;i++){
+			newArray[i] = arr[ DefaultCellularComponent.wrapIndex( i+j , arr.length ) ];
+		}
+		return newArray;
 	}
 
 	/* (non-Javadoc)
@@ -513,6 +556,61 @@ public class FloatProfile implements IProfile {
 		}
 		return new FloatProfile(newArray);
 	}
+	
+    /**
+     * Interpolate the array in this profile to the given length, and
+     * return as a new array
+     * @return
+     */
+    private static float[] interpolate(float[] array, int length){
+        
+        float[] result = new float[length];
+
+        // where in the old curve index is the new curve index?
+        for (int i=0; i<length; i++) {
+            // we have a point in the new array.
+            // we want to know which points it lies between in the old profile
+            float fraction = ( (float)i / (float)length); // get the fractional index position needed
+
+            // get the value in the old profile at the given fractional index position
+            result[i] = getInterpolatedValue(array, fraction);
+        }
+        return result;
+        
+    }
+    
+    /**
+     * Get the interpolated value at the given fraction along the given array
+     * @param array
+     * @param fraction the fraction, from 0-1
+     * @return
+     */
+    private static float getInterpolatedValue(float[] array, float fraction){
+      // Get the equivalent index of the fraction in the array
+      double index = fraction * array.length;
+      double indexFloor = Math.floor(index);
+      
+      // Get the integer portion and find the bounding indices
+      int indexLower = (int) indexFloor;
+      if(indexLower==array.length){ // only wrap possible if fraction is range 0-1
+          indexLower = 0;
+      }
+      
+      int indexHigher  = indexLower+1;
+      if(indexHigher==array.length){ // only wrap possible if fraction is range 0-1
+          indexHigher = 0;
+      }
+      
+      // Find the fraction between the indices
+      double diffFraction = index - indexFloor;
+      
+      // Calculate the linear interpolation
+      double interpolate = array[indexLower] + (   (array[indexHigher] - array[indexLower])  * diffFraction ) ;
+      
+      return (float) interpolate;
+
+    }
+
 
 	/**
 	 * Take an index position from a non-normalised profile. Normalise it
@@ -589,6 +687,30 @@ public class FloatProfile implements IProfile {
 	 */
 	@Override
 	public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
+		
+        /*
+         * NEW CODE VERSION - FAIL. GIVES ERROR IN getSubRegion() during segment fitting
+         */
+        
+//        float[] test = testProfile.toFloatArray();
+//        
+//        if(array.length==test.length){
+//            return getBestFitOffset(array, test);
+//        }
+//        
+//        if(array.length>test.length){
+//            test = interpolate(test, array.length);
+//            return getBestFitOffset(array, test);
+//        } else {
+//            float[] arr1 = this.toFloatArray();
+//            arr1 = interpolate(arr1, test.length);
+//            return getBestFitOffset(arr1, test);
+//        }
+		
+		
+        /*
+         * OLD CODE
+         */
 
 		double lowestScore = this.absoluteSquareDifference(testProfile);
 		int index = 0;
@@ -619,26 +741,30 @@ public class FloatProfile implements IProfile {
 		int index = 0;
 		
 		// Duplicate array 1
-		float[] tmp = new float[arr1.length];
-		System.arraycopy(arr1, 0, tmp, 0, arr1.length);
+//		float[] tmp = new float[arr1.length];
+//		System.arraycopy(arr1, 0, tmp, 0, arr1.length);
 		
 		// Position by position
-		for(int i=1;i<arr1.length;i++){
-			float[] tmp2 = new float[arr1.length];	
+		for(int i=0;i<arr1.length;i++){
 			
-			// Offset the array by 1
-			System.arraycopy(tmp, 0, tmp2, 1, arr1.length-1);
-			tmp2[0] = tmp[arr1.length-1];
+			float[] tmp = offset(arr1, i);
 			
-			// Compare to array 2
-			double score = squareDifference(tmp2, arr2);
+//			float[] tmp2 = new float[arr1.length];	
+//			
+//			// Offset the array by 1
+//			System.arraycopy(tmp, 0, tmp2, 1, tmp.length-1);
+//			tmp2[0] = tmp[tmp.length-1];
+//			
+//			// Compare to array 2
+			double score = squareDifference(tmp, arr2);
 			if(score<lowestScore){
 				lowestScore=score;
 				index=i;
 			}
-			
-			// Fix the offset
-			tmp = tmp2;
+//			
+//			// Fix the offset
+//			System.arraycopy(tmp2, 0, tmp, 0, tmp.length);
+//			tmp = tmp2;
 
 		}
 		return index;
@@ -920,6 +1046,15 @@ public class FloatProfile implements IProfile {
 	@Override
 	public IProfile getSubregion(int indexStart, int indexEnd) {
 
+		if(indexStart >= array.length){
+			throw new IllegalArgumentException("Start index ("+indexStart+") is beyond array length ("+array.length+")");
+		}
+		
+		if(indexEnd >= array.length){
+			throw new IllegalArgumentException("End index ("+indexEnd+") is beyond array length ("+array.length+")");
+		}
+		
+		
 		if(indexStart < indexEnd ){
 
 			float[] result = Arrays.copyOfRange(array,indexStart, indexEnd);
@@ -941,7 +1076,7 @@ public class FloatProfile implements IProfile {
 			}
 
 			if(result.length==0){
-				log(Level.SEVERE, "Subregion length zero: "+indexStart+" - "+indexEnd);
+				warn("Subregion length zero: "+indexStart+" - "+indexEnd);
 			}
 			return new FloatProfile(result);
 		}
@@ -957,7 +1092,7 @@ public class FloatProfile implements IProfile {
 			throw new IllegalArgumentException("Segment is null");
 		}
 
-		if(segment.getTotalLength()!=this.size()){
+		if(segment.getTotalLength()!=array.length){
 			throw new ProfileException("Segment comes from a different length profile");
 		}
 		return getSubregion(segment.getStartIndex(), segment.getEndIndex());
