@@ -137,7 +137,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	 * Get the array from the profile
 	 * @return an array of values
 	 */
-	public boolean[] asArray(){
+	public boolean[] toArray(){
 		return this.array;
 	}
 	

@@ -618,7 +618,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		double[] props = new double[segments.length];
 		
 		for(int i=0; i<segments.length; i++){
-			props[i] = this.getIndexProportion(segments[i].getStartIndex());
+			props[i] = this.getFractionOfIndex(segments[i].getStartIndex());
 		}
 		
 		// get the target start indexes of the new segments

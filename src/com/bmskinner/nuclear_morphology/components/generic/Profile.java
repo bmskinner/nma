@@ -153,7 +153,7 @@ public class Profile implements IProfile {
 			throw new IndexOutOfBoundsException("Value "+prop+" must be between 0-1");
 		}
 		
-		int index = this.getProportionalIndex(prop);
+		int index = this.getIndexOfFraction(prop);
 		
 		return array[index];
 
@@ -204,7 +204,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#getProportionalIndex(double)
 	 */
 	@Override
-	public int getProportionalIndex(double d) {
+	public int getIndexOfFraction(double d) {
 		if(d<0 || d > 1){
 			throw new IllegalArgumentException("Proportion must be between 0-1: "+d);
 		}
@@ -220,7 +220,7 @@ public class Profile implements IProfile {
 	 * @see components.generic.IProfile#getIndexProportion(int)
 	 */
 	@Override
-	public double getIndexProportion(int index){
+	public double getFractionOfIndex(int index){
 		if(index < 0 || index >= this.size()){
 			throw new IllegalArgumentException("Index out of bounds: "+index);
 		}

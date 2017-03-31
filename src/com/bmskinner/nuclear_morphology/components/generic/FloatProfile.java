@@ -203,7 +203,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getProportionalIndex(double)
 	 */
 	@Override
-	public int getProportionalIndex(double d) {
+	public int getIndexOfFraction(double d) {
 		if(d<0 || d > 1){
 			throw new IllegalArgumentException("Proportion must be between 0-1: "+d);
 		}
@@ -219,14 +219,12 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getIndexProportion(int)
 	 */
 	@Override
-	public double getIndexProportion(int index){
-		if(index < 0 || index >= this.size()){
+	public double getFractionOfIndex(int index){
+		if(index < 0 || index >= array.length){
 			throw new IllegalArgumentException("Index out of bounds: "+index);
 		}
 		
-		double fractionalDistance =  (double) index / (double) array.length;
-		
-		return fractionalDistance;
+		return (double) index / (double) array.length;
 	}
 
 	/* (non-Javadoc)
@@ -280,22 +278,21 @@ public class FloatProfile implements IProfile {
 		//		}
 		//		return minIndex;
 	}
-
-	/* (non-Javadoc)
-	 * @see components.generic.IProfile#asArray()
-	 */
+	
 	@Override
-	public double[] asArray(){
-		double[] result = new double[this.size()];
-		for(int i=0;i<result.length; i++){
-			result[i] = this.array[i];
-		}
+	public float[] toFloatArray(){
+		float[] result = new float[array.length];
+		System.arraycopy( array, 0, result, 0, array.length );
 		return result;
 	}
 	
 	@Override
-	public float[] toFloatArray(){
-		return array;
+	public double[] toDoubleArray(){
+		double[] result = new double[array.length];
+		for(int i=0;i<result.length; i++){
+			result[i] = array[i];
+		}
+		return result;
 	}
 
 

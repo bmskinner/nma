@@ -107,15 +107,15 @@ public interface IProfile
 	 * @param d a fraction between 0 (start) and 1 (end)
 	 * @return the nearest index
 	 */
-	int getProportionalIndex(double d);
+	int getIndexOfFraction(double d);
 
 	/**
-	 * Get the proportion of the given index along the profile
+	 * Get the fractional distance of the given index along the profile
 	 * from zero to one.
 	 * @param index the index to test
 	 * @return
 	 */
-	double getIndexProportion(int index);
+	double getFractionOfIndex(int index);
 	
 	/**
 	 * Get the minimum value in the profile.If there are multiple values 

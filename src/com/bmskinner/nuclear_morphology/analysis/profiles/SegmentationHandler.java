@@ -216,7 +216,7 @@ public class SegmentationHandler implements Loggable {
 
 			double prop = dataset.getCollection()
 				.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-				.getIndexProportion(index);
+				.getFractionOfIndex(index);
 		
 
 		// Update the median profile
@@ -232,7 +232,7 @@ public class SegmentationHandler implements Loggable {
 			
 			int childIndex = child.getCollection()
 					.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getProportionalIndex(prop);
+					.getIndexOfFraction(prop);
 			
 			child.getCollection()
 				.getProfileManager()
@@ -282,7 +282,7 @@ public class SegmentationHandler implements Loggable {
 			
 			double prop = dataset.getCollection()
 					.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getIndexProportion(index);
+					.getFractionOfIndex(index);
 			
 			
 			dataset.getCollection()
@@ -296,7 +296,7 @@ public class SegmentationHandler implements Loggable {
 				
 				int childIndex = child.getCollection()
 						.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-						.getProportionalIndex(prop);
+						.getIndexOfFraction(prop);
 				
 				child.getCollection()
 					.getProfileManager()
