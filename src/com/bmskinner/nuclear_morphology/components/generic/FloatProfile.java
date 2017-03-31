@@ -339,6 +339,30 @@ public class FloatProfile implements IProfile {
 
 		return profile1;
 	}
+	
+	/**
+	 * Return an array in which the first array has been interpolated (lengthened) to match the second
+	 * array. If the first array is shorter of equal in length to the second array, this has no effect
+	 * @param profile1
+	 * @param profile2
+	 * @return
+	 * @throws ProfileException
+	 */
+	private float[] equaliseLengths(float[] profile1, float[] profile2) throws ProfileException {
+		if(profile1==null || profile2==null){
+			throw new IllegalArgumentException("Input profile is null when equilising lengths");
+		}
+		
+		// profile 2 is smaller or the same length
+		// return profile 1 unchanged
+		if(profile2.length <= profile1.length ){
+			return profile1;
+		} else {
+			// profile 1 is smaller; interpolate to profile 2 length
+			return interpolate(profile1, profile2.length);// profile1 = profile1.interpolate(profile2.size());
+		}
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see components.generic.IProfile#absoluteSquareDifference(components.generic.IProfile)
@@ -605,6 +629,44 @@ public class FloatProfile implements IProfile {
 				lowestScore=score;
 				index=i;
 			}
+
+		}
+		return index;
+	}
+	
+	/**
+	 * Get the sliding window offset of array 1 that best matches array 2.
+	 * The arrays must be the same length
+	 * @param arr1
+	 * @param arr2
+	 * @return
+	 */
+	private int getBestFitOffset(float[] arr1, float[] arr2){
+		
+		double lowestScore = squareDifference(arr1, arr2);
+		int index = 0;
+		
+		// Duplicate array 1
+		float[] tmp = new float[arr1.length];
+		System.arraycopy(arr1, 0, tmp, 0, arr1.length);
+		
+		// Position by position
+		for(int i=1;i<arr1.length;i++){
+			float[] tmp2 = new float[arr1.length];	
+			
+			// Offset the array by 1
+			System.arraycopy(tmp, 0, tmp2, 1, arr1.length-1);
+			tmp2[0] = tmp[arr1.length-1];
+			
+			// Compare to array 2
+			double score = squareDifference(tmp2, arr2);
+			if(score<lowestScore){
+				lowestScore=score;
+				index=i;
+			}
+			
+			// Fix the offset
+			tmp = tmp2;
 
 		}
 		return index;
