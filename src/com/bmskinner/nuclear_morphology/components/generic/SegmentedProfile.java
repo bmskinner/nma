@@ -683,20 +683,20 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#equals(components.generic.ISegmentedProfile)
 	 */
-	@Override
-	public boolean equals(ISegmentedProfile profile){
-		if(!super.equals(profile)){
-			return false;
-		}
-		// check the segments
-		for(String name : this.getSegmentNames()){
-			if(!this.getSegment(name).equals(profile.getSegment(name))){
-				return false;
-			}
-		}
-		return true;
-	}
-	
+//	@Override
+//	public boolean equals(ISegmentedProfile profile){
+//		if(!super.equals(profile)){
+//			return false;
+//		}
+//		// check the segments
+//		for(String name : this.getSegmentNames()){
+//			if(!this.getSegment(name).equals(profile.getSegment(name))){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
+//	
 	public ISegmentedProfile interpolateSegments(int length){
 
 		// get the target lengths of the new segments

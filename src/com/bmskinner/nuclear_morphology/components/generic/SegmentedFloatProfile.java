@@ -51,7 +51,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @param segments the list of segments to use
 	 * @throws ProfileException 
 	 */
-	public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws IndexOutOfBoundsException, ProfileException {		
+	public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws ProfileException {		
 		super(p);
 
 		if(segments==null || segments.isEmpty()){
@@ -59,21 +59,14 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		}
 
 		if(p.size() != segments.get(0).getTotalLength() ){
-			throw new IndexOutOfBoundsException("Segments total length ("
+			throw new IllegalArgumentException("Segments total length ("
 					+segments.get(0).getTotalLength()
 					+") does not fit profile ("+
 					+p.size()
 					+")");
 		}
 		
-
-
-//		try {
-			IBorderSegment.linkSegments(segments);
-//		} catch (ProfileException e) {
-//			warn("Error linking segments in profile constructor");
-//			stack("Profile error linking segments", e);
-//		}
+		IBorderSegment.linkSegments(segments);
 
 		this.segments = new IBorderSegment[segments.size()];
 		for(int i=0; i<segments.size(); i++){
@@ -757,19 +750,27 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#equals(components.generic.ISegmentedProfile)
 	 */
-	@Override
-	public boolean equals(ISegmentedProfile profile){
-		if(!super.equals(profile)){
-			return false;
-		}
-		// check the segments
-		for(String name : this.getSegmentNames()){
-			if(!this.getSegment(name).equals(profile.getSegment(name))){
-				return false;
-			}
-		}
-		return true;
-	}
+//	@Override
+//	public boolean equals(ISegmentedProfile profile){
+//		if(this==profile){
+//			return true;
+//		}
+//		
+//		if(!(profile instanceof ISegmentedProfile)){
+//			return false;
+//		}
+//		
+//		if(!super.equals(profile)){
+//			return false;
+//		}
+//		// check the segments
+//		for(String name : this.getSegmentNames()){
+//			if(!this.getSegment(name).equals(profile.getSegment(name))){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#reverse()

@@ -230,7 +230,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param profile
 	 * @return
 	 */
-	boolean equals(ISegmentedProfile profile);
+//	boolean equals(ISegmentedProfile profile);
 
 	void reverse();
 

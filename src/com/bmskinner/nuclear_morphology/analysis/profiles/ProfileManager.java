@@ -66,12 +66,6 @@ public class ProfileManager implements Loggable {
 		return collection.getProfileCollection().length();
 	}
 	
-//	public void removeProfiles(){
-//		for(ProfileType type : ProfileType.values()){
-//			collection.removeProfileCollection(type);
-//		}
-//		
-//	}
 	
 	/**
 	 * Get the average profile window size in the population.
@@ -106,14 +100,14 @@ public class ProfileManager implements Loggable {
 				int newIndex;
 				try {
 					newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-				} catch (Exception e1) {
-					fine("Unable to get sliding window offset from nucleus profile", e1);
+				} catch (UnavailableProfileTypeException | ProfileException e1) {
+					stack("Unable to get sliding window offset from nucleus profile", e1);
 					return;
 				}
 				try {
 					n.setBorderTag(tag, newIndex);
-				} catch (Exception e) {
-					fine("Cannot update nucleus tag");
+				} catch (IndexOutOfBoundsException e) {
+					stack("Cannot update nucleus tag", e);
 					return;
 				}		
 				
@@ -127,53 +121,7 @@ public class ProfileManager implements Loggable {
 		});
 				
 	}
-	
-//	/**
-//	 * Create the profile collections to hold angles from nuclear
-//	 * profiles based on the current nucleus profiles. The ProfileAggregate
-//	 * for each ProfileType is recalculated. The resulting median profiles
-//	 * will have the same length after this update
-//	 * @param keepLength when recalculating the profile aggregate, should the previous length be kept
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	public void createProfileCollections(boolean keepLength) {
-//
-//		/*
-//		 * Build a first set of profile aggregates
-//		 * Default is to make profile aggregate from reference point
-//		 * Do not build an aggregate for the non-existent frankenprofile
-//		 * 
-//		 * 
-//		 */
-//		IProfileCollection pc = collection.getProfileCollection();
-//		pc.createProfileAggregate(collection, pc.length());
-//		
-//		
-////		for(ProfileType type : ProfileType.values()){
-////			
-////			if(type.equals(ProfileType.FRANKEN)){
-////				continue;
-////			}
-////			
-////			fine("Creating profile aggregate: "+type);
-////			IProfileCollection pc = collection.getProfileCollection();
-////			int length = pc.length();
-////						
-////			if(keepLength && length>0){ // failsafe in case some idiot (me) tries to maintain length on an empty aggregate
-////				
-////			
-////				finer(type+" length before update: "+pc.length());
-////
-////				pc.createProfileAggregate(collection, length);
-////
-////				finer(type+" length after update: "+pc.length());
-////			} else {
-////				pc.createProfileAggregate(collection, type);
-////			}
-////		}
-//	}
-		
+			
 	/**
 	 * Add the given offset to each of the profile types in the ProfileCollection
 	 * except for the frankencollection

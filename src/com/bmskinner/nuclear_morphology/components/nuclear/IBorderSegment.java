@@ -332,6 +332,50 @@ public interface IBorderSegment
 
 	String toString();
 	
+	
+	/**
+	 * Given a list of segments, link them together into a circle.
+	 * @param list the segments to link
+	 * @throws ProfileException if updating the first segment indexes fails
+	 */
+	static void linkSegments(IBorderSegment[] list) throws ProfileException {
+		if(list==null){
+			throw new IllegalArgumentException("List of segments is null");
+		}
+		
+		if( list.length<2 ){
+			throw new IllegalArgumentException("Must have at least two segments (have "+list.length+")");
+		}
+		
+		for(int i=0; i<list.length; i++){
+			IBorderSegment s = list[i];
+			// Wrap indices
+			int p = i==0 ? list.length-1 : i-1;
+			int n = i==list.length-1 ? 0 : i+1;
+			
+			if(i==0){
+				
+				boolean lockState = s.isLocked();
+				s.setLocked(false);
+				try {
+					
+					s.update(list[p].getEndIndex(), s.getEndIndex());
+					
+				} catch(IllegalArgumentException e){	
+					throw new ProfileException("Error linking final segment: "+e.getMessage());
+				}
+				s.setLocked(lockState);
+			}
+			
+			
+			
+			s.setPrevSegment(list[p]);
+			s.setNextSegment(list[n]);
+			s.setPosition(i);
+			
+		}		
+	}
+	
 	/**
 	 * Given a list of segments, link them together into a circle.
 	 * Links start and end properly.
@@ -342,71 +386,93 @@ public interface IBorderSegment
 		if(list==null){
 			throw new IllegalArgumentException("List of segments is null");
 		}
-		
-		if( list.isEmpty() ){
-			throw new IllegalArgumentException("List of segments is empty");
+				
+		if( list.size()<2 ){
+			throw new IllegalArgumentException("Must have at least two segments (have "+list.size()+")");
 		}
 		
-		if( list.size()==1 ){
-			throw new IllegalArgumentException("Only one segment in list");
-		}
-
-		IBorderSegment prevSeg = null;
 		
-		int position = 0;
-		for(IBorderSegment segment : list){
-
-			if(prevSeg != null){
-				segment.setPrevSegment(prevSeg);
-				prevSeg.setNextSegment(segment);
-			}
-			segment.setPosition(position);
-
-			prevSeg = segment;
-			position++;
-		}
-		
-		if(list.size()>1){
-		
-			IBorderSegment firstSegment = list.get(0);
-			IBorderSegment lastSegment  = list.get(list.size()-1);
-
-			/*
-			 * Ensure the end of the final segment is the same index as the start of the first segment.
-			 * 
-			 * Unlock the first segment while the update proceeds
-			 */
-
-			boolean lockState = firstSegment.isLocked();
-			firstSegment.setLocked(false);
+		for(int i=0; i<list.size(); i++){
+			IBorderSegment s = list.get(i);
+			// Wrap indices
+			int p = i==0 ? list.size()-1 : i-1;
+			int n = i==list.size()-1 ? 0 : i+1;
 			
-
-			try {
+			if(i==0){
 				
-				
-				firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
-				
-			} catch(IllegalArgumentException e){				
-				throw new ProfileException("Error fitting final segment: "+e.getMessage()+"\n"+IBorderSegment.toString(list));
+				boolean lockState = list.get(0).isLocked();
+				s.setLocked(false);
+				try {
+					
+					s.update(list.get(p).getEndIndex(), s.getEndIndex());
+					
+				} catch(IllegalArgumentException e){	
+					throw new ProfileException("Error linking final segment: "+e.getMessage());
+				}
+				s.setLocked(lockState);
 			}
 			
-			lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
-			firstSegment.setPrevSegment(lastSegment);
+			
+			
+			s.setPrevSegment(list.get(p));
+			s.setNextSegment(list.get(n));
+			s.setPosition(i);
+			
+		}		
+		
 
-			// if the first segment is starting at the last index of the profile, correct
-			// it to start at 0
-			if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
-				firstSegment.update(0, firstSegment.getEndIndex());
-			}	
-			/*
-			 * Relock the segment if it was previously locked
-			 */
-			firstSegment.setLocked(lockState);
-		} else {
-			IBorderSegment firstSegment = list.get(0);
-			firstSegment.setNextSegment(firstSegment);
-			firstSegment.setPrevSegment(firstSegment);
-		}
+//		IBorderSegment prevSeg = null;
+//		
+//		int position = 0;
+//		for(IBorderSegment segment : list){
+//
+//			if(prevSeg != null){
+//				segment.setPrevSegment(prevSeg);
+//				prevSeg.setNextSegment(segment);
+//			}
+//			segment.setPosition(position);
+//
+//			prevSeg = segment;
+//			position++;
+//		}
+//		
+//
+//		
+//		IBorderSegment firstSegment = list.get(0);
+//		IBorderSegment lastSegment  = list.get(list.size()-1);
+//
+//		/*
+//		 * Ensure the end of the final segment is the same index as the start of the first segment.
+//		 * 
+//		 * Unlock the first segment while the update proceeds
+//		 */
+//
+//		boolean lockState = firstSegment.isLocked();
+//		firstSegment.setLocked(false);
+//		
+//
+//		try {
+//			
+//			
+//			firstSegment.update(lastSegment.getEndIndex(), firstSegment.getEndIndex());
+//			
+//		} catch(IllegalArgumentException e){	
+//			throw new ProfileException("Error linking final segment: "+e.getMessage()+"\n"+IBorderSegment.toString(list));
+//		}
+//		
+//		lastSegment.setNextSegment(firstSegment); // ensure they match up at the end
+//		firstSegment.setPrevSegment(lastSegment);
+//
+//		// if the first segment is starting at the last index of the profile, correct
+//		// it to start at 0
+//		if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
+//			firstSegment.update(0, firstSegment.getEndIndex());
+//		}	
+//		/*
+//		 * Relock the segment if it was previously locked
+//		 */
+//		firstSegment.setLocked(lockState);
+
 		
 	}
 	
