@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
 /**
  * A hash based options for nucleus detection settings
@@ -18,7 +19,7 @@ public class DefaultNucleusHashDetectionOptions
 	public static final double DEFAULT_MIN_NUCLEUS_CIRC = 0.2;
 	public static final double DEFAULT_MAX_NUCLEUS_CIRC = 0.8;
 	public static final int    DEFAULT_NUCLEUS_THRESHOLD = 36;
-	private static final double    DEFAULT_SCALE = 1.0;
+	private static final double    DEFAULT_SCALE = GlobalOptions.getInstance().getImageScale();
 	private static final int    DEFAULT_CHANNEL      = 2;
 	private static final boolean DEFAULT_NORMALISE_CONTRAST = false;
 	private static final boolean DEFAULT_IS_RGB = false;
@@ -34,6 +35,7 @@ public class DefaultNucleusHashDetectionOptions
 		this.setSize(DEFAULT_MIN_NUCLEUS_SIZE, DEFAULT_MAX_NUCLEUS_SIZE);
 		this.setCircularity(DEFAULT_MIN_NUCLEUS_CIRC, DEFAULT_MAX_NUCLEUS_CIRC);
 		this.setThreshold(DEFAULT_NUCLEUS_THRESHOLD);
+				
 		this.setScale(DEFAULT_SCALE);
 		this.setChannel(DEFAULT_CHANNEL);
 		this.setNormaliseContrast(DEFAULT_NORMALISE_CONTRAST);

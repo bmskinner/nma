@@ -31,6 +31,9 @@ public class GlobalOptions {
 	
 	private boolean convertDatasets = true;
 	
+	private static double DEFAULT_SCALE = 1;
+	private double scaleValue;
+	
 	/**
 	 * Should the consensus nucleus plots be filled, or empty
 	 */
@@ -68,14 +71,24 @@ public class GlobalOptions {
 		this.violinPlots = true;
 		this.fillConsensus = true;
 		this.antiAliasing  = false;
+		this.scaleValue = DEFAULT_SCALE;
+		this.defaultDir = new File(System.getProperty("user.home"));
 	}
 
-	public MeasurementScale getScale() {
+	public synchronized MeasurementScale getScale() {
 		return scale;
 	}
 
 	public void setScale(MeasurementScale scale) {
 		this.scale = scale;
+	}
+	
+	public synchronized double getImageScale() {
+		return scaleValue;
+	}
+	
+	public void setImageScale(double scale) {
+		this.scaleValue = scale;
 	}
 
 	public synchronized Level getLogLevel() {

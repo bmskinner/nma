@@ -21,10 +21,12 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -38,7 +40,9 @@ public class PropertiesReader implements Loggable {
 	
 	public static final String INI_FILE = "config.ini";
 	
-	private static final String DEFAULT_DIR_KEY = "DEFAULT_DIR";
+	private static final String DEFAULT_DIR_KEY   = "DEFAULT_DIR";
+	private static final String DEFAULT_IMAGE_SCALE_KEY = "DEFAULT_IMAGE_SCALE";
+	private static final String DEFAULT_DISPLAY_SCALE_KEY = "DEFAULT_DISPLAY_SCALE";
 
 	public PropertiesReader() {
 		try {
@@ -51,22 +55,35 @@ public class PropertiesReader implements Loggable {
 			
 			if(ini.exists()){
 				// Read the properties
-			Properties properties = new Properties();
-
-			properties.load(new FileInputStream(ini));
-
-			assignOptions(properties);
+				Properties properties = new Properties();
+	
+				properties.load(new FileInputStream(ini));
+	
+				assignOptions(properties);
 			} else {
-				System.out.println("No ini file: creating default");
+				log("No ini file: creating default");
+				Properties properties = createDefaultProperties();
+				properties.store(new FileOutputStream(ini), null);
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			stack("Error reading ini file", e);
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			stack("Error reading ini file", e);
 		}
 
+	}
+	
+	private Properties createDefaultProperties(){
+		Properties properties = new Properties();
+		
+		GlobalOptions op = GlobalOptions.getInstance();
+		
+		properties.setProperty(DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
+		properties.setProperty(DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
+		properties.setProperty(DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
+		return properties;
+		
 	}
 	
 	private void assignOptions(Properties properties){
@@ -81,7 +98,14 @@ public class PropertiesReader implements Loggable {
 			if(DEFAULT_DIR_KEY.equals(key)){
 				op.setDefaultDir( new File(value));
 			}
-//			System.out.println(key + " => " + value);
+			
+			if(DEFAULT_IMAGE_SCALE_KEY.equals(key)){
+				op.setImageScale(Double.valueOf(value));
+			}
+			
+			if(DEFAULT_DISPLAY_SCALE_KEY.equals(key)){
+				op.setScale(MeasurementScale.valueOf(value));
+			}
 
 		}
 	}

@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -88,7 +89,7 @@ public interface IDetectionOptions extends Serializable, Loggable {
 		
 	}
 	
-	static final double DEFAULT_SCALE = 1;
+	static final double DEFAULT_SCALE = GlobalOptions.getInstance().getImageScale();
 	static final double DEFAULT_MIN_CIRC = 0;
 	static final double DEFAULT_MAX_CIRC = 1;
 	static final boolean DEFAULT_IS_RGB = false;
