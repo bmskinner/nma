@@ -49,7 +49,11 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testFloatProfileFloatArray() {
-		fail("Not yet implemented");
+		float[] data = null;
+		exception.expect(IllegalArgumentException.class);
+		IProfile tester = new FloatProfile(data);
+		
+		tester = new FloatProfile(this.data);
 	}
 
 	/**
@@ -57,7 +61,21 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testFloatProfileIProfile() {
-		fail("Not yet implemented");
+		float[] data   = {0, 1, 2, 3,  4,  5 };
+
+		IProfile tester = new FloatProfile(data);
+		float[] result = new FloatProfile(tester).toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i], result[i],0);
+		}
+		
+		
+		// Check null
+		IProfile nullP = null;
+		exception.expect(IllegalArgumentException.class);
+		tester = new FloatProfile(nullP);
+		
 	}
 
 	/**
@@ -65,7 +83,19 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testFloatProfileFloatInt() {
-		fail("Not yet implemented");
+		
+		int value = 1;
+		int length = 6;
+		
+		float[] exp   = { 1, 1, 1, 1, 1, 1 };
+		
+		IProfile p  = new FloatProfile(value, length);
+		
+		float[] result = p.toFloatArray();
+		
+		for( int i =0;i<exp.length; i++){
+			assertEquals(exp[i], result[i],0);
+		}
 	}
 
 	/**
@@ -372,7 +402,59 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetSlidingWindowOffset() {
-		fail("Not yet implemented");
+		
+		/*
+		 * Testing with equal array lengths
+		 */
+		
+		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+
+		int expectedOffset = 8;
+		
+		IProfile dataProfile = new FloatProfile(data);
+		IProfile templateProfile = new FloatProfile(test);
+
+		
+		int offset = 0;
+		try {
+			offset = dataProfile.getSlidingWindowOffset(templateProfile);
+		} catch (ProfileException e) {
+			System.out.println("Error offsetting profile: "+e.getMessage());
+			fail("Offsetting failed");
+		}
+
+		assertEquals(expectedOffset, offset,0);
+		
+		/*
+		 * Testing with shorter test array
+		 */
+		
+		float[] smallTest  = { 9, 16, 5, 7, 1.5f, 13, 7 };
+		IProfile pTest = new FloatProfile(smallTest);
+		
+		offset = 0;
+		try {
+			offset = dataProfile.getSlidingWindowOffset(pTest);
+		} catch (ProfileException e) {
+			System.out.println("Error offsetting profile: "+e.getMessage());
+			fail("Offsetting failed");
+		}
+
+		assertEquals(expectedOffset, offset,0);
+		
+		/*
+		 * Testing with longer test array
+		 */
+		float[] longTest  = { 9, 14, 20, 16, 13, 9, 6, 5, 4, 7, 10, 7, 5, 2, 1, 1.5f, 2, 4, 7, 13, 19, 15, 12, 7, 3 };
+		pTest = new FloatProfile(longTest);
+		offset = 0;
+		try {
+			offset = dataProfile.getSlidingWindowOffset(pTest);
+		} catch (ProfileException e) {
+			System.out.println("Error offsetting profile: "+e.getMessage());
+			fail("Offsetting failed");
+		}
+		assertEquals(expectedOffset, offset,0);
 	}
 
 	/**
@@ -678,71 +760,7 @@ public class ProfileTest {
 		fail("Not yet implemented");
 	}
 	
-	
-	@Test
-	public void profileShouldNotBeCreatedWithNullData(){
-		float[] data = null;
-		exception.expect(IllegalArgumentException.class);
-		IProfile tester = new FloatProfile(data);
-	}
-	
-	@Test
-	public void profileCanBeCreatedFromProfile(){
-		float[] data   = {0, 1, 2, 3,  4,  5 };
-
-		IProfile tester = new FloatProfile(data);
-		IProfile result = new FloatProfile(tester);
 		
-		for( int i =0;i<data.length; i++){
-			assertEquals("Values should be identical", data[i], result.toFloatArray()[i],0);
-		}
-	}
-	
-	
-//	@Test
-//	public void profileShouldErrorOnOutOfLowerBoundsRequest(){
-//		float[] data   = {0, 1, 2, 3,  4,  5 };
-//		IProfile tester = new FloatProfile(data);
-//		exception.expect(IndexOutOfBoundsException.class);
-//		tester.get(-1);
-//		
-//	}
-//	
-//	
-//	@Test
-//	public void profileShouldErrorOnOutOfUpperBoundsRequest(){
-//		float[] data   = {0, 1, 2, 3,  4,  5 };
-//		IProfile tester = new FloatProfile(data);
-//		exception.expect(IndexOutOfBoundsException.class);
-//		tester.get(6);
-//	}
-//	
-//	@Test
-//	public void profileShouldGetInBoundsRequest(){
-//		
-//		float[] data   = {0, 1, 2, 3,  4,  5 };
-//		IProfile tester = new FloatProfile(data);
-//		
-//		double d = tester.get(0);
-//		assertEquals("Value should be 0", 0, d,0);
-//
-//		d = tester.get(1);
-//		assertEquals("Value should be 1", 1, d,0);
-//		
-//		d = tester.get(2);
-//		assertEquals("Value should be 2", 2, d,0);
-//				
-//	}
-		
-	@Test
-	public void profileSizeShouldBeArrayLength(){
-		float[] data     = {1, 1, 1, 1, 1, 1};
-		
-		IProfile tester = new FloatProfile(data);
-		
-		assertEquals("Profile length should be 6", data.length, tester.size(),0);
-	}
-
 		
 	@Test
 	public void interpolationShouldLinearExtend(){
@@ -809,29 +827,6 @@ public class ProfileTest {
 		
 	}
 	
-	
-	@Test
-	public void bestFittingReturnsCorrectOffset(){
-
-		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
-
-		int expectedOffset = 8;
-		
-		IProfile dataProfile = new FloatProfile(data);
-		IProfile templateProfile = new FloatProfile(test);
-
-		
-		int offset = 0;
-		try {
-			offset = dataProfile.getSlidingWindowOffset(templateProfile);
-		} catch (ProfileException e) {
-			System.out.println("Error offsetting profile: "+e.getMessage());
-			fail("Offsetting failed");
-		}
-
-		assertEquals(offset+" should be "+expectedOffset, expectedOffset, offset,0);
-		
-	}
 	
 	@Test
 	public void squareDiffsAreCalculatedCorrectly(){

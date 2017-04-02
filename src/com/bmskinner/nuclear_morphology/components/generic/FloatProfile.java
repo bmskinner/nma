@@ -565,7 +565,7 @@ public class FloatProfile implements IProfile {
 	}
 	
     /**
-     * Interpolate the array in this profile to the given length, and
+     * Interpolate the array to the given length, and
      * return as a new array
      * @return
      */
@@ -699,40 +699,36 @@ public class FloatProfile implements IProfile {
          * NEW CODE VERSION - FAIL. GIVES ERROR IN getSubRegion() during segment fitting
          */
         
-//        float[] test = testProfile.toFloatArray();
-//        
-//        if(array.length==test.length){
-//            return getBestFitOffset(array, test);
-//        }
-//        
-//        if(array.length>test.length){
-//            test = interpolate(test, array.length);
-//            return getBestFitOffset(array, test);
-//        } else {
-//            float[] arr1 = this.toFloatArray();
-//            arr1 = interpolate(arr1, test.length);
-//            return getBestFitOffset(arr1, test);
-//        }
-		
-		
+        float[] test = testProfile.toFloatArray();
+        
+        if(array.length==test.length){
+            return getBestFitOffset(array, test);
+        } else {
+        	
+        	// Change the test array to fit
+        	test = interpolate(test, array.length);
+            return getBestFitOffset(array, test);
+        	
+        }
+        
         /*
          * OLD CODE
          */
 
-		double lowestScore = this.absoluteSquareDifference(testProfile);
-		int index = 0;
-		for(int i=0;i<this.size();i++){
-
-			IProfile offsetProfile = this.offset(i);
-
-			double score = offsetProfile.absoluteSquareDifference(testProfile);
-			if(score<lowestScore){
-				lowestScore=score;
-				index=i;
-			}
-
-		}
-		return index;
+//		double lowestScore = this.absoluteSquareDifference(testProfile);
+//		int index = 0;
+//		for(int i=0;i<this.size();i++){
+//
+//			IProfile offsetProfile = this.offset(i);
+//
+//			double score = offsetProfile.absoluteSquareDifference(testProfile);
+//			if(score<lowestScore){
+//				lowestScore=score;
+//				index=i;
+//			}
+//
+//		}
+//		return index;
 	}
 	
 	/**
