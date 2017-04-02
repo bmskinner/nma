@@ -496,6 +496,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
 					datasetSelectionOrder.clear();
 				}
+				
+				int cellTotal = 0;
 								
 				// Track the datasets currently selected
 				List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(5);
@@ -515,6 +517,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 								
 								IAnalysisDataset d = treeTable.getDatasetAtRow(i);
 								datasets.add(d);
+								cellTotal += d.getCollection().size();
 								
 								datasetSelectionOrder.add(d);
 								
@@ -557,10 +560,21 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 					
 					PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
 					treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(rend);
+					treeTable.getColumnModel()
+						.getColumn(PopulationTreeTable.COLUMN_NAME)
+						.setHeaderValue("Dataset ("+datasets.size()+")");
+					
+					
+					treeTable.getColumnModel()
+						.getColumn(PopulationTreeTable.COLUMN_CELL_COUNT)
+						.setHeaderValue("Cells ("+cellTotal+")");
+					
 
 					if(datasets.isEmpty() && totalSelectionCount==0){
 						populationPopup.setEnabled(false);
 					} else {
+						
+						
 
 						if(totalSelectionCount>1){ // multiple of datasets or clusters
 							// single dataset

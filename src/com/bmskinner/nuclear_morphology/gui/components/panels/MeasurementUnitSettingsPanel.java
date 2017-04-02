@@ -54,7 +54,7 @@ public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
 			map.put(type, button);
 		}
 		// Set the default
-		map.get(MeasurementScale.PIXELS).setSelected(true);		
+		map.get(GlobalOptions.getInstance().getScale()).setSelected(true);		
 	}
 	
 	@Override

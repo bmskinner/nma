@@ -16,8 +16,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class PopulationTreeTableModel extends DefaultTreeTableModel implements Loggable{
 		
-	private static final String DATASET_COLUMN_LBL = "Dataset";
-	private static final String CELL_COLUMN_LBL    = "Cells";
+	private static final String DATASET_COLUMN_LBL = "Dataset (0)";
+	private static final String CELL_COLUMN_LBL    = "Cells (0)";
 	private static final String COLOUR_COLUMN_LBL  = "";
 	
 	public PopulationTreeTableModel(){

@@ -48,7 +48,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 	 * The default width for the colour column
 	 */
 	public static final int DEFAULT_COLOUR_COLUMN_WIDTH   = 5;
-	
+		
 	private TreeSelectionHandler treeListener;
 	
 	public PopulationTreeTable(){
