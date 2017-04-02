@@ -170,6 +170,22 @@ public class DefaultBorderSegment implements IBorderSegment{
 	@Override
 	public void addMergeSource(IBorderSegment seg){
 
+		if(seg==null){
+			throw new IllegalArgumentException("Merge source segment is null");
+		}
+		
+		if(seg.getTotalLength()!=totalLength){
+			throw new IllegalArgumentException("Merge source length does not match");
+		}
+		
+		if( ! this.contains(seg.getStartIndex())){
+			throw new IllegalArgumentException("Start index of source is not in this segment");
+		}
+		
+		if( ! this.contains(seg.getEndIndex())){
+			throw new IllegalArgumentException("End index of source is not in this segment");
+		}
+		
 		mergeSources = Arrays.copyOf(mergeSources, mergeSources.length+1);
 		mergeSources[mergeSources.length-1] = seg;
 	}
@@ -182,19 +198,6 @@ public class DefaultBorderSegment implements IBorderSegment{
 		return mergeSources.length>0;
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#getLastFailReason()
-	 */
-	@Override
-	public String getLastFailReason(){
-		return "";
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#setLastFailReason(java.lang.String)
-	 */
-	@Override
-	public void setLastFailReason(String reason){}
 
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#getStartIndex()
@@ -521,7 +524,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean contains(int index){
-		return testContains(this.getStartIndex() , this.getEndIndex(), index);
+		return testContains(startIndex , endIndex, index);
 	}
 	
 	/* (non-Javadoc)
@@ -529,20 +532,16 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean testContains(int start, int end, int index){
-		if(index < 0 || index > this.getTotalLength()){
-			throw new IllegalArgumentException("Index is outside the total profile length: "+index);
+		if(index < 0 || index > totalLength){
+			return false;
 		}
 		
 		if(wraps(start, end)){ // wrapped
-			if(index<=end || index>start){
-				return true;
-			}
+			return (index<=end || index>=start);
 		} else{ // regular
-			if(index>=start && index<end){
-				return true;
-			}
+			return (index>=start && index<=end);
 		}
-		return false;
+
 	}
 	
 	/**
@@ -552,11 +551,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 * @return
 	 */
 	private boolean updateAffectsThisSegment(int startIndex, int endIndex){
-		if(startIndex != this.getStartIndex() || endIndex != this.getEndIndex()){
-			return true;
-		} else {
-			return false;
-		}
+		return ( startIndex != this.startIndex || endIndex != this.endIndex);
 	}
 	
 	/* (non-Javadoc)
@@ -570,109 +565,106 @@ public class DefaultBorderSegment implements IBorderSegment{
 		}
 		
 //		 Check the incoming data
-		if(startIndex < 0 || startIndex > this.getTotalLength()){
+		if(startIndex < 0 || startIndex > totalLength){
 			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
 		}
-		if(endIndex < 0 || endIndex > this.getTotalLength()){
+		if(endIndex < 0 || endIndex > totalLength){
 			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
 		}
 		
 		// only run an update and checks if the update will actually
 		// cause changes to the segment. If not, return true so as not
 		// to interfere with other linked segments
-		if(updateAffectsThisSegment(startIndex, endIndex)){
+		if( ! updateAffectsThisSegment(startIndex, endIndex)){
+			return true;
+		}
 
-			// Check that the new positions will not make this segment too small
-			int testLength = testLength(startIndex, endIndex);
-			if(testLength < MINIMUM_SEGMENT_LENGTH){
+		// Check that the new positions will not make this segment too small
+		int testLength = testLength(startIndex, endIndex);
+		if(testLength < MINIMUM_SEGMENT_LENGTH){
+			return false;
+		}
+
+		// Check that next and previous segments are not invalidated by length change
+		// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
+		// previous segment, and the max length increase forwards is up to the 
+		// MIN_SEG_LENGTH of the next segment
+
+		if(this.hasPrevSegment()){
+			int prevTestLength = prevSegment.testLength(prevSegment.getStartIndex(), startIndex);
+			if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
+				return false;
+			}
+		}
+		if(this.hasNextSegment()){
+			int nextTestLength = nextSegment.testLength(endIndex, nextSegment.getEndIndex());
+			if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
+				return false;
+			}
+		}
+
+		// check that updating will not cause segments to overlap or invert
+		// i.e. where a start becomes greater than an end without begin part of
+		// an array wrap
+		if(startIndex > endIndex){
+
+			if(!this.testContains(startIndex , endIndex, 0)){
 				return false;
 			}
 
-			// Check that next and previous segments are not invalidated by length change
-			// i.e the max length increase backwards is up to the MIN_SEG_LENGTH of the
-			// previous segment, and the max length increase forwards is up to the 
-			// MIN_SEG_LENGTH of the next segment
-
-			if(this.hasPrevSegment()){
-				int prevTestLength = this.prevSegment().testLength(this.prevSegment().getStartIndex(), startIndex);
-				if( prevTestLength < MINIMUM_SEGMENT_LENGTH){
-					return false;
-				}
-			}
-			if(this.hasNextSegment()){
-				int nextTestLength = this.nextSegment().testLength(endIndex, this.nextSegment().getEndIndex());
-				if( nextTestLength < MINIMUM_SEGMENT_LENGTH){
-					return false;
-				}
-			}
-
-			// check that updating will not cause segments to overlap or invert
-			// i.e. where a start becomes greater than an end without begin part of
-			// an array wrap
-			if(startIndex > endIndex){
-
-				if(!this.testContains(startIndex , endIndex, 0)){
-					return false;
-				}
-
-			}
-
-			// also test the effect on the next and previous segments
-			if(this.hasPrevSegment()){
-				if(this.prevSegment().getStartIndex() > startIndex){
-
-					if(!this.prevSegment().wraps() && this.prevSegment().wraps(startIndex, endIndex)){
-						return false;
-					}
-
-					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
-					if(this.prevSegment().wraps(startIndex, endIndex) && !this.prevSegment().testContains(startIndex, endIndex, 0)){
-						return false;
-					}
-				}
-			}
-
-			if(this.hasNextSegment()){
-				if( endIndex > this.nextSegment().getEndIndex()){
-
-					// if the next segment goes from not wrapping to wrapping when this segment is altered,
-					// an inversion must have occurred. Prevent.
-					if(!this.nextSegment().wraps() && this.nextSegment().wraps(startIndex, endIndex)){
-						return false;
-					}
-
-					// another wrapping test - if the new positions induce a wrap, the segment should contain 0
-					if(this.nextSegment().wraps(startIndex, endIndex) && !this.nextSegment().testContains(startIndex, endIndex, 0)){
-						return false;
-					}
-				}
-			}
-
-			// All checks have been passed; the update can proceed
-
-
-			//		 wrap in if to ensure we don't go in circles forever when testing a circular profile
-			if(this.getStartIndex()!=startIndex){
-				this.startIndex = startIndex;
-				if(this.hasPrevSegment()){
-					IBorderSegment prev = this.prevSegment();
-					prev.update(prev.getStartIndex(), startIndex);
-				}
-			}
-
-			if(this.getEndIndex()!=endIndex){
-				this.endIndex = endIndex;
-
-				if(this.hasNextSegment()){
-					IBorderSegment next = this.nextSegment();
-					next.update(endIndex, next.getEndIndex());
-				}
-			}
-			return true;
-		} else {
-			// update does not affect this segment
-			return true;
 		}
+
+		// also test the effect on the next and previous segments
+		if(this.hasPrevSegment()){
+			if(this.prevSegment().getStartIndex() > startIndex){
+
+				if(!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex)){
+					return false;
+				}
+
+				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+				if(prevSegment.wraps(startIndex, endIndex) && !prevSegment.testContains(startIndex, endIndex, 0)){
+					return false;
+				}
+			}
+		}
+
+		if(this.hasNextSegment()){
+			if( endIndex > nextSegment.getEndIndex()){
+
+				// if the next segment goes from not wrapping to wrapping when this segment is altered,
+				// an inversion must have occurred. Prevent.
+				if(!nextSegment.wraps() && nextSegment.wraps(startIndex, endIndex)){
+					return false;
+				}
+
+				// another wrapping test - if the new positions induce a wrap, the segment should contain 0
+				if(nextSegment.wraps(startIndex, endIndex) && !nextSegment.testContains(startIndex, endIndex, 0)){
+					return false;
+				}
+			}
+		}
+
+		// All checks have been passed; the update can proceed
+
+
+		//		 wrap in if to ensure we don't go in circles forever when testing a circular profile
+		if(this.getStartIndex()!=startIndex){ // becomes false after the first pass of the circle
+			this.startIndex = startIndex;
+			if(this.hasPrevSegment()){
+				prevSegment.update(prevSegment.getStartIndex(), startIndex);
+			}
+		}
+
+		if(this.getEndIndex()!=endIndex){
+			this.endIndex = endIndex;
+
+			if(this.hasNextSegment()){
+				nextSegment.update(endIndex, nextSegment.getEndIndex());
+			}
+		}
+		return true;
+		
 	}
 	
 

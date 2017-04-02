@@ -170,18 +170,18 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#getLastFailReason()
 	 */
-	@Override
-	public String getLastFailReason(){
-		return this.lastFailReason;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#setLastFailReason(java.lang.String)
-	 */
-	@Override
-	public void setLastFailReason(String reason){
-		this.lastFailReason = reason;
-	}
+//	@Override
+//	public String getLastFailReason(){
+//		return this.lastFailReason;
+//	}
+//	
+//	/* (non-Javadoc)
+//	 * @see components.nuclear.IBorderSegment#setLastFailReason(java.lang.String)
+//	 */
+//	@Override
+//	public void setLastFailReason(String reason){
+//		this.lastFailReason = reason;
+//	}
 
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#getStartIndex()

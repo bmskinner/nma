@@ -1,7 +1,7 @@
 /**
  * 
  */
-package components;
+package components.generic;
 
 import static org.junit.Assert.*;
 

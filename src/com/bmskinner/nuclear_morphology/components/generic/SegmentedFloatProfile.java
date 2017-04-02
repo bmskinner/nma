@@ -489,7 +489,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 				if(!testSeg.getName().equals(segment.getName())
 						&& !testSeg.getName().equals(nextSegment.getName())
 						&& !testSeg.getName().equals(prevSegment.getName())){
-					segment.setLastFailReason("Index out of bounds of next and prev");
+//					segment.setLastFailReason("Index out of bounds of next and prev");
 					return false;
 				}
 			}

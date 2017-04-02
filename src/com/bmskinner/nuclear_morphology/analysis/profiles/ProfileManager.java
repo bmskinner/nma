@@ -691,7 +691,7 @@ public class ProfileManager implements Loggable {
 			n.updateDependentStats();
 			
 		} else {
-			log("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+			log("Updating "+seg.getStartIndex()+" to index "+index+" failed");
 		}
 	}
 	
@@ -756,7 +756,7 @@ public class ProfileManager implements Loggable {
 			finest("Segments added, refresh the charts");
 							
 		} else {
-			warn("Updating "+seg.getStartIndex()+" to index "+index+" failed: "+seg.getLastFailReason());
+			warn("Updating "+seg.getStartIndex()+" to index "+index+" failed");
 		}
 		
 	}

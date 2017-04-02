@@ -108,9 +108,9 @@ public interface IBorderSegment
 	 */
 	boolean hasMergeSources();
 
-	String getLastFailReason();
+//	String getLastFailReason();
 
-	void setLastFailReason(String reason);
+//	void setLastFailReason(String reason);
 
 	/**
 	 * Get the index at the start of the segment

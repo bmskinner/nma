@@ -488,7 +488,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 				if(!testSeg.getName().equals(segment.getName())
 						&& !testSeg.getName().equals(nextSegment.getName())
 						&& !testSeg.getName().equals(prevSegment.getName())){
-					segment.setLastFailReason("Index out of bounds of next and prev");
+//					segment.setLastFailReason("Index out of bounds of next and prev");
 					return false;
 				}
 			}
@@ -505,7 +505,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 				return false;
 			} else {
 				
-				IJ.log("Error updating SegmentedProfile: segments unlinked: "+segment.getLastFailReason());
+//				IJ.log("Error updating SegmentedProfile: segments unlinked: "+segment.getLastFailReason());
 				IJ.log(segment.toString());
 				return false;
 			}
