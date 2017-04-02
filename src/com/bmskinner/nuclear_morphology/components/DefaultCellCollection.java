@@ -1243,7 +1243,7 @@ public class DefaultCellCollection
 	 * @param d2
 	 * @return
 	 */
-	public int countShared(IAnalysisDataset d2){
+	public synchronized int countShared(IAnalysisDataset d2){
 
 		return countShared(d2.getCollection());
 
@@ -1254,12 +1254,11 @@ public class DefaultCellCollection
 	 * @param d2
 	 * @return
 	 */
-	public int countShared(ICellCollection d2){
+	public synchronized int countShared(ICellCollection d2){
 
 		if(vennCache.hasCount(d2)){
 			return vennCache.getCount(d2);
 		}
-		
 		int shared  = countSharedNuclei(d2);
 		d2.setSharedCount(this, shared);
 		vennCache.addCount(d2, shared);

@@ -21,8 +21,11 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import ij.IJ;
+import ij.Prefs;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.measure.Calibration;
 
 import java.awt.geom.Point2D;
 
@@ -210,6 +213,30 @@ public class FloatPoint
 			throw new IllegalArgumentException("An input point is null in angle finding");
 		}
 		
+		
+		/*
+		 * Copy of ImageJ angle code from ij.gui.PolygonRoi#getAngleAsString()
+		 */
+		
+		float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
+		float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
+		
+		double angle1 = 0.0;
+		double angle2 = 0.0;
+
+		angle1 = getFloatAngle(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
+		angle2 = getFloatAngle(xpoints[1], ypoints[1], xpoints[2], ypoints[2]);
+		
+		double degrees = Math.abs(180-Math.abs(angle1-angle2));
+		if (degrees>180.0)
+			degrees = 360.0-degrees;
+		
+		return degrees;
+		
+		/*
+		 * Test code - not working
+		 */
+		
 		// Use the cosine rule: a-b^2 = this-b^2 + this-a^2 - 2 * this-b * this-a * cos (theta)
 
 		//	  double ab = a.getLengthTo(b);
@@ -223,10 +250,29 @@ public class FloatPoint
 		//	  double t = Math.acos(cosT);
 		//	  return Math.toDegrees(t);
 
-		float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
-		float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
-		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
-		return roi.getAngle();
+		/*
+		 * OLD CODE - WORKING
+		 */
+		
+//		float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
+//		float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
+//		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, 3, Roi.ANGLE);
+//		return roi.getAngle();
+	}
+	
+	/**
+	 * Get the angle in degrees between the specified line and a horizontal line.
+	 * Copied from ij.gui.Roi#getFloatAngle()
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @return
+	 */
+	private double getFloatAngle(double x1, double y1, double x2, double y2){
+		double dx = x2-x1;
+		double dy = y1-y2;
+		return (180.0/Math.PI)*Math.atan2(dy, dx);
 	}
 	
 	/* (non-Javadoc)
