@@ -207,31 +207,48 @@ public class FloatPoint
 	 * @see components.generic.IPoint#findAngle(components.generic.IPoint, components.generic.IPoint)
 	 */
 	@Override
-	public double findAngle(IPoint a, IPoint b){
+	public double findAngle(IPoint a, IPoint c){
 
-		if(a==null || b==null){
+		if(a==null || c==null){
 			throw new IllegalArgumentException("An input point is null in angle finding");
 		}
+		
+		/*
+		 * Test of rotation and comparison to a horizontal axis
+		 * From http://stackoverflow.com/questions/3486172/angle-between-3-points
+		 */
+		
+		
+		IPoint ab = IPoint.makeNew( x - a.getX(), y - a.getY() );
+		IPoint cb = IPoint.makeNew( x - c.getX(), y - c.getY() );
+
+
+	    double dot = (ab.getX() * cb.getX() + ab.getY() * cb.getY()); // dot product
+	    double cross = (ab.getX() * cb.getY() - ab.getY() * cb.getX()); // cross product
+
+	    double alpha = Math.atan2(cross, dot);
+
+	    return Math.abs(alpha * 180 / Math.PI);
 		
 		
 		/*
 		 * Copy of ImageJ angle code from ij.gui.PolygonRoi#getAngleAsString()
 		 */
 		
-		float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
-		float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
-		
-		double angle1 = 0.0;
-		double angle2 = 0.0;
-
-		angle1 = getFloatAngle(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
-		angle2 = getFloatAngle(xpoints[1], ypoints[1], xpoints[2], ypoints[2]);
-		
-		double degrees = Math.abs(180-Math.abs(angle1-angle2));
-		if (degrees>180.0)
-			degrees = 360.0-degrees;
-		
-		return degrees;
+//		float[] xpoints = { (float) a.getX(), (float) getX(), (float) b.getX()};
+//		float[] ypoints = { (float) a.getY(), (float) getY(), (float) b.getY()};
+//		
+//		double angle1 = 0.0;
+//		double angle2 = 0.0;
+//
+//		angle1 = getFloatAngle(xpoints[0], ypoints[0], xpoints[1], ypoints[1]);
+//		angle2 = getFloatAngle(xpoints[1], ypoints[1], xpoints[2], ypoints[2]);
+//		
+//		double degrees = Math.abs(180-Math.abs(angle1-angle2));
+//		if (degrees>180.0)
+//			degrees = 360.0-degrees;
+//		
+//		return degrees;
 		
 		/*
 		 * Test code - not working
