@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
@@ -471,10 +473,15 @@ public class DatasetConverter implements Loggable, Importer {
 		
 		// Get the roi for the old nucleus
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
-		
-		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
-			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+		try {
+			for(int i=0; i<xpoints.length; i++){
+				xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+				ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+			}
+ 
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+			throw new DatasetConversionException("Unable to get border point");
 		}
 		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
@@ -500,12 +507,15 @@ public class DatasetConverter implements Loggable, Importer {
 		
 		// Get the roi for the old nucleus
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
-		
-		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
-			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+		try{
+			for(int i=0; i<xpoints.length; i++){
+				xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+				ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+			}
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+			throw new DatasetConversionException("Unable to get border point");
 		}
-		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
 		
 		if(! roi.contains(n.getOriginalCentreOfMass().getXAsInt(), n.getOriginalCentreOfMass().getYAsInt())){
@@ -545,10 +555,14 @@ public class DatasetConverter implements Loggable, Importer {
 		
 		// Get the roi for the old nucleus
 		float[] xpoints = new float[n.getBorderLength()], ypoints = new float[n.getBorderLength()];
-		
-		for(int i=0; i<xpoints.length; i++){
-			xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
-			ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+		try{
+			for(int i=0; i<xpoints.length; i++){
+				xpoints[i] = (float) n.getOriginalBorderPoint(i).getX();
+				ypoints[i] = (float) n.getOriginalBorderPoint(i).getY();
+			}
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+			throw new DatasetConversionException("Unable to get border point");
 		}
 		
 		PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
@@ -753,17 +767,23 @@ public class DatasetConverter implements Loggable, Importer {
 		for(UUID signalGroup : template.getSignalCollection().getSignalGroupIDs()){
 
 			for(INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)){
-
-				INuclearSignal newSignal = convertSignal(s);
 				
-				newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
+				try {
+					INuclearSignal newSignal = convertSignal(s);
+					newNucleus.getSignalCollection().addSignal(newSignal, signalGroup);
+				} catch (UnavailableBorderPointException e) {
+					warn("Could not convert signal "+s.toString());
+					stack("Unable to get border point", e);
+				}
+				
+				
 
 			}
 
 		}
 	}
 	
-	private INuclearSignal convertSignal(INuclearSignal oldSignal){
+	private INuclearSignal convertSignal(INuclearSignal oldSignal) throws UnavailableBorderPointException{
 		// Get the roi for the old signal
 		float[] xpoints = new float[oldSignal.getBorderLength()], ypoints = new float[oldSignal.getBorderLength()];
 

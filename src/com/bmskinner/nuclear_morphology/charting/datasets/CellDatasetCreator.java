@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -201,7 +202,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 				finest("Getting start point at index "+start);
 				IPoint point = verticalNucleus.getBorderPoint(start);
 				result.add(point);	
-			} catch(UnavailableProfileTypeException e){
+			} catch(UnavailableProfileTypeException | UnavailableBorderPointException e){
 				warn("Cannot get angle profile for nucleus");
 				
 			}
@@ -269,7 +270,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 			}
 			
 			
-		} catch(UnavailableProfileTypeException e){
+		} catch(UnavailableProfileTypeException | UnavailableBorderPointException e){
 			warn("Cannot get angle profile for nucleus");	
 		}
 

@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
@@ -224,7 +225,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 						if( ! s.containsPoint(s.getCentreOfMass())){
 						
 							for(int i=0; i<s.getBorderLength();i++){
-								s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+								try {
+									s.getBorderPoint(i).offset(-n.getPosition()[0], -n.getPosition()[1]);
+								} catch (UnavailableBorderPointException e) {
+									stack("Could not offset border point", e);
+								}
 							}
 						}
 						

@@ -173,14 +173,23 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getIndexOfMax(components.generic.BooleanProfile)
 	 */
 	@Override
-	public int getIndexOfMax(BooleanProfile limits){
-		double max = 0;
-		int maxIndex = 0;
+	public int getIndexOfMax(BooleanProfile limits) throws ProfileException {
+		
+		if(limits==null || limits.size()!=array.length){
+			throw new IllegalArgumentException("Limits are null or wrong size for this profile");
+		}
+		
+		double max = Double.MIN_VALUE;
+		int maxIndex = -1;
 		for(int i=0; i<array.length;i++){
 			if( limits.get(i) && array[i]>max){
 				max = array[i];
 				maxIndex = i;
 			}
+		}
+		
+		if(maxIndex==-1){
+			throw new ProfileException("No valid index for maximum value");
 		}
 		return maxIndex;
 	}
@@ -189,7 +198,7 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getIndexOfMax()
 	 */
 	@Override
-	public int getIndexOfMax(){
+	public int getIndexOfMax() throws ProfileException {
 
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMax(b);
@@ -241,10 +250,15 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getIndexOfMin(components.generic.BooleanProfile)
 	 */
 	@Override
-	public int getIndexOfMin(BooleanProfile limits){
-		double min = this.getMax();
+	public int getIndexOfMin(BooleanProfile limits) throws ProfileException {
 
-		int minIndex = 0;
+		if(limits==null || limits.size()!=array.length){
+			throw new IllegalArgumentException("Limits are null or wrong size for this profile");
+		}
+		
+		double min = Double.MAX_VALUE;
+
+		int minIndex = -1;
 
 		for(int i=0; i<array.length;i++){
 			if( limits.get(i) && array[i]<min){
@@ -252,7 +266,9 @@ public class FloatProfile implements IProfile {
 				minIndex = i;
 			}
 		}
-
+		if(minIndex==-1){
+			throw new ProfileException("No valid index for minimum value");
+		}
 		return minIndex;
 	}
 
@@ -260,19 +276,10 @@ public class FloatProfile implements IProfile {
 	 * @see components.generic.IProfile#getIndexOfMin()
 	 */
 	@Override
-	public int getIndexOfMin(){
+	public int getIndexOfMin() throws ProfileException {
 
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMin(b);
-		//		double min = this.getMax();
-		//		int minIndex = 0;
-		//		for(int i=0; i<array.length;i++){
-		//			if(array[i]<min){
-		//				min = array[i];
-		//				minIndex = i;
-		//			}
-		//		}
-		//		return minIndex;
 	}
 	
 	@Override

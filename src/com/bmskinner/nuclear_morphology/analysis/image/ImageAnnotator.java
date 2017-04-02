@@ -30,11 +30,13 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -315,8 +317,8 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 			IBorderPoint narrow1 = n.getBorderPoint(minIndex);
 			IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
 			return annotateLine(narrow1, narrow2, Color.MAGENTA);
-		} catch (UnavailableProfileTypeException e) {
-			fine("Unable to get diameter profile", e);
+		} catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
+			stack("Unable to get diameter profile", e);
 			return this;
 		}
 		

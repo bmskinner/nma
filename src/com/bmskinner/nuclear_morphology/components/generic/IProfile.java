@@ -89,16 +89,18 @@ public interface IProfile
 	 * first only
 	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index
+	 * @throws ProfileException 
 	 */
-	int getIndexOfMax(BooleanProfile limits);
+	int getIndexOfMax(BooleanProfile limits) throws ProfileException;
 
 	/**
 	 * Get the index of the maximum value in the profile
 	 * If there are multiple values at maximum, this returns the
 	 * first only
 	 * @return the index
+	 * @throws ProfileException 
 	 */
-	int getIndexOfMax();
+	int getIndexOfMax() throws ProfileException;
 
 	
 	/**
@@ -128,14 +130,16 @@ public interface IProfile
 	 * Get the index of the minimum value in the profile
 	 * @param limits indexes that should be included or excluded from the search
 	 * @return the index
+	 * @throws ProfileException 
 	 */
-	int getIndexOfMin(BooleanProfile limits);
+	int getIndexOfMin(BooleanProfile limits) throws ProfileException;
 
 	/**
 	 * Get the index of the minimum value in the profile
 	 * @return the index
+	 * @throws ProfileException 
 	 */
-	int getIndexOfMin();
+	int getIndexOfMin() throws ProfileException;
 
 	/**
 	 * Get the array from the profile
@@ -179,11 +183,11 @@ public interface IProfile
 	IProfile copy();
 
 	/**
-	 * Copy the profile and offset it to start from the given index
+	 * Create a profile offset to start from the given index.
+	 * For example, a profile { 1, 2, 3, 4} offset by 1 will become { 2, 3, 4, 1 }
 	 * @param j the index to start from
-	 * @return a new offset Profile
+	 * @return a new offset profile
 	 * @throws ProfileException 
-	 * @throws Exception 
 	 */
 	IProfile offset(int j) throws ProfileException;
 

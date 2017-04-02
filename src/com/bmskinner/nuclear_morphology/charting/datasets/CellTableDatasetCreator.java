@@ -342,7 +342,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 */
 	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, INuclearSignal s){
 		
-//		DecimalFormat df = new DecimalFormat("#0.00"); 
 		
 		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
 
@@ -359,8 +358,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		fieldNames.add("Original CoM");
 		rowData.add(s.getOriginalCentreOfMass().toString());
 		
-		fieldNames.add("First border point");
-		rowData.add(s.getBorderPoint(0).toString());
+//		fieldNames.add("First border point");
+//		rowData.add(s.getBorderPoint(0).toString());
 		
 	}
 

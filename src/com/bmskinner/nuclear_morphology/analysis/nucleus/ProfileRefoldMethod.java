@@ -13,6 +13,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
@@ -262,7 +263,7 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 			Random mutation to the X and Y position. Must remain
 			within a certain range of neighbours
 	*/
-	private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
+	private double iterateOverNucleus() throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, UnavailableBorderPointException {
 
 		ISegmentedProfile refoldProfile = refoldNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -321,8 +322,9 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 	 * @throws ProfileException 
 	 * @throws UnavailableBorderTagException 
 	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderPointException 
 	 */
-	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException{
+	private double improveBorderPoint(int index, double minDistance, double maxDistance, double similarityScore, Nucleus testNucleus) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, UnavailableBorderPointException{
 //		// make all changes to a fresh nucleus before buggering up the real one
 		finest("Testing point "+index);
 		double score = testNucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).absoluteSquareDifference(targetCurve);
@@ -397,8 +399,9 @@ public class ProfileRefoldMethod extends AbstractAnalysisMethod {
 	 * @param min the min acceptable distance between points
 	 * @param max the max acceptable distance between points
 	 * @return
+	 * @throws UnavailableBorderPointException 
 	 */
-	private boolean checkPositionIsOK(IPoint point,  Nucleus n, int index, double min, double max){
+	private boolean checkPositionIsOK(IPoint point,  Nucleus n, int index, double min, double max) throws UnavailableBorderPointException{
 		double distanceToPrev = point.getLengthTo( n.getBorderPoint( n.wrapIndex(index-1) ) );
 		double distanceToNext = point.getLengthTo( n.getBorderPoint( n.wrapIndex(index+1) ) );
 

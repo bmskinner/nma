@@ -27,6 +27,7 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -54,24 +55,29 @@ public class ProfileCreator implements Loggable {
 	 */
 	public ISegmentedProfile createProfile(ProfileType type){
 		
+		try {
 		
-		switch(type){
-			case ANGLE: { 
-				return calculateAngleProfile();
+			switch(type){
+				case ANGLE: { 
+					return calculateAngleProfile();
+				}
+				
+				case DIAMETER:{
+					return calculateDiameterProfile();
+				}
+				
+				case RADIUS:{
+					return calculateRadiusProfile();
+				}
+				
+				
+				default:{
+					return calculateAngleProfile(); // Franken profiles will be angle until modified
+				}
 			}
-			
-			case DIAMETER:{
-				return calculateDiameterProfile();
-			}
-			
-			case RADIUS:{
-				return calculateRadiusProfile();
-			}
-			
-			
-			default:{
-				return calculateAngleProfile(); // Franken profiles will be angle until modified
-			}
+		} catch(UnavailableBorderPointException e){
+			stack("Cannot create profile", e);
+			return null; //TODO - get proper exception here
 		}
 	}
 	
@@ -101,7 +107,7 @@ public class ProfileCreator implements Loggable {
 		return segments;
 	}
 	
-	private ISegmentedProfile calculateAngleProfile() {
+	private ISegmentedProfile calculateAngleProfile() throws UnavailableBorderPointException {
 
 		List<IBorderSegment> segments = getExistingSegments();
 		
@@ -171,7 +177,7 @@ public class ProfileCreator implements Loggable {
 		profile.setSegments(segments);
 	}
 
-	private ISegmentedProfile calculateDiameterProfile() {
+	private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
 
 		float[] profile = new float[target.getBorderLength()];
 			
@@ -189,7 +195,7 @@ public class ProfileCreator implements Loggable {
 		return new SegmentedFloatProfile(profile);
 	}
 	
-	private ISegmentedProfile calculateRadiusProfile() {
+	private ISegmentedProfile calculateRadiusProfile() throws UnavailableBorderPointException {
 
 		float[] profile = new float[target.getBorderLength()];
 		

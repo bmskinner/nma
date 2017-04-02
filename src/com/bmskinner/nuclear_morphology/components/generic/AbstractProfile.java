@@ -23,7 +23,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
- * Abstract base class for profiles
+ * Abstract base class for profiles. Not yet in use.
  * @author bms41
  * @since 1.13.4
  *
@@ -33,14 +33,14 @@ public abstract class AbstractProfile implements IProfile {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public int getIndexOfMax(){
+	public int getIndexOfMax() throws ProfileException{
 
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMax(b);
 	}
 
 	@Override
-	public int getIndexOfMin(){
+	public int getIndexOfMin() throws ProfileException{
 
 		BooleanProfile b = new BooleanProfile(this, true);
 		return getIndexOfMin(b);

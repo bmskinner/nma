@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
@@ -639,19 +640,18 @@ public abstract class ProfileableCellularComponent
 	}
 	
 
-	public IBorderPoint getNarrowestDiameterPoint() {
-		
-		int index = 0;
-		
+	public IBorderPoint getNarrowestDiameterPoint() throws UnavailableBorderPointException {
+				
 		try {
 
-			index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+			int index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+			return IBorderPoint.makeNew(this.getBorderPoint(index));
 
-		} catch (UnavailableProfileTypeException e) {
-			stack("Error getting diameter profile", e);
+		} catch (UnavailableProfileTypeException | ProfileException e) {
+			stack("Error getting diameter profile minimum", e);
+			throw new UnavailableBorderPointException("Error getting diameter profile minimum");
 		}
-		
-		return IBorderPoint.makeNew(this.getBorderPoint(index));
+
 	}
 	
 	public double getNarrowestDiameter() {

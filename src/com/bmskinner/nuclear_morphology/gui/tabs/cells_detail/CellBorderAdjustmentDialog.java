@@ -66,6 +66,7 @@ import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleEdge;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.EllipticalOverlay;
@@ -84,6 +85,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
@@ -412,7 +414,13 @@ public class CellBorderAdjustmentDialog
 		IPoint newPoint = IPoint.makeNew(newX, newY);
 		
 		// Get the border point that is closest to the clicked point
-		IBorderPoint bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
+		IBorderPoint bp = null;
+		try {
+			bp = workingCell.getNucleus().findClosestBorderPoint(newPoint);
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+			
+		}
 		
 		List<IBorderPoint> newList = new ArrayList<IBorderPoint>();
 		

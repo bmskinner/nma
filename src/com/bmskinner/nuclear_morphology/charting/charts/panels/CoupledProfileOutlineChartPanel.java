@@ -37,14 +37,17 @@ import org.jfree.chart.plot.Crosshair;
 import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.BorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -167,11 +170,19 @@ public class CoupledProfileOutlineChartPanel implements Loggable{
 	
 	private IBorderPoint getPointFromProfileIndex(int index){
 		// Find the index of the border point with the current profile chart x value
-		int rpIndex = cell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
-		int xIndex  = AbstractCellularComponent.wrapIndex(index+rpIndex, cell.getNucleus().getBorderLength()); 
+		Nucleus n = cell.getNucleus();
+		int rpIndex = n.getBorderIndex(Tag.REFERENCE_POINT);
+		int xIndex  = n.wrapIndex(index+rpIndex); 
 		
 		// Get that border point
-		return cell.getNucleus().getBorderPoint(xIndex);
+		IBorderPoint p = null;
+		try{
+			p = n.getBorderPoint(xIndex);
+		}catch (UnavailableBorderPointException e) {
+			stack("Cannot get border point at index", e);
+		}
+		
+		return p;
 	}
 	
 	public ChartPanel getProfilePanel(){

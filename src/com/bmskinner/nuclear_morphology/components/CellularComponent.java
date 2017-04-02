@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -148,14 +149,14 @@ public interface CellularComponent
 	 * @param i
 	 * @return
 	 */
-	IBorderPoint getBorderPoint(int i);
+	IBorderPoint getBorderPoint(int i) throws UnavailableBorderPointException;
 	
 	/**
 	 * Get a copy of the original (non-offset) border point at the given index
 	 * @param i
 	 * @return
 	 */
-	IBorderPoint getOriginalBorderPoint(int i);
+	IBorderPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException;
 	
 	/**
 	 * Get the index of the given point in the border list
@@ -206,7 +207,7 @@ public interface CellularComponent
 	 * offset to their original coordinates in the source image
 	 * @return
 	 */
-	List<IBorderPoint> getOriginalBorderList();
+	List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException;
 
 	
 	/**
@@ -348,15 +349,21 @@ public interface CellularComponent
 	 */
 	int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB);
 
-	// For a position in the roi, draw a line through the CoM and get the intersection point
-	IBorderPoint findOppositeBorder(IBorderPoint p);
+
+	/**
+	 * For a position in the roi, draw a line through the CoM and get the intersection point
+	 * @param p
+	 * @return
+	 * @throws UnavailableBorderPointException
+	 */
+	IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException;
 
 	/*
     From the point given, create a line to the CoM. Measure angles from all 
     other points. Pick the point closest to 90 degrees. Can then get opposite
     point. Defaults to input point if unable to find point.
 	 */
-	IBorderPoint findOrthogonalBorderPoint(IBorderPoint a);
+	IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException;
 	
 	
 	/**
@@ -365,7 +372,7 @@ public interface CellularComponent
 	 * @param p
 	 * @return
 	 */
-	IBorderPoint findClosestBorderPoint(IPoint p);
+	IBorderPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException;
 
 		
 	/**

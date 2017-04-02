@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
@@ -1157,14 +1158,19 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 		double[] xpoints = new double[n.getBorderLength()+1];
 		double[] ypoints = new double[n.getBorderLength()+1];
 		
-		for(int i=0; i<n.getBorderLength();i++){
-			IBorderPoint p = n.getBorderPoint(i);
-			xpoints[i] = p.getX();
-			ypoints[i] = p.getY();
-		}
-		// complete the line
-		xpoints[n.getBorderLength()] = xpoints[0];
-		ypoints[n.getBorderLength()] = ypoints[0];
+		try {
+			for(int i=0; i<n.getBorderLength();i++){
+				IBorderPoint p = n.getBorderPoint(i);
+				xpoints[i] = p.getX();
+				ypoints[i] = p.getY();
+			}
+			// complete the line
+			xpoints[n.getBorderLength()] = xpoints[0];
+			ypoints[n.getBorderLength()] = ypoints[0];
+		} catch (UnavailableBorderPointException e) {
+			throw new ChartDatasetCreationException("Unable to get border point", e);
+		} // get the border points in the segment
+		
 		
 		double[][] data = { xpoints, ypoints };
 		ds.addSeries("Outline", data);
@@ -1219,7 +1225,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.LOWER_QUARTILE);
 			q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.UPPER_QUARTILE);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-			fine("Error getting upper or lower quartile profile from tag", e);
+			stack("Error getting upper or lower quartile profile from tag", e);
 			throw new ChartDatasetCreationException("Unable to get quartile profile", e);
 		}
 		
@@ -1274,7 +1280,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					// so the correct border point needs to be offset
 					int borderIndex = n.wrapIndex(seg.getStartIndex()+j+pointIndex);
 					
-					IBorderPoint p = n.getBorderPoint(borderIndex); // get the border points in the segment
+					IBorderPoint p;
+					try {
+						p = n.getBorderPoint(borderIndex);
+					} catch (UnavailableBorderPointException e) {
+						throw new ChartDatasetCreationException("Unable to get border point", e);
+					} // get the border points in the segment
 					xpoints[j] = p.getX();
 					ypoints[j] = p.getY();
 				}
@@ -1325,39 +1336,44 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			int index = DefaultCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
-			IBorderPoint p = n.getBorderPoint(index); // get the border points in the segment
-
-
-			// Find points three indexes ahead and behind to make a triangle from
-			int prevIndex = n.wrapIndex(index-3);
-			int nextIndex = n.wrapIndex(index+3);
-
-
+			IBorderPoint p;
+			try {
+				p = n.getBorderPoint(index);
 			
-			// decide the angle at which to place the iqr points
-			// make a line between points 3 ahead and behind. 
-			// get the orthogonal line, running through the XYPoint
-			LineEquation eq = new DoubleEquation(n.getBorderPoint( prevIndex  ), n.getBorderPoint( nextIndex  ));
-			// move the line to the index point, and find the orthogonal line
-			LineEquation perp = eq.translate(p).getPerpendicular(p);
+				// Find points three indexes ahead and behind to make a triangle from
+				int prevIndex = n.wrapIndex(index-3);
+				int nextIndex = n.wrapIndex(index+3);
+	
+	
+				
+				// decide the angle at which to place the iqr points
+				// make a line between points 3 ahead and behind. 
+				// get the orthogonal line, running through the XYPoint
+				LineEquation eq = new DoubleEquation(n.getBorderPoint( prevIndex  ), n.getBorderPoint( nextIndex  ));
+				// move the line to the index point, and find the orthogonal line
+				LineEquation perp = eq.translate(p).getPerpendicular(p);
+				
+				// Select the index from the scaledRange corresponding to the position in the segment
+				// The scaledRange is aligned to the segment already
+				IPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())   )    )    );
+				IPoint bPoint = perp.getPointOnLine(p, scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())));
+	
+				// determine which of the points is inside the nucleus and which is outside
+				
+				FloatPolygon nucleusRoi = n.createPolygon();
+				IPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
+				IPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
+	
+				
+				// assign the points
+				innerIQRX[i] = innerPoint.getX();
+				innerIQRY[i] = innerPoint.getY();
+				outerIQRX[i] = outerPoint.getX();
+				outerIQRY[i] = outerPoint.getY();
 			
-			// Select the index from the scaledRange corresponding to the position in the segment
-			// The scaledRange is aligned to the segment already
-			IPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())   )    )    );
-			IPoint bPoint = perp.getPointOnLine(p, scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())));
-
-			// determine which of the points is inside the nucleus and which is outside
-			
-			FloatPolygon nucleusRoi = n.createPolygon();
-			IPoint innerPoint = nucleusRoi.contains(  (float) aPoint.getX(), (float) aPoint.getY() ) ? aPoint : bPoint;
-			IPoint outerPoint = nucleusRoi.contains(  (float) bPoint.getX(), (float) bPoint.getY() ) ? aPoint : bPoint;
-
-			
-			// assign the points
-			innerIQRX[i] = innerPoint.getX();
-			innerIQRY[i] = innerPoint.getY();
-			outerIQRX[i] = outerPoint.getX();
-			outerIQRY[i] = outerPoint.getY();
+			} catch (UnavailableBorderPointException e) {
+				throw new ChartDatasetCreationException("Unable to get border point", e);
+			} // get the border points in the segment
 
 		}
 		
@@ -1396,20 +1412,20 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public XYDataset createNucleusIndexTags(Nucleus nucleus) throws ChartDatasetCreationException {
 
 		DefaultXYDataset ds = new DefaultXYDataset();
+		try {
+			for(Tag tag : nucleus.getBorderTags().keySet()){
+				IBorderPoint tagPoint;
 
-		for(Tag tag : nucleus.getBorderTags().keySet()){
-			IBorderPoint tagPoint;
-//			try {
 				int tagIndex = nucleus.getBorderIndex(tag);
 				tagPoint = nucleus.getOriginalBorderPoint(tagIndex);
-//			} catch (UnavailableBorderTagException e) {
-//				fine("Tag is not present: "+tag);
-//				throw new ChartDatasetCreationException("Cannot get border tag");
-//			}
-			double[] xpoints = { tagPoint.getX()-0.5, nucleus.getOriginalCentreOfMass().getX()-0.5 };
-			double[] ypoints = { tagPoint.getY()-0.5, nucleus.getOriginalCentreOfMass().getY()-0.5 };
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Tag_"+tag, data);
+
+				double[] xpoints = { tagPoint.getX()-0.5, nucleus.getOriginalCentreOfMass().getX()-0.5 };
+				double[] ypoints = { tagPoint.getY()-0.5, nucleus.getOriginalCentreOfMass().getY()-0.5 };
+				double[][] data = { xpoints, ypoints };
+				ds.addSeries("Tag_"+tag, data);
+			}
+		}catch (UnavailableBorderPointException e) {
+			throw new ChartDatasetCreationException("Unable to get border point", e);
 		}
 
 		return ds;
@@ -1529,37 +1545,39 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
+	
+		
 		int i=0;
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
-			
+
 			String seriesKey = "Nucleus_"+i+"_"+collection.getName();
-			
+
 			if(collection.hasConsensus()){
 				Nucleus n = collection.getConsensus();
-				
-				
+
+
 				double[] xpoints = new double[n.getBorderLength()];
 				double[] ypoints = new double[n.getBorderLength()];
 
 				int j =0;
 
 				for(IBorderPoint p : n.getBorderList()){
-					
+
 					double x = p.getX();
 					double y = p.getY();
-					
+
 					if(scale.equals(MeasurementScale.MICRONS)){
 						x = PlottableStatistic.micronLength(x, n.getScale());
 						y = PlottableStatistic.micronLength(y, n.getScale());
 					}
-					
+
 					xpoints[j] = x;
 					ypoints[j] = y;
 					j++;
 				}
-				
-				
+
+
 				double[][] data = { xpoints, ypoints };
 				ds.addSeries(seriesKey, data);
 				ds.setComponent(seriesKey, n);
@@ -1570,6 +1588,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			i++;
 
 		}
+
 		return ds;
 	}
 	

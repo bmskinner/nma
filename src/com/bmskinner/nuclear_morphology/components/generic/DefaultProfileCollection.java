@@ -624,7 +624,17 @@ public class DefaultProfileCollection implements IProfileCollection {
 		// store the rank (1-3) and the index of the position at this rank
 		// To future me: I am sorry about this.
 		Map<Integer, Integer> values = new HashMap<Integer, Integer>(0);
-		int minIndex = iqrProfile.getIndexOfMin(); // ensure that our has begins with lowest data
+		
+		int minIndex = -1;
+		try {
+			minIndex = iqrProfile.getIndexOfMin();
+		} catch (ProfileException e) {
+			stack("Error getting index", e);
+			return result;
+		} // ensure that our has begins with lowest data
+		
+		
+		
 		values.put(1, minIndex);
 		values.put(2, minIndex);
 		values.put(3, minIndex);

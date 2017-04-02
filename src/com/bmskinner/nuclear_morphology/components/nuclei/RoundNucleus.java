@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -234,9 +235,13 @@ public class RoundNucleus extends AbstractCellularComponent
 
 		calculateProfiles();
 		
-		SignalAnalyser s = new SignalAnalyser();
-		s.calculateSignalDistancesFromCoM(this);
-		s.calculateFractionalSignalDistancesFromCoM(this);
+		try {
+			SignalAnalyser s = new SignalAnalyser();
+			s.calculateSignalDistancesFromCoM(this);
+			s.calculateFractionalSignalDistancesFromCoM(this); 
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+		}
 		
 	    
 	}
@@ -1019,7 +1024,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		int index = 0;
 		try {
 			index = this.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-		} catch (UnavailableProfileTypeException e) {
+		} catch (UnavailableProfileTypeException | ProfileException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

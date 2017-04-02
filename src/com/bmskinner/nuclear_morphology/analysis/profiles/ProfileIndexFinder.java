@@ -516,26 +516,41 @@ public class ProfileIndexFinder implements Loggable {
 	}
 	
 	
+
 	/**
 	 * Find the index of the minimum value in a profile
-	 * @param p
+	 * @param p the profile to test
+	 * @param limits the limits to apply to the profile
+	 * @param b should the test be for indexes that are minimum or are not minumum
 	 * @return
 	 */
 	private BooleanProfile findMinimum(final IProfile p, BooleanProfile limits, boolean b){
 		
-		int index = p.getIndexOfMin(limits);
+		int index = NO_INDEX_FOUND;
 		
-		BooleanProfile result;
-		
-		if(b){
-			
-			result = new BooleanProfile(p, false);
-			result.set(index, true);
-			
-		} else {
-			result = new BooleanProfile(p, true);
-			result.set(index, false);
+		try {
+			index = p.getIndexOfMin(limits);
+		} catch (ProfileException e) {
+			fine("No minimum index found");
 		}
+				
+		BooleanProfile result = new BooleanProfile(p, !b);
+		if(index>NO_INDEX_FOUND){
+			result.set(index, b);
+		}
+		
+//		if(b){
+//			
+//			result = new BooleanProfile(p, false);
+//			
+//			if(index>NO_INDEX_FOUND)
+//				result.set(index, true);
+//			
+//		} else {
+//			result = new BooleanProfile(p, true);
+//			if(index>NO_INDEX_FOUND)
+//				result.set(index, false);
+//		}
 		
 
 		return result;
@@ -547,20 +562,31 @@ public class ProfileIndexFinder implements Loggable {
 	 * @return
 	 */
 	private BooleanProfile findMaximum(final IProfile p, BooleanProfile limits, boolean b){
+		int index = NO_INDEX_FOUND;
 		
-		int index = p.getIndexOfMax(limits);
-		
-		BooleanProfile result;
-		
-		if(b){
-			
-			result = new BooleanProfile(p, false);
-			result.set(index, true);
-			
-		} else {
-			result = new BooleanProfile(p, true);
-			result.set(index, false);
+		try {
+			index = p.getIndexOfMax(limits);
+		} catch (ProfileException e) {
+			fine("No maximum index found");
 		}
+		
+		
+		BooleanProfile result = new BooleanProfile(p, !b);
+		if(index>NO_INDEX_FOUND){
+			result.set(index, b);
+		}
+		
+//		if(b){
+//			
+//			result = new BooleanProfile(p, false);
+//			if(index>NO_INDEX_FOUND)
+//				result.set(index, true);
+//			
+//		} else {
+//			result = new BooleanProfile(p, true);
+//			if(index>NO_INDEX_FOUND)
+//				result.set(index, false);
+//		}
 		
 		return result;
 	}

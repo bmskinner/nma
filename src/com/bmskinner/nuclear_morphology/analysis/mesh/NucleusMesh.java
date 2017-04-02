@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -640,45 +641,44 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 	 */
 	private void createPeripheralVertices() throws MeshCreationException {
 		finer("Creating peripheral vertices");
-
-		List<IBorderSegment> list;
-
-			try {
-				list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
-			} catch (UnavailableBorderTagException
-					| UnavailableProfileTypeException | ProfileException e) {
-				throw new MeshCreationException("Unable to get segments from template nucleus", e);
-			}
+		try {
+			List<IBorderSegment> list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 				
-		Set<Integer> segs = segmentVertexProportions.keySet();
-		for(int segIndex : segs){
-			
-			IBorderSegment segment = list.get(segIndex);
-			finer("Segment "+segIndex+": "+segment.length());
-			
-			
-			
-			List<Double> proportions = segmentVertexProportions.get(segIndex);
-			
-			
-			if(segment.length()<=proportions.size()){
-				// The segment is too small for each vertex to have a separate XYPoint
-				// Usually caused when mapping a poorly segmented nucleus onto a template mesh.
-				throw new IllegalArgumentException("Segment "+segIndex+" is too small to fit mesh");
-			}
-			
-			for(Double d : proportions){
-				int index = segment.getProportionalIndex(d);
+					
+			Set<Integer> segs = segmentVertexProportions.keySet();
+			for(int segIndex : segs){
 				
-				// Since the segments have been offset to the RP, correct back
-				// to the actual nucleus index
-				int correctedIndex = DefaultCellularComponent
-						.wrapIndex(index+nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
+				IBorderSegment segment = list.get(segIndex);
+				finer("Segment "+segIndex+": "+segment.length());
 				
-				finest("Fetching point at index "+correctedIndex);
-				addVertex(nucleus.getOriginalBorderPoint(correctedIndex), true);
+				
+				
+				List<Double> proportions = segmentVertexProportions.get(segIndex);
+				
+				
+				if(segment.length()<=proportions.size()){
+					// The segment is too small for each vertex to have a separate XYPoint
+					// Usually caused when mapping a poorly segmented nucleus onto a template mesh.
+					throw new IllegalArgumentException("Segment "+segIndex+" is too small to fit mesh");
+				}
+				
+				for(Double d : proportions){
+					int index = segment.getProportionalIndex(d);
+					
+					// Since the segments have been offset to the RP, correct back
+					// to the actual nucleus index
+					int correctedIndex = DefaultCellularComponent
+							.wrapIndex(index+nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
+					
+					finest("Fetching point at index "+correctedIndex);
+					
+					addVertex(nucleus.getOriginalBorderPoint(correctedIndex), true);
+				}
+				
 			}
-			
+		} catch (UnavailableBorderTagException
+				| UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
+			throw new MeshCreationException("Unable to get segments from template nucleus", e);
 		}
 	}
 	

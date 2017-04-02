@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 
@@ -72,7 +73,9 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testSize() {
-		fail("Not yet implemented");
+		IProfile p1 = new FloatProfile(data);
+		int i = p1.size();
+		assertEquals(i, data.length);
 	}
 
 	/**
@@ -80,10 +83,8 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testEqualsObject() {
-		fail("Not yet implemented");
 		IProfile p1 = new FloatProfile(data);
 		IProfile p2 = new FloatProfile(data);
-		
 		assertTrue(p1.equals(p2));
 		
 	}
@@ -93,7 +94,15 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetInt() {
-		fail("Not yet implemented");
+		IProfile p1 = new FloatProfile(data);
+		double d = p1.get(4);
+		assertEquals( 7d , d, 0);
+		
+		exception.expect(IndexOutOfBoundsException.class);
+		p1.get(-1);
+
+		exception.expect(IndexOutOfBoundsException.class);
+		p1.get(14);		
 	}
 
 	/**
@@ -118,7 +127,38 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetIndexOfMaxBooleanProfile() {
-		fail("Not yet implemented");
+		
+		// Restrict to first half of array
+		BooleanProfile b = new BooleanProfile(data.length, false);
+		for(int i=0; i<data.length/2; i++){
+			b.set(i, true);
+		}
+		
+		int expected = 5;
+		
+		try {
+			
+			IProfile p1 = new FloatProfile(data);
+			int index = p1.getIndexOfMax(b);
+			assertEquals( expected , index);
+			
+			// Test null
+			exception.expect(IllegalArgumentException.class);
+			index = p1.getIndexOfMax(null);
+			
+			// Test all false
+			b = new BooleanProfile(data.length, false);
+			exception.expect(ProfileException.class);
+			index = p1.getIndexOfMax(b);
+		
+		
+		} catch(ProfileException e){
+			System.out.println("Error getting index: "+e.getMessage());
+			fail("Index fetch failed");
+		}
+		
+		
+		
 	}
 
 	/**
@@ -127,7 +167,12 @@ public class ProfileTest {
 	@Test
 	public void testGetIndexOfMax() {
 		IProfile p1 = new FloatProfile(data);
-		assertEquals( 9 , p1.getIndexOfMax());
+		try {
+			assertEquals( 9 , p1.getIndexOfMax());
+		} catch(ProfileException e){
+			System.out.println("Error getting index: "+e.getMessage());
+			fail("Index fetch failed");
+		}
 	}
 
 	/**
@@ -160,7 +205,34 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetIndexOfMinBooleanProfile() {
-		fail("Not yet implemented");
+		// Restrict to second half of array
+		BooleanProfile b = new BooleanProfile(data.length, true);
+		for(int i=0; i<data.length/2; i++){
+			b.set(i, false);
+		}
+
+		int expected = 7; // index
+		
+		try {
+			
+			IProfile p1 = new FloatProfile(data);
+			int index = p1.getIndexOfMin(b);
+			assertEquals( expected , index);
+			
+			// Test null
+			exception.expect(IllegalArgumentException.class);
+			index = p1.getIndexOfMin(null);
+			
+			// Test all false
+			b = new BooleanProfile(data.length, false);
+			exception.expect(ProfileException.class);
+			index = p1.getIndexOfMin(b);
+		
+		
+		} catch(ProfileException e){
+			System.out.println("Error getting index: "+e.getMessage());
+			fail("Index fetch failed");
+		}
 	}
 
 	/**
@@ -168,8 +240,15 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetIndexOfMin() {
+		
 		IProfile p1 = new FloatProfile(data);
-		assertEquals( 2 , p1.getIndexOfMin());
+
+		try {
+			assertEquals( 2 , p1.getIndexOfMin());
+		} catch(ProfileException e){
+			System.out.println("Error getting index: "+e.getMessage());
+			fail("Index fetch failed");
+		}
 	}
 
 	/**
@@ -177,7 +256,13 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testToFloatArray() {
-		fail("Not yet implemented");
+		IProfile p1 = new FloatProfile(data);
+		
+		float[] result = p1.toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i], result[i],0);
+		}
 	}
 
 	/**
@@ -225,7 +310,37 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testOffset() {
-		fail("Not yet implemented");
+		
+		float[] exp1       = { 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4, 10 };
+		float[] exp5       = { 19, 12, 3, 9, 20, 13, 6, 4, 10, 5, 1, 2, 7 };
+		float[] exp_1      = { 4, 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6 }; // negative 1
+		
+		try {
+			
+			IProfile p = new FloatProfile(data);
+			float[] result = p.offset(1).toFloatArray();
+			
+			for( int i =0;i<data.length; i++){
+				assertEquals(exp1[i], result[i],0);
+			}
+			
+			
+			result = p.offset(5).toFloatArray();
+			for( int i =0;i<data.length; i++){
+				assertEquals(exp5[i], result[i],0);
+			}
+			
+			result = p.offset(-1).toFloatArray();
+			for( int i =0;i<data.length; i++){
+				assertEquals(exp_1[i], result[i],0);
+			}
+			
+			
+		} catch (ProfileException e) {
+			System.out.println(e.getMessage());
+			fail("Offset failed");
+		}
+		
 	}
 
 	/**
@@ -584,59 +699,41 @@ public class ProfileTest {
 	}
 	
 	
-	@Test
-	public void profileShouldErrorOnOutOfLowerBoundsRequest(){
-		float[] data   = {0, 1, 2, 3,  4,  5 };
-		IProfile tester = new FloatProfile(data);
-		exception.expect(IndexOutOfBoundsException.class);
-		tester.get(-1);
+//	@Test
+//	public void profileShouldErrorOnOutOfLowerBoundsRequest(){
+//		float[] data   = {0, 1, 2, 3,  4,  5 };
+//		IProfile tester = new FloatProfile(data);
+//		exception.expect(IndexOutOfBoundsException.class);
+//		tester.get(-1);
+//		
+//	}
+//	
+//	
+//	@Test
+//	public void profileShouldErrorOnOutOfUpperBoundsRequest(){
+//		float[] data   = {0, 1, 2, 3,  4,  5 };
+//		IProfile tester = new FloatProfile(data);
+//		exception.expect(IndexOutOfBoundsException.class);
+//		tester.get(6);
+//	}
+//	
+//	@Test
+//	public void profileShouldGetInBoundsRequest(){
+//		
+//		float[] data   = {0, 1, 2, 3,  4,  5 };
+//		IProfile tester = new FloatProfile(data);
+//		
+//		double d = tester.get(0);
+//		assertEquals("Value should be 0", 0, d,0);
+//
+//		d = tester.get(1);
+//		assertEquals("Value should be 1", 1, d,0);
+//		
+//		d = tester.get(2);
+//		assertEquals("Value should be 2", 2, d,0);
+//				
+//	}
 		
-	}
-	
-	
-	@Test
-	public void profileShouldErrorOnOutOfUpperBoundsRequest(){
-		float[] data   = {0, 1, 2, 3,  4,  5 };
-		IProfile tester = new FloatProfile(data);
-		exception.expect(IndexOutOfBoundsException.class);
-		tester.get(6);
-	}
-	
-	@Test
-	public void profileShouldGetInBoundsRequest(){
-		
-		float[] data   = {0, 1, 2, 3,  4,  5 };
-		IProfile tester = new FloatProfile(data);
-		
-		double d = tester.get(0);
-		assertEquals("Value should be 0", 0, d,0);
-
-		d = tester.get(1);
-		assertEquals("Value should be 1", 1, d,0);
-		
-		d = tester.get(2);
-		assertEquals("Value should be 2", 2, d,0);
-				
-	}
-	
-	@Test
-	public void profileShouldGetMinAndMax(){
-		
-		float[] data   = {-1, 0, 2, 3,  4,  5 };
-		IProfile tester = new FloatProfile(data);
-				
-		assertEquals("Min should should be -1", -1, tester.getMin(),0);
-		
-		
-		assertEquals("Min index should be 0", 0, tester.getIndexOfMin(),0);
-		assertEquals("Max index should be 5", 5, tester.getIndexOfMax(),0);
-			
-		for( int i =0;i<data.length; i++){
-			assertEquals("Data within array should be identical to input", data[i], tester.toFloatArray()[i],0);
-		}
-	}
-	
-	
 	@Test
 	public void profileSizeShouldBeArrayLength(){
 		float[] data     = {1, 1, 1, 1, 1, 1};
@@ -718,7 +815,7 @@ public class ProfileTest {
 
 		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
 
-		int expectedOffset = 5;
+		int expectedOffset = 8;
 		
 		IProfile dataProfile = new FloatProfile(data);
 		IProfile templateProfile = new FloatProfile(test);

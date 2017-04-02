@@ -17,6 +17,7 @@ import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -262,8 +263,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		}
 		
 		Nucleus n = cell.getNucleus();
-//		double[] positions = n.getPosition();
-
 		
 		// annotate the image processor with the nucleus outline
 		List<IBorderSegment> segmentList;
@@ -282,22 +281,26 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 				float[] x = new float[seg.length()+1];
 				float[] y = new float[seg.length()+1];
 				
-				
-				for(int j=0; j<=seg.length();j++){
-					int k = n.wrapIndex(seg.getStartIndex()+j);
-					IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
-					x[j] = (float) p.getX();
-					y[j] = (float) p.getY();
+				try {
+					for(int j=0; j<=seg.length();j++){
+						int k = n.wrapIndex(seg.getStartIndex()+j);
+						IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+						x[j] = (float) p.getX();
+						y[j] = (float) p.getY();
+					}
+					
+					int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
+					ip.setColor((Color) ColourSelecter.getColor(segIndex));
+					
+					PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
+					
+					segRoi.setLocation(segRoi.getBounds().getMinX()+CellularComponent.COMPONENT_BUFFER, segRoi.getBounds().getMinY()+CellularComponent.COMPONENT_BUFFER);
+					
+					ip.draw(segRoi);
+				} catch (UnavailableBorderPointException e) {
+					warn("Missing border point in segment");
+					stack(e.getMessage(), e);
 				}
-				
-				int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-				ip.setColor((Color) ColourSelecter.getColor(segIndex));
-				
-				PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
-				
-				segRoi.setLocation(segRoi.getBounds().getMinX()+CellularComponent.COMPONENT_BUFFER, segRoi.getBounds().getMinY()+CellularComponent.COMPONENT_BUFFER);
-				
-				ip.draw(segRoi);
 
 			}
 		} else {

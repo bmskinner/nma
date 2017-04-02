@@ -33,6 +33,7 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
+import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -41,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
@@ -152,10 +154,13 @@ public class DefaultNucleus
 
 		super.initialise(proportion);
 		
-		
-		SignalAnalyser s = new SignalAnalyser();
-		s.calculateSignalDistancesFromCoM(this);
-		s.calculateFractionalSignalDistancesFromCoM(this); 
+		try {
+			SignalAnalyser s = new SignalAnalyser();
+			s.calculateSignalDistancesFromCoM(this);
+			s.calculateFractionalSignalDistancesFromCoM(this); 
+		} catch (UnavailableBorderPointException e) {
+			stack("Unable to get border point", e);
+		}
 	}
 	
 	@Override

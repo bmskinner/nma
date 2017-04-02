@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
@@ -64,7 +65,7 @@ public class SignalAnalyser implements Loggable {
 	mass as a fraction of the distance from the nuclear CoM, through the 
 	signal CoM, to the nuclear border
 	 */
-	public void calculateFractionalSignalDistancesFromCoM(Nucleus n){
+	public void calculateFractionalSignalDistancesFromCoM(Nucleus n) throws UnavailableBorderPointException{
 
 		ISignalCollection signalCollection = n.getSignalCollection();
 		this.calculateClosestBorderToSignals(n);
@@ -112,7 +113,7 @@ public class SignalAnalyser implements Loggable {
 	Go through the signals in the nucleus, and find the point on
 	the nuclear ROI that is closest to the signal centre of mass.
 	 */
-	private void calculateClosestBorderToSignals(Nucleus n) {
+	private void calculateClosestBorderToSignals(Nucleus n) throws UnavailableBorderPointException {
 		ISignalCollection signalCollection = n.getSignalCollection();
 		for(List<INuclearSignal> signals : signalCollection.getSignals()){
 
