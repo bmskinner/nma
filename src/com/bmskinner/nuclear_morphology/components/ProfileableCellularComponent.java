@@ -49,7 +49,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * This is the class of objects that can have angle profiles applied to them.
+ * This is the class of objects that can have profiles applied to them.
+ * Positions around the border of the component can be tagged; the profiles will
+ * track the tags.
  * @author ben
  * @since 1.13.3
  *
@@ -495,17 +497,18 @@ public abstract class ProfileableCellularComponent
 	
 	
 	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
-		if(this.hasProfile(type)){
-				try {
-					return new SegmentedFloatProfile(this.profileMap.get(type));
-				} catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
-					stack("Error getting profile "+type, e);
-					throw new UnavailableProfileTypeException("Cannot get profile type "+type, e);
-				}
-
-		} else {
-			throw new IllegalArgumentException("Profile type "+type+" is not found in this component");
+		
+		if( ! this.hasProfile(type)){
+			throw new UnavailableProfileTypeException("Cannot get profile type "+type);
 		}
+		
+		try {
+			return new SegmentedFloatProfile(this.profileMap.get(type));
+		} catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
+			stack("Error getting profile "+type, e);
+			throw new UnavailableProfileTypeException("Cannot get profile type "+type, e);
+		}
+
 	}
 	
 	public boolean hasProfile(ProfileType type){
@@ -520,22 +523,12 @@ public abstract class ProfileableCellularComponent
 		if( ! this.hasBorderTag(tag)){
 			throw new UnavailableBorderTagException("Tag "+tag+" not present");
 		}
-		
-		if( ! this.hasProfile(type)){
-			throw new UnavailableProfileTypeException("Profile type "+type+" not present");
-		}
-		
+				
 		int pointIndex = this.borderTags.get(tag);
-		
-		ISegmentedProfile profile = null;
-		if(this.hasProfile(type)){
-			
-			// offset the angle profile to start at the pointIndex
-			profile =  new SegmentedFloatProfile(this.getProfile(type).offset(pointIndex));
-			
-		}
+					
+		// offset the angle profile to start at the pointIndex
+		return getProfile(type).offset(pointIndex);
 
-		return profile;
 	}
 	
 
@@ -703,12 +696,12 @@ public abstract class ProfileableCellularComponent
 
 	}
 	
-	public class IndexOutOfBoundsException extends Exception {
-		private static final long serialVersionUID = 1L;
-		public IndexOutOfBoundsException() { super(); }
-		public IndexOutOfBoundsException(String message) { super(message); }
-		public IndexOutOfBoundsException(String message, Throwable cause) { super(message, cause); }
-		public IndexOutOfBoundsException(Throwable cause) { super(cause); }
-	}
+//	public class IndexOutOfBoundsException extends Exception {
+//		private static final long serialVersionUID = 1L;
+//		public IndexOutOfBoundsException() { super(); }
+//		public IndexOutOfBoundsException(String message) { super(message); }
+//		public IndexOutOfBoundsException(String message, Throwable cause) { super(message, cause); }
+//		public IndexOutOfBoundsException(Throwable cause) { super(cause); }
+//	}
 	
 }

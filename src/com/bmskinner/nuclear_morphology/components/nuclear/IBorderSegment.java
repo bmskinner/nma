@@ -636,6 +636,8 @@ public interface IBorderSegment
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
 		}
+		
+		
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>();
 		
 		for(IBorderSegment segment : list){
@@ -646,13 +648,28 @@ public interface IBorderSegment
 	}
 	
 	/**
+	 * Make a copy of the given list of segments, but do not link the segments
+	 * @param list
+	 * @return
+	 * @throws ProfileException
+	 */
+	static IBorderSegment[] copyWithoutLinking(IBorderSegment[] list) throws ProfileException{
+		if(list==null || list.length==0){
+			throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
+		}
+		
+		return Arrays.copyOf(list, list.length);
+		
+	}
+	
+	/**
 	 * Given a list of ordered segments, fetch the segment with the given name
 	 * @param list the linked order list
 	 * @param segName the segment name to find ('Seg_n')
 	 * @return the segment or null
 	 * @throws Exception
 	 */
-	static IBorderSegment getSegment(List<IBorderSegment> list, String segName) throws Exception{
+	static IBorderSegment getSegment(List<IBorderSegment> list, String segName) {
 
 		for(IBorderSegment segment : list){
 

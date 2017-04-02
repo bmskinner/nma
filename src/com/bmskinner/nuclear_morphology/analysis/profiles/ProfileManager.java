@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.Unseg
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent.IndexOutOfBoundsException;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;

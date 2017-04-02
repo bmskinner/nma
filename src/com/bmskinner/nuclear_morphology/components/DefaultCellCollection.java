@@ -210,14 +210,7 @@ public class DefaultCellCollection
 	public Set<UUID> getCellIDs(){
 
 		return cells.parallelStream().map(c -> c.getId()).collect(Collectors.toSet());
-//		
-//		Set<UUID> result = new HashSet<UUID>(size());
-//
-//		for(ICell c : cells){
-//			result.add(c.getId());
-//		}
-//
-//		return result;
+
 	}
 
 	public void addCell(ICell r) {
@@ -1149,17 +1142,13 @@ public class DefaultCellCollection
 	 * @return
 	 */
 	public boolean contains(ICell c){
-		for(ICell cell : this.getCells()){
-			if (cell.equals(c)){
-				return true;
-			}
-		}
-		return false;
+		return contains(c.getId());
+//		return cells.parallelStream().anyMatch( cell -> cell.getId().equals(id));
 	}
 	
 	@Override
-	public boolean contains(UUID cellID) {
-		return this.getCellIDs().contains(cellID);
+	public boolean contains(UUID id) {
+		return cells.parallelStream().anyMatch( cell -> cell.getId().equals(id));
 	}
 
 	/**
@@ -1170,12 +1159,13 @@ public class DefaultCellCollection
 	 * @return
 	 */
 	public boolean containsExact(ICell c){
-		for(ICell cell : cells){
-			if (cell==c){
-				return true;
-			}
-		}
-		return false;
+		return cells.parallelStream().anyMatch( cell -> cell==c);
+//		for(ICell cell : cells){
+//			if (cell==c){
+//				return true;
+//			}
+//		}
+//		return false;
 	}
 
 	/**
