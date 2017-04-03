@@ -1,6 +1,10 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import ij.IJ;
 
 public interface Importer {
 	
@@ -29,6 +33,30 @@ public interface Importer {
 		}
 		String newFileName = f.getAbsolutePath().replace(oldExt, newExt);
 		return new File(newFileName);
+		
+	}
+	
+	/**
+	 * Get the directory that the program is being run from
+	 * @return the program directory
+	 */
+	static File getProgramDir(){
+		
+		try {
+			// Get the location of the jar file
+			File dir =  new File(Importer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+
+			// Difference in path between standalone and jar
+			if(dir.getAbsolutePath().endsWith(".jar")){
+				dir = dir.getParentFile();
+			}
+			return dir;
+		} catch (URISyntaxException e) {
+			System.err.println("Error getting program dir");
+			e.printStackTrace();
+			IJ.log("Error getting program dir");
+			return null;
+		}
 		
 	}
 	

@@ -48,12 +48,7 @@ public class PropertiesReader implements Loggable {
 		try {
 
 			// Get the location of the jar file
-			File dir =  new File(PropertiesReader.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			
-			// Difference in path between standalone and jar
-			if(dir.getAbsolutePath().endsWith(".jar")){
-				dir = dir.getParentFile();
-			}
+			File dir =  Importer.getProgramDir();
 			
 			File ini = new File(dir, INI_FILE);
 			System.out.println("ini: "+ini.getAbsolutePath());
@@ -72,8 +67,6 @@ public class PropertiesReader implements Loggable {
 			}
 
 		} catch (IOException e) {
-			stack("Error reading ini file", e);
-		} catch (URISyntaxException e) {
 			stack("Error reading ini file", e);
 		}
 

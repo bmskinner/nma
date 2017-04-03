@@ -37,6 +37,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
@@ -109,12 +110,8 @@ implements PlugIn, Loggable
 		try {
 			
 
-			File dir = new File(Nuclear_Morphology_Analysis.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-
-			// Difference in path between standalone and jar
-			if(dir.getAbsolutePath().endsWith(".jar")){
-				dir = dir.getParentFile();
-			}
+			// Get the location of the jar file
+			File dir =  Importer.getProgramDir();
 			
 			File errorFile = new File(dir, "error.log");
 			System.out.println(errorFile.getAbsolutePath());
@@ -125,9 +122,6 @@ implements PlugIn, Loggable
 			errorLogger.addHandler(errorHandler);
 			errorLogger.setLevel(Loggable.TRACE);
 			
-		} catch (URISyntaxException e) {
-			logToImageJ("Error initialising", e);
-
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);
 		} catch (IOException e) {
