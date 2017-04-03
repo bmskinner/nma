@@ -329,33 +329,16 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		
 		return panel;
 	}
-	
-	@Override
-	protected void updateSingle() {
-		super.updateSingle();
-		updateSingleDataset();
-		finest("Updated consensus panel");
-	}
-	
-
-	@Override
-	protected void updateMultiple() {
-		updateMultipleDatasets();
-		finest("Updated consensus panel");
-	}
-	
-	@Override
-	protected void updateNull() {		
-		updateBlankChart();
-	}
-	
+		
+		
 	@Override
 	protected JFreeChart createPanelChartType(ChartOptions options) {
 			return new ConsensusNucleusChartFactory(options).makeConsensusChart();
 	}
 
-		
-	private void updateSingleDataset() {
+	@Override
+	protected synchronized void updateSingle() {
+		super.updateSingle();
 		runRefoldingButton.setVisible(false);
 		
 		showMeshEdgesBox.setEnabled(showMeshBox.isSelected());
@@ -395,7 +378,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		}
 	}
 	
-	private void updateMultipleDatasets() {
+	@Override
+	protected synchronized void updateMultiple() {
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
@@ -410,7 +394,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		offsetsPanel.setVisible(false);
 	}
 	
-	private void updateBlankChart() {
+	@Override
+	protected synchronized void updateNull() {
 		
 		consensusChartPanel.setChart(ConsensusNucleusChartFactory.makeEmptyChart());
 		runRefoldingButton.setVisible(false);

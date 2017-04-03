@@ -80,14 +80,14 @@ public class VirtualCellCollection implements ICellCollection {
 	private String 	    name;			// the name of the collection
 
 	//this holds the mapping of tail indexes etc in the median profile arrays
-	private IProfileCollection profileCollection = new DefaultProfileCollection();
+	private volatile IProfileCollection profileCollection = new DefaultProfileCollection();
 	
 //	protected final Map<ProfileType, IProfileCollection> profileCollections = new HashMap<ProfileType, IProfileCollection>();
 
-	private Nucleus consensusNucleus; 	// the refolded consensus nucleus
+	private volatile Nucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	// We need to store signal groups separately to allow shell results etc to be kept
-	private Map<UUID, IShellResult> shellResults = new HashMap<UUID, IShellResult>(0);
+	private volatile Map<UUID, IShellResult> shellResults = new HashMap<UUID, IShellResult>(0);
 	
 	/*
 	 * TRANSIENT FIELDS
@@ -766,6 +766,10 @@ public class VirtualCellCollection implements ICellCollection {
 		if(d2==this){
 			return this.size();
 		}
+		
+		if(parent.getCollection()==d2){
+			return this.size();
+		}
 
 		if(d2.getNucleusType() != this.getNucleusType()){
 			return 0;
@@ -852,6 +856,7 @@ public class VirtualCellCollection implements ICellCollection {
 
 	@Override
 	public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
+		
 		try {
 			
 			if(CellularComponent.WHOLE_CELL.equals(component)){
@@ -868,9 +873,10 @@ public class VirtualCellCollection implements ICellCollection {
 
 			}
 		} catch (Exception e){
+			stack("Error fetching stats from virtual collection", e);
 			return new double[0];
 		}
-			
+		fine("No stats returned");
 		return new double[0];
 	}
 	

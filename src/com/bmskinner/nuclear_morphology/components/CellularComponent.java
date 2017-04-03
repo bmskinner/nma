@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -308,6 +309,14 @@ public interface CellularComponent
 	 * @return
 	 */
 	Shape toShape();
+	
+	/**
+	 * Create a shape (in this case a Path2D encompassing 
+	 * the border points of the component) at the given scale
+	 * @param scale the measurement scale for the component
+	 * @return
+	 */
+	Shape toShape(MeasurementScale scale);
 	
 	/**
 	 * Create a shape (in this case a Path2D encompassing 

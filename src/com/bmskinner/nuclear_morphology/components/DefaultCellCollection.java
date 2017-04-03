@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -798,9 +799,11 @@ public class DefaultCellCollection
 
 			}
 		} catch (Exception e){
+			stack("Unable to get median stats of "+stat+" for "+component+" at "+scale, e);
 			return null;
 		}
 
+		warn("No stats of type "+stat+" can be handled");
 		return null;
 	}
 	
@@ -836,7 +839,6 @@ public class DefaultCellCollection
 					}
 					
 					median = Quartile.quartile(values, Quartile.MEDIAN);
-//					median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
 				}
 
 				statsCache.setMedian(stat, component, scale, median);
@@ -857,17 +859,18 @@ public class DefaultCellCollection
 		
 		double[] result = null;
 		
-		if(statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)){
-			return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+		if(statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale)){
+			return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale);
 		
 		} else {
 
-			result = getCells().parallelStream()
-						.mapToDouble( n -> n.getStatistic(stat)  )
-						.toArray();
-			
+			result = cells.parallelStream()
+					.mapToDouble( c -> c.getStatistic(stat, scale)  )
+					.toArray();
+
 			Arrays.sort(result);
 			statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, result);
+
 		}
 		
 		return result;
@@ -931,6 +934,7 @@ public class DefaultCellCollection
 						try {
 							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
 						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+							stack("Unable to get segment statistic", e);
 							return 0;
 						}
 						double perimeterLength = 0;
@@ -949,12 +953,6 @@ public class DefaultCellCollection
 		}
 		
 		return result;
-
-//		SegmentStatisticFetchingTask task = new SegmentStatisticFetchingTask(getNucleusArray(),
-//				stat,
-//				scale, 
-//				id);
-//		return task.invoke();
 	}
 
 	/*

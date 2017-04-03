@@ -900,7 +900,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			// Converts whatever coordinates are in the border
 			// to a shape
 			return toOffsetShape(0, 0);
+		}
+		
+		public Shape toShape(MeasurementScale scale){
 			
+			// Converts whatever coordinates are in the border
+			// to a shape
+			return toOffsetShape(0, 0, scale);
 		}
 		
 		public Shape toOriginalShape(){
@@ -951,26 +957,54 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return result;
 		}
 		
-		private Shape toOffsetShape(double xOffset, double yOffset){
+		/**
+		 * Create a shape from the border of the object with the given translation
+		 * and at the given scale
+		 * @param xOffset
+		 * @param yOffset
+		 * @param scale
+		 * @return
+		 */
+		private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale){
+			
+			double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
+			
+			
 			Path2D.Double path = new Path2D.Double();
 			
 			if( borderList.size()==0 ){
 				throw new IllegalArgumentException("Border list is empty");
 			}
-			
-//			if( borderList.size()==1 ){
-//				throw new IllegalArgumentException("Border list has only a single entry");
-//			}
-			
+						
 			IBorderPoint first = borderList.get(0);
-			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
+			path.moveTo(( first.getX()+xOffset )/ sc, (first.getY()+yOffset ) / sc);
 			
 			for(IBorderPoint b : this.borderList){
-				path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
+				path.lineTo( (b.getX()+xOffset) /sc , (b.getY()+yOffset) /sc );
 			}
 			path.closePath();
 
 			return path;
+			
+		}
+		
+		private Shape toOffsetShape(double xOffset, double yOffset){
+			return this.toOffsetShape(xOffset, yOffset, MeasurementScale.PIXELS);
+//			Path2D.Double path = new Path2D.Double();
+//			
+//			if( borderList.size()==0 ){
+//				throw new IllegalArgumentException("Border list is empty");
+//			}
+//						
+//			IBorderPoint first = borderList.get(0);
+//			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
+//			
+//			for(IBorderPoint b : this.borderList){
+//				path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
+//			}
+//			path.closePath();
+//
+//			return path;
 		}
 
 		/**

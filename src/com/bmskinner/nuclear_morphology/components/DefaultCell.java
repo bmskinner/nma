@@ -46,14 +46,14 @@ public class DefaultCell
 
 	protected UUID uuid;
 	
-	protected Nucleus nucleus = null; // depractated, use the list
-	protected List<IMitochondrion> mitochondria; // unknown staining patterns so far
-	protected List<Flagellum> tails;	
-	protected List<IAcrosome> acrosomes;
-	protected ICytoplasm cytoplasm = null;
-	protected List<Nucleus> nuclei;
+	protected volatile Nucleus nucleus = null; // depractated, use the list
+	protected volatile List<IMitochondrion> mitochondria; // unknown staining patterns so far
+	protected volatile List<Flagellum> tails;	
+	protected volatile List<IAcrosome> acrosomes;
+	protected volatile ICytoplasm cytoplasm = null;
+	protected volatile List<Nucleus> nuclei;
 	
-	private Map<PlottableStatistic, Double> statistics; // The statistical values stored for this object
+	private volatile Map<PlottableStatistic, Double> statistics; // The statistical values stored for this object
 	
 	/**
 	 * Create a new cell with a random ID
@@ -126,6 +126,8 @@ public class DefaultCell
 		if(c.hasCytoplasm()){
 			this.cytoplasm = c.getCytoplasm().duplicate();
 		}
+		
+		statistics   = new HashMap<PlottableStatistic, Double>();
 	}
 	
 	/* (non-Javadoc)
@@ -167,16 +169,38 @@ public class DefaultCell
 	@Override
 	public synchronized double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
 		
+		// Get the scale of one of the components of the cell
+		double sc = this.hasNucleus() ? this.getNucleus().getScale() : this.hasCytoplasm() ? this.getCytoplasm().getScale() : 1d;
+		
+//		if(hasStatistic(stat)){
+//			return statistics.get(stat);
+//		} else {
+//			double result =  calculateStatistic(stat);
+//			statistics.put(stat, result);
+//			return result;
+//		}
+		
+		
 		if(hasStatistic(stat)){
-			return statistics.get(stat);
+
+			double result = statistics.get(stat);	
+		
+			result = stat.convert(result, sc, scale);
+			return result;
 		} else {
-			double result =  calculateStatistic(stat);
+
+			double result = calculateStatistic(stat);
 			statistics.put(stat, result);
 			return result;
 		}
+		
 	}
 	
 	protected double calculateStatistic(PlottableStatistic stat){
+		
+		if(stat==null){
+			throw new IllegalArgumentException("Stat cannot be null");
+		}
 		double result = ERROR_CALCULATING_STAT;
 				
 		// Do not add getters for values added at creation time
