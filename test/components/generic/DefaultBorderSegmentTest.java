@@ -6,6 +6,7 @@ package components.generic;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
@@ -32,15 +34,14 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testDefaultBorderSegmentIntIntIntUUID() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#DefaultBorderSegment(int, int, int)}.
-	 */
-	@Test
-	public void testDefaultBorderSegmentIntIntInt() {
-		fail("Not yet implemented");
+		UUID id = UUID.randomUUID();
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100, id);
+		
+		exception.expect(IllegalArgumentException.class);
+		test = new DefaultBorderSegment(0, 20, 100, null);
+		test = new DefaultBorderSegment(-1, 20, 100, id);
+		test = new DefaultBorderSegment(0, 100, 100, id);
+		test = new DefaultBorderSegment(0, 99, 100, id);
 	}
 
 	/**
@@ -48,7 +49,8 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testDefaultBorderSegmentIBorderSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(test);
+		assertEquals(test, s1);
 	}
 
 	/**
@@ -67,7 +69,24 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetMergeSources() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+						
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		
+		test.addMergeSource(s1);
+		test.addMergeSource(s2);
+		
+		assertTrue(test.hasMergeSources());
+		int[] mgeStart = { 0, 11 };
+		int[] mgeEnd   = { 11, 20 };
+		
+		List<IBorderSegment> sources = test.getMergeSources();
+		for(int i=0; i<sources.size(); i++){
+			IBorderSegment s = sources.get(i);
+			assertEquals(mgeStart[i], s.getStartIndex());
+			assertEquals(  mgeEnd[i], s.getEndIndex());	
+		}
 	}
 
 	/**
@@ -222,7 +241,7 @@ public class DefaultBorderSegmentTest {
 		/*
 		 * Outside segment
 		 */
-		assertEquals(30, test.getDistanceToStart(90));
+		assertEquals(30, test.getDistanceToEnd(90));
 	}
 
 	/**
@@ -283,18 +302,10 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testLength() {
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(90, 30, 100);
 		
 		assertEquals(20, s1.length());
-		assertEquals(10, s2.length());
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#equals(java.lang.Object)}.
-	 */
-	@Test
-	public void testEqualsObject() {
-		fail("Not yet implemented");
+		assertEquals(40, s2.length());
 	}
 
 	/**
@@ -302,7 +313,11 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testTestLength() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		assertEquals(20, s1.length());
+		
+		DefaultBorderSegment s2 = new DefaultBorderSegment(90,  20, 100);
+		assertEquals(30, s2.length());
 	}
 
 	/**
@@ -310,7 +325,14 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testWrapsIntInt() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		
+		assertFalse(s1.wraps(0, 10));
+		assertTrue(s1.wraps(90, 10));
+		
+		exception.expect(IllegalArgumentException.class);
+		s1.wraps(-1, 10);
+		s1.wraps(0, 100);
 	}
 
 	/**
@@ -343,6 +365,10 @@ public class DefaultBorderSegmentTest {
 		assertFalse(s1.contains(99));
 		assertFalse(s1.contains(21));
 		assertFalse(s1.contains(60));
+		
+		// Invalid inputs
+		assertFalse(s1.contains(-1));
+		assertFalse(s1.contains(101));
 	}
 
 	/**
@@ -398,7 +424,21 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testSetNextSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultBorderSegment s3 = new DefaultBorderSegment(20, 30, 100);
+		DefaultBorderSegment s4 = new DefaultBorderSegment(11, 20, 90);
+		
+		
+		assertFalse(s1.hasNextSegment());
+		s1.setNextSegment(s2);
+		assertTrue(s1.hasNextSegment());
+		
+		// Add null and invalid segments
+		exception.expect(IllegalArgumentException.class);
+		s1.setNextSegment(null);
+		s1.setNextSegment(s3);
+		s1.setNextSegment(s4);
 	}
 
 	/**
@@ -406,7 +446,21 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testSetPrevSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		DefaultBorderSegment s3 = new DefaultBorderSegment(0, 5, 100);
+		DefaultBorderSegment s4 = new DefaultBorderSegment(0, 11, 90);
+		
+		
+		assertFalse(s2.hasPrevSegment());
+		s2.setPrevSegment(s1);
+		assertTrue(s2.hasPrevSegment());
+		
+		// Add null and invalid segments
+		exception.expect(IllegalArgumentException.class);
+		s2.setPrevSegment(null);
+		s2.setPrevSegment(s3);
+		s2.setPrevSegment(s4);
 	}
 
 	/**
@@ -414,7 +468,13 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testHasNextSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		
+		assertFalse(s1.hasNextSegment());
+		s1.setNextSegment(s2);
+		assertTrue(s1.hasNextSegment());
+		
 	}
 
 	/**
@@ -422,7 +482,11 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testHasPrevSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
+		assertFalse(s2.hasPrevSegment());
+		s2.setPrevSegment(s1);
+		assertTrue(s2.hasPrevSegment());
 	}
 
 	/**
@@ -430,31 +494,14 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testSetPosition() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getPosition()}.
-	 */
-	@Test
-	public void testGetPosition() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#toString()}.
-	 */
-	@Test
-	public void testToString() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getDetail()}.
-	 */
-	@Test
-	public void testGetDetail() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		assertEquals(0, s1.getPosition());
+		s1.setPosition(3);
+		assertEquals(3, s1.getPosition());
+		
+		// Out of range
+		exception.expect(IllegalArgumentException.class);
+		s1.setPosition(-1);
 	}
 
 	/**
@@ -462,12 +509,45 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testIterator() {
-		fail("Not yet implemented");
+		
+		// Standard
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
+		
+		Iterator<Integer> it = s1.iterator();
+		
+		int i=0;
+		
+		int[] exp = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+		
+		while(it.hasNext()){
+			int index = it.next();
+			assertEquals(exp[i], index);
+			i++;
+		}
+		
+		// Wrapping
+		DefaultBorderSegment s2 = new DefaultBorderSegment(95, 5, 100);
+		i=0;
+		
+		int[] exp2 = { 95, 96, 97, 98, 99, 0, 1, 2, 3, 4, 5 };
+		
+		 it = s2.iterator();
+		while(it.hasNext()){
+			int index = it.next();
+			assertEquals(exp2[i], index);
+			i++;
+		}
 	}
 	
 	@Test
 	public void testNudgeUnlinked(){
 		
+		testNudgeUnlinkedWithoutMergeSources();
+		testNudgeUnlinkedWithMergeSources();
+	}
+	
+	@Test
+	public void testNudgeUnlinkedWithoutMergeSources(){
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
 		
@@ -481,8 +561,8 @@ public class DefaultBorderSegmentTest {
 		 * Offset of 1
 		 */
 		
-		int[] expStart = { 1,  12, 32, 90 };
-		int[] expEnd   = { 11, 31, 89, 0 };
+		int[] expStart = { 1,  11, 31, 89 };
+		int[] expEnd   = { 11, 31, 89, 1 };
 		
 		List<IBorderSegment> result = IBorderSegment.nudgeUnlinked(list, 1);
 		
@@ -495,8 +575,8 @@ public class DefaultBorderSegmentTest {
 		/*
 		 * Offset of -2
 		 */
-		int[] expStart_2 = { 98, 9,  29, 87 };
-		int[] expEnd_2   = { 8, 28,  86, 97 };
+		int[] expStart_2 = { 98, 8,  28, 86 };
+		int[] expEnd_2   = { 8, 28,  86, 98 };
 		
 		result = IBorderSegment.nudgeUnlinked(list, -2);
 		
@@ -511,7 +591,92 @@ public class DefaultBorderSegmentTest {
 		 */
 		exception.expect(IllegalArgumentException.class);
 		IBorderSegment.nudgeUnlinked(null, -2);
+	}
+	
+	
+	@Test
+	public void testNudgeUnlinkedWithMergeSources(){
 		
+		int[] start = { 0,  10, 30, 88 };
+		int[] end   = { 10, 30, 88, 0  };
+		
+		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		
+		for(int i=0; i<start.length; i++){
+			list.add(new DefaultBorderSegment(start[i], end[i], 100));
+		}
+		// Add merge sources to seg 1
+		
+		list.get(0).addMergeSource( new DefaultBorderSegment(0, 4,  100) );
+		list.get(0).addMergeSource( new DefaultBorderSegment(4, 10, 100) );
+		
+		
+		/*
+		 * Offset of 1
+		 */
+		
+		int[] expStart = { 1,  11, 31, 89 };
+		int[] expEnd   = { 11, 31, 89, 1 };
+		
+		List<IBorderSegment> result = IBorderSegment.nudgeUnlinked(list, 1);
+		
+		for(int i=0; i<list.size(); i++){
+			IBorderSegment s = result.get(i);
+			assertEquals(expStart[i], s.getStartIndex());
+			assertEquals(  expEnd[i], s.getEndIndex());			
+		}
+		
+		
+		int[] mgeStart = { 1, 5 };
+		int[] mgeEnd   = { 5, 11 };
+		List<IBorderSegment> sources = list.get(0).getMergeSources();
+		for(int i=0; i<sources.size(); i++){
+			IBorderSegment s = sources.get(i);
+			assertEquals(mgeStart[i], s.getStartIndex());
+			assertEquals(  mgeEnd[i], s.getEndIndex());	
+		}
+		
+		
+	}
+	
+	@Test
+	public void testCopy(){
+		
+		int[] start = { 0,  10, 30, 88 };
+		int[] end   = { 10, 30, 88, 0  };
+		
+		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		
+		for(int i=0; i<start.length; i++){
+			list.add(new DefaultBorderSegment(start[i], end[i], 100));
+		}
+		
+		try {
+			IBorderSegment.linkSegments(list);
+		} catch (ProfileException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			fail("Error linking segments");
+			
+		}
+		
+		try {
+			List<IBorderSegment> result = IBorderSegment.copy(list);
+			
+			for(int i=0; i<start.length; i++){
+				IBorderSegment t = list.get(i);
+				IBorderSegment r = result.get(i);
+				
+				assertEquals(t, r);
+				
+			}
+			
+		} catch (ProfileException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			fail("Error copying segments");
+			
+		}
 	}
 
 }

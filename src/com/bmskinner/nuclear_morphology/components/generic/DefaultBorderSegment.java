@@ -37,7 +37,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -77,6 +76,10 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id){
 		
+		if(id == null){
+			throw new IllegalArgumentException("Segment ID cannot be null");
+		}
+		
 		// ensure that the segment meets minimum length requirements
 		int testLength = 0;
 		if(startIndex < endIndex){ // no wrap
@@ -91,6 +94,11 @@ public class DefaultBorderSegment implements IBorderSegment{
 						+ " from " + startIndex + " to " + endIndex
 						+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
 		}
+		
+		if(testLength == total){
+			throw new IllegalArgumentException("Profile must have more than one segment");
+		}
+		
 		this.startIndex   = startIndex;
 		this.endIndex     = endIndex;
 		this.totalLength  = total;
@@ -223,7 +231,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	@Override
 	public int getProportionalIndex(double d){
 		if(d<0 || d > 1){
-			return -1;
+			throw new IllegalArgumentException("Value must be between 0 and 1");
 		}
 		
 		double desiredDistanceFromStart = (double) this.length() * d;
@@ -250,8 +258,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	@Override
 	public double getIndexProportion(int index){
 		if(!this.contains(index)){
-			finest("Segment does not contain index "+index);
-			return -1;
+			throw new IllegalArgumentException("Segment does not contain index "+index);
 		}
 		
 		int counter = 0;
@@ -264,25 +271,10 @@ public class DefaultBorderSegment implements IBorderSegment{
 			}
 			counter++;
 		}
-		finest("Error finding position of index "+index+", returning -1");
-		finest("Listing indexes within segment");
-		it = this.iterator();
-		while(it.hasNext()){
-			int test = it.next();
-			finest("Segment contains index "+test);
-			counter++;
-		}
-		return -1;
+		
+		throw new IllegalArgumentException("Cannot get proportion for "+index);
 	}
-	
-//	public String getOldName(){
-////		if(this.name==null){
-////			IJ.log("Name is null on segment getName()");
-////			return null;
-////		}
-//		return this.name;
-//	}
-	
+		
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#getName()
 	 */
@@ -300,7 +292,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 		if(this.wraps()){
 			
 			int midLength = this.length() >> 1 ;
-			if( midLength+startIndex < this.getTotalLength()){
+			if( midLength+startIndex < totalLength){
 				return midLength+startIndex;
 			} else {
 				return endIndex - midLength;
@@ -316,14 +308,16 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public int getDistanceToStart(int index){
-
-		int startIndex 	= this.getStartIndex();
-
-		int distForwards 	= Math.abs(index - startIndex);
-		int distBackwards 	= this.length() - distForwards;
+		if(index <0 || index >= totalLength){
+			throw new IllegalArgumentException("Index is not in profile: "+index+"; total "+totalLength );
+		}
 		
-		int result = Math.min(distForwards, distBackwards);
-		return result;	
+		// Two possibilieites: abs distance or total - abs distance
+		
+		int abs = Math.abs(index - startIndex);
+		int alt = totalLength - abs;
+		
+		return Math.min(abs, alt);	
 	}
 	
 	/* (non-Javadoc)
@@ -331,14 +325,14 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public int getDistanceToEnd(int index){
-
-		int endIndex 	= this.getEndIndex();
-
-		int distForwards 	= Math.abs(index - endIndex);
-		int distBackwards 	= this.length() - distForwards;
+		if(index <0 || index >= totalLength){
+			throw new IllegalArgumentException("Index is not in profile: "+index+"; total "+totalLength);
+		}
 		
-		int result = Math.min(distForwards, distBackwards);
-		return result;	
+		int abs = Math.abs(index - endIndex);
+		int alt = totalLength - abs;
+		
+		return Math.min(abs, alt);
 	}
 	
 	
@@ -382,44 +376,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	public IBorderSegment prevSegment(){
 		return this.prevSegment;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#shortenStart(int)
-	 */
-//	@Override
-//	public boolean shortenStart(int value){
-//		int newValue = DefaultCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
-//		return this.update(newValue, this.getEndIndex());
-//	}
-//	
-//	/* (non-Javadoc)
-//	 * @see components.nuclear.IBorderSegment#shortenEnd(int)
-//	 */
-//	@Override
-//	public boolean shortenEnd(int value){
-//		int newValue = DefaultCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
-//		return this.update(this.getStartIndex(), newValue);
-//
-//	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#lengthenStart(int)
-	 */
-//	@Override
-//	public boolean lengthenStart(int value){
-//		int newValue = DefaultCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
-//		return this.update(newValue, this.getEndIndex());
-//	}
-//	
-//	/* (non-Javadoc)
-//	 * @see components.nuclear.IBorderSegment#lengthenEnd(int)
-//	 */
-//	@Override
-//	public boolean lengthenEnd(int value){
-//		int newValue = DefaultCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
-//		return this.update(this.getStartIndex(), newValue);
-//	}
-		
+			
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#length()
 	 */
@@ -464,28 +421,6 @@ public class DefaultBorderSegment implements IBorderSegment{
 		return true;
 	}
 
-//	/**
-//	 * Test if the given segment matches this segment in position, length
-//	 * and name
-//	 * @param test
-//	 * @return
-//	 */
-//	public boolean equals(NucleusBorderSegment test){
-//		
-//		if(test==null){
-//			return false;
-//		}
-//		
-//		if(test.getTotalLength()!=this.getTotalLength()){
-//			return false;
-//		}
-//
-//		if(test.getStartIndex()!=this.getStartIndex() 
-//				|| test.getEndIndex()!=this.getEndIndex()){
-//			return false;
-//		}
-//		return true;
-//	}
 	
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#testLength(int, int)
@@ -493,7 +428,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	@Override
 	public int testLength(int start, int end){
 		if(wraps(start, end)){ // the segment wraps
-			return end + (this.getTotalLength()-start);
+			return end + (totalLength-start);
 		} else{
 			return end - start;
 		}
@@ -504,11 +439,10 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public boolean wraps(int start, int end){
-		if(end<=start){ // the segment wraps
-			return true;
-		} else{
-			return false;
+		if( (start<0 || start>totalLength) ||  (end<0 || end>totalLength) ){
+			throw new IllegalArgumentException("Index is outside profile bounds");
 		}
+		return (end<=start);
 	}
 	
 	/* (non-Javadoc)
@@ -673,6 +607,10 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public void setNextSegment(IBorderSegment s){
+		if(s==null){
+			throw new IllegalArgumentException("Segment cannot be null");
+		}
+		
 		if(s.getTotalLength() != this.getTotalLength()){
 			throw new IllegalArgumentException("Segment has a different total length");
 		}
@@ -688,6 +626,11 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public void setPrevSegment(IBorderSegment s){
+		
+		if(s==null){
+			throw new IllegalArgumentException("Segment cannot be null");
+		}
+		
 		if(s.getTotalLength() != this.getTotalLength()){
 			throw new IllegalArgumentException("Segment has a different total length");
 		}
@@ -731,6 +674,9 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 */
 	@Override
 	public void setPosition(int i){
+		if(i<0){
+			throw new IllegalArgumentException("Position must be a positve integer");
+		}
 		this.positionInProfile = (short) i;
 	}
 	
