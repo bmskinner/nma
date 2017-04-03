@@ -1541,17 +1541,18 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param list the analysis datasets
 	 * @return a chartable dataset
 	 */
-	public XYDataset createMultiNucleusOutline(List<IAnalysisDataset> list, MeasurementScale scale) throws ChartDatasetCreationException {
+	public XYDataset createMultiNucleusOutline() throws ChartDatasetCreationException {
 
 		ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
-	
+		List<IAnalysisDataset> list = options.getDatasets();
+		MeasurementScale scale = options.getScale();
 		
 		int i=0;
 		for(IAnalysisDataset dataset : list){
 			ICellCollection collection = dataset.getCollection();
 
-			String seriesKey = "Nucleus_"+i+"_"+collection.getName();
+			String seriesKey = CellularComponent.NUCLEUS+"_"+i+"_"+collection.getName();
 
 			if(collection.hasConsensus()){
 				Nucleus n = collection.getConsensus();

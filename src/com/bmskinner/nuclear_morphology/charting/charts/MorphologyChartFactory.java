@@ -823,7 +823,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		
 		XYDataset nuclearOutlines;
 		try {
-			nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline(options.getDatasets(), options.getScale());
+			nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline();
 		} catch (ChartDatasetCreationException e) {
 			return makeErrorChart();
 		}

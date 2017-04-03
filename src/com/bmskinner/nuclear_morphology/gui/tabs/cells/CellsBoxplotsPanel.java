@@ -77,7 +77,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateSingle() {
+	protected synchronized void updateSingle() {
 		super.updateSingle();
 		finest("Passing to update multiple in "+this.getClass().getName());
 		updateMultiple();
@@ -85,7 +85,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateMultiple() {
+	protected synchronized void updateMultiple() {
 		super.updateMultiple();
 		
 
@@ -108,7 +108,7 @@ public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListen
 	}
 
 	@Override
-	protected void updateNull() {
+	protected synchronized void updateNull() {
 		super.updateNull();
 		finest("Passing to update multiple in "+this.getClass().getName());
 		updateMultiple();

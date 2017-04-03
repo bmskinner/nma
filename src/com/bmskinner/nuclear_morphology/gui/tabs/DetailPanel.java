@@ -135,7 +135,6 @@ public abstract class DetailPanel
 	 * @return
 	 */
 	public synchronized IAnalysisDataset activeDataset(){
-//		return list.get(0);
 		return DatasetListManager.getInstance().getActiveDataset();
 	}
 	
@@ -627,7 +626,7 @@ public abstract class DetailPanel
 	 * used for every column except the first.
 	 * @param table
 	 */
-	protected void setRenderer(JTable table, TableCellRenderer renderer){
+	protected synchronized void setRenderer(JTable table, TableCellRenderer renderer){
 		int columns = table.getColumnModel().getColumnCount();
 		if(columns>1){
 			for(int i=1;i<columns;i++){
@@ -636,7 +635,7 @@ public abstract class DetailPanel
 		}
 	}
 	
-	private void setRenderers(TableOptions options){
+	private synchronized void setRenderers(TableOptions options){
 		JTable table = options.getTarget();
 		int columns  = table.getColumnModel().getColumnCount();
 		

@@ -378,12 +378,23 @@ public class LogPanel extends DetailPanel implements ActionListener {
 					break;
 				}
 				
+				case "throw":{
+					log("Throwing exception");
+					try {
+						throw new IllegalArgumentException("Throwing an exception");
+					} catch(Exception e){
+						error("Throwing expected exception", e);
+					}
+				}
+				
 				case "list datasets":{
 					listDatasets();
+					break;
 				}
 				
 				case "kill":{
 					killAllTasks();
+					break;
 				}
 				
 				default: {

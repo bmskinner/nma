@@ -797,7 +797,7 @@ public class ProfileManager implements Loggable {
 	}
 	
 	/**
-	 * Merge the given segments
+	 * Merge the given segments from the median profile
 	 * @param seg1
 	 * @param seg2
 	 * @throws UnsegmentedProfileException 

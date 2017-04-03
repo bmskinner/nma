@@ -91,7 +91,7 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 		}
 		
 		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options){
+		protected synchronized JFreeChart createPanelChartType(ChartOptions options){
 			if(GlobalOptions.getInstance().isViolinPlots()){
 				return new ViolinChartFactory(options).createStatisticPlot(component);
 			} else {
@@ -100,7 +100,7 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 		}
 		
 		@Override
-		protected TableModel createPanelTableType(TableOptions options){
+		protected synchronized TableModel createPanelTableType(TableOptions options){
 			return null;
 		}
 

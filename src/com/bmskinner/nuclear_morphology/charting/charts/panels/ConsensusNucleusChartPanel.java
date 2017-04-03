@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.overlays.ComponentOverla
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.ShapeOverlayObject;
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
@@ -85,6 +86,8 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		
 		super.setChart(chart);
 		
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
+		
 		// Clear the overlay
 		if(consensusOverlay !=null){
 			consensusOverlay.clearShapes();
@@ -136,7 +139,7 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 					fine("Component is not null, making shape");
 					//							Color c = ColourSelecter.getColor(series);
 					c = ColourSelecter.getTransparentColour((Color) c, true, 128);
-					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(), null, null, c);
+					ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
 					consensusOverlay.addShape(o, n);
 				} else {
 					fine("Component is null for "+seriesKey);

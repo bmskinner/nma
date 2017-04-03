@@ -293,7 +293,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 		// multiple nuclei
 		XYDataset ds;
 		try {
-			ds = new NucleusDatasetCreator(options).createMultiNucleusOutline(options.getDatasets(), options.getScale());
+			ds = new NucleusDatasetCreator(options)
+					.createMultiNucleusOutline();
 		} catch (ChartDatasetCreationException e) {
 			fine("Error making consensus dataset", e);
 			return makeErrorChart();

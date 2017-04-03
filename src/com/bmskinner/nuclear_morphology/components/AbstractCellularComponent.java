@@ -857,6 +857,11 @@ public abstract class AbstractCellularComponent
 		
 	}
 	
+	@Override
+	public Shape toShape(MeasurementScale scale){
+		return toOffsetShape(0, 0);
+	}
+	
 	public Shape toOriginalShape(){
 		
 		// The object is created, and the border points are
