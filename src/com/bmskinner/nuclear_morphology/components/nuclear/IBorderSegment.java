@@ -198,37 +198,37 @@ public interface IBorderSegment
 	 */
 	IBorderSegment prevSegment();
 
-	/**
-	 * Make this segment shorter by the given amount.
-	 * The start index is moved forward. The previous segment
-	 * is adjusted to keep the segments in sync
-	 * @param value the amount to shorten
-	 */
-	boolean shortenStart(int value);
+//	/**
+//	 * Make this segment shorter by the given amount.
+//	 * The start index is moved forward. The previous segment
+//	 * is adjusted to keep the segments in sync
+//	 * @param value the amount to shorten
+//	 */
+//	boolean shortenStart(int value);
+//
+//	/**
+//	 * Make this segment shorter by the given amount.
+//	 * The end index is moved back. The next segment
+//	 * is adjusted to keep the segments in sync
+//	 * @param value the amount to shorten
+//	 */
+//	boolean shortenEnd(int value);
 
-	/**
-	 * Make this segment shorter by the given amount.
-	 * The end index is moved back. The next segment
-	 * is adjusted to keep the segments in sync
-	 * @param value the amount to shorten
-	 */
-	boolean shortenEnd(int value);
-
-	/**
-	 * Make this segment longer by the given amount.
-	 * The start index is moved back. The previous segment
-	 * is adjusted to keep the segments in sync
-	 * @param value the amount to shorten
-	 */
-	boolean lengthenStart(int value);
-
-	/**
-	 * Make this segment longer by the given amount.
-	 * The end index is moved forward. The previous segment
-	 * is adjusted to keep the segments in sync
-	 * @param value the amount to shorten
-	 */
-	boolean lengthenEnd(int value);
+//	/**
+//	 * Make this segment longer by the given amount.
+//	 * The start index is moved back. The previous segment
+//	 * is adjusted to keep the segments in sync
+//	 * @param value the amount to shorten
+//	 */
+//	boolean lengthenStart(int value);
+//
+//	/**
+//	 * Make this segment longer by the given amount.
+//	 * The end index is moved forward. The previous segment
+//	 * is adjusted to keep the segments in sync
+//	 * @param value the amount to shorten
+//	 */
+//	boolean lengthenEnd(int value);
 
 	/**
 	 * Get the length of this segment. Accounts
@@ -476,6 +476,21 @@ public interface IBorderSegment
 		
 	}
 	
+//	static void nudgeUnlinked(IBorderSegment seg, int offset){
+//		
+//		int newStart = DefaultCellularComponent.wrapIndex(seg.getStartIndex()+offset, seg.getTotalLength());
+//		int newEnd   = DefaultCellularComponent.wrapIndex(seg.getEndIndex()+offset, seg.getTotalLength());
+//		
+//		seg.update(newStart, newEnd);
+//		if(seg.hasMergeSources()){
+//			
+//			for(IBorderSegment s: seg.getMergeSources()){
+//				nudgeUnlinked(s, offset);
+//			}
+//		}
+//		
+//	}
+	
 	/**
 	 * Nudge segments that are not linked together into a complete profile. Used in merging and unmerging
 	 * segments recursively.
@@ -485,14 +500,21 @@ public interface IBorderSegment
 	 * @throws Exception
 	 */
 	static List<IBorderSegment> nudgeUnlinked(List<IBorderSegment> list, int value) {
+		
+		if(list==null){
+			throw new IllegalArgumentException("Input list cannot be null");
+		}
+		
+		
 		List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
 		
 		for(IBorderSegment segment : list){
 			
 			IBorderSegment newSeg = IBorderSegment.newSegment(DefaultCellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value, segment.getTotalLength()), 
-					segment.getTotalLength(),
-					segment.getID());
+					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value, 
+						segment.getTotalLength()), 
+						segment.getTotalLength(),
+						segment.getID());
 						
 			
 			// adjust merge sources also and readd
@@ -517,12 +539,11 @@ public interface IBorderSegment
 	
 	
 	/**
-	 * Move the segments by the given amount, without shrinking them.
+	 * Move the segments by the given amount along the profile, without shrinking them.
 	 * @param list the list of segments
 	 * @param value the amount to nudge
 	 * @return a new list of segments
 	 * @throws ProfileException 
-	 * @throws Exception 
 	 */
 	static List<IBorderSegment> nudge(List<IBorderSegment> list, int value) throws ProfileException  {
 				

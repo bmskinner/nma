@@ -5,11 +5,16 @@ package components.generic;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
  * @author ben
@@ -51,7 +56,10 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetID() {
-		fail("Not yet implemented");
+		UUID id = UUID.randomUUID();
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100, id);
+		
+		assertEquals(id, test.getID());
 	}
 
 	/**
@@ -121,7 +129,10 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetStartIndex() {
-		fail("Not yet implemented");
+
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		
+		assertEquals(0, test.getStartIndex());
 	}
 
 	/**
@@ -129,7 +140,9 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetEndIndex() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		
+		assertEquals(20, test.getEndIndex());
 	}
 
 	/**
@@ -137,7 +150,8 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetProportionalIndex() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(10, test.getProportionalIndex(0.5));
 	}
 
 	/**
@@ -145,7 +159,8 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetIndexProportion() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(0.5, test.getIndexProportion(10), 0);
 	}
 
 	/**
@@ -153,7 +168,11 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetName() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals("Seg_0", test.getName());
+		
+		test.setPosition(1);
+		assertEquals("Seg_1", test.getName());
 	}
 
 	/**
@@ -161,7 +180,14 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetMidpointIndex() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(10, test.getMidpointIndex());
+		
+		/*
+		 * Wrapping segment
+		 */
+		test = new DefaultBorderSegment(90, 10, 100);
+		assertEquals(0, test.getMidpointIndex());
 	}
 
 	/**
@@ -169,7 +195,17 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetDistanceToStart() {
-		fail("Not yet implemented");
+		/*
+		 * Within segment
+		 */
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(5, test.getDistanceToStart(5));
+		
+		/*
+		 * Outside segment
+		 */
+		assertEquals(10, test.getDistanceToStart(90));
+		
 	}
 
 	/**
@@ -177,7 +213,16 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetDistanceToEnd() {
-		fail("Not yet implemented");
+		/*
+		 * Within segment
+		 */
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(15, test.getDistanceToEnd(5));
+		
+		/*
+		 * Outside segment
+		 */
+		assertEquals(30, test.getDistanceToStart(90));
 	}
 
 	/**
@@ -185,15 +230,14 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testIsLocked() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#setLocked(boolean)}.
-	 */
-	@Test
-	public void testSetLocked() {
-		fail("Not yet implemented");
+		// Created unlocked
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertFalse(test.isLocked());
+		
+		test.setLocked(true);
+		assertTrue(test.isLocked());
+		test.setLocked(false);
+		assertFalse(test.isLocked());
 	}
 
 	/**
@@ -201,7 +245,9 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetTotalLength() {
-		fail("Not yet implemented");
+		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+		assertEquals(100, test.getTotalLength());
+		
 	}
 
 	/**
@@ -209,7 +255,12 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testNextSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		
+		s1.setNextSegment(s2);
+		
+		assertEquals(s2, s1.nextSegment());
 	}
 
 	/**
@@ -217,47 +268,25 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testPrevSegment() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		
+		s2.setPrevSegment(s1);
+		
+		assertEquals(s1, s2.prevSegment());
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#shortenStart(int)}.
-	 */
-	@Test
-	public void testShortenStart() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#shortenEnd(int)}.
-	 */
-	@Test
-	public void testShortenEnd() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#lengthenStart(int)}.
-	 */
-	@Test
-	public void testLengthenStart() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#lengthenEnd(int)}.
-	 */
-	@Test
-	public void testLengthenEnd() {
-		fail("Not yet implemented");
-	}
-
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#length()}.
 	 */
 	@Test
 	public void testLength() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(20, 30, 100);
+		
+		assertEquals(20, s1.length());
+		assertEquals(10, s2.length());
 	}
 
 	/**
@@ -289,7 +318,17 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testWraps() {
-		fail("Not yet implemented");
+		
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		assertFalse(s1.wraps());
+		
+		
+		DefaultBorderSegment s2 = new DefaultBorderSegment(90, 30, 100);
+		assertTrue(s2.wraps());
+		
+		DefaultBorderSegment s3 = new DefaultBorderSegment(99, 30, 100);
+		assertTrue(s3.wraps());
+		
 	}
 
 	/**
@@ -297,7 +336,13 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testContains() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		assertTrue(s1.contains(0));
+		assertTrue(s1.contains(10));
+		assertTrue(s1.contains(20));
+		assertFalse(s1.contains(99));
+		assertFalse(s1.contains(21));
+		assertFalse(s1.contains(60));
 	}
 
 	/**
@@ -305,7 +350,17 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testTestContains() {
-		fail("Not yet implemented");
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		assertTrue(s1.testContains(0, 25, 0));
+		assertTrue(s1.testContains(0, 25, 10));
+		assertTrue(s1.testContains(0, 25, 20));
+		assertFalse(s1.testContains(0, 25, 99));
+		assertTrue(s1.testContains(0, 25, 21));
+		assertFalse(s1.testContains(0, 25, 60));
+		
+		assertFalse(s1.testContains(90, 25, 60));
+		assertTrue(s1.testContains(90, 25, 90));
+		assertFalse(s1.testContains(90, 25, 89));
 	}
 
 	/**
@@ -313,7 +368,29 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testUpdate() {
-		fail("Not yet implemented");
+		/*
+		 * Lone segment
+		 */
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		
+		assertTrue(s1.update(0, 25));
+		assertTrue(s1.update(90, 20));
+		assertTrue(s1.update(0, 25));
+		
+		/*
+		 * Linked segment
+		 */
+		DefaultBorderSegment s2 = new DefaultBorderSegment(25,  40, 100);
+		s1.setNextSegment(s2);
+		s2.setPrevSegment(s1);
+		
+		// No effect on end of s2, but start is updated
+		assertTrue(s1.update(0, 26));
+		assertEquals(26, s2.getStartIndex());
+		assertEquals(40, s2.getEndIndex());
+		
+		// Out of range of s2; should fail
+		assertFalse(s1.update(0, 42));
 	}
 
 	/**
@@ -386,6 +463,55 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testIterator() {
 		fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testNudgeUnlinked(){
+		
+		int[] start = { 0,  10, 30, 88 };
+		int[] end   = { 10, 30, 88, 0  };
+		
+		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		
+		for(int i=0; i<start.length; i++){
+			list.add(new DefaultBorderSegment(start[i], end[i], 100));
+		}
+		
+		/*
+		 * Offset of 1
+		 */
+		
+		int[] expStart = { 1,  12, 32, 90 };
+		int[] expEnd   = { 11, 31, 89, 0 };
+		
+		List<IBorderSegment> result = IBorderSegment.nudgeUnlinked(list, 1);
+		
+		for(int i=0; i<list.size(); i++){
+			IBorderSegment s = result.get(i);
+			assertEquals(expStart[i], s.getStartIndex());
+			assertEquals(  expEnd[i], s.getEndIndex());			
+		}
+		
+		/*
+		 * Offset of -2
+		 */
+		int[] expStart_2 = { 98, 9,  29, 87 };
+		int[] expEnd_2   = { 8, 28,  86, 97 };
+		
+		result = IBorderSegment.nudgeUnlinked(list, -2);
+		
+		for(int i=0; i<list.size(); i++){
+			IBorderSegment s = result.get(i);
+			assertEquals(expStart_2[i], s.getStartIndex());
+			assertEquals(  expEnd_2[i], s.getEndIndex());			
+		}
+		
+		/*
+		 * Invalid input
+		 */
+		exception.expect(IllegalArgumentException.class);
+		IBorderSegment.nudgeUnlinked(null, -2);
+		
 	}
 
 }

@@ -370,39 +370,39 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#shortenStart(int)
 	 */
-	@Override
-	public boolean shortenStart(int value){
-		int newValue = AbstractCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
-		return this.update(newValue, this.getEndIndex());
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#shortenEnd(int)
-	 */
-	@Override
-	public boolean shortenEnd(int value){
-		int newValue = AbstractCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
-		return this.update(this.getStartIndex(), newValue);
-
-	}
+//	@Override
+//	public boolean shortenStart(int value){
+//		int newValue = AbstractCellularComponent.wrapIndex(this.getStartIndex()+value, this.getTotalLength());
+//		return this.update(newValue, this.getEndIndex());
+//	}
+//	
+//	/* (non-Javadoc)
+//	 * @see components.nuclear.IBorderSegment#shortenEnd(int)
+//	 */
+//	@Override
+//	public boolean shortenEnd(int value){
+//		int newValue = AbstractCellularComponent.wrapIndex(this.getEndIndex()-value, this.getTotalLength());
+//		return this.update(this.getStartIndex(), newValue);
+//
+//	}
 	
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#lengthenStart(int)
 	 */
-	@Override
-	public boolean lengthenStart(int value){
-		int newValue = AbstractCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
-		return this.update(newValue, this.getEndIndex());
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#lengthenEnd(int)
-	 */
-	@Override
-	public boolean lengthenEnd(int value){
-		int newValue = AbstractCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
-		return this.update(this.getStartIndex(), newValue);
-	}
+//	@Override
+//	public boolean lengthenStart(int value){
+//		int newValue = AbstractCellularComponent.wrapIndex( this.getStartIndex()-value, this.getTotalLength());
+//		return this.update(newValue, this.getEndIndex());
+//	}
+//	
+//	/* (non-Javadoc)
+//	 * @see components.nuclear.IBorderSegment#lengthenEnd(int)
+//	 */
+//	@Override
+//	public boolean lengthenEnd(int value){
+//		int newValue = AbstractCellularComponent.wrapIndex( this.getEndIndex()+value, this.getTotalLength());
+//		return this.update(this.getStartIndex(), newValue);
+//	}
 		
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#length()
