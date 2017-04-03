@@ -22,6 +22,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public final class DatasetListManager implements Loggable {
 	
 	private static volatile DatasetListManager instance = null;
+	private static final Object lockObject = new Object(); // synchronisation
 	
 	/**
 	 * The list of root datasets currently loaded. The order of datasets
@@ -51,10 +52,20 @@ public final class DatasetListManager implements Loggable {
 	 * @return
 	 */
 	public static DatasetListManager getInstance(){
-		if(instance==null){
-			instance = new DatasetListManager();
+		
+		if(instance!=null){
+			return instance;
+		} else {
+			
+			synchronized(lockObject){
+				if(instance==null){
+					instance = new DatasetListManager();
+				}
+			}
+			
+			return instance;
 		}
-		return instance;
+
 	}
 	
 	public synchronized List<IAnalysisDataset> getRootDatasets(){
