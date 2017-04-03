@@ -107,8 +107,15 @@ implements PlugIn, Loggable
 		// Add a log file for program errors
 		
 		try {
+			
+
 			File dir = new File(Nuclear_Morphology_Analysis.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 
+			// Difference in path between standalone and jar
+			if(dir.getAbsolutePath().endsWith(".jar")){
+				dir = dir.getParentFile();
+			}
+			
 			File errorFile = new File(dir, "error.log");
 			System.out.println(errorFile.getAbsolutePath());
 
@@ -119,14 +126,12 @@ implements PlugIn, Loggable
 			errorLogger.setLevel(Loggable.TRACE);
 			
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logToImageJ("Error initialising", e);
+
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logToImageJ("Error initialising", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logToImageJ("Error initialising", e);
 		}
 	}
 	

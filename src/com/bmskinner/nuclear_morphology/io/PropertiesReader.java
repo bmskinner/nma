@@ -50,6 +50,11 @@ public class PropertiesReader implements Loggable {
 			// Get the location of the jar file
 			File dir =  new File(PropertiesReader.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 			
+			// Difference in path between standalone and jar
+			if(dir.getAbsolutePath().endsWith(".jar")){
+				dir = dir.getParentFile();
+			}
+			
 			File ini = new File(dir, INI_FILE);
 			System.out.println("ini: "+ini.getAbsolutePath());
 			

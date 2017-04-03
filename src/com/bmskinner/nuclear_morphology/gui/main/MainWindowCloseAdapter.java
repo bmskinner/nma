@@ -3,6 +3,8 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 
@@ -72,6 +74,11 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 	  public void close(){
 		  DatasetListManager.getInstance().clear();
 		  GlobalOptions.getInstance().setDefaults();
+		  
+		  for(Handler h : Logger.getLogger(Loggable.ERROR_LOGGER).getHandlers()){
+			  h.close();
+		  }
+		  
 		  mw.dispose();
 		  if(mw.isStandalone()){
 			  System.exit(0);
