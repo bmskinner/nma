@@ -32,6 +32,7 @@ import java.util.logging.Level;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
  * The default implementation of a segmented profile.
@@ -346,14 +347,17 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public IBorderSegment getSegmentContaining(int index){
+		
+		if(index<0 || index >= this.size()){
+			throw new IllegalArgumentException("Index is out of profile bounds");
+		}
 
-		IBorderSegment result = null;
-		for(IBorderSegment seg : this.segments){
+		for(IBorderSegment seg : segments){
 			if(seg.contains(index)){
-				result = seg;
+				return seg;
 			}
 		}
-		return result;
+		throw new IllegalArgumentException("Index not in profile");
 	}
 
 	/* (non-Javadoc)
@@ -387,7 +391,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 */
 	@Override
 	public void clearSegments(){
-		this.segments = new IBorderSegment[0];
+		segments = new IBorderSegment[0];
 
 	}
 
@@ -449,26 +453,29 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	@Override
 	public boolean contains(IBorderSegment segment){
 		if(segment==null){
-			return false;
+			throw new IllegalArgumentException("Segment cannot be null");
 		}
-		boolean result = false;
-		for(IBorderSegment seg : this.segments){
-			if(	seg.getStartIndex()==segment.getStartIndex()
-					&& seg.getEndIndex()==segment.getEndIndex()
-					&& seg.getTotalLength()==this.size()
 
-					){
+		for(IBorderSegment seg : this.segments){
+			if(seg.equals(segment)){
 				return true;
 			}
+//			if(	       seg.getStartIndex() ==segment.getStartIndex()
+//					&& seg.getEndIndex()   ==segment.getEndIndex()
+//					&& seg.getTotalLength()==this.size()
+//
+//					){
+//				return true;
+//			}
 		}
-		return result;
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#update(components.nuclear.IBorderSegment, int, int)
 	 */
 	@Override
-	public boolean update(IBorderSegment segment, int startIndex, int endIndex){
+	public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException{
 
 		if(!this.contains(segment)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
@@ -509,7 +516,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @see components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID, int)
 	 */
 	@Override
-	public boolean adjustSegmentStart(UUID id, int amount){
+	public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException{
 		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
@@ -525,7 +532,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 	 * @see components.generic.ISegmentedProfile#adjustSegmentEnd(java.util.UUID, int)
 	 */
 	@Override
-	public boolean adjustSegmentEnd(UUID id, int amount){
+	public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException{
 
 		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
@@ -642,22 +649,26 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// Since the start position may already have been set, we need to adjust the end,
 		// i.e the start position of the first segment.
 		
-		int firstStart = newStarts[0];
-		int lastStart  = newStarts[segments.length-1];
-		if(segments[0].wraps(newStarts[segments.length-1], newStarts[0])){
-			// wrapping final segment
-			if(firstStart + (length-lastStart) < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
-				newStarts[0] = firstStart+1; // update the start in the array
-				newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update the new segment
-			}
-			
-		} else {
-			// non-wrapping final segment
-			if( firstStart - lastStart < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
-				newStarts[0] = firstStart+1; // update the start in the array
-				newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update the new segment
+		try {
+			int firstStart = newStarts[0];
+			int lastStart  = newStarts[segments.length-1];
+			if(segments[0].wraps(newStarts[segments.length-1], newStarts[0])){
+				// wrapping final segment
+				if(firstStart + (length-lastStart) < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
+					newStarts[0] = firstStart+1; // update the start in the array
+					newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update the new segment
+				}
 
+			} else {
+				// non-wrapping final segment
+				if( firstStart - lastStart < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
+					newStarts[0] = firstStart+1; // update the start in the array
+					newSegs.get(0).update(firstStart, newSegs.get(1).getStartIndex()); // update the new segment
+
+				}
 			}
+		} catch(SegmentUpdateException e){
+			throw new ProfileException("Could not update segment indexes");
 		}
 		
 		IBorderSegment lastSeg = new DefaultBorderSegment(newStarts[segments.length-1], newStarts[0], length, segments[segments.length-1].getID());

@@ -550,7 +550,7 @@ public class NucleusBorderSegment  implements IBorderSegment{
 	 * @see components.nuclear.IBorderSegment#update(int, int)
 	 */
 	@Override
-	public boolean update(int startIndex, int endIndex){
+	public boolean update(int startIndex, int endIndex) throws SegmentUpdateException{
 		
 		if(this.startPositionLocked){ // don't allow locked segments to update
 			this.lastFailReason = "Segment locked";

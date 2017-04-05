@@ -291,7 +291,7 @@ public interface IBorderSegment
 	 * @param start the new start index
 	 * @param end the new end index
 	 */
-	boolean update(int startIndex, int endIndex);
+	boolean update(int startIndex, int endIndex) throws SegmentUpdateException;
 
 	/**
 	 * Set the next segment in the profile from this
@@ -361,7 +361,7 @@ public interface IBorderSegment
 					
 					s.update(list[p].getEndIndex(), s.getEndIndex());
 					
-				} catch(IllegalArgumentException e){	
+				} catch(IllegalArgumentException | SegmentUpdateException e){	
 					throw new ProfileException("Error linking final segment: "+e.getMessage());
 				}
 				s.setLocked(lockState);
@@ -378,7 +378,7 @@ public interface IBorderSegment
 	
 	/**
 	 * Given a list of segments, link them together into a circle.
-	 * Links start and end properly.
+	 * Links start and end properly. Does not copy the segments.
 	 * @param list
 	 * @throws Exception 
 	 */
@@ -406,7 +406,7 @@ public interface IBorderSegment
 					
 					s.update(list.get(p).getEndIndex(), s.getEndIndex());
 					
-				} catch(IllegalArgumentException e){	
+				} catch(IllegalArgumentException | SegmentUpdateException e){	
 					throw new ProfileException("Error linking final segment: "+e.getMessage());
 				}
 				s.setLocked(lockState);
@@ -729,5 +729,20 @@ public interface IBorderSegment
 	}
 
 	Iterator<Integer> iterator();
+	
+	/**
+	 * Thrown when a segment update attempt fails
+	 * @author bms41
+	 * @since 1.13.4
+	 *
+	 */
+	public class SegmentUpdateException extends Exception {
+			private static final long serialVersionUID = 1L;
+			public SegmentUpdateException() { super(); }
+			public SegmentUpdateException(String message) { super(message); }
+			public SegmentUpdateException(String message, Throwable cause) { super(message, cause); }
+			public SegmentUpdateException(Throwable cause) { super(cause); }
+		
+	}
 
 }

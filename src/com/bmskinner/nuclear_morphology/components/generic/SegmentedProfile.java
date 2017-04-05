@@ -30,6 +30,7 @@ import java.util.logging.Level;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 
 /**
@@ -467,7 +468,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#update(components.nuclear.NucleusBorderSegment, int, int)
 	 */
 	@Override
-	public boolean update(IBorderSegment segment, int startIndex, int endIndex){
+	public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException{
 				
 		if(!this.contains(segment)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
@@ -530,7 +531,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID, int)
 	 */
 	@Override
-	public boolean adjustSegmentStart(UUID id, int amount){
+	public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException{
 		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");
 		}
@@ -546,7 +547,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 	 * @see components.generic.ISegmentedProfile#adjustSegmentEnd(java.util.UUID, int)
 	 */
 	@Override
-	public boolean adjustSegmentEnd(UUID id, int amount){
+	public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException{
 
 		if(!this.getSegmentIDs().contains(id)){
 			throw new IllegalArgumentException("Segment is not part of this profile");

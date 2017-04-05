@@ -100,8 +100,8 @@ public class SegmentationHandler implements Loggable {
 			
 		} catch(ProfileException | UnavailableBorderTagException 
 				| UnavailableProfileTypeException | UnsegmentedProfileException e){
-			warn("Welp, shit done got fucked");
-			error("Error merging segments", e);
+			warn("Error merging segments");
+			stack(e.getMessage(), e);
 
 		}
 	}
@@ -149,8 +149,8 @@ public class SegmentationHandler implements Loggable {
 			}
 		} catch(ProfileException | UnavailableBorderTagException 
 				| UnavailableProfileTypeException | UnsegmentedProfileException e){
-			warn("Welp, shit done got fucked");
-			error("Error unmerging segments", e);
+			warn("Error unmerging segments");
+			stack(e.getMessage(), e);
 
 		}
 	}
@@ -196,8 +196,8 @@ public class SegmentationHandler implements Loggable {
 
 		} catch(ProfileException | UnavailableBorderTagException 
 				| UnavailableProfileTypeException | UnsegmentedProfileException e){
-			warn("Welp, shit done got fucked");
-			error("Error unmerging segments", e);
+			warn("Error splitting segments");
+			stack(e.getMessage(), e);
 
 		}
 	}
@@ -246,8 +246,8 @@ public class SegmentationHandler implements Loggable {
 
 		} catch(ProfileException | UnavailableBorderTagException 
 				| UnavailableProfileTypeException | UnsegmentedProfileException e){
-			warn("Welp, shit done got fucked");
-			error("Error unmerging segments", e);
+			warn("Error updating index of segments");
+			stack(e.getMessage(), e);
 
 		}
 

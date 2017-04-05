@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
  * This details a profile that can have segments applied to it.
@@ -184,24 +185,27 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param startIndex the new start
 	 * @param endIndex the new end
 	 * @return did the update succeed
+	 * @throws SegmentUpdateException 
 	 */
-	boolean update(IBorderSegment segment, int startIndex, int endIndex);
+	boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
 
 	/**
 	 * Adjust the start position of the given segment by the given amount.
 	 * @param segment the segment to apply the change to
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
+	 * @throws SegmentUpdateException 
 	 */
-	boolean adjustSegmentStart(UUID id, int amount);
+	boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException;
 
 	/**
 	 * Adjust the end position of the given segment by the given amount.
 	 * @param segment the segment to apply the change to
 	 * @param amount the number of indexes to move
 	 * @return did the update succeed
+	 * @throws SegmentUpdateException 
 	 */
-	boolean adjustSegmentEnd(UUID id, int amount);
+	boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException;
 
 	void nudgeSegments(int amount) throws ProfileException;
 
