@@ -492,7 +492,7 @@ public class DefaultBorderSegment implements IBorderSegment{
 	 * @see components.nuclear.IBorderSegment#update(int, int)
 	 */
 	@Override
-	public boolean update(int startIndex, int endIndex){
+	public boolean update(int startIndex, int endIndex) throws SegmentUpdateException{
 		
 		if(this.isLocked){ // don't allow locked segments to update
 			return false;

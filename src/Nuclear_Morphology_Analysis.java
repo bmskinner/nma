@@ -118,7 +118,6 @@ implements PlugIn, Loggable
 
 			DebugFileHandler errorHandler = new DebugFileHandler(errorFile);
 			errorHandler.setFormatter(new DebugFileFormatter());
-			System.out.println("Added error log formatter");
 			errorLogger.addHandler(errorHandler);
 			errorLogger.setLevel(Loggable.TRACE);
 			

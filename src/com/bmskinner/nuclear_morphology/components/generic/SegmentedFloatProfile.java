@@ -505,11 +505,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// the basic checks have been passed; the update will not damage linkage
 		// Allow the segment to determine if the update is valid and apply it
 
-		if( segment.update(startIndex, endIndex)){
-			return true;
-		} else{
-			return false;
-		}
+		return segment.update(startIndex, endIndex);
 	}
 
 	/* (non-Javadoc)
