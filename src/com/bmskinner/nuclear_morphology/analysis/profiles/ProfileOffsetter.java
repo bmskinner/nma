@@ -84,7 +84,7 @@ public class ProfileOffsetter implements Loggable {
 			profile = collection.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e1) {
-			fine("Error getting median profile", e1);
+			stack("Error getting median profile", e1);
 			throw new ProfileOffsetException("Cannot get median profile");
 		}
 
@@ -134,7 +134,7 @@ public class ProfileOffsetter implements Loggable {
 				nucleus.setBorderTag(tag, newIndex);
 				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
 			} catch (IndexOutOfBoundsException | UnavailableProfileTypeException e) {
-				fine("Cannot set "+tag+" index in nucleus profile", e);
+				stack("Cannot set "+tag+" index in nucleus profile", e);
 			}		
 			
 		}

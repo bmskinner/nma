@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -99,14 +100,25 @@ public class ProfileManager implements Loggable {
 				int newIndex;
 				try {
 					newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-				} catch (UnavailableProfileTypeException | ProfileException e1) {
-					stack("Unable to get sliding window offset from nucleus profile", e1);
+//<<<<<<< HEAD
+//				} catch (UnavailableProfileTypeException | ProfileException e1) {
+//					stack("Unable to get sliding window offset from nucleus profile", e1);
+//=======
+				} catch (ProfileException | UnavailableProfileTypeException e1) {
+					warn("Error getting offset from nucleus "+n.getNameAndNumber());
+					stack(e1.getMessage(), e1);
+//>>>>>>> working_profiles
 					return;
 				}
 				try {
 					n.setBorderTag(tag, newIndex);
 				} catch (IndexOutOfBoundsException e) {
-					stack("Cannot update nucleus tag", e);
+//<<<<<<< HEAD
+//					stack("Cannot update nucleus tag", e);
+//=======
+					warn("Error updating nucleus tag "+n.getNameAndNumber());
+					stack(e.getMessage(), e);
+//>>>>>>> working_profiles
 					return;
 				}		
 				
@@ -741,22 +753,27 @@ public class ProfileManager implements Loggable {
 		}
 
 		 // Move the appropriate segment endpoint
-		if(oldProfile.update(seg, newStart, newEnd)){
-			
+		try {
+			if(oldProfile.update(seg, newStart, newEnd)){
+				
 //			programLogger.log(Level.FINEST, "Segment position update succeeded");
-			// Replace the old segments in the median
+				// Replace the old segments in the median
 //			programLogger.log(Level.FINEST, "Updated profile: "+oldProfile.toString());
 
 //			programLogger.log(Level.FINEST, "Adding segments to profile collection");
-			
-			collection
-			.getProfileCollection()
-			.addSegments(Tag.REFERENCE_POINT, oldProfile.getSegments());
-			
-			finest("Segments added, refresh the charts");
-							
-		} else {
-			warn("Updating "+seg.getStartIndex()+" to index "+index+" failed");
+				
+				collection
+				.getProfileCollection()
+				.addSegments(Tag.REFERENCE_POINT, oldProfile.getSegments());
+				
+				finest("Segments added, refresh the charts");
+								
+			} else {
+				warn("Updating "+seg.getStartIndex()+" to index "+index+" failed");
+			}
+		} catch (SegmentUpdateException e) {
+			warn("Error updating segments");
+			stack(e);
 		}
 		
 	}
