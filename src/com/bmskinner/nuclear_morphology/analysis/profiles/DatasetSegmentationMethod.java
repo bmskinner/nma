@@ -319,12 +319,18 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 		// find the corresponding point in each Nucleus
 		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-		
+		/*
+		 * OLD CODE
+		 */
 		
 //		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
 //		task.addProgressListener(this);
 //		task.invoke();
 //		fine("Assigned segments to nuclei");
+		
+		/*
+		 * NEW CODE
+		 */
 		
 		collection.getNuclei().parallelStream().forEach( n -> {
 			try {
@@ -429,7 +435,25 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 	private boolean checkRPmatchesSegments(ICellCollection collection){
 		return collection.getNuclei().stream().allMatch( n -> {
 			try {
-				log("RP: "+n.getBorderIndex(Tag.REFERENCE_POINT));
+
+				boolean hit = false;
+				for(IBorderSegment s : n.getProfile(ProfileType.ANGLE).getSegments()){
+					if(s.getStartIndex()==n.getBorderIndex(Tag.REFERENCE_POINT)){
+						hit=true;
+					}
+				}
+				if(!hit){
+					// Update the segment boundary closest to the RP
+					fine("RP not at segment start for "+n.getNameAndNumber());
+					int end = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
+						 	.getSegmentAt(0).getEndIndex();
+					
+					 ISegmentedProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+							 
+					 p.getSegmentAt(0).update(0, end);
+					 
+					 n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, p);
+				}
 				return n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getStartIndex()==0;
 			} catch (UnavailableComponentException | ProfileException e) {
 				warn("Error checking profile offsets");
