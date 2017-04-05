@@ -524,7 +524,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 		plot.setDataset(ds);
 
 		// the default is to use an x range of 100, for a normalised chart
-		plot.getDomainAxis().setRange(0,xLength);
+		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX,xLength);
 
 		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
 		plot.getRenderer().setBaseToolTipGenerator(tooltip);

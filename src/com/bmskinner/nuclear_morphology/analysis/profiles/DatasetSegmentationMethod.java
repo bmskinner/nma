@@ -19,6 +19,9 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -266,11 +269,9 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 
 		fine("Beginning segmentation...");
 
-			// generate segments in the median profile
-			fine("Creating segments...");
-			createSegmentsInMedian(collection);
+		createSegmentsInMedian(collection);
 
-			assignMedianSegmentsToNuclei(collection, pointType);
+		assignMedianSegmentsToNuclei(collection, pointType);
 
 
 		fine("Segmentation complete");
@@ -317,11 +318,125 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 
 		// find the corresponding point in each Nucleus
 		ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-		//			assignSegments(collection);
-		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
-		task.addProgressListener(this);
-		task.invoke();
-		fine("Assigned segments to nuclei");
+
+		
+		
+//		SegmentAssignmentTask task = new SegmentAssignmentTask(median, collection.getNuclei().toArray(new Nucleus[0]));
+//		task.addProgressListener(this);
+//		task.invoke();
+//		fine("Assigned segments to nuclei");
+		
+		collection.getNuclei().parallelStream().forEach( n -> {
+			try {
+				assignSegmentsToNucleus(median, n);
+			} catch (ProfileException e) {
+				warn("Error setting profile offsets in "+n.getNameAndNumber());
+				stack(e.getMessage(), e);
+			}
+		});
+				
+		if(!checkRPmatchesSegments(collection)){
+			warn("Segments do not all start on reference point after offsetting");
+		}
+		
+	}
+	
+	/**
+	 * Assign the median segments to the nucleus, finding the best match of the nucleus
+	 * profile to the median profile
+	 * @param n the nucleus to segment
+	 * @param median the segmented median profile
+	 */
+	private void assignSegmentsToNucleus(ISegmentedProfile median, Nucleus n) throws ProfileException {
+
+		if(n.isLocked()){
+			return;
+		}
+		
+		// remove any existing segments in the nucleus
+		ISegmentedProfile nucleusProfile;
+		try {
+			nucleusProfile = n.getProfile(ProfileType.ANGLE);
+		} catch (UnavailableProfileTypeException e1) {
+			warn("Cannot get angle profile for nucleus");
+			stack("Profile type angle is not available", e1);
+			return;
+		}
+		nucleusProfile.clearSegments();
+
+		List<IBorderSegment> nucleusSegments = new ArrayList<IBorderSegment>();
+
+		// go through each segment defined for the median curve
+		IBorderSegment prevSeg = null;
+
+		for(IBorderSegment segment : median.getSegments()){
+
+			// get the positions the segment begins and ends in the median profile
+			int startIndexInMedian 	= segment.getStartIndex();
+			int endIndexInMedian 	= segment.getEndIndex();
+
+			// find the positions these correspond to in the offset profiles
+
+			// get the median profile, indexed to the start or end point
+			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
+			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
+			
+			try {
+				
+				// find the index at the point of the best fit
+				int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
+				int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
+
+
+
+				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
+				if(prevSeg != null){
+					seg.setPrevSegment(prevSeg);
+					prevSeg.setNextSegment(seg);
+				}
+
+				nucleusSegments.add(seg);
+
+				prevSeg = seg;
+			
+			} catch(IllegalArgumentException | UnavailableProfileTypeException e){
+				warn("Cannot make segment");
+				stack("Error making segment for nucleus "+n.getNameAndNumber(), e);
+				break;
+				
+			}
+
+		}
+
+		IBorderSegment.linkSegments(nucleusSegments);
+		
+		nucleusProfile.setSegments(nucleusSegments);
+
+		n.setProfile(ProfileType.ANGLE, nucleusProfile);
+		finest("Assigned segments to nucleus "+n.getNameAndNumber()+":");
+		finest(nucleusProfile.toString());
+		
+		finest("Assigned segments to "+n.getNameAndNumber());
+		
+	}
+	
+	/**
+	 * Check if the reference point of the nuclear profiles is at a segment boundary
+	 * for all nuclei
+	 * @param collection
+	 * @return
+	 */
+	private boolean checkRPmatchesSegments(ICellCollection collection){
+		return collection.getNuclei().stream().allMatch( n -> {
+			try {
+				log("RP: "+n.getBorderIndex(Tag.REFERENCE_POINT));
+				return n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getStartIndex()==0;
+			} catch (UnavailableComponentException | ProfileException e) {
+				warn("Error checking profile offsets");
+				stack(e.getMessage(), e);
+				return false;
+			}
+		});
 	}
 	
 		
@@ -430,38 +545,23 @@ public class DatasetSegmentationMethod extends AbstractAnalysisMethod implements
 				finest("Creating franken profile aggregate of length "+pc.length());
 //				frankenCollection.createProfileAggregate(collection, ProfileType.FRANKEN, pc.getAggregate().length());
 			} catch(Exception e){
-				log(Level.SEVERE, "Error creating franken profile aggregate");
-				log(Level.SEVERE, "Attempting to continue without franken profiling");
+				warn("Error creating franken profile aggregate");
+				stack(e.getMessage(), e);
 				return;
 			}
 			
-			/*
-			 * At this point, the frankencollection is indexed on the reference point.
-			 * This is because the reference point is used to generate the profile collection.
-			 * Copy the segments from the profile collection, starting from the reference point
-			 */
-//			frankenCollection.addSegments(pointType, segments);
-//
-//			double firstPoint = frankenCollection.getSegmentedProfile(Tag.REFERENCE_POINT).get(0);
-//			finer("FrankenProfile generated: angle at index 0 for "+Tag.REFERENCE_POINT+" is "+firstPoint);
-//			
-//			// attach the frankencollection to the cellcollection
-//			collection.setProfileCollection(ProfileType.FRANKEN, frankenCollection);
-//			finer("Segment assignments refined");
 			
-//			// copy the segments from the profile collection to other profiles
-//			finer("Copying profile collection segments to distance profile");
-//			collection.getProfileCollection(ProfileType.DIAMETER).addSegments(pointType, segments);
-//			
-//			finer("Copying profile collection segments to single distance profile");
-//			collection.getProfileCollection(ProfileType.RADIUS).addSegments(pointType, segments);
+			
+			if(!checkRPmatchesSegments(collection)){
+				warn("Segments do not all start on reference point after recombining");
+			}
+			
 	}
 	
 	
 	@Override
 	public void progressEventReceived(ProgressEvent event) {
 		fireProgressEvent();
-		
 	}
 
 }

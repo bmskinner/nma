@@ -106,14 +106,16 @@ public class ProfileManager implements Loggable {
 				int newIndex;
 				try {
 					newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-				} catch (Exception e1) {
-					fine("Unable to get sliding window offset from nucleus profile", e1);
+				} catch (ProfileException | UnavailableProfileTypeException e1) {
+					warn("Error getting offset from nucleus "+n.getNameAndNumber());
+					stack(e1.getMessage(), e1);
 					return;
 				}
 				try {
 					n.setBorderTag(tag, newIndex);
-				} catch (Exception e) {
-					fine("Cannot update nucleus tag");
+				} catch (IndexOutOfBoundsException e) {
+					warn("Error updating nucleus tag "+n.getNameAndNumber());
+					stack(e.getMessage(), e);
 					return;
 				}		
 				

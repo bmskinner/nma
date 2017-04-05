@@ -50,6 +50,7 @@ public abstract class AbstractChartFactory implements Loggable {
 	protected static final ForkJoinPool mainPool = new ForkJoinPool();
 	
 	protected static final int DEFAULT_EMPTY_RANGE = 10;
+	protected static final int DEFAULT_PROFILE_START_INDEX = -1;
 	
 	protected final ChartOptions options;
 	
