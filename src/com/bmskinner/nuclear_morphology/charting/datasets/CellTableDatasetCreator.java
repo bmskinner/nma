@@ -27,14 +27,18 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
@@ -100,6 +104,43 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
 			
 		return model;	
+	}
+	
+	public TableModel createCellSegmentsTable(){
+		if( ! options.hasDatasets()){
+			return AbstractTableCreator.createBlankTable();
+		}
+		
+		if(options.isMultipleDatasets()){
+			return AbstractTableCreator.createBlankTable();
+		}
+		
+		IAnalysisDataset d = options.firstDataset();
+		DefaultTableModel model = new DefaultTableModel();
+		
+		List<Object> fieldNames = new ArrayList<Object>(0);
+		List<Object> rowData 	= new ArrayList<Object>(0);
+
+		try {
+			ISegmentedProfile p = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			
+			for(IBorderSegment s : p.getSegments()){
+				fieldNames.add(s.getName());
+				rowData.add(s.getStartIndex()+"-"+s.getEndIndex());
+				
+			}	
+			
+			model.addColumn("Segment", fieldNames.toArray(new Object[0])); 
+			model.addColumn("Range (of "+p.size()+")",   rowData.toArray(new Object[0]));
+			
+			
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			return AbstractTableCreator.createBlankTable();
+		}
+		
+		
+		return model;
+		
 	}
 	
 	

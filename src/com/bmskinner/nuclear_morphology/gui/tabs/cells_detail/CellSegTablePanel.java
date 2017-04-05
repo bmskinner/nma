@@ -1,0 +1,83 @@
+/*******************************************************************************
+ *  	Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.TableModel;
+
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.CellTableDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+
+
+public class CellSegTablePanel extends AbstractCellDetailPanel {
+	
+	JTable table;
+	
+	public CellSegTablePanel(final CellViewModel model) {
+		super(model);
+		
+		this.setLayout(new BorderLayout());
+		this.setBorder(null);
+		
+		TableModel tableModel = AbstractTableCreator.createBlankTable();
+		
+		table = new JTable(tableModel);
+		JScrollPane sp = new JScrollPane(table);
+		add(sp, BorderLayout.CENTER);
+		
+	}
+
+	@Override
+	public synchronized void update() {
+		if(this.isMultipleDatasets() || ! this.hasDatasets()){
+			table.setModel(AbstractTableCreator.createBlankTable());
+			return;
+		}
+		
+		TableOptions options = new TableOptionsBuilder()
+			.setDatasets(getDatasets())
+			.setCell(this.getCellModel().getCell())
+			.setScale(GlobalOptions.getInstance().getScale())
+			.setTarget(table)
+			.build();
+
+		try{
+			
+			setTable(options);
+
+		} catch(Exception e){
+			warn("Error updating cell segments table");
+			stack(e.getMessage(), e);
+		}
+		
+	}
+	
+	@Override
+	protected TableModel createPanelTableType(TableOptions options){
+		return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellSegmentsTable();
+	}
+
+}

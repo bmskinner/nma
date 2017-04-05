@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellBorderTagPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellOutlinePanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellProfilePanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellSegTablePanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellSignalStatsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellStatsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
@@ -52,6 +53,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 	private static final String CELL_TAGS_LBL    = "Tags";
 	private static final String CELL_OUTLINE_LBL = "Outline";
 	private static final String CELL_SIGNALS_LBL = "Signals";
+	private static final String CELL_SEGTABLE_LBL  = "Segtable";
 	
 	protected CellsListPanel	 cellsListPanel;		// the list of cells in the active dataset
 	protected CellProfilePanel	 segmentProfilePanel;// = new CellProfilePanel(); 		// the nucleus angle profile
@@ -60,7 +62,9 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 	protected CellStatsPanel 	 cellStatsPanel ;//     = new CellStatsPanel();		// the stats table
 	protected ComponentListPanel signalListPanel;	// choose which background image to display
 	protected CellSignalStatsPanel 	 cellsignalStatsPanel ; // show pairwise distances for signals
-
+	protected CellSegTablePanel 	 cellSegTablePanel ; // show segments in cell profiles
+	
+	
 	private CellViewModel model   = new CellViewModel(null, null);
 	
 	public IndividualCellDetailPanel() {
@@ -83,6 +87,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 			this.addSubPanel(cellsListPanel);
 			this.addSubPanel(signalListPanel);
 			this.addSubPanel(cellsignalStatsPanel);
+			this.addSubPanel(cellSegTablePanel);
 			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
@@ -92,7 +97,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 			tabPane.add(CELL_TAGS_LBL, cellBorderTagPanel);
 			tabPane.add(CELL_OUTLINE_LBL, outlinePanel);
 			tabPane.add(CELL_SIGNALS_LBL, cellsignalStatsPanel);
-
+			tabPane.add(CELL_SEGTABLE_LBL, cellSegTablePanel);
 		
 			this.validate();
 		} catch(Exception e){
@@ -108,12 +113,14 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 		outlinePanel        = new CellOutlinePanel(model); 		// the outline of the cell and detected objects
 		cellStatsPanel      = new CellStatsPanel(model);		// the stats table
 		cellsignalStatsPanel= new CellSignalStatsPanel(model);
+		cellSegTablePanel   = new CellSegTablePanel(model);
 		
 		model.addView(segmentProfilePanel);
 		model.addView(cellBorderTagPanel);
 		model.addView(outlinePanel);
 		model.addView(cellStatsPanel);
 		model.addView(cellsignalStatsPanel);
+		model.addView(cellSegTablePanel);
 	}
 	
 	private JPanel createCellandSignalListPanels(){
