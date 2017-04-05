@@ -821,14 +821,14 @@ public abstract class DetailPanel
      */
     protected class ChartFactoryWorker extends SwingWorker<JFreeChart, Void> implements CancellableRunnable {
     	
-    	private ChartOptions options;
+    	final private ChartOptions options;
     	
-    	public ChartFactoryWorker(ChartOptions options){
-    		this.options = options;
+    	public ChartFactoryWorker(final ChartOptions o){
+    		options = o;
     	}
 
     	@Override
-    	protected JFreeChart doInBackground() throws Exception {
+    	protected synchronized JFreeChart doInBackground() throws Exception {
 
     		try {
     			if(options.hasTarget()){
@@ -865,10 +865,10 @@ public abstract class DetailPanel
     			}
 			} catch (InterruptedException e) {
 				warn("Interruption to charting in "+DetailPanel.this.getClass().getName());
-				stack("Error in chart worker", e);
+				stack(e);
 			} catch (ExecutionException e) {
 				warn("Excecution error in charting in "+DetailPanel.this.getClass().getName());
-				stack("Error in chart worker", e);
+				stack(e);
 			}
         }
 
@@ -887,15 +887,15 @@ public abstract class DetailPanel
      */
     protected class TableFactoryWorker extends SwingWorker<TableModel, Void> implements CancellableRunnable{
     	
-    	private TableOptions options;
+    	final private TableOptions options;
     	
-    	public TableFactoryWorker(TableOptions options){
-    		this.options = options;
+    	public TableFactoryWorker(final TableOptions o){
+    		options = o;
     		
     	}
 
     	@Override
-    	protected TableModel doInBackground() throws Exception {
+    	protected synchronized TableModel doInBackground() throws Exception {
 
     		try {
     			if(options.hasTarget()){
@@ -911,7 +911,7 @@ public abstract class DetailPanel
     			return model;
     		} catch(Exception e){
     			warn("Error creating table model");
-    			stack("Error creating table model", e);
+    			stack(e);
     			return null;
     		}
 
@@ -920,7 +920,7 @@ public abstract class DetailPanel
     	
     	
     	@Override
-        public void done() {
+        public synchronized void done() {
    	
     		try {
     			if(options.getTarget()!=null){
