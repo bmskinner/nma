@@ -87,7 +87,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 			this.addSubPanel(cellsListPanel);
 			this.addSubPanel(signalListPanel);
 			this.addSubPanel(cellsignalStatsPanel);
-			this.addSubPanel(cellSegTablePanel);
+//			this.addSubPanel(cellSegTablePanel);
 			
 			tabPane = new JTabbedPane(JTabbedPane.LEFT);
 			this.add(tabPane, BorderLayout.CENTER);
@@ -97,7 +97,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 			tabPane.add(CELL_TAGS_LBL, cellBorderTagPanel);
 			tabPane.add(CELL_OUTLINE_LBL, outlinePanel);
 			tabPane.add(CELL_SIGNALS_LBL, cellsignalStatsPanel);
-			tabPane.add(CELL_SEGTABLE_LBL, cellSegTablePanel);
+//			tabPane.add(CELL_SEGTABLE_LBL, cellSegTablePanel);
 		
 			this.validate();
 		} catch(Exception e){
@@ -113,14 +113,14 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 		outlinePanel        = new CellOutlinePanel(model); 		// the outline of the cell and detected objects
 		cellStatsPanel      = new CellStatsPanel(model);		// the stats table
 		cellsignalStatsPanel= new CellSignalStatsPanel(model);
-		cellSegTablePanel   = new CellSegTablePanel(model);
+//		cellSegTablePanel   = new CellSegTablePanel(model);
 		
 		model.addView(segmentProfilePanel);
 		model.addView(cellBorderTagPanel);
 		model.addView(outlinePanel);
 		model.addView(cellStatsPanel);
 		model.addView(cellsignalStatsPanel);
-		model.addView(cellSegTablePanel);
+//		model.addView(cellSegTablePanel);
 	}
 	
 	private JPanel createCellandSignalListPanels(){

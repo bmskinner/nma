@@ -724,4 +724,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return false;
 	}
 
+	@Override
+	public Shape toShape(MeasurementScale scale) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

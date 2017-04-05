@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
 
+@SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
 	
 	JTable table;
@@ -46,6 +47,7 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
 		
 		table = new JTable(tableModel);
 		JScrollPane sp = new JScrollPane(table);
+		sp.setColumnHeaderView(table.getTableHeader());
 		add(sp, BorderLayout.CENTER);
 		
 	}
@@ -53,6 +55,11 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
 	@Override
 	public synchronized void update() {
 		if(this.isMultipleDatasets() || ! this.hasDatasets()){
+			table.setModel(AbstractTableCreator.createBlankTable());
+			return;
+		}
+		
+		if( ! getCellModel().hasCell()){
 			table.setModel(AbstractTableCreator.createBlankTable());
 			return;
 		}
@@ -70,7 +77,7 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
 
 		} catch(Exception e){
 			warn("Error updating cell segments table");
-			stack(e.getMessage(), e);
+			stack(e);
 		}
 		
 	}
