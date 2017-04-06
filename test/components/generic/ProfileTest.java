@@ -210,7 +210,14 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetIndexOfFraction() {
-		fail("Not yet implemented");
+		
+		IProfile p1 = new FloatProfile(data);
+		
+		double fraction = 0.5;
+		int exp = 6;
+		int i = p1.getIndexOfFraction(fraction);
+		assertEquals( 6, i);
+		
 	}
 
 	/**
@@ -683,7 +690,17 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testAddIProfile() {
-		fail("Not yet implemented");
+		
+		float[] exp       = { 20, 10, 2, 4, 14, 38, 24, 6, 18, 40, 26, 12, 8 }; // template data for a profile
+		IProfile p1 = new FloatProfile(data);
+		IProfile p2 = new FloatProfile(data);
+		
+		IProfile p3 = p1.add(p2);
+		float[] result = p3.toFloatArray();
+		
+		for( int i =0;i<exp.length; i++){
+			assertEquals(exp[i], result[i], 0);
+		}
 	}
 
 	/**
@@ -725,7 +742,19 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testSubtract() {
-		fail("Not yet implemented");
+
+		float[] f    = { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
+		IProfile p2 = new FloatProfile(f);
+		float[] exp  = { 0, -5, -9, -8, -3, 9, 2, -7, -1, 10, 3, -4, -6 };
+		IProfile p1 = new FloatProfile(data);
+		IProfile p3 = p1.subtract(p2);
+		
+		float[] result = p3.toFloatArray();
+		
+		for( int i =0;i<exp.length; i++){
+			assertEquals(exp[i], result[i], 0);
+		}
+		
 	}
 
 	/**

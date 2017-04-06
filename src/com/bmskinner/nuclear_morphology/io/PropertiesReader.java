@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -43,6 +44,9 @@ public class PropertiesReader implements Loggable {
 	private static final String DEFAULT_DIR_KEY   = "DEFAULT_DIR";
 	private static final String DEFAULT_IMAGE_SCALE_KEY = "DEFAULT_IMAGE_SCALE";
 	private static final String DEFAULT_DISPLAY_SCALE_KEY = "DEFAULT_DISPLAY_SCALE";
+	private static final String DEFAULT_FILL_CONSENSUS_KEY = "FILL_CONSENSUS";
+	private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
+	private static final String DEFAULT_SWATCH_KEY = "DEFAULT_COLOUR_SWATCH";
 
 	public PropertiesReader() {
 		try {
@@ -80,6 +84,10 @@ public class PropertiesReader implements Loggable {
 		properties.setProperty(DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
 		properties.setProperty(DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
 		properties.setProperty(DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
+		properties.setProperty(DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
+		properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
+		properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
+		
 		return properties;
 		
 	}
@@ -103,6 +111,18 @@ public class PropertiesReader implements Loggable {
 			
 			if(DEFAULT_DISPLAY_SCALE_KEY.equals(key)){
 				op.setScale(MeasurementScale.valueOf(value));
+			}
+			
+			if(DEFAULT_FILL_CONSENSUS_KEY.equals(key)){
+				op.setFillConsensus(Boolean.valueOf(value));
+			}
+			
+			if(DEFAULT_USE_ANTIALIASING_KEY.equals(key)){
+				op.setAntiAlias(Boolean.valueOf(value));
+			}
+			
+			if(DEFAULT_SWATCH_KEY.equals(key)){
+				op.setSwatch(ColourSwatch.valueOf(value));
 			}
 
 		}
