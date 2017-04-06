@@ -339,7 +339,13 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testCopy() {
-		fail("Not yet implemented");
+		IProfile p = new FloatProfile(data);
+		float[] result = p.copy().toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(data[i], result[i],0);
+		}
+		
 	}
 
 	/**
@@ -573,7 +579,17 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testPower() {
-		fail("Not yet implemented");
+		float[] data    = { 1, 2, 3, 4, 5};
+		double d = 2;
+		float[] exp     = { 1, 4,  9, 16, 25};
+		
+		IProfile p1 = new FloatProfile(data);
+		
+		float[] result = p1.power(d).toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(exp[i], result[i],0);
+		}
 	}
 
 	/**
@@ -581,7 +597,16 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testAbsolute() {
-		fail("Not yet implemented");
+		float[] data    = { 1, 0, -1, 20, -20};
+		float[] exp     = { 1, 0,  1, 20,  20};
+		
+		IProfile p1 = new FloatProfile(data);
+		
+		float[] result = p1.absolute().toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(exp[i], result[i],0);
+		}
 	}
 
 	/**
@@ -589,7 +614,16 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testCumulativeSum() {
-		fail("Not yet implemented");
+		float[] data    = { 1, 2, 3, 4, 5};
+		float[] exp     = { 1, 3,  6, 10, 15};
+		
+		IProfile p1 = new FloatProfile(data);
+		
+		float[] result = p1.cumulativeSum().toFloatArray();
+		
+		for( int i =0;i<data.length; i++){
+			assertEquals(exp[i], result[i],0);
+		}
 	}
 
 	/**
