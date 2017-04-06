@@ -628,27 +628,31 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		 * The final frankenprofile is made of stitched together profiles from each segment
 		 */
 		List<IProfile> finalSegmentProfiles = new ArrayList<IProfile>(this.getSegmentCount());
-				
-		
-		
-		for(UUID segID : template.getSegmentIDs()){
-			// Get the corresponding segment in this profile, by segment position
-			IBorderSegment testSeg     = this.getSegment(segID);
-			IBorderSegment templateSeg = template.getSegment(segID);
-			
-			if(testSeg==null){
-				throw new ProfileException("Cannot find segment "+segID+" in test profile");
-			}
-			
-			if(templateSeg==null){
-				throw new ProfileException("Cannot find segment "+segID+" in template profile");
-			}
 
-			// Interpolate the segment region to the new length
-			IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
-			finalSegmentProfiles.add(revisedProfile);
+		try{
+
+			for(UUID segID : template.getSegmentIDs()){
+				// Get the corresponding segment in this profile, by segment position
+				IBorderSegment testSeg     = this.getSegment(segID);
+				IBorderSegment templateSeg = template.getSegment(segID);
+
+				if(testSeg==null){
+					throw new ProfileException("Cannot find segment "+segID+" in test profile");
+				}
+
+				if(templateSeg==null){
+					throw new ProfileException("Cannot find segment "+segID+" in template profile");
+				}
+
+				// Interpolate the segment region to the new length
+				IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
+				finalSegmentProfiles.add(revisedProfile);
+			}
+		} catch(UnavailableComponentException e) {
+			stack(e);
+			throw new ProfileException("Error getting segment for normalising");
 		}
-				
+
 		
 //		Recombine the segment profiles
 		Profile mergedProfile = new Profile( Profile.merge(finalSegmentProfiles));

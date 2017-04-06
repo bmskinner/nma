@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -715,11 +716,10 @@ public class ProfileManager implements Loggable {
 	 * @param index
 	 * @throws UnsegmentedProfileException 
 	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
+	 * @throws UnavailableComponentException 
 	 * @throws Exception
 	 */
-	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+	public void updateMedianProfileSegmentIndex(boolean start, UUID id, int index) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
 				
 		ISegmentedProfile oldProfile = collection
 				.getProfileCollection()
@@ -819,12 +819,21 @@ public class ProfileManager implements Loggable {
 	 * @param seg2
 	 * @throws UnsegmentedProfileException 
 	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws Exception
+	 * @throws UnavailableComponentException 
 	 */
-	public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2, UUID newID) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
-
+	public void mergeSegments(IBorderSegment seg1, IBorderSegment seg2, UUID newID) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+		if(seg1==null){
+			throw new IllegalArgumentException("Segment 1 cannot be null");
+		}
+		
+		if(seg2==null){
+			throw new IllegalArgumentException("Segment 2 cannot be null");
+		}
+		
+		if(newID==null){
+			throw new IllegalArgumentException("New segment UUID cannot be null");
+		}
+		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
@@ -849,12 +858,7 @@ public class ProfileManager implements Loggable {
 
 					boolean wasLocked = n.isLocked();
 					n.setLocked(false); // Merging segments is not destructive
-
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-					IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
-					IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
-					profile.mergeSegments(nSeg1, nSeg2, newID);
-					n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+					mergeSegments(n, seg1, seg2, newID);
 					n.setLocked(wasLocked);
 				}
 			}
@@ -864,30 +868,39 @@ public class ProfileManager implements Loggable {
 			 */
 			if(collection.hasConsensus()){
 				Nucleus n = collection.getConsensus();
-				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
-				IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
-				profile.mergeSegments(nSeg1, nSeg2, newID);
-				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+				mergeSegments(n, seg1, seg2, newID);
 			}
 			
 			// Ensure the vertical nuclei have the same segment pattern
 			collection.updateVerticalNuclei();
-			
-			
-			// Now apply the same update to any virtual child datasets
-			// to keep them in sync
-			
 
 		}
 		
 		
 	}
 	
+	/**
+	 * Merge the segments with the given IDs into a new segment with the given new ID
+	 * @param p the object with a segmented profile to merge
+	 * @param seg1 the first segment to be merged
+	 * @param seg2 the second segment to be merged
+	 * @param newID the new ID for the merged segment
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException 
+	 */
+	private void mergeSegments(Taggable p, IBorderSegment seg1, IBorderSegment seg2, UUID newID) throws ProfileException, UnavailableComponentException{
+
+		ISegmentedProfile profile = p.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment nSeg1 = profile.getSegment(seg1.getID());
+		IBorderSegment nSeg2 = profile.getSegment(seg2.getID());
+		profile.mergeSegments(nSeg1, nSeg2, newID);
+		p.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+	}
+	
 	
 	/**
-	 * Split the given segment into two segmnets. The split is made at the given index. The new segmnet
-	 * ids are provided
+	 * Split the given segment into two segmnets. The split is made at the given index. The new segment
+	 * ids are generated randomly
 	 * @param segName
 	 * @return
 	 * @throws Exception
@@ -902,11 +915,13 @@ public class ProfileManager implements Loggable {
 	 * @return
 	 * @throws UnsegmentedProfileException 
 	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws Exception
+	 * @throws UnavailableComponentException if the reference point tag is missing, or the segment is missing
 	 */
-	public boolean splitSegment(IBorderSegment seg, UUID newID1, UUID newID2) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+	public boolean splitSegment(IBorderSegment seg, UUID newID1, UUID newID2) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
+		
+		if(seg==null){
+			throw new IllegalArgumentException("Segment cannot be null");
+		}
 		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
@@ -916,10 +931,6 @@ public class ProfileManager implements Loggable {
 		int index = seg.getMidpointIndex();
 		
 
-		// Do not try to split segments that are a merge of other segments
-		if(seg.hasMergeSources()){
-			return false;
-		}
 		
 		if(newID1==null){
 			newID1 = java.util.UUID.randomUUID();
@@ -929,60 +940,59 @@ public class ProfileManager implements Loggable {
 			newID2 = java.util.UUID.randomUUID();
 		}
 						
-		try{
+		if(seg.contains(index)){
 
-			if(seg.contains(index)){
+			double proportion = seg.getIndexProportion(index);
 
-				double proportion = seg.getIndexProportion(index);
+			// split the two segments in the median
+			medianProfile.splitSegment(seg, index, newID1, newID2);
 
-				// split the two segments in the median
-				medianProfile.splitSegment(seg, index, newID1, newID2);
+			// put the new segment pattern back with the appropriate offset
+			collection.getProfileCollection()
+			.addSegments( Tag.REFERENCE_POINT,  medianProfile.getSegments());
 
-				// put the new segment pattern back with the appropriate offset
-				collection.getProfileCollection()
-					.addSegments( Tag.REFERENCE_POINT,  medianProfile.getSegments());
-
-				/*
-				 * With the median profile segments unmerged, also split the segments
-				 * in the individual nuclei. Requires proportional alignment
-				 */
-				if(collection.isReal()){ // do not handle nuclei in virtual collections
-					for(Nucleus n : collection.getNuclei()){
-						boolean wasLocked = n.isLocked();
-						n.setLocked(false); // Merging segments is not destructive
-
-						ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-						IBorderSegment nSeg = profile.getSegment(seg.getID());
-
-						int targetIndex = nSeg.getProportionalIndex(proportion);
-						profile.splitSegment(nSeg, targetIndex, newID1, newID2);
-						n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-						n.setLocked(wasLocked);
-					}
+			/*
+			 * With the median profile segments unmerged, also split the segments
+			 * in the individual nuclei. Requires proportional alignment
+			 */
+			if(collection.isReal()){ // do not handle nuclei in virtual collections
+				for(Nucleus n : collection.getNuclei()){
+					boolean wasLocked = n.isLocked();
+					n.setLocked(false); // Merging segments is not destructive
+					splitSegment(n, seg.getID(), proportion, newID1, newID2);
+					n.setLocked(wasLocked);
 				}
-
-				/*
-				 * Update the consensus if present
-				 */
-				if(collection.hasConsensus()){
-					Nucleus n = collection.getConsensus();
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-					IBorderSegment nSeg1 = profile.getSegment(seg.getID());
-					int targetIndex = nSeg1.getProportionalIndex(proportion);
-					profile.splitSegment(nSeg1, targetIndex, newID1, newID2);
-					n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-				}
-				
-				// Ensure the vertical nuclei have the same segment pattern
-				collection.updateVerticalNuclei();
-
-				return true;
-			} else {
-				return false;
 			}
-		} catch(Exception e){
+
+			/*
+			 * Update the consensus if present
+			 */
+			if(collection.hasConsensus()){
+				Nucleus n = collection.getConsensus();
+				boolean wasLocked = n.isLocked();
+				n.setLocked(false); // Merging segments is not destructive
+				splitSegment(n, seg.getID(), proportion, newID1, newID2);
+				n.setLocked(wasLocked);
+			}
+
+			// Ensure the vertical nuclei have the same segment pattern
+			collection.updateVerticalNuclei();
+
+			return true;
+		} else {
 			return false;
 		}
+	}
+	
+	private void splitSegment(Taggable t, UUID idToSplit, double proportion, UUID newID1, UUID newID2) throws ProfileException, UnavailableComponentException{
+
+		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment nSeg = profile.getSegment(idToSplit);
+
+		int targetIndex = nSeg.getProportionalIndex(proportion);
+		profile.splitSegment(nSeg, targetIndex, newID1, newID2);
+		t.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+
 	}
 	
 	/**
@@ -991,11 +1001,9 @@ public class ProfileManager implements Loggable {
 	 * @return
 	 * @throws UnsegmentedProfileException 
 	 * @throws ProfileException 
-	 * @throws UnavailableProfileTypeException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws Exception
+	 * @throws UnavailableComponentException 
 	 */	
-	public void unmergeSegments(IBorderSegment seg) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnsegmentedProfileException {
+	public void unmergeSegments(IBorderSegment seg) throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
 		
 		ISegmentedProfile medianProfile = collection.getProfileCollection()
 				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
@@ -1022,11 +1030,12 @@ public class ProfileManager implements Loggable {
 		if(collection.isReal()){ // do not handle nuclei in virtual collections
 			for(Nucleus n : collection.getNuclei()){
 				boolean wasLocked = n.isLocked();
-				n.setLocked(false); // Merging segments is not destructive
-				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				IBorderSegment nSeg = profile.getSegment(seg.getID());
-				profile.unmergeSegment(nSeg);
-				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+				n.setLocked(false); 
+				unmergeSegments(n, seg.getID());
+//				ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//				IBorderSegment nSeg = profile.getSegment(seg.getID());
+//				profile.unmergeSegment(nSeg);
+//				n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 				n.setLocked(wasLocked);
 			}
 		}
@@ -1036,14 +1045,22 @@ public class ProfileManager implements Loggable {
 		 */
 		if(collection.hasConsensus()){
 			Nucleus n = collection.getConsensus();
-			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			IBorderSegment nSeg1 = profile.getSegment(seg.getID());
-			profile.unmergeSegment(nSeg1);
-			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+			unmergeSegments(n, seg.getID());
+//			ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//			IBorderSegment nSeg1 = profile.getSegment(seg.getID());
+//			profile.unmergeSegment(nSeg1);
+//			n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 		}
 		
 		// Ensure the vertical nuclei have the same segment pattern
 		collection.updateVerticalNuclei();
+	}
+	
+	private void unmergeSegments(Taggable t, UUID id) throws ProfileException, UnavailableComponentException{
+		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment nSeg = profile.getSegment(id);
+		profile.unmergeSegment(nSeg);
+		t.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 	}
 	
 }

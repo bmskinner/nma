@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -69,27 +70,23 @@ public class ProfileOffsetter implements Loggable {
 
 		
 		UUID segID;
+		ISegmentedProfile profile;
+		IBorderSegment segFromRef;
 		try {
 			segID = collection.getProfileCollection()
 					.getSegmentContaining(tag).getID();
-		} catch (ProfileException | UnsegmentedProfileException e) {
-			throw new ProfileOffsetException("Cannot find segment with tag "+tag+" in median");
-		}
 
-
-
-
-		ISegmentedProfile profile;
-		try {
 			profile = collection.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e1) {
-			stack("Error getting median profile", e1);
-			throw new ProfileOffsetException("Cannot get median profile");
+			
+			segFromRef    = profile.getSegment(segID);
+		} catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {
+			stack("Error getting median profile and segment", e1);
+			throw new ProfileOffsetException("Cannot get median profile or segment", e1);
 		}
 
 		
-		IBorderSegment segFromRef    = profile.getSegment(segID);
+		
 
 
 		/*
@@ -133,7 +130,7 @@ public class ProfileOffsetter implements Loggable {
 
 				nucleus.setBorderTag(tag, newIndex);
 				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
-			} catch (IndexOutOfBoundsException | UnavailableProfileTypeException e) {
+			} catch (IndexOutOfBoundsException | UnavailableComponentException e) {
 				stack("Cannot set "+tag+" index in nucleus profile", e);
 			}		
 			

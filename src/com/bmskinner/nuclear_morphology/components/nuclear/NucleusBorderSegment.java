@@ -834,4 +834,11 @@ public class NucleusBorderSegment  implements IBorderSegment{
 //		finest("\t\tWrote nucleus border segment");
 	}
 
+
+	@Override
+	public void clearMergeSources() {
+		mergeSources.clear();
+		
+	}
+
 }

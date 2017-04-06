@@ -933,7 +933,7 @@ public class DefaultCellCollection
 						IBorderSegment segment;
 						try {
 							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+						} catch (ProfileException | UnavailableComponentException e) {
 							stack("Unable to get segment statistic", e);
 							return 0;
 						}

@@ -471,7 +471,7 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	@Test
-	public void testUpdateWithMergeSourcesInBounds(){
+	public void testUpdateWithMergeSources(){
 		IBorderSegment p1 = new DefaultBorderSegment(10, 30, 100);
 		IBorderSegment m1 = new DefaultBorderSegment(10, 20, 100);
 		IBorderSegment m2 = new DefaultBorderSegment(20, 30, 100);
@@ -483,8 +483,7 @@ public class DefaultBorderSegmentTest {
 			p1.update(14, 30);
 			
 			List<IBorderSegment> merges = p1.getMergeSources();
-			assertEquals(14, merges.get(0).getStartIndex());
-			assertEquals(20, merges.get(1).getStartIndex());
+			assertEquals(0, merges.size());
 			
 		} catch (SegmentUpdateException e) {
 			e.printStackTrace();
@@ -493,28 +492,6 @@ public class DefaultBorderSegmentTest {
 		
 	}
 	
-	@Test
-	public void testUpdateWithMergeSourcesOutOfBounds(){
-		IBorderSegment p1 = new DefaultBorderSegment(10, 30, 100);
-		IBorderSegment m1 = new DefaultBorderSegment(10, 20, 100);
-		IBorderSegment m2 = new DefaultBorderSegment(20, 30, 100);
-		
-		p1.addMergeSource(m1);
-		p1.addMergeSource(m2);
-		
-		try {
-			p1.update(21, 30);
-			
-			List<IBorderSegment> merges = p1.getMergeSources();
-			assertEquals(21, merges.get(0).getStartIndex());
-			assertEquals(p1.getMidpointIndex(), merges.get(1).getStartIndex());
-			
-		} catch (SegmentUpdateException e) {
-			e.printStackTrace();
-			fail("Error updating segments");
-		}
-	}
-
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#setNextSegment(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
 	 */

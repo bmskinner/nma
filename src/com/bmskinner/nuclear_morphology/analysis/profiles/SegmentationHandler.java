@@ -26,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -42,9 +43,9 @@ import com.bmskinner.nuclear_morphology.stats.Quartile;
  */
 public class SegmentationHandler implements Loggable {
 	
-	private IAnalysisDataset dataset;
+	private final IAnalysisDataset dataset;
 	
-	public SegmentationHandler(IAnalysisDataset d){
+	public SegmentationHandler(final IAnalysisDataset d){
 		dataset = d;
 	}
 	
@@ -55,16 +56,20 @@ public class SegmentationHandler implements Loggable {
 	 */
 	public void mergeSegments(UUID segID1, UUID segID2){
 		
+		if(segID1==null || segID2==null){
+			throw new IllegalArgumentException("Segment IDs cannot be null");
+		}
+		
 		if(dataset.getCollection().isVirtual()){
 			return;
 		}
 
 		// Give the new merged segment a new ID
 		UUID newID = java.util.UUID.randomUUID();
-		
+		ISegmentedProfile medianProfile = null;
 		try {
 
-			ISegmentedProfile medianProfile = dataset.getCollection()
+			medianProfile = dataset.getCollection()
 					.getProfileCollection()
 					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
@@ -98,10 +103,12 @@ public class SegmentationHandler implements Loggable {
 				warn("Segments are not mergable");
 			}
 			
-		} catch(ProfileException | UnavailableBorderTagException 
-				| UnavailableProfileTypeException | UnsegmentedProfileException e){
+		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
 			warn("Error merging segments");
-			stack(e.getMessage(), e);
+			for(UUID id : medianProfile.getSegmentIDs()){
+				warn(id.toString());
+			}
+			stack(e);
 
 		}
 	}
@@ -147,8 +154,7 @@ public class SegmentationHandler implements Loggable {
 				.getProfileManager()
 				.unmergeSegments(childSeg);
 			}
-		} catch(ProfileException | UnavailableBorderTagException 
-				| UnavailableProfileTypeException | UnsegmentedProfileException e){
+		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
 			warn("Error unmerging segments");
 			stack(e.getMessage(), e);
 
@@ -194,8 +200,7 @@ public class SegmentationHandler implements Loggable {
 				}
 			}
 
-		} catch(ProfileException | UnavailableBorderTagException 
-				| UnavailableProfileTypeException | UnsegmentedProfileException e){
+		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
 			warn("Error splitting segments");
 			stack(e.getMessage(), e);
 
@@ -244,8 +249,7 @@ public class SegmentationHandler implements Loggable {
 			.getProfileManager()
 			.setLockOnAllNucleusSegmentsExcept(id, true);
 
-		} catch(ProfileException | UnavailableBorderTagException 
-				| UnavailableProfileTypeException | UnsegmentedProfileException e){
+		} catch(ProfileException |  UnsegmentedProfileException | UnavailableComponentException e){
 			warn("Error updating index of segments");
 			stack(e.getMessage(), e);
 

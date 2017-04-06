@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -381,7 +382,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
 					double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
-				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				} catch (ProfileException | UnavailableComponentException e) {
 					fine("Error getting segment length");
 					lengths[count] = 0;
 				} finally {
@@ -432,7 +433,7 @@ public class NuclearHistogramDatasetCreator extends AbstractDatasetCreator<Chart
 					double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
 					double length = n.getStatistic(PlottableStatistic.PERIMETER, options.getScale()) * proportionPerimeter;
 					lengths[count] = length;
-				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				} catch (ProfileException | UnavailableComponentException e) {
 					fine("Error getting segment length");
 					lengths[count] = 0;
 				} finally {

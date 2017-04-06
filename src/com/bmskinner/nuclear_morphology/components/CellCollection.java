@@ -1021,7 +1021,8 @@ public class CellCollection implements ICellCollection {
 						IBorderSegment segment;
 						try {
 							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+						} catch (ProfileException | UnavailableComponentException e) {
+							stack(e);
 							return 0;
 						}
 						double perimeterLength = 0;

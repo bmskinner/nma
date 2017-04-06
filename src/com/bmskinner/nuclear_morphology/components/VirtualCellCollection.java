@@ -47,6 +47,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
@@ -909,7 +910,7 @@ public class VirtualCellCollection implements ICellCollection {
 						IBorderSegment segment;
 						try {
 							segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-						} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+						} catch (ProfileException | UnavailableComponentException e) {
 							return 0;
 						}
 						double perimeterLength = 0;

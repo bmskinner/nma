@@ -197,13 +197,18 @@ public class DefaultBorderSegment implements IBorderSegment{
 		mergeSources = Arrays.copyOf(mergeSources, mergeSources.length+1);
 		mergeSources[mergeSources.length-1] = seg;
 	}
-	
+		
 	/* (non-Javadoc)
 	 * @see components.nuclear.IBorderSegment#hasMergeSources()
 	 */
 	@Override
 	public boolean hasMergeSources(){
 		return mergeSources.length>0;
+	}
+	
+	@Override
+	public void clearMergeSources(){
+		mergeSources = new IBorderSegment[0];
 	}
 	
 
@@ -488,22 +493,9 @@ public class DefaultBorderSegment implements IBorderSegment{
 		return ( startIndex != this.startIndex || endIndex != this.endIndex);
 	}
 	
-	/* (non-Javadoc)
-	 * @see components.nuclear.IBorderSegment#update(int, int)
-	 */
-	@Override
-	public boolean update(int startIndex, int endIndex) throws SegmentUpdateException{
-		
+	private boolean canUpdateSegment(int startIndex, int endIndex){
 		if(this.isLocked){ // don't allow locked segments to update
 			return false;
-		}
-		
-//		 Check the incoming data
-		if(startIndex < 0 || startIndex > totalLength){
-			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
-		}
-		if(endIndex < 0 || endIndex > totalLength){
-			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
 		}
 		
 		// only run an update and checks if the update will actually
@@ -578,8 +570,32 @@ public class DefaultBorderSegment implements IBorderSegment{
 				}
 			}
 		}
+		return true;
+		
+	}
+	
+	/* (non-Javadoc)
+	 * @see components.nuclear.IBorderSegment#update(int, int)
+	 */
+	@Override
+	public boolean update(int startIndex, int endIndex) throws SegmentUpdateException{
+//		 Check the incoming data
+		if(startIndex < 0 || startIndex > totalLength){
+			throw new IllegalArgumentException("Start index is outside the profile range: "+startIndex);
+		}
+		if(endIndex < 0 || endIndex > totalLength){
+			throw new IllegalArgumentException("End index is outside the profile range: "+endIndex);
+		}
+		
+		if( ! canUpdateSegment( startIndex, endIndex )){
+			return false;
+		}
 
 		// All checks have been passed; the update can proceed
+		
+		// Remove any merge sources - we cannot guarantee that these can be maintained
+		// over repeated updates
+		mergeSources = new IBorderSegment[0];
 
 
 		//		 wrap in if to ensure we don't go in circles forever when testing a circular profile

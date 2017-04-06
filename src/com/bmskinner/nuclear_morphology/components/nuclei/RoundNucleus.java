@@ -63,6 +63,7 @@ import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -957,9 +958,14 @@ public class RoundNucleus extends AbstractCellularComponent
 			throw new IllegalArgumentException("Requested seg id is null");
 		}
 		for(ISegmentedProfile p : this.profileMap.values()){
-			
+
 			if(p.hasSegment(segID)){
-				p.getSegment(segID).setLocked(lock);
+				try{
+					p.getSegment(segID).setLocked(lock);
+				} catch(UnavailableComponentException e) {
+					stack(e);
+
+				}
 			}
 		}
 	}

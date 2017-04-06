@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
@@ -320,7 +321,12 @@ protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 		for(UUID segID : options.getSegments()){
 			if(options.isIncludeSegment(segID)){
 				Attribute att = (Attribute) attributes.elementAt(attNumber++);
-				double length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
+				double length = 0;
+				try {
+					length = n.getProfile(ProfileType.ANGLE).getSegment(segID).length();
+				} catch (UnavailableComponentException e) {
+					stack(e);
+				}
 				inst.setValue(att, length);
 			}
 		}

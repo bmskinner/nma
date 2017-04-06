@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
@@ -318,7 +319,7 @@ public class SegmentedFloatProfileTest {
 			
 			
 
-		} catch(SegmentUpdateException | ProfileException e){
+		} catch(SegmentUpdateException | ProfileException | UnavailableComponentException e){
 			fail("Error updating segments");
 			e.printStackTrace();
 		}

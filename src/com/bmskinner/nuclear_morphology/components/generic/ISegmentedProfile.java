@@ -73,7 +73,7 @@ public interface ISegmentedProfile extends IProfile {
 	 * @param id
 	 * @return
 	 */
-	IBorderSegment getSegment(UUID id);
+	IBorderSegment getSegment(UUID id) throws UnavailableComponentException;
 
 	boolean hasSegment(UUID id);
 	

@@ -100,7 +100,16 @@ public interface IBorderSegment
 	 */
 	List<IBorderSegment> getMergeSources();
 
+	/**
+	 * Add the given segment as a merge source
+	 * @param seg
+	 */
 	void addMergeSource(IBorderSegment seg);
+	
+	/**
+	 * Remove all merge sources from the segment
+	 */
+	void clearMergeSources();
 
 	/**
 	 * Test if this segment is a merge of other segments
@@ -744,5 +753,6 @@ public interface IBorderSegment
 			public SegmentUpdateException(Throwable cause) { super(cause); }
 		
 	}
+
 
 }

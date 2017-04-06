@@ -18,6 +18,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -278,7 +279,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
 				addProbabilities(dataset, list, rowKey, colKey);
 				
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+			} catch (ProfileException | UnavailableComponentException e) {
 				fine("Error getting segmented profile", e);
 				throw new ChartDatasetCreationException("Cannot get segmented profile", e);
 			}		
@@ -310,7 +311,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
 						.getSegmentAt(segPosition);
 			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-				fine("Unable to get segmented median profile", e);
+				stack("Unable to get segmented median profile", e);
 				throw new ChartDatasetCreationException("Cannot get median profile");
 			}
 
@@ -318,18 +319,21 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 			List<Number> list = new ArrayList<Number>(0);
 
 			for(Nucleus n : collection.getNuclei()){
-				ISegmentedProfile profile;
+
 				try {
-					profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-					fine("Error getting segmented profile", e);
+					
+					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+					
+					IBorderSegment seg = profile.getSegment(medianSeg.getID());
+					
+					double displacement = profile.getDisplacement(seg);
+					list.add(displacement);
+				} catch (ProfileException | UnavailableComponentException e) {
+					stack("Error getting segmented profile", e);
 					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
 				}
 				
-				IBorderSegment seg = profile.getSegment(medianSeg.getID());
 				
-				double displacement = profile.getDisplacement(seg);
-				list.add(displacement);
 			}
 			
 			String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;

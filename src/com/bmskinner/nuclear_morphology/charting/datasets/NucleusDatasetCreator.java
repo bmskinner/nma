@@ -56,6 +56,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -1029,7 +1030,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 						
 					}
 					
-				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				} catch (ProfileException |  UnavailableComponentException e) {
 					warn("Cannot get segment length for "+n.getNameAndNumber());
 					fine("Error getting profile", e);
 					
@@ -1082,7 +1083,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					double displacement = profile.getDisplacement(seg);
 					list.add(displacement);
 					
-				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+				} catch (ProfileException | UnavailableComponentException e) {
 					warn("Cannot get segment displacement for "+n.getNameAndNumber());
 					fine("Error getting profile", e);
 				}		
