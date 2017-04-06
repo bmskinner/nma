@@ -1380,6 +1380,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 //					log(p.toString());
 				}
 			}
+			shapeCache.clear();
 					
 		}
 		
@@ -1493,6 +1494,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			public boolean has(double x, double y, MeasurementScale s){
 				Key key = new Key(x, y, s);
 				return cache.containsKey(key);
+			}
+			
+			public void clear(){
+				cache.clear();
 			}
 		}
 }

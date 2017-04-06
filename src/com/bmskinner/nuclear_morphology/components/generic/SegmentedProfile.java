@@ -957,4 +957,10 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		in.defaultReadObject();
 //		finest("\tRead segmented profile");
 	}
+
+	@Override
+	public boolean isSplittable(UUID id, int splitIndex) {
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
