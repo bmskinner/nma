@@ -1096,6 +1096,9 @@ public class DefaultCellCollection
 				n.updateVerticallyRotatedNucleus();
 				n.updateDependentStats();
 			});
+			
+			statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS);
+			statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS);
 		} catch (Exception e){
 			warn("Cannot update all vertical nuclei");
 			stack("Error updating vertical nuclei", e);

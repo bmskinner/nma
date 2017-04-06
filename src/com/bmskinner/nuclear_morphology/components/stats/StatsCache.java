@@ -103,7 +103,7 @@ public class StatsCache {
 		cache.put(key, d);
 
 	}
-	
+		
 	/**
 	 * Store the given statistic
 	 * @param stat
@@ -125,6 +125,33 @@ public class StatsCache {
 			return 0;
 		}
 		
+	}
+	
+	/**
+	 * Clear the values for the given stat
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 */
+	public void clear(PlottableStatistic stat, String component, MeasurementScale scale){
+		Key key = new Key(stat, component, scale);
+		values.remove(key);
+		cache.remove(key);
+	}
+	
+	/**
+	 * Clear the values for the given stat
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 */
+	public void clear(PlottableStatistic stat, String component){
+		
+		for(MeasurementScale s : MeasurementScale.values()){
+			Key key = new Key(stat, component, s);
+			values.remove(key);
+			cache.remove(key);
+		}
 	}
 	
 	/**

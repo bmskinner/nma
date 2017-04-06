@@ -118,6 +118,10 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		if( this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)){
 
 			if(tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)){
+				
+				// Invalidate previous data
+				setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
+				setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
 
 				calculateHookAndBodyLength();
 			}
