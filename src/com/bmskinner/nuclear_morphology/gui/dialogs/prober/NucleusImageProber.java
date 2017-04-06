@@ -23,14 +23,17 @@ public class NucleusImageProber extends IntegratedImageProber {
 	
 	private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
-	public NucleusImageProber(final File folder){
+	public NucleusImageProber(final File folder, final IMutableAnalysisOptions o){
 
 		try {
-			options = OptionsFactory.makeAnalysisOptions();
-
-			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+			this.options = o;
 			
-			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+//			options = OptionsFactory.makeAnalysisOptions();
+
+//			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+//			
+//			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 			// make the panel
 			

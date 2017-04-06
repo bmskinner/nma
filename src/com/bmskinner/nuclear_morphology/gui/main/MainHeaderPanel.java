@@ -54,6 +54,8 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 			
 			// TODO: Enable this when neutrophil analysis is ready to go
 	        final JPopupMenu popup = new JPopupMenu();
+	        
+	        
 	        popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
 	            public void actionPerformed(ActionEvent e) {
 	            	Runnable r = new NewAnalysisAction(mw);

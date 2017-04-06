@@ -34,7 +34,9 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -52,7 +54,7 @@ public class NewAnalysisAction extends ProgressableAction {
 	private Date startTime;
 	private String outputFolderName;
 	
-	private File folder;
+	private File folder = null;
 	
 	public static final int NEW_ANALYSIS = 0;
 	
@@ -75,6 +77,9 @@ public class NewAnalysisAction extends ProgressableAction {
 	public NewAnalysisAction(MainWindow mw, final File folder) {
 		super(PROGRESS_LABEL, mw);
 		this.folder = folder;
+		options = OptionsFactory.makeAnalysisOptions();
+		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 	}
 	
 	@Override
@@ -85,18 +90,19 @@ public class NewAnalysisAction extends ProgressableAction {
 		
 		if(folder==null){
 			if(! getImageDirectory()){
+				fine("Could not get image directory");
 				this.cancel();
 				return;
 			}
 		}
+				
 		fine("Creating for "+folder.getAbsolutePath());
-//		fine("Making analysis options");
 		
-		NucleusImageProber analysisSetup = new NucleusImageProber( folder );
+		NucleusImageProber analysisSetup = new NucleusImageProber( folder, options );
 
 		if(analysisSetup.isOk()){
 
-			options = analysisSetup.getOptions();
+//			options = analysisSetup.getOptions();
 			File directory = null;
 			try {
 				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
@@ -188,14 +194,16 @@ public class NewAnalysisAction extends ProgressableAction {
 		}
 		fine("Selected directory: "+file.getAbsolutePath());
 		folder = file;
+		fine("Set directory");
 		try {
 			options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
-		} catch (MissingOptionException e) {
+			fine("Set analysis options");
+		} catch (Exception e) {
 			warn("Missing nucleus options");
 			stack(e.getMessage(), e);
 			return false;
 		}
-
+		fine("Returning");
 		return true;
 	}
 	
