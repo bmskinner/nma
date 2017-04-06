@@ -137,6 +137,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	
 	private transient SoftReference<ImageProcessor> imageRef = new SoftReference<ImageProcessor>(null); // allow caching of images while memory is available
 	
+	private transient ShapeCache shapeCache = new ShapeCache();
 	
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image.
@@ -967,14 +968,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		private Shape toOffsetShape(double xOffset, double yOffset, MeasurementScale scale){
 			
+			if( borderList.size()==0 ){
+				throw new IllegalArgumentException("Border list is empty");
+			}
+			
+			if(shapeCache.has(xOffset,yOffset, scale)){
+				return shapeCache.get(xOffset, yOffset, scale);
+			}
+			
 			double sc = scale.equals(MeasurementScale.MICRONS) ? this.scale : 1;
 			
 			
 			Path2D.Double path = new Path2D.Double();
 			
-			if( borderList.size()==0 ){
-				throw new IllegalArgumentException("Border list is empty");
-			}
+			
 						
 			IBorderPoint first = borderList.get(0);
 			path.moveTo(( first.getX()+xOffset )/ sc, (first.getY()+yOffset ) / sc);
@@ -984,6 +991,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 			path.closePath();
 
+			shapeCache.add(xOffset, yOffset, scale, path);
+			
 			return path;
 			
 		}
@@ -1242,6 +1251,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			// Fill the transient fields
 			imageRef = new SoftReference<ImageProcessor>(null);
+			shapeCache = new ShapeCache();
 			
 			// needs to be traced to allow interpolation into the border list
 //			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
@@ -1406,5 +1416,83 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + centreOfMass.getX();
 			double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + centreOfMass.getY();
 			return IPoint.makeNew(newX, newY);
+		}
+		
+		private class ShapeCache{
+						
+			public class Key {
+				final double xOffset;
+				final double yOffset;
+				final MeasurementScale scale;
+				
+				public Key(final double x, final double y, final MeasurementScale s){
+					xOffset = x;
+					yOffset = y;
+					scale = s;
+				}
+
+				@Override
+				public int hashCode() {
+					final int prime = 31;
+					int result = 1;
+					result = prime * result + getOuterType().hashCode();
+					result = prime * result + ((scale == null) ? 0 : scale.hashCode());
+					long temp;
+					temp = Double.doubleToLongBits(xOffset);
+					result = prime * result + (int) (temp ^ (temp >>> 32));
+					temp = Double.doubleToLongBits(yOffset);
+					result = prime * result + (int) (temp ^ (temp >>> 32));
+					return result;
+				}
+
+				@Override
+				public boolean equals(Object obj) {
+					if (this == obj)
+						return true;
+					if (obj == null)
+						return false;
+					if (getClass() != obj.getClass())
+						return false;
+					Key other = (Key) obj;
+					if (!getOuterType().equals(other.getOuterType()))
+						return false;
+					if (scale != other.scale)
+						return false;
+					if (Double.doubleToLongBits(xOffset) != Double.doubleToLongBits(other.xOffset))
+						return false;
+					if (Double.doubleToLongBits(yOffset) != Double.doubleToLongBits(other.yOffset))
+						return false;
+					return true;
+				}
+
+
+
+
+
+				private ShapeCache getOuterType() {
+					return ShapeCache.this;
+				}
+				
+				
+			}
+			
+			private Map<Key, Shape> cache = new HashMap<Key, Shape>();
+			
+			public ShapeCache(){}
+			
+			public void add(double x, double y, MeasurementScale s, Shape shape){
+				Key key = new Key(x, y, s);
+				cache.put(key, shape);
+			}
+			
+			public Shape get(double x, double y, MeasurementScale s){
+				Key key = new Key(x, y, s);
+				return cache.get(key);
+			}
+			
+			public boolean has(double x, double y, MeasurementScale s){
+				Key key = new Key(x, y, s);
+				return cache.containsKey(key);
+			}
 		}
 }
