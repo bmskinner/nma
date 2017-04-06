@@ -938,6 +938,28 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		this.setSegments(newSegs);
 
 	}
+	
+	@Override
+	public boolean isSplittable(UUID id, int splitIndex){
+		if(!this.hasSegment(id) ){
+			throw new IllegalArgumentException("No segment with the given id");
+		}
+		
+		IBorderSegment segment;
+		try {
+			segment = getSegment(id);
+		} catch (UnavailableComponentException e) {
+			stack(e);
+			return false;
+		}
+
+		if(!segment.contains(splitIndex)){
+			throw new IllegalArgumentException("Splitting index is not within the segment");
+		}
+		
+		return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getTotalLength())
+				&& IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getTotalLength());
+	}
 
 	/* (non-Javadoc)
 	 * @see components.generic.ISegmentedProfile#splitSegment(components.nuclear.IBorderSegment, int, java.util.UUID, java.util.UUID)

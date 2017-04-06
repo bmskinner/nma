@@ -736,6 +736,29 @@ public interface IBorderSegment
 		}
 		return builder.toString();
 	}
+	
+	/**
+	 * Test the length for new segments
+	 * @param start
+	 * @param end
+	 * @param total
+	 * @return 
+	 */
+	public static boolean isLongEnough(int start, int end, int total){
+		
+		int testLength = 0;
+		if(start < end){ // no wrap
+			testLength = end - start;
+		} else { // wrap
+			testLength = end + (total-start);
+		}
+		
+		if(testLength < MINIMUM_SEGMENT_LENGTH){
+			return false;
+		}
+		return true;
+	}
+	
 
 	Iterator<Integer> iterator();
 	

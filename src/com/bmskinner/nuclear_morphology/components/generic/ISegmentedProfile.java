@@ -264,6 +264,15 @@ public interface ISegmentedProfile extends IProfile {
 	 */
 	void splitSegment(IBorderSegment segment, int splitIndex, UUID id1,
 			UUID id2) throws ProfileException;
+	
+	/**
+	 * Test if the given segment can be split at the given index and produce two 
+	 * new valid segments
+	 * @param segment
+	 * @param splitIndex
+	 * @return
+	 */
+	boolean isSplittable(UUID id, int splitIndex);
 
 	String toString();
 

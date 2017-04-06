@@ -940,48 +940,102 @@ public class ProfileManager implements Loggable {
 			newID2 = java.util.UUID.randomUUID();
 		}
 						
-		if(seg.contains(index)){
+		if( ! seg.contains(index)){
+			return false;
+		}
 
-			double proportion = seg.getIndexProportion(index);
+		double proportion = seg.getIndexProportion(index);
 
-			// split the two segments in the median
-			medianProfile.splitSegment(seg, index, newID1, newID2);
+		// Validate that all nuclei have segments long enough to be split
+		fine("Testing split");
+		if( ! isCollectionSplittable(seg.getID(), proportion)){
+			warn("Segment too small to split");
+			return false;
+		}
 
-			// put the new segment pattern back with the appropriate offset
-			collection.getProfileCollection()
-			.addSegments( Tag.REFERENCE_POINT,  medianProfile.getSegments());
+		
+		// split the two segments in the median
+		medianProfile.splitSegment(seg, index, newID1, newID2);
+		fine("Split median");
 
-			/*
-			 * With the median profile segments unmerged, also split the segments
-			 * in the individual nuclei. Requires proportional alignment
-			 */
-			if(collection.isReal()){ // do not handle nuclei in virtual collections
-				for(Nucleus n : collection.getNuclei()){
-					boolean wasLocked = n.isLocked();
-					n.setLocked(false); // Merging segments is not destructive
-					splitSegment(n, seg.getID(), proportion, newID1, newID2);
-					n.setLocked(wasLocked);
-				}
-			}
+		// put the new segment pattern back with the appropriate offset
+		collection.getProfileCollection()
+		.addSegments( Tag.REFERENCE_POINT,  medianProfile.getSegments());
 
-			/*
-			 * Update the consensus if present
-			 */
-			if(collection.hasConsensus()){
-				Nucleus n = collection.getConsensus();
+		/*
+		 * With the median profile segments unmerged, also split the segments
+		 * in the individual nuclei. Requires proportional alignment
+		 */
+		if(collection.isReal()){ // do not handle nuclei in virtual collections
+			for(Nucleus n : collection.getNuclei()){
 				boolean wasLocked = n.isLocked();
 				n.setLocked(false); // Merging segments is not destructive
 				splitSegment(n, seg.getID(), proportion, newID1, newID2);
 				n.setLocked(wasLocked);
 			}
+		}
 
-			// Ensure the vertical nuclei have the same segment pattern
-			collection.updateVerticalNuclei();
+		/*
+		 * Update the consensus if present
+		 */
+		if(collection.hasConsensus()){
+			Nucleus n = collection.getConsensus();
+			boolean wasLocked = n.isLocked();
+			n.setLocked(false); // Merging segments is not destructive
+			splitSegment(n, seg.getID(), proportion, newID1, newID2);
+			n.setLocked(wasLocked);
+		}
 
-			return true;
-		} else {
+		// Ensure the vertical nuclei have the same segment pattern
+		collection.updateVerticalNuclei();
+
+		return true;
+
+	}
+	
+	/**
+	 * Test all the nuclei of the collection to see if all segments can be split
+	 * before we carry out the split.
+	 * @param seg
+	 * @param proportion
+	 * @return
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException
+	 * @throws UnsegmentedProfileException
+	 */
+	private boolean isCollectionSplittable(UUID id, double proportion) throws ProfileException, UnavailableComponentException, UnsegmentedProfileException{
+		
+		ISegmentedProfile medianProfile = collection.getProfileCollection()
+				.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		
+		int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
+		
+		if(!medianProfile.isSplittable(id, index)){
 			return false;
 		}
+		
+		if(collection.isReal()){ // do not handle nuclei in virtual collections
+			for(Nucleus n : collection.getNuclei()){
+				if( !isSplittable( n, id, proportion)){
+					return false;
+				}
+			}
+		}
+		
+		if(collection.hasConsensus()){
+			Nucleus n = collection.getConsensus();
+			if( !isSplittable( n, id, proportion)){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isSplittable(Taggable t, UUID id, double proportion) throws ProfileException, UnavailableComponentException{
+		ISegmentedProfile profile = t.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		IBorderSegment nSeg = profile.getSegment(id);
+		int targetIndex = nSeg.getProportionalIndex(proportion);
+		return profile.isSplittable(id, targetIndex);
 	}
 	
 	private void splitSegment(Taggable t, UUID idToSplit, double proportion, UUID newID1, UUID newID2) throws ProfileException, UnavailableComponentException{

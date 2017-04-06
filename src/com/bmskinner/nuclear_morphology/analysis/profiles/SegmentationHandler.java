@@ -198,6 +198,9 @@ public class SegmentationHandler implements Loggable {
 					.getProfileManager()
 					.splitSegment(seg, newID1, newID2);
 				}
+				log("Segment split sucessful");
+			} else {
+				warn("Splitting segment cancelled");
 			}
 
 		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){

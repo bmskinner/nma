@@ -81,23 +81,15 @@ public class DefaultBorderSegment implements IBorderSegment{
 		}
 		
 		// ensure that the segment meets minimum length requirements
-		int testLength = 0;
-		if(startIndex < endIndex){ // no wrap
-			testLength = endIndex - startIndex;
-		} else { // wrap
-			testLength = endIndex + (total-startIndex);
+		if( ! IBorderSegment.isLongEnough(startIndex, endIndex, total)){
+			throw new IllegalArgumentException("Cannot create segment from " + startIndex + " to " + endIndex
+					+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
 		}
 		
-		if(testLength < MINIMUM_SEGMENT_LENGTH){
-			throw new IllegalArgumentException("Cannot create segment of length "
-						+ testLength
-						+ " from " + startIndex + " to " + endIndex
-						+ ": shorter than "+MINIMUM_SEGMENT_LENGTH);
-		}
-		
-		if(testLength == total){
-			throw new IllegalArgumentException("Profile must have more than one segment");
-		}
+
+//		if(testLength == total){
+//			throw new IllegalArgumentException("Profiles must have more than one segment");
+//		}
 		
 		this.startIndex   = startIndex;
 		this.endIndex     = endIndex;
