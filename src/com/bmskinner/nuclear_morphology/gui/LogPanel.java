@@ -34,9 +34,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,6 +84,10 @@ import com.bmskinner.nuclear_morphology.io.Importer;
 @SuppressWarnings("serial")
 public class LogPanel extends DetailPanel implements ActionListener {
 	
+	private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
+	private static final String NEXT_HISTORY_ACTION = "Next";
+	private static final String PREV_HISTORY_ACTION = "Prev";
+	
 	private JTextPane  textArea = new JTextPane();
 	
 	private JPanel 					logPanel;				// messages and errors
@@ -91,6 +98,9 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	private SimpleAttributeSet attrs; // the styling attributes
 	
 	private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
+	
+	int historyIndex = -1;
+	List<String> history = new LinkedList<String>();
 	
 	{
 //		commandMap.put("list datasets", InterfaceMethod.LIST_DATASETS);
@@ -174,19 +184,27 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		panel.add(scrollPane, BorderLayout.CENTER);
 
 		progressPanel = new JPanel();
-//		progressPanel = new ProgressBarPanel();
+
 		progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
 		panel.add(progressPanel, BorderLayout.NORTH);
 		
 		this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
-				"ShowConsole"); // grave accent new Character('\u0065')
-		this.getActionMap().put("ShowConsole",
-				new ShowConsoleAction());
+				SHOW_CONSOLE_ACTION); // grave accent new Character('\u0065')
+		this.getActionMap().put(SHOW_CONSOLE_ACTION, new ShowConsoleAction());
 		
 		console.setFont(font);
 		panel.add(console, BorderLayout.SOUTH);
 		console.setVisible(false);
 		console.addActionListener(this);
+		
+		console.getInputMap(JComponent.WHEN_FOCUSED)
+			.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), PREV_HISTORY_ACTION);
+		
+		console.getActionMap().put(PREV_HISTORY_ACTION, new PrevHistoryAction());
+		
+		console.getInputMap(JComponent.WHEN_FOCUSED)
+		.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NEXT_HISTORY_ACTION);
+		console.getActionMap().put(NEXT_HISTORY_ACTION, new NextHistoryAction());
 		
 		// Need an extra drop target for file opening  as well as in the main window
 		DropTarget dropTarget = makePanelDropTarget();
@@ -259,13 +277,6 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		return d;
 	}
 	
-	/**
-	 * Standard log - append a newline
-	 * @param s the string to log
-	 */
-	public void log(String s){
-		print(s+"\n");
-	}
 	
 	public void print(String s){
 		StyledDocument doc = textArea.getStyledDocument();
@@ -283,17 +294,22 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 	}
 	
+	/**
+	 * Set the text of the console
+	 * @param s
+	 */
+	private void setConsoleText(String s){
+		console.setText(s);
+	}
+	
+	
+	/**
+	 * Clear the log window of all text
+	 */
 	public void clear(){
 		textArea.setText(null);
 	}
 	
-	/**
-	 * Continuous log - do not append a newline
-	 * @param s the string to log
-	 */
-	public void logc(String s){
-		print(s);
-	}
 	
 	/**
 	 * Get all the progress bars attached to the log panel
@@ -319,7 +335,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	}
 	
 
-	class ShowConsoleAction extends AbstractAction {
+	private class ShowConsoleAction extends AbstractAction {
 
 		public ShowConsoleAction() {
 			super("Show console");
@@ -340,6 +356,52 @@ public class LogPanel extends DetailPanel implements ActionListener {
 			repaint();
 		}
 	}
+	
+	private class PrevHistoryAction extends AbstractAction {
+
+		public PrevHistoryAction() {
+			super("Prev");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			
+			if(history.isEmpty()){
+				return;
+			}
+			
+			if(historyIndex==history.size()){
+				return;
+			}
+			
+			historyIndex++;
+			console.setText(history.get(historyIndex));
+			
+		}
+	}
+	
+	private class NextHistoryAction extends AbstractAction {
+
+		public NextHistoryAction() {
+			super("Next");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if(history.isEmpty()){
+				return;
+			}
+			if(historyIndex<0){
+				return;
+			}
+			if(historyIndex==0){
+				console.setText("");
+				return;
+			}
+			
+			historyIndex--;
+			console.setText(history.get(historyIndex));
+			
+		}
+	}
 
 	/*
 	 * Listener for the console
@@ -348,10 +410,14 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		if(e.getSource().equals(console)){
+			
 			log(console.getText());
+			history.add(console.getText());
+//			historyIndex=0;
 			runCommand(console.getText());
+			
 			console.setText("");
-		}
+		}		
 		
 	}
 	
@@ -413,17 +479,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 	}
 
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
-	
+		
 	/*
 	 * 
 	 * Copied from https://tips4java.wordpress.com/2008/10/15/limit-lines-in-document/
