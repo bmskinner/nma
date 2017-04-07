@@ -139,6 +139,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	
 	private transient ShapeCache shapeCache = new ShapeCache();
 	
+	private transient Rectangle2D bounds;
+	
 	/**
 	 * Construct with an ROI, a source image and channel, and the original position in the source image.
 	 * It sets the immutable original centre of mass, and the mutable current centre of mass. 
@@ -262,7 +264,24 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
 		
 		moveCentreOfMass(oldCoM);
+		calculateBounds();
+				
+	}
+	
+	private void calculateBounds(){
+		double xMax = Double.MIN_VALUE;
+		double xMin = Double.MAX_VALUE;
+		double yMax = Double.MIN_VALUE;
+		double yMin = Double.MAX_VALUE;
 		
+		for(IBorderPoint p : borderList){
+			xMax = p.getX()>xMax ? p.getX():xMax;
+			xMin = p.getX()<xMin ? p.getX():xMin;
+			yMax = p.getY()>yMax ? p.getX():yMax;
+			yMin = p.getX()<yMin ? p.getX():yMin;
+		}
+		
+		bounds = new Rectangle2D.Double(xMin, yMin, xMax-xMin, yMax-yMin);
 	}
 	
 	
@@ -352,7 +371,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	}
 	
 	public Rectangle getBounds() {
-		return this.toShape().getBounds();
+		return new Rectangle( (int) bounds.getX(), (int)bounds.getY(), (int)bounds.getWidth(), (int)bounds.getHeight());
+//		return bounds;
+//		return this.toShape().getBounds();
 	}
 	
 	/**
@@ -779,20 +800,20 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 */
 		
 		public double getMaxX(){
-			
-			return this.toShape().getBounds().getMaxX();
+			return bounds.getMaxX();
+//			return this.toShape().getBounds().getMaxX();
 		}
 
 		public double getMinX(){
-			return this.toShape().getBounds().getMinX();
+			return bounds.getMinX();
 		}
 
 		public double getMaxY(){
-			return this.toShape().getBounds().getMaxY();
+			return bounds.getMaxY();
 		}
 
 		public double getMinY(){
-			return this.toShape().getBounds().getMinY();
+			return bounds.getMinY();
 		}
 		
 
@@ -852,6 +873,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			}
 
 			this.centreOfMass.offset(xOffset,  yOffset);
+			calculateBounds();
 
 		}
 		

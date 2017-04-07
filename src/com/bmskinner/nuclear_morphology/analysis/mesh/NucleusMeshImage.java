@@ -333,9 +333,19 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 			map.put(face, new ArrayList<MeshPixel>());
 		}
 		
+		Rectangle bounds = template.getComponent().toOriginalShape().getBounds();
+		
 		for(int x=0; x<ip.getWidth(); x++){
 			
+			if(x<bounds.getMinX() || x>bounds.getMaxX()){
+				continue;
+			}
+			
 			for(int y=0; y<ip.getHeight(); y++){
+				
+				if(y<bounds.getMinY() || y>bounds.getMaxY()){
+					continue;
+				}
 				
 				// The pixel
 				IPoint pixel = IPoint.makeNew(x, y);
