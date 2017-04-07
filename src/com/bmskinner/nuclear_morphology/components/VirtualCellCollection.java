@@ -457,6 +457,15 @@ public class VirtualCellCollection implements ICellCollection {
 				}
 			}
 			
+			@Override
+			public void setVisible(boolean b){
+				try {
+					parent.getCollection().getSignalGroup(signalGroup).setVisible(b);
+				} catch (UnavailableSignalGroupException e) {
+					stack("Signal group not found", e);
+				}
+			}
+			
 		};
 		
 //		if(shellResults.containsKey(signalGroup)){

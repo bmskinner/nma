@@ -72,6 +72,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	
 	private JButton warpButton;
 	
+	private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
+	
 //	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
 	
 	
@@ -210,16 +212,23 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				JCheckBox box = new JCheckBox(name, visible);
 
 				// Don't enable when the consensus is missing
-                if(activeDataset().getCollection().hasConsensus()){
-                    box.setEnabled(true);
-                } else {
-                    box.setEnabled(false);
-                }
+                box.setEnabled(activeDataset().getCollection().hasConsensus());
+   
 
 
 				// apply the appropriate action 
-				box.setActionCommand("GroupVisble_"+signalGroup);
-				box.addActionListener(this);
+//				box.setActionCommand(SET_SIGNAL_GROUP_VISIBLE_ACTION+signalGroup);
+				box.addActionListener( e ->{
+//					signalGroup = getSignalGroupFromLabel(e.getActionCommand());
+//					JCheckBox box = (JCheckBox) e.getSource();
+					try {
+						activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
+					} catch (UnavailableSignalGroupException e1) {
+						stack(e1);
+					}
+					fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
+					this.refreshChartCache(getDatasets());
+				});
 				panel.add(box);
 				
             	} catch(UnavailableSignalGroupException e){
