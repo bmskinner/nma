@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -23,7 +24,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
 	static final boolean DEFAULT_REFOLD      = true;
 	static final boolean DEFAULT_KEEP_FAILED = false;
 	static final double  DEFAULT_WINDOW_PROPORTION = 0.05;
-	static final NucleusType DEFAULT_TYPE    = NucleusType.RODENT_SPERM;
+	static final NucleusType DEFAULT_TYPE    = GlobalOptions.getInstance().getDefaultType();
 
 	
 	/**

@@ -209,6 +209,7 @@ public abstract class ImageProberPanel extends JPanel
         	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
         }
         
+      //TODO - what happens when different height dual monitors are used?
         rowHeight =  (int) Math.ceil(((java.awt.Toolkit.getDefaultToolkit().getScreenSize().getHeight() * IMAGE_SCREEN_PROPORTION) / (rows+1)));
 
 		table.setRowHeight(rowHeight);	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 
@@ -33,6 +34,8 @@ public class GlobalOptions {
 	
 	private static double DEFAULT_SCALE = 1;
 	private double scaleValue;
+	
+	private NucleusType defaultType;
 	
 	/**
 	 * Should the consensus nucleus plots be filled, or empty
@@ -73,6 +76,17 @@ public class GlobalOptions {
 		this.antiAliasing  = false;
 		this.scaleValue = DEFAULT_SCALE;
 		this.defaultDir = new File(System.getProperty("user.home"));
+		this.defaultType = NucleusType.RODENT_SPERM;
+	}
+	
+	
+
+	public NucleusType getDefaultType() {
+		return defaultType;
+	}
+
+	public void setDefaultType(NucleusType defaultType) {
+		this.defaultType = defaultType;
 	}
 
 	public synchronized MeasurementScale getScale() {

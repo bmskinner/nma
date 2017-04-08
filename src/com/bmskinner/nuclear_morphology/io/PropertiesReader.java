@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -46,6 +47,7 @@ public class PropertiesReader implements Loggable {
 	private static final String DEFAULT_FILL_CONSENSUS_KEY = "FILL_CONSENSUS";
 	private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
 	private static final String DEFAULT_SWATCH_KEY = "DEFAULT_COLOUR_SWATCH";
+	private static final String DEFAULT_NUCLEUS_TYPE_KEY = "DEFAULT_NUCLEUS_TYPE";
 
 	public PropertiesReader() {
 		try {
@@ -86,6 +88,8 @@ public class PropertiesReader implements Loggable {
 		properties.setProperty(DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
 		properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
 		properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
+		properties.setProperty(DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
+		
 		
 		return properties;
 		
@@ -122,6 +126,10 @@ public class PropertiesReader implements Loggable {
 			
 			if(DEFAULT_SWATCH_KEY.equals(key)){
 				op.setSwatch(ColourSwatch.valueOf(value));
+			}
+			
+			if(DEFAULT_NUCLEUS_TYPE_KEY.equals(key)){
+				op.setDefaultType(NucleusType.valueOf(value));
 			}
 
 		}
