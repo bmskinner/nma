@@ -367,10 +367,11 @@ public interface CellularComponent
 	 */
 	IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException;
 
-	/*
-    From the point given, create a line to the CoM. Measure angles from all 
-    other points. Pick the point closest to 90 degrees. Can then get opposite
-    point. Defaults to input point if unable to find point.
+	
+	/**
+	 * @param a the point to draw to the centre of mass
+	 * @return the orthogonal border point or input point if no other point was found
+	 * @throws UnavailableBorderPointException if the input point is not found in the component border
 	 */
 	IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException;
 	

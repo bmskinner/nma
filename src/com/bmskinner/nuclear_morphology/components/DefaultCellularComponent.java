@@ -1209,11 +1209,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			return this.getBorderPoint(minDeltaYIndex);
 		}
 
-		/*
-			From the point given, create a line to the CoM. Measure angles from all 
-			other points. Pick the point closest to 90 degrees. Can then get opposite
-			point. Defaults to input point if unable to find point.
-		*/
+		@Override
 		public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a){
 
 			IBorderPoint orthgonalPoint = a;
@@ -1232,16 +1228,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		
-		
+		@Override
 		public IBorderPoint findClosestBorderPoint(IPoint p){
 			
 			double minDist = Double.MAX_VALUE;
 			IBorderPoint result = null;
 			
-			for(IBorderPoint bp : this.borderList){
-				
-				if(bp.getLengthTo(p)< minDist){
-					minDist = bp.getLengthTo(p);
+			for(IBorderPoint bp : borderList){
+				double d = bp.getLengthTo(p);
+				if(d< minDist){
+					minDist = d;
 					result = bp;
 				}
 			}

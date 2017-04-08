@@ -371,7 +371,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public FloatPolygon createOriginalPolygon() {
+	public FloatPolygon toOriginalPolygon() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -389,7 +389,7 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 	}
 
 	@Override
-	public FloatPolygon createPolygon() {
+	public FloatPolygon toPolygon() {
 		// TODO Auto-generated method stub
 		return null;
 	}
