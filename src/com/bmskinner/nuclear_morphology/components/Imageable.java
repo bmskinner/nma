@@ -127,7 +127,7 @@ public interface Imageable {
 	 * Get the pixels within this object as a list of points
 	 * @return a list of points
 	 */
-	List<IPoint> getPixelsAsPoints();
+//	List<IPoint> getPixelsAsPoints();
 	
 	/**
 	 * Get the bounding rectangle for the object.

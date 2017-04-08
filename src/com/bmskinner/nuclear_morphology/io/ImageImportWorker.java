@@ -306,7 +306,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		} else {
 
 			ip.setColor(Color.ORANGE);
-			FloatPolygon polygon = n.createPolygon();
+			FloatPolygon polygon = n.toPolygon();
 			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
 			roi.setLocation(CellularComponent.COMPONENT_BUFFER, CellularComponent.COMPONENT_BUFFER);
 			ip.draw(roi);

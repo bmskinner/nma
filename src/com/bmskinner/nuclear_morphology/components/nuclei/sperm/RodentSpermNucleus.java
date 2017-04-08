@@ -193,8 +193,8 @@ public class RodentSpermNucleus extends SpermNucleus {
 			 * Find the x values in the bounding box of the 
 			 * vertical nucleus.
 			 */
-			double maxBoundingX = testNucleus.createPolygon().getBounds().getMaxX();
-			double minBoundingX = testNucleus.createPolygon().getBounds().getMinX();
+			double maxBoundingX = testNucleus.toPolygon().getBounds().getMaxX();
+			double minBoundingX = testNucleus.toPolygon().getBounds().getMinX();
 			
 			if(vertX < minBoundingX || vertX > maxBoundingX ){
 				finer("Error calculating hook and body: vertical is out of bounds" );

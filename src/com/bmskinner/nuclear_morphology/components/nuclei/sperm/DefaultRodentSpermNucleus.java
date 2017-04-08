@@ -201,7 +201,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 		 * Find the x values in the bounding box of the 
 		 * vertical nucleus.
 		 */
-		FloatPolygon p = testNucleus.createPolygon();
+		FloatPolygon p = testNucleus.toPolygon();
 		double maxBoundingX = p.getBounds().getMaxX();
 		double minBoundingX = p.getBounds().getMinX();
 

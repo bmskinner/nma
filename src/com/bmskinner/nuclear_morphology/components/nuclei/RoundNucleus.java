@@ -411,7 +411,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 
 		
-		FloatPolygon pw = testw.createPolygon();
+		FloatPolygon pw = testw.toPolygon();
 		return pw.getBounds();
 	}
 	

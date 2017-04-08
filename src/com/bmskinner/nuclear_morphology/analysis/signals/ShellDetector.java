@@ -436,7 +436,7 @@ public class ShellDetector extends Detector {
 	private void createShells(CellularComponent c, int shellCount){
 				
 		// Position of the shells is with respect to the source image
-		Roi nucleusRoi = new PolygonRoi(c.createOriginalPolygon(), Roi.POLYGON);
+		Roi nucleusRoi = new PolygonRoi(c.toOriginalPolygon(), Roi.POLYGON);
 		fine("Creating shells");
 
 		double initialArea = new com.bmskinner.nuclear_morphology.stats.Area(nucleusRoi).doubleValue();

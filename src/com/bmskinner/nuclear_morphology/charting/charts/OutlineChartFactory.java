@@ -227,7 +227,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		
 		// Get the bounding box size for the consensus, to find the offsets for the images created
 		Rectangle r = dataset.getCollection().getConsensus().getBounds(); //.createPolygon().getBounds();
-		r = r==null ? dataset.getCollection().getConsensus().createPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
+		r = r==null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
 		int w = (int) ( (double) r.width*1.2);
 		int h = (int) ( (double) r.height*1.2);
 		

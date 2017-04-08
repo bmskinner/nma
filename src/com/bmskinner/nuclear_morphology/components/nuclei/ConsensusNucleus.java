@@ -53,7 +53,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	
 	@Override
 	public int[] getPosition(){
-		Rectangle bounds = getVerticallyRotatedNucleus().createPolygon().getBounds();
+		Rectangle bounds = getVerticallyRotatedNucleus().toPolygon().getBounds();
 		int newWidth  = (int) bounds.getWidth();
 		int newHeight = (int) bounds.getHeight();
 		int newX      = (int) bounds.getX();
@@ -79,8 +79,8 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	}
 	
 	@Override
-	public FloatPolygon createOriginalPolygon(){
-		return this.createPolygon();
+	public FloatPolygon toOriginalPolygon(){
+		return this.toPolygon();
 	}
 	
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

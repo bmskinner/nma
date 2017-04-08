@@ -157,20 +157,17 @@ public class SignalProberWorker  extends ImageProberWorker {
 	private boolean checkSignal(INuclearSignal s, Nucleus n) throws Exception{
 		
 		INuclearSignalOptions testOptions = (INuclearSignalOptions) options; 
-		
-		
-		boolean result = true;
-		
+				
 		if(s.getStatistic(PlottableStatistic.AREA) < testOptions.getMinSize()){
 			
-			result = false;
+			return false;
 		}
 		
 		if(s.getStatistic(PlottableStatistic.AREA) > (testOptions.getMaxFraction() * n.getStatistic(PlottableStatistic.AREA) )   ){
 			
-			result = false;
+			return false;
 		}		
-		return result;
+		return true;
 	}
 
 }

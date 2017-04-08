@@ -468,7 +468,7 @@ public class TailDetector extends Detector {
 		// ensure that the positions of the nucleus are corrected to
 		// match the original image
 		List<Flagellum> result = new ArrayList<Flagellum>(0);
-		FloatPolygon nucleusOutline = n.createOriginalPolygon();
+		FloatPolygon nucleusOutline = n.toOriginalPolygon();
 		
 		for(Flagellum tail : tails){
 			

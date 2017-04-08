@@ -647,7 +647,7 @@ public abstract class AbstractCellularComponent
 		} 
 		
 		// Check detailed position
-		if(this.createPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
+		if(this.toPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 			return true;
 		} else { 
 			return false;
@@ -677,7 +677,7 @@ public abstract class AbstractCellularComponent
 	public boolean containsOriginalPoint(IPoint p){
 
 		// Check detailed position
-		return this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
+		return this.toOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
 	}
 	
 	/**
@@ -829,7 +829,7 @@ public abstract class AbstractCellularComponent
 	 * @see Nucleus.getPosition
 	 * @return
 	 */
-	public FloatPolygon createOriginalPolygon(){
+	public FloatPolygon toOriginalPolygon(){
 		
 		double minX = this.getBounds().getX();
 		double minY = this.getBounds().getY();
@@ -845,7 +845,7 @@ public abstract class AbstractCellularComponent
 	 * Turn the list of border points into a closed polygon. 
 	 * @return
 	 */
-	public FloatPolygon createPolygon(){
+	public FloatPolygon toPolygon(){
 		return createOffsetPolygon(0, 0);
 	}
 	

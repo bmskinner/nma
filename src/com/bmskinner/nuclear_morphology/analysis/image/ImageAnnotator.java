@@ -138,9 +138,9 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
 		} catch (UnavailableBorderTagException e) {
-			fine("Cannot get OP index");
-			return this;
+			stack(e);	
 		}
+		return this;
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		try {
 			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
 		} catch (UnavailableBorderTagException e) {
-			fine("Cannot get RP index");
+			stack(e);	
 			return this;
 		}
 	}
@@ -175,7 +175,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	 * @return the annotator
 	 */
 	public ImageAnnotator annotateBorder(CellularComponent n, Color c){
-		FloatPolygon p = n.createOriginalPolygon();
+		FloatPolygon p = n.toOriginalPolygon();
 		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 		
 		return annotatePolygon(roi, c);
@@ -388,7 +388,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 					
 					annotatePoint(s.getCentreOfMass(), colour);
 					
-					FloatPolygon p = s.createPolygon();
+					FloatPolygon p = s.toPolygon();
 					PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 					annotatePolygon(roi, colour);
 				}

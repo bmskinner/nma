@@ -97,7 +97,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	@Override
 	public int[] getPosition(){
 		
-		Rectangle bounds = createPolygon().getBounds();
+		Rectangle bounds = toPolygon().getBounds();
 		int newWidth  = (int) bounds.getWidth();
 		int newHeight = (int) bounds.getHeight();
 		int newX      = (int) this.getMinX();
@@ -123,10 +123,10 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	}
 	
 	@Override
-	public FloatPolygon createOriginalPolygon(){
+	public FloatPolygon toOriginalPolygon(){
 		
 		// There is no original position for a consensus
-		return this.createPolygon();
+		return this.toPolygon();
 	}
 	
 	@Override

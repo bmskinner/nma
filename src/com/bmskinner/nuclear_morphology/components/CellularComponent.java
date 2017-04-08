@@ -301,7 +301,7 @@ public interface CellularComponent
 	 * in its source image.
 	 * @return
 	 */
-	FloatPolygon createOriginalPolygon();
+	FloatPolygon toOriginalPolygon();
 	
 	/**
 	 * Create a shape (in this case a Path2D encompassing 
@@ -331,7 +331,7 @@ public interface CellularComponent
 	 * @param list the list of border points
 	 * @return
 	 */
-	FloatPolygon createPolygon();
+	FloatPolygon toPolygon();
 	
 
 	

@@ -740,7 +740,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			} 
 			
 			// Check detailed position
-			if(this.createPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
+			if(this.toPolygon().contains( (float)p.getX(), (float)p.getY() ) ){
 				return true;
 			} else { 
 				return false;
@@ -770,7 +770,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public boolean containsOriginalPoint(IPoint p){
 
 			// Check detailed position
-			return this.createOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
+			return this.toOriginalPolygon().contains( (float)p.getX(), (float)p.getY() );
 		}
 		
 		/**
@@ -893,30 +893,49 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		}
 		
 		/**
+		 * Turn the list of border points into a closed polygon. 
+		 * @return
+		 */
+		public FloatPolygon toPolygon(){
+			return toOffsetPolygon(0, 0);
+		}
+		
+		/**
 		 * Turn the list of border points into a polygon. The points are at the original
 		 * position in a source image.
 		 * @see Nucleus.getPosition
 		 * @return
 		 */
-		public FloatPolygon createOriginalPolygon(){
+		public FloatPolygon toOriginalPolygon(){
 			
-			double minX = this.getBounds().getX();
-			double minY = this.getBounds().getY();
-			
-			double diffX = position[CellularComponent.X_BASE] - minX;
-			double diffY = position[CellularComponent.Y_BASE] - minY;
+			double diffX = originalCentreOfMass.getX() - centreOfMass.getX();
+			double diffY = originalCentreOfMass.getY() - centreOfMass.getY();
 
-			return createOffsetPolygon(  (float) diffX,
-					                     (float) diffY);
+			return toOffsetPolygon(  (float) diffX, (float) diffY);
 		}
-
+		
 		/**
-		 * Turn the list of border points into a closed polygon. 
+		 * Make an offset polygon from the border list of this object
 		 * @return
 		 */
-		public FloatPolygon createPolygon(){
-			return createOffsetPolygon(0, 0);
+		private FloatPolygon toOffsetPolygon(float xOffset, float yOffset){
+			float[] xpoints = new float[borderList.size()+1];
+			float[] ypoints = new float[borderList.size()+1];
+
+			for(int i=0;i<borderList.size();i++){
+				IBorderPoint p = borderList.get(i);
+				xpoints[i] = (float) p.getX() + xOffset;
+				ypoints[i] = (float) p.getY() + yOffset;
+			}
+
+			// Ensure the polygon is closed
+			xpoints[borderList.size()] = (float) borderList.get(0).getX() + xOffset;
+			ypoints[borderList.size()] = (float) borderList.get(0).getY() + yOffset;
+
+			return new FloatPolygon(xpoints, ypoints);
 		}
+
+
 		
 		public Shape toShape(){
 			
@@ -942,42 +961,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			return toOffsetShape(diffX, diffY);
 		}
+			
 		
-		public List<IPoint> getPixelsAsPoints(){
-			
-			// Get a list of all the points within the ROI
-			List<IPoint> result = new ArrayList<IPoint>(0);
-			
-			Rectangle b = this.toShape().getBounds();
-			
-			// get the bounding box of the roi
-			// make a list of all the pixels in the roi
-			int minX = (int) b.getMinX();
-			int maxX = (int) (minX + b.getWidth());
-			
-			int minY = (int) b.getMinY();
-			int maxY = minY + (int) b.getHeight();
-			
-			for(int x=minX; x<=maxX; x++){
-				for(int y=minY; y<=maxY; y++){
-					
-					if(this.containsPoint(x, y)){
-
-						result.add( IPoint.makeNew(x, y));
-					}
-				}
-			}
-			
-			if(result.isEmpty()){
-//				IJ.log("    Roi has no pixels");
-				warn("No points found in roi");
-				fine("X base: "+minX
-						+"  Y base: "+minY
-						+"  X max: "+maxX
-						+"  Y max: "+maxY);
-			}
-			
-			return result;
+		private Shape toOffsetShape(double xOffset, double yOffset){
+			return this.toOffsetShape(xOffset, yOffset, MeasurementScale.PIXELS);
 		}
 		
 		/**
@@ -1019,46 +1006,47 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 		}
 		
-		private Shape toOffsetShape(double xOffset, double yOffset){
-			return this.toOffsetShape(xOffset, yOffset, MeasurementScale.PIXELS);
-//			Path2D.Double path = new Path2D.Double();
+
+
+//		@Override
+//		public List<IPoint> getPixelsAsPoints(){
 //			
-//			if( borderList.size()==0 ){
-//				throw new IllegalArgumentException("Border list is empty");
-//			}
-//						
-//			IBorderPoint first = borderList.get(0);
-//			path.moveTo(first.getX()+xOffset, first.getY()+yOffset);
+//			// Get a list of all the points within the ROI
+//			List<IPoint> result = new ArrayList<IPoint>(0);
 //			
-//			for(IBorderPoint b : this.borderList){
-//				path.lineTo(b.getX()+xOffset, b.getY()+yOffset);
-//			}
-//			path.closePath();
+//			Rectangle b = this.toShape().getBounds();
+//			
+//			// get the bounding box of the roi
+//			// make a list of all the pixels in the roi
+//			int minX = (int) b.getMinX();
+//			int maxX = (int) (minX + b.getWidth());
+//			
+//			int minY = (int) b.getMinY();
+//			int maxY = minY + (int) b.getHeight();
+//			
+//			for(int x=minX; x<=maxX; x++){
+//				for(int y=minY; y<=maxY; y++){
+//					
+//					if(this.containsPoint(x, y)){
 //
-//			return path;
-		}
-
-		/**
-		 * Make an offset polygon from the border list of this object
-		 * @return
-		 */
-		private FloatPolygon createOffsetPolygon(float xOffset, float yOffset){
-			float[] xpoints = new float[borderList.size()+1];
-			float[] ypoints = new float[borderList.size()+1];
-
-			for(int i=0;i<borderList.size();i++){
-				IBorderPoint p = borderList.get(i);
-				xpoints[i] = (float) p.getX() + xOffset;
-				ypoints[i] = (float) p.getY() + yOffset;
-			}
-
-			// Ensure the polygon is closed
-			xpoints[borderList.size()] = (float) borderList.get(0).getX() + xOffset;
-			ypoints[borderList.size()] = (float) borderList.get(0).getY() + yOffset;
-
-			return new FloatPolygon(xpoints, ypoints);
-		}
+//						result.add( IPoint.makeNew(x, y));
+//					}
+//				}
+//			}
+//			
+//			if(result.isEmpty()){
+////				IJ.log("    Roi has no pixels");
+//				warn("No points found in roi");
+//				fine("X base: "+minX
+//						+"  Y base: "+minY
+//						+"  X max: "+maxX
+//						+"  Y max: "+maxY);
+//			}
+//			
+//			return result;
+//		}
 		
+		@Override
 		public int wrapIndex(int i){
 			return wrapIndex(i, this.getBorderLength());
 		}

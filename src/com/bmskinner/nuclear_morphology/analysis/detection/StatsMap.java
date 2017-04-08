@@ -28,6 +28,13 @@ import java.util.Set;
  */
 public class StatsMap {
 	
+	public static final String COM_X = "XM";
+	public static final String COM_Y = "YM";
+	public static final String AREA = "Area";
+	public static final String PERIM = "Perim";
+	public static final String FERET = "Feret";
+	
+	
 	private HashMap<String, Double> values = new HashMap<String, Double>(0);
 	
 	public StatsMap(){

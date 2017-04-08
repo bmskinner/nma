@@ -18,14 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
-import ij.ImageStack;
-import ij.gui.Roi;
-import ij.measure.Calibration;
-import ij.measure.Measurements;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-import ij.process.ImageStatistics;
-
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
@@ -43,14 +35,22 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
+import ij.ImageStack;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.measure.Measurements;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+
 public class SignalDetector extends Detector {
 	
-	private IMutableNuclearSignalOptions options;
+	private INuclearSignalOptions options;
 	private  int channel;
 	private int minThreshold;
 	
@@ -59,7 +59,7 @@ public class SignalDetector extends Detector {
 	 * @param options the size and circularity parameters
 	 * @param channel the RGB channel
 	 */
-	public SignalDetector(IMutableNuclearSignalOptions options, int channel){
+	public SignalDetector(INuclearSignalOptions options, int channel){
 		this.options = options;
 		this.channel = channel;
 		this.minThreshold = options.getThreshold();
@@ -74,7 +74,7 @@ public class SignalDetector extends Detector {
 	 */
 	public List<INuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
 		
-		options.setThreshold(minThreshold); // reset to default;
+		options.unlock().setThreshold(minThreshold); // reset to default;
 		
 		if(options.getDetectionMode().equals(SignalDetectionMode.FORWARD)){
 			finest("Running forward detection");
@@ -111,10 +111,10 @@ public class SignalDetector extends Detector {
 		// the given minimum
 		if(newThreshold > minThreshold){
 			fine( "Threshold set at: "+newThreshold);
-			options.setThreshold(newThreshold);
+			options.unlock().setThreshold(newThreshold);
 		} else {
 			fine( "Threshold kept at minimum: "+minThreshold);
-			options.setThreshold(minThreshold);
+			options.unlock().setThreshold(minThreshold);
 		}
 	}
 	
@@ -152,60 +152,61 @@ public class SignalDetector extends Detector {
 
 		List<INuclearSignal> signals = new ArrayList<INuclearSignal>(0);
 
-		if(!roiList.isEmpty()){
-			
-			fine( roiList.size()+" signals in stack "+stackNumber);
+		if(roiList.isEmpty()){
+			fine( "No signal in stack "+stackNumber);
+			return signals;
+		}
+		
 
-			for( Roi r : roiList){
-				ImageProcessor ip = stack.getProcessor(stackNumber);
-				StatsMap values = measure(r, ip);
-				
-				
-				int xbase     = (int) r.getXBase();
-				int ybase     = (int) r.getYBase();
-				Rectangle bounds = r.getBounds();
-				int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
-				
-				try {
-					INuclearSignal s = new DefaultNuclearSignal( r,
-							IPoint.makeNew(values.get("XM").floatValue(), values.get("YM").floatValue()), 
-							sourceFile, 
-							channel, 
-							originalPosition);
-					
-					s.setScale(n.getScale()); // copy scaling information from source nucleus
+		fine( roiList.size()+" signals in stack "+stackNumber);
 
-					s.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
-					s.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
-					s.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
+		for( Roi r : roiList){
+			ImageProcessor ip = stack.getProcessor(stackNumber);
+			StatsMap values = measure(r, ip);
 
-					/*
+
+			int xbase     = (int) r.getXBase();
+			int ybase     = (int) r.getYBase();
+			Rectangle bounds = r.getBounds();
+			int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+
+			try {
+				INuclearSignal s = new DefaultNuclearSignal( r,
+						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()), 
+						sourceFile, 
+						channel, 
+						originalPosition);
+
+				s.setScale(n.getScale()); // copy scaling information from source nucleus
+
+				s.setStatistic(PlottableStatistic.AREA,      values.get(StatsMap.AREA));
+				s.setStatistic(PlottableStatistic.MAX_FERET, values.get(StatsMap.FERET));
+				s.setStatistic(PlottableStatistic.PERIMETER, values.get(StatsMap.PERIM));
+
+				/*
 			    Assuming the signal were a perfect circle of area equal
 			    to the measured area, get the radius for that circle
-					 */
-					s.setStatistic(PlottableStatistic.RADIUS,  Math.sqrt(values.get("Area")/Math.PI));
+				 */
+				s.setStatistic(PlottableStatistic.RADIUS,  Math.sqrt(values.get(StatsMap.AREA)/Math.PI));
 
 
 
-					// only keep the signal if it is within the nucleus
-					if(n.containsOriginalPoint(s.getCentreOfMass())){
+				// only keep the signal if it is within the nucleus
+				if(n.containsOriginalPoint(s.getOriginalCentreOfMass())){
 
-						// Offset the centre of mass and border points of the signal to match the nucleus offset
-						s.offset(-n.getPosition()[CellularComponent.X_BASE], 
-								-n.getPosition()[CellularComponent.Y_BASE]);
+					// Offset the centre of mass and border points of the signal to match the nucleus offset
+					s.offset(-n.getPosition()[CellularComponent.X_BASE], 
+							-n.getPosition()[CellularComponent.Y_BASE]);
 
-						signals.add(s);
+					signals.add(s);
 
 
-					}
-				} catch(IllegalArgumentException e){
-					stack("Cannot make signal", e);
-					continue;
 				}
-				
+			} catch(IllegalArgumentException e){
+				stack("Cannot make signal", e);
+				continue;
 			}
-		} else {
-			fine( "No signal in stack "+stackNumber);
+
 		}
 		return signals;
 	}
@@ -233,7 +234,7 @@ public class SignalDetector extends Detector {
 		int stackNumber = ImageImporter.rgbToStack(channel);
 		
 		ImageProcessor ip = stack.getProcessor(stackNumber);
-		FloatPolygon polygon = n.createOriginalPolygon();
+		FloatPolygon polygon = n.toOriginalPolygon();
 		
 		// map brightness to count
 		Map<Integer, Integer> counts = new HashMap<Integer, Integer>(0);
