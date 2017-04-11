@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions.IMutableHoughDetectionOptions;
 
 /**
@@ -49,8 +50,8 @@ public class HoughSettingsPanel extends SettingsPanel {
 
 	private IMutableHoughDetectionOptions options;
 	
-	public HoughSettingsPanel(final IMutableHoughDetectionOptions options){
-		this.options = options;
+	public HoughSettingsPanel(final IHoughDetectionOptions options){
+		this.options = options.unlock();
 		createSpinners();
 		createPanel();
 	}
@@ -168,6 +169,8 @@ public class HoughSettingsPanel extends SettingsPanel {
 	
 	private void createPanel(){
 		
+		try {
+		
 		this.setLayout(new GridBagLayout());
 
 		List<JLabel> labelList	   = new ArrayList<JLabel>();
@@ -189,6 +192,9 @@ public class HoughSettingsPanel extends SettingsPanel {
 
 					
 		addLabelTextRows(labels, fields, this );
+		} catch(Exception e){
+			error(e.getMessage(), e);
+		}
 		
 	}
 	

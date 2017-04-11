@@ -33,6 +33,12 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  */
 public interface StatisticalCollection {
 	
+	/**
+	 * Force the given statistic to be recalculated
+	 * @param stat the statistic to recalculate
+	 * @param component the cellular component to fetch from
+	 */
+	void clear(PlottableStatistic stat, String component);
 
 	/**
 	 * Get the median value of the given stat in the collection

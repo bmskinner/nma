@@ -413,13 +413,11 @@ public class MainWindow
 		 */
 		public Runnable create(final SignalChangeEvent event){
 			
-			
-			
 			if(event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)){
 				return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), MainWindow.this); 
 			}
 			
-			if(event.type().equals("DatasetArithmeticAction")){
+			if(event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC)){
 				return new DatasetArithmeticAction(selectedDatasets, MainWindow.this); 
 			}
 			
@@ -431,7 +429,7 @@ public class MainWindow
 				return new AddNuclearSignalAction(selectedDataset,  MainWindow.this);
 			}
 			
-			if(event.type().equals("PostFISHRemappingAction")){
+			if(event.type().equals(SignalChangeEvent.POST_FISH_MAPPING)){
 				return new FishRemappingAction(selectedDatasets, MainWindow.this);
 			}
 			
@@ -898,49 +896,6 @@ public class MainWindow
 		threadManager.submit(task);
 
 	}
-	
-//	private void resegmentDatasets(){
-//		
-//		Runnable task = () -> {
-//			final int flag = CURVE_REFOLD; // ensure consensus is replaced
-//			// Recalculate the head and hump positions for rodent sperm
-//			if(populationsPanel.getSelectedDatasets().get(0).getCollection().getNucleusType().equals(NucleusType.RODENT_SPERM)){
-//
-//				try{
-//					fine("Replacing nucleus roi patterns");
-//					for( Nucleus n : populationsPanel.getSelectedDatasets().get(0).getCollection().getNuclei()){
-//
-//						DefaultRodentSpermNucleus r = (DefaultRodentSpermNucleus) n;  
-//
-//						r.splitNucleusToHeadAndHump();
-//						try {
-//
-//							r.calculateSignalAnglesFromPoint(r.getPoint(Tag.ORIENTATION_POINT));
-//						} catch (Exception e) {
-//							error("Error restoring signal angles", e);
-//						}
-//
-//					}
-//
-//				}catch(Exception e){
-//					error("Error recalculating angles", e);
-//				}
-//			}
-//			
-//			fine("Regenerating charts");
-//			for(TabPanel panel : detailPanels){
-//				panel.refreshChartCache();
-//				panel.refreshTableCache();
-//			}
-//			
-//			fine("Resegmenting datasets");
-//			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
-//			Runnable r = new RunSegmentationAction(list, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-//			r.run();
-//		};
-//		threadManager.execute(task);
-//	}
-
 	
 	
 	@Override

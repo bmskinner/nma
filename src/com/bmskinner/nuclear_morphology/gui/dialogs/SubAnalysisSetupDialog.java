@@ -47,8 +47,10 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
 	 */
 	public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
 		super( mw, true);
+		fine("Making sub-analysis setup dialog");
 		this.dataset = dataset;
 		this.setTitle(title);
+		this.setModal(true);
 	}
 	
 	

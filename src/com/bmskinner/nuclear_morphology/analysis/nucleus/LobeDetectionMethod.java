@@ -15,6 +15,7 @@ import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
@@ -63,16 +64,15 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 	private void run() {
 		
 		// Clear existing lobes
-		for(ICell cell : dataset.getCollection().getCells()){
-			for(Nucleus n : cell.getNuclei()){
-				
-				if(n instanceof LobedNucleus){
-					LobedNucleus l = (LobedNucleus) n;
-					l.removeAllLobes();
-					
-				}
+		dataset.getCollection().getNuclei().stream().forEach( n -> {
+			if(n instanceof LobedNucleus){
+				((LobedNucleus)n).removeAllLobes();
+				n.setStatistic(PlottableStatistic.LOBE_COUNT, Statistical.STAT_NOT_CALCULATED);
 			}
-		}
+		});
+		
+		// Remove existing cached stats
+		dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.NUCLEUS);
 		
 		
 		// For each cell
@@ -121,8 +121,10 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 				
 			} catch (UnloadableImageException e) {
 				warn("Unable to load cell image");
+				stack(e);
 			} catch (MissingOptionException e) {
 				warn("Missing nucleus detection options for thresholding");
+				stack(e);
 			} catch (Exception e) {
 				warn("Error in lobe detection");
 				stack(e.getMessage(), e);

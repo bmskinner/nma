@@ -73,6 +73,7 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
 	 */
 	public SettingsDialog(Frame owner, boolean modal){
 		super(owner, modal);
+		fine("Making settings dialog");
 		this.setLocationRelativeTo(null);
 	}
 	

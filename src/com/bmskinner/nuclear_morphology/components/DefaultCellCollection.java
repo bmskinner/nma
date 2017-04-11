@@ -754,6 +754,12 @@ public class DefaultCellCollection
 	 * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
 	 * 
 	 */
+	
+	@Override
+	public void clear(PlottableStatistic stat, String component){
+		statsCache.clear(stat, component);
+	}
+	
 
 	@Override
 	public double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)  throws Exception {

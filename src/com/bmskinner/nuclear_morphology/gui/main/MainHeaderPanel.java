@@ -52,7 +52,6 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		if(Version.currentVersion().isNewerThan(Version.v_1_13_4)){
 			
-			// TODO: Enable this when neutrophil analysis is ready to go
 	        final JPopupMenu popup = new JPopupMenu();
 	        
 	        

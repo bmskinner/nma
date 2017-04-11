@@ -860,6 +860,11 @@ public class CellCollection implements ICellCollection {
 	private Nucleus[] getNucleusArray(){
 		return this.getNuclei().toArray(new Nucleus[0]);
 	}
+	
+	@Override
+	public void clear(PlottableStatistic stat, String component){
+//		statsCache.clear(stat, component);
+	}
 
 	public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale)  throws Exception {
 		if(this.getNucleusCount()==0){

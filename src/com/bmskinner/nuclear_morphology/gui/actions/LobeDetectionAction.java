@@ -19,7 +19,7 @@ public class LobeDetectionAction extends ProgressableAction {
 	
 	@Override
 	public void run(){
-
+		fine("Getting lobe detection options");
 		SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(mw, dataset);
 
 		if(setup.isReadyToRun()){ // if dialog was cancelled, skip
@@ -34,6 +34,7 @@ public class LobeDetectionAction extends ProgressableAction {
 			ThreadManager.getInstance().submit(worker);
 
 		} else {
+			fine("Cancelling lobe detection");
 			this.cancel();
 		}
 		setup.dispose();

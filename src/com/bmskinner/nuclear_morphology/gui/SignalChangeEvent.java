@@ -24,11 +24,13 @@ public class SignalChangeEvent extends EventObject {
 	
 	public static final String SIGNAL_COLOUR_CHANGE = "SignalColourUpdate";
 	public static final String GROUP_VISIBLE_PREFIX = "GroupVisble_";
+	public static final String POST_FISH_MAPPING = "PostFISHRemappingAction";
 	
 	public static final String LOBE_DETECTION = "LobeDetection";
 	public static final String EXPORT_STATS   = "ExportStatsAction";
 	public static final String EXPORT_WORKSPACE = "ExportWorkspace";
 	public static final String ADD_NUCLEAR_SIGNAL = "AddNuclearSignalAction";
+	public static final String DATASET_ARITHMETIC = "DatasetArithmeticAction";
 	
 	private static final long serialVersionUID = 1L;
 	private String message;
