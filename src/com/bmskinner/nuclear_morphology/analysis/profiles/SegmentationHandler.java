@@ -314,6 +314,10 @@ public class SegmentationHandler implements Loggable {
 			warn("Unable to update border tag index");
 			stack("Profiling error", e);
 			return;
+		} catch(Exception e){
+			warn("Unexpected error");
+			stack(e);
+			return;
 		}
 	}
 	

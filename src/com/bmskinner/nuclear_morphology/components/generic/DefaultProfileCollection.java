@@ -23,6 +23,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -379,7 +380,9 @@ public class DefaultProfileCollection implements IProfileCollection {
 		if(tag.equals(Tag.REFERENCE_POINT)){
 			return;
 		}
+		cache.remove(tag);
 		indexes.put(tag, offset);
+		
 	}
 	
 	/* (non-Javadoc)
@@ -702,6 +705,14 @@ public class DefaultProfileCollection implements IProfileCollection {
 				this.tag = tag;
 			}
 			
+			public boolean has(ProfileType t){
+				return type.equals(t);
+			}
+			
+			public boolean has(Tag t){
+				return tag.equals(t);
+			}
+			
 			@Override
 			public int hashCode() {
 				final int prime = 31;
@@ -769,6 +780,23 @@ public class DefaultProfileCollection implements IProfileCollection {
 		public IProfile getProfile(final ProfileType type, final double quartile, final Tag tag){
 			ProfileKey key = new ProfileKey(type, quartile, tag);
 			return map.get(key);
+		}
+		
+		public void remove(final ProfileType type, final double quartile, final Tag tag){
+			ProfileKey key = new ProfileKey(type, quartile, tag);
+			map.remove(key);
+		}
+		
+		public void remove(final Tag t){
+			
+			Iterator<ProfileKey> it = map.keySet().iterator();
+			while(it.hasNext()){
+				ProfileKey k = it.next();
+				if(k.has(t)){
+					it.remove();
+				}
+			}
+			
 		}
 	}
 

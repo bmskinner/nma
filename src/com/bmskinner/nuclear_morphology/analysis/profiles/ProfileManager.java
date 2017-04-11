@@ -101,25 +101,17 @@ public class ProfileManager implements Loggable {
 				int newIndex;
 				try {
 					newIndex = n.getProfile(type).getSlidingWindowOffset(median);
-//<<<<<<< HEAD
-//				} catch (UnavailableProfileTypeException | ProfileException e1) {
-//					stack("Unable to get sliding window offset from nucleus profile", e1);
-//=======
+
 				} catch (ProfileException | UnavailableProfileTypeException e1) {
 					warn("Error getting offset from nucleus "+n.getNameAndNumber());
 					stack(e1.getMessage(), e1);
-//>>>>>>> working_profiles
 					return;
 				}
 				try {
 					n.setBorderTag(tag, newIndex);
 				} catch (IndexOutOfBoundsException e) {
-//<<<<<<< HEAD
-//					stack("Cannot update nucleus tag", e);
-//=======
 					warn("Error updating nucleus tag "+n.getNameAndNumber());
 					stack(e.getMessage(), e);
-//>>>>>>> working_profiles
 					return;
 				}		
 				
@@ -293,7 +285,7 @@ public class ProfileManager implements Loggable {
 		/*
 		 * Set the border tag in the median profile 
 		 */
-		finest("Setting border tag in median profiles to "+index+ " from "+oldIndex);
+		finer("Setting "+tag+" in median profiles to "+index+ " from "+oldIndex);
 		updateProfileCollectionOffsets(tag, index);
 		
 		// Use the median profile to set the tag in the nuclei
@@ -301,6 +293,7 @@ public class ProfileManager implements Loggable {
 		IProfile median = collection.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN); 
 		
+		finer("Updating tag in nuclei");
 		offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
 		
 		collection.updateVerticalNuclei();
