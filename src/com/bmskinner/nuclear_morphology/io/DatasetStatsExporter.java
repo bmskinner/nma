@@ -39,6 +39,10 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		}
 		exportFile = file;
 		
+		if(exportFile.exists()){
+			exportFile.delete();
+		}
+		
 	}
 	
 	/**

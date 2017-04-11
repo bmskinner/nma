@@ -195,7 +195,7 @@ public class FloatPoint
 	 */
 	@Override
 	public String toString(){
-		return this.getXAsInt()+","+this.getYAsInt();
+		return this.getXAsInt()+"-"+this.getYAsInt();
 	}
 
 	@Override
