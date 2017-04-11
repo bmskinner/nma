@@ -79,12 +79,12 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	}
 	
 	/**
-	 * Write a column header line to the StringBuilder
+	 * Write a column header line to the StringBuilder. Only nuclear stats for now
 	 * @param outLine
 	 */
 	private void writeHeader(StringBuilder outLine){
 		
-		outLine.append("Dataset\tCellID\tComponent\tImage\t");
+		outLine.append("Dataset\tCellID\tComponent\tImage\tCentre_of_mass\t");
 		
 		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
 			outLine.append(s.label(MeasurementScale.PIXELS)+"\t");
@@ -97,30 +97,60 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		outLine.append(NEWLINE);
 	}
 	
+	/**
+	 * Test if the given component is present in the dataset
+	 * @param d
+	 * @param component
+	 * @return
+	 */
+	private boolean hasComponent(IAnalysisDataset d, String component){
+		
+		if(CellularComponent.CYTOPLASM.equals(component)){
+			return d.getCollection().getCells().stream().allMatch(  c -> c.hasCytoplasm()  );
+		}
+		
+		if(CellularComponent.NUCLEUS.equals(component)){
+			return d.getCollection().getCells().stream().allMatch(  c -> c.hasNucleus()  );
+		}
+		
+		return false;
+		
+	}
+	
+	/**
+	 * Write the dataset level info that will always be present	 * 
+	 */
+	private void writeDatasetHeader(){
+		
+		
+	}
+	
 	public void export(IAnalysisDataset d, StringBuilder outLine, File exportFile){
 		log("Exporting stats...");
 
 		for(ICell cell : d.getCollection().getCells()){
 
-			if(cell.hasCytoplasm()){
-				
-				ICytoplasm c = cell.getCytoplasm();
-				outLine.append(d.getName()+"\t");
-				outLine.append(cell.getId()+"\t");
-				outLine.append("Cytoplasm\t");
-				outLine.append(c.getSourceFileName()+"\t");
-				appendNucleusStats(outLine, d, cell, c);
-				outLine.append(NEWLINE);
-			}
+//			if(cell.hasCytoplasm()){
+//				
+//				ICytoplasm c = cell.getCytoplasm();
+//				outLine.append(d.getName()+"\t")
+//					.append(cell.getId()+"\t")
+//					.append("Cytoplasm\t")
+//					.append(c.getSourceFileName()+"\t");
+//				
+//				appendNucleusStats(outLine, d, cell, c);
+//				outLine.append(NEWLINE);
+//			}
 			
 			if(cell.hasNucleus()){
 				
 				for(Nucleus n : cell.getNuclei()){
 					
-					outLine.append(d.getName()+"\t");
-					outLine.append(cell.getId()+"\t");
-					outLine.append("Nucleus_"+n.getNameAndNumber()+"\t");
-					outLine.append(n.getSourceFileName()+"\t");
+					outLine.append(d.getName()+"\t")
+						.append(cell.getId()+"\t")
+						.append("Nucleus_"+n.getNameAndNumber()+"\t")
+						.append(n.getSourceFileName()+"\t")
+						.append(n.getOriginalCentreOfMass().toString()+"\t");
 					appendNucleusStats(outLine, d, cell, n);
 					outLine.append(NEWLINE);
 				}

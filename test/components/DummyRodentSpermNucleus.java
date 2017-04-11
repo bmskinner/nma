@@ -454,11 +454,11 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
-	@Override
-	public List<IPoint> getPixelsAsPoints() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public List<IPoint> getPixelsAsPoints() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 	@Override
 	public Rectangle getBounds() {
