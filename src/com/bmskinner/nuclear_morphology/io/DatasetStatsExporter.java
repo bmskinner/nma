@@ -6,7 +6,6 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
@@ -24,7 +23,7 @@ import ij.IJ;
  */
 public class DatasetStatsExporter implements Exporter, Loggable {
 	
-//	private File exportFolder;
+	private static final String EXPORT_MESSAGE = "Exporting stats...";
 	private File exportFile;
 	private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export"+Exporter.TAB_FILE_EXTENSION;
 	
@@ -51,7 +50,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	 */
 	public void export(IAnalysisDataset d){
 		
-//		File exportFile = makeFile(d.getName());
+		log(EXPORT_MESSAGE);
 		
 		StringBuilder outLine = new StringBuilder();
 		writeHeader(outLine);
@@ -66,13 +65,10 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	 */
 	public void export(List<IAnalysisDataset> list){
 		
-//		File exportFile = makeFile(DEFAULT_MULTI_FILE_NAME);
-		
+		log(EXPORT_MESSAGE);
 		StringBuilder outLine = new StringBuilder();
-		
-//		NucleusType type = IAnalysisDataset.getBroadestNucleusType(list);
 
-		
+
 		writeHeader(outLine);
 		
 		for(IAnalysisDataset d : list){
@@ -130,7 +126,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	}
 	
 	public void export(IAnalysisDataset d, StringBuilder outLine, File exportFile){
-		log("Exporting stats...");
+//		log("Exporting stats...");
 
 		for(ICell cell : d.getCollection().getCells()){
 
