@@ -26,10 +26,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -60,6 +62,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
@@ -134,6 +137,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JPanel lowerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		
 		datasetBoxOne = new DatasetSelectionPanel(datasets);
+		
+		// Can warp onto any dataset with consensus
+//		List<IAnalysisDataset> targets = DatasetListManager.getInstance()
+//				.getAllDatasets().stream()
+//				.filter( d -> d.getCollection().hasConsensus())
+//				.collect(Collectors.toList());
+//		
+//		datasetBoxTwo = new DatasetSelectionPanel(targets);
 		datasetBoxTwo = new DatasetSelectionPanel(datasets);
 		
 		datasetBoxOne.setSelectedDataset(datasets.get(0));
@@ -431,7 +442,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				}
 				
 			} catch (Exception e){
-				error("Error in signal warper", e);
+				warn("Error in warper");
+				stack("Error in signal warper", e);
 				return false;
 			} 
 			
@@ -628,6 +640,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			int h = warpedImages[0].getHeight();
 			
 			// Create an empty white processor
+			return createBlankProcessor(w, h);
+		}
+		
+		private ImageProcessor createBlankProcessor(int w, int h){
+			
+			// Create an empty white processor
 			ImageProcessor ip = new ByteProcessor(w, h);
 			for(int i=0; i<ip.getPixelCount(); i++){
 				ip.set(i, 255); // set all to white initially
@@ -635,6 +653,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			return ip;
 		}
+		
 		
 		/**
 		 * Create a new image processor with the average of all warped images

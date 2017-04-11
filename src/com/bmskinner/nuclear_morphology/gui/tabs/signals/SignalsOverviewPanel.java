@@ -31,9 +31,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -71,6 +73,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	private JPanel		checkboxPanel;
 	
 	private JButton warpButton;
+	
+	private JLabel headerText;
 	
 	private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
 	
@@ -219,8 +223,6 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				// apply the appropriate action 
 //				box.setActionCommand(SET_SIGNAL_GROUP_VISIBLE_ACTION+signalGroup);
 				box.addActionListener( e ->{
-//					signalGroup = getSignalGroupFromLabel(e.getActionCommand());
-//					JCheckBox box = (JCheckBox) e.getSource();
 					try {
 						activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
 					} catch (UnavailableSignalGroupException e1) {
@@ -252,6 +254,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		
 
 		panel.add(warpButton);
+		
+		headerText = new JLabel("");
+		panel.add(headerText);
+		
 		return panel;
 	}
 		
@@ -300,6 +306,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 			if(IAnalysisDataset.haveConsensusNuclei(getDatasets())){
 				
 				// Check at least one of the selected datasets has signals
+				String text = "";
+				
 				boolean hasSignals = false;
 				for(IAnalysisDataset d : getDatasets()){
 				
@@ -313,15 +321,23 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 				// Segments need to match for mesh creation
 				boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());		
 				
+				if(!segmentsMatch){
+					text = "Segments do not match between datasets";
+				}
+				
 				if(hasSignals && segmentsMatch){
 					warpButton.setEnabled(true);
 				} else {
 					warpButton.setEnabled(false);
+					headerText.setText(text);
 				}
+				
+				
 				
 				
 			} else {
 				warpButton.setEnabled(false);
+				headerText.setText("Datasets do not all have consensus");
 			}
 		}
 	}
