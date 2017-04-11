@@ -64,6 +64,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -73,6 +74,13 @@ import ij.process.ImageProcessor;
 
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
+	
+	private static final String SOURCE_DATASET_LBL  = "Source dataset";
+	private static final String TARGET_DATASET_LBL  = "Target dataset";
+	private static final String SIGNAL_GROUP_LBL    = "Signal group";
+	private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
+	private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
+	private static final String RUN_LBL             = "Run";
 	
 	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanel;
@@ -153,7 +161,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		datasetBoxOne.addActionListener(this);
 		datasetBoxTwo.addActionListener(this);
 		
-		upperPanel.add(new JLabel("Source dataset"));
+		upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
 		upperPanel.add(datasetBoxOne);
 		
 		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
@@ -167,34 +175,33 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			signalBox.setEnabled(false);
 		}
 
-		upperPanel.add(new JLabel("Signal group"));
+		upperPanel.add(new JLabel(SIGNAL_GROUP_LBL));
 		upperPanel.add(signalBox);		
-		finest("Added signal group box");
+
 				
 		signalBox.addActionListener(this);
 		
-		cellsWithSignalsBox = new JCheckBox("Only include cells with signals", true);
+		cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
 		cellsWithSignalsBox.addActionListener(this);
 		upperPanel.add(cellsWithSignalsBox);
 		
-		straightenMeshBox = new JCheckBox("Straighten meshes", false);
+		straightenMeshBox = new JCheckBox(STRAIGHTEN_MESH_LBL, false);
 		straightenMeshBox.addActionListener(this);
 //		upperPanel.add(straightenMeshBox);
 		
 		
-		lowerPanel.add(new JLabel("Target dataset"));
+		lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
 		lowerPanel.add(datasetBoxTwo);
 		
-		runButton = new JButton("Run");
+		runButton = new JButton(RUN_LBL);
 		
 		runButton.addActionListener( e -> {
 
 				Runnable task = () -> { 
 					runWarping();
 				};
-				Thread thr = new Thread(task);
-				thr.start();
 				
+				ThreadManager.getInstance().submit(task);			
 			
 		});	
 

@@ -1,10 +1,14 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
@@ -14,6 +18,8 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
+import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 
 @SuppressWarnings("serial")
@@ -75,6 +81,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 			.setCell(this.getCellModel().getCell())
 			.setScale(GlobalOptions.getInstance().getScale())
 			.setTarget(table)
+			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer())
 			.build();
 
 		try{
@@ -122,6 +129,31 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 			return new CellTableDatasetCreator(options, getCellModel().getCell()).createPairwiseSignalDistanceTable();
 		} else {
 			return AbstractTableCreator.createBlankTable();
+		}
+	}
+	
+	/**
+	 * Colour colocalising signal table. Self matches are greyed out.
+	 */
+	private class CellSignalColocalisationRenderer extends DefaultTableCellRenderer {
+
+		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	        
+			//Cells are by default rendered as a JLabel.
+			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+			Color bgColour = Color.WHITE;
+			Color fgColour = Color.BLACK;
+			
+			if(row==column-1){
+				bgColour = Color.LIGHT_GRAY;
+				fgColour = Color.LIGHT_GRAY;
+			}
+
+			setBackground(bgColour);
+			setForeground(fgColour);
+
+			return this;
 		}
 	}
 

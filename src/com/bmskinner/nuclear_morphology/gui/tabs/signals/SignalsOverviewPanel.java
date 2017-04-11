@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -256,6 +257,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		panel.add(warpButton);
 		
 		headerText = new JLabel("");
+		headerText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		panel.add(headerText);
 		
 		return panel;
