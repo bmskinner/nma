@@ -849,6 +849,11 @@ public class VirtualCellCollection implements ICellCollection {
 	public int getMaxProfileLength() {
 		return Arrays.stream(this.getArrayLengths()).max().orElse(0); //Stats.max(values);
 	}
+	
+	@Override
+	public void clear(PlottableStatistic stat, String component){
+		statsCache.clear(stat, component);
+	}
 
 
 	@Override
