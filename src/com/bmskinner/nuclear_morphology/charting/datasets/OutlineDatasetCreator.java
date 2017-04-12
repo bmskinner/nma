@@ -168,6 +168,11 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
 					IBorderPoint p;
 					try {
+						/*
+						 * Note that the original border point is used here to avoid mismatches with the border tags
+						 * drawn in other methods.
+						 */
+//						p = t.getBorderPoint(offsetIndex);
 						p = t.getOriginalBorderPoint(offsetIndex);
 					} catch (UnavailableBorderPointException e) {
 						throw new ChartDatasetCreationException("Cannot get border point at index "+offsetIndex, e);

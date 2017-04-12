@@ -20,17 +20,13 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.charting.charts;
 
-import ij.process.ImageProcessor;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -76,17 +72,16 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+
+import ij.process.ImageProcessor;
 
 /**
  * Factory for creating outlines of cellular components
@@ -226,10 +221,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		}
 		
 		// Get the bounding box size for the consensus, to find the offsets for the images created
-		Rectangle r = dataset.getCollection().getConsensus().getBounds(); //.createPolygon().getBounds();
+		Rectangle2D r = dataset.getCollection().getConsensus().getBounds(); //.createPolygon().getBounds();
 		r = r==null ? dataset.getCollection().getConsensus().toPolygon().getBounds() : r; // in case the bounds were not set (fixed 1.12.2)
-		int w = (int) ( (double) r.width*1.2);
-		int h = (int) ( (double) r.height*1.2);
+		int w = (int) ( (double) r.getWidth()*1.2);
+		int h = (int) ( (double) r.getHeight()*1.2);
 		
 		int xOffset = w >>1;
 		int yOffset = h >>1;
@@ -487,8 +482,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 		IAnalysisDataset dataset = options.firstDataset();
 		
 		if(options.getRotateMode().equals(RotationMode.VERTICAL)){
-				cell = new DefaultCell(cell.getNucleus().getVerticallyRotatedNucleus());
-				finest("Fetched vertical nucleus");
+			Nucleus n = cell.getNucleus().getVerticallyRotatedNucleus();
+			cell = new DefaultCell(n);
 		}
 				
 		CellDataset cellDataset = new CellDataset(cell);

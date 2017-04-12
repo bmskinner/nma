@@ -20,12 +20,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -34,7 +28,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.OptionalDataException;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +55,12 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
+
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 /**
  * An abstract implementation of {@link CellularComponent}, which is extended
@@ -277,11 +276,16 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		for(IBorderPoint p : borderList){
 			xMax = p.getX()>xMax ? p.getX():xMax;
 			xMin = p.getX()<xMin ? p.getX():xMin;
-			yMax = p.getY()>yMax ? p.getX():yMax;
-			yMin = p.getX()<yMin ? p.getX():yMin;
+			yMax = p.getY()>yMax ? p.getY():yMax;
+			yMin = p.getY()<yMin ? p.getY():yMin;
 		}
 		
-		bounds = new Rectangle2D.Double(xMin, yMin, xMax-xMin, yMax-yMin);
+		double w = xMax-xMin;
+		double h = yMax-yMin;
+		
+		
+		// Constructor for rectangle - upper-left point plus w and h;
+		bounds = new Rectangle2D.Double(xMin, yMax, w, h);
 	}
 	
 	
@@ -353,26 +357,31 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		last.setPrevPoint(borderList.get(borderList.size()-2));
 	}
 	
+	@Override
 	public boolean isSmoothByDefault(){
 		return true;
 	}
 	
+	@Override
 	public UUID getID() {
 		return this.id;
 	}
 	
-
+	@Override
 	public int[] getPosition() {
 		return this.position;
 	}
 	
+	@Override
 	public IPoint getOriginalBase(){
 		return IPoint.makeNew(position[X_BASE], position[Y_BASE]);
 	}
 	
-	public Rectangle getBounds() {
-		return new Rectangle( (int) bounds.getX(), (int)bounds.getY(), (int)bounds.getWidth(), (int)bounds.getHeight());
-//		return bounds;
+	@Override
+	public Rectangle2D getBounds() {
+
+//		return new Rectangle( (int) bounds.getX(), (int)bounds.getY(), (int)bounds.getWidth(), (int)bounds.getHeight());
+		return bounds;
 //		return this.toShape().getBounds();
 	}
 	
@@ -380,11 +389,12 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 	 * Get the source folder for images
 	 * @return
 	 */
+	@Override
 	public File getSourceFolder(){
 		return this.sourceFile.getParentFile();
 	}
 	
-
+	@Override
 	public void updateSourceFolder(File newFolder) {
 		File oldFile = sourceFile;
 		String oldName = oldFile.getName();
@@ -1380,12 +1390,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			if(angle!=0){
 
 				for(IMutablePoint p : borderList){
-//					log(p.toString());
 					IPoint newPoint = getPositionAfterRotation(p, angle);
 					p.set(newPoint);
-//					log(p.toString());
 				}
 			}
+			calculateBounds();
 			shapeCache.clear();
 					
 		}

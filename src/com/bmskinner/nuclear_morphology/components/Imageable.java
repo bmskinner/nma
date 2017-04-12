@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.components;
 import ij.process.ImageProcessor;
 
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.List;
 
@@ -133,7 +134,7 @@ public interface Imageable {
 	 * Get the bounding rectangle for the object.
 	 * @return the bounding rectangle
 	 */
-	Rectangle getBounds();
+	Rectangle2D getBounds();
 	
 	/**
 	 * Get the folder of the image the component was found in.
@@ -163,6 +164,12 @@ public interface Imageable {
 	 * @return a file name without extension
 	 */
 	String getSourceFileNameWithoutExtension();
+	
+	/**
+	 * Update the image source folder to the given new folder
+	 * @param newFolder
+	 */
+	void updateSourceFolder(File newFolder);
 	
 	
 	/**
