@@ -362,12 +362,15 @@ public class DefaultNucleus
 		fine("Creating new vertical nucleus: "+verticalNucleus.getClass().getSimpleName());
 
 		verticalNucleus.alignVertically();	
+		
+		double h = verticalNucleus.getBounds().getHeight();
+		double w = verticalNucleus.getBounds().getWidth();
+		
 
+		this.setStatistic(PlottableStatistic.BOUNDING_HEIGHT, h );
+		this.setStatistic(PlottableStatistic.BOUNDING_WIDTH,  w );
 
-		this.setStatistic(PlottableStatistic.BOUNDING_HEIGHT, verticalNucleus.getBounds().getHeight());
-		this.setStatistic(PlottableStatistic.BOUNDING_WIDTH,  verticalNucleus.getBounds().getWidth());
-
-		double aspect = verticalNucleus.getBounds().getHeight() / verticalNucleus.getBounds().getWidth();
+		double aspect = h / w;
 		this.setStatistic(PlottableStatistic.ASPECT,  aspect);
 
 		this.setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);

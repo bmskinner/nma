@@ -106,14 +106,7 @@ public interface Nucleus
 	 */
 //	public String getOutputFolderName();
 	
-	
-	/**
-	 * Update the image source folder to the given new folder
-	 * @param newFolder
-	 * @throws Exception 
-	 */
-	public void updateSourceFolder(File newFolder);
-	
+		
 	
 	/**
 	 * Fetch the vertically oriented copy of the nucleus. Calculate if 

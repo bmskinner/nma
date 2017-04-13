@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import ij.process.ImageProcessor;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -95,6 +96,12 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 			throws UnloadableImageException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void updateSourceFolder(File newFolder) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

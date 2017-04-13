@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -164,14 +165,14 @@ public class ShellRandomDistributionCreator implements Loggable {
 	 */
 	private IPoint createRandomPoint(CellularComponent template){
 		
-		Rectangle r = template.getBounds();
+		Rectangle2D r = template.getBounds();
 		
 		
 		// Make a random position in the rectangle
 		// nextDouble is exclusive of the top value,
 		// so add 1 to make it inclusive
-		double rx = ThreadLocalRandom.current().nextDouble(r.x, r.width + 1);
-		double ry = ThreadLocalRandom.current().nextDouble(r.y, r.height + 1);
+		double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
+		double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
 		
 		IPoint p = IPoint.makeNew(rx, ry);
 		
