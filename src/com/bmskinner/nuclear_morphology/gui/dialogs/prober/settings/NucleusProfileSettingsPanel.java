@@ -76,8 +76,8 @@ public class NucleusProfileSettingsPanel extends SettingsPanel  {
 				}
 
 				if(type.equals(NucleusType.PIG_SPERM)){
-					nucleusOptions.setMinCirc(  0.2 );
-					nucleusOptions.setMaxCirc(  0.8 );
+					nucleusOptions.setMinCirc(  0.1 );
+					nucleusOptions.setMaxCirc(  0.9 );
 				}
 
 				fireOptionsChangeEvent();
