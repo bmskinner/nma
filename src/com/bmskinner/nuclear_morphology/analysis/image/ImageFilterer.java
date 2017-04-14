@@ -452,6 +452,32 @@ public class ImageFilterer extends AbstractImageFilterer {
 
 	}
 	
+	/**
+	 * Dilate by the given amount
+	 * @param ip the image processor. It must be convertible to a ByteProcessor
+	 * @param amount the radius of the circle
+	 * @return a new ByteProcessor containing the closed image
+	 */
+	public ImageFilterer dilate(int amount) {
+
+		ByteProcessor result = ip.convertToByteProcessor();
+
+		int shift    = 1;
+		int[] offset = {0,0}; // no offsets to the structure element
+		int elType   = StructureElement.CIRCLE; //circle
+		
+		StructureElement se = new StructureElement(elType,  shift,  amount, offset);
+		MorphoProcessor  mp = new MorphoProcessor(se);
+
+		/*
+		 * Better way of closing.
+		 * Dilate, fill, then erode
+		 */
+		mp.dilate(result);
+		return new ImageFilterer(result);
+
+	}
+	
 	// 
     /**
      * Based on the ImageJ Fill holes command:

@@ -129,5 +129,19 @@ public interface Nucleus
 	 * @return
 	 */
 	public boolean isClockwiseRP();
+	
+	/**
+	 * Thrown when a nucleus type in a collection is incorrect for a requested analysis
+	 * @author ben
+	 * @since 1.13.5
+	 *
+	 */
+	public class IncorrectNucleusTypeException extends Exception {
+		private static final long serialVersionUID = 1L;
+		public IncorrectNucleusTypeException() { super(); }
+		public IncorrectNucleusTypeException(String message) { super(message); }
+		public IncorrectNucleusTypeException(String message, Throwable cause) { super(message, cause); }
+		public IncorrectNucleusTypeException(Throwable cause) { super(cause); }
+	}
 			
 }

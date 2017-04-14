@@ -5,8 +5,10 @@ import ij.gui.Roi;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -19,29 +21,36 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 	implements LobedNucleus {
 
 	private static final long serialVersionUID = 1L;
-	
-	
-	Set<IPoint> lobeCoMs = new HashSet<IPoint>();
+		
+	Set<Lobe> lobes = new HashSet<Lobe>();
 
 	public DefaultLobedNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number) {
 		super(roi, centreOfMass, f, channel, position, number);
 		
 	}
+	
+	@Override
+	public Set<Lobe> getLobes() {
+		return lobes;
+	}
 
 	@Override
 	public Set<IPoint> getLobeCoMs() {
-		return lobeCoMs;
+		return lobes.stream().map( l -> l.getCentreOfMass()).collect(Collectors.toSet());
 	}
 
 
 	@Override
-	public void addLobeCentre(IPoint com) {
-		lobeCoMs.add(com);
+	public void addLobe(Lobe l) {
+		if(l==null){
+			throw new IllegalArgumentException("Lobe cannot be null");
+		}
+		lobes.add(l);
 	}
 
 	@Override
 	public int getLobeCount() {
-		return lobeCoMs.size();
+		return lobes.size();
 	}
 	
 	@Override
@@ -49,7 +58,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 		double result = super.calculateStatistic(stat);
 		
 		if(PlottableStatistic.LOBE_COUNT.equals(stat)){
-			return lobeCoMs.size();
+			return lobes.size();
 		}
 				
 		return result;
@@ -58,8 +67,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 	@Override
 	public void removeAllLobes() {
-		lobeCoMs = new HashSet<IPoint>();
+		lobes.clear();
 	}
-	
+
 
 }

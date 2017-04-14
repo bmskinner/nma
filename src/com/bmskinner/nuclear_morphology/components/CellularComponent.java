@@ -54,6 +54,7 @@ public interface CellularComponent
 	static final String CYTOPLASM   = "Cytoplasm";
 	static final String SPERM_TAIL  = "SpermTail";
 	static final String NUCLEAR_SIGNAL  = "NuclearSignal";
+	static final String NUCLEAR_LOBE    = "NuclearLobe";
 	static final String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";	
 				
 	/**
