@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -1440,21 +1442,37 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @return
 	 * @throws Exception
 	 */
-	public XYDataset createNucleusLobeDataset(LobedNucleus nucleus) throws ChartDatasetCreationException {
+	public ComponentOutlineDataset createNucleusLobeDataset(LobedNucleus nucleus) throws ChartDatasetCreationException {
 
-		DefaultXYDataset ds = new DefaultXYDataset();
-
-		int i=0;
-		for(IPoint p : nucleus.getLobeCoMs()){
-			
-			double[] xpoints = { p.getX()  };
-			double[] ypoints = { p.getY()  };
-			double[][] data = { xpoints, ypoints };
-			
-			ds.addSeries("Lobe_"+i, data);
-			i++;
-		}
+//		DefaultXYDataset ds = new DefaultXYDataset();
+//		
+//		int i=0;
+//		
+//		List<IPoint> coms = nucleus.getLobes().stream().map( l -> l.getOriginalCentreOfMass() ).collect(Collectors.toList());
+//		for(IPoint p : coms){
+//			
+//			double[] xpoints = { p.getX()  };
+//			double[] ypoints = { p.getY()  };
+//			double[][] data = { xpoints, ypoints };
+//			
+//			ds.addSeries("Lobe_"+i, data);
+//			i++;
+//		}
+//		
+//		return ds;
 		
+		
+		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
+		int i = 0;
+
+		for(Lobe l : nucleus.getLobes()){
+
+			String seriesKey = CellularComponent.NUCLEAR_LOBE+"_"+i;
+			finest("Adding lobe to dataset: "+seriesKey);
+			OutlineDatasetCreator dc = new OutlineDatasetCreator(options, l);
+			dc.addOutline(ds, seriesKey, false);
+
+		}
 		return ds;
 	}
 		

@@ -527,8 +527,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				if(n instanceof LobedNucleus){
 					
-					XYDataset lobes = new NucleusDatasetCreator(options).createNucleusLobeDataset((LobedNucleus) n);
-					cellDataset.addLobes("Lobes_"+n.getID(), lobes);
+					OutlineDataset lobes = new NucleusDatasetCreator(options).createNucleusLobeDataset((LobedNucleus) n);
+					cellDataset.addLobes(CellularComponent.NUCLEAR_LOBE+"_"+n.getID(), lobes);
 				}
 				
 				
@@ -603,8 +603,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			plot.setDataset( i, ds);
 			
 			
-			boolean showLines  = key.startsWith("Lobes_") ? false : options.isShowLines();
-			boolean showPoints = key.startsWith("Lobes_") ? true : options.isShowPoints();
+			boolean showLines  = key.startsWith(CellularComponent.NUCLEAR_LOBE) ? true : options.isShowLines();
+			boolean showPoints = key.startsWith(CellularComponent.NUCLEAR_LOBE) ? false : options.isShowPoints();
 			XYLineAndShapeRenderer rend = new XYLineAndShapeRenderer(showLines, showPoints);
 			plot.setRenderer(i, rend);
 			
@@ -631,6 +631,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					rend.setSeriesPaint(series, colour);					
 				}
 				
+				if(key.startsWith(CellularComponent.NUCLEAR_LOBE)){
+//					rend.setSeriesShape(series, ChartComponents.DEFAULT_POINT_SHAPE);
+					rend.setSeriesPaint(series, Color.RED);				
+				}
+				
 				/*
 				 * Cytoplasm outline
 				 */
@@ -638,10 +643,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 					rend.setSeriesPaint(series, Color.CYAN);					
 				}
 				
-				if(key.startsWith("Lobes_")){
-					rend.setSeriesShape(series, ChartComponents.DEFAULT_POINT_SHAPE);
-					rend.setSeriesPaint(series, Color.RED);				
-				}
+				
 								
 				/*
 				 * Border tags

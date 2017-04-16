@@ -59,8 +59,8 @@ public class CellDataset {
 		tags.put(key, ds);
 	}
 	
-	public void addLobes(String key, XYDataset ds){
-		lobes.put(key, ds);
+	public void addLobes(String key, OutlineDataset ds){
+		outlines.put(key, ds);
 	}
 	
 	public Collection<OutlineDataset> getDatasets(){
