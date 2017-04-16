@@ -134,7 +134,6 @@ public interface Nucleus
 	 * Thrown when a nucleus type in a collection is incorrect for a requested analysis
 	 * @author ben
 	 * @since 1.13.5
-	 *
 	 */
 	public class IncorrectNucleusTypeException extends Exception {
 		private static final long serialVersionUID = 1L;

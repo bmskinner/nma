@@ -38,6 +38,8 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 	public Set<IPoint> getLobeCoMs() {
 		return lobes.stream().map( l -> l.getCentreOfMass()).collect(Collectors.toSet());
 	}
+	
+	
 
 
 	@Override

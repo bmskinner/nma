@@ -158,7 +158,7 @@ public class DefaultCell
 	
 	@Override
 	public synchronized boolean hasStatistic(PlottableStatistic stat){
-		return statistics.containsKey(stat);
+		return statistics.containsKey(stat) && Statistical.STAT_NOT_CALCULATED!=statistics.get(stat);
 	}
 	
 	@Override
@@ -201,7 +201,7 @@ public class DefaultCell
 		if(stat==null){
 			throw new IllegalArgumentException("Stat cannot be null");
 		}
-		double result = ERROR_CALCULATING_STAT;
+		double result = STAT_NOT_CALCULATED;
 				
 		// Do not add getters for values added at creation time
 		// or you'll get infinite loops when things break
@@ -227,8 +227,21 @@ public class DefaultCell
 	
 	@Override
 	public void setStatistic(PlottableStatistic stat, double d) {
-		// TODO Auto-generated method stub
-		// Nothing to set here yet
+		if(PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat)){
+			statistics.put(stat, d);
+		}
+		
+		if(PlottableStatistic.LOBE_COUNT.equals(stat)){
+			statistics.put(stat, d);
+		}
+		
+		if(PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat)){
+			statistics.put(stat, d);
+		}
+		
+		if(PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)){
+			statistics.put(stat, d);
+		}
 	}
 
 	@Override
@@ -238,13 +251,15 @@ public class DefaultCell
 	
 	
 	private int getLobeCount(){
-		int i = 0;
-		for(Nucleus n : nuclei){
-			if(n instanceof LobedNucleus){
-				i += ((LobedNucleus) n).getLobeCount();
-			}
-		}
-		return i;
+		
+		return (int) getNuclei().stream().mapToDouble( n -> n.getStatistic(PlottableStatistic.LOBE_COUNT )).sum();
+//		int i = 0;
+//		for(Nucleus n : nuclei){
+//			if(n instanceof LobedNucleus){
+//				i += ((LobedNucleus) n).getLobeCount();
+//			}
+//		}
+//		return i;
 	}
 	
 	private int getNuclearArea(){
