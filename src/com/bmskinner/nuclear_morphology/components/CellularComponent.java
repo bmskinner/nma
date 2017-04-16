@@ -62,14 +62,6 @@ public interface CellularComponent
 	 * @return
 	 */
 	public UUID getID();
-
-	/**
-	 * The pixel border added to the edges of the component
-	 * when fetching and cropping its source image. This prevents
-	 * the component nestling right up to the edges of the 
-	 * resulting cropped image
-	 */
-	public static final int COMPONENT_BUFFER = 10;
 	
 	/**
 	 * A string prepended to any exported image files, so that

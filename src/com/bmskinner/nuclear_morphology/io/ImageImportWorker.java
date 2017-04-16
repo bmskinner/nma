@@ -9,6 +9,7 @@ import javax.swing.SwingWorker;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -102,15 +103,44 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
     } 
 	
 	private ImageIcon importCellImage(ICell c){
-		Nucleus n = c.getNucleus();
 		ImageProcessor ip;
-		try {
-			ip = n.getComponentImage();
+		
+		
+		try {		
+			if(c.hasCytoplasm()){
+				ip = c.getCytoplasm().getComponentRGBImage();
+			} else {
+				ip = c.getNucleus().getComponentImage();
+			}
+		
+//			Nucleus n = c.getNucleus();
+//			ip = n.getComponentImage();
+			
 		} catch (UnloadableImageException e) {
-			fine("Cannot load image for component");
+			stack("Cannot load image for component", e);
 			return new ImageIcon();
 		}
-		drawNucleus(c, ip);
+		
+		ImageAnnotator an = new ImageAnnotator(ip);
+		if(c.hasCytoplasm()){
+			
+			an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
+			for(Nucleus n : c.getNuclei()){
+				an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
+//				an = an.annotateSegments(n, n);
+			}
+			
+		} else{
+			
+			for(Nucleus n : c.getNuclei()){
+				an = an.annotateSegments(n, n);
+			}
+		}
+
+		
+		ip = an.toProcessor();
+		
+//		drawNucleus(c, ip);
 
 		if(rotate){
 			try {
@@ -252,67 +282,67 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 		return ip;
 	}
 	
-	/**
-	 * Draw the outline of a nucleus on the given processor
-	 * @param cell
-	 * @param ip
-	 */
-	private void drawNucleus(ICell cell, ImageProcessor ip) {
-		if(cell==null){
-			throw new IllegalArgumentException("Input cell is null");
-		}
-		
-		Nucleus n = cell.getNucleus();
-		
-		// annotate the image processor with the nucleus outline
-		List<IBorderSegment> segmentList;
-		try {
-			segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
-		} catch (UnavailableProfileTypeException e) {
-			warn("Angle profile not present");
-			return;
-		}
-		
-		ip.setLineWidth(2);
-		if(!segmentList.isEmpty()){ // only draw if there are segments
-			
-			for(IBorderSegment seg  : segmentList){
-				
-				float[] x = new float[seg.length()+1];
-				float[] y = new float[seg.length()+1];
-				
-				try {
-					for(int j=0; j<=seg.length();j++){
-						int k = n.wrapIndex(seg.getStartIndex()+j);
-						IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
-						x[j] = (float) p.getX();
-						y[j] = (float) p.getY();
-					}
-					
-					int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-					ip.setColor((Color) ColourSelecter.getColor(segIndex));
-					
-					PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
-					
-					segRoi.setLocation(segRoi.getBounds().getMinX()+CellularComponent.COMPONENT_BUFFER, segRoi.getBounds().getMinY()+CellularComponent.COMPONENT_BUFFER);
-					
-					ip.draw(segRoi);
-				} catch (UnavailableBorderPointException e) {
-					warn("Missing border point in segment");
-					stack(e.getMessage(), e);
-				}
-
-			}
-		} else {
-
-			ip.setColor(Color.ORANGE);
-			FloatPolygon polygon = n.toPolygon();
-			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-			roi.setLocation(CellularComponent.COMPONENT_BUFFER, CellularComponent.COMPONENT_BUFFER);
-			ip.draw(roi);
-		}
-
-	}
+//	/**
+//	 * Draw the outline of a nucleus on the given processor
+//	 * @param cell
+//	 * @param ip
+//	 */
+//	private void drawNucleus(ICell cell, ImageProcessor ip) {
+//		if(cell==null){
+//			throw new IllegalArgumentException("Input cell is null");
+//		}
+//		
+//		Nucleus n = cell.getNucleus();
+//		
+//		// annotate the image processor with the nucleus outline
+//		List<IBorderSegment> segmentList;
+//		try {
+//			segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
+//		} catch (UnavailableProfileTypeException e) {
+//			warn("Angle profile not present");
+//			return;
+//		}
+//		
+//		ip.setLineWidth(2);
+//		if(!segmentList.isEmpty()){ // only draw if there are segments
+//			
+//			for(IBorderSegment seg  : segmentList){
+//				
+//				float[] x = new float[seg.length()+1];
+//				float[] y = new float[seg.length()+1];
+//				
+//				try {
+//					for(int j=0; j<=seg.length();j++){
+//						int k = n.wrapIndex(seg.getStartIndex()+j);
+//						IBorderPoint p = n.getBorderPoint(k); // get the border points in the segment
+//						x[j] = (float) p.getX();
+//						y[j] = (float) p.getY();
+//					}
+//					
+//					int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
+//					ip.setColor((Color) ColourSelecter.getColor(segIndex));
+//					
+//					PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
+//					
+//					segRoi.setLocation(segRoi.getBounds().getMinX()+CellularComponent.COMPONENT_BUFFER, segRoi.getBounds().getMinY()+CellularComponent.COMPONENT_BUFFER);
+//					
+//					ip.draw(segRoi);
+//				} catch (UnavailableBorderPointException e) {
+//					warn("Missing border point in segment");
+//					stack(e.getMessage(), e);
+//				}
+//
+//			}
+//		} else {
+//
+//			ip.setColor(Color.ORANGE);
+//			FloatPolygon polygon = n.toPolygon();
+//			PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
+//			roi.setLocation(CellularComponent.COMPONENT_BUFFER, CellularComponent.COMPONENT_BUFFER);
+//			ip.draw(roi);
+//		}
+//
+//	}
 	
 	@Override
     protected void process( List<LabelInfo> chunks ) {

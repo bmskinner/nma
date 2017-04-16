@@ -33,6 +33,7 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -169,7 +170,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	}
 	
 	/**
-	 * Draw the outline of the component in the given colour
+	 * Draw the outline of the component in the given colour at the original position
 	 * @param n the component
 	 * @param c the colour
 	 * @return the annotator
@@ -181,7 +182,25 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		return annotatePolygon(roi, c);
 	}
 	
-	
+	/**
+	 * Draw the border of the given component on the component image of the template.
+	 * These can be the same object.
+	 * @param n the component to draw
+	 * @param template the component to get the component image from
+	 * @param c the colour to draw the border
+	 * @return this annotator
+	 */
+	public ImageAnnotator annotateBorder(CellularComponent n, Imageable template, Color c){
+		FloatPolygon p = n.toOriginalPolygon();
+		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+		
+		IPoint base = n.getOriginalBase();
+		IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+		roi.setLocation(offset.getX(), offset.getY());
+		
+		return annotatePolygon(roi, c);
+	}
+		
 	
 	/**
 	 * Annotate the image with the given text. The text background is white and the
@@ -351,6 +370,52 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 
 					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
 
+
+					Paint color = ColourSelecter.getColor(i);
+
+					annotatePolygon(segRoi, color);
+				}
+			}
+		} catch(Exception e){
+			error("Error annotating segments", e);
+		}
+		return this;
+	}
+	
+	/**
+	 * Draw the segments of a profilable component in the global
+	 * colour swatch colours. Draw the segments at their positions in the 
+	 * template compent image
+	 * @param n the component
+	 * @return the annotator
+	 */
+	public ImageAnnotator annotateSegments(Profileable n, Imageable template){
+
+		try{
+			
+			
+
+			if(n.getProfile(ProfileType.ANGLE).getSegments().size()>0){ // only draw if there are segments
+				for(int i=0;i<n.getProfile(ProfileType.ANGLE).getSegments().size();i++){
+
+					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
+
+					float[] xpoints = new float[seg.length()+1];
+					float[] ypoints = new float[seg.length()+1];
+					for(int j=0; j<=seg.length();j++){
+						int k = n.wrapIndex(seg.getStartIndex()+j);
+						IBorderPoint p = n.getOriginalBorderPoint(k); // get the border points in the segment
+						xpoints[j] = (float) p.getX();
+						ypoints[j] = (float) p.getY();
+					}
+
+					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+					
+					// Offset the segment relative to the nucleus component image
+					IPoint base = IPoint.makeNew(segRoi.getXBase(), segRoi.getYBase());
+					IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+					
+					segRoi.setLocation(offset.getX(), offset.getY());
 
 					Paint color = ColourSelecter.getColor(i);
 
