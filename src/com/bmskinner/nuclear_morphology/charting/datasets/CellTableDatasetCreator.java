@@ -27,11 +27,14 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -48,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * Generate the stats tables for a single cell
@@ -86,6 +90,11 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 						
 		// find the collection with the most channels
 		// this defines  the number of rows
+		
+		if(cell.hasCytoplasm()){
+			addCytoplasmDataToTable(fieldNames, rowData, cell, d);
+		}
+		
 		
 		fieldNames.add("Number of nuclei (lobes)");
 		rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT)+" ("+cell.getStatistic(PlottableStatistic.LOBE_COUNT)+")");
@@ -226,6 +235,25 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 	 * PRIVATE METHODS
 	 * 
 	 */
+	
+	private void addCytoplasmDataToTable(List<Object> fieldNames,  List<Object> rowData, ICell c, IAnalysisDataset d){
+		fieldNames.add("Cytoplasm");
+		rowData.add("");
+
+		try {
+			ColourMeasurometer cm = new ColourMeasurometer();
+			Color colour = cm.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
+			
+			fieldNames.add("Average RGB");
+			rowData.add(colour.getRed()+", "+colour.getGreen()+", "+colour.getBlue());
+			
+		} catch (UnloadableImageException e) {
+			warn("Cannot get colour of cytoplasm");
+			stack(e);
+		}
+		
+		
+	}
 	
 	private void addNuclearDataToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, IAnalysisDataset d){
 					
