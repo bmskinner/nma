@@ -57,20 +57,35 @@ public abstract class Detector implements Loggable {
 	public static final String COM_X = "XM";
 	public static final String COM_Y = "YM";
 	
+	public static final String RESULT_TABLE_PERIM = "Perim.";
+	
+	
 	private double minSize;
 	private double maxSize;
 	private double minCirc;
 	private double maxCirc;
+	
+	private boolean includeHoles = true;
 
-	private int  threshold;
+	private Integer  threshold;
 
 	private List<Roi> roiList; // the detected ROIs
 	
+	/**
+	 * Set the minimum and maximum size ROIs to detect
+	 * @param min the minimum in pixels
+	 * @param max the maximum in pixels
+	 */
 	public void setSize(double min, double max){
 		minSize = min;
 		maxSize = max;
 	}
 	
+	/**
+	 * Set the minimum and maximum circularity ROIs to detect
+	 * @param min the minimum circularity
+	 * @param max the maximum circularity
+	 */
 	public void setCirc(double min, double max){
 		minCirc = min;
 		maxCirc = max;
@@ -96,10 +111,21 @@ public abstract class Detector implements Loggable {
 		this.threshold = i;
 	}
   
-  protected List<Roi> detectRois(ImageProcessor image){
+  
+	/**
+	 * Set whether the ROIs should include holes - i.e. should holes be flood filled
+	 * before detection
+	 * @param b
+	 */
+	public void setIncludeHoles(boolean b){
+		includeHoles = b;
+	}
+	
+	protected List<Roi> detectRois(ImageProcessor image){
 	  if(image==null){
 		  throw new IllegalArgumentException("No image to analyse");
 	  }
+	  
 	  if( Double.isNaN(this.minSize) || 
 			  Double.isNaN(this.maxSize) ||
 			  Double.isNaN(this.minCirc) ||
@@ -112,6 +138,11 @@ public abstract class Detector implements Loggable {
 	  }
 	  if(this.minCirc >= this.maxCirc){
 		  throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
+	  }
+	  
+	  if(threshold==null){
+		  threshold=128;
+//		  warn("Using default theshold "+threshold);
 	  }
 
 	  findInImage(image);
@@ -141,9 +172,9 @@ public abstract class Detector implements Loggable {
 			  							rt);
 	  analyser.measure();
 	  StatsMap values = new StatsMap();
-	  values.add("Area", rt.getValue("Area",0)); 
-	  values.add("Feret", rt.getValue("Feret",0)); 
-	  values.add("Perim", rt.getValue("Perim.",0)); 
+	  values.add(StatsMap.AREA, rt.getValue(StatsMap.AREA,0)); 
+	  values.add(StatsMap.FERET, rt.getValue(StatsMap.FERET,0)); 
+	  values.add(StatsMap.PERIM, rt.getValue(RESULT_TABLE_PERIM,0)); 
 	  values.add(COM_X, rt.getValue(COM_X,0)); 
 	  values.add(COM_Y, rt.getValue(COM_Y,0)); 
 	  return values;
@@ -162,13 +193,19 @@ public abstract class Detector implements Loggable {
 		  throw new IllegalArgumentException("Processor must be byte or short");
 	  }
 	  
+	  
 	  ImageProcessor searchProcessor = image.duplicate();
 
 	  searchProcessor.threshold(this.threshold);
-
+//	  ImagePlus imp = new ImagePlus("Search Processor", searchProcessor.duplicate());	
+//	  imp.show();
+	  
 	  roiList = this.runAnalyser(searchProcessor);
+	  
+	  //TODO: this needs to be figured out and removed
 	  if(roiList.size()==0){
-		  searchProcessor.invert(); // Work PC needs the inversion; MANETHEREN does not. Don't yet know why.
+		  // As of 2017-04-15, manetheren needs this inversion to work, but other PCs don't. Don't yet know why.
+		  searchProcessor.invert();
 		  roiList = this.runAnalyser(searchProcessor);
 	  }
   }
@@ -179,9 +216,14 @@ public abstract class Detector implements Loggable {
 	 
 	  // run the particle analyser
 	  ResultsTable rt     = new ResultsTable();
-	  ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER 
-			  | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES 
-			  | ParticleAnalyzer.INCLUDE_HOLES, 
+	  
+	  // By default, add all particles to the ROI manager, and do not count anythig touching the edge
+	  int options = ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+	  if(includeHoles){
+		  options = options | ParticleAnalyzer.INCLUDE_HOLES;
+	  }
+	  
+	  ParticleAnalyzer pa = new ParticleAnalyzer(options, 
 			  ParticleAnalyzer.FERET ,
 			  rt, minSize, maxSize, minCirc, maxCirc);
 	  
@@ -189,7 +231,7 @@ public abstract class Detector implements Loggable {
 		  ParticleAnalyzer.setRoiManager(manager);
 		  boolean success = pa.analyze(image);
 		  if(!success){
-			  finest("Unable to perform particle analysis");
+			  fine("Unable to perform particle analysis");
 		  }
 	  } catch(Exception e){
 		  warn("Error in particle analyser");

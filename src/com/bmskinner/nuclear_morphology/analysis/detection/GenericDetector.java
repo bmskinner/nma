@@ -50,7 +50,7 @@ public class GenericDetector extends Detector {
 	 */
 	public List<Roi> getRois(ImageProcessor ip){
 		this.setMaxSize(  ip.getWidth()*ip.getHeight()  );
-		
+//		this.setThreshold(128); // should be already set
 		return this.detectRois(ip);
 	}
 

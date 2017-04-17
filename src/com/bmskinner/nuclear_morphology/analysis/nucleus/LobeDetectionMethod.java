@@ -14,8 +14,11 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclear.LobeFactory;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
@@ -54,6 +57,8 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 
 	private IHoughDetectionOptions options;
 	
+	private static final double DEFAULT_MIN_LOBE_AREA = 10;
+	
 	public LobeDetectionMethod(IAnalysisDataset dataset, IHoughDetectionOptions op) {
 		super(dataset);
 		options = op;
@@ -86,11 +91,11 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 		
 		// Remove existing cached stats
 		dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.NUCLEUS);
-
+		dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.WHOLE_CELL);
 		for(ICell cell : dataset.getCollection().getCells()){
 			detectLobes(cell);
+			fireProgressEvent();
 		}
-		
 		
 	}
 	
@@ -102,15 +107,15 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 
 		try {
 
-//			detectLobesViaWatershed(cell);
-			detectLobesViaHough(cell);
+			detectLobesViaWatershed(cell);
+//			detectLobesViaHough(cell);
 
 		} catch (UnloadableImageException e) {
 			warn("Unable to load cell image");
 			stack(e);
-		} catch (MissingOptionException e) {
-			warn("Missing nucleus detection options for thresholding");
-			stack(e);
+//		} catch (MissingOptionException e) {
+//			warn("Missing nucleus detection options for thresholding");
+//			stack(e);
 		} catch (Exception e) {
 			warn("Error in lobe detection");
 			stack(e.getMessage(), e);
@@ -163,60 +168,96 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 	 * @throws ComponentCreationException
 	 */
 	private void detectLobesViaWatershed(ICell cell) throws UnloadableImageException, ComponentCreationException{
-		Strel strel = DiskStrel.fromRadius(20);
-		ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
 		
-		ImageProcessor test = new ImageConverter(ip)
-//				.convertToGreyscale()
-				.convertToByteProcessor()
-				.toProcessor();
-		
-		ImageProcessor th = Morphology.blackTopHat(test, strel);
-		new ImagePlus("Top hat processor", th).show();
-//		th = MinimaAndMaxima.extendedMinima(th, 20);
-		th.setMinAndMax(20, 255);
-		ImagePlus imp = new ImagePlus("Min max", th);
-		imp.show();
-
-		// Copy the process used in the MorphologicalSegmentation plugin
-					
-		ImageStack image = new ImageStack(th.getWidth(), th.getHeight());
-		image.addSlice(th);
+		int topHatRadius = 20;
 		boolean calculateDams  = true;
 		int gradientRadius = 2;
 		int connectivity = 6;
-		double dynamic = 10; // is this tolerance?
+		int bitDepth = 32;
+		int dynamic = 10; // the minimal difference between a minima and its boundary
+		
+		int thresholdMin = 20;
+		int thresholdMax = 255;
+		
+		Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
+		
+		// Since we're using the component image, we need to offset coordinates back to the 
+		// source image when testing if a lobe is within the nucleus
+		ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
+		
+		ImageProcessor test = new ImageConverter(ip)
+				.convertToByteProcessor()
+				.toProcessor();
+		
+		
+        /*
+         * Top hat filtering removes most cytoplasm background
+         * Computes black top hat (or "bottom hat") of the original image.
+         *  The black top hat is obtained by subtracting the original image from the result of a closing.
+         *  The black top hat enhances dark structures smaller than the structuring element.
+         */
+		
+		ImageProcessor th = Morphology.blackTopHat(test, strel);
+
+		// Most remaining cytoplasm is weak, can can be thresholded away 
+		th.setMinAndMax(thresholdMin, thresholdMax);
+		
+		ImagePlus imp = new ImagePlus("Min max", th);
+//		imp.show();
+
+		// Copy the process used in the MorphoLbJ MorphologicalSegmentation plugin
+					
+		ImageStack image = new ImageStack(th.getWidth(), th.getHeight());
+		image.addSlice(th);
+		
 		strel = Strel.Shape.SQUARE.fromRadius( gradientRadius );
+		
+		/*
+		 * Computes the morphological gradient of the input image. 
+		 * The morphological gradient is obtained from the difference
+		 * of image dilation and image erosion computed with the 
+		 * same structuring element.
+		 */
 		ImageProcessor gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
 		image = new ImageStack(image.getWidth(), image.getHeight());
 		image.addSlice(gradient); 
 		
-		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, (int)dynamic, connectivity );
+		
+		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, dynamic, connectivity );
 
-
-		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, 32 );
+		/*
+		 * Computes the labels in the binary 2D or 3D image contained 
+		 * in the given ImagePlus, and computes the maximum label 
+		 * to set up the display range of the resulting ImagePlus.
+		 */
+		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, bitDepth );
 		ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
 		
 
+		/*
+		 * Compute watershed with markers with a
+		 *  binary mask to restrict the regions of application
+		 */
 		ImagePlus resultStack = Watershed.computeWatershed( imp, min, 
 				connectivity, calculateDams );
-		resultStack.show();
+//		resultStack.show();
 		final ImagePlus lines = BinaryImages.binarize( resultStack );
-		lines.show();
+//		lines.show();
 		
 		ImageProcessor lp = lines.getProcessor();
 		lp.invert();
 		
+		// Now take the watershed image, and detect the distinct lobes
+		
 		ImageFilterer ft = new ImageFilterer(lp);
-		ImageProcessor ws = ft.dilate(2).toProcessor();
-//		
-		ImagePlus wimp = new ImagePlus("Dilated", ws);	
-		wimp.show();
-		ws.invert();
+		ImageProcessor ws = ft.dilate(1).toProcessor();
+		
 		GenericDetector gd = new GenericDetector();
-//		gd.setSize(20, 3000);
+		gd.setIncludeHoles(false);
+		gd.setSize(DEFAULT_MIN_LOBE_AREA, cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA));
 		List<Roi> rois  = gd.getRois(ws);
 		addLobesToNuclei(cell, rois);
+		
 	}
 	
 	private void addLobesToNuclei(ICell cell, List<Roi> rois) throws UnloadableImageException, ComponentCreationException{
@@ -224,33 +265,60 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 		GenericDetector gd = new GenericDetector();
 		
 		List<Nucleus> nuclei = cell.getNuclei();
-
+		LobeFactory factory = new LobeFactory(nuclei.get(0).getSourceFile());
 		for(Nucleus n : nuclei){
 
 			if(n instanceof LobedNucleus){
 				LobedNucleus l = (LobedNucleus) n;
 				ImageProcessor ip = l.getImage();
-				LobeFactory factory = new LobeFactory(l.getSourceFile());
+				
+				
+				// Add this to the roi centre of mass
 
+//				log("Testing "+l.getNameAndNumber()+": "+l.getOriginalCentreOfMass().toString());
 				for(Roi roi : rois){
 					StatsMap m = gd.measure(roi, ip);
 					int x = m.get(GenericDetector.COM_X).intValue();
 					int y = m.get(GenericDetector.COM_Y).intValue();
-
 					IPoint com = IPoint.makeNew(x, y);
-					if(l.containsOriginalPoint(com)){
+					IPoint adj = Imageable.translateCoordinateToSourceImage(com, cell.getCytoplasm());
+					
+					
+					
+//					log("\tTesting "+adj.toString());
+					if(l.containsOriginalPoint(adj)){
+//						log("\t\tMatch ");
+						
+						
+						// Now adjust the roi base to match the source image
+						IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
+						IPoint adjBase = Imageable.translateCoordinateToSourceImage(base, cell.getCytoplasm());
+						
 						Rectangle bounds = roi.getBounds();
-						int xbase = (int) roi.getXBase();
-						int ybase = (int) roi.getYBase();
-						int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
-						l.addLobe( factory.buildInstance(roi, 0, originalPosition, com)); //TODO makethe channel useful
+						
+						roi.setLocation(adjBase.getXAsInt(), adjBase.getYAsInt());
+
+						int[] originalPosition = {adjBase.getXAsInt(), 
+								adjBase.getYAsInt(), 
+								(int) bounds.getWidth(), 
+								(int) bounds.getHeight() };
+						
+						Lobe lobe = factory.buildInstance(roi, 0, originalPosition, adj);
+//						lobe.moveCentreOfMass(adj);
+						
+						l.addLobe( lobe); //TODO makethe channel useful
 					}
 
 				}
 
 				l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
 			}
+			
+			
 		}
+		// Update stats
+		double lobes = cell.getNuclei().stream().mapToDouble( n -> n.getStatistic(PlottableStatistic.LOBE_COUNT )).sum();
+		cell.setStatistic(PlottableStatistic.LOBE_COUNT, lobes);
 	}
 	
 	
