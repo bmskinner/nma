@@ -661,7 +661,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		try {
 			int firstStart = newStarts[0];
 			int lastStart  = newStarts[segments.length-1];
-			if(segments[0].wraps(newStarts[segments.length-1], newStarts[0])){
+			if(newSegs.get(0).wraps(newStarts[segments.length-1], newStarts[0])){
 				// wrapping final segment
 				if(firstStart + (length-lastStart) < IBorderSegment.MINIMUM_SEGMENT_LENGTH){
 					newStarts[0] = firstStart+1; // update the start in the array
