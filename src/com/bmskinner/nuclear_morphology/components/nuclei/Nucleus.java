@@ -18,9 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import java.io.File;
-
-import com.bmskinner.nuclear_morphology.analysis.nucleus.Indexable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -35,7 +32,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
  */
 public interface Nucleus 
 	extends CellularComponent, 
-	        Indexable, 
 	        Profileable, 
 	        Taggable,
 	        Comparable<Nucleus> {
