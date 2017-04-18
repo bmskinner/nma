@@ -22,6 +22,8 @@ package com.bmskinner.nuclear_morphology.components;
 
 import ij.gui.Roi;
 
+import java.io.File;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -43,6 +45,7 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
 	 * @throws NucleusCreationException 
 	 */
 	E buildInstance(Roi roi,
+			File file,
 			int channel, 
 			int[] originalPosition, 
 			IPoint centreOfMass) throws ComponentCreationException;

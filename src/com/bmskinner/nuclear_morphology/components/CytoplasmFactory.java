@@ -33,29 +33,31 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public class CytoplasmFactory implements ComponentFactory<ICytoplasm> {
 
-	private final File file;
+//	private final File file;
 	
-	/**
-	 * Create a factory for nuclei of the given type
-	 * @param imageFile
-	 * @param nucleusType
-	 */
-	public CytoplasmFactory(File imageFile){
+//	/**
+//	 * Create a factory for nuclei of the given type
+//	 * @param imageFile
+//	 * @param nucleusType
+//	 */
+//	public CytoplasmFactory(File imageFile){
+//		
+//		
+//		file = imageFile;
+//
+//	}
+	
+	
+	@Override
+	public ICytoplasm buildInstance(Roi roi, File imageFile, int channel,
+			int[] originalPosition, IPoint centreOfMass)
+			throws ComponentCreationException {
 		
 		if(imageFile==null){
 			throw new IllegalArgumentException("File cannot be null in factory");
 		}
-		file = imageFile;
-
-	}
-	
-	
-	@Override
-	public ICytoplasm buildInstance(Roi roi, int channel,
-			int[] originalPosition, IPoint centreOfMass)
-			throws ComponentCreationException {
 		
-		ICytoplasm result = new DefaultCytoplasm(roi, centreOfMass, file, channel, originalPosition);
+		ICytoplasm result = new DefaultCytoplasm(roi, centreOfMass, imageFile, channel, originalPosition);
 		return result;
 	}
 	

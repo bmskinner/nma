@@ -31,7 +31,7 @@ public class LobedNucleusDetectionPipeline  extends DetectionPipeline<Nucleus> {
 	public LobedNucleusDetectionPipeline(IDetectionOptions op, File imageFile, double prop, List<ICell> cells) throws ImageImportException {
 		super(op, imageFile, prop);
 		this.cells = cells;
-		factory = new NucleusFactory(imageFile, NucleusType.NEUTROPHIL);
+		factory = new NucleusFactory(NucleusType.NEUTROPHIL);
 		
 	}
 	
@@ -63,6 +63,7 @@ public class LobedNucleusDetectionPipeline  extends DetectionPipeline<Nucleus> {
 		
 		
 		Nucleus currentNucleus = factory.buildInstance(roi, 
+				file,
 				options.getChannel(),
 				originalPosition, 
 				centreOfMass);

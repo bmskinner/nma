@@ -15,6 +15,8 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import ij.gui.Roi;
 
 public class CytoplasmDetectionPipeline extends DetectionPipeline<ICytoplasm> {
+	
+	final private CytoplasmFactory factory = new CytoplasmFactory();
 
 	public CytoplasmDetectionPipeline(IDetectionOptions op, File imageFile, double prop) throws ImageImportException {
 		super(op, imageFile, prop);
@@ -37,7 +39,7 @@ public class CytoplasmDetectionPipeline extends DetectionPipeline<ICytoplasm> {
 		// create a Nucleus from the roi
 		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
 
-		ICytoplasm result = new CytoplasmFactory(file).buildInstance(roi, options.getChannel(), originalPosition, centreOfMass); 
+		ICytoplasm result = factory.buildInstance(roi, file, options.getChannel(), originalPosition, centreOfMass); 
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
 		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );

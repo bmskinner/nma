@@ -59,6 +59,8 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 	
 	private static final double DEFAULT_MIN_LOBE_AREA = 10;
 	
+	private final LobeFactory factory = new LobeFactory();
+	
 	public LobeDetectionMethod(IAnalysisDataset dataset, IHoughDetectionOptions op) {
 		super(dataset);
 		options = op;
@@ -265,7 +267,7 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 		GenericDetector gd = new GenericDetector();
 		
 		List<Nucleus> nuclei = cell.getNuclei();
-		LobeFactory factory = new LobeFactory(nuclei.get(0).getSourceFile());
+		
 		for(Nucleus n : nuclei){
 
 			if(n instanceof LobedNucleus){
@@ -303,7 +305,7 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 								(int) bounds.getWidth(), 
 								(int) bounds.getHeight() };
 						
-						Lobe lobe = factory.buildInstance(roi, 0, originalPosition, adj);
+						Lobe lobe = factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, adj);
 //						lobe.moveCentreOfMass(adj);
 						
 						l.addLobe( lobe); //TODO makethe channel useful
@@ -335,7 +337,6 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 			
 			if(n instanceof LobedNucleus){
 				LobedNucleus l = (LobedNucleus) n;
-				LobeFactory factory = new LobeFactory(l.getSourceFile());
 				
 				// Trim the points so that the centre of a point cluster is chosen, 
 				// rather than the whole cloud
@@ -384,7 +385,7 @@ public class LobeDetectionMethod extends AbstractAnalysisMethod {
 							int xbase = (int) roi.getXBase();
 							int ybase = (int) roi.getYBase();
 							int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
-							l.addLobe( factory.buildInstance(roi, 0, originalPosition, com)); //TODO makethe channel useful
+							l.addLobe( factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com)); //TODO makethe channel useful
 //							l.addLobeCentre(com);
 						}
 

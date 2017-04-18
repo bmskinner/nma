@@ -7,7 +7,10 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
@@ -24,9 +27,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.filter.BackgroundSubtracter;
+import ij.plugin.filter.GaussianBlur;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import ijt.filter.morphology.MinimaAndMaxima;
 
 /**
  * The abstract pipeline implementing common methods. Extending classes
@@ -342,6 +347,19 @@ public abstract class DetectionPipeline<E> extends Detector implements Loggable 
 		} catch (MissingOptionException e) {
 			warn("Missing canny options");
 		}
+		return this;
+	}
+	
+	public DetectionPipeline<E> extendedMinimaAndMaxima(int dynamic, int conn){
+
+		ip = MinimaAndMaxima.extendedMinima(ip, dynamic, conn);
+		return this;
+	}
+	
+	public DetectionPipeline<E> gaussianBlur(int radius){
+
+		GaussianBlur bl = new GaussianBlur();
+		bl.blurGaussian(ip, radius, radius, 0.02);
 		return this;
 	}
 	

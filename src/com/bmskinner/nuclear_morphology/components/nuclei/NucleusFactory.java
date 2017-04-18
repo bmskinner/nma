@@ -37,7 +37,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 
-	private final File file;
 	private int nucleusCount = 0; // store the number of nuclei created by this factory
 	private final NucleusType type;
 	
@@ -46,17 +45,17 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 	 * @param imageFile
 	 * @param nucleusType
 	 */
-	public NucleusFactory(File imageFile, NucleusType nucleusType){
+	public NucleusFactory(NucleusType nucleusType){
 		
-		if(nucleusType==null || imageFile==null){
-			throw new IllegalArgumentException("File or type cannot be null in nucleus factory");
+		if(nucleusType==null){
+			throw new IllegalArgumentException("Type cannot be null in nucleus factory");
 		}
-		file = imageFile;
 		type = nucleusType;
 	}
 	
 	@Override
 	public Nucleus buildInstance(Roi roi,
+			File imageFile,
 			int channel, 
 			int[] originalPosition, 
 			IPoint centreOfMass) throws ComponentCreationException {
@@ -84,7 +83,7 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
 
 				n = (Nucleus) nucleusConstructor.newInstance(roi,
 						  centreOfMass, 
-						  file, 
+						  imageFile, 
 						  channel, 
 						  originalPosition,
 						  nucleusCount);

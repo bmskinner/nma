@@ -29,7 +29,7 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 	
 	public FluoresentNucleusDetectionPipeline(IDetectionOptions op, File imageFile, NucleusType t, double prop) throws ImageImportException {
 		super(op, imageFile, prop);
-		factory = new NucleusFactory(imageFile, t);
+		factory = new NucleusFactory(t);
 	}
 		
 	/**
@@ -60,6 +60,7 @@ public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell>
 		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
 
 		Nucleus currentNucleus = factory.buildInstance(roi, 
+				file,
 				options.getChannel(),
 				originalPosition, 
 				centreOfMass);
