@@ -2,8 +2,6 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions;
-
 /**
  * A default implementation of the IMutableLobeDetectionOptions interface.
  * @author ben

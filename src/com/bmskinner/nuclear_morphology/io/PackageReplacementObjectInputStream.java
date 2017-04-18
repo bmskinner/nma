@@ -28,11 +28,16 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
 
     static
     {
+    	
+    	/*
+         * Changes from 1.13.2 to 1.13.3
+         */
+    	
         MIGRATION_MAP.put("analysis.AnalysisDataset", com.bmskinner.nuclear_morphology.components.AnalysisDataset.class);
         MIGRATION_MAP.put("analysis.AnalysisOptions", com.bmskinner.nuclear_morphology.components.options.AnalysisOptions.class);
         MIGRATION_MAP.put("analysis.AnalysisOptions$CannyOptions", com.bmskinner.nuclear_morphology.components.options.AnalysisOptions.CannyOptions.class);
         MIGRATION_MAP.put("analysis.DefaultAnalysisOptions", com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions.class);
-        MIGRATION_MAP.put("analysis.nucleus.DefaultNucleusDetectionOptions", com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions.class);
+        MIGRATION_MAP.put("analysis.nucleus.DefaultNucleusDetectionOptions", com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);
         
         MIGRATION_MAP.put("analysis.profiles.RuleSetCollection", com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection.class);
         MIGRATION_MAP.put("analysis.profiles.RuleSet", com.bmskinner.nuclear_morphology.components.rules.RuleSet.class);
@@ -43,7 +48,6 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("analysis.signals.DefaultNuclearSignalOptions", com.bmskinner.nuclear_morphology.components.options.DefaultNuclearSignalOptions.class);
         MIGRATION_MAP.put("analysis.signals.INuclearSignalOptions$SignalDetectionMode", com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode.class);
 
-        
         MIGRATION_MAP.put("components.AbstractCellularComponent", com.bmskinner.nuclear_morphology.components.AbstractCellularComponent.class);
         MIGRATION_MAP.put("components.CellCollection", com.bmskinner.nuclear_morphology.components.CellCollection.class);
         MIGRATION_MAP.put("components.CellCollection$StatsCache", com.bmskinner.nuclear_morphology.components.CellCollection.StatsCache.class);
@@ -52,11 +56,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("components.ClusterGroup", com.bmskinner.nuclear_morphology.components.ClusterGroup.class);
         MIGRATION_MAP.put("components.Mitochondrion", com.bmskinner.nuclear_morphology.components.Mitochondrion.class);
         MIGRATION_MAP.put("components.SpermTail", com.bmskinner.nuclear_morphology.components.SpermTail.class);
-        
-//        MIGRATION_MAP.put("components.active.DefaultAnalysisDataset", com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset.class);
-  
-//        MIGRATION_MAP.put("components.DefaultAnalysisDataset", com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset.class);
-        
+
         MIGRATION_MAP.put("components.generic.BorderTag", com.bmskinner.nuclear_morphology.components.generic.BorderTag.class);
         MIGRATION_MAP.put("components.generic.BorderTagObject", com.bmskinner.nuclear_morphology.components.generic.BorderTagObject.class);
         MIGRATION_MAP.put("components.generic.MeasurementScale", com.bmskinner.nuclear_morphology.components.generic.MeasurementScale.class);
@@ -92,6 +92,14 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         
         MIGRATION_MAP.put("utility.Version", com.bmskinner.nuclear_morphology.components.generic.Version.class);
 
+        
+        /*
+         * Changes from 1.13.4 to 1.13.5
+         */
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions", com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);
+
+        
     }
 
     /**
