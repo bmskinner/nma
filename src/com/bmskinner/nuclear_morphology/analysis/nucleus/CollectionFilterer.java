@@ -28,6 +28,13 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Filter cell collections to remove poorly fitted edges. 
+ * @author bms41
+ * @deprecated since 1.13.5. Use the Filterer subclasses.
+ *
+ */
+@Deprecated
 public class CollectionFilterer implements Loggable {
 	
 	public static final int FAILURE_THRESHOLD = 1;

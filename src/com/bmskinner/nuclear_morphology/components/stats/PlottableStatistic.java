@@ -32,10 +32,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  * @author ben
  *
  */
-/**
- * @author bms41
- *
- */
 public interface PlottableStatistic extends Serializable {
 	
 	

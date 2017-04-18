@@ -33,13 +33,14 @@ import java.util.List;
  */
 public class GenericDetector extends Detector {
 	
+	/**
+	 * Create with no constraints on size or circularity.
+	 */
 	public GenericDetector(){
 		
 		this.setMinCirc(0);
 		this.setMaxCirc(1);
 		this.setMinSize(1);
-		
-		
 	}
 	
 	/**

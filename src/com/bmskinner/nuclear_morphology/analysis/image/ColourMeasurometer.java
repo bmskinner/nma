@@ -28,6 +28,17 @@ public class ColourMeasurometer implements Loggable {
 
 	public ColourMeasurometer(){}
 	
+	
+	
+	/**
+	 * Calculate the median RGB value in the given component of a cell.
+	 * If the component contains other components (e.g cytoplasm contains
+	 * nucleus) the area of the sub-component will be excluded from the calculation
+	 * @param c
+	 * @param component
+	 * @return
+	 * @throws UnloadableImageException if the image file can't be read
+	 */
 	public Color calculateAverageRGB(ICell c, String component) throws UnloadableImageException{
 		
 		// Get the component of interest, and remove any subcomponents
@@ -46,10 +57,27 @@ public class ColourMeasurometer implements Loggable {
 	}
 	
 	/**
+	 * Calculate the median RGB value in the given component.
+	 * @param component
+	 * @return
+	 * @throws UnloadableImageException if the image file can't be read
+	 */
+	public Color calculateAverageRGB(CellularComponent component) throws UnloadableImageException{
+		Area a = new Area(component.toOriginalShape());
+		return calculateAverageRGB(a, component.getRGBImage());
+		
+	}
+	
+	/*
+	 * PRIVATE METHODS
+	 * 
+	 */
+	
+	/**
 	 * Calculate the pixel values for cytoplasm, excluding nuclei
 	 * @param c
 	 * @return
-	 * @throws UnloadableImageException
+	 * @throws UnloadableImageException if the image file can't be read
 	 */
 	private Color calculateAverageCytoplasmRGB(ICell c) throws UnloadableImageException{
 		CellularComponent comp = c.getCytoplasm();
