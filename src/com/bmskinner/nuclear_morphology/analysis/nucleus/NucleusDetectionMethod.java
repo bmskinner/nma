@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 	private static final String SPACER = "---------";
+	private static final double DEFAULT_FILTERING_DELTA = 1.6;
 
 	private final String outputFolder;
 
@@ -73,18 +74,22 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			getTotalImagesToAnalyse();
 
 			log("Running nucleus detector");
+			
+			// Detect the nuclei in the folders selected
 			processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 
 			fine("Detected nuclei in "+analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
 
 			fine( "Creating cell collections");
 
+			// Get the collections containing nuclei
 			List<ICellCollection> folderCollection = this.getNucleiCollections();
 
 			// Run the analysis pipeline
 
 			fine("Analysing collections");
 
+			// Filter the datasets
 			datasets = analysePopulations(folderCollection);		
 
 			fine( "Analysis complete; return collections");
@@ -119,7 +124,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		return this.datasets;
 	}
 
-	public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection){
+	private List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection){
 
 		log("Creating cell collections");
 
@@ -143,12 +148,17 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 
 				log("Filtering collection...");
-				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
-				if(ok){
-					log("Filtered OK");
-				} else {
-					log("Filtering error");
-				}
+				
+				Filterer<ICellCollection> f = new CellCollectionFilterer();
+				f.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
+				log("Filtered OK");
+				
+//				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
+//				if(ok){
+//					log("Filtered OK");
+//				} else {
+//					log("Filtering error");
+//				}
 
 				/*
 				 * Keep the failed nuclei - they can be manually assessed later
@@ -194,7 +204,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 *  @param file a folder to be analysed
 	 *  @param collection the collection of nuclei found
 	 */
-	public void addNucleusCollection(File file, ICellCollection collection){
+	private void addNucleusCollection(File file, ICellCollection collection){
 		this.collectionGroup.put(file, collection);
 	}
 
@@ -206,7 +216,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 *
 	 *  @return a Map of a folder to its nuclei
 	 */
-	public List<ICellCollection> getNucleiCollections(){
+	private List<ICellCollection> getNucleiCollections(){
 		// remove any empty collections before returning
 
 		fine( "Getting all collections");
@@ -248,7 +258,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 * @param folder the folder to count
 	 * @return the number of analysable image files
 	 */
-	public static int countSuitableImages(File folder){
+	private static int countSuitableImages(File folder){
 
 		File[] listOfFiles = folder.listFiles();
 
