@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 /**
  * The interface for component factories
  * @author ben
+ * @since 1.13.3
  *
  * @param <E> the type of CellularComponent to be created
  */
@@ -38,11 +39,12 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
 	/**
 	 * Create a component of the appropriate class for the factory
 	 * @param roi the roi to create a nucleus from
-	 * @param channel the image channel
-	 * @param originalPosition the position of the roi in the source image
+	 * @param file the image file the component is found in
+	 * @param channel the RGB image channel
+	 * @param originalPosition the position of the roi in the source image in the format of {@link CellularComponent#getPosition()}
 	 * @param centreOfMass the centre of mass of the roi
 	 * @return a component of the type for this factory
-	 * @throws NucleusCreationException 
+	 * @throws ComponentCreationException if creation fails
 	 */
 	E buildInstance(Roi roi,
 			File file,

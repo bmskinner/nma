@@ -42,46 +42,11 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 		
 		try {
 
-			options = OptionsFactory.makeAnalysisOptions();
+			// Create the options
+			options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
 
-			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-			IMutableDetectionOptions cytoOptions    = OptionsFactory.makeNucleusDetectionOptions(folder);
-			
-			options.setNucleusType(NucleusType.NEUTROPHIL);
-			
-			
-			cytoOptions.setRGB(true);
-			
-			cytoOptions.setMinCirc(0);
-			cytoOptions.setMaxCirc(1);
-			cytoOptions.setMinSize(100);
-			cytoOptions.setMaxSize(10000); // for 20x images
-			PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-			pre.setUseColourThreshold(true);
-			pre.setHueThreshold(0, 104);
-			pre.setSaturationThreshold(0, 50);
-			pre.setBrightnessThreshold(142, 255);
-			cytoOptions.getCannyOptions().setUseKuwahara(false);;
-			cytoOptions.getCannyOptions().setFlattenImage(false);		
-			cytoOptions.getCannyOptions().setUseCanny(false);
-			
-			nucleusOptions.setRGB(true);
-			
-			nucleusOptions.setMinCirc(0);
-			nucleusOptions.setMaxCirc(1);
-			nucleusOptions.setMinSize(100);
-			nucleusOptions.setMaxSize(3000);
-			PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-			preN.setUseColourThreshold(true);
-			preN.setHueThreshold(0, 255);
-			preN.setSaturationThreshold(4, 120);
-			preN.setBrightnessThreshold(90, 250);
-			nucleusOptions.getCannyOptions().setUseKuwahara(false);;
-			nucleusOptions.getCannyOptions().setFlattenImage(false);
-			nucleusOptions.getCannyOptions().setUseCanny(false);
-
-			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-			options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
+			IMutableDetectionOptions cytoOptions    = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 			// make the panel
 			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);

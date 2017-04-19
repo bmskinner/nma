@@ -10,8 +10,10 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.CytoplasmFactory;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
@@ -28,13 +30,11 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -53,7 +53,7 @@ import inra.ijpb.watershed.Watershed;
  * @since 1.13.5
  *
  */
-public class NeutrophilDetectonTest {
+public class NeutrophilDetectonTest implements Loggable	 {
 	
 	/**
 	 * Interface implemented by probers to be notified that a new image is available
@@ -82,14 +82,22 @@ public class NeutrophilDetectonTest {
 			this.message = message;
 		}
 		
+		public ImageProcessor getProcessor(){
+			return ip;
+		}
+		
+		public String getMessage(){
+			return message;
+		}
+		
 	}
 	
 	final private IAnalysisOptions options;
 	final private boolean useProber;
 	final private List<Object> listeners = new ArrayList<>();
-	final private CytoplasmFactory cytoFactory = new CytoplasmFactory();
-	final private NucleusFactory nuclFactory   = new NucleusFactory(NucleusType.NEUTROPHIL);
-	final private LobeFactory lobeFactory      = new LobeFactory();
+	final private ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
+	final private ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
+	final private ComponentFactory<Lobe>       lobeFactory = new LobeFactory();
 	
 	/**
 	 * Construct with an analysis options
@@ -99,8 +107,6 @@ public class NeutrophilDetectonTest {
 	public NeutrophilDetectonTest(IAnalysisOptions op, boolean prober){
 		options = op;
 		useProber = prober;
-		
-		
 	}
 	
 	/*
@@ -169,10 +175,25 @@ public class NeutrophilDetectonTest {
 					it.remove();
 				}
 			}
-
+			
+			if(cell.hasNucleus()){
+				list.add(cell);
+			}
 			
 		}
 		
+		
+		if(useProber){
+			// Display the final image
+			ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
+			ImageAnnotator an = new ImageAnnotator(ip);
+			
+			for(ICell cell : list){
+				an.annotateCellBorders(cell);
+			}
+			fireDetectionEvent(an.toProcessor(), "Detected");
+			
+		}
 		
 		return list;
 	}
@@ -180,6 +201,8 @@ public class NeutrophilDetectonTest {
 	private List<ICytoplasm> detectCytoplasm(File imageFile) throws ComponentCreationException, ImageImportException{
 		List<ICytoplasm> list = new ArrayList<>();
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
+		ImageProcessor ann = ip.duplicate();
+		
 		try {
 			
 			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
@@ -216,11 +239,18 @@ public class NeutrophilDetectonTest {
 				
 
 		} catch (MissingOptionException e) {
-			
+			error("Missing option", e);
 		}
-		if(useProber){
-			fireDetectionEvent(ip, "Cytoplasm");
-		}
+//		if(useProber){
+////			fireDetectionEvent(ip, "Cytoplasm");
+//			
+//			ImageAnnotator an = new ImageAnnotator(ann);
+//			for(ICytoplasm c : list){
+//				an.annotateBorder(c, Color.CYAN);
+//			}
+//			fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
+//			
+//		}
 		return list;
 	}
 	
@@ -261,8 +291,12 @@ public class NeutrophilDetectonTest {
 	private List<Nucleus> detectNucleus(File imageFile, List<ICytoplasm> mask) throws ComponentCreationException, ImageImportException{
 		List<Nucleus> list = new ArrayList<>();
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
+		ImageProcessor ann = ip.duplicate();
 		try {
 			int topHatRadius = 20;
+			int thresholdMin = 20;
+			int thresholdMax = 255;
+			
 			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 			ImageProcessor test = new ImageConverter(ip)
@@ -270,18 +304,33 @@ public class NeutrophilDetectonTest {
 					.toProcessor();
 			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
 			ip = Morphology.blackTopHat(test, strel);
-			ip.invert();
+			
+//			if(useProber){
+//				fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
+//			}
+//			
+			// Most remaining cytoplasm is weak, can can be thresholded away 
+			
+			ImageProcessor bin = ip.duplicate();
+			ip.setMinAndMax(thresholdMin, thresholdMax);
+			bin.threshold(thresholdMin);
+//			ip = BinaryImages.binarize( ip ); // Converts a grayscale 2D or 3D image into a binary image by setting non-zero elements to 255.
+
+//			if(useProber){
+//				fireDetectionEvent(bin.duplicate(), "Nucleus binarized");
+//			}
+//			ip.invert();
 
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(main.getMinCirc(), main.getMaxCirc());
 			gd.setSize(main.getMinSize(), main.getMaxSize());
 			gd.setThreshold(main.getThreshold());
-			List<Roi> rois = gd.getRois(ip);
+			List<Roi> rois = gd.getRois(bin);
 			
 			for(int i=0; i<rois.size(); i++){
 				
 				Roi roi = rois.get(i);
-				Nucleus n = makeNucleus(roi, imageFile, main, ip, i, gd);
+				Nucleus n = makeNucleus(roi, imageFile, main, bin, i, gd);
 				list.add(n);
 				
 			}
@@ -291,17 +340,25 @@ public class NeutrophilDetectonTest {
 			
 		}
 		
-		if(useProber){
-			fireDetectionEvent(ip.duplicate(), "Nucleus");
-		}
+//		if(useProber){
+////			fireDetectionEvent(ip.duplicate(), "Nucleus");
+//			
+//			ImageAnnotator an = new ImageAnnotator(ann);
+//			for(Nucleus c : list){
+//				an.annotateBorder(c, Color.ORANGE);
+//			}
+//			fireDetectionEvent(an.toProcessor(), "Detected nucleus");
+//		}
 		
 		
 		detectLobes(ip, list);
-		if(useProber){
-			fireDetectionEvent(ip.duplicate(), "Lobes");
-		}
+		
+//		if(useProber){
+//			fireDetectionEvent(ip.duplicate(), "Lobes");
+//		}
 		return list;
 	}
+	
 	
 	private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber, Detector gd) throws ComponentCreationException {
 		
@@ -340,20 +397,15 @@ public class NeutrophilDetectonTest {
 	private void detectLobes(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
 
 		boolean calculateDams  = true;
-		int gradientRadius = 2;
-		int connectivity = 6;
-		int bitDepth = 32;
-		int dynamic = 10; // the minimal difference between a minima and its boundary
+		int gradientRadius     = 2;
+		int connectivity       = 6;
+		int bitDepth           = 32;
+		int dynamic            = 10; // the minimal difference between a minima and its boundary
+		int minArea            = 5;
+		int maxArea            = 3000;
 		
-		int thresholdMin = 20;
-		int thresholdMax = 255;
-				
+		ImagePlus imp = new ImagePlus("Input image", ip);
 
-		// Most remaining cytoplasm is weak, can can be thresholded away 
-		ip.setMinAndMax(thresholdMin, thresholdMax);
-		
-		ImagePlus imp = new ImagePlus("Min max", ip);
-//		imp.show();
 
 		// Copy the process used in the MorphoLbJ MorphologicalSegmentation plugin
 					
@@ -367,44 +419,83 @@ public class NeutrophilDetectonTest {
 		 * The morphological gradient is obtained from the difference
 		 * of image dilation and image erosion computed with the 
 		 * same structuring element.
+		 * 
+    	 *	This effectively gets the borders of the nuclei in the image
+    	 * TODO: use the nuclei themselves as a mask 
 		 */
 		ImageProcessor gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
+		
+		if(useProber){
+			fireDetectionEvent(gradient.duplicate(), "Gradient");
+		}
+		
+		// Make a stack for use in the minima detection
 		image = new ImageStack(image.getWidth(), image.getHeight());
 		image.addSlice(gradient); 
 		
-		
+		/*
+		 * Computes the extended minima in grayscale  image, keeping minima 
+		 * with the specified dynamic, and using the specified connectivity.
+		 *     dynamic - the difference between maxima and maxima boundary
+    	 *	  conn - the connectivity for maxima, that should be either 6 or 26
+    	 *
+    	 *	This finds minima in the image where the difference between the minimum and maximum is greater than 
+    	 * a specified value. Big enough differences. Finds the regions inside the gradient circles - the interior of the nuclei
+    	 *
+		 */
 		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, dynamic, connectivity );
 
+		if(useProber){
+			fireDetectionEvent(regionalMinima.getProcessor(1).duplicate(), "Regional minima");
+		}
+		
 		/*
 		 * Computes the labels in the binary 2D or 3D image contained 
 		 * in the given ImagePlus, and computes the maximum label 
 		 * to set up the display range of the resulting ImagePlus.
+		 * 
+		 * Used to restrict the watershed to only the bounds of the nuclei
 		 */
 		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, bitDepth );
 		ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
 		
-
+		if(useProber){
+			fireDetectionEvent(min.getProcessor().duplicate(), "Labelled minima");
+		}
+		
 		/*
 		 * Compute watershed with markers with a
 		 *  binary mask to restrict the regions of application
 		 */
 		ImagePlus resultStack = Watershed.computeWatershed( imp, min, 
 				connectivity, calculateDams );
-//		resultStack.show();
+		
+		if(useProber){
+			fireDetectionEvent(resultStack.getProcessor().duplicate(), "Watershed");
+		}
+
 		final ImagePlus lines = BinaryImages.binarize( resultStack );
-//		lines.show();
+		
+		if(useProber){
+			fireDetectionEvent(lines.getProcessor().duplicate(), "Binarized");
+		}
 		
 		ImageProcessor lp = lines.getProcessor();
 		lp.invert();
 		
+		if(useProber){
+			fireDetectionEvent(lp.duplicate(), "Lines");
+		}
+		
 		// Now take the watershed image, and detect the distinct lobes
 		
 		ImageFilterer ft = new ImageFilterer(lp);
-		ImageProcessor ws = ft.dilate(1).toProcessor();
+		ImageProcessor ws = ft.dilate(1).toProcessor(); // separate the lobes from each other
+//		ImageProcessor ws = ft.toProcessor();
 		
 		GenericDetector gd = new GenericDetector();
 		gd.setIncludeHoles(false);
-		gd.setSize(20, 3000);
+		gd.setSize(minArea, maxArea);
 		List<Roi> rois  = gd.getRois(ws);
 		
 		for(Roi roi : rois){
@@ -436,22 +527,4 @@ public class NeutrophilDetectonTest {
 		
 		
 	}
-	
-	
-	
-	public static IAnalysisOptions demoOptions(){
-		
-		File folder = new File("C:\\test\\");
-		IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-		
-		IMutableDetectionOptions cyto = OptionsFactory.makeNucleusDetectionOptions(folder);
-		
-		IMutableDetectionOptions nucl = OptionsFactory.makeNucleusDetectionOptions(folder);
-		
-		op.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cyto);
-		op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucl);
-		
-		return op;
-	}
-
 }

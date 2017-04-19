@@ -33,6 +33,7 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -44,6 +45,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -58,6 +61,30 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 
 	public ImageAnnotator(ImageProcessor ip) {
 		super(ip);
+	}
+	
+	/**
+	 * Draw the borders of all cell components
+	 * @param cell
+	 * @return
+	 */
+	public ImageAnnotator annotateCellBorders(ICell cell){
+		
+		if(cell.hasCytoplasm()){
+			annotateBorder(cell.getCytoplasm(), Color.CYAN);
+		}
+		
+		for(Nucleus n : cell.getNuclei()){
+			annotateBorder(n, Color.ORANGE);
+			if(n instanceof LobedNucleus){
+				for(Lobe l : ((LobedNucleus)n).getLobes()){
+					annotateBorder(l, Color.RED);
+					annotatePoint(l.getCentreOfMass(), Color.GREEN);
+				}
+			}
+		}
+		
+		return this;
 	}
 		
 	

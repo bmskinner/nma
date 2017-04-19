@@ -7,18 +7,14 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
-import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -28,10 +24,9 @@ import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.filter.BackgroundSubtracter;
 import ij.plugin.filter.GaussianBlur;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import ijt.filter.morphology.MinimaAndMaxima;
+//import ijt.filter.morphology.MinimaAndMaxima;
+import inra.ijpb.morphology.MinimaAndMaxima;
 
 /**
  * The abstract pipeline implementing common methods. Extending classes
