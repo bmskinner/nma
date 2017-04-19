@@ -13,7 +13,7 @@ import java.util.Map;
  * @author ben
  * @since 1.13.4
  */
-public abstract class AbstractHashOptions implements Serializable {
+public abstract class AbstractHashOptions implements Serializable, HashOptions {
 
 	private static final long serialVersionUID = 1L;
 	protected Map<String, Integer> intMap  = new HashMap<String, Integer>();

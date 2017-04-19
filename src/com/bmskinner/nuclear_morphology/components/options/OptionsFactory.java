@@ -2,6 +2,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
@@ -114,5 +115,81 @@ public interface OptionsFactory {
 	
 	static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template){
 		return new ClusteringOptions(template);
+	}
+	
+	
+	
+	/**
+	 * Create default options for cytoplasm detection in neutrophils using colour thresholding
+	 * @param folder
+	 * @return
+	 * @throws MissingOptionException
+	 */
+	static IMutableDetectionOptions makeDefaultCytoplasmDetectionOptions(File folder) throws MissingOptionException{
+
+		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeNucleusDetectionOptions(folder);
+		
+		cytoOptions.setRGB(true);
+		
+		cytoOptions.setMinCirc(0);
+		cytoOptions.setMaxCirc(1);
+		cytoOptions.setMinSize(100);
+		cytoOptions.setMaxSize(10000); // for 20x images
+		PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+		pre.setUseColourThreshold(true);
+		pre.setHueThreshold(0, 104);
+		pre.setSaturationThreshold(0, 50);
+		pre.setBrightnessThreshold(142, 255);
+		cytoOptions.getCannyOptions().setUseKuwahara(false);;
+		cytoOptions.getCannyOptions().setFlattenImage(false);		
+		cytoOptions.getCannyOptions().setUseCanny(false);
+		return cytoOptions;
+	}
+	
+	/**
+	 * Create default options for nucleus detection in neutrophils using colour thresholding
+	 * @param folder
+	 * @return
+	 * @throws MissingOptionException
+	 */
+	static IMutableDetectionOptions makeDefaultNucleusDetectionOptions(File folder) throws MissingOptionException{
+		
+		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+		nucleusOptions.setRGB(true);
+		
+		nucleusOptions.setMinCirc(0);
+		nucleusOptions.setMaxCirc(1);
+		nucleusOptions.setMinSize(100);
+		nucleusOptions.setMaxSize(3000);
+		PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+		preN.setUseColourThreshold(true);
+		preN.setHueThreshold(0, 255);
+		preN.setSaturationThreshold(4, 120);
+		preN.setBrightnessThreshold(90, 250);
+		nucleusOptions.getCannyOptions().setUseKuwahara(false);;
+		nucleusOptions.getCannyOptions().setFlattenImage(false);
+		nucleusOptions.getCannyOptions().setUseCanny(false);
+		return nucleusOptions;
+
+	}
+	
+	/**
+	 * Create default options for neutrophil detection using colour thresholding
+	 * @param folder
+	 * @return
+	 * @throws MissingOptionException
+	 */
+	static IMutableAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
+		
+		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
+		options.setNucleusType(NucleusType.NEUTROPHIL);
+		
+		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeDefaultCytoplasmDetectionOptions(folder);
+		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNucleusDetectionOptions(folder);
+
+		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+		options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);
+		return options;
+
 	}
 }
