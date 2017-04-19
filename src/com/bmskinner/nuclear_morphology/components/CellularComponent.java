@@ -18,6 +18,7 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components;
 
+import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
 import java.awt.Shape;
@@ -290,6 +291,13 @@ public interface CellularComponent
 	int wrapIndex(int i);
 	
 	/**
+	 * Turn a list of border points into a polygon. 
+	 * @param list the list of border points
+	 * @return
+	 */
+	FloatPolygon toPolygon();
+	
+	/**
 	 * Create a polygon with the same position as the component
 	 * in its source image.
 	 * @return
@@ -319,13 +327,19 @@ public interface CellularComponent
 	 */
 	Shape toOriginalShape();
 	
-	 /**
-	 * Turn a list of border points into a polygon. 
-	 * @param list the list of border points
+	/**
+	 * Create an ImageJ ROI encompassing the component
 	 * @return
 	 */
-	FloatPolygon toPolygon();
+	Roi toRoi();
 	
+	/**
+	 * Create an ImageJ ROI encompassing the component
+	 * with the same position as the component in its 
+	 * source image.
+	 * @return
+	 */
+	Roi toOriginalRoi();
 
 	
 	/**

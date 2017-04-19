@@ -421,10 +421,11 @@ public class DefaultCellCollection
 		double[] result = new double[count];
 
 		int i=0;
-		for(ICell cell : getCells() ){ 
-			Nucleus n = cell.getNucleus();
+	
+		for(Nucleus n : getNuclei()){
 			result[i++] =  n.getMedianDistanceBetweenPoints();
-		}
+		}		
+		
 		return result;
 	}
 
@@ -448,7 +449,7 @@ public class DefaultCellCollection
 		Set<ICell> result = new HashSet<ICell>(cells.size());
 
 		for(ICell cell : cells){
-			if(cell.getNucleus().getSourceFile().equals(imageFile)){
+			if(cell.getNuclei().get(0).getSourceFile().equals(imageFile)){
 				result.add(cell);
 			}
 		}
@@ -990,7 +991,6 @@ public class DefaultCellCollection
 
 		} else {
 			
-			finest("Running cell filter stream");
 			filteredCells = getCells()
 					.parallelStream()
 					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)

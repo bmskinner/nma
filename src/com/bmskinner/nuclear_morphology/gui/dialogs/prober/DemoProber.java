@@ -1,0 +1,195 @@
+package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Window;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableModel;
+
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilDetectonTest;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.LargeImageDialog;
+
+/**
+ * This test class demostrates using the DetectionEventListener interface to fill a table
+ * model as detection occurs
+ * @author ben
+ * @since 1.13.5
+ *
+ */
+public class DemoProber extends SettingsDialog {
+
+	public DemoProber(File folder){
+		super();
+		try {
+			ProberTableModel model = new ProberTableModel();
+
+
+			NeutrophilDetectonTest test = new NeutrophilDetectonTest(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder), true);
+			test.addDetectionEventListener(model);
+
+			JTable table = createTable(model);
+
+			JScrollPane scrollPane = new JScrollPane(table);
+			add(scrollPane);
+			pack();
+			setVisible(true);
+			setModal(true);
+			Runnable r = () -> {
+				try {
+					List<ICell> cells = test.run();
+				} catch (Exception e) {
+					warn("Error in prober");
+					stack(e);
+				}
+			};
+			ThreadManager.getInstance().submit(r);
+			
+		} catch (Exception e) {
+			warn("Error in prober");
+			stack(e);
+		}
+	}
+	
+	private JTable createTable(TableModel model){
+		JTable table = new JTable(model);
+		table.setRowHeight(200);
+		table.getColumnModel().getColumn(1).setCellRenderer(new IconCellRenderer());
+		
+		table.setCellSelectionEnabled(true);
+        table.setRowSelectionAllowed(false);
+        table.setColumnSelectionAllowed(false);
+        
+        table.addMouseListener( new MouseAdapter(){
+        	
+        	@Override
+        	public void mouseClicked(MouseEvent e){
+        		if(e.getClickCount()==1){
+        			
+        			// Get the data model for this table
+        			TableModel model = (TableModel)table.getModel();
+        			
+        			Point pnt = e.getPoint();
+        			int row = table.rowAtPoint(pnt);
+        			int col = table.columnAtPoint(pnt);
+        			
+        			if(col==1){
+        				ImageProberTableCell selectedData = (ImageProberTableCell) model.getValueAt( row, col );
+
+            			if(selectedData.getLargeIcon()!=null){
+            				new LargeImageDialog(selectedData, DemoProber.this);
+            			}
+        			}
+
+        			
+        			
+        		}
+        	}
+        	
+        });
+        return table;
+	}
+
+	/**
+	 * This renderer displays the small icons from an ImageProberTableCell, and sets text
+	 * appropriate to the label within the cell.
+	 * @author ben
+	 *
+	 */
+	private class IconCellRenderer extends DefaultTableCellRenderer	{
+		@Override
+		public Component getTableCellRendererComponent(	JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			try {
+				super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+				if(column==1){
+					
+				
+					ImageProberTableCell info = (ImageProberTableCell) value;
+					setHorizontalAlignment(JLabel.CENTER);
+					setVerticalAlignment(JLabel.TOP); // image has no offset
+					setBackground(Color.WHITE);
+					setText("");
+
+					if(info==null){
+						setText("");
+						return this;
+					}
+
+					if(info.hasSmallIcon()){
+						setIcon( info.getSmallIcon() );
+					} else {
+						setIcon(null);
+					}
+				}
+			}
+			catch (Exception e){
+				error("Renderer error", e);
+			}
+
+			return this;
+		}
+
+
+}
+
+
+	/**
+	 * Show images in a non-modal window at IMAGE_SCREEN_PROPORTION of the 
+	 * screen width or size
+	 *
+	 */
+	public class LargeImageDialog extends JDialog {
+
+		public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
+
+		/**
+		 * Create a full-scale image for the given key in this ImageProber.
+		 * @param key the image to show
+		 * @param parent the parent ImageProber window
+		 */
+		public LargeImageDialog(final ImageProberTableCell cell, final Window parent){
+			super( parent );
+
+			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+			final ImageIcon icon = cell.getLargeIconFitToScreen(DEFAULT_SCREEN_PROPORTION);
+
+			this.setLayout(new BorderLayout());
+
+
+			this.add(new JLabel(icon), BorderLayout.CENTER);
+
+			// Show the scaling factor in the title bar
+			//			double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
+			//			scale *=100;
+			//			DecimalFormat df = new DecimalFormat("#0.00"); 
+			//
+			//	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
+			this.setTitle(cell.toString());
+
+			this.setModal(true);
+			this.setResizable(false);
+			this.pack();
+			this.setLocationRelativeTo(null);
+			this.setVisible(true);
+		}
+
+	}
+
+}

@@ -1,5 +1,6 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
+import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -35,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -241,16 +244,16 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		} catch (MissingOptionException e) {
 			error("Missing option", e);
 		}
-//		if(useProber){
-////			fireDetectionEvent(ip, "Cytoplasm");
-//			
-//			ImageAnnotator an = new ImageAnnotator(ann);
-//			for(ICytoplasm c : list){
-//				an.annotateBorder(c, Color.CYAN);
-//			}
-//			fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
-//			
-//		}
+		if(useProber){
+//			fireDetectionEvent(ip, "Cytoplasm");
+			
+			ImageAnnotator an = new ImageAnnotator(ann);
+			for(ICytoplasm c : list){
+				an.annotateBorder(c, Color.CYAN);
+			}
+			fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
+			
+		}
 		return list;
 	}
 	
@@ -340,19 +343,19 @@ public class NeutrophilDetectonTest implements Loggable	 {
 			
 		}
 		
-//		if(useProber){
-////			fireDetectionEvent(ip.duplicate(), "Nucleus");
-//			
-//			ImageAnnotator an = new ImageAnnotator(ann);
-//			for(Nucleus c : list){
-//				an.annotateBorder(c, Color.ORANGE);
-//			}
-//			fireDetectionEvent(an.toProcessor(), "Detected nucleus");
-//		}
+		if(useProber){
+//			fireDetectionEvent(ip.duplicate(), "Nucleus");
+			
+			ImageAnnotator an = new ImageAnnotator(ann);
+			for(Nucleus c : list){
+				an.annotateBorder(c, Color.ORANGE);
+			}
+			fireDetectionEvent(an.toProcessor(), "Detected nucleus");
+		}
 		
 		
 		detectLobes(ip, list);
-		
+//		detectLobesViaSubtraction(ip, list);
 //		if(useProber){
 //			fireDetectionEvent(ip.duplicate(), "Lobes");
 //		}
@@ -526,5 +529,76 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		}
 		
 		
+	}
+	
+	/**
+	 * Subtract the median intenity of each nucleus from a greyscale image to find lobes
+	 * as islands
+	 * @param ip
+	 * @param list
+	 * @throws ComponentCreationException 
+	 */
+	private void detectLobesViaSubtraction(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
+		
+		if(useProber){
+			fireDetectionEvent(ip.duplicate(), "Lobe input");
+		}
+		
+		
+		int minArea            = 5;
+		int maxArea            = 3000;
+		
+		GenericDetector gd = new GenericDetector();
+		gd.setIncludeHoles(false);
+		gd.setSize(minArea, maxArea);
+		
+		int i=0;
+		for(Nucleus n : list){
+//			if(i>0){
+//				continue;
+//			}
+//			i++;
+			int avg = ColourMeasurometer.calculateIntensity(n, ip, Quartile.LOWER_QUARTILE);
+			
+			ImageProcessor test = ip.duplicate();
+			
+			test.subtract(avg);
+//			if(useProber){
+//				fireDetectionEvent(test.duplicate(), "Subtracted "+avg);
+//			}
+			
+			test.threshold(avg);// binarise
+//			if(useProber){
+//				fireDetectionEvent(test.duplicate(), "Binarised "+avg);
+//			}
+			
+			List<Roi> rois  = gd.getRois(test);
+						
+			LobedNucleus l = (LobedNucleus) n;
+			
+			for(Roi roi : rois){
+				StatsMap m = gd.measure(roi, ip);
+				int x = m.get(GenericDetector.COM_X).intValue();
+				int y = m.get(GenericDetector.COM_Y).intValue();
+				IPoint com = IPoint.makeNew(x, y);
+				if(n.containsOriginalPoint(com)){
+					// Now adjust the roi base to match the source image
+					IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
+
+					Rectangle bounds = roi.getBounds();
+
+					roi.setLocation(base.getXAsInt(), base.getYAsInt());
+
+					int[] originalPosition = {base.getXAsInt(), 
+							base.getYAsInt(), 
+							(int) bounds.getWidth(), 
+							(int) bounds.getHeight() };
+
+					Lobe lobe = lobeFactory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com);
+
+					l.addLobe( lobe); //TODO makethe channel useful
+				}
+			}
+		}
 	}
 }

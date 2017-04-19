@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DemoProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
@@ -93,11 +94,13 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 		fine("Making analysis options");
 		
 		try {
-			NeutrophilDetectonTest test = new NeutrophilDetectonTest(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder), true);
-			test.addDetectionEventListener( e -> {
-				new ImagePlus(e.getMessage(), e.getProcessor()).show();
-			});
-			List<ICell> cells = test.run();
+			
+			DemoProber demo = new DemoProber(folder);
+//			NeutrophilDetectonTest test = new NeutrophilDetectonTest(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder), true);
+//			test.addDetectionEventListener( e -> {
+//				new ImagePlus(e.getMessage(), e.getProcessor()).show();
+//			});
+//			List<ICell> cells = test.run();
 			this.cancel();
 		} catch (Exception e1) {
 			error("Error in test", e1);

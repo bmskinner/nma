@@ -21,6 +21,7 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import ij.ImageStack;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
@@ -881,6 +882,25 @@ public abstract class AbstractCellularComponent
 		double diffY = position[CellularComponent.Y_BASE] - getMinY();
 		
 		return toOffsetShape(diffX, diffY);
+	}
+	
+	@Override
+	public Roi toRoi(){
+		//TODO: offset to current position
+		
+		int[] xpoints = new int[borderList.size()]; 
+		int[] ypoints = new int[borderList.size()]; 
+		
+		for(int i=0; i<borderList.size(); i++){
+			xpoints[i] = borderList.get(i).getXAsInt();
+			ypoints[i] = borderList.get(i).getYAsInt();
+		}
+		return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+	}
+	
+	@Override
+	public Roi toOriginalRoi(){
+		return toRoi();
 	}
 	
 	public List<IPoint> getPixelsAsPoints(){

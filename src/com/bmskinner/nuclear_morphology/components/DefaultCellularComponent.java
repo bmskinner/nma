@@ -971,6 +971,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			
 			return toOffsetShape(diffX, diffY);
 		}
+		
+		@Override
+		public Roi toRoi(){
+			//TODO: offset to current position
+			return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		}
+		
+		@Override
+		public Roi toOriginalRoi(){
+			return new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
+		}
 			
 		
 		private Shape toOffsetShape(double xOffset, double yOffset){

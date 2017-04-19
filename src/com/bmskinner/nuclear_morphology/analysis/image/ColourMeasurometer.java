@@ -14,6 +14,7 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
+import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
@@ -26,8 +27,51 @@ import ij.process.ImageProcessor;
  */
 public class ColourMeasurometer implements Loggable {
 
-	public ColourMeasurometer(){}
+//	public ColourMeasurometer(){}
 	
+	
+	/**
+	 * Calculate the median greyscale intensity in the given component of a cell.
+	 * @param component
+	 * @return
+	 * @throws UnloadableImageException
+	 */
+	public int calculateAverageIntensity(CellularComponent component) throws UnloadableImageException{
+		Area a = new Area(component.toOriginalShape());
+		return calculateAverageIntensity(a, component.getImage(), Quartile.MEDIAN);
+	}
+	
+	/**
+	 * Calculate the median greyscale intensity of the given processor within the area of the given component
+	 * @param component
+	 * @param ip the image processor to search
+	 * @return
+	 */
+	public static int calculateAverageIntensity(CellularComponent component, ImageProcessor ip) {
+		Area a = new Area(component.toOriginalShape());
+		return calculateAverageIntensity(a, ip, Quartile.MEDIAN);
+	}
+	
+	/**
+	 * Calculate the median greyscale intensity of the given processor within the area of the given component
+	 * @param component
+	 * @param ip the image processor to search
+	 * @param quartile the quartile to return, from 0-100
+	 * @return
+	 */
+	public static int calculateIntensity(CellularComponent component, ImageProcessor ip, double quartile) {
+		
+		if(component==null || ip==null){
+			throw new IllegalArgumentException("Component or image is null");
+		}
+		
+		if(quartile<0 || quartile > 100){
+			throw new IllegalArgumentException("Quartile must be between 0-100");
+		}
+		
+		Area a = new Area(component.toOriginalShape());
+		return calculateAverageIntensity(a, ip, quartile);
+	}
 	
 	
 	/**
@@ -39,7 +83,9 @@ public class ColourMeasurometer implements Loggable {
 	 * @return
 	 * @throws UnloadableImageException if the image file can't be read
 	 */
-	public Color calculateAverageRGB(ICell c, String component) throws UnloadableImageException{
+	public static Color calculateAverageRGB(ICell c, String component) throws UnloadableImageException{
+		
+		
 		
 		// Get the component of interest, and remove any subcomponents
 		// from its shape before calculating
@@ -62,7 +108,12 @@ public class ColourMeasurometer implements Loggable {
 	 * @return
 	 * @throws UnloadableImageException if the image file can't be read
 	 */
-	public Color calculateAverageRGB(CellularComponent component) throws UnloadableImageException{
+	public static Color calculateAverageRGB(CellularComponent component) throws UnloadableImageException{
+		
+		if(component==null){
+			throw new IllegalArgumentException("Component or image is null");
+		}
+		
 		Area a = new Area(component.toOriginalShape());
 		return calculateAverageRGB(a, component.getRGBImage());
 		
@@ -74,12 +125,54 @@ public class ColourMeasurometer implements Loggable {
 	 */
 	
 	/**
+	 * Get the average RGB values within the area. 
+	 * @param a
+	 * @param ip a color immage processor
+	 * @return
+	 */
+	private static int calculateAverageIntensity(Area a, ImageProcessor ip, double quartile){
+		
+		if( ! (ip instanceof ByteProcessor)){
+			throw new IllegalArgumentException("Must be an 8-bit greyscale image processor");
+		}
+				
+
+		
+		Rectangle r = a.getBounds();
+		
+		List<Integer> grey   = new ArrayList<Integer>(100);
+		
+		for(int x=0; x<ip.getWidth(); x++){
+			
+			if(x<r.getMinX() || x>r.getMaxX()){
+				continue;
+			}
+			
+			for(int y=0; y<ip.getHeight(); y++){
+				if(y<r.getMinY() || y>r.getMaxY()){
+					continue;
+				}
+
+				if(a.contains(x, y)){
+
+					grey.add(  ip.get( x, y )  );
+
+				}
+
+			}
+		}
+		
+		Quartile q = new Quartile(grey, quartile);
+		return q.intValue();
+	}
+	
+	/**
 	 * Calculate the pixel values for cytoplasm, excluding nuclei
 	 * @param c
 	 * @return
 	 * @throws UnloadableImageException if the image file can't be read
 	 */
-	private Color calculateAverageCytoplasmRGB(ICell c) throws UnloadableImageException{
+	private static Color calculateAverageCytoplasmRGB(ICell c) throws UnloadableImageException{
 		CellularComponent comp = c.getCytoplasm();
 		Shape s = comp.toOriginalShape();
 		
@@ -100,7 +193,7 @@ public class ColourMeasurometer implements Loggable {
 	 * @param ip a color immage processor
 	 * @return
 	 */
-	private Color calculateAverageRGB(Area a, ImageProcessor ip){
+	private static Color calculateAverageRGB(Area a, ImageProcessor ip){
 		
 		if( ! (ip instanceof ColorProcessor)){
 			throw new IllegalArgumentException("Must be a colour image processor");
@@ -152,7 +245,7 @@ public class ColourMeasurometer implements Loggable {
 		
 	}
 	
-	private int calculateAverage(List<Integer> list){
+	private static int calculateAverage(List<Integer> list){
 		Quartile q = new Quartile(list, Quartile.MEDIAN);
 		return q.intValue();
 	}

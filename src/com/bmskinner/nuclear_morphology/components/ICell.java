@@ -46,8 +46,10 @@ public interface ICell
 	UUID getId();
 
 	/**
-	 * Get the first nucleus of the cell
+	 * Get the first nucleus of the cell. Use {@link #getNuclei()} instead
+	 * to ensure cells with multiple nuclei are handled correctly
 	 * @return
+	 * @deprecated from 1.13.5
 	 */
 	Nucleus getNucleus();
 	
