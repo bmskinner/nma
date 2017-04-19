@@ -19,12 +19,19 @@
 
 package com.bmskinner.nuclear_morphology.analysis.classification;
 
+import java.awt.Color;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Attempt to classify the cells from an H&E stained blood smear.
@@ -32,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
  * @since 1.13.5
  *
  */
-public class BloodCellClassifier implements CellClassifier {
+public class BloodCellClassifier implements CellClassifier, Loggable {
 	
 	public static final String ERYTHROCYTE = "Erythrocyte";
 	public static final String NEUTROPHIL  = "Neutrophil";
@@ -55,7 +62,39 @@ public class BloodCellClassifier implements CellClassifier {
 	@Override
 	public void classify(){
 		
+		Set<ICell> eryth  = new HashSet<>();
+		Set<ICell> neutro = new HashSet<>();
+		Set<ICell> lympho = new HashSet<>();
+		
 		// Go through the difference blood cell types we can look for
+		
+		for(ICell c : dataset.getCollection().getCells()){
+			
+			if( ! c.hasNucleus()){
+				eryth.add(c);
+				continue;
+			}
+			
+			if(c.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT)==1 || c.getStatistic(PlottableStatistic.LOBE_COUNT)==1 ){
+				lympho.add(c);
+				continue;
+			}
+			
+			// Now look for the differences between granulocytes
+			// Pass RGB data to a clusterer and group on cytoplasm intensity
+			// Requires user confirmation of cells
+			
+			ColourMeasurometer cm  = new ColourMeasurometer();
+			try {
+				
+				Color colour = cm.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
+				
+				
+			} catch (UnloadableImageException e) {
+				stack(e);
+			}
+			
+		}
 		
 	}
 
