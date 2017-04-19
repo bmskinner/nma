@@ -23,7 +23,7 @@
   Given two images, find the offset that best
   aligns them
 */  
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.analysis.image;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.ImageCalculator;
