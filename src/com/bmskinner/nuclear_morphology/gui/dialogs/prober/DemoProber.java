@@ -11,6 +11,7 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -18,12 +19,12 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilDetectonTest;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.LargeImageDialog;
 
 /**
  * This test class demostrates using the DetectionEventListener interface to fill a table
@@ -34,36 +35,49 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.Larg
  */
 public class DemoProber extends SettingsDialog {
 
+	private Finder test;
+	JButton runButton;
 	public DemoProber(File folder){
 		super();
 		try {
 			ProberTableModel model = new ProberTableModel();
 
 
-			NeutrophilDetectonTest test = new NeutrophilDetectonTest(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder), true);
+			test = new NeutrophilFinder(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder));
 			test.addDetectionEventListener(model);
 
 			JTable table = createTable(model);
+			
+			runButton = new JButton("Run");
+			runButton.addActionListener( e ->{
+				run();
+			});
+			add(runButton, BorderLayout.NORTH);
 
 			JScrollPane scrollPane = new JScrollPane(table);
-			add(scrollPane);
+			add(scrollPane, BorderLayout.CENTER);
 			pack();
-			setVisible(true);
 			setModal(true);
-			Runnable r = () -> {
-				try {
-					List<ICell> cells = test.run();
-				} catch (Exception e) {
-					warn("Error in prober");
-					stack(e);
-				}
-			};
-			ThreadManager.getInstance().submit(r);
+			setVisible(true);		
 			
 		} catch (Exception e) {
-			warn("Error in prober");
+			error("Error in prober", e);
 			stack(e);
 		}
+	}
+	
+	public void run(){
+		Runnable r = () -> {
+			try {
+				runButton.setEnabled(false);
+				List<ICell> cells = test.find();
+				runButton.setEnabled(true);
+			} catch (Exception e) {
+				error("Error in prober", e);
+				stack(e);
+			}
+		};
+		ThreadManager.getInstance().submit(r);
 	}
 	
 	private JTable createTable(TableModel model){
@@ -183,7 +197,7 @@ public class DemoProber extends SettingsDialog {
 			//	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
 			this.setTitle(cell.toString());
 
-			this.setModal(true);
+			this.setModal(false);
 			this.setResizable(false);
 			this.pack();
 			this.setLocationRelativeTo(null);

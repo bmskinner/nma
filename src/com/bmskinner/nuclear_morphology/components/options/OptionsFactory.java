@@ -137,9 +137,9 @@ public interface OptionsFactory {
 		cytoOptions.setMaxSize(10000); // for 20x images
 		PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 		pre.setUseColourThreshold(true);
-		pre.setHueThreshold(0, 104);
-		pre.setSaturationThreshold(0, 50);
-		pre.setBrightnessThreshold(142, 255);
+		pre.setHueThreshold(48, 113);
+		pre.setSaturationThreshold(0, 56);
+		pre.setBrightnessThreshold(109, 181);
 		cytoOptions.getCannyOptions().setUseKuwahara(false);;
 		cytoOptions.getCannyOptions().setFlattenImage(false);		
 		cytoOptions.getCannyOptions().setUseCanny(false);

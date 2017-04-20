@@ -31,7 +31,7 @@ import javax.swing.JFileChooser;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilDetectonTest;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -96,12 +96,9 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 		try {
 			
 			DemoProber demo = new DemoProber(folder);
-//			NeutrophilDetectonTest test = new NeutrophilDetectonTest(OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder), true);
-//			test.addDetectionEventListener( e -> {
-//				new ImagePlus(e.getMessage(), e.getProcessor()).show();
-//			});
-//			List<ICell> cells = test.run();
-			this.cancel();
+
+			cancel();
+			return;
 		} catch (Exception e1) {
 			error("Error in test", e1);
 		}

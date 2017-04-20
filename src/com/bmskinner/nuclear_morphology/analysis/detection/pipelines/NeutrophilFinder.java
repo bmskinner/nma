@@ -4,14 +4,12 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
-import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -36,18 +34,23 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
+import inra.ijpb.binary.ChamferWeights;
+import inra.ijpb.binary.distmap.DistanceTransform;
+import inra.ijpb.binary.distmap.DistanceTransform5x5Float;
+import inra.ijpb.morphology.MinimaAndMaxima;
 import inra.ijpb.morphology.MinimaAndMaxima3D;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Strel;
+import inra.ijpb.morphology.attrfilt.AreaOpening;
+import inra.ijpb.morphology.attrfilt.AreaOpeningNaive;
 import inra.ijpb.morphology.strel.DiskStrel;
+import inra.ijpb.watershed.ExtendedMinimaWatershed;
 import inra.ijpb.watershed.Watershed;
 
 /**
@@ -56,94 +59,39 @@ import inra.ijpb.watershed.Watershed;
  * @since 1.13.5
  *
  */
-public class NeutrophilDetectonTest implements Loggable	 {
+public class NeutrophilFinder extends AbstractFinder	 {
 	
-	/**
-	 * Interface implemented by probers to be notified that a new image is available
-	 * for display
-	 * @author ben
-	 * @since 1.13.5
-	 *
-	 */
-	public interface DetectionEventListener{
-		void detectionEventReceived(DetectionEvent e);
-	}
-	
-	/**
-	 * Fired when an image has been processed to detect components.
-	 * @author ben
-	 * @since 1.13.5
-	 *
-	 */
-	public class DetectionEvent extends EventObject {
-		
-		final private ImageProcessor ip;
-		final private String message;
-		public DetectionEvent(final Object source, final ImageProcessor ip, final String message){
-			super(source);
-			this.ip = ip;
-			this.message = message;
-		}
-		
-		public ImageProcessor getProcessor(){
-			return ip;
-		}
-		
-		public String getMessage(){
-			return message;
-		}
-		
-	}
-	
-	final private IAnalysisOptions options;
-	final private boolean useProber;
-	final private List<Object> listeners = new ArrayList<>();
 	final private ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
 	final private ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
 	final private ComponentFactory<Lobe>       lobeFactory = new LobeFactory();
+	
+	final private static int CONNECTIIVITY  = 4;
+	final private static boolean IS_VERBOSE = false;
+	final private static boolean NORMALISE_DISTANCE_MAP      = true;
 	
 	/**
 	 * Construct with an analysis options
 	 * @param op
 	 * @param prober should prober events be fired
 	 */
-	public NeutrophilDetectonTest(IAnalysisOptions op, boolean prober){
-		options = op;
-		useProber = prober;
+	public NeutrophilFinder(IAnalysisOptions op){
+		super(op);
 	}
-	
+		
 	/*
-	 * EVENT HANDLING
+	 * METHODS IMPLEMENTING THE FINDER INTERFACE
 	 * 
 	 */
 	
-	public void addDetectionEventListener(DetectionEventListener l){
-		listeners.add(l);
-	}
-	
-	public void removeDetectionEventListener(DetectionEventListener l){
-		listeners.remove(l);
-	}
-	
-	public void fireDetectionEvent(ImageProcessor ip, String message){
-		for(Object l : listeners){
-			((DetectionEventListener)l).detectionEventReceived(new DetectionEvent(this, ip, message));
-		}
-	}
-	
-	/*
-	 * PIPELINE HANDLING
-	 * 
-	 */
-	
-	
-	public List<ICell> run() throws Exception{
+	@Override
+	public List<ICell> find() throws Exception{
 		
 		List<ICell> list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
 		return list;
 		
 	}
 	
+	@Override
 	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
 		List<ICell> list = new ArrayList<>();
 		
@@ -157,6 +105,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 	}
 	
 	
+	@Override
 	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException{
 		List<ICell> list = new ArrayList<>();
 		
@@ -186,7 +135,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		}
 		
 		
-		if(useProber){
+		if( ! listeners.isEmpty()){
 			// Display the final image
 			ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
 			ImageAnnotator an = new ImageAnnotator(ip);
@@ -194,10 +143,90 @@ public class NeutrophilDetectonTest implements Loggable	 {
 			for(ICell cell : list){
 				an.annotateCellBorders(cell);
 			}
-			fireDetectionEvent(an.toProcessor(), "Detected");
+			fireDetectionEvent(an.toProcessor(), "Detected cells");
 			
 		}
 		
+		return list;
+	}
+	
+	/*
+	 * PRIVATE METHODS
+	 */
+	
+	private List<ICytoplasm> detectCytoplasmBySegmentation(File imageFile) throws ComponentCreationException, ImageImportException{
+		List<ICytoplasm> list = new ArrayList<>();
+		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
+		ImageProcessor ann = ip.duplicate();
+		
+		// Based on http://blogs.mathworks.com/steve/2013/11/19/watershed-transform-question-from-tech-support/
+		try {
+			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+			IPreprocessingOptions op = (IPreprocessingOptions) main.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			
+			// Use colour thresholds to get rough cytoplasms
+
+			int minHue = op.getMinHue();
+			int maxHue = op.getMaxHue();
+			int minSat = op.getMinSaturation();
+			int maxSat = op.getMaxSaturation();
+			int minBri = op.getMinBrightness();
+			int maxBri = op.getMaxBrightness();
+			int connectivity = 8;
+
+			ip = new ImageFilterer(ip)
+					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
+					.convertToByteProcessor()
+					.toProcessor();
+
+			ip.invert();
+
+			fireDetectionEvent(ip.duplicate(), "Colour threshold");
+			
+			// Fill area holes
+			AreaOpening ao = new AreaOpeningNaive();
+			ip = ao.process(ip, (int) main.getMinSize());
+
+			fireDetectionEvent(ip.duplicate(), "Area opening");
+						
+			// Calculate a distance map
+			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+			boolean normalize = true;
+			DistanceTransform dt = new DistanceTransform5x5Float(floatWeights, normalize);
+			ImageProcessor distance = dt.distanceMap(ip);
+//			distance.invert();
+			fireDetectionEvent(distance.duplicate(), "Distance map");
+			
+			// Calculate extended minima
+			int dynamic = 2;
+			ImageProcessor minima = MinimaAndMaxima.extendedMinima( distance, dynamic, connectivity );
+//			minima.invert();
+
+			fireDetectionEvent(minima.duplicate(), "Extended minima");
+			
+			// Impose the minima to the distnace map
+			ImageProcessor minimaDistance = MinimaAndMaxima.imposeMinima(distance, minima);
+			
+			
+			
+			// Watershed the image
+//			WatershedTransform2D wt = new WatershedTransform2D(result, null, connectivity);
+//			ImageProcessor watersheded = wt.apply();
+			
+			ImageProcessor watersheded = Watershed.computeWatershed(minimaDistance, null, connectivity);
+			
+			fireDetectionEvent(watersheded.duplicate(), "Watershed");
+
+			
+			
+			ImageProcessor lines = BinaryImages.binarize( watersheded );
+				
+			fireDetectionEvent(lines.duplicate(), "Binarized");
+			
+			
+		} catch (MissingOptionException e) {
+			error("Missing option", e);
+		}
 		return list;
 	}
 	
@@ -244,8 +273,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		} catch (MissingOptionException e) {
 			error("Missing option", e);
 		}
-		if(useProber){
-//			fireDetectionEvent(ip, "Cytoplasm");
+		if( ! listeners.isEmpty()){
 			
 			ImageAnnotator an = new ImageAnnotator(ann);
 			for(ICytoplasm c : list){
@@ -308,9 +336,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
 			ip = Morphology.blackTopHat(test, strel);
 			
-//			if(useProber){
-//				fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
-//			}
+//			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
 //			
 			// Most remaining cytoplasm is weak, can can be thresholded away 
 			
@@ -319,9 +345,9 @@ public class NeutrophilDetectonTest implements Loggable	 {
 			bin.threshold(thresholdMin);
 //			ip = BinaryImages.binarize( ip ); // Converts a grayscale 2D or 3D image into a binary image by setting non-zero elements to 255.
 
-//			if(useProber){
-//				fireDetectionEvent(bin.duplicate(), "Nucleus binarized");
-//			}
+
+//			fireDetectionEvent(bin.duplicate(), "Nucleus binarized");
+
 //			ip.invert();
 
 			GenericDetector gd = new GenericDetector();
@@ -343,7 +369,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 			
 		}
 		
-		if(useProber){
+		if( ! listeners.isEmpty()){
 //			fireDetectionEvent(ip.duplicate(), "Nucleus");
 			
 			ImageAnnotator an = new ImageAnnotator(ann);
@@ -354,7 +380,8 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		}
 		
 		
-		detectLobes(ip, list);
+//		detectLobes(ip, list);
+		detectLobesViaWatershed(ip, list);
 //		detectLobesViaSubtraction(ip, list);
 //		if(useProber){
 //			fireDetectionEvent(ip.duplicate(), "Lobes");
@@ -428,9 +455,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		 */
 		ImageProcessor gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
 		
-		if(useProber){
-			fireDetectionEvent(gradient.duplicate(), "Gradient");
-		}
+		fireDetectionEvent(gradient.duplicate(), "Gradient");
 		
 		// Make a stack for use in the minima detection
 		image = new ImageStack(image.getWidth(), image.getHeight());
@@ -448,9 +473,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		 */
 		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, dynamic, connectivity );
 
-		if(useProber){
-			fireDetectionEvent(regionalMinima.getProcessor(1).duplicate(), "Regional minima");
-		}
+		fireDetectionEvent(regionalMinima.getProcessor(1).duplicate(), "Regional minima");
 		
 		/*
 		 * Computes the labels in the binary 2D or 3D image contained 
@@ -461,10 +484,7 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		 */
 		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, bitDepth );
 		ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
-		
-		if(useProber){
-			fireDetectionEvent(min.getProcessor().duplicate(), "Labelled minima");
-		}
+		fireDetectionEvent(min.getProcessor().duplicate(), "Labelled minima");
 		
 		/*
 		 * Compute watershed with markers with a
@@ -472,23 +492,17 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		 */
 		ImagePlus resultStack = Watershed.computeWatershed( imp, min, 
 				connectivity, calculateDams );
-		
-		if(useProber){
 			fireDetectionEvent(resultStack.getProcessor().duplicate(), "Watershed");
-		}
 
 		final ImagePlus lines = BinaryImages.binarize( resultStack );
-		
-		if(useProber){
-			fireDetectionEvent(lines.getProcessor().duplicate(), "Binarized");
-		}
+
+		fireDetectionEvent(lines.getProcessor().duplicate(), "Binarized");
+
 		
 		ImageProcessor lp = lines.getProcessor();
 		lp.invert();
-		
-		if(useProber){
-			fireDetectionEvent(lp.duplicate(), "Lines");
-		}
+		fireDetectionEvent(lp.duplicate(), "Lines");
+
 		
 		// Now take the watershed image, and detect the distinct lobes
 		
@@ -496,10 +510,70 @@ public class NeutrophilDetectonTest implements Loggable	 {
 		ImageProcessor ws = ft.dilate(1).toProcessor(); // separate the lobes from each other
 //		ImageProcessor ws = ft.toProcessor();
 		
+		makeLobes(ws, list);
+		
+		
+	}
+	
+	/* 
+	 * 	Uses the Distance Transform watershed	
+     * Take the distance map from the input.
+	 * Invert it, and perform watershed using the binary mask (dynamic of 1 and 4-connectivity).	 
+	 * @param ip
+	 * @param list
+	 * @throws ComponentCreationException
+	 */
+	private void detectLobesViaWatershed(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
+
+		int erosionDiameter    = 1;
+		int dynamic            = 1; // the minimal difference between a minima and its boundary
+		
+//		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
+		ImageProcessor mask = ip.duplicate();		
+		mask.threshold(20);// binarise
+//		fireDetectionEvent(mask.duplicate(), "Binarised input");
+					
+		// Calculate a distance map on the binarised input
+		float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+		ImageProcessor dist =	BinaryImages.distanceMap( mask, floatWeights, NORMALISE_DISTANCE_MAP );
+		dist.invert();
+//		fireDetectionEvent(dist.duplicate(), "Distance map");
+
+		// Watershed the inverted map
+		ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
+				dist, mask, dynamic, CONNECTIIVITY, IS_VERBOSE );
+//		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+
+		// Binarise for object detection
+		ImageProcessor lines = BinaryImages.binarize( watersheded );
+//		fireDetectionEvent(lines.duplicate(), "Binarized");
+		
+		// Erode by 1 pixel to better separate lobes
+		Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
+		lines = Morphology.erosion(lines, erosionStrel);
+//		fireDetectionEvent(lines.duplicate(), "Eroded");
+		
+		
+		// Now take the watershed image, and detect the distinct lobes
+		makeLobes(lines, list);
+
+	}
+	
+	/**
+	 * Detect lobes in the given processed image, and assign them to nuclei
+	 * @param ip the binary image with lobe objects
+	 * @param list the nuclei to which lobes in this image belong
+	 * @throws ComponentCreationException 
+	 */
+	private void makeLobes(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
+		
+		int minArea            = 5;
+		int maxArea            = 3000;
+		
 		GenericDetector gd = new GenericDetector();
 		gd.setIncludeHoles(false);
 		gd.setSize(minArea, maxArea);
-		List<Roi> rois  = gd.getRois(ws);
+		List<Roi> rois  = gd.getRois(ip);
 		
 		for(Roi roi : rois){
 			for(Nucleus n : list){
@@ -527,78 +601,6 @@ public class NeutrophilDetectonTest implements Loggable	 {
 				}
 			}
 		}
-		
-		
 	}
 	
-	/**
-	 * Subtract the median intenity of each nucleus from a greyscale image to find lobes
-	 * as islands
-	 * @param ip
-	 * @param list
-	 * @throws ComponentCreationException 
-	 */
-	private void detectLobesViaSubtraction(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
-		
-		if(useProber){
-			fireDetectionEvent(ip.duplicate(), "Lobe input");
-		}
-		
-		
-		int minArea            = 5;
-		int maxArea            = 3000;
-		
-		GenericDetector gd = new GenericDetector();
-		gd.setIncludeHoles(false);
-		gd.setSize(minArea, maxArea);
-		
-		int i=0;
-		for(Nucleus n : list){
-//			if(i>0){
-//				continue;
-//			}
-//			i++;
-			int avg = ColourMeasurometer.calculateIntensity(n, ip, Quartile.LOWER_QUARTILE);
-			
-			ImageProcessor test = ip.duplicate();
-			
-			test.subtract(avg);
-//			if(useProber){
-//				fireDetectionEvent(test.duplicate(), "Subtracted "+avg);
-//			}
-			
-			test.threshold(avg);// binarise
-//			if(useProber){
-//				fireDetectionEvent(test.duplicate(), "Binarised "+avg);
-//			}
-			
-			List<Roi> rois  = gd.getRois(test);
-						
-			LobedNucleus l = (LobedNucleus) n;
-			
-			for(Roi roi : rois){
-				StatsMap m = gd.measure(roi, ip);
-				int x = m.get(GenericDetector.COM_X).intValue();
-				int y = m.get(GenericDetector.COM_Y).intValue();
-				IPoint com = IPoint.makeNew(x, y);
-				if(n.containsOriginalPoint(com)){
-					// Now adjust the roi base to match the source image
-					IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
-
-					Rectangle bounds = roi.getBounds();
-
-					roi.setLocation(base.getXAsInt(), base.getYAsInt());
-
-					int[] originalPosition = {base.getXAsInt(), 
-							base.getYAsInt(), 
-							(int) bounds.getWidth(), 
-							(int) bounds.getHeight() };
-
-					Lobe lobe = lobeFactory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com);
-
-					l.addLobe( lobe); //TODO makethe channel useful
-				}
-			}
-		}
-	}
 }

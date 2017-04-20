@@ -3,8 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilDetectonTest.DetectionEvent;
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilDetectonTest.DetectionEventListener;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder.*;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 
 import ij.process.ImageProcessor;
