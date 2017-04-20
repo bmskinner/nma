@@ -93,63 +93,63 @@ public class NeutrophilAnalysisAction extends ProgressableAction {
 		
 		fine("Making analysis options");
 		
-		try {
-			
-			DemoProber demo = new DemoProber(folder);
-
-			cancel();
-			return;
-		} catch (Exception e1) {
-			error("Error in test", e1);
-		}
-
-//		NeutrophilImageProber analysisSetup = new NeutrophilImageProber( folder );
-//
-//		if(analysisSetup.isOk()){
-//
-//
-//			options = analysisSetup.getOptions();
+//		try {
 //			
-//			File directory = null;
-//			try {
-//				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-//						.getFolder();
-//			} catch (MissingOptionException e) {
-//				warn("Missing nucleus options");
-//				this.cancel();
-//			}
-//			
+//			DemoProber demo = new DemoProber(folder);
 //
-//
-//			log("Directory: "+directory.getName());
-//
-//			this.startTime = Calendar.getInstance().getTime();
-//			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
-//
-//			// craete the analysis folder early. Did not before in case folder had no images
-//			File analysisFolder = new File(directory, outputFolderName);
-//			if(!analysisFolder.exists()){
-//				analysisFolder.mkdir();
-//			}
-//			//	
-//			File logFile = new File(analysisFolder, 
-//					directory.getName() + Importer.LOG_FILE_EXTENSION);
-//
-//
-//			IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
-//
-//
-//			worker = new DefaultAnalysisWorker(m);
-//			worker.addPropertyChangeListener(this);
-//			ThreadManager.getInstance().submit(worker);
-//			finest("Worker is executing");
-//			analysisSetup.dispose();
-//
-//		} else {				
-//			analysisSetup.dispose();
-//			fine("Analysis cancelled");
-//			this.cancel();
+//			cancel();
+//			return;
+//		} catch (Exception e1) {
+//			error("Error in test", e1);
 //		}
+
+		NeutrophilImageProber analysisSetup = new NeutrophilImageProber( folder );
+
+		if(analysisSetup.isOk()){
+
+
+			options = analysisSetup.getOptions();
+			
+			File directory = null;
+			try {
+				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
+						.getFolder();
+			} catch (MissingOptionException e) {
+				warn("Missing nucleus options");
+				this.cancel();
+			}
+			
+
+
+			log("Directory: "+directory.getName());
+
+			this.startTime = Calendar.getInstance().getTime();
+			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+
+			// craete the analysis folder early. Did not before in case folder had no images
+			File analysisFolder = new File(directory, outputFolderName);
+			if(!analysisFolder.exists()){
+				analysisFolder.mkdir();
+			}
+			//	
+			File logFile = new File(analysisFolder, 
+					directory.getName() + Importer.LOG_FILE_EXTENSION);
+
+
+			IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
+
+
+			worker = new DefaultAnalysisWorker(m);
+			worker.addPropertyChangeListener(this);
+			ThreadManager.getInstance().submit(worker);
+			finest("Worker is executing");
+			analysisSetup.dispose();
+
+		} else {				
+			analysisSetup.dispose();
+			fine("Analysis cancelled");
+			this.cancel();
+		}
 	}
 
 	@Override

@@ -419,8 +419,8 @@ public class NeutrophilFinder extends AbstractFinder	 {
 		result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
 
 		result.setScale(options.getScale());
-		result.initialise(0.05);
-
+		result.initialise(this.options.getProfileWindowProportion());
+		result.findPointsAroundBorder();
 		return result;
 	}
 	

@@ -31,9 +31,12 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -55,9 +58,13 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 	private final String outputFolder;
 
+	private Finder finder;
+	
+	private final File folder;
+	
 	private final IMutableAnalysisOptions analysisOptions;
 
-	private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
+	private Map<File, ICellCollection> collectionMap = new HashMap<File, ICellCollection>();
 
 	List<IAnalysisDataset> datasets;
 
@@ -71,8 +78,20 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	 */
 	public NeutrophilDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options){
 		super(null);
+		
+		if(outputFolder==null || options==null){
+			throw new IllegalArgumentException("Must have output folder name and input options");
+		}
+		
 		this.outputFolder 	= outputFolder;
 		this.analysisOptions 	= options;
+		try {
+			folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+		} catch(MissingOptionException e){
+			throw new IllegalArgumentException("Input options does not have a folder", e);
+		}
+		finder = new NeutrophilFinder(options);
+		
 	}
 
 
@@ -90,9 +109,9 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 		try{
 
-			getTotalImagesToAnalyse();
+			countTotalImagesToAnalyse();
 
-			log("Running nucleus detector");
+			log("Running neutrophil detector");
 			processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 
 			fine("Detected nuclei in "+analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
@@ -116,7 +135,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	}
 
 
-	private void getTotalImagesToAnalyse(){
+	private void countTotalImagesToAnalyse(){
 		log("Calculating number of images to analyse");
 		try {
 			
@@ -214,7 +233,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	 *  @param collection the collection of nuclei found
 	 */
 	public void addNucleusCollection(File file, ICellCollection collection){
-		this.collectionGroup.put(file, collection);
+		this.collectionMap.put(file, collection);
 	}
 
 
@@ -234,9 +253,9 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 		fine( "Testing nucleus counts");
 
-		Set<File> keys = collectionGroup.keySet();
+		Set<File> keys = collectionMap.keySet();
 		for (File key : keys) {
-			ICellCollection collection = collectionGroup.get(key);
+			ICellCollection collection = collectionMap.get(key);
 			if(collection.size()==0){
 				fine( "Removing collection "+key.toString());
 				toRemove.add(key);
@@ -247,13 +266,13 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 		Iterator<File> iter = toRemove.iterator();
 		while(iter.hasNext()){
-			collectionGroup.remove(iter.next());
+			collectionMap.remove(iter.next());
 		}
 
 		fine( "Removed collections");
 
 		List<ICellCollection> result = new ArrayList<ICellCollection>();
-		for(ICellCollection c : collectionGroup.values()){
+		for(ICellCollection c : collectionMap.values()){
 			result.add(c);
 		}
 		return result;
@@ -305,20 +324,86 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 				folder.getName(), 
 				analysisOptions.getNucleusType());
 
-		this.collectionGroup.put(folder, folderCollection);
+		collectionMap.put(folder, folderCollection);
 
 		finest("Invoking recursive detection task");
-		NeutrophilDetectionTask task = new NeutrophilDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
-		task.addProgressListener(this);
-		task.invoke();
+//		NeutrophilDetectionTask task = new NeutrophilDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
+//		task.addProgressListener(this);
+//		task.invoke();
 
 		for(File f : listOfFiles){
 			if(f.isDirectory()){
 				processFolder(f); // recurse over each folder
+			} else {
+				analyseFile(f, folderCollection);
 			}
 		}
 
 
 	} // end function
+	
+	protected void analyseFile(File file, ICellCollection collection){
+		
+		finest("Analysing file "+file.getAbsolutePath());
+		boolean ok = checkFile(file);
+
+		if(!ok){
+			return;
+		}
+
+		try {
+
+			// put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
+			makeFolder(folder);
+
+			log("File:  "+file.getName());
+			List<ICell> cells = finder.findInImage(file);
+//			// Build a pipline for the image
+//			DetectionPipeline<ICell> pipe = new NeutrophilDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.CYTOPLASM),
+//					analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
+//					file,
+//					analysisOptions.getProfileWindowProportion());
+//
+//			// Run each step of the pipeline without sampling intermediate results
+//			List<ICell> cells = pipe.findInImage();
+
+			if(cells.isEmpty()){
+				log("  No cells detected in image");
+			} else {
+
+				for(ICell cell : cells){
+					collection.addCell(cell);
+					log("  Added nucleus "+cell.getNucleus().getNucleusNumber());
+				}
+				log("  Added "+cells.size()+" nuclei");
+			}
+
+		} catch (Exception e) { 
+			warn("Error processing file");
+			stack("Error in image processing: "+e.getMessage(), e);
+		} 
+
+		fireProgressEvent();
+
+
+	}
+	
+	  /**
+	  * Create the output folder for the analysis if required
+	  *
+	  * @param folder the folder in which to create the analysis folder
+	  * @return a File containing the created folder
+	  */
+	protected File makeFolder(File folder){
+	    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
+	    if(!output.exists()){
+	      try{
+	        output.mkdir();
+	      } catch(Exception e) {
+	    	  error("Failed to create directory", e);
+	      }
+	    }
+	    return output;
+	  }
 
 }

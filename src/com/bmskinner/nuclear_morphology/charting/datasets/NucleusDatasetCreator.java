@@ -22,7 +22,9 @@ import ij.process.FloatPolygon;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -1444,34 +1446,17 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 */
 	public ComponentOutlineDataset createNucleusLobeDataset(LobedNucleus nucleus) throws ChartDatasetCreationException {
 
-//		DefaultXYDataset ds = new DefaultXYDataset();
-//		
-//		int i=0;
-//		
-//		List<IPoint> coms = nucleus.getLobes().stream().map( l -> l.getOriginalCentreOfMass() ).collect(Collectors.toList());
-//		for(IPoint p : coms){
-//			
-//			double[] xpoints = { p.getX()  };
-//			double[] ypoints = { p.getY()  };
-//			double[][] data = { xpoints, ypoints };
-//			
-//			ds.addSeries("Lobe_"+i, data);
-//			i++;
-//		}
-//		
-//		return ds;
-		
-		
 		ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
-		int i = 0;
 
-		for(Lobe l : nucleus.getLobes()){
-
+		int i=0;
+		Iterator<Lobe> lobes = nucleus.getLobes().iterator();
+		while(lobes.hasNext()){
+			Lobe l = lobes.next();
 			String seriesKey = CellularComponent.NUCLEAR_LOBE+"_"+i;
 			finest("Adding lobe to dataset: "+seriesKey);
 			OutlineDatasetCreator dc = new OutlineDatasetCreator(options, l);
 			dc.addOutline(ds, seriesKey, false);
-
+			i++;
 		}
 		return ds;
 	}
