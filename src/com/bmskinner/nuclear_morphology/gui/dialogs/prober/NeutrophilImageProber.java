@@ -24,13 +24,10 @@ import java.io.File;
 
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
 
 @SuppressWarnings("serial")
@@ -44,13 +41,12 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 
 			// Create the options
 			options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
-//
-//			IMutableDetectionOptions cytoOptions    = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-//			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
+			Finder finder = new NeutrophilFinder(options);
 			// make the panel
 			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
-			imageProberPanel     = new DemoImageProberPanel(folder, options, this);
+			imageProberPanel     = new GenericImageProberPanel(folder, finder, this);
+			
 //			imageProberPanel     = new NeutrophilImageProberPanel(this, cytoOptions, nucleusOptions, ImageSet.NEUTROPHIL_IMAGE_SET);
 			JPanel footerPanel   = createFooter();
 			
@@ -61,7 +57,7 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			this.setTitle(DIALOG_TITLE_BAR_LBL);
 			
 			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform update needed
-//			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
+			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
 						
 			
 		} catch (Exception e){

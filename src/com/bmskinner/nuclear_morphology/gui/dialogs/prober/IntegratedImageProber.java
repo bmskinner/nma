@@ -24,7 +24,7 @@ public abstract class IntegratedImageProber extends LoadingIconDialog {
 	
 	protected SettingsPanel optionsSettingsPanel; // settings
 	
-	protected AbstractImageProberPanel imageProberPanel; // result
+	protected GenericImageProberPanel imageProberPanel; // result
 	
 	protected boolean ok = false;
 	

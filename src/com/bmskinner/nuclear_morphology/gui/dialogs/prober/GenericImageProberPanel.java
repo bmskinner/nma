@@ -51,19 +51,19 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * An abstract implementation of the image prober panel 
+ * An basic implementation of the image prober panel 
  * @author bms41
  * @since 1.13.5
  *
  */
-public abstract class AbstractImageProberPanel  extends JPanel
+@SuppressWarnings("serial")
+public class GenericImageProberPanel  extends JPanel
 	implements  Loggable, 
 				PropertyChangeListener, 
 				ProberReloadEventListener {
@@ -108,11 +108,12 @@ public abstract class AbstractImageProberPanel  extends JPanel
 	
 	protected final File folder; // the folder of files
 	
-	public AbstractImageProberPanel(File folder, IAnalysisOptions options, Window parent) throws MissingOptionException{
+	public GenericImageProberPanel(File folder, Finder finder, Window parent) throws MissingOptionException{
 		
 		this.folder = folder;
 		this.parent = parent;
-		
+		test        = finder;
+		createUI();
 	}
 	
 	/**
@@ -120,7 +121,33 @@ public abstract class AbstractImageProberPanel  extends JPanel
 	 * display the image with annotated  outlines
 	 * @param imageFile
 	 */
-	protected abstract void importAndDisplayImage(File imageFile);
+	protected void importAndDisplayImage(File imageFile){
+		if(imageFile==null){
+			throw new IllegalArgumentException(NULL_FILE_ERROR);
+		}
+		
+		try {
+			finer("Firing panel updating event");
+			
+			progressBar.setVisible(true);
+			test.removeAllDetectionEventListeners();
+			ProberTableModel model = new ProberTableModel();
+			
+			test.addDetectionEventListener(model);
+			table.setModel(model);
+			table.getColumnModel().getColumn(1).setCellRenderer(new IconCellRenderer());
+			
+//			progressBar.setValue(0);
+			setImageLabel(imageFile.getAbsolutePath());
+			
+			
+			test.findInImage(imageFile);
+			progressBar.setVisible(false);
+			firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
+		} catch (Exception e) { // end try
+			error(e.getMessage(), e);
+		} 
+	}
 	
 	protected void createUI(){
 		setLayout(new BorderLayout());
@@ -193,7 +220,7 @@ public abstract class AbstractImageProberPanel  extends JPanel
 					importAndDisplayImage(openImage);
 				} else {
 					warn("No images found in folder");
-					JOptionPane.showMessageDialog(AbstractImageProberPanel.this,  
+					JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
 							"No images found in folder.", 
 							"Nope.",
 							JOptionPane.ERROR_MESSAGE);

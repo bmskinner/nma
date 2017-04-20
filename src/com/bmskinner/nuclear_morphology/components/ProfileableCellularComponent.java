@@ -47,8 +47,10 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 /**
  * This is the class of objects that can have profiles applied to them.
  * Positions around the border of the component can be tagged; the profiles will
@@ -63,7 +65,7 @@ public abstract class ProfileableCellularComponent
 	
 	private static final long serialVersionUID = 1L;
 	
-	protected double angleWindowProportion; // The proportion of the perimeter to use for profiling
+	protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION; // The proportion of the perimeter to use for profiling
 	
 	protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<ProfileType, ISegmentedProfile>();
 
@@ -145,24 +147,29 @@ public abstract class ProfileableCellularComponent
 	* nucleus is to get the longest diameter and set this as
 	*  the head/tail axis.
 	*/
-	public abstract void findPointsAroundBorder();
+	public abstract void findPointsAroundBorder() throws ComponentCreationException;
 	
 
-	public void initialise(double proportion) {
-
-		finest("Initialising profilable object");
+	public void initialise(double proportion) throws ComponentCreationException {
+		if(proportion<=0 || proportion >=1){
+			throw new ComponentCreationException("Must have a value between 0-1");
+		}
+		
+		fine("Initialising profilable object");
 		this.angleWindowProportion = proportion;
 		
-		finest("Getting perimeter");
 		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
 		double angleWindow = perimeter * proportion;
 		
-		
 		// calculate profiles
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
-		finest("Set window size");
-
-		calculateProfiles();
+		fine("Calculating profiles with window size "+angleProfileWindowSize);
+		try {
+			calculateProfiles();
+		} catch (ProfileException e) {
+			stack(e);
+			throw new ComponentCreationException("Could not calculate profiles", e);
+		}
     
 	}
 	
@@ -469,8 +476,8 @@ public abstract class ProfileableCellularComponent
 	
 
 	public void setWindowProportion(ProfileType type, double d){
-		if(d<0 || d> 1){
-			throw new IllegalArgumentException("Angle window proportion must be 0-1");
+		if(d<=0 || d>=1){
+			throw new IllegalArgumentException("Angle window proportion must be higher than 0 and less than 1");
 		}
 		
 		if(segsLocked){
@@ -489,7 +496,14 @@ public abstract class ProfileableCellularComponent
 			this.angleProfileWindowSize = (int) Math.round(angleWindow);
 			finest("Recalculating angle profile");
 			ProfileCreator creator = new ProfileCreator(this);
-			ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+			ISegmentedProfile profile;
+			try {
+				profile = creator.createProfile(ProfileType.ANGLE);
+			} catch (ProfileException e) {
+				warn("Unable to set window proportion");
+				stack(e);
+				return;
+			}
 			
 			this.profileMap.put(ProfileType.ANGLE, profile);		
 			
@@ -555,18 +569,19 @@ public abstract class ProfileableCellularComponent
 		}
 	}
 	
-	public void calculateProfiles() {
+	public void calculateProfiles() throws ProfileException {
 		
 		/*
 		 * All these calculations operate on the same border point order
 		 */
 		
 		ProfileCreator creator = new ProfileCreator(this);
-		
+
 		for(ProfileType type : ProfileType.values()){
-			
+			fine("Creating profile "+type);
 			ISegmentedProfile profile = creator.createProfile(type);
 			profileMap.put(type, profile);
+			fine("Created profile "+type);
 		}
 	}
 	

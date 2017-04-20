@@ -98,8 +98,8 @@ public class ImageFilterer extends AbstractImageFilterer {
 		ImageProcessor result = ip.duplicate();
 		
 		kw.filter(result, filterSize);
-		
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
 	}
 	
 	
@@ -117,7 +117,8 @@ public class ImageFilterer extends AbstractImageFilterer {
 		// fetch a copy of the int array
 		ip = st.getProcessor(stackNumber);
 		ImageProcessor result = squashChromocentres(threshold).ip;
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
 	}
 	
 	/**
@@ -138,8 +139,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 				result.set(i, threshold);
 			}
 		}
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -158,8 +160,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 				result.set(i, threshold);
 			}
 		}
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -176,8 +179,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		ct.setSat(minSat, maxSat);
 		
 		ImageProcessor result = ct.threshold(ip);
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -215,7 +219,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		}
 		
 		result.setIntArray(array);
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -250,7 +256,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		// Create the image
 		ImageProcessor result = ip.duplicate().resize(newWidth, newHeight );
 
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -276,8 +284,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 				   : finalWidth; // but constrain width too
 		
 		ImageProcessor result = ip.duplicate().resize( (int) finalWidth); 
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	/**
@@ -317,8 +326,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 
 		ip.setRoi(wideX, wideY, wideW, wideH);
 		ImageProcessor result = ip.crop();
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	
@@ -447,8 +457,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		fill(result);
 
 		mp.erode(result);
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 
 	}
 	
@@ -474,7 +485,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		 * Dilate, fill, then erode
 		 */
 		mp.dilate(result);
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 
 	}
 	
@@ -534,8 +547,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		
 		searchStack = ImageStack.create(st.getWidth(), st.getHeight(), 0, 8);
 		searchStack.addSlice("closed", closed, 0);
-
-		return new ImageFilterer(searchStack);
+		st = searchStack;
+		return this;
+//		return new ImageFilterer(searchStack);
 	}
 	
 	/**
@@ -566,8 +580,9 @@ public class ImageFilterer extends AbstractImageFilterer {
 		result = new ByteProcessor(converted);
 		
 		converted = null;
-
-		return new ImageFilterer(result);
+		ip = result;
+		return this;
+//		return new ImageFilterer(result);
 	}
 	
 	

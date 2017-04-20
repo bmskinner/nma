@@ -23,6 +23,9 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface HashOptions extends Serializable {
+	
+	
+	static final String TOP_HAT_RADIUS = "Top hat radius";
 
 	/**
 	 * Get the double value with the given key

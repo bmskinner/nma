@@ -52,8 +52,9 @@ public class ProfileCreator implements Loggable {
 	 * Create a profile for the desired profile type on the template object
 	 * @param type the profile type
 	 * @return a segmented profile of the requested type.
+	 * @throws ProfileException 
 	 */
-	public ISegmentedProfile createProfile(ProfileType type){
+	public ISegmentedProfile createProfile(ProfileType type) throws ProfileException{
 		
 		try {
 		
@@ -76,8 +77,9 @@ public class ProfileCreator implements Loggable {
 				}
 			}
 		} catch(UnavailableBorderPointException e){
+			warn("Cannot make profile "+type);
 			stack("Cannot create profile", e);
-			return null; //TODO - get proper exception here
+			throw new ProfileException("Error getting border point", e);
 		}
 	}
 	
@@ -113,21 +115,37 @@ public class ProfileCreator implements Loggable {
 		
 		float[] angles = new float[target.getBorderLength()];
 		
-//		FloatPolygon polygon = target.createPolygon();
 		Shape s = target.toShape();
 
-		
 		int index = 0;
-		Iterator<IBorderPoint> it = target.getBorderList().iterator();
+		List<IBorderPoint> borderList = target.getBorderList();
+		
+		if(borderList==null){
+			throw new UnavailableBorderPointException("Null border list in target");
+		}
+		
+		int pointOffset = target.getWindowSize(ProfileType.ANGLE);
+		
+		if(pointOffset==0){
+			throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
+		}
+		finest("Point offset: "+pointOffset );
+		Iterator<IBorderPoint> it = borderList.iterator();
+		finer("Iterating border");
 		while(it.hasNext()){
-
+			finest("Getting points");
+			
 			IBorderPoint point = it.next();
-			IBorderPoint pointBefore = point.prevPoint(target.getWindowSize(ProfileType.ANGLE));
-			IBorderPoint pointAfter  = point.nextPoint(target.getWindowSize(ProfileType.ANGLE));
 
+			IBorderPoint pointBefore = point.prevPoint(pointOffset);
+
+			IBorderPoint pointAfter  = point.nextPoint(pointOffset);
+
+			finest("Got points");
 			// Get the smallest angle between the points
 			float angle = (float) point.findAngle(pointBefore, pointAfter);
-
+			
+			finest("Got angle");
 			// Now discover if this measured angle is inside or outside the object
 			
 			// find the halfway point between the first and last points.
@@ -138,6 +156,7 @@ public class ProfileCreator implements Loggable {
 			float midY = (float) ((pointBefore.getY()+pointAfter.getY())/2);
 			
 			// Check if the polygon contains the point
+			finest("Checking position in shape");
 			if(s.contains( midX,  midY)){
 			
 				angles[index] = angle;
@@ -146,16 +165,16 @@ public class ProfileCreator implements Loggable {
 			}
 			index++;
 		}
-		
+		finer("Making new profile");
 		// Make a new profile. This will have two segments by default
 		ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 		
 		// Reapply any segments that were present in the original profile
 		if( ! segments.isEmpty()){
-			
+			finer("Applying segments");
 			reapplySegments(segments, newProfile);
 		}
-
+		finer("Returning profile");
 		return newProfile;
 	}
 	

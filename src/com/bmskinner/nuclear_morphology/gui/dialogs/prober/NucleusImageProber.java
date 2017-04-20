@@ -5,6 +5,9 @@ import java.io.File;
 
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
@@ -28,10 +31,6 @@ public class NucleusImageProber extends IntegratedImageProber {
 		try {
 			this.options = o;
 			
-//			options = OptionsFactory.makeAnalysisOptions();
-
-//			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-//			
 //			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
@@ -47,8 +46,10 @@ public class NucleusImageProber extends IntegratedImageProber {
 				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
 				.build();
 			
+			Finder finder = new FluorescentNucleusFinder(options);
+			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 //			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
-			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, ImageSet.NUCLEUS_IMAGE_SET);
+//			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, ImageSet.NUCLEUS_IMAGE_SET);
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);

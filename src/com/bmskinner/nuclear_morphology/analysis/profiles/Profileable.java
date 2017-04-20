@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
@@ -43,8 +44,18 @@ public interface Profileable extends CellularComponent {
 	/**
 	 * Calculate profiles based on the desired window proportion
 	 * @param proportion
+	 * @throws ComponentCreationException 
 	 */
-	void initialise(double proportion);
+	void initialise(double proportion) throws ComponentCreationException;
+	
+	/*
+	* Finds the key points of interest around the border
+	* of the Nucleus. Can use several different methods, and 
+	* take a best-fit, or just use one. The default in a round 
+	* nucleus is to get the longest diameter and set this as
+	*  the head/tail axis.
+	*/
+	public void findPointsAroundBorder() throws ComponentCreationException;
 	
 	/**
 	 * Check if the object has a profile of the given type

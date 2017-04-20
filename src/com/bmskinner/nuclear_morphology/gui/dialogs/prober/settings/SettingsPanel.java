@@ -12,8 +12,9 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEvent;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel.PanelUpdatingEventListener;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEvent;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
+
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;
@@ -27,7 +28,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 @SuppressWarnings("serial")
-public abstract class SettingsPanel extends JPanel implements Loggable, OptionsChangeListener, PanelUpdatingEventListener {
+public abstract class SettingsPanel 
+		extends JPanel 
+		implements Loggable, 
+		OptionsChangeListener, 
+		PanelUpdatingEventListener {
 	
 
 	protected static final int BOX_WIDTH = 80;

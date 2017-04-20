@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ProfileableCellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -120,7 +121,7 @@ public class DefaultNucleus
 	*  the head/tail axis.
 	*/
 	@Override
-	public void findPointsAroundBorder(){
+	public void findPointsAroundBorder() throws ComponentCreationException{
 
 		try {
 
@@ -150,7 +151,7 @@ public class DefaultNucleus
 	}
 	
 	@Override
-	public void initialise(double proportion) {
+	public void initialise(double proportion) throws ComponentCreationException {
 
 		super.initialise(proportion);
 		

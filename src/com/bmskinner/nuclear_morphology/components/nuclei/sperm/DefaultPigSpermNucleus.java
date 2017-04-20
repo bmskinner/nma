@@ -23,6 +23,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -73,7 +74,7 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 	}
 	
 	@Override
-    public void findPointsAroundBorder() {
+    public void findPointsAroundBorder() throws ComponentCreationException {
     	
 
 		try {

@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.3
  *
  */
-public interface IDetectionOptions extends Serializable, Loggable {
+public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 	
 	static final String NEWLINE = System.getProperty("line.separator"); 
 	

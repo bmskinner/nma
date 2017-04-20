@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -108,7 +109,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 	}
 	
 	@Override
-	public void calculateProfiles() {
+	public void calculateProfiles() throws ProfileException {
 		
 		/*
 		 * The CurveRefolder currently only uses the angle profile

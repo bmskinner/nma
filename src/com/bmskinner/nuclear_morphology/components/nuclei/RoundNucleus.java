@@ -938,7 +938,7 @@ public class RoundNucleus extends AbstractCellularComponent
 		}
 	}
 	
-	public void calculateProfiles() {
+	public void calculateProfiles() throws ProfileException {
 		
 		/*
 		 * All these calculations operate on the same border point order

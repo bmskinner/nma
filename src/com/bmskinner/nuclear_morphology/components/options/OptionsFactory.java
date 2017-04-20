@@ -155,7 +155,9 @@ public interface OptionsFactory {
 	static IMutableDetectionOptions makeDefaultNucleusDetectionOptions(File folder) throws MissingOptionException{
 		
 		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+//		nucleusOptions.setInt(IMutableDetectionOptions.TOP_HAT_RADIUS, 20);
 		nucleusOptions.setRGB(true);
+		nucleusOptions.setThreshold(20);
 		
 		nucleusOptions.setMinCirc(0);
 		nucleusOptions.setMaxCirc(1);

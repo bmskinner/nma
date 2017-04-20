@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -64,7 +65,7 @@ public class ConsensusNucleus extends RoundNucleus implements Serializable {
 	}
 	
 	@Override
-	public void calculateProfiles() {
+	public void calculateProfiles() throws ProfileException {
 		
 		/*
 		 * The CurveRefolder currently only uses the angle profile

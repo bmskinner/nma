@@ -54,12 +54,12 @@ import inra.ijpb.watershed.ExtendedMinimaWatershed;
 import inra.ijpb.watershed.Watershed;
 
 /**
- * Test for the new neutrophil pipeline and image prober model
+ * Detect neutrophils in H&E stained images
  * @author ben
  * @since 1.13.5
  *
  */
-public class NeutrophilFinder extends AbstractFinder	 {
+public class NeutrophilFinder extends AbstractFinder {
 	
 	final private ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
 	final private ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
@@ -82,28 +82,7 @@ public class NeutrophilFinder extends AbstractFinder	 {
 	 * METHODS IMPLEMENTING THE FINDER INTERFACE
 	 * 
 	 */
-	
-	@Override
-	public List<ICell> find() throws Exception{
 		
-		List<ICell> list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
-		return list;
-		
-	}
-	
-	@Override
-	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
-		List<ICell> list = new ArrayList<>();
-		
-		for(File f : folder.listFiles()){
-			if(! f.isDirectory()){
-				list.addAll(findInImage(f));
-			}
-		}
-		
-		return list;
-	}
-	
 	
 	@Override
 	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException{
@@ -247,13 +226,37 @@ public class NeutrophilFinder extends AbstractFinder	 {
 			int maxSat = op.getMaxSaturation();
 			int minBri = op.getMinBrightness();
 			int maxBri = op.getMaxBrightness();
-
+			int erosionDiameter = 1;
+			int dynamic         = 2;
+			
 			ip = new ImageFilterer(ip)
 					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
 					.convertToByteProcessor()
 					.toProcessor();
-
+//			fireDetectionEvent(ip.duplicate(), "Colour threshold");
 			ip.invert();
+//			
+//			
+//			
+//			// Calculate a distance map on the binarised input
+//			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+//			ImageProcessor dist =	BinaryImages.distanceMap( ip, floatWeights, NORMALISE_DISTANCE_MAP );
+//			dist.invert();
+//			fireDetectionEvent(dist.duplicate(), "Distance map");
+//
+//			// Watershed the inverted map
+//			ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
+//					dist, ip, dynamic, CONNECTIIVITY, IS_VERBOSE );
+//			fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+//
+//			// Binarise for object detection
+//			ImageProcessor lines = BinaryImages.binarize( watersheded );
+//			fireDetectionEvent(lines.duplicate(), "Binarized");
+//			
+//			// Erode by 1 pixel to better separate lobes
+//			Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
+//			lines = Morphology.erosion(lines, erosionStrel);
+//			fireDetectionEvent(lines.duplicate(), "Eroded");
 
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(main.getMinCirc(), main.getMaxCirc());
@@ -324,36 +327,33 @@ public class NeutrophilFinder extends AbstractFinder	 {
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
 		ImageProcessor ann = ip.duplicate();
 		try {
-			int topHatRadius = 20;
-			int thresholdMin = 20;
-			int thresholdMax = 255;
 			
 			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+			int topHatRadius = main.getInt(IDetectionOptions.TOP_HAT_RADIUS);
+			
+			int thresholdMin = main.getThreshold();
+//			int thresholdMax = 255;
+			
+			
 
 			ImageProcessor test = new ImageConverter(ip)
 					.convertToByteProcessor()
 					.toProcessor();
 			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
 			ip = Morphology.blackTopHat(test, strel);
-			
 //			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
 //			
-			// Most remaining cytoplasm is weak, can can be thresholded away 
 			
+			// Most remaining cytoplasm is weak, can can be thresholded away 
 			ImageProcessor bin = ip.duplicate();
-			ip.setMinAndMax(thresholdMin, thresholdMax);
+//			ip.setMinAndMax(thresholdMin, thresholdMax);
 			bin.threshold(thresholdMin);
-//			ip = BinaryImages.binarize( ip ); // Converts a grayscale 2D or 3D image into a binary image by setting non-zero elements to 255.
 
-
-//			fireDetectionEvent(bin.duplicate(), "Nucleus binarized");
-
-//			ip.invert();
 
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(main.getMinCirc(), main.getMaxCirc());
 			gd.setSize(main.getMinSize(), main.getMaxSize());
-			gd.setThreshold(main.getThreshold());
+			gd.setThreshold(thresholdMin);
 			List<Roi> rois = gd.getRois(bin);
 			
 			for(int i=0; i<rois.size(); i++){

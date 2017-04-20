@@ -42,15 +42,6 @@ public interface Nucleus
 	public static final int ALL_POINTS = 0;
 	public static final int BORDER_POINTS = 1;
 	public static final int BORDER_TAGS = 2;
-
-	/*
-	* Finds the key points of interest around the border
-	* of the Nucleus. Can use several different methods, and 
-	* take a best-fit, or just use one. The default in a round 
-	* nucleus is to get the longest diameter and set this as
-	*  the head/tail axis.
-	*/
-	public void findPointsAroundBorder();
 	
 	
 	/**

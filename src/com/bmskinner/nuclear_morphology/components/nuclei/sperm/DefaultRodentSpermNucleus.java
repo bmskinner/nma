@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -367,7 +368,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     Identify key points: tip, estimated tail position
 	 */
 	@Override
-	public void findPointsAroundBorder() {
+	public void findPointsAroundBorder() throws ComponentCreationException {
 
 		try {
 

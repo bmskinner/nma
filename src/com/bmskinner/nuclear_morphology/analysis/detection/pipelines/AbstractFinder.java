@@ -19,10 +19,14 @@
 
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.process.ImageProcessor;
@@ -44,6 +48,32 @@ public abstract class AbstractFinder implements Finder, Loggable {
 	 */
 	public AbstractFinder(IAnalysisOptions op){
 		options = op;
+	}
+	
+	/*
+	 * METHODS IMPLEMENTING THE FINDER INTERFACE
+	 * 
+	 */
+	
+	@Override
+	public List<ICell> find() throws Exception{
+		
+		List<ICell> list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
+		return list;
+		
+	}
+	
+	@Override
+	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
+		List<ICell> list = new ArrayList<>();
+		
+		for(File f : folder.listFiles()){
+			if(! f.isDirectory()){
+				list.addAll(findInImage(f));
+			}
+		}
+		
+		return list;
 	}
 	
 	

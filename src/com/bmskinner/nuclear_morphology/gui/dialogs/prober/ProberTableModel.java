@@ -5,7 +5,7 @@ import javax.swing.table.DefaultTableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder.*;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.AbstractImageProberPanel.ProberTableCell;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.ProberTableCell;
 
 import ij.process.ImageProcessor;
 
