@@ -32,8 +32,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class NuclearLobesPanel extends DetailPanel {
 	
 	
-	private static final String RUN_LOBE_DETECTION_LBL = "Run lobe detection";
-	private JButton runLobeDetectionBtn;
+//	private static final String RUN_LOBE_DETECTION_LBL = "Run lobe detection";
+//	private JButton runLobeDetectionBtn;
 	
 	private ExportableChartPanel chartPanel;
 	private ExportableTable table;
@@ -55,13 +55,13 @@ public class NuclearLobesPanel extends DetailPanel {
 	private JPanel createHeader(){
 		JPanel panel = new JPanel(new FlowLayout());
 				
-		runLobeDetectionBtn = new JButton(RUN_LOBE_DETECTION_LBL);
-		runLobeDetectionBtn.addActionListener( a -> {
-			fireSignalChangeEvent(SignalChangeEvent.LOBE_DETECTION);
-		}  );
-		runLobeDetectionBtn.setEnabled(false);
-		
-		panel.add(runLobeDetectionBtn);
+//		runLobeDetectionBtn = new JButton(RUN_LOBE_DETECTION_LBL);
+//		runLobeDetectionBtn.addActionListener( a -> {
+//			fireSignalChangeEvent(SignalChangeEvent.LOBE_DETECTION);
+//		}  );
+//		runLobeDetectionBtn.setEnabled(false);
+//		
+//		panel.add(runLobeDetectionBtn);
 		return panel;
 	}
 	
@@ -88,13 +88,13 @@ public class NuclearLobesPanel extends DetailPanel {
 		
 		finest("Passing to update multiple in "+this.getClass().getName());
 		updateMultiple();
-		runLobeDetectionBtn.setEnabled(true);	
+//		runLobeDetectionBtn.setEnabled(true);	
 	}
 
 	@Override
 	protected void updateMultiple() {
 		super.updateMultiple();
-		runLobeDetectionBtn.setEnabled(false);	
+//		runLobeDetectionBtn.setEnabled(false);	
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(getDatasets())
 			.addStatistic(PlottableStatistic.LOBE_COUNT)

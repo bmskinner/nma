@@ -188,13 +188,6 @@ public class DemoProber extends SettingsDialog {
 
 
 			this.add(new JLabel(icon), BorderLayout.CENTER);
-
-			// Show the scaling factor in the title bar
-			//			double scale = (double) icon.getIconHeight() / (double) procMap.get(key).getHeight();
-			//			scale *=100;
-			//			DecimalFormat df = new DecimalFormat("#0.00"); 
-			//
-			//	        this.setTitle(key.toString()+": "+ df.format(scale) +"% scale");
 			this.setTitle(cell.toString());
 
 			this.setModal(false);

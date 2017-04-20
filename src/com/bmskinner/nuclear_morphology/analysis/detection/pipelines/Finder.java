@@ -77,6 +77,11 @@ public interface Finder {
 	void removeDetectionEventListener(DetectionEventListener l);
 	
 	/**
+	 * Remove all event listeners from the finder
+	 */
+	void removeAllDetectionEventListeners();
+	
+	/**
 	 * Fire a detection event with the given image and message
 	 * @param ip
 	 * @param message

@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.AbstractImageProberPanel.PanelUpdatingEvent;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.AbstractImageProberPanel.PanelUpdatingEventListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
@@ -20,7 +22,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
  *
  */
 @SuppressWarnings("serial")
-public class NeutrophilDetectionSettingsPanel extends SettingsPanel {
+public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements PanelUpdatingEventListener {
 	
 	private IMutableAnalysisOptions options;
 	
@@ -106,5 +108,11 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel {
 		
 		
 
+	}
+
+	@Override
+	public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

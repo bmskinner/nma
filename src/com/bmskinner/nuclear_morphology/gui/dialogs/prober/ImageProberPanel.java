@@ -91,7 +91,7 @@ public abstract class ImageProberPanel extends JPanel
 		if(options==null || set==null){
 			throw new IllegalArgumentException("Options or image set is null");
 		}
-		
+//		
 		this.options = options;
 		this.imageSet = set;
 		
@@ -147,7 +147,7 @@ public abstract class ImageProberPanel extends JPanel
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		
-		table = createImageTable();
+//		table = createImageTable();
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setViewportView(table);
 		

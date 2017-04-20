@@ -68,5 +68,10 @@ public abstract class AbstractFinder implements Finder, Loggable {
 		}
 
 	}
+	
+	@Override
+	public void removeAllDetectionEventListeners(){
+		listeners.clear();
+	}
 
 }

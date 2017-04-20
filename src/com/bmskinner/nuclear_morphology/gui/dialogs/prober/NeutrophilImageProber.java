@@ -44,13 +44,14 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 
 			// Create the options
 			options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
-
-			IMutableDetectionOptions cytoOptions    = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//
+//			IMutableDetectionOptions cytoOptions    = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+//			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 			// make the panel
 			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
-			imageProberPanel     = new NeutrophilImageProberPanel(this, cytoOptions, nucleusOptions, ImageSet.NEUTROPHIL_IMAGE_SET);
+			imageProberPanel     = new DemoImageProberPanel(folder, options, this);
+//			imageProberPanel     = new NeutrophilImageProberPanel(this, cytoOptions, nucleusOptions, ImageSet.NEUTROPHIL_IMAGE_SET);
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);
@@ -60,11 +61,11 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			this.setTitle(DIALOG_TITLE_BAR_LBL);
 			
 			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform update needed
-			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
+//			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
 						
 			
 		} catch (Exception e){
-			warn("Error launching analysis window");
+			error("Error launching analysis window", e);
 			stack(e.getMessage(), e);
 			this.dispose();
 		}	
