@@ -38,11 +38,13 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.Roi;
+import ij.plugin.ContrastEnhancer;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.binary.ChamferWeights;
 import inra.ijpb.binary.distmap.DistanceTransform;
 import inra.ijpb.binary.distmap.DistanceTransform5x5Float;
+import inra.ijpb.morphology.GeodesicReconstruction;
 import inra.ijpb.morphology.MinimaAndMaxima;
 import inra.ijpb.morphology.MinimaAndMaxima3D;
 import inra.ijpb.morphology.Morphology;
@@ -90,7 +92,7 @@ public class NeutrophilFinder extends AbstractFinder {
 		
 		
 		
-		List<ICytoplasm> cyto = detectCytoplasm(imageFile);
+		List<ICytoplasm> cyto = detectCytoplasmByWatershed(imageFile);
 		List<Nucleus> nucl    = detectNucleus(imageFile, cyto);
 		
 		for(ICytoplasm c : cyto){
@@ -108,13 +110,19 @@ public class NeutrophilFinder extends AbstractFinder {
 			}
 			
 			if(cell.hasNucleus()){
-				list.add(cell);
+				
+				double cytoRatio = cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_RATIO);
+				if(cytoRatio < 1 ){ // if the nuclear area is greater than the cytoplasmic area, something went wrong in detection of cytoplasm
+					list.add(cell);
+				}
+				
+				
 			}
 			
 		}
+				
 		
-		
-		if( ! listeners.isEmpty()){
+		if(  hasDetectionListeners()  ){
 			// Display the final image
 			ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
 			ImageAnnotator an = new ImageAnnotator(ip);
@@ -125,7 +133,7 @@ public class NeutrophilFinder extends AbstractFinder {
 			fireDetectionEvent(an.toProcessor(), "Detected cells");
 			
 		}
-		
+		fireProgressEvent();
 		return list;
 	}
 	
@@ -209,6 +217,97 @@ public class NeutrophilFinder extends AbstractFinder {
 		return list;
 	}
 	
+	
+	private List<ICytoplasm> detectCytoplasmByWatershed(File imageFile) throws ComponentCreationException, ImageImportException{
+
+		List<ICytoplasm> list = new ArrayList<>();
+		ImageProcessor ip =  new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
+		ImageProcessor ann = ip.duplicate();
+		fireDetectionEvent(ip.duplicate(), "Input");
+
+		try {
+			
+			int dilationRadius     = 3;
+			int erosionDiameter    = 1;
+			int dynamic            = 1; // the minimal difference between a minima and its boundary
+
+			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+
+			ip= GeodesicReconstruction.fillHoles(ip);
+			fireDetectionEvent(ip.duplicate(), "Filled holes");
+			
+			
+			ContrastEnhancer ch = new  ContrastEnhancer();
+			ch.setNormalize(true);
+			ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
+			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
+			
+			Strel strel = Strel.Shape.DISK.fromRadius(dilationRadius);
+			ip = Morphology.internalGradient(ip, strel);
+			fireDetectionEvent(ip.duplicate(), "Internal gradient");
+			
+			ip = Morphology.dilation(ip, strel);
+			fireDetectionEvent(ip.duplicate(), "Dilated");
+			
+			ip = MinimaAndMaxima.extendedMinima(ip, dynamic);
+//			ip.threshold(2);
+			
+			fireDetectionEvent(ip.duplicate(), "Thresholded to minima");
+			
+			ip = Morphology.erosion(ip, strel);
+			fireDetectionEvent(ip.duplicate(), "Eroded");
+			
+//			ip.invert();
+//			fireDetectionEvent(ip.duplicate(), "Inverted");
+			
+			// Calculate a distance map on the binarised input
+			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+			ImageProcessor dist =	BinaryImages.distanceMap( ip, floatWeights, NORMALISE_DISTANCE_MAP );
+			dist.invert();
+			fireDetectionEvent(dist.duplicate(), "Distance map");
+
+			// Watershed the inverted map
+			ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
+					dist, ip, dynamic, CONNECTIIVITY, IS_VERBOSE );
+			fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+
+			// Binarise for object detection
+			ImageProcessor lines = BinaryImages.binarize( watersheded );
+			fireDetectionEvent(lines.duplicate(), "Binarized");
+			
+			// Erode by 1 pixel to better separate lobes
+//			Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
+//			lines = Morphology.erosion(lines, erosionStrel);
+//			fireDetectionEvent(lines.duplicate(), "Eroded");
+
+			GenericDetector gd = new GenericDetector();
+			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
+			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
+			gd.setThreshold(cytoOptions.getThreshold());
+			List<Roi> rois = gd.getRois(lines);
+
+			for(int i=0; i<rois.size(); i++){
+
+				Roi roi = rois.get(i);
+				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip, i, gd);
+				list.add(cyto);
+
+			}
+		} catch (MissingOptionException e) {
+			error("Missing option", e);
+		}
+		if( hasDetectionListeners() ){
+
+			ImageAnnotator an = new ImageAnnotator(ann);
+			for(ICytoplasm c : list){
+				an.annotateBorder(c, Color.CYAN);
+			}
+			fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
+
+		}
+		return list;
+	}
+	
 	private List<ICytoplasm> detectCytoplasm(File imageFile) throws ComponentCreationException, ImageImportException{
 		List<ICytoplasm> list = new ArrayList<>();
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
@@ -216,8 +315,8 @@ public class NeutrophilFinder extends AbstractFinder {
 		
 		try {
 			
-			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-			IPreprocessingOptions op = (IPreprocessingOptions) main.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+			IPreprocessingOptions op = (IPreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 			
 
 			int minHue = op.getMinHue();
@@ -235,6 +334,8 @@ public class NeutrophilFinder extends AbstractFinder {
 					.toProcessor();
 //			fireDetectionEvent(ip.duplicate(), "Colour threshold");
 			ip.invert();
+			
+			
 //			
 //			
 //			
@@ -259,15 +360,15 @@ public class NeutrophilFinder extends AbstractFinder {
 //			fireDetectionEvent(lines.duplicate(), "Eroded");
 
 			GenericDetector gd = new GenericDetector();
-			gd.setCirc(main.getMinCirc(), main.getMaxCirc());
-			gd.setSize(main.getMinSize(), main.getMaxSize());
-			gd.setThreshold(main.getThreshold());
+			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
+			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
+			gd.setThreshold(cytoOptions.getThreshold());
 			List<Roi> rois = gd.getRois(ip);
 			
 			for(int i=0; i<rois.size(); i++){
 				
 				Roi roi = rois.get(i);
-				ICytoplasm cyto = makeCytoplasm(roi, imageFile, main, ip, i, gd);
+				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip, i, gd);
 				list.add(cyto);
 				
 			}
@@ -276,7 +377,7 @@ public class NeutrophilFinder extends AbstractFinder {
 		} catch (MissingOptionException e) {
 			error("Missing option", e);
 		}
-		if( ! listeners.isEmpty()){
+		if( hasDetectionListeners() ){
 			
 			ImageAnnotator an = new ImageAnnotator(ann);
 			for(ICytoplasm c : list){
@@ -328,10 +429,10 @@ public class NeutrophilFinder extends AbstractFinder {
 		ImageProcessor ann = ip.duplicate();
 		try {
 			
-			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-			int topHatRadius = main.getInt(IDetectionOptions.TOP_HAT_RADIUS);
+			IDetectionOptions nuclOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+			int topHatRadius = nuclOptions.getInt(IDetectionOptions.TOP_HAT_RADIUS);
 			
-			int thresholdMin = main.getThreshold();
+			int thresholdMin = nuclOptions.getThreshold();
 //			int thresholdMax = 255;
 			
 			
@@ -351,25 +452,25 @@ public class NeutrophilFinder extends AbstractFinder {
 
 
 			GenericDetector gd = new GenericDetector();
-			gd.setCirc(main.getMinCirc(), main.getMaxCirc());
-			gd.setSize(main.getMinSize(), main.getMaxSize());
+			gd.setCirc(nuclOptions.getMinCirc(), nuclOptions.getMaxCirc());
+			gd.setSize(nuclOptions.getMinSize(), nuclOptions.getMaxSize());
 			gd.setThreshold(thresholdMin);
 			List<Roi> rois = gd.getRois(bin);
 			
 			for(int i=0; i<rois.size(); i++){
 				
 				Roi roi = rois.get(i);
-				Nucleus n = makeNucleus(roi, imageFile, main, bin, i, gd);
+				Nucleus n = makeNucleus(roi, imageFile, nuclOptions, bin, i, gd);
 				list.add(n);
 				
 			}
 				
 
 		} catch (MissingOptionException e) {
-			
+			stack("Missing options in nucleus detection", e);
 		}
 		
-		if( ! listeners.isEmpty()){
+		if( hasDetectionListeners() ){
 //			fireDetectionEvent(ip.duplicate(), "Nucleus");
 			
 			ImageAnnotator an = new ImageAnnotator(ann);

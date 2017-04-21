@@ -280,7 +280,7 @@ public class DefaultCell
 			return n / cy;
 			
 		} else {
-			return 1;
+			return STAT_NOT_CALCULATED;
 		}
 
 	}

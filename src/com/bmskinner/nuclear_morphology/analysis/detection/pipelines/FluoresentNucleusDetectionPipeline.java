@@ -23,6 +23,7 @@ import ij.gui.Roi;
  * @since 1.13.4
  *
  */
+@Deprecated
 public class FluoresentNucleusDetectionPipeline extends DetectionPipeline<ICell> {
 	
 	private final NucleusFactory factory;

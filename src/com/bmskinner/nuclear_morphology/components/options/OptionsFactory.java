@@ -133,7 +133,7 @@ public interface OptionsFactory {
 		
 		cytoOptions.setMinCirc(0);
 		cytoOptions.setMaxCirc(1);
-		cytoOptions.setMinSize(100);
+		cytoOptions.setMinSize(500);
 		cytoOptions.setMaxSize(10000); // for 20x images
 		PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 		pre.setUseColourThreshold(true);
@@ -161,7 +161,7 @@ public interface OptionsFactory {
 		
 		nucleusOptions.setMinCirc(0);
 		nucleusOptions.setMaxCirc(1);
-		nucleusOptions.setMinSize(100);
+		nucleusOptions.setMinSize(200);
 		nucleusOptions.setMaxSize(3000);
 		PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 		preN.setUseColourThreshold(true);

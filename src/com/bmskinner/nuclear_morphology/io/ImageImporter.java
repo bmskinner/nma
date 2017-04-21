@@ -149,7 +149,6 @@ public class ImageImporter implements Loggable, Importer {
 		  return null;
 	  }
 
-
 	  /**
 	   * Import and convert the image in the given file to an ImageStack
 	   * @return the ImageStack

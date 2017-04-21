@@ -241,6 +241,16 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		rowData.add("");
 
 		try {
+			
+			ICytoplasm cyto = c.getCytoplasm();
+			
+			for(PlottableStatistic stat : PlottableStatistic.getComponentStats()){
+				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
+
+				double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale()  );
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
+			}
+			
 			ColourMeasurometer cm = new ColourMeasurometer();
 			Color colour = cm.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
 			
