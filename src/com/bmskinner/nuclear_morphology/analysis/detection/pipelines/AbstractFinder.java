@@ -40,10 +40,11 @@ import ij.process.ImageProcessor;
 /**
  * An abstract implementation of the {@link Finder} interface.
  * @author bms41
+ * @param <E> the element to find
  * @since 1.13.5
  *
  */
-public abstract class AbstractFinder implements Finder, Loggable {
+public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
 
 	final protected IAnalysisOptions options;
 	final protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
@@ -68,41 +69,12 @@ public abstract class AbstractFinder implements Finder, Loggable {
 	 */
 	
 	@Override
-	public List<ICell> find() throws Exception{
+	public E find() throws Exception{
 		
-		List<ICell> list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
+		E list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
 		return list;
 		
-	}
-	
-	@Override
-	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
-		List<ICell> list = new ArrayList<>();
-		
-		List<File> files = Arrays.asList(folder.listFiles());
-
-		files.parallelStream().forEach( f -> {
-			if( ! f.isDirectory()){
-				
-				if(ImageImporter.fileIsImportable(f)){
-					try {
-						list.addAll(findInImage(f));
-					} catch (ImageImportException | ComponentCreationException e) {
-						stack("Error searching image", e);
-					}
-				}
-			}
-		});
-		
-//		for(File f : folder.listFiles()){
-//			if(! f.isDirectory()){
-//				list.addAll(findInImage(f));
-//			}
-//		}
-//		
-		return list;
-	}
-	
+	}	
 	
 	/*
 	 * EVENT HANDLING

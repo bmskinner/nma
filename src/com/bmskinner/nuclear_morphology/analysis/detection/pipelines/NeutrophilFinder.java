@@ -63,7 +63,7 @@ import inra.ijpb.watershed.Watershed;
  * @since 1.13.5
  *
  */
-public class NeutrophilFinder extends AbstractFinder {
+public class NeutrophilFinder extends CellFinder {
 	
 	final private ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
 	final private ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);

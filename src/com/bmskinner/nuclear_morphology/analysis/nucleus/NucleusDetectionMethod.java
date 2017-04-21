@@ -311,7 +311,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 		 * NEW METHOD - appears to be working
 		 */
 		
-		Finder finder =  new FluorescentNucleusFinder(analysisOptions);
+		Finder<List<ICell>> finder =  new FluorescentNucleusFinder(analysisOptions);
 		finder.addProgressListener(this);
 				
 		try {

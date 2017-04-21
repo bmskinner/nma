@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
@@ -49,7 +50,7 @@ import ij.process.ImageProcessor;
  * @since 1.13.5
  *
  */
-public class FishRemappingFinder extends AbstractFinder {
+public class FishRemappingFinder extends VoidFinder {
 	
 	private static final String FISH_FOLDER_IS_FILE_ERROR = "FISH directory is not a folder";
 	private final File dir;
@@ -64,7 +65,7 @@ public class FishRemappingFinder extends AbstractFinder {
 	}
 
 	@Override
-	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+	public Void findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
 		List<ICell> list = new ArrayList<>();
 		
 		ImageStack stack;
@@ -72,7 +73,7 @@ public class FishRemappingFinder extends AbstractFinder {
 			stack = new ImageImporter(imageFile).importToStack();
 		} catch (ImageImportException e) {
 			error("Error importing file "+imageFile.getAbsolutePath(), e);
-			return list;
+			return null ;
 		}
 
 		// Import the image as a stack
@@ -96,7 +97,7 @@ public class FishRemappingFinder extends AbstractFinder {
 					.annotateString(ep.getWidth()/2, ep.getHeight()/2, "File not found");
 			
 			fireDetectionEvent(an.toProcessor().duplicate(), "FISH image");			
-			return list;
+			return null;
 		}
 			
 		ImageStack fishStack;
@@ -104,14 +105,14 @@ public class FishRemappingFinder extends AbstractFinder {
 			fishStack = new ImageImporter(fishImageFile).importToStack();
 		} catch (ImageImportException e) {
 			error("Error importing FISH image file "+fishImageFile.getAbsolutePath(), e);
-			return list;
+			return null;
 		}
 
 		ImageProcessor fp = new ImageConverter(fishStack).convertToRGB().toProcessor();
 		fireDetectionEvent(fp.duplicate(), "FISH image");	
 		
 		fireProgressEvent();
-		return list;
+		return null;
 		
 	}
 

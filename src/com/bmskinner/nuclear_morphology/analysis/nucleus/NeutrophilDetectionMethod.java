@@ -58,7 +58,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 	private final String outputFolder;
 
-	private Finder finder;
+	private Finder<List<ICell>> finder;
 	
 	private final File folder;
 	

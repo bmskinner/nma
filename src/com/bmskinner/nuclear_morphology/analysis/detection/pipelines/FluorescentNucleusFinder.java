@@ -36,7 +36,6 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -50,7 +49,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
-public class FluorescentNucleusFinder extends AbstractFinder {
+public class FluorescentNucleusFinder extends CellFinder {
 	
 	final private ComponentFactory<Nucleus> nuclFactory;
 	

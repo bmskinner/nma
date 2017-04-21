@@ -33,17 +33,18 @@ import ij.process.ImageProcessor;
 /**
  * Interface for all detection piplines. Replacing the DetectionPipeline classes.
  * @author bms41
+ * @param <E> the type of element to find
  * @since 1.13.5
  *
  */
-public interface Finder {
+public interface Finder<E> {
 
 	/**
-	 * Find cells using the options given in the setup
+	 * Find elements using the options given in the setup
 	 * @return the cells detected in the folder of images
 	 * @throws Exception if detection fails
 	 */
-	public List<ICell> find() throws Exception;
+	public E find() throws Exception;
 	
 	/**
 	 * Find cells using the options given in the setup in the given folder
@@ -52,7 +53,7 @@ public interface Finder {
 	 * @throws ImageImportException
 	 * @throws ComponentCreationException
 	 */
-	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException;
+	public E findInFolder(File folder) throws ImageImportException, ComponentCreationException;
 	
 	
 	/**
@@ -62,7 +63,7 @@ public interface Finder {
 	 * @throws ImageImportException
 	 * @throws ComponentCreationException
 	 */
-	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException;
+	public E findInImage(File imageFile) throws ImageImportException, ComponentCreationException;
 	
 
 	

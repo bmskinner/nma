@@ -28,6 +28,7 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.VoidFinder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -35,12 +36,15 @@ import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.CytoplasmFactory;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -57,21 +61,23 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
-public class SignalFinder extends AbstractFinder {
+public class SignalFinder extends VoidFinder {
 	
 	final private ICellCollection cells;
+	final private ComponentFactory<INuclearSignal> factory = new SignalFactory();
 	
 	public SignalFinder(IAnalysisOptions op, ICellCollection cells) {
 		super(op);
 		this.cells = cells;
 	}
 
-	final private ComponentFactory<INuclearSignal> factory = new SignalFactory();
+	
 
 	@Override
-	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+	public Void findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
 		
-		// TODO Auto-generated method stub
+		
+		return null;
 
 	}
 	

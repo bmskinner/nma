@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
  */
 public class DemoProber extends SettingsDialog {
 
-	private Finder test;
+	private Finder<List<ICell>> test;
 	JButton runButton;
 	public DemoProber(File folder){
 		super();
