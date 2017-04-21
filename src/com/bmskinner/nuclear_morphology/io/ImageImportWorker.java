@@ -23,6 +23,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
@@ -127,6 +129,14 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 			an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
 			for(Nucleus n : c.getNuclei()){
 				an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
+				
+				if(n instanceof LobedNucleus){
+					
+					for(Lobe l : ((LobedNucleus)n).getLobes()){
+						an.annotateBorder(l, c.getCytoplasm(), Color.RED);
+						an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
+					}
+				}
 //				an = an.annotateSegments(n, n);
 			}
 			

@@ -64,7 +64,8 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 	}
 	
 	/**
-	 * Draw the borders of all cell components
+	 * Draw the borders of all cell components. Assumes that the image
+	 * contains the original coordinates of the cell
 	 * @param cell
 	 * @return
 	 */
@@ -132,6 +133,19 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 		ip.setLineWidth(3);
 		ip.drawDot( p.getXAsInt(), p.getYAsInt());
 		return this;
+	}
+	
+	/**
+	 * Draw the border of the given component on the component image of the template.
+	 * These can be the same object.
+	 * @param n the component to draw
+	 * @param template the component to get the component image from
+	 * @param c the colour to draw the border
+	 * @return this annotator
+	 */
+	public ImageAnnotator annotatePoint(IPoint p, Imageable template, Color c){		
+		IPoint offset = Imageable.translateCoordinateToComponentImage(p, template);	
+		return annotatePoint(offset, c);
 	}
 	
 	/**
