@@ -10,7 +10,6 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPane
 
 /**
  * Integrates the analysis setup dialog with the image prober.
- * Experimental.
  * @author ben
  * @since 1.13.4
  *

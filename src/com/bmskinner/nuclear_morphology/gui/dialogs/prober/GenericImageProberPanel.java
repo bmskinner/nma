@@ -148,10 +148,9 @@ public class GenericImageProberPanel  extends JPanel
 		} catch (Exception e) { // end try
 			warn(e.getMessage());
 			stack(e.getMessage(), e);
-			
+			setImageLabel("Error probing "+imageFile.getAbsolutePath());
 		} finally {
 			finder.removeDetectionEventListener(model);
-			setImageLabel("Error probing "+imageFile.getAbsolutePath());
 			progressBar.setVisible(false);
 			firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
 		}
@@ -197,6 +196,11 @@ public class GenericImageProberPanel  extends JPanel
 			}
 		};
 		ThreadManager.getInstance().submit(r);
+	}
+	
+	
+	protected Window getWindow(){
+		return parent;
 	}
 	
 	/**
@@ -338,7 +342,7 @@ public class GenericImageProberPanel  extends JPanel
 	}
 	
 	
-	private JTable createTable(TableModel model){
+	protected JTable createTable(TableModel model){
 		JTable table = new JTable(model);
 		table.setRowHeight(200);
 		for(int i=0; i<table.getColumnCount(); i++){

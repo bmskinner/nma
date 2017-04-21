@@ -12,7 +12,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,18 +20,20 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
+import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.FishRemappingProberWorker;
 
 /**
  * The image panel for FISH remapping. Stores the cells selected for
@@ -42,7 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.workers.FishRemapping
  *
  */
 @SuppressWarnings("serial")
-public class FishRemappingProberPanel extends ImageProberPanel {
+public class FishRemappingProberPanel extends GenericImageProberPanel {
 	
 	private static final int ORIGINAL_IMG_COL = 0;
 	private static final int ORIGINAL_IMG_ROW = 0;
@@ -50,73 +51,87 @@ public class FishRemappingProberPanel extends ImageProberPanel {
 
 	
 	private final IAnalysisDataset dataset;
-//	private final File nucleusDir;
-	private final File fishDir;
+
+//	private final File fishDir;
 	
 	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei selected with the left button
 	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei selected with the right button
 	
 	private Set<ICell> openCells = new HashSet<ICell>();
 	
-	public FishRemappingProberPanel(final Window parent, 
-			final IDetectionOptions options, 
-			final ImageSet set, 
-			final IAnalysisDataset dataset,
-			final File fishDir){
+	public FishRemappingProberPanel(IAnalysisDataset dataset, Finder finder, Window parent) throws MissingOptionException{
 		
-		super(parent, options, set);
+		super(dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder(), finder, parent);
 		
+
 		this.dataset   = dataset;
-		this.fishDir = fishDir;
+//		this.fishDir = fishDir;
+		
 				
-		for(MouseListener l : table.getMouseListeners()){
-			table.removeMouseListener(l);
-		}
-		
-		// Add listener for nucleus click
-		table.addMouseListener( new MouseAdapter(){
-        	
-        	@Override
-        	public void mouseClicked(MouseEvent e){
-        		if(e.getClickCount()==1){
-        			
-        			Point pnt = e.getPoint();
-        			int row = table.rowAtPoint(pnt);
-        			int col = table.columnAtPoint(pnt);
-        			
-        			if(row==ORIGINAL_IMG_ROW && col==ORIGINAL_IMG_COL){
-        				
-        				Runnable r = () -> {
-        					smallImageClicked(e, pnt);
-        				};
-        				
-        				ThreadManager.getInstance().execute(r);
-        				
-        				
-        				
-        			} else { // Show a large image for the FISH image when clicked
-
-            			TableModel model = (TableModel)table.getModel();
-
-            			ImageProberTableCell selectedData = (ImageProberTableCell) model.getValueAt( row, col );
-
-            			if(selectedData.getLargeIcon()!=null){
-            				new LargeImageDialog(selectedData, parent);
-            			}
-        			}
-        			
-        			
-        		}
-        	}
-        	
-        });
-		
-		// Make sure the images fit in the table
+//		// Make sure the images fit in the table
 		Dimension minPanelSize = getPreferredSize();
 		minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth() * PANEL_SCREEN_WIDTH_PROP);
 		setPreferredSize(minPanelSize);
 		
-		createFileList(options.getFolder());
+//		createFileList(options.getFolder());
+	}
+	
+	@Override
+	protected JTable createTable(TableModel model){
+		JTable table = super.createTable(model);
+		
+//		// change the table widths
+//		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+//		// set the new width
+//		double ratio = (double) screenSize.getWidth() / (double) screenSize.getHeight();
+//		int newWidth = (int) ( screenSize.getWidth() * PANEL_SCREEN_WIDTH_PROP);
+//		int newHeight = (int) (   (double) newWidth / ratio);
+//		
+//		table.setRowHeight(newHeight);
+//		table.setC
+
+		for(MouseListener l : table.getMouseListeners()){
+			table.removeMouseListener(l);
+		}
+
+		// Add listener for nucleus click
+		table.addMouseListener( new MouseAdapter(){
+
+			@Override
+			public void mouseClicked(MouseEvent e){
+				if(e.getClickCount()==1){
+
+					Point pnt = e.getPoint();
+					int row = table.rowAtPoint(pnt);
+					int col = table.columnAtPoint(pnt);
+
+					if(row==ORIGINAL_IMG_ROW && col==ORIGINAL_IMG_COL){
+
+						Runnable r = () -> {
+							smallImageClicked(e, pnt);
+						};
+
+						ThreadManager.getInstance().execute(r);
+
+
+
+					} else { // Show a large image for the FISH image when clicked
+
+						TableModel model = (TableModel)table.getModel();
+
+						ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
+
+						if(selectedData.getLargeIcon()!=null){
+							new LargeImageDialog(selectedData, getWindow());
+						}
+					}
+
+
+				}
+			}
+
+		});
+		return table;
 	}
 	
 	/**
@@ -126,73 +141,28 @@ public class FishRemappingProberPanel extends ImageProberPanel {
 	 */
 	@Override
 	protected void importAndDisplayImage(File imageFile){
-
-		if(imageFile==null){
-			throw new IllegalArgumentException(NULL_FILE_ERROR);
-		}
 		
-		try {
-
-			setImageLabel(imageFile.getAbsolutePath());
-			
-			// Get the cells open in this image
-			openCells = dataset.getCollection().getCells(imageFile);
-			
-			table.setModel(createEmptyTableModel(rows, cols));
-			
-			for(int col=0; col<cols; col++){
-	        	table.getColumnModel().getColumn(col).setCellRenderer(new IconCellRenderer());
-	        }
-
-									
-			worker = new FishRemappingProberWorker(imageFile, 
-					options, 
-					imageSet, 
-					table.getModel(),
-					fishDir);
-			
-			worker.setSmallIconSize(new Dimension(SMALL_ICON_MAX_WIDTH, SMALL_ICON_MAX_HEIGHT));
-			
-			worker.addPropertyChangeListener(this);
-			progressBar.setVisible(true);
-			worker.execute();
-
-
-		} catch (Exception e) { // end try
-			warn("Error loading "+imageFile.getAbsolutePath());
-			stack(e.getMessage(), e);
-			return;
-		} 
-	}
-	
-	/* (non-Javadoc)
-	 * @see com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageProberPanel#propertyChange(java.beans.PropertyChangeEvent)
-	 * 
-	 * This is the response of the panel to changes in the ImageProberWorker creating the images in the table. 
-	 * Once the worker signals FINISHED, the filled nuclei are overlaid onto the image. In this method,
-	 * all the fills will be blue, when the worker is run on a newly opened image, and coloured by selection if the 
-	 * image is reopened.
-	 */
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		super.propertyChange(evt);
+		// Get the cells open in this image
+		openCells = dataset.getCollection().getCells(imageFile);
+		super.importAndDisplayImage(imageFile);
 		
-		ImageProberTableCell infoCell = (ImageProberTableCell) table.getModel()
+		ProberTableCell infoCell = (ProberTableCell) table.getModel()
 				.getValueAt(ORIGINAL_IMG_COL, ORIGINAL_IMG_ROW);
-		
+
 		Image largeImage = infoCell.getLargeIcon().getImage();
-		
+
 		// Get the cells matching the imageFile
 		for(ICell c : openCells){
 			drawNucleus(c, largeImage);
 		}
-		
+
 
 		// Update the small icon
 		infoCell.setSmallIcon( new ImageIcon(scaleImage( infoCell.getLargeIcon() )) );
+		table.repaint();
 
 	}
-	
+		
 	private void smallImageClicked(MouseEvent e, Point pnt){
 		
 		IPoint p = getPointInOriginalImage(pnt);
@@ -208,7 +178,7 @@ public class FishRemappingProberPanel extends ImageProberPanel {
 		Rectangle cellRectangle = table.getCellRect(row, col, false);
 		
 		// Get the icon cell at the clicked row and column
-		ImageProberTableCell selectedData = (ImageProberTableCell) table.getModel().getValueAt( row, col );
+		ProberTableCell selectedData = (ProberTableCell) table.getModel().getValueAt( row, col );
 		
 		for(ICell c : openCells){
 			if(c.getNucleus().containsOriginalPoint( p )){
@@ -268,7 +238,7 @@ public class FishRemappingProberPanel extends ImageProberPanel {
 		Rectangle cellRectangle = table.getCellRect(row, col, false);
 
 		// Get the icon cell at the clicked row and column
-		ImageProberTableCell selectedData = (ImageProberTableCell) model.getValueAt( row, col );
+		ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
 
 		// Get the width of the icon in the icon cell
 		int iconWidth = selectedData.getSmallIcon().getIconWidth();

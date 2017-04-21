@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -32,12 +34,17 @@ public class FishRemappingProber extends IntegratedImageProber {
 		try {
 			
 			// make the panel
+			Finder finder = new FishRemappingFinder(dataset.getAnalysisOptions(), fishImageDir);
+			
+			
+			imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
 
-			imageProberPanel     = new FishRemappingProberPanel(this, 
-					dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS), 
-					ImageSet.FISH_REMAPPING_IMAGE_SET, 
-					dataset,
-					fishImageDir);
+
+//			imageProberPanel     = new FishRemappingProberPanel(this, 
+//					dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS), 
+//					ImageSet.FISH_REMAPPING_IMAGE_SET, 
+//					dataset,
+//					fishImageDir);
 			
 			JPanel footerPanel   = createFooter();
 			this.setOkButtonText(PROCEED_LBL);

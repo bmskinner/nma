@@ -65,8 +65,7 @@ public class FishRemappingProberWorker extends ImageProberWorker {
 		
 		if( ! fishImageFile.exists()){
 			warn("File does not exist: "+fishImageFile.getAbsolutePath());
-			ImageProcessor ep = ImageConverter.createBlankImage(openProcessor.getWidth(), openProcessor.getHeight())
-					.toProcessor();
+			ImageProcessor ep = ImageConverter.createBlankImage(openProcessor.getWidth(), openProcessor.getHeight());
 			
 			ImageAnnotator an = new ImageAnnotator(ep)
 					.annotateString(ep.getWidth()/2, ep.getHeight()/2, "File not found");
