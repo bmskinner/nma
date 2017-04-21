@@ -65,7 +65,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class GenericImageProberPanel  extends JPanel
 	implements  Loggable, 
-				PropertyChangeListener, 
 				ProberReloadEventListener {
 	
 	/*
@@ -191,7 +190,6 @@ public class GenericImageProberPanel  extends JPanel
 				importAndDisplayImage(openImage);
 			} catch (Exception e) {
 				error("Error in prober", e);
-				stack(e);
 			}
 		};
 		ThreadManager.getInstance().submit(r);
@@ -213,26 +211,22 @@ public class GenericImageProberPanel  extends JPanel
 		
 		finest("Generating file list from "+folder.getAbsolutePath());
 
-		
-		Thread thr = new Thread(){
-			public void run() {
-				
-				imageFiles = new ArrayList<File>();
-				imageFiles = importImages(folder);
-				
-				if(imageFiles.size()>0){
-					openImage = imageFiles.get(fileIndex);
-					importAndDisplayImage(openImage);
-				} else {
-					warn("No images found in folder");
-					JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
-							"No images found in folder.", 
-							"Nope.",
-							JOptionPane.ERROR_MESSAGE);
-				}
+		Runnable r = () -> {
+			imageFiles = new ArrayList<File>();
+			imageFiles = importImages(folder);
+			
+			if(imageFiles.size()>0){
+				openImage = imageFiles.get(fileIndex);
+				run();
+			} else {
+				warn("No images found in folder");
+				JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
+						"No images found in folder.", 
+						"Nope.",
+						JOptionPane.ERROR_MESSAGE);
 			}
-		};	
-		thr.start();
+		};
+		ThreadManager.getInstance().submit(r);
 
 	}
 		
@@ -333,7 +327,7 @@ public class GenericImageProberPanel  extends JPanel
 		
 		panel.add( new JLabel(HEADER_LBL));
 		
-		imageLabel = new JLabel("label");
+		imageLabel = new JLabel("");
 		panel.add( imageLabel );
 
 		return panel;
@@ -576,37 +570,37 @@ public class GenericImageProberPanel  extends JPanel
 	}	
 		
 	
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		int value = 0;
-	    try{
-	    	Object newValue = evt.getNewValue();
-	    	
-	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
-	    		value = (int) newValue;
-	    		
-	    	}
-	    	if(value >=0 && value <=100){
-	    		progressBar.setValue(value);
-	    	}
-	    	
-	    	
-	    	if(evt.getPropertyName().equals("Finished")){
-
-				progressBar.setVisible(false);
-				firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-				
-			}
-	    	
-	    } catch (Exception e){
-	    	error("Error getting value from property change", e);
-	    }
-		
-	}
+//	@Override
+//	public void propertyChange(PropertyChangeEvent evt) {
+//		int value = 0;
+//	    try{
+//	    	Object newValue = evt.getNewValue();
+//	    	
+//	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
+//	    		value = (int) newValue;
+//	    		
+//	    	}
+//	    	if(value >=0 && value <=100){
+//	    		progressBar.setValue(value);
+//	    	}
+//	    	
+//	    	
+//	    	if(evt.getPropertyName().equals("Finished")){
+//
+//				progressBar.setVisible(false);
+//				firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
+//				
+//			}
+//	    	
+//	    } catch (Exception e){
+//	    	error("Error getting value from property change", e);
+//	    }
+//		
+//	}
 		
 	@Override
 	public void proberReloadEventReceived(ProberReloadEvent e) {
-		importAndDisplayImage(openImage);
+		run();
 	}
 
 		

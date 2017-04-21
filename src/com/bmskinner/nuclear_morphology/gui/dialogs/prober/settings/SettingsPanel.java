@@ -86,6 +86,14 @@ public abstract class SettingsPanel
 		return false;
 	}
 	
+	/**
+	 * Get the sub panels
+	 * @return
+	 */
+	protected List<SettingsPanel> getSubPanels(){
+		return subPanels;
+	}
+	
 	protected void update(){
 
 		for(SettingsPanel p : subPanels){

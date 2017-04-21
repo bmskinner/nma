@@ -112,7 +112,10 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 
 	@Override
 	public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-		// TODO Auto-generated method stub
+
+		for(SettingsPanel s : this.getSubPanels()){
+			s.panelUpdatingEventReceived(e);
+		}
 		
 	}
 }
