@@ -432,7 +432,7 @@ public class SegmentFitter implements Loggable {
 	 * Get the score for an entire segment list of a profile. Tests the effect of  changing one segment
 	 * on the entire set
 	 * @param reference
-	 * @param test
+	 * @param finder
 	 * @return the score
 	 * @throws Exception 
 	 */

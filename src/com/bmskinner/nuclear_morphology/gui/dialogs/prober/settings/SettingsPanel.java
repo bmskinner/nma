@@ -207,6 +207,9 @@ public abstract class SettingsPanel
 	@Override
 	public void setEnabled(boolean b){
 		finer(this.getClass().getSimpleName()+": Setting updating "+b);
+		for(Component c : this.getComponents()){
+			c.setEnabled(b);
+		}
 		for(SettingsPanel p : subPanels){
 			p.setEnabled(b);
 		}
@@ -221,6 +224,10 @@ public abstract class SettingsPanel
 		
 		if(e.getType()==PanelUpdatingEvent.COMPLETE){
 			this.setEnabled(true);
+		}
+		
+		for(SettingsPanel s : this.getSubPanels()){
+			s.panelUpdatingEventReceived(e);
 		}
 
 	}

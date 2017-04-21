@@ -94,7 +94,7 @@ public class GenericImageProberPanel  extends JPanel
 	 * PROTECTED VALUES
 	 */
 	
-	protected  Finder test;
+	protected  Finder finder;
 	
 	protected static final int SMALL_ICON_MAX_WIDTH   = 500;
 	protected static final int SMALL_ICON_MAX_HEIGHT  = 500;
@@ -111,7 +111,7 @@ public class GenericImageProberPanel  extends JPanel
 		
 		this.folder = folder;
 		this.parent = parent;
-		test        = finder;
+		this.finder        = finder;
 		createUI();
 	}
 	
@@ -124,16 +124,16 @@ public class GenericImageProberPanel  extends JPanel
 		if(imageFile==null){
 			throw new IllegalArgumentException(NULL_FILE_ERROR);
 		}
+		ProberTableModel model = new ProberTableModel();
 		
 		try {
 			finer("Firing panel updating event");
+			setImageLabel(imageFile.getAbsolutePath());
 			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
-			
 			progressBar.setVisible(true);
-			test.removeAllDetectionEventListeners();
-			ProberTableModel model = new ProberTableModel();
 			
-			test.addDetectionEventListener(model);
+			
+			finder.addDetectionEventListener(model);
 			table.setModel(model);
 			
 			for(int i=0; i<table.getColumnCount(); i++){
@@ -141,16 +141,20 @@ public class GenericImageProberPanel  extends JPanel
 			}
 			
 			
-//			progressBar.setValue(0);
-			setImageLabel(imageFile.getAbsolutePath());
 			
+			finder.findInImage(imageFile);
+
 			
-			test.findInImage(imageFile);
+		} catch (Exception e) { // end try
+			warn(e.getMessage());
+			stack(e.getMessage(), e);
+			
+		} finally {
+			finder.removeDetectionEventListener(model);
+			setImageLabel("Error probing "+imageFile.getAbsolutePath());
 			progressBar.setVisible(false);
 			firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-		} catch (Exception e) { // end try
-			error(e.getMessage(), e);
-		} 
+		}
 	}
 	
 	protected void createUI(){
@@ -301,7 +305,7 @@ public class GenericImageProberPanel  extends JPanel
 		
 		ProberTableModel model = new ProberTableModel();
 		
-		test.addDetectionEventListener(model);
+		finder.addDetectionEventListener(model);
 		
 		table = createTable(model);
 		

@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -29,6 +30,8 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 	private static final String CYTO_SETTINGS_LBL = "Cytoplasm";
 	private static final String NUCL_SETTINGS_LBL = "Nucleus";
 	private static final String RELOAD_LBL        = "Reload";
+	
+	private JButton reloadBtn;
 	
 	public NeutrophilDetectionSettingsPanel(IMutableAnalysisOptions options){
 		this.options = options;
@@ -84,13 +87,20 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 	
 	private JPanel createFooter(){
 		JPanel panel = new JPanel();
-		JButton reloadBtn = new JButton(RELOAD_LBL);
+		reloadBtn = new JButton(RELOAD_LBL);
 		reloadBtn.addActionListener( e->{
 			fireProberReloadEvent(); 
 		});
 		
 		panel.add(reloadBtn);
 		return panel;
+		
+	}
+	
+	@Override
+	public void setEnabled(boolean b){
+		super.setEnabled(b);
+		reloadBtn.setEnabled(b);
 		
 	}
 	
@@ -105,17 +115,6 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 //			
 //		}
 
-		
-		
-
 	}
 
-	@Override
-	public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-
-		for(SettingsPanel s : this.getSubPanels()){
-			s.panelUpdatingEventReceived(e);
-		}
-		
-	}
 }
