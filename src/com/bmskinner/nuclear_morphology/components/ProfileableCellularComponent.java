@@ -157,12 +157,14 @@ public abstract class ProfileableCellularComponent
 		
 		fine("Initialising profilable object");
 		this.angleWindowProportion = proportion;
-		
+		fine("Proportion is "+proportion);
 		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
+		fine("Perimeter is "+perimeter);
 		double angleWindow = perimeter * proportion;
+		angleWindow = angleWindow < 1 ? 1 : angleWindow;
 		
 		// calculate profiles
-		this.angleProfileWindowSize = (int) Math.round(angleWindow);
+		this.angleProfileWindowSize = (int) Math.ceil(angleWindow);
 		fine("Calculating profiles with window size "+angleProfileWindowSize);
 		try {
 			calculateProfiles();

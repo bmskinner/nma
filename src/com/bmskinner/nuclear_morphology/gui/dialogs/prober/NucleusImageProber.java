@@ -32,7 +32,7 @@ public class NucleusImageProber extends IntegratedImageProber {
 			this.options = o;
 			
 //			options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//			IMutableDetectionOptions nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
 			// make the panel
 			

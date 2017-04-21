@@ -43,6 +43,11 @@ public abstract class AbstractFinder implements Finder, Loggable {
 	final protected List<Object> listeners = new ArrayList<>();
 	
 	/**
+	 * The minimum size of an object to detect for {@link Profileable} objects
+	 */
+	public static final int MIN_PROFILABLE_OBJECT_SIZE = 50;
+	
+	/**
 	 * Construct with an analysis options
 	 * @param op the analysis options
 	 */

@@ -68,7 +68,6 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 			List<Nucleus> nuclei = detectNucleus(imageFile);
 
 			IDetectionOptions nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
-			log("Found nuclei");
 			
 			// Display passing and failing size nuclei
 			if( ! listeners.isEmpty()){
@@ -145,32 +144,28 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 		fireDetectionEvent(ip.duplicate(), "Gap closing");
 		
 		GenericDetector gd = new GenericDetector();
-		gd.setSize(1, original.getWidth()*original.getHeight());
+		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth()*original.getHeight());
 		
-		log("Getting rois");
 		ImageProcessor img = filt.toProcessor();
 		List<Roi> rois = gd.getRois(img.duplicate());
 		
 
-		log("Making nuclei");
 		for(int i=0; i<rois.size(); i++){
-			log("Making nucleus "+i);
 			Roi roi = rois.get(i);
 			Nucleus n = makeNucleus(roi, imageFile, nuclOptions, img, i, gd);
 			list.add(n);
 			
 		}
-		log("Made nuclei");
 		return list;
 		
 	}
 	
 	
-	private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber, Detector gd) throws ComponentCreationException {
+	private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions nuclOptions, ImageProcessor ip, int objectNumber, Detector gd) throws ComponentCreationException {
 		
 		  // measure the area, density etc within the nucleus
 		StatsMap values   = gd.measure(roi, ip);
-		log("\tMeasured stats");
+//		log("\tMeasured stats");
 		  // save the position of the roi, for later use
 		int xbase = (int) roi.getXBase();
 		int ybase = (int) roi.getYBase();
@@ -180,9 +175,9 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 		int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
 		// create a Nucleus from the roi
-		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+		IPoint centreOfMass = IPoint.makeNew(values.get(StatsMap.COM_X), values.get(StatsMap.COM_Y));
 
-		Nucleus result = nuclFactory.buildInstance(roi, f, options.getChannel(), originalPosition, centreOfMass); 
+		Nucleus result = nuclFactory.buildInstance(roi, f, nuclOptions.getChannel(), originalPosition, centreOfMass); 
 
 		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
 		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );
@@ -194,9 +189,9 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 		result.setStatistic(PlottableStatistic.MAX_FERET, values.get(StatsMap.FERET));
 		result.setStatistic(PlottableStatistic.PERIMETER, values.get(StatsMap.PERIM));
 		
-		result.setScale(options.getScale());
+		result.setScale(nuclOptions.getScale());
 		
-		double prop = this.options.getProfileWindowProportion();
+		double prop = options.getProfileWindowProportion();
 		log("\tInitialising with "+prop);
 		result.initialise(prop);
 		log("\tFinding border points");
