@@ -168,9 +168,9 @@ public class TailDetector extends Detector {
 //		binaryImage.show();
 		
 		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions(); 
-		IMutableDetectionOptions op = new DefaultTailDetectionOptions((File)null);
-		op.getCannyOptions().setClosingObjectRadius(5);
-		options.setDetectionOptions(IAnalysisOptions.SPERM_TAIL, op);
+//		IMutableDetectionOptions op = new DefaultTailDetectionOptions((File)null);
+//		op.getCannyOptions().setClosingObjectRadius(5);
+//		options.setDetectionOptions(IAnalysisOptions.SPERM_TAIL, op);
 		
 		ByteProcessor byteProcessor = (ByteProcessor) new ImageFilterer(bp).morphologyClose(  5).toProcessor();
 //		morphologyClose(binaryProcessor, options.getCannyOptions("tail"));

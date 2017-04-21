@@ -74,7 +74,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 
 /**
  * @author bms41
@@ -223,7 +223,7 @@ public class RoundNucleus extends AbstractCellularComponent
 	}
 	
 
-	public void initialise(double proportion) {
+	public void initialise(double proportion) throws ComponentCreationException {
 
 		this.angleWindowProportion = proportion;
 		
@@ -233,15 +233,16 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		// calculate profiles
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
-
-		calculateProfiles();
-		
 		try {
+			calculateProfiles();
+		
+		
 			SignalAnalyser s = new SignalAnalyser();
 			s.calculateSignalDistancesFromCoM(this);
 			s.calculateFractionalSignalDistancesFromCoM(this); 
-		} catch (UnavailableBorderPointException e) {
+		} catch (UnavailableBorderPointException | ProfileException e) {
 			stack("Unable to get border point", e);
+			throw new ComponentCreationException("Error finding signals or making profiles", e);
 		}
 		
 	    
@@ -867,9 +868,16 @@ public class RoundNucleus extends AbstractCellularComponent
 			this.angleProfileWindowSize = (int) Math.round(angleWindow);
 			finest("Recalculating angle profile");
 			ProfileCreator creator = new ProfileCreator(this);
-			ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+			ISegmentedProfile profile;
+			try {
+				profile = creator.createProfile(ProfileType.ANGLE);
+				this.profileMap.put(ProfileType.ANGLE, profile);		
+			} catch (ProfileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
-			this.profileMap.put(ProfileType.ANGLE, profile);		
+			
 			
 		}
 	}

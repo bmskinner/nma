@@ -28,6 +28,8 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
  *
  */
 public interface INuclearSignalOptions extends IDetectionOptions {
+	
+	static final String MAX_FRACTION = "Max fraction";
 
 	static final int    DEFAULT_SIGNAL_THRESHOLD     = 70;
 	static final int    DEFAULT_MIN_SIGNAL_SIZE      = 5;
@@ -37,6 +39,7 @@ public interface INuclearSignalOptions extends IDetectionOptions {
 	static final double DEFAULT_MAX_CIRC             = 1.0;
 	static final SignalDetectionMode DEFAULT_METHOD = SignalDetectionMode.FORWARD;
 	static final int DEFAULT_CHANNEL = 0;
+	
 		
 	/**
 	 * The analysis types available for detecting signals

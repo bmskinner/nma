@@ -80,7 +80,7 @@ public class GenericImageProberPanel  extends JPanel
 	private static final String PREV_IMAGE_BTN = "Prev";
 	private static final String NEXT_IMAGE_BTN = "Next";
 	private static final String WORKING_LBL    = "Working...";
-	private static final double IMAGE_SCREEN_PROPORTION = 0.90;
+	private static final double IMAGE_SCREEN_PROPORTION = 0.80;
 	
 	/*
 	 * PRIVATE VALUES
@@ -135,7 +135,11 @@ public class GenericImageProberPanel  extends JPanel
 			
 			test.addDetectionEventListener(model);
 			table.setModel(model);
-			table.getColumnModel().getColumn(1).setCellRenderer(new IconCellRenderer());
+			
+			for(int i=0; i<table.getColumnCount(); i++){
+				table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
+			}
+			
 			
 //			progressBar.setValue(0);
 			setImageLabel(imageFile.getAbsolutePath());
@@ -338,8 +342,11 @@ public class GenericImageProberPanel  extends JPanel
 	private JTable createTable(TableModel model){
 		JTable table = new JTable(model);
 		table.setRowHeight(200);
-		table.getColumnModel().getColumn(1).setCellRenderer(new IconCellRenderer());
+		for(int i=0; i<table.getColumnCount(); i++){
+			table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
+		}
 		
+		table.setTableHeader(null);
 		table.setCellSelectionEnabled(true);
         table.setRowSelectionAllowed(false);
         table.setColumnSelectionAllowed(false);
@@ -357,13 +364,16 @@ public class GenericImageProberPanel  extends JPanel
         			int row = table.rowAtPoint(pnt);
         			int col = table.columnAtPoint(pnt);
         			
-        			if(col==1){
-        				ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
 
-            			if(selectedData.getLargeIcon()!=null){
-            				new LargeImageDialog(selectedData, parent);
-            			}
+        			ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
+        			
+        			if(selectedData!=null){
+
+        				if(selectedData.getLargeIcon()!=null){
+        					new LargeImageDialog(selectedData, parent);
+        				}
         			}
+        			
 
         			
         			
@@ -379,10 +389,20 @@ public class GenericImageProberPanel  extends JPanel
 		private ImageIcon smallIcon;
 		private ImageIcon largeIcon;
 		private boolean enabled;
+		private String label;
 		
-		public ProberTableCell(ImageIcon largeIcon, boolean enabled){
+		public ProberTableCell(ImageIcon largeIcon, String label, boolean enabled){
 			this.largeIcon = largeIcon;
-			this.enabled = enabled;
+			this.enabled   = enabled;
+			this.label     = label;
+		}
+		
+		public String toString(){
+			if(enabled){
+				return label;
+			} else {
+				return label+" (disabled)";
+			}
 		}
 
 		public ImageIcon getSmallIcon() {
@@ -476,32 +496,41 @@ public class GenericImageProberPanel  extends JPanel
 			try {
 				super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-				if(column==1){
-					
+				ProberTableCell info = (ProberTableCell) value;
 				
-					ProberTableCell info = (ProberTableCell) value;
-					setHorizontalAlignment(JLabel.CENTER);
-					setVerticalAlignment(JLabel.CENTER); // image has no offset
-					setBackground(Color.WHITE);
+				setTextHorizontalAlignment(JLabel.CENTER);
+				setHorizontalTextPosition(JLabel.CENTER);
+				setVerticalTextPosition(JLabel.BOTTOM);
+				
+				setHorizontalAlignment(JLabel.CENTER);
+				setVerticalAlignment(JLabel.CENTER); // image has no offset
+				setBackground(Color.WHITE);
+				setText("");
+
+				if(info==null){
 					setText("");
-
-					if(info==null){
-						setText("");
-						return this;
-					}
-
-					if(info.hasSmallIcon()){
-						setIcon( info.getSmallIcon() );
-					} else {
-						setIcon(null);
-					}
+					return this;
+				} else {
+					setText(info.toString());
 				}
+
+				if(info.hasSmallIcon()){
+					setIcon( info.getSmallIcon() );
+				} else {
+					setIcon(null);
+				}
+				
 			}
 			catch (Exception e){
 				error("Renderer error", e);
 			}
 
 			return this;
+		}
+
+		private void setTextHorizontalAlignment(int center) {
+			// TODO Auto-generated method stub
+			
 		}
 
 
@@ -516,7 +545,7 @@ public class GenericImageProberPanel  extends JPanel
 	@SuppressWarnings("serial")
 	public class LargeImageDialog extends JDialog {
 
-		public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
+//		public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
 
 		/**
 		 * Create a full-scale image for the given key in this ImageProber.
@@ -528,7 +557,7 @@ public class GenericImageProberPanel  extends JPanel
 
 			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-			final ImageIcon icon = cell.getLargeIconFitToScreen(DEFAULT_SCREEN_PROPORTION);
+			final ImageIcon icon = cell.getLargeIconFitToScreen(IMAGE_SCREEN_PROPORTION);
 
 			this.setLayout(new BorderLayout());
 

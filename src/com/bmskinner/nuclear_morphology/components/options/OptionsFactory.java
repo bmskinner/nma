@@ -125,7 +125,7 @@ public interface OptionsFactory {
 	 * @return
 	 * @throws MissingOptionException
 	 */
-	static IMutableDetectionOptions makeDefaultCytoplasmDetectionOptions(File folder) throws MissingOptionException{
+	static IMutableDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder) throws MissingOptionException{
 
 		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeNucleusDetectionOptions(folder);
 		
@@ -152,10 +152,10 @@ public interface OptionsFactory {
 	 * @return
 	 * @throws MissingOptionException
 	 */
-	static IMutableDetectionOptions makeDefaultNucleusDetectionOptions(File folder) throws MissingOptionException{
+	static IMutableDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder) throws MissingOptionException{
 		
 		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-//		nucleusOptions.setInt(IMutableDetectionOptions.TOP_HAT_RADIUS, 20);
+		nucleusOptions.setInt(IMutableDetectionOptions.TOP_HAT_RADIUS, 20);
 		nucleusOptions.setRGB(true);
 		nucleusOptions.setThreshold(20);
 		
@@ -186,8 +186,8 @@ public interface OptionsFactory {
 		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
 		options.setNucleusType(NucleusType.NEUTROPHIL);
 		
-		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeDefaultCytoplasmDetectionOptions(folder);
-		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNucleusDetectionOptions(folder);
+		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeDefaultNeutrophilCytoplasmDetectionOptions(folder);
+		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeDefaultNeutrophilNucleusDetectionOptions(folder);
 
 		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 		options.setDetectionOptions(IAnalysisOptions.CYTOPLASM, cytoOptions);

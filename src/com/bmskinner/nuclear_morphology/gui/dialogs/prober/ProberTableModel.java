@@ -4,6 +4,7 @@ import javax.swing.ImageIcon;
 import javax.swing.table.DefaultTableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder.*;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.ProberTableCell;
 
@@ -16,13 +17,29 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
 	public ProberTableModel(){
 		super();	
 		this.setColumnCount(2);
-		this.setColumnIdentifiers(new Object[]{ "Process", "Preview"});
+//		this.setColumnIdentifiers(new Object[]{ "Process", "Preview"});
 	}
 
 	@Override
 	public void detectionEventReceived(DetectionEvent e) {
-		ProberTableCell cell = makeIconCell(e.getProcessor(), true);
-		addRow( new Object[] {e.getMessage(), cell});
+		ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
+		
+		ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(200, 200), "", true);
+		
+		if(getRowCount()==0){
+			addRow( new ProberTableCell[] { cell, blank });
+			return;
+		}
+		
+		
+		ProberTableCell existing = (ProberTableCell) getValueAt(getRowCount()-1, 1);
+		
+		if(existing.toString().equals("")){ // Blank processor
+			this.setValueAt(cell, getRowCount()-1, 1);
+		} else {
+			addRow( new ProberTableCell[] { cell, blank });
+		}
+		
 		
 	}
 	
@@ -33,12 +50,11 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
 	 * @param type
 	 * @return
 	 */
-	protected ProberTableCell makeIconCell(ImageProcessor ip, boolean enabled){
+	protected ProberTableCell makeIconCell(ImageProcessor ip, String label, boolean enabled){
 		
 		ImageFilterer filt = new ImageFilterer(ip);
-//		ImageIcon ic = filt.fitToScreen().toImageIcon(); // This causes problems when drawing overlay nuclei based on original image size
 		ImageIcon ic = filt.toImageIcon();
-		ProberTableCell iconCell = new ProberTableCell( ic, enabled);
+		ProberTableCell iconCell = new ProberTableCell( ic, label,  enabled);
 		
 		ImageIcon small = filt.resize( (int) 200, (int) 200)
 				.toImageIcon();

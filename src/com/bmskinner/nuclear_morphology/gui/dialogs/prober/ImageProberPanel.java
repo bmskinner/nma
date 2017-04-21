@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  */
 @SuppressWarnings("serial")
+@Deprecated
 public abstract class ImageProberPanel extends JPanel
 	implements Loggable, 
 				PropertyChangeListener, 
@@ -282,7 +283,7 @@ public abstract class ImageProberPanel extends JPanel
 				ImageProberTableCell cell;
 				if(count<values){
 					
-					ImageIcon blankIcon = ImageConverter.createBlankImage(SMALL_ICON_MAX_WIDTH, SMALL_ICON_MAX_HEIGHT).toImageIcon();
+					ImageIcon blankIcon = ImageConverter.createBlankImageConverter(SMALL_ICON_MAX_WIDTH, SMALL_ICON_MAX_HEIGHT).toImageIcon();
 					cell = new ImageProberTableCell(blankIcon, imageSet.getType(count), true, count);
 
 				} else {

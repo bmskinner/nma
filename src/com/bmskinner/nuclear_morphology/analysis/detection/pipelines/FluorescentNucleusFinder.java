@@ -119,7 +119,7 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 				.toProcessor();
 		
 		ImageProcessor ip = importer.importToStack().getProcessor(stackNumber);
-		fireDetectionEvent(original.duplicate(), "Input image");
+//		fireDetectionEvent(original.duplicate(), "Input image");
 
 		ImageFilterer filt =  new ImageFilterer(ip.duplicate());
 		
@@ -192,9 +192,7 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 		result.setScale(nuclOptions.getScale());
 		
 		double prop = options.getProfileWindowProportion();
-		log("\tInitialising with "+prop);
 		result.initialise(prop);
-		log("\tFinding border points");
 		result.findPointsAroundBorder();
 		return result;
 	}

@@ -32,6 +32,7 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
@@ -622,13 +623,13 @@ public class DatasetConverter implements Loggable, Importer {
 
 		// Create the profiles within the nucleus
 		finer("\tInitialising");
-
-		newNucleus.initialise(template.getWindowProportion(ProfileType.ANGLE));
-
-
-		fine("\tCopying tags");
-
 		try {
+			newNucleus.initialise(template.getWindowProportion(ProfileType.ANGLE));
+
+
+			fine("\tCopying tags");
+
+		
 			// The keyset of the map will not have a defined order, so do the RP first now
 			// and skip it in the loop below
 			template.getBorderPoint(Tag.REFERENCE_POINT);
@@ -640,9 +641,9 @@ public class DatasetConverter implements Loggable, Importer {
 
 			fine("\tChanging tag "+Tag.REFERENCE_POINT+" to index "+newIndex+" : "+propIndex);
 			newNucleus.setBorderTag(Tag.REFERENCE_POINT, newIndex);
-		} catch (UnavailableBorderTagException | IndexOutOfBoundsException e) {
-			stack("Cannot set border tag to requested index", e);
-			throw new DatasetConversionException("Cannot set reference point", e);
+		} catch (UnavailableBorderTagException | IndexOutOfBoundsException | ComponentCreationException e) {
+			stack("Cannot initialise or cannot set border tag to requested index", e);
+			throw new DatasetConversionException("Cannot create profilable object", e);
 		}
 		
 		//Copy the other existing border tags

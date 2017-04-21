@@ -139,62 +139,114 @@ public class DefaultNuclearSignalOptions
 
 	@Override
 	public IMutableDetectionOptions unlock() {
-		// TODO Auto-generated method stub
-		return null;
+		return this;
 	}
 
 	@Override
 	public boolean isUseHoughTransform() {
 		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return false;
 	}
 
 	@Override
 	public IDetectionOptions lock() {
 		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return null;
 	}
 
 	@Override
 	public void setHoughOptions(IHoughDetectionOptions hough) {
 		// TODO Auto-generated method stub
-		
+		warn("Unimplemented method");
 	}
 
 	@Override
 	public IDetectionSubOptions getSubOptions(String s) {
-		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return null;
 	}
 
 	@Override
 	public boolean isRGB() {
-		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return false;
 	}
 
 	@Override
 	public void setSubOptions(String s, IDetectionSubOptions sub) {
-		// TODO Auto-generated method stub
-		
+		warn("Unimplemented method");
 	}
 
 	@Override
-	public void setRGB(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void setRGB(boolean b) {	
+		warn("Unimplemented method");
+		}
 
 	@Override
 	public List<String> getKeys() {
 		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return null;
 	}
 
 	@Override
 	public boolean hasSubOptions(String key) {
 		// TODO Auto-generated method stub
+		warn("Unimplemented method");
 		return false;
+	}
+
+	@Override
+	public double getDouble(String s) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method");
+		return 0;
+	}
+
+	@Override
+	public int getInt(String s) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean getBoolean(String s) {
+		warn("Unimplemented method");
+		return false;
+	}
+
+	@Override
+	public void setDouble(String s, double d) {
+		warn("Unimplemented method");
+		
+	}
+
+	@Override
+	public void setInt(String s, int i) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method");
+	}
+
+	@Override
+	public void setBoolean(String s, boolean b) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method");
+	}
+
+	@Override
+	public float getFloat(String s) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method");
+		return 0;
+	}
+
+	@Override
+	public void setFloat(String s, float f) {
+		// TODO Auto-generated method stub
+		warn("Unimplemented method");
+		
 	}
 
 }

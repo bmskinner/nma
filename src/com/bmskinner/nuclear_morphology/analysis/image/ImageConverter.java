@@ -52,10 +52,23 @@ public class ImageConverter extends AbstractImageFilterer {
 	 * Create a blank byte processor image of the specified dimensions
 	 * @param w the width
 	 * @param h the height
-	 * @return an image converter
+	 * @return an image processor
 	 */
-	public static ImageConverter createBlankImage(int w, int h){
+	public static ImageProcessor createBlankImage(int w, int h){
 		ImageProcessor ip = new ByteProcessor(w, h);
+		ip.invert();
+		return new ImageConverter(ip).convertTORGBGreyscale().toProcessor();
+	}
+	
+	/**
+	 * Create a blank byte processor image of the specified dimensions
+	 * @param w the width
+	 * @param h the height
+	 * @return an image processor
+	 */
+	public static ImageConverter createBlankImageConverter(int w, int h){
+		ImageProcessor ip = new ByteProcessor(w, h);
+		ip.invert();
 		return new ImageConverter(ip).convertTORGBGreyscale();
 	}
 			

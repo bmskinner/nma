@@ -12,15 +12,13 @@ public class DefaultNuclearSignalHashOptions
 	extends AbstractHashDetectionOptions 
 	implements IMutableNuclearSignalOptions {
 	 
-	public static final String MAX_FRACTION = "Max fraction";
-	
 	private static final long serialVersionUID = 1L;
 	
 	private SignalDetectionMode mode;
 	
 	public DefaultNuclearSignalHashOptions(File folder){
 		super(folder);
-		setDouble(MAX_FRACTION,DEFAULT_MAX_SIGNAL_FRACTION);
+		setDouble(MAX_FRACTION,  DEFAULT_MAX_SIGNAL_FRACTION);
 		mode        = DEFAULT_METHOD;
 		
 		setMinSize(DEFAULT_MIN_SIGNAL_SIZE);
@@ -30,8 +28,8 @@ public class DefaultNuclearSignalHashOptions
 		setChannel(DEFAULT_CHANNEL);
 		setThreshold(DEFAULT_SIGNAL_THRESHOLD);
 		setScale(DEFAULT_SCALE);
-		setBoolean(IS_RGB, DEFAULT_IS_RGB);
-		setBoolean(IS_NORMALISE_CONTRAST, DEFAULT_IS_NORMALISE);
+		setBoolean(IDetectionOptions.IS_RGB, DEFAULT_IS_RGB);
+		setBoolean(IDetectionOptions.IS_NORMALISE_CONTRAST, DEFAULT_IS_NORMALISE);
 		
 	}
 	

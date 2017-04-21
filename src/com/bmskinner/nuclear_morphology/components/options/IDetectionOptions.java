@@ -38,6 +38,18 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 	
 	static final String NEWLINE = System.getProperty("line.separator"); 
 	
+	static final String THRESHOLD = "Threshold";
+	static final String CHANNEL   = "Channel";
+	static final String IS_RGB    = "Is RGB";
+	static final String MIN_CIRC  = "Min circ";
+	static final String MAX_CIRC  = "Max circ";
+	static final String MIN_SIZE  = "Min size";
+	static final String MAX_SIZE  = "Max size";
+	static final String SCALE     = "Scale";
+	static final String IS_NORMALISE_CONTRAST   = "Normalise contrast";
+	static final String IS_USE_HOUGH   = "Use Hough";
+	static final String IS_USE_CANNY   = "Use Canny";
+	
 	/**
 	 * All sub option classes implement this interface.
 	 * They must be cast appropriately later.

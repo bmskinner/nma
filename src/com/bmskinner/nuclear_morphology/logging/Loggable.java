@@ -56,6 +56,8 @@ public interface Loggable {
 	default void error(String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
 		Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
+		System.err.println(message);
+		t.printStackTrace();
 	}
 	
 	/**
@@ -68,6 +70,8 @@ public interface Loggable {
 	default void stack(String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
 		Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
+		System.err.println(message);
+		t.printStackTrace();
 	}
 	
 	/**
@@ -78,8 +82,7 @@ public interface Loggable {
      * @param t the exception
      */
 	default void stack(Throwable t){
-		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, t.getMessage(), t);
-		Logger.getLogger(ERROR_LOGGER).log(TRACE, t.getMessage(), t);
+		stack(t.getMessage(), t);
 	}
 	
 	
@@ -167,5 +170,6 @@ public interface Loggable {
 	 */
 	default void logIJ(String message){
 		IJ.log(message);
+		System.err.println(message);
 	}
 }

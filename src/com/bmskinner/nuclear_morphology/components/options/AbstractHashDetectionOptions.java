@@ -20,19 +20,7 @@ public abstract class AbstractHashDetectionOptions
 	implements IMutableDetectionOptions {
 	
 	private static final long serialVersionUID = 1L;
-	
-	public static final String THRESHOLD = "Threshold";
-	public static final String CHANNEL   = "Channel";
-	public static final String IS_RGB    = "Is RGB";
-	public static final String MIN_CIRC  = "Min circ";
-	public static final String MAX_CIRC  = "Max circ";
-	public static final String MIN_SIZE  = "Min size";
-	public static final String MAX_SIZE  = "Max size";
-	public static final String SCALE     = "Scale";
-	public static final String IS_NORMALISE_CONTRAST   = "Normalise contrast";
-	public static final String IS_USE_HOUGH   = "Use Hough";
-	public static final String IS_USE_CANNY   = "Use Canny";
-	
+
 	private File folder;
 	
 	private Map<String, IDetectionSubOptions> subMap = new HashMap<String, IDetectionSubOptions>();
