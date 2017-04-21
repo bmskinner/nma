@@ -876,7 +876,7 @@ public class AnalysisDataset implements IAnalysisDataset {
 
 		for (File file : listOfFiles) {
 
-			boolean ok = ImageImporter.checkFile(file);
+			boolean ok = ImageImporter.fileIsImportable(file);
 
 			if(ok){
 				result++;

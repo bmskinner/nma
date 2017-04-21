@@ -23,6 +23,11 @@ public class NucleusImageProber extends IntegratedImageProber {
 	
 	private static final String DIALOG_TITLE_BAR_LBL = "Nucleus detection settings";
 
+	/**
+	 * Construct with a folder of images to probe, and the initial options 
+	 * @param folder
+	 * @param o
+	 */
 	public NucleusImageProber(final File folder, final IMutableAnalysisOptions o){
 
 		try {

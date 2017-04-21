@@ -24,6 +24,7 @@ import java.util.EventObject;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
@@ -64,6 +65,19 @@ public interface Finder {
 	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException;
 	
 
+	
+	/**
+	 * Add a listener for progress through the detection.
+	 * @param l
+	 */
+	void addProgressListener( ProgressListener l );
+
+	/**
+	 * Remove the progress listener from the finder
+	 * @param l
+	 */
+	void removeProgressListener( ProgressListener l );
+	
 	/**
 	 * Add the given event listener to the finder
 	 * @param l

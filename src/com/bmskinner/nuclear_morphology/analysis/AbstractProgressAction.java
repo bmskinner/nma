@@ -56,9 +56,7 @@ public abstract class AbstractProgressAction extends RecursiveAction implements 
 
 	@Override
 	public void progressEventReceived(ProgressEvent event) {
-		// pass up the chain
 		fireProgressEvent();
-
 	}
 
 }

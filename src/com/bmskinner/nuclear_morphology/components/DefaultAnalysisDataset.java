@@ -692,7 +692,7 @@ public class DefaultAnalysisDataset
 
 		for (File file : listOfFiles) {
 
-			boolean ok = ImageImporter.checkFile(file);
+			boolean ok = ImageImporter.fileIsImportable(file);
 
 			if(ok){
 				result++;

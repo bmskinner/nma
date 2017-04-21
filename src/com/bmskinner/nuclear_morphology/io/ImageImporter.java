@@ -83,7 +83,7 @@ public class ImageImporter implements Loggable, Importer {
 	  *  @param file the File to check
 	  *  @return a true or false of whether the file passed checks
 	  */
-	  public static boolean checkFile(File file){
+	  public static boolean fileIsImportable(File file){
 	    
 	    if( ! file.isFile()){
 	    	return false;

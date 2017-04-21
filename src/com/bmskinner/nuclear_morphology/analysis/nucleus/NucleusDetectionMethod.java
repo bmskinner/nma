@@ -12,9 +12,13 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -22,6 +26,7 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 /**
  * The method for finding nuclei in fluorescence images
@@ -149,8 +154,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 				log("Filtering collection...");
 				
-				Filterer<ICellCollection> f = new CellCollectionFilterer();
-				f.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
+				Filterer<ICellCollection> filter = new CellCollectionFilterer();
+				filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
 				log("Filtered OK");
 				
 //				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
@@ -266,7 +271,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
 		for (File file : listOfFiles) {
 
-			boolean ok = ImageImporter.checkFile(file);
+			boolean ok = ImageImporter.fileIsImportable(file);
 
 			if(ok){
 				result++;
@@ -287,8 +292,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 * @param folder the folder of images to be analysed
 	 */
 	protected void processFolder(File folder){
-
-		File[] listOfFiles = folder.listFiles();
+		
+		// Recurse over all folders in the supplied folder
+		for(File f : folder.listFiles()){
+			if(f.isDirectory()){
+				processFolder(f);
+			}
+		}
 
 		ICellCollection folderCollection = new DefaultCellCollection(folder, 
 				outputFolder, 
@@ -296,19 +306,62 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 				analysisOptions.getNucleusType());
 
 		this.collectionGroup.put(folder, folderCollection);
-
-
-		NucleusDetectionTask task = new NucleusDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
-		task.addProgressListener(this);
-		task.invoke();
-
-		for(File f : listOfFiles){
-			if(f.isDirectory()){
-				processFolder(f); // recurse over each folder
+		
+		/*
+		 * NEW METHOD - appears to be working
+		 */
+		
+		Finder finder =  new FluorescentNucleusFinder(analysisOptions);
+		finder.addProgressListener(this);
+				
+		try {
+			List<ICell> cells = finder.findInFolder(folder);
+			for(ICell cell : cells){
+				folderCollection.addCell(cell);
 			}
+			
+			if( ! cells.isEmpty()){
+				makeFolder(folder);
+			}
+		} catch (ImageImportException | ComponentCreationException e) {
+			stack("Error searching folder", e);
 		}
+		
+		
+		/*
+		 * OLD METHOD
+		 */
+//		File[] listOfFiles = folder.listFiles();
+//
+//		NucleusDetectionTask task = new NucleusDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
+//		task.addProgressListener(this);
+//		task.invoke();
+//
+//		for(File f : listOfFiles){
+//			if(f.isDirectory()){
+//				processFolder(f); // recurse over each folder
+//			}
+//		}
 
 
 	} // end function
+	
+	  /**
+	  * Create the output folder for the analysis if required
+	  *
+	  * @param folder the folder in which to create the analysis folder
+	  * @return a File containing the created folder
+	  */
+	protected File makeFolder(File folder){
+	    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
+	    if(!output.exists()){
+	      try{
+	        output.mkdir();
+	      } catch(Exception e) {
+	    	  error("Failed to create directory", e);
+	      }
+	    }
+	    return output;
+	  }
 
 }

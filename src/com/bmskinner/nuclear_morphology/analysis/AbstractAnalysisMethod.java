@@ -86,7 +86,6 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
 				}
 			}
 			return false;
-		}
-		
+		}		
 
 }

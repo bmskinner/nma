@@ -474,7 +474,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 
 		for (File file :  folder.listFiles()) {
 
-			boolean ok = ImageImporter.checkFile(file); // check file extension
+			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
 
 			if(ok){
 				files.add(file);

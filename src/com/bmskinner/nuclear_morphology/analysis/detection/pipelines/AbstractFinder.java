@@ -21,11 +21,17 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
+import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
+import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -40,7 +46,8 @@ import ij.process.ImageProcessor;
 public abstract class AbstractFinder implements Finder, Loggable {
 
 	final protected IAnalysisOptions options;
-	final protected List<Object> listeners = new ArrayList<>();
+	final protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
+	final protected List<ProgressListener>        progressListeners = new ArrayList<>();
 	
 	/**
 	 * The minimum size of an object to detect for {@link Profileable} objects
@@ -72,12 +79,27 @@ public abstract class AbstractFinder implements Finder, Loggable {
 	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
 		List<ICell> list = new ArrayList<>();
 		
-		for(File f : folder.listFiles()){
-			if(! f.isDirectory()){
-				list.addAll(findInImage(f));
+		List<File> files = Arrays.asList(folder.listFiles());
+
+		files.parallelStream().forEach( f -> {
+			if( ! f.isDirectory()){
+				
+				if(ImageImporter.fileIsImportable(f)){
+					try {
+						list.addAll(findInImage(f));
+					} catch (ImageImportException | ComponentCreationException e) {
+						stack("Error searching image", e);
+					}
+				}
 			}
-		}
+		});
 		
+//		for(File f : folder.listFiles()){
+//			if(! f.isDirectory()){
+//				list.addAll(findInImage(f));
+//			}
+//		}
+//		
 		return list;
 	}
 	
@@ -88,25 +110,59 @@ public abstract class AbstractFinder implements Finder, Loggable {
 	 */
 	@Override
 	public void addDetectionEventListener(DetectionEventListener l){
-		listeners.add(l);
+		detectionlisteners.add(l);
 	}
 	
 	@Override
 	public void removeDetectionEventListener(DetectionEventListener l){
-		listeners.remove(l);
+		detectionlisteners.remove(l);
 	}
 	
 	@Override
 	public void fireDetectionEvent(ImageProcessor ip, String message){
-		for(Object l : listeners){
-			((DetectionEventListener)l).detectionEventReceived(new DetectionEvent(this, ip, message));
+		for(DetectionEventListener l : detectionlisteners){
+			l.detectionEventReceived(new DetectionEvent(this, ip, message));
 		}
 
 	}
 	
 	@Override
 	public void removeAllDetectionEventListeners(){
-		listeners.clear();
+		detectionlisteners.clear();
+	}
+	
+	protected boolean hasDetectionListeners(){
+		return !detectionlisteners.isEmpty();
+	}
+	
+	/*
+	 * PROGRESS HANDLING
+	 * 
+	 */
+	
+	public synchronized void addProgressListener( ProgressListener l ) {
+		progressListeners.add( l );
+	}
+
+	public synchronized void removeProgressListener( ProgressListener l ) {
+		progressListeners.remove( l );
+	}
+	
+	protected boolean hasProgressListeners(){
+		return !progressListeners.isEmpty();
+	}
+
+	/**
+	 * Signal that a stage in an analysis has completed.
+	 */
+	protected synchronized void fireProgressEvent() {
+
+		ProgressEvent event = new ProgressEvent( this);
+		Iterator<ProgressListener> iterator = progressListeners.iterator();
+		while( iterator.hasNext() ) {
+			
+			iterator.next().progressEventReceived( event );
+		}
 	}
 
 }

@@ -19,6 +19,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
  *
  */
 @SuppressWarnings("serial")
+@Deprecated
 public class NucleusDetectionTask extends AbstractDetectionTask  {
 		
 	private NucleusDetectionTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, IAnalysisOptions analysisOptions) {

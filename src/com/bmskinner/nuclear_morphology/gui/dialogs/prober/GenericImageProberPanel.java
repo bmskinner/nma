@@ -242,7 +242,7 @@ public class GenericImageProberPanel  extends JPanel
 
 		for (File file :  folder.listFiles()) {
 
-			boolean ok = ImageImporter.checkFile(file); // check file extension
+			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
 
 			if(ok){
 				files.add(file);
@@ -327,7 +327,7 @@ public class GenericImageProberPanel  extends JPanel
 		
 		panel.add( new JLabel(HEADER_LBL));
 		
-		imageLabel = new JLabel("");
+		imageLabel = new JLabel("Looking for images...");
 		panel.add( imageLabel );
 
 		return panel;

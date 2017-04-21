@@ -294,7 +294,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
 		for (File file : listOfFiles) {
 
-			boolean ok = ImageImporter.checkFile(file);
+			boolean ok = ImageImporter.fileIsImportable(file);
 
 			if(ok){
 				result++;

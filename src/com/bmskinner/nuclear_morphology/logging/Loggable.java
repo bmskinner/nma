@@ -113,7 +113,7 @@ public interface Loggable {
      */
 	default void finer(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
-		System.out.println(message);
+//		System.out.println(message);
 	}
 	
 	/**
@@ -122,7 +122,7 @@ public interface Loggable {
      */
 	default void finest(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
-		System.out.println(message);
+//		System.out.println(message);
 	}
 	
 	/**

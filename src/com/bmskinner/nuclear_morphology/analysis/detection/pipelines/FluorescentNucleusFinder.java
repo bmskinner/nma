@@ -56,7 +56,7 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 	
 	public FluorescentNucleusFinder(IAnalysisOptions op) {
 		super(op);
-		nuclFactory = new NucleusFactory(NucleusType.ROUND);
+		nuclFactory = new NucleusFactory(op.getNucleusType());
 	}
 
 	@Override
@@ -70,7 +70,7 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 			IDetectionOptions nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
 			
 			// Display passing and failing size nuclei
-			if( ! listeners.isEmpty()){
+			if( hasDetectionListeners()){
 
 				ImageProcessor original =  new ImageImporter(imageFile).importImage(nuclOptions.getChannel()).convertToRGB();
 				ImageAnnotator ann = new ImageAnnotator(original);
@@ -93,9 +93,11 @@ public class FluorescentNucleusFinder extends AbstractFinder {
 				}
 			}
 		} catch(Exception e){
-			warn("Missing options for nuclei");
-			stack(e);
+			error("Error searching in image "+imageFile.getAbsolutePath(), e);
+//			stack(e);
 		}
+		
+		fireProgressEvent();
 		return list;
 		
 	}
