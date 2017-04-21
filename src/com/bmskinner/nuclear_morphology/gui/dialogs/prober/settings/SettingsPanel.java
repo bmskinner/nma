@@ -206,7 +206,7 @@ public abstract class SettingsPanel
 	
 	@Override
 	public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-
+		finer("Panel updating event heard");
 		if(e.getType()==PanelUpdatingEvent.UPDATING){
 			this.setEnabled(false);
 		}
@@ -216,53 +216,5 @@ public abstract class SettingsPanel
 		}
 
 	}
-	
-//	public class MinMaxIntSpinnerChangeListener implements ChangeListener {
-//		
-//		private JSpinner min, max;
-//		boolean isMin;
-//		
-//		/**
-//		 * Create a listener allowing a min and max settings spinner to interact
-//		 * @param minSpinner
-//		 * @param maxSpinner
-//		 * @param isMin
-//		 */
-//		public MinMaxIntSpinnerChangeListener(JSpinner minSpinner, JSpinner maxSpinner){
-//			min = minSpinner;
-//			max = maxSpinner;
-//		}
-//		
-//
-//
-//		@Override
-//		public void stateChanged(ChangeEvent e) {
-//			// TODO Auto-generated method stub
-//			try {
-//				
-//				if(isMin){
-//					
-//					
-//					
-//				} else {
-//				
-//				JSpinner j = (JSpinner) e.getSource();
-//				j.commitEdit();
-//				Integer value = (Integer) j.getValue();
-//				
-//				if(value.intValue() <= (int) minSatSpinner.getValue()){ 
-//					j.setValue(value.intValue() + 1); // Cannot be above max 
-//
-//				} 
-//								
-//				options.setHueThreshold( (int) minSatSpinner.getValue(), (int) j.getValue());
-//				fireOptionsChangeEvent();
-//			} catch(ParseException e1){
-//				warn("Parsing exception");
-//				stack("Parsing error in JSpinner", e1);
-//			}
-//		}
-//		
-//	}
 	
 }

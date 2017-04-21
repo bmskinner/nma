@@ -44,6 +44,7 @@ public interface Loggable {
 //		l.setUseParentHandlers(true);
 //		l.log(level, message); // will be passed upwards to root logger
 		Logger.getLogger(PROGRAM_LOGGER).log(level, message );
+		System.out.println(message);
 	}
     
 	
@@ -92,6 +93,7 @@ public interface Loggable {
      */
 	default void fine(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
+		System.out.println(message);
 	}
 	
 	/**
@@ -102,6 +104,7 @@ public interface Loggable {
 	 */
 	default void fine(String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
+		System.out.println(message);
 	}
 	
 	/**
@@ -110,6 +113,7 @@ public interface Loggable {
      */
 	default void finer(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINER, message);
+		System.out.println(message);
 	}
 	
 	/**
@@ -118,6 +122,7 @@ public interface Loggable {
      */
 	default void finest(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
+		System.out.println(message);
 	}
 	
 	/**

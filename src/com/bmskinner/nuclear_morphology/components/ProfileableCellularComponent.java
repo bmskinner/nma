@@ -155,17 +155,17 @@ public abstract class ProfileableCellularComponent
 			throw new ComponentCreationException("Must have a value between 0-1");
 		}
 		
-		fine("Initialising profilable object");
+//		fine("Initialising profilable object");
 		this.angleWindowProportion = proportion;
-		fine("Proportion is "+proportion);
+//		fine("Proportion is "+proportion);
 		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
-		fine("Perimeter is "+perimeter);
+//		fine("Perimeter is "+perimeter);
 		double angleWindow = perimeter * proportion;
 		angleWindow = angleWindow < 1 ? 1 : angleWindow;
 		
 		// calculate profiles
 		this.angleProfileWindowSize = (int) Math.ceil(angleWindow);
-		fine("Calculating profiles with window size "+angleProfileWindowSize);
+//		fine("Calculating profiles with window size "+angleProfileWindowSize);
 		try {
 			calculateProfiles();
 		} catch (ProfileException e) {
@@ -580,10 +580,10 @@ public abstract class ProfileableCellularComponent
 		ProfileCreator creator = new ProfileCreator(this);
 
 		for(ProfileType type : ProfileType.values()){
-			fine("Creating profile "+type);
+//			fine("Creating profile "+type);
 			ISegmentedProfile profile = creator.createProfile(type);
 			profileMap.put(type, profile);
-			fine("Created profile "+type);
+//			fine("Created profile "+type);
 		}
 	}
 	

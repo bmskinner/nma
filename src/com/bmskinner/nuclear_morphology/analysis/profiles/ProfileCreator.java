@@ -129,11 +129,11 @@ public class ProfileCreator implements Loggable {
 		if(pointOffset==0){
 			throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
 		}
-		finest("Point offset: "+pointOffset );
+//		finest("Point offset: "+pointOffset );
 		Iterator<IBorderPoint> it = borderList.iterator();
-		finer("Iterating border");
+//		finer("Iterating border");
 		while(it.hasNext()){
-			finest("Getting points");
+//			finest("Getting points");
 			
 			IBorderPoint point = it.next();
 
@@ -141,11 +141,11 @@ public class ProfileCreator implements Loggable {
 
 			IBorderPoint pointAfter  = point.nextPoint(pointOffset);
 
-			finest("Got points");
+//			finest("Got points");
 			// Get the smallest angle between the points
 			float angle = (float) point.findAngle(pointBefore, pointAfter);
 			
-			finest("Got angle");
+//			finest("Got angle");
 			// Now discover if this measured angle is inside or outside the object
 			
 			// find the halfway point between the first and last points.
@@ -156,7 +156,7 @@ public class ProfileCreator implements Loggable {
 			float midY = (float) ((pointBefore.getY()+pointAfter.getY())/2);
 			
 			// Check if the polygon contains the point
-			finest("Checking position in shape");
+//			finest("Checking position in shape");
 			if(s.contains( midX,  midY)){
 			
 				angles[index] = angle;
@@ -165,16 +165,16 @@ public class ProfileCreator implements Loggable {
 			}
 			index++;
 		}
-		finer("Making new profile");
+//		finer("Making new profile");
 		// Make a new profile. This will have two segments by default
 		ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 		
 		// Reapply any segments that were present in the original profile
 		if( ! segments.isEmpty()){
-			finer("Applying segments");
+//			finer("Applying segments");
 			reapplySegments(segments, newProfile);
 		}
-		finer("Returning profile");
+//		finer("Returning profile");
 		return newProfile;
 	}
 	

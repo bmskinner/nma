@@ -128,6 +128,7 @@ public class GenericImageProberPanel  extends JPanel
 		
 		try {
 			finer("Firing panel updating event");
+			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
 			
 			progressBar.setVisible(true);
 			test.removeAllDetectionEventListeners();
