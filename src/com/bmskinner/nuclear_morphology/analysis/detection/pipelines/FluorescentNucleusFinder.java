@@ -70,7 +70,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 			
 			// Display passing and failing size nuclei
 			if( hasDetectionListeners()){
-
+				
 				ImageProcessor original =  new ImageImporter(imageFile).importImage(nuclOptions.getChannel()).convertToRGB();
 				ImageAnnotator ann = new ImageAnnotator(original);
 
@@ -123,26 +123,37 @@ public class FluorescentNucleusFinder extends CellFinder {
 //		fireDetectionEvent(original.duplicate(), "Input image");
 
 		ImageFilterer filt =  new ImageFilterer(ip.duplicate());
+		if(cannyOptions.isUseKuwahara()){
+			filt.runKuwaharaFiltering( cannyOptions.getKuwaharaKernel());
+			ip = filt.toProcessor().duplicate();
+			ip.invert();
+			fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
+		}
 		
-		filt.runKuwaharaFiltering( cannyOptions.getKuwaharaKernel());
-		ip = filt.toProcessor().duplicate();
-		ip.invert();
-		fireDetectionEvent(ip.duplicate(), "Kuwahara filter");
 		
-		filt.squashChromocentres(cannyOptions.getFlattenThreshold());
-		ip = filt.toProcessor().duplicate();
-		ip.invert();
-		fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+		if(cannyOptions.isUseFlattenImage()){
+			filt.squashChromocentres(cannyOptions.getFlattenThreshold());
+			ip = filt.toProcessor().duplicate();
+			ip.invert();
+			fireDetectionEvent(ip.duplicate(), "Chromocentre flattening");
+		}
 		
-		filt.runEdgeDetector( cannyOptions );
-		ip = filt.toProcessor().duplicate();
-		ip.invert();
-		fireDetectionEvent(ip.duplicate(), "Edge detection");
-		
-		filt.morphologyClose(cannyOptions.getClosingObjectRadius());
-		ip = filt.toProcessor().duplicate();
-		ip.invert();
-		fireDetectionEvent(ip.duplicate(), "Gap closing");
+		if(cannyOptions.isUseCanny()){
+			filt.runEdgeDetector( cannyOptions );
+			ip = filt.toProcessor().duplicate();
+			ip.invert();
+			fireDetectionEvent(ip.duplicate(), "Edge detection");
+
+			filt.morphologyClose(cannyOptions.getClosingObjectRadius());
+			ip = filt.toProcessor().duplicate();
+			ip.invert();
+			fireDetectionEvent(ip.duplicate(), "Gap closing");
+		} else {
+			filt.threshold(nuclOptions.getThreshold());
+			ip = filt.toProcessor().duplicate();
+			ip.invert();
+			fireDetectionEvent(ip.duplicate(), "Thresholded");
+		}
 		
 		GenericDetector gd = new GenericDetector();
 		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth()*original.getHeight());

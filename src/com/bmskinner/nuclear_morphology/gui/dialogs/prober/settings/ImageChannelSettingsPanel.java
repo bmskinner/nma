@@ -16,6 +16,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
@@ -40,6 +41,7 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	private JSpinner scaleSpinner;
 	private JCheckBox hAndECheckBox = new JCheckBox("", DEFAULT_H_AND_E);
 
+	
 
 	public ImageChannelSettingsPanel(final IMutableDetectionOptions options){
 		super(options);		
@@ -129,10 +131,12 @@ public class ImageChannelSettingsPanel extends DetectionSettingsPanel {
 	@Override
 	protected void update(){
 		super.update();
+		isUpdating = true;
 		hAndECheckBox.setSelected(options.isRGB());
 		channelBox.setSelectedItem(ImageImporter.channelIntToName(options.getChannel()));
 		channelBox.setEnabled( ! options.isRGB());
 		scaleSpinner.setValue(options.getScale());
+		isUpdating = false;
 	}
 	
 	@Override

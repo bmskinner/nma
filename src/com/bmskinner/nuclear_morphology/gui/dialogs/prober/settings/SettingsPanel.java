@@ -44,6 +44,12 @@ public abstract class SettingsPanel
 	
 	protected String[] channelOptionStrings = {"Greyscale", "Red", "Green", "Blue"};
 	
+	/**
+	 * Used to prevent OptionsChangeEvents firing while panel
+	 * is updating settings to match attached options
+	 */
+	protected boolean isUpdating = false;
+	
 	public SettingsPanel(){
 		super();
 	}
@@ -65,6 +71,7 @@ public abstract class SettingsPanel
 	 */
 	protected void removeSubPanel(SettingsPanel panel){
 		subPanels.remove(panel);
+		panel.removeOptionsChangeListener(this);
 	}
 	
 	/**
@@ -97,7 +104,9 @@ public abstract class SettingsPanel
 	protected void update(){
 
 		for(SettingsPanel p : subPanels){
+			p.removeOptionsChangeListener(this); // Don't trigger reload events
 			p.update();
+			p.addOptionsChangeListener(this);
 		}
 	}
 	
@@ -164,13 +173,15 @@ public abstract class SettingsPanel
 	}
 	
 	protected void fireOptionsChangeEvent(){
-		OptionsChangeEvent e = new OptionsChangeEvent(this);
-		
-		Iterator<OptionsChangeListener> it = optionsListeners.iterator();
-		
-		while(it.hasNext()){
-			OptionsChangeListener l = it.next();
-			l.optionsChangeEventReceived(e);
+		if(!isUpdating){
+			OptionsChangeEvent e = new OptionsChangeEvent(this);
+
+			Iterator<OptionsChangeListener> it = optionsListeners.iterator();
+
+			while(it.hasNext()){
+				OptionsChangeListener l = it.next();
+				l.optionsChangeEventReceived(e);
+			}
 		}
 	}
 	
@@ -183,6 +194,7 @@ public abstract class SettingsPanel
 	}
 	
 	protected void fireProberReloadEvent(){
+
 		ProberReloadEvent e = new ProberReloadEvent(this);
 		
 		Iterator<ProberReloadEventListener> it = proberListeners.iterator();

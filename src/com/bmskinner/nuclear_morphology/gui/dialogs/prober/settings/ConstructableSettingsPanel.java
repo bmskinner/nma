@@ -300,7 +300,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-		
+
 		if(this.hasSubPanel((SettingsPanel) e.getSource())){
 			update();
 			

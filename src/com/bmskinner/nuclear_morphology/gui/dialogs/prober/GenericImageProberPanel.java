@@ -124,33 +124,21 @@ public class GenericImageProberPanel  extends JPanel
 		if(imageFile==null){
 			throw new IllegalArgumentException(NULL_FILE_ERROR);
 		}
-		ProberTableModel model = new ProberTableModel();
-		
+
 		try {
 			finer("Firing panel updating event");
 			setImageLabel(imageFile.getAbsolutePath());
 			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
 			progressBar.setVisible(true);
 			
-			
-			finder.addDetectionEventListener(model);
-			table.setModel(model);
-			
-			for(int i=0; i<table.getColumnCount(); i++){
-				table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
-			}
-			
-			
-			
 			finder.findInImage(imageFile);
 
-			
 		} catch (Exception e) { // end try
 			warn(e.getMessage());
 			stack(e.getMessage(), e);
 			setImageLabel("Error probing "+imageFile.getAbsolutePath());
 		} finally {
-			finder.removeDetectionEventListener(model);
+
 			progressBar.setVisible(false);
 			firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
 		}
@@ -188,6 +176,8 @@ public class GenericImageProberPanel  extends JPanel
 	}
 	
 	public void run(){
+
+		((ProberTableModel)table.getModel()).setRowCount(0);
 		Runnable r = () -> {
 			try {
 				importAndDisplayImage(openImage);
@@ -219,23 +209,19 @@ public class GenericImageProberPanel  extends JPanel
 		
 		finest("Generating file list from "+folder.getAbsolutePath());
 
-		Runnable r = () -> {
-			imageFiles = new ArrayList<File>();
-			imageFiles = importImages(folder);
-			
-			if(imageFiles.size()>0){
-				openImage = imageFiles.get(fileIndex);
-				run();
-			} else {
-				warn("No images found in folder");
-				JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
-						"No images found in folder.", 
-						"Nope.",
-						JOptionPane.ERROR_MESSAGE);
-			}
-		};
-		ThreadManager.getInstance().submit(r);
+		imageFiles = new ArrayList<File>();
+		imageFiles = importImages(folder);
 
+		if(imageFiles.size()>0){
+			openImage = imageFiles.get(fileIndex);
+			run();
+		} else {
+			warn("No images found in folder");
+			JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
+					"No images found in folder.", 
+					"Nope.",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
 		
 	/**

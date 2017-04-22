@@ -74,7 +74,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 	 */
 	protected void update(){
 		super.update();
-
+		isUpdating = true;
 		cannyLowThreshold.setValue( (double) options.getLowThreshold());
 		cannyHighThreshold.setValue( (double) options.getHighThreshold());
 		cannyKernelRadius.setValue( (double) options.getKernelRadius());
@@ -82,7 +82,7 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
 		closingObjectRadiusSpinner.setValue(options.getClosingObjectRadius());
 		
 		cannyAutoThresholdCheckBox.setSelected(options.isCannyAutoThreshold());
-
+		isUpdating = false;
 	}
 	
 	public void set(final ICannyOptions options){

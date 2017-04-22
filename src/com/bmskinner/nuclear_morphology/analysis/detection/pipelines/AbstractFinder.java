@@ -46,9 +46,9 @@ import ij.process.ImageProcessor;
  */
 public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
 
-	final protected IAnalysisOptions options;
-	final protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
-	final protected List<ProgressListener>        progressListeners = new ArrayList<>();
+	volatile protected IAnalysisOptions options;
+	volatile protected List<DetectionEventListener> detectionlisteners = new ArrayList<>();
+	volatile protected List<ProgressListener>        progressListeners = new ArrayList<>();
 	
 	/**
 	 * The minimum size of an object to detect for {@link Profileable} objects
@@ -103,6 +103,11 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
 		detectionlisteners.clear();
 	}
 	
+	/**
+	 * Are there registered listenters for detection events? These
+	 * allow display of images from within the pipeline.
+	 * @return
+	 */
 	protected boolean hasDetectionListeners(){
 		return !detectionlisteners.isEmpty();
 	}

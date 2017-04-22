@@ -43,6 +43,13 @@ public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 	public List<ICell> findInImage() {
 		
 		List<ICell> cells = new ArrayList<ICell>(0);
+		
+//		List<ICytoplasm> cytoplasms = cyto.gaussianBlur(10)
+//				.extendedMinimaAndMaxima(28, 8)
+//				.convertToByteProcessor()
+//				.invert()
+//				.findInImage();
+		
 		List<ICytoplasm> cytoplasms = cyto.colourThreshold()
 				.convertToByteProcessor()
 				.invert()

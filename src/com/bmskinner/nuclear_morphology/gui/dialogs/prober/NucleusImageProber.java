@@ -2,11 +2,13 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
@@ -45,10 +47,9 @@ public class NucleusImageProber extends IntegratedImageProber {
 				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)
 				.build();
 			
-			Finder finder = new FluorescentNucleusFinder(options);
+			Finder<List<ICell>> finder = new FluorescentNucleusFinder(options);
 			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
-//			optionsSettingsPanel = new NucleusDetectionSettingsPanel(options);
-//			imageProberPanel     = new NucleusImageProberPanel(this, nucleusOptions, ImageSet.NUCLEUS_IMAGE_SET);
+
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);

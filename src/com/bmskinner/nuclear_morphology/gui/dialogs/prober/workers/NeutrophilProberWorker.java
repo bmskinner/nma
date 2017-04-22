@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  * @since 1.13.4
  *
  */
+@Deprecated
 public class NeutrophilProberWorker extends ImageProberWorker {
 	
 	private IDetectionOptions nucleusOptions;
@@ -75,6 +76,9 @@ public class NeutrophilProberWorker extends ImageProberWorker {
 		cyto.colourThreshold()
 			.convertToByteProcessor()
 			.invert();
+		
+//		cyto.gaussianBlur(10)
+//		.extendedMinimaAndMaxima(28, 8).convertToByteProcessor().invert();
 		
 		
 		ImageProberTableCell iconCell1 = makeIconCell(cyto.getProcessor(), 

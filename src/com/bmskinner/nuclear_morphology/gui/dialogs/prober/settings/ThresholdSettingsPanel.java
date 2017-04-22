@@ -60,7 +60,9 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel  {
 	@Override
 	protected void update(){
 		super.update();
+		isUpdating = true;
 		thresholdSpinner.setValue(options.getThreshold());
+		isUpdating = false;
 	}
 	
 	@Override
