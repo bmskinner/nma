@@ -75,7 +75,8 @@ public class SignalDetectionMethod extends AbstractAnalysisMethod {
 			
 			int originalMinThreshold = options.getThreshold();
 			
-			SignalDetector finder = new SignalDetector(options, channel);
+			SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
+//			SignalDetector finder = new SignalDetector(options, channel);
 			
 			for(ICell c : dataset.getCollection().getCells()){
 				
@@ -94,7 +95,8 @@ public class SignalDetectionMethod extends AbstractAnalysisMethod {
 					
 					ImageStack stack = new ImageImporter(imageFile).importToStack();
 
-					List<INuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
+					List<INuclearSignal> signals = finder.findInImage(imageFile, n);
+//					List<INuclearSignal> signals = finder.detectSignal(imageFile, stack, n);
 					
 					finer("Creating signal collection");
 					

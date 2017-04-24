@@ -28,12 +28,13 @@ import java.util.Map;
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.nuclear.DefaultNuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalFactory;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
@@ -51,6 +52,7 @@ import ij.process.ImageStatistics;
 public class SignalDetector extends Detector {
 	
 	private INuclearSignalOptions options;
+	final private ComponentFactory<INuclearSignal> factory = new SignalFactory();
 	private  int channel;
 	private int minThreshold;
 	
@@ -171,11 +173,18 @@ public class SignalDetector extends Detector {
 			int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
 
 			try {
-				INuclearSignal s = new DefaultNuclearSignal( r,
-						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()), 
+				
+				INuclearSignal s = factory.buildInstance(r, 
 						sourceFile, 
 						channel, 
-						originalPosition);
+						originalPosition, 
+						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()));
+				
+//				INuclearSignal s = new DefaultNuclearSignal( r,
+//						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()), 
+//						sourceFile, 
+//						channel, 
+//						originalPosition);
 
 				s.setScale(n.getScale()); // copy scaling information from source nucleus
 

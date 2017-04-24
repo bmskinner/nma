@@ -8,6 +8,8 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -61,7 +63,10 @@ public class SignalImageProber extends IntegratedImageProber {
 			
 			// make the panel
 			optionsSettingsPanel = new SignalDetectionSettingsPanel(options);
-			imageProberPanel     = new SignalImageProberPanel(this, options, ImageSet.SIGNAL_IMAGE_SET, dataset);
+			
+			Finder<?> finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
+			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
+//			imageProberPanel     = new SignalImageProberPanel(this, options, ImageSet.SIGNAL_IMAGE_SET, dataset);
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);
@@ -71,7 +76,7 @@ public class SignalImageProber extends IntegratedImageProber {
 			this.setTitle(DIALOG_TITLE_BAR_LBL);
 			
 			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
-			
+			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel);
 			
 		} catch (Exception e){
 			warn("Error launching analysis window");
