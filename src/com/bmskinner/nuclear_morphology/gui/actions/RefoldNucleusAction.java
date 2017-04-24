@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethodDemo;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -48,7 +49,7 @@ public class RefoldNucleusAction extends ProgressableAction {
 		try{
 
 			this.setProgressBarIndeterminate();
-			
+//			IAnalysisMethod m = new ProfileRefoldMethodDemo(dataset);
 			IAnalysisMethod m = new ProfileRefoldMethod(dataset, 
 					CurveRefoldingMode.FAST);
 			
