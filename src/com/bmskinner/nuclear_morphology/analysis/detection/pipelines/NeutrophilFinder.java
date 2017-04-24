@@ -44,6 +44,7 @@ import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.binary.ChamferWeights;
 import inra.ijpb.binary.distmap.DistanceTransform;
 import inra.ijpb.binary.distmap.DistanceTransform5x5Float;
+import inra.ijpb.label.LabelImages;
 import inra.ijpb.math.ImageCalculator;
 import inra.ijpb.math.ImageCalculator.Operation;
 import inra.ijpb.morphology.GeodesicReconstruction;
@@ -325,35 +326,62 @@ public class NeutrophilFinder extends CellFinder {
 			ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
 //			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
 			
-			Strel strel = Strel.Shape.DISK.fromRadius(dilationRadius);
-			ip = Morphology.internalGradient(ip, strel);
-//			fireDetectionEvent(ip.duplicate(), "Internal gradient");
+			/*
+			 * Use a top hat filter to approximate cytoplasm
+			 */
+			{
+				
+				Strel strel = Strel.Shape.DISK.fromRadius(40);
+				ip = Morphology.blackTopHat(ip, strel);
+				fireDetectionEvent(ip.duplicate(), "Top hat");
+				
+				ip = LabelImages.labelBoundaries(ip);
+				fireDetectionEvent(ip.duplicate(), "Boundaries");
+				ip.invert();
+				
+				strel = Strel.Shape.DISK.fromRadius(dilationRadius);
+				ip = Morphology.erosion(ip, strel);
+				strel = Strel.Shape.DISK.fromRadius(dilationRadius*2);
+				ip = Morphology.dilation(ip, strel);
+			}
 			
-			ip = Morphology.dilation(ip, strel);
-//			fireDetectionEvent(ip.duplicate(), "Dilated");
-			
-			ip = MinimaAndMaxima.extendedMinima(ip, dynamic);
-//			ip.threshold(2);
-			
-//			fireDetectionEvent(ip.duplicate(), "Thresholded to minima");
-			
-			ip = Morphology.erosion(ip, strel);
-//			fireDetectionEvent(ip.duplicate(), "Eroded");
-			
-//			ip.invert();
-//			fireDetectionEvent(ip.duplicate(), "Inverted");
+			/*
+			 * Use the gradient to find edges
+			 */
+//			{
+//				Strel strel = Strel.Shape.DISK.fromRadius(dilationRadius);
+//				ip = Morphology.internalGradient(ip, strel);
+//	//			fireDetectionEvent(ip.duplicate(), "Internal gradient");
+//				
+//				ip = Morphology.dilation(ip, strel);
+//	//			fireDetectionEvent(ip.duplicate(), "Dilated");
+//				
+//				ip = MinimaAndMaxima.extendedMinima(ip, dynamic);
+//	//			ip.threshold(2);
+//				
+//	//			fireDetectionEvent(ip.duplicate(), "Thresholded to minima");
+//				
+//				ip = Morphology.erosion(ip, strel);
+//	//			fireDetectionEvent(ip.duplicate(), "Eroded");
+//				
+//	//			ip.invert();
+//	//			fireDetectionEvent(ip.duplicate(), "Inverted");
+//			}
 			
 			// Calculate a distance map on the binarised input
 			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
 			ImageProcessor dist =	BinaryImages.distanceMap( ip, floatWeights, NORMALISE_DISTANCE_MAP );
 			dist.invert();
 //			fireDetectionEvent(dist.duplicate(), "Distance map");
-
+						
 			// Watershed the inverted map
 			ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
 					dist, ip, dynamic, CONNECTIIVITY, IS_VERBOSE );
 //			fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
-
+			
+			Strel strel = Strel.Shape.DISK.fromRadius(erosionDiameter);
+			watersheded = Morphology.erosion(watersheded, strel);
+			
 			// Binarise for object detection
 			ImageProcessor lines = BinaryImages.binarize( watersheded );
 //			fireDetectionEvent(lines.duplicate(), "Binarized");

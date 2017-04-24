@@ -38,6 +38,7 @@ import inra.ijpb.morphology.MinimaAndMaxima;
  * @since 1.13.4
  *
  */
+@Deprecated
 public abstract class DetectionPipeline<E> extends Detector implements Loggable {
 	protected File file;
 	protected ImageProcessor ip;

@@ -94,7 +94,7 @@ public class GenericImageProberPanel  extends JPanel
 	 * PROTECTED VALUES
 	 */
 	
-	protected  Finder finder;
+	protected  Finder<?> finder;
 	
 	protected static final int SMALL_ICON_MAX_WIDTH   = 500;
 	protected static final int SMALL_ICON_MAX_HEIGHT  = 500;
@@ -124,7 +124,6 @@ public class GenericImageProberPanel  extends JPanel
 		if(imageFile==null){
 			throw new IllegalArgumentException(NULL_FILE_ERROR);
 		}
-
 		try {
 			finer("Firing panel updating event");
 			setImageLabel(imageFile.getAbsolutePath());
@@ -137,6 +136,7 @@ public class GenericImageProberPanel  extends JPanel
 			warn(e.getMessage());
 			stack(e.getMessage(), e);
 			setImageLabel("Error probing "+imageFile.getAbsolutePath());
+
 		} finally {
 
 			progressBar.setVisible(false);

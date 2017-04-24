@@ -21,6 +21,7 @@ import ij.gui.Roi;
  * @aince 1.13.4
  *
  */
+@Deprecated
 public class NeutrophilDetectionPipeline extends DetectionPipeline<ICell> {
 
 	private final CytoplasmDetectionPipeline cyto;
