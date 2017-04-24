@@ -129,6 +129,11 @@ public interface OptionsFactory {
 
 		IMutableDetectionOptions cytoOptions    = OptionsFactory.makeNucleusDetectionOptions(folder);
 		
+		cytoOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
+		cytoOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
+		cytoOptions.setInt(IDetectionOptions.DYNAMIC, IDetectionOptions.DEFAULT_DYNAMIC);
+		
+		
 		cytoOptions.setRGB(true);
 		
 		cytoOptions.setMinCirc(0);
@@ -156,6 +161,10 @@ public interface OptionsFactory {
 		
 		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
 		nucleusOptions.setInt(IMutableDetectionOptions.TOP_HAT_RADIUS, 20);
+		nucleusOptions.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
+		nucleusOptions.setInt(IDetectionOptions.EROSION, IDetectionOptions.DEFAULT_EROSION);
+		nucleusOptions.setInt(IDetectionOptions.DYNAMIC, IDetectionOptions.DEFAULT_DYNAMIC);
+		
 		nucleusOptions.setRGB(true);
 		nucleusOptions.setThreshold(20);
 		

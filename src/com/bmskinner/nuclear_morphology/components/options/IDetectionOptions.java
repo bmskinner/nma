@@ -51,6 +51,19 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 	static final String IS_USE_CANNY   = "Use Canny";
 	static final String DYNAMIC   = "Dynamic";
 	static final String EROSION   = "Dynamic";
+	static final String IS_USE_WATERSHED = "Use watershed";
+	
+	
+	static final double DEFAULT_SCALE = GlobalOptions.getInstance().getImageScale();
+	static final double DEFAULT_MIN_CIRC = 0;
+	static final double DEFAULT_MAX_CIRC = 1;
+	static final boolean DEFAULT_IS_RGB = false;
+	static final boolean DEFAULT_IS_NORMALISE = false;
+	
+	static final boolean DEFAULT_IS_USE_WATERSHED = true;
+	static final int DEFAULT_DYNAMIC = 1;
+	static final int DEFAULT_EROSION = 1;
+	
 	
 	/**
 	 * All sub option classes implement this interface.
@@ -103,11 +116,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 		
 	}
 	
-	static final double DEFAULT_SCALE = GlobalOptions.getInstance().getImageScale();
-	static final double DEFAULT_MIN_CIRC = 0;
-	static final double DEFAULT_MAX_CIRC = 1;
-	static final boolean DEFAULT_IS_RGB = false;
-	static final boolean DEFAULT_IS_NORMALISE = false;
+	
 	
 	/**
 	 * Unlock the options to allow modification

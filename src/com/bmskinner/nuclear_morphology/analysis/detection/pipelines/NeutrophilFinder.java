@@ -158,12 +158,19 @@ public class NeutrophilFinder extends CellFinder {
 		
 			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 
-
+			ImageProcessor ip;
 			// Do the filtering. Returns binary images.
-			ImageProcessor ip1 = detectCytoplasmByWatershed(imageFile);
-			fireDetectionEvent(ip1.duplicate(), "Watershed");
-//			ImageProcessor ip2 = detectCytoplasmByThreshold(imageFile);
-//			fireDetectionEvent(ip2.duplicate(), "Threshold");
+			if(cytoOptions.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
+				ip = detectCytoplasmByWatershed(imageFile);
+				fireDetectionEvent(ip.duplicate(), "Watershed");
+			} else {
+				ip = detectCytoplasmByThreshold(imageFile);
+				fireDetectionEvent(ip.duplicate(), "Threshold");
+			}
+			
+			
+			
+			
 //			ImageProcessor ip3 = detectCytoplasmBySegmentation(imageFile);
 //			fireDetectionEvent(ip3.duplicate(), "Segmentation");
 			
@@ -179,13 +186,13 @@ public class NeutrophilFinder extends CellFinder {
 			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
 			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
 			gd.setThreshold(cytoOptions.getThreshold());
-			List<Roi> rois = gd.getRois(ip1);
+			List<Roi> rois = gd.getRois(ip);
 
 			List<ICytoplasm> list = new ArrayList<>();
 			for(int i=0; i<rois.size(); i++){
 
 				Roi roi = rois.get(i);
-				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip1, i, gd);
+				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip, i, gd);
 				list.add(cyto);
 
 			}
@@ -310,12 +317,13 @@ public class NeutrophilFinder extends CellFinder {
 //		fireDetectionEvent(ip.duplicate(), "Input");
 
 		try {
+			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 			
 			int dilationRadius     = 3;
-			int erosionDiameter    = 1;
-			int dynamic            = 1; // the minimal difference between a minima and its boundary
+			int erosionDiameter    = cytoOptions.getInt(IDetectionOptions.EROSION);
+			int dynamic            = cytoOptions.getInt(IDetectionOptions.DYNAMIC); // the minimal difference between a minima and its boundary
 
-			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+			
 
 			ip= GeodesicReconstruction.fillHoles(ip);
 //			fireDetectionEvent(ip.duplicate(), "Filled holes");
@@ -529,8 +537,10 @@ public class NeutrophilFinder extends CellFinder {
 			fireDetectionEvent(an.toProcessor(), "Detected nucleus");
 		}
 		
+		if(options.getNucleusType().equals(NucleusType.NEUTROPHIL)){
+			detectLobesViaWatershed(ip, result);
+		}
 		
-		detectLobesViaWatershed(ip, result);
 
 		} catch (MissingOptionException e) {
 			stack("Missing options in nucleus detection", e);

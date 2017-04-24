@@ -11,11 +11,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
+@SuppressWarnings("serial")
 public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel implements ActionListener {
 	
 	private static final String THRESHOLD_LBL = "Colour Threshold";
@@ -50,27 +49,24 @@ public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel
 	
 	private JPanel makeCardPanel(){
 		JPanel cardPanel = new JPanel(new CardLayout());
-		try {
-			ICannyOptions canny = options.getCannyOptions();
-			
-			SettingsPanel thresholdPanel = new ColourThresholdingSettingsPanel(options);
-			SettingsPanel watershedPanel = new WatershedSettingsPanel(options);
-			
-			this.addSubPanel(thresholdPanel);
-			this.addSubPanel(watershedPanel);
-			
-			
-			cardPanel.add(thresholdPanel, THRESHOLD_LBL);
-			cardPanel.add(watershedPanel, WATERSHED_LBL);
-			CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		    cl.show(cardPanel, WATERSHED_LBL);
-		} catch (MissingOptionException e) {
-			warn("Missing options");
-			stack(e);
+
+
+		SettingsPanel thresholdPanel = new ColourThresholdingSettingsPanel(options);
+		SettingsPanel watershedPanel = new WatershedSettingsPanel(options);
+
+		this.addSubPanel(thresholdPanel);
+		this.addSubPanel(watershedPanel);
+
+
+		cardPanel.add(thresholdPanel, THRESHOLD_LBL);
+		cardPanel.add(watershedPanel, WATERSHED_LBL);
+		CardLayout cl = (CardLayout)(cardPanel.getLayout());
+		if(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
+			cl.show(cardPanel, WATERSHED_LBL);
+		} else {
+			cl.show(cardPanel, THRESHOLD_LBL);
 		}
-		
-		
-		
+
 	    return cardPanel;
 	}
 	
@@ -83,8 +79,8 @@ public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel
 	private JPanel makeSwitchPanel(){
 		JPanel panel = new JPanel(new FlowLayout());
 		
-		thresholdBtn.setSelected(false);
-		waterBtn.setSelected(true);
+		thresholdBtn.setSelected(!options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
+		waterBtn.setSelected(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
 		thresholdBtn.setActionCommand(THRESHOLD_LBL);
 		waterBtn.setActionCommand(WATERSHED_LBL);
 
@@ -105,7 +101,7 @@ public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals(THRESHOLD_LBL)){
-
+			options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
 			
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, THRESHOLD_LBL);
@@ -113,7 +109,7 @@ public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel
 		}
 		
 		if(e.getActionCommand().equals(WATERSHED_LBL)){
-
+			options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
 			CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		    cl.show(cardPanel, WATERSHED_LBL);
 		}
@@ -126,14 +122,15 @@ public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel
 	public void update() {
 		super.update();
 
-		
+		isUpdating = true;
 		CardLayout cl = (CardLayout)(cardPanel.getLayout());
 		
-		if(showCanny){
+		if(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
 			cl.show(cardPanel, WATERSHED_LBL);
 		} else {
 			cl.show(cardPanel, THRESHOLD_LBL);
 		}
+		isUpdating = false;
 		
 	}
 	

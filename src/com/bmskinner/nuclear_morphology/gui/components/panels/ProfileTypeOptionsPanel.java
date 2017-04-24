@@ -33,9 +33,16 @@ public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 		
 		// FrankenProfiles cause problems for individual nuclei, so disable for now
 		DefaultComboBoxModel<ProfileType> model = new DefaultComboBoxModel<ProfileType>();
-		model.addElement(ProfileType.ANGLE);
-		model.addElement(ProfileType.DIAMETER);
-		model.addElement(ProfileType.RADIUS);
+		
+		for(ProfileType type : ProfileType.values()){
+			if(type.equals(ProfileType.FRANKEN)){
+				continue;
+			}
+			model.addElement(type);
+		}
+//		
+//		model.addElement(ProfileType.DIAMETER);
+//		model.addElement(ProfileType.RADIUS);
 		
 		profileTypeBox = new JComboBox<ProfileType>(model);
 		

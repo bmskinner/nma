@@ -2,8 +2,12 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -36,35 +40,57 @@ public class WatershedSettingsPanel  extends DetectionSettingsPanel  {
 	}
 	
 	private JPanel createPanel(){
-		JPanel panel = new JPanel(new FlowLayout());
+		JPanel panel = new JPanel(new GridBagLayout());
+
+		List<JLabel> labelList	   = new ArrayList<JLabel>();
+		List<JComponent> fieldList = new ArrayList<JComponent>();
 		
 		dynamicSpinner = new JSpinner(new SpinnerNumberModel(
-				Integer.valueOf( options.getInt("erosion) ),	
+				Integer.valueOf( options.getInt(IDetectionOptions.DYNAMIC) ),	
 				DYNAMIC_MIN_RANGE, 
 				DYNAMIC_MAX_RANGE, 
 				DYNAMIC_STEP));
 		
 		erosionSpinner = new JSpinner(new SpinnerNumberModel(
-				Integer.valueOf( options.getThreshold() ),	
+				Integer.valueOf( options.getInt(IDetectionOptions.EROSION) ),	
 				EROSION_MIN_RANGE, 
 				EROSION_MAX_RANGE, 
 				EROSION_STEP));
 		
-		JLabel lbl = new JLabel(DYNAMIC_LBL);
+		JLabel dynabmicLbl = new JLabel(DYNAMIC_LBL);
 		
-		panel.add(lbl);
-		panel.add(thresholdSpinner);
+		labelList.add(dynabmicLbl);
+		fieldList.add(dynamicSpinner);
 		
-		thresholdSpinner.addChangeListener( e ->{
+		dynamicSpinner.addChangeListener( e ->{
 			try {
-				thresholdSpinner.commitEdit();	
-				options.setThreshold(  ((Integer) thresholdSpinner.getValue()).intValue() );
+				dynamicSpinner.commitEdit();	
+				options.setInt( IDetectionOptions.DYNAMIC,  ((Integer) dynamicSpinner.getValue()).intValue()  );
 				fireOptionsChangeEvent();
 			} catch (ParseException e1) {
 				warn("Parsing error in JSpinner");
 				stack("Parsing error in JSpinner", e1);
 			}
 		});
+		
+		
+		JLabel erosionLbl = new JLabel(EROSION_LBL);
+		
+		labelList.add(erosionLbl);
+		fieldList.add(erosionSpinner);
+		
+		erosionSpinner.addChangeListener( e ->{
+			try {
+				erosionSpinner.commitEdit();	
+				options.setInt( IDetectionOptions.EROSION,  ((Integer) erosionSpinner.getValue()).intValue()  );
+				fireOptionsChangeEvent();
+			} catch (ParseException e1) {
+				warn("Parsing error in JSpinner");
+				stack("Parsing error in JSpinner", e1);
+			}
+		});
+		
+		addLabelTextRows(labelList, fieldList, panel );
 
 		return panel;
 	}
@@ -73,14 +99,16 @@ public class WatershedSettingsPanel  extends DetectionSettingsPanel  {
 	protected void update(){
 		super.update();
 		isUpdating = true;
-		thresholdSpinner.setValue(options.getThreshold());
+		dynamicSpinner.setValue(options.getInt(IDetectionOptions.DYNAMIC));
+		erosionSpinner.setValue(options.getInt(IDetectionOptions.EROSION));
 		isUpdating = false;
 	}
 	
 	@Override
 	public void setEnabled(boolean b){
 		super.setEnabled(b);
-		thresholdSpinner.setEnabled(b);
+		dynamicSpinner.setEnabled(b);
+		erosionSpinner.setEnabled(b);
 
 	}
 

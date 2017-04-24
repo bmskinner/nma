@@ -26,9 +26,12 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 @SuppressWarnings("serial")
 public class NeutrophilImageProber  extends IntegratedImageProber {
@@ -42,12 +45,19 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 			// Create the options
 			options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
 
-			Finder finder = new NeutrophilFinder(options);
-			// make the panel
-			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
-			imageProberPanel     = new GenericImageProberPanel(folder, finder, this);
+			Finder<?> finder = new NeutrophilFinder(options);
 			
-//			imageProberPanel     = new NeutrophilImageProberPanel(this, cytoOptions, nucleusOptions, ImageSet.NEUTROPHIL_IMAGE_SET);
+			optionsSettingsPanel = new ConstructableSettingsPanel(options)
+					.addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm detection")
+					.addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
+					.addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
+					.addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
+					.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
+					.build();
+			// make the panel
+//			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
+			imageProberPanel     = new GenericImageProberPanel(folder, finder, this);
+
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);

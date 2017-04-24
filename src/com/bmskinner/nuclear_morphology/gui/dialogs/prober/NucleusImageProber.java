@@ -41,7 +41,7 @@ public class NucleusImageProber extends IntegratedImageProber {
 				.addCopyFromOpenPanel(IAnalysisOptions.NUCLEUS)
 				.addImageChannelPanel(IAnalysisOptions.NUCLEUS)
 				.addImageProcessingPanel(IAnalysisOptions.NUCLEUS)
-				.addSwitchPanel(IAnalysisOptions.NUCLEUS)
+				.addEdgeThresholdSwitchPanel(IAnalysisOptions.NUCLEUS)
 				.addSizePanel(IAnalysisOptions.NUCLEUS)
 				.addMiscNucleusSettingsPanel(IAnalysisOptions.NUCLEUS)
 				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS)

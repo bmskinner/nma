@@ -25,8 +25,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class MainHeaderPanel extends JPanel implements Loggable {
 	
 	private static final String NEW_ANALYSIS_LBL   = "New analysis";
-	private static final String NEW_STANDARD_LBL   = "Standard analysis";
-	private static final String NEW_NEUTROPHIL_LBL = "Neutrophil analysis";
+	private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";
+	private static final String NEW_NEUTROPHIL_LBL = "Neutrophils";
 
 	private static final String LOAD_DATASET_LBL   = "Load dataset";
 	private static final String SAVE_ALL_LBL       = "Save all";

@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class ConstructableSettingsPanel extends SettingsPanel {
 	
+	public static final String TOPHAT_LBL         = "Top hat filtering";
 	public static final String OBJECT_FINDING_LBL = "Object finding";
 	public static final String SIZE_SETTINGS_LBL  = "Filtering";
 	public static final String PROFILING_LBL      = "Profiling";
@@ -95,8 +96,8 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 	 * @return
 	 * @throws MissingOptionException 
 	 */
-	public ConstructableSettingsPanel addSwitchPanel(String optionsKey) throws MissingOptionException{
-		return addSwitchPanel(optionsKey, OBJECT_FINDING_LBL);
+	public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey) throws MissingOptionException{
+		return addEdgeThresholdSwitchPanel(optionsKey, OBJECT_FINDING_LBL);
 	}
 	
 	/**
@@ -106,7 +107,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 	 * @return
 	 * @throws MissingOptionException 
 	 */
-	public ConstructableSettingsPanel addSwitchPanel(String optionsKey, String label) throws MissingOptionException{
+	public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey, String label) throws MissingOptionException{
 		IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
 		SettingsPanel panel  = new EdgeThresholdSwitchPanel(subOptions);
 		panel.setBorder( BorderFactory.createTitledBorder(label));
@@ -114,6 +115,61 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 		mainPanel.add(panel);
 		return this;
 	}
+	
+	/**
+	 * Add a panel switching between thresholding and edge detection
+	 * @param optionsKey the options subtype to select
+	 * @param label the label to give the panel
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey) throws MissingOptionException{
+		return addEdgeThresholdSwitchPanel(optionsKey, OBJECT_FINDING_LBL);
+	}
+	
+	
+	/**
+	 * Add a panel switching between thresholding and edge detection
+	 * @param optionsKey the options subtype to select
+	 * @param label the label to give the panel
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey, String label) throws MissingOptionException{
+		IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
+		SettingsPanel panel  = new ColourThresholdWatershedSwitchPanel(subOptions);
+		panel.setBorder( BorderFactory.createTitledBorder(label));
+		this.addSubPanel(panel);
+		mainPanel.add(panel);
+		return this;
+	}
+	
+	/**
+	 * Add a panel controlling top hat filtering with the default label
+	 * @param optionsKey the options subtype to select
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addTopHatPanel(String optionsKey) throws MissingOptionException{
+		return addTopHatPanel(optionsKey, TOPHAT_LBL);
+	}
+	
+	/**
+	 * Add a panel controlling top hat filtering
+	 * @param optionsKey the options subtype to select
+	 * @param label the label to give the panel
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addTopHatPanel(String optionsKey, String label) throws MissingOptionException{
+		IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
+		SettingsPanel panel  = new TophatPanel(subOptions);
+		panel.setBorder( BorderFactory.createTitledBorder(label));
+		this.addSubPanel(panel);
+		mainPanel.add(panel);
+		return this;
+	}
+	
 	
 	/**
 	 * Add a panel for colour thresholding images
@@ -300,16 +356,17 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
-
+		super.optionsChangeEventReceived(e);
 		if(this.hasSubPanel((SettingsPanel) e.getSource())){
-			update();
+//			update();
 			
-			if(e.getSource() instanceof EdgeThresholdSwitchPanel 
-					|| e.getSource() instanceof ImagePreprocessingSettingsPanel 
-					|| e.getSource() instanceof ComponentSizeSettingsPanel 
-					|| e.getSource() instanceof ImageChannelSettingsPanel){
+//			if(e.getSource() instanceof EdgeThresholdSwitchPanel 
+//					|| e.getSource() instanceof ImagePreprocessingSettingsPanel 
+//					|| e.getSource() instanceof ImagePreprocessingSettingsPanel 
+//					|| e.getSource() instanceof ComponentSizeSettingsPanel 
+//					|| e.getSource() instanceof ImageChannelSettingsPanel){
 				fireProberReloadEvent(); // don't fire an update for values that have no effect on a prober
-			}
+//			}
 		}
 
 		

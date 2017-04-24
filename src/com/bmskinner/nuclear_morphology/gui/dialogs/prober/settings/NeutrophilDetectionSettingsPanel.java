@@ -50,16 +50,21 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 
 		try {
 			SettingsPanel cytoPanel = new ConstructableSettingsPanel(options)
-				.addImageChannelPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.CHANNEL_LBL)
-				.addColorThresholdPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
-				.addSizePanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
+//				.addImageChannelPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.CHANNEL_LBL)
+				.addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
+//				.addColorThresholdPanel(IAnalysisOptions.CYTOPLASM, ConstructableSettingsPanel.THRESHOLDING_LBL)
+				.addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
+				.addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
+				.addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
+				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
 				.build();
 
 
 
 			SettingsPanel nuclPanel = new ConstructableSettingsPanel(options)
-				.addImageChannelPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.CHANNEL_LBL)
-				.addColorThresholdPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.THRESHOLDING_LBL)
+					.addTopHatPanel(IAnalysisOptions.NUCLEUS)
+//				.addImageChannelPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.CHANNEL_LBL)
+//				.addColorThresholdPanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.THRESHOLDING_LBL)
 				.addSizePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.SIZE_SETTINGS_LBL)
 				.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
 				.build();
@@ -106,14 +111,21 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 	
 	@Override
 	public void optionsChangeEventReceived(OptionsChangeEvent e) {
+
+		if(this.hasSubPanel((SettingsPanel) e.getSource())){
+			update();
+			
+			if(e.getSource() instanceof EdgeThresholdSwitchPanel 
+					|| e.getSource() instanceof ColourThresholdWatershedSwitchPanel
+					|| e.getSource() instanceof ImagePreprocessingSettingsPanel 
+					|| e.getSource() instanceof ComponentSizeSettingsPanel 
+					|| e.getSource() instanceof ImageChannelSettingsPanel){
+				fireProberReloadEvent(); // don't fire an update for values that have no effect on a prober
+			}
+		}
+
 		
-		fireProberReloadEvent(); 
-//		if(this.hasSubPanel((SettingsPanel) e.getSource())){
-//			update();
-//
-//			
-//			
-//		}
+		
 
 	}
 
