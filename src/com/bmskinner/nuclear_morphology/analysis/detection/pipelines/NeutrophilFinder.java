@@ -529,7 +529,7 @@ public class NeutrophilFinder extends CellFinder {
 		if( hasDetectionListeners() ){
 //			fireDetectionEvent(ip.duplicate(), "Nucleus");
 			
-			ImageAnnotator an = new ImageAnnotator(ann);
+			ImageAnnotator an = new ImageAnnotator(ann.duplicate());
 			for(Nucleus c : list){
 				Color colour = nuclOptions.isValid(c) ? Color.ORANGE : Color.RED;
 				an.annotateBorder(c, colour);
@@ -539,6 +539,18 @@ public class NeutrophilFinder extends CellFinder {
 		
 		if(options.getNucleusType().equals(NucleusType.NEUTROPHIL)){
 			detectLobesViaWatershed(ip, result);
+			
+			ImageAnnotator an = new ImageAnnotator(ann.duplicate());
+			for(Nucleus c : list){
+				if(c instanceof LobedNucleus){
+					for(Lobe l : ((LobedNucleus)c).getLobes()){
+						an.annotateBorder(l, Color.YELLOW);
+					}
+					
+				}
+			}
+			fireDetectionEvent(an.toProcessor(), "Detected lobes");
+			
 		}
 		
 

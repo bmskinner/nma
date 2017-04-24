@@ -50,7 +50,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 	static final String IS_USE_HOUGH   = "Use Hough";
 	static final String IS_USE_CANNY   = "Use Canny";
 	static final String DYNAMIC   = "Dynamic";
-	static final String EROSION   = "Dynamic";
+	static final String EROSION   = "Erosion";
 	static final String IS_USE_WATERSHED = "Use watershed";
 	
 	

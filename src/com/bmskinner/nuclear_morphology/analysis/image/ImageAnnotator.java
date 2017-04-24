@@ -79,7 +79,7 @@ public class ImageAnnotator  extends AbstractImageFilterer {
 			annotateBorder(n, Color.ORANGE);
 			if(n instanceof LobedNucleus){
 				for(Lobe l : ((LobedNucleus)n).getLobes()){
-					annotateBorder(l, Color.RED);
+					annotateBorder(l, Color.GREEN);
 					annotatePoint(l.getCentreOfMass(), Color.GREEN);
 				}
 			}

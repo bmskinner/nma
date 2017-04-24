@@ -267,7 +267,7 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel  {
 		List<JLabel> labelList	   = new ArrayList<JLabel>();
 		List<JComponent> fieldList = new ArrayList<JComponent>();
 
-		labelList.add(new JLabel(USE_THRESHOLD_LBL));
+//		labelList.add(new JLabel(USE_THRESHOLD_LBL));
 		labelList.add(new JLabel(MIN_HUE_LBL));
 		labelList.add(new JLabel(MAX_HUE_LBL));
 		labelList.add(new JLabel(MIN_SAT_LBL));
@@ -278,7 +278,7 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel  {
 		
 		JLabel[] labels = labelList.toArray(new JLabel[0]);
 
-		fieldList.add(useThresholdCheckBox);
+//		fieldList.add(useThresholdCheckBox);
 		fieldList.add(minHueSpinner);
 		fieldList.add(maxHueSpinner);
 		fieldList.add(minSatSpinner);
