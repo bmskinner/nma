@@ -49,6 +49,8 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
 	static final String IS_NORMALISE_CONTRAST   = "Normalise contrast";
 	static final String IS_USE_HOUGH   = "Use Hough";
 	static final String IS_USE_CANNY   = "Use Canny";
+	static final String DYNAMIC   = "Dynamic";
+	static final String EROSION   = "Dynamic";
 	
 	/**
 	 * All sub option classes implement this interface.

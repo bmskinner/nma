@@ -71,6 +71,10 @@ public class ProfileCreator implements Loggable {
 					return calculateRadiusProfile();
 				}
 				
+				case ZAHN_ROSKIE:{
+					return calculateZahnRoskieProfile();
+				}
+				
 				
 				default:{
 					return calculateAngleProfile(); // Franken profiles will be angle until modified
@@ -196,6 +200,26 @@ public class ProfileCreator implements Loggable {
 		profile.setSegments(segments);
 	}
 
+	
+	private ISegmentedProfile calculateZahnRoskieProfile() throws UnavailableBorderPointException {
+
+		float[] profile = new float[target.getBorderLength()];
+			
+		int index = 0;
+		Iterator<IBorderPoint> it = target.getBorderList().iterator();
+		while(it.hasNext()){
+
+			IBorderPoint point = it.next();
+			IBorderPoint prev = point.prevPoint();
+			IBorderPoint next = point.nextPoint();
+
+			profile[index++] = (float) point.findAngle(prev, next) - 180;
+			
+		}
+
+		return new SegmentedFloatProfile(profile);
+	}
+	
 	private ISegmentedProfile calculateDiameterProfile() throws UnavailableBorderPointException {
 
 		float[] profile = new float[target.getBorderLength()];

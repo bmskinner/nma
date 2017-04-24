@@ -715,6 +715,22 @@ public abstract class ProfileableCellularComponent
 		double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
 		double angleWindow = perimeter * angleWindowProportion;
 		this.angleProfileWindowSize = (int) Math.round(angleWindow);
+		
+		// Check if calulation needed
+		boolean isRecalculate = false;
+		for(ProfileType type : ProfileType.values()){
+			if( ! this.hasProfile(type)){
+				isRecalculate = true;
+			}
+		}
+		if(isRecalculate){
+			try {
+				calculateProfiles();
+			} catch (ProfileException e) {
+				warn("Error calculating profiles");
+				stack(e);
+			}
+		}
 
 	}
 	

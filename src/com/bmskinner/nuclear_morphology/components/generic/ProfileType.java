@@ -30,7 +30,8 @@ public enum ProfileType {
 	  ANGLE (   "Angle profile"    , "Angle"              , StatisticDimension.ANGLE), 
 	  FRANKEN ( "Franken profile"  , "Angle"              , StatisticDimension.ANGLE),
 	  DIAMETER( "Diameter profile" , "Distance across CoM", StatisticDimension.LENGTH),
-	  RADIUS(   "Radius profile"   , "Distance from CoM"  , StatisticDimension.LENGTH);
+	  RADIUS(   "Radius profile"   , "Distance from CoM"  , StatisticDimension.LENGTH),
+	  ZAHN_ROSKIE("Zahn-Roskie profile", "Angle delta"    , StatisticDimension.ANGLE);
 	  
 	  private String name;
 	  private String label;
