@@ -204,19 +204,27 @@ public class ProfileCreator implements Loggable {
 		profile.setSegments(segments);
 	}
 
-	
+    /**
+     * Calculate a modified ZR profile. This uses the same window size as
+     * the angle profile, so is not a true ZR transform.
+     * @return
+     * @throws UnavailableBorderPointException
+     */
 	private ISegmentedProfile calculateZahnRoskieProfile() throws UnavailableBorderPointException {
 
 		float[] profile = new float[target.getBorderLength()];
-			
+		int window = target.getWindowSize(ProfileType.ANGLE);
 		int index = 0;
 		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
 			IBorderPoint point = it.next();
-			IBorderPoint prev = point.prevPoint();
-			IBorderPoint next = point.nextPoint();
-			
+            
+            IBorderPoint prev = point.prevPoint(window);
+            IBorderPoint next = point.nextPoint(window);
+
+//            IBorderPoint prev = point.prevPoint();
+//            IBorderPoint next = point.nextPoint();
 			
 			// Get the equation between the first two points
 			LineEquation eq = new DoubleEquation(prev, point);
@@ -227,25 +235,13 @@ public class ProfileCreator implements Loggable {
 			if(p.getLengthTo(prev)< point.getLengthTo(prev)){
 				p = eq.getPointOnLine(point, -point.getLengthTo(prev));
 			}
+					
+			// Get the angle between the points
+			double rad = AngleTools.angleBetweenLines(point, p, point, next);
 			
-			
-			double angle = point.findAngle(p, next);
-			
-			
-			// rotate the points to vertical
-			// Get the angle between the prev-point-p line and the vertical axis
-			
-			double adj = point.findAngle(prev, IPoint.makeNew(prev.getX(), point.getY()));
-			
-			// Rotate the points by this angle
-			IPoint rotPrev = AngleTools.rotateAboutPoint(prev, point, adj);
-			IPoint rotP    = AngleTools.rotateAboutPoint(p   , point, adj);
-			
-			if(rotPrev.isBelow(point) && rotP.isLeftOf(point)){
-				angle = 0-angle;
-			}
-			
-			if(rotPrev.isAbove(point) && rotP.isRightOf(point)){
+			double angle = Math.toDegrees(rad);
+						
+			if(angle < 0){
 				angle = 0-angle;
 			}
 

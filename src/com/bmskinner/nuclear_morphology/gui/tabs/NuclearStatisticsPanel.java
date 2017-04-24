@@ -56,7 +56,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		DetailPanel histogramsPanel          = new NuclearHistogramsPanel();
 		DetailPanel wilcoxonPanel 	         = new WilcoxonDetailPanel();
 		DetailPanel nucleusMagnitudePanel    = new NucleusMagnitudePanel();
-		DetailPanel nuclearOverlaysPanel 	 = new NuclearOverlaysPanel();
+//		DetailPanel nuclearOverlaysPanel 	 = new NuclearOverlaysPanel();
 		DetailPanel nuclearScatterChartPanel = new NuclearScatterChartPanel();
 		DetailPanel nuclearLobesPanel        = new NuclearLobesPanel();
 		
@@ -65,7 +65,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		this.addSubPanel(histogramsPanel);
 		this.addSubPanel(wilcoxonPanel);
 		this.addSubPanel(nucleusMagnitudePanel);
-		this.addSubPanel(nuclearOverlaysPanel);
+//		this.addSubPanel(nuclearOverlaysPanel);
 		this.addSubPanel(nuclearScatterChartPanel);
 		this.addSubPanel(nuclearLobesPanel);
 		
@@ -74,7 +74,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 		tabPane.addTab(HISTOGRAM_TAB_LBL, histogramsPanel);
 		tabPane.addTab(WILCOXON_TAB_LBL, wilcoxonPanel);
 		tabPane.addTab(MAGNITUDE_TAB_LBL, null, nucleusMagnitudePanel, "Pop, pop");
-		tabPane.addTab(OVERLAYS_TAB_LBL, nuclearOverlaysPanel);
+//		tabPane.addTab(OVERLAYS_TAB_LBL, nuclearOverlaysPanel);
 		tabPane.addTab(SCATTER_TAB_LBL, nuclearScatterChartPanel);
 		tabPane.addTab(LOBES_TAB_LBL, nuclearLobesPanel);
 		

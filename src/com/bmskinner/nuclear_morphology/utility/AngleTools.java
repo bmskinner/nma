@@ -87,5 +87,25 @@ public class AngleTools {
 		 double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + centre.getY();
 		 return IPoint.makeNew(newX, newY);
 	 }
+	
+	/**
+	 * Calculate the angle between two lines in radians
+	 * @param line1Start
+	 * @param line1End
+	 * @param line2Start
+	 * @param line2End
+	 * @return
+	 */
+	public static double angleBetweenLines(IPoint line1Start, IPoint line1End, IPoint line2Start, IPoint line2End){
+	    double a = line1End.getX() - line1Start.getX();
+	    double b = line1End.getY() - line1Start.getY();
+	    double c = line2End.getX() - line2Start.getX();
+	    double d = line2End.getY() - line2Start.getY();
+
+	    double atanA = Math.atan2(a, b);
+	    double atanB = Math.atan2(c, d);
+
+	    return atanA - atanB;
+	}
 	 
 }
