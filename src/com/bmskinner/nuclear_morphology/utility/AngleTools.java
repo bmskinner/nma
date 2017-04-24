@@ -19,6 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.utility;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+
 /**
  * Calculate the x and y components of a vector
  * @author ben
@@ -34,7 +36,7 @@ public class AngleTools {
 	 * @param angle the angle from 0 relative to positive x axis in degrees
 	 * @return the x distance
 	 */
-	public double getXComponentOfAngle(double length, double angle){
+	public static double getXComponentOfAngle(double length, double angle){
 		 // cos(angle) = x / h
 		 // x = cos(a)*h
 		 double x = length * Math.cos(Math.toRadians(angle));
@@ -47,9 +49,43 @@ public class AngleTools {
 	 * @param angle the angle from 0 relative to positive x axis in degrees
 	 * @return the y distance
 	 */
-	 public double getYComponentOfAngle(double length, double angle){
+	 public static double getYComponentOfAngle(double length, double angle){
 		 double y = length * Math.sin(Math.toRadians(angle));
 		 return y;
+	 }
+	 
+	 /**
+	  * Rotate the given point about a centre
+	 * @param p the point to be moved
+	 * @param centre the centre of rotation
+	 * @param angle the angle to rotate in degrees
+	 * @return
+	 */
+	public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle){
+		 // get the distance from the point to the centre of mass
+		 double distance = p.getLengthTo(centre);
+
+		 // get the angle between the centre of mass (C), the point (P) and a
+		 // point directly under the centre of mass (V)
+
+		 /*
+		  *      C
+		  *      |\  
+		  *      V P
+		  * 
+		  */
+		 double oldAngle = centre.findAngle( p,
+				 IPoint.makeNew(centre.getX(),-10));
+
+
+		 if(p.getX()<centre.getX()){
+			 oldAngle = 360-oldAngle;
+		 }
+
+		 double newAngle = oldAngle + angle;
+		 double newX = AngleTools.getXComponentOfAngle(distance, newAngle) + centre.getX();
+		 double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + centre.getY();
+		 return IPoint.makeNew(newX, newY);
 	 }
 	 
 }

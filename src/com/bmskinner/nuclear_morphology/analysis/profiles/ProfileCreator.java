@@ -24,7 +24,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -32,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 /**
  * Performs angle and distance profiling on Profileable
@@ -212,8 +216,40 @@ public class ProfileCreator implements Loggable {
 			IBorderPoint point = it.next();
 			IBorderPoint prev = point.prevPoint();
 			IBorderPoint next = point.nextPoint();
+			
+			
+			// Get the equation between the first two points
+			LineEquation eq = new DoubleEquation(prev, point);
+			
+			IPoint p = eq.getPointOnLine(point, point.getLengthTo(prev)); // move out along line
+			
+			// Don't go the wrong way along the line
+			if(p.getLengthTo(prev)< point.getLengthTo(prev)){
+				p = eq.getPointOnLine(point, -point.getLengthTo(prev));
+			}
+			
+			
+			double angle = point.findAngle(p, next);
+			
+			
+			// rotate the points to vertical
+			// Get the angle between the prev-point-p line and the vertical axis
+			
+			double adj = point.findAngle(prev, IPoint.makeNew(prev.getX(), point.getY()));
+			
+			// Rotate the points by this angle
+			IPoint rotPrev = AngleTools.rotateAboutPoint(prev, point, adj);
+			IPoint rotP    = AngleTools.rotateAboutPoint(p   , point, adj);
+			
+			if(rotPrev.isBelow(point) && rotP.isLeftOf(point)){
+				angle = 0-angle;
+			}
+			
+			if(rotPrev.isAbove(point) && rotP.isRightOf(point)){
+				angle = 0-angle;
+			}
 
-			profile[index++] = (float) point.findAngle(prev, next) - 180;
+			profile[index++] = (float) angle;
 			
 		}
 

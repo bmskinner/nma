@@ -116,7 +116,7 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 			
 			IPoint[] inters = null;
 			loop = true;
-			while( loop && distance > 1 && distance < 1000){
+			while( loop && distance < 1000){
 				try {
 					inters = intersectionPoints(com, r, current, distance);
 					loop=false;
@@ -127,13 +127,34 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 					
 				}
 			}
+			
+			// We have the two intersections of the circles. One of these will be closer 
+			// to the desired angle
 
 			double a1 = current.findAngle(prev, inters[0]);
 			double a2 = current.findAngle(prev, inters[1]);
 			
-//			IPoint next = Math.abs(a1-a) < Math.abs(a2-a) ? inters[0] : inters[1];
+			// The angle should be the interior angle of the object being drawn
+			// If the desired angle is >180 degrees, correct
 			
-			IPoint next = inters[0];
+			if(a>180){
+				a1+=180;
+				a2+=180;
+			}
+			
+			// get the differences to the desired angle
+			
+			double d1 = Math.abs(a1-a);
+			double d2 = Math.abs(a2-a);
+			
+
+			
+			IPoint next = d1 < d2 ? inters[0] : inters[1];
+			
+			if(next.getLengthTo(current) > distance){
+				log("Error getting points");
+			}
+
 			list.add(next);
 			
 		}
@@ -222,12 +243,12 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 				
 
 		double h = Math.sqrt( r1*r1 - a*a);
-		double xm = x1 + a*dx/d;
-		double ym = y1 + a*dy/d;
-		double xs1 = xm + h*dy/d;
-		double xs2 = xm - h*dy/d;
-		double ys1 = ym - h*dx/d;
-		double ys2 = ym + h*dx/d;
+		double xm = x1 + (a*dx)/d;
+		double ym = y1 + (a*dy)/d;
+		double xs1 = xm + (h*dy)/d;
+		double xs2 = xm - (h*dy)/d;
+		double ys1 = ym - (h*dx)/d;
+		double ys2 = ym + (h*dx)/d;
 		
 		IPoint first = IPoint.makeNew(xs1, ys1);
 		IPoint second = IPoint.makeNew(xs2,ys2);

@@ -54,7 +54,7 @@ public interface LineEquation {
 	 *
 	 * @param p	the reference point to measure from
 	 * @param distance	the distance along the line from the point p
-	 * @return The position <distance> away from <p>
+	 * @return The position <i>distance</i> away from <i>p</i>
 	 */
 	IPoint getPointOnLine(IPoint p, double distance);
 

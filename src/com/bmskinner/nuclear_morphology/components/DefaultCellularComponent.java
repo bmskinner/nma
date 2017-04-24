@@ -1401,7 +1401,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			if(angle!=0){
 
 				for(IMutablePoint p : borderList){
-					IPoint newPoint = getPositionAfterRotation(p, angle);
+					
+					IPoint newPoint = AngleTools.rotateAboutPoint(p, centreOfMass, angle);
+//					IPoint newPoint = getPositionAfterRotation(p, angle);
 					p.set(newPoint);
 				}
 			}
@@ -1409,42 +1411,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			shapeCache.clear();
 					
 		}
-		
+				
 		/**
-		 * Get the position of the given point in this object after the object
-		 * has been rotated by the given amount
-		 * @param p the point to move
-		 * @param angle the angle in degrees
-		 * @return
+		 * Cache the shapes of the object in various positions
+		 * @author bms41
+		 * @since 1.13.4
+		 *
 		 */
-		protected IPoint getPositionAfterRotation(IPoint p, double angle){
-			
-			// get the distance from the point to the centre of mass
-			double distance = p.getLengthTo(centreOfMass);
-
-			// get the angle between the centre of mass (C), the point (P) and a
-			// point directly under the centre of mass (V)
-
-			/*
-			 *      C
-			 *      |\  
-			 *      V P
-			 * 
-			 */
-			double oldAngle = centreOfMass.findAngle( p,
-					IPoint.makeNew(centreOfMass.getX(),-10));
-
-
-			if(p.getX()<centreOfMass.getX()){
-				oldAngle = 360-oldAngle;
-			}
-
-			double newAngle = oldAngle + angle;
-			double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + centreOfMass.getX();
-			double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + centreOfMass.getY();
-			return IPoint.makeNew(newX, newY);
-		}
-		
 		private class ShapeCache{
 						
 			public class Key {

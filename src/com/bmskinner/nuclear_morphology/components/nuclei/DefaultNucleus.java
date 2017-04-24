@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 /**
  * The standard round nucleus, implementing {@link Nucleus}. All 
@@ -561,7 +562,9 @@ public class DefaultNucleus
 					s.rotate(angle);
 										
 					// get the new signal centre of mass based on the nucleus rotation
-					IPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);				
+					
+					IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
+//					IPoint p = getPositionAfterRotation(s.getCentreOfMass(), angle);				
 					s.moveCentreOfMass(p);					
 				});
 								
