@@ -131,8 +131,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 //				map.put(n, temp);
 				
 				if(hasDetectionListeners()){
-					drawSignals(n, list, in, false);
-					drawSignals(n, list, an, true);
+					drawSignals(n, temp, in, false);
+					drawSignals(n, temp, an, true);
 				}
 				
 				
