@@ -165,27 +165,15 @@ public class NeutrophilFinder extends CellFinder {
 				fireDetectionEvent(ip.duplicate(), "Watershed");
 			} else {
 				ip = detectCytoplasmByThreshold(imageFile);
-				fireDetectionEvent(ip.duplicate(), "Threshold");
+				ip.invert();
 			}
-			
-			
-			
-			
-//			ImageProcessor ip3 = detectCytoplasmBySegmentation(imageFile);
-//			fireDetectionEvent(ip3.duplicate(), "Segmentation");
-			
-			// Combine the images to find best consensus
-//			ImageProcessor ip = ImageCalculator.combineImages(ip1, ip2, Operation.AND);
-//			fireDetectionEvent(ip.duplicate(), "Combined water and colour");
-//			ip = ImageCalculator.combineImages(ip, ip3, Operation.AND);
-//			fireDetectionEvent(ip.duplicate(), "Combined combination and seg");
 
 			
 			// Find rois
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
 			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
-			gd.setThreshold(cytoOptions.getThreshold());
+//			gd.setThreshold(cytoOptions.getThreshold());
 			List<Roi> rois = gd.getRois(ip);
 
 			List<ICytoplasm> list = new ArrayList<>();
@@ -420,15 +408,13 @@ public class NeutrophilFinder extends CellFinder {
 			int maxSat = op.getMaxSaturation();
 			int minBri = op.getMinBrightness();
 			int maxBri = op.getMaxBrightness();
-			int erosionDiameter = 1;
-			int dynamic         = 2;
 			
 			ip = new ImageFilterer(ip)
 					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
 					.convertToByteProcessor()
 					.toProcessor();
-//			fireDetectionEvent(ip.duplicate(), "Colour threshold");
-			
+			fireDetectionEvent(ip.duplicate(), "Colour threshold");
+
 			return ip;
 			
 				
@@ -703,30 +689,30 @@ public class NeutrophilFinder extends CellFinder {
 		int erosionDiameter    = 1;
 		int dynamic            = 1; // the minimal difference between a minima and its boundary
 		
-//		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
+		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
 		ImageProcessor mask = ip.duplicate();		
 		mask.threshold(20);// binarise
-//		fireDetectionEvent(mask.duplicate(), "Binarised input");
+		fireDetectionEvent(mask.duplicate(), "Binarised input");
 					
 		// Calculate a distance map on the binarised input
 		float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
 		ImageProcessor dist =	BinaryImages.distanceMap( mask, floatWeights, NORMALISE_DISTANCE_MAP );
 		dist.invert();
-//		fireDetectionEvent(dist.duplicate(), "Distance map");
+		fireDetectionEvent(dist.duplicate(), "Distance map");
 
 		// Watershed the inverted map
 		ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
 				dist, mask, dynamic, CONNECTIIVITY, IS_VERBOSE );
-//		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
 
 		// Binarise for object detection
 		ImageProcessor lines = BinaryImages.binarize( watersheded );
-//		fireDetectionEvent(lines.duplicate(), "Binarized");
+		fireDetectionEvent(lines.duplicate(), "Binarized");
 		
 		// Erode by 1 pixel to better separate lobes
 		Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
 		lines = Morphology.erosion(lines, erosionStrel);
-//		fireDetectionEvent(lines.duplicate(), "Eroded");
+		fireDetectionEvent(lines.duplicate(), "Eroded");
 		
 		
 		// Now take the watershed image, and detect the distinct lobes
