@@ -122,7 +122,6 @@ public interface Loggable {
      */
 	default void finest(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.FINEST, message);
-//		System.out.println(message);
 	}
 	
 	/**
@@ -131,6 +130,7 @@ public interface Loggable {
      */
 	default void warn(String message){
 		Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
+		System.err.println(message);
 	}
 	
 	/**
@@ -138,7 +138,7 @@ public interface Loggable {
      * @param message the error messsage
      */
 	default void log(String message){
-		Logger.getLogger(PROGRAM_LOGGER).log(Level.INFO, message);
+		log(Level.INFO, message);
 	}
 	
 	/**
@@ -150,7 +150,10 @@ public interface Loggable {
      */
 	default void log(Level level, String message, Throwable t){
 		Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
+		System.err.println(message);
+		t.printStackTrace();
 	}
+	
 	
 	/**
 	 * Log the given message and srack trace from the given throwable

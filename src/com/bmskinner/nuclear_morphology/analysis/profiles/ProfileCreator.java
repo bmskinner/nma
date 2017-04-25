@@ -30,10 +30,13 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -46,9 +49,9 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  */
 public class ProfileCreator implements Loggable {
 	
-	Profileable target;
+	Taggable target;
 	
-	public ProfileCreator(Profileable target){
+	public ProfileCreator(Taggable target){
 		this.target = target;
 	}
 	
@@ -84,7 +87,7 @@ public class ProfileCreator implements Loggable {
 					return calculateAngleProfile(); // Franken profiles will be angle until modified
 				}
 			}
-		} catch(UnavailableBorderPointException e){
+		} catch(UnavailableBorderPointException | UnavailableBorderTagException e){
 			warn("Cannot make profile "+type);
 			stack("Cannot create profile", e);
 			throw new ProfileException("Error getting border point", e);
@@ -209,12 +212,26 @@ public class ProfileCreator implements Loggable {
      * the angle profile, so is not a true ZR transform.
      * @return
      * @throws UnavailableBorderPointException
+     * @throws UnavailableBorderTagException 
      */
-	private ISegmentedProfile calculateZahnRoskieProfile() throws UnavailableBorderPointException {
+	private ISegmentedProfile calculateZahnRoskieProfile() throws UnavailableBorderPointException, UnavailableBorderTagException {
 
+		// Ensure all nuclei point in the same direction
+		
+//		Taggable template;
+//		if(target instanceof Nucleus){
+		// This does not work, the vertical nucleus has not been established when profiling begins
+//			template = ((Nucleus)target).getVerticallyRotatedNucleus();
+//		} else {
+//			template = target;
+//		}
+				
 		float[] profile = new float[target.getBorderLength()];
 		int window = target.getWindowSize(ProfileType.ANGLE);
 		int index = 0;
+		
+		IBorderPoint rp = target.getBorderPoint(Tag.REFERENCE_POINT);
+		IBorderPoint tv = target.getBorderPoint(Tag.TOP_VERTICAL);
 		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 
@@ -241,14 +258,17 @@ public class ProfileCreator implements Loggable {
 			
 			double angle = Math.toDegrees(rad);
 						
-			if(angle < 0){
-				angle = 0-angle;
-			}
+//			if(angle < 0){
+//				angle = 0-angle;
+//			}
 
 			profile[index++] = (float) angle;
 			
-		}
 
+
+			
+		}
+		
 		return new SegmentedFloatProfile(profile);
 	}
 	
