@@ -138,13 +138,13 @@ public interface OptionsFactory {
 		
 		cytoOptions.setMinCirc(0);
 		cytoOptions.setMaxCirc(1);
-		cytoOptions.setMinSize(500);
-		cytoOptions.setMaxSize(10000); // for 20x images
+		cytoOptions.setMinSize(3000);
+		cytoOptions.setMaxSize(12000); // for 20x images
 		PreprocessingOptions pre = (PreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 		pre.setUseColourThreshold(true);
-		pre.setHueThreshold(48, 113);
-		pre.setSaturationThreshold(0, 56);
-		pre.setBrightnessThreshold(109, 181);
+		pre.setHueThreshold(0, 104);
+		pre.setSaturationThreshold(0, 50);
+		pre.setBrightnessThreshold(142, 255);
 		cytoOptions.getCannyOptions().setUseKuwahara(false);;
 		cytoOptions.getCannyOptions().setFlattenImage(false);		
 		cytoOptions.getCannyOptions().setUseCanny(false);
@@ -170,7 +170,7 @@ public interface OptionsFactory {
 		
 		nucleusOptions.setMinCirc(0);
 		nucleusOptions.setMaxCirc(1);
-		nucleusOptions.setMinSize(200);
+		nucleusOptions.setMinSize(500);
 		nucleusOptions.setMaxSize(3000);
 		PreprocessingOptions preN = (PreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 		preN.setUseColourThreshold(true);
