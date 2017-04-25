@@ -230,8 +230,6 @@ public class ProfileCreator implements Loggable {
 		int window = target.getWindowSize(ProfileType.ANGLE);
 		int index = 0;
 		
-		IBorderPoint rp = target.getBorderPoint(Tag.REFERENCE_POINT);
-		IBorderPoint tv = target.getBorderPoint(Tag.TOP_VERTICAL);
 		Iterator<IBorderPoint> it = target.getBorderList().iterator();
 		while(it.hasNext()){
 

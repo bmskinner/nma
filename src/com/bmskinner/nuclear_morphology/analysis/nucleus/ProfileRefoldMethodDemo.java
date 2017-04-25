@@ -253,29 +253,40 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 	 * @return
 	 */
 	private IPoint calculateSecondPoint(IPoint first, double r1, IPoint com, double r2){
+		
+//		IPoint lastPoint; // needed to get the position of second point correct
+		
 		/*
 		 * Looking for the intersection of the circles
 		 * with radii described
 		 */
-		IPoint[] interesctions = null;
-		boolean loop = true;
-		while( loop && r1 > 1 && r1 < 1000){
-			try {
-				interesctions = CircleTools.findIntersections(first, r1, com, r2 );
-				loop=false;
-			} catch(IllegalArgumentException e){
-				log(e.getMessage());
-				r1++;
-				log("Increasing distance to "+r1);
-				
-			}
-		}
+		IPoint[] inters = CircleTools.findIntersections(first, r1, com, r2 );
 		
-		log("Second point possible values:");
-		log(interesctions[0].toString());
-		log(interesctions[1].toString());
-		IPoint second = interesctions[0];
-		return second;
+		IPoint i0 = inters[0];
+		IPoint i1 = inters[1];
+		
+		// Check the angle with the last point in the object
+		
+//		IPoint[] interesctions = null;
+//		boolean loop = true;
+//		while( loop && r1 > 1 && r1 < 1000){
+//			try {
+//				interesctions = CircleTools.findIntersections(first, r1, com, r2 );
+//				loop=false;
+//			} catch(IllegalArgumentException e){
+//				log(e.getMessage());
+//				r1++;
+//				log("Increasing distance to "+r1);
+//				
+//			}
+//		}
+		
+		return i0.getX()<0 ? i0 : i1;
+		
+//		log("Second point possible values:");
+//		log(i0.toString());
+//		log(i1.toString());
+//		return i0;
 	}
 
 }
