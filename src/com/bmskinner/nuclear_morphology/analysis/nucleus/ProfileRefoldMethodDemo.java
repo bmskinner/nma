@@ -6,15 +6,20 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -30,6 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.CircleTools;
@@ -98,70 +104,99 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 		
 		int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(), (int) bounds.getHeight() };
 		
-		NucleusFactory fact = new NucleusFactory(dataset.getAnalysisOptions().getNucleusType());
+		NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
 		Nucleus n = fact.buildInstance(roi, new File("Empty"), 0, original, com);
-		n.initialise(dataset.getAnalysisOptions().getProfileWindowProportion());
-		n.findPointsAroundBorder();
+		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
+		
+		IProfile median = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		
+		for(Tag tag : BorderTagObject.values()){
+
+			int newIndex  = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+			n.setBorderTag(tag, newIndex);
+		}
 		
 		
-//		// TODO - adjust to fit size
+//		// Adjust segments to fit size
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
 		List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
 		profile.setSegments(newSegs);
 		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 		
-		// TODO: apply tags via profile manager
-		DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getAnalysisOptions().getNucleusType());
+
+		DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
+
+		
+		if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+			n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
+
+			if(n.getBorderPoint(Tag.REFERENCE_POINT).getX()>n.getCentreOfMass().getX()){
+				// need to flip about the CoM
+				n.flipXAroundPoint(n.getCentreOfMass());
+			}
+
+		}
 		return cons;
 		
 	}
-	
+		
 	private List<IPoint> getPointAverage() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnavailableBorderPointException, MissingOptionException{
 		
 		List<IPoint> result = new ArrayList<>();
-//		List<IPoint> list = new ArrayList<>();
-//		
-//		// Get the RP in each nucleus
-//		for(Nucleus n : dataset.getCollection().getNuclei()){
-//
-//			IPoint point = n.getBorderPoint(Tag.REFERENCE_POINT);
-//			list.add(point);
-//		}
-//		
-//		
-//		result.add(calculateMedianPoint(list));
+		
+		final Map<Double, List<IPoint>> map = new HashMap<Double, List<IPoint>>();
+		
 		IPoint com = IPoint.makeNew(0, 0);
-		for(double d=0; d<1; d+=0.01){
-			List<IPoint> list = new ArrayList<>();
-			for(Nucleus n : dataset.getCollection().getNuclei()){
-
+		dataset.getCollection().getNuclei().stream().forEach( n ->{
+			try {
 				Nucleus v = n.getVerticallyRotatedNucleus();
 				v.moveCentreOfMass(com);
 				IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-				int index = p.getIndexOfFraction(d);
 
-				int offset = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
+				for(int i=0; i<100; i++){
 
-				IPoint point = v.getBorderPoint(offset);
-				list.add(point);
+					double d = ((double) i) /100d;
+
+					if(map.get(d)==null){
+						map.put(d, new ArrayList<IPoint>());
+					}
+					List<IPoint> list = map.get(d);
+
+
+					int index = p.getIndexOfFraction(d);
+
+					int offset = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
+
+					IPoint point;
+					point = v.getBorderPoint(offset);
+					list.add(point);
+				}
+			} catch (Exception e1) {
+				error("Error on nucleus "+n.getNameAndNumber(), e1);
 			}
+
+		});
+
+
+		for(int i=0; i<100; i++){
+			
+			double d = ((double) i) /100d;
+			List<IPoint> list = map.get(d);
 			result.add(calculateMedianPoint(list));
+			fireProgressEvent();
 		}
 		
-//		log("##################");
-//		for(IPoint p : result){
-//			log("\t"+p.getX()+"\t"+p.getY());
-//		}
-
 		return result;
 	}
 	
-	private IPoint calculateMedianPoint(List<IPoint> list){
+	private synchronized IPoint calculateMedianPoint(List<IPoint> list){
 		double[] xpoints = new double[list.size()];
 		double[] ypoints = new double[list.size()];
-		
+
 		for(int i=0; i<list.size(); i++){
 			IPoint p = list.get(i);
 			

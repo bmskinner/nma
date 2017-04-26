@@ -51,8 +51,8 @@ public class RefoldNucleusAction extends ProgressableAction {
 			this.setProgressBarIndeterminate();
 			IAnalysisMethod m = new ProfileRefoldMethodDemo(dataset);
 //			IAnalysisMethod m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
-			
-			worker = new DefaultAnalysisWorker(m, CurveRefoldingMode.FAST.maxIterations());
+			worker = new DefaultAnalysisWorker(m, 100);
+//			worker = new DefaultAnalysisWorker(m, CurveRefoldingMode.FAST.maxIterations());
 
 			worker.addPropertyChangeListener(this);
 			this.setProgressMessage("Refolding: "+dataset.getName());
