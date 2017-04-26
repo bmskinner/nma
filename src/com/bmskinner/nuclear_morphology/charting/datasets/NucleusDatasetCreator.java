@@ -1338,7 +1338,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 			// pointType index is given within this
 			// We need to add the index of the pointType to the values within the segment
 			int segmentIndex = segment.getStartIndex() + i;
-			int index = DefaultCellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
+			int index = CellularComponent.wrapIndex(segmentIndex + n.getBorderIndex(pointType), n.getBorderLength());
 			
 			// get the border point at this index
 			IBorderPoint p;
@@ -1360,8 +1360,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 				
 				// Select the index from the scaledRange corresponding to the position in the segment
 				// The scaledRange is aligned to the segment already
-				IPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())   )    )    );
-				IPoint bPoint = perp.getPointOnLine(p, scaledRange.get(DefaultCellularComponent.wrapIndex(segmentIndex, scaledRange.size())));
+				IPoint aPoint = perp.getPointOnLine(p, (0-scaledRange.get(CellularComponent.wrapIndex(segmentIndex, scaledRange.size())   )    )    );
+				IPoint bPoint = perp.getPointOnLine(p, scaledRange.get(CellularComponent.wrapIndex(segmentIndex, scaledRange.size())));
 	
 				// determine which of the points is inside the nucleus and which is outside
 				

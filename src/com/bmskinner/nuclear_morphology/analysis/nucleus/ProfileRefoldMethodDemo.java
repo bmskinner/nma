@@ -1,23 +1,41 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
+import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.CircleTools;
+
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
 
 /**
  * Testing new ways to refold profiles
@@ -42,6 +60,124 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 		
 	private void run() {
 		
+//		runFromPoint(3);
+		try {
+			List<IPoint> border = getPointAverage();
+			
+			Nucleus refoldNucleus = makeConsensus(border);
+
+		
+			dataset.getCollection().setConsensus(refoldNucleus);
+			
+			
+		} catch (Exception e) {
+			error("Error getting points", e);
+		}
+//		for(int i=0; i<16; i++){
+//			runFromPoint(i);
+//		}
+		
+	}
+	
+	private Nucleus makeConsensus(List<IPoint> list) throws UnprofilableObjectException, MissingOptionException, ComponentCreationException, UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException{
+		
+		float[] xpoints = new float[list.size()];
+		float[] ypoints = new float[list.size()];
+		
+		for(int i=0; i<list.size(); i++){
+			IPoint p = list.get(i);
+			
+			xpoints[i] = (float) p.getX();
+			ypoints[i] = (float) p.getY();
+		}
+		
+		Roi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
+		IPoint com = IPoint.makeNew(0, 0);
+		
+		Rectangle bounds = roi.getBounds();
+		
+		int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(), (int) bounds.getHeight() };
+		
+		NucleusFactory fact = new NucleusFactory(dataset.getAnalysisOptions().getNucleusType());
+		Nucleus n = fact.buildInstance(roi, new File("Empty"), 0, original, com);
+		n.initialise(dataset.getAnalysisOptions().getProfileWindowProportion());
+		n.findPointsAroundBorder();
+		
+		
+//		// TODO - adjust to fit size
+		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+		List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
+		profile.setSegments(newSegs);
+		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+		
+		// TODO: apply tags via profile manager
+		DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getAnalysisOptions().getNucleusType());
+		return cons;
+		
+	}
+	
+	private List<IPoint> getPointAverage() throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException, UnavailableBorderPointException, MissingOptionException{
+		
+		List<IPoint> result = new ArrayList<>();
+//		List<IPoint> list = new ArrayList<>();
+//		
+//		// Get the RP in each nucleus
+//		for(Nucleus n : dataset.getCollection().getNuclei()){
+//
+//			IPoint point = n.getBorderPoint(Tag.REFERENCE_POINT);
+//			list.add(point);
+//		}
+//		
+//		
+//		result.add(calculateMedianPoint(list));
+		IPoint com = IPoint.makeNew(0, 0);
+		for(double d=0; d<1; d+=0.01){
+			List<IPoint> list = new ArrayList<>();
+			for(Nucleus n : dataset.getCollection().getNuclei()){
+
+				Nucleus v = n.getVerticallyRotatedNucleus();
+				v.moveCentreOfMass(com);
+				IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+
+				int index = p.getIndexOfFraction(d);
+
+				int offset = v.getOffsetBorderIndex(Tag.REFERENCE_POINT, index);
+
+				IPoint point = v.getBorderPoint(offset);
+				list.add(point);
+			}
+			result.add(calculateMedianPoint(list));
+		}
+		
+//		log("##################");
+//		for(IPoint p : result){
+//			log("\t"+p.getX()+"\t"+p.getY());
+//		}
+
+		return result;
+	}
+	
+	private IPoint calculateMedianPoint(List<IPoint> list){
+		double[] xpoints = new double[list.size()];
+		double[] ypoints = new double[list.size()];
+		
+		for(int i=0; i<list.size(); i++){
+			IPoint p = list.get(i);
+			
+			xpoints[i] = p.getX();
+			ypoints[i] = p.getY();
+		}
+		
+		double xMed = Quartile.quartile(xpoints, Quartile.MEDIAN);
+		double yMed = Quartile.quartile(ypoints, Quartile.MEDIAN);
+		
+		IPoint avgRP = IPoint.makeNew(xMed, yMed);
+		return avgRP;
+	}
+	
+	private void runFromPoint(int start) {
+		
 		try {
 		
 			IProfile angleProfile  = dataset.getCollection()
@@ -52,9 +188,9 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 					.getProfileCollection()
 					.getProfile(ProfileType.RADIUS, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-			IProfile diameterProfile = dataset.getCollection()
+			IProfile p2pProfile = dataset.getCollection()
 					.getProfileCollection()
-					.getProfile(ProfileType.DIAMETER, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+					.getProfile(ProfileType.P2P, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
 
 			angleProfile.reverse();
@@ -65,8 +201,8 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 
 			// Make the first point on the x axis, radius from zero.
 			// This is the reference point
-			log("First point radius is "+radiusProfile.get(0));
-			IPoint first = IPoint.makeNew( 0, radiusProfile.get(0));
+			log("First point radius is "+radiusProfile.get(start));
+			IPoint first = IPoint.makeNew( 0, radiusProfile.get(start));
 
 			/*
 			 * The angle profile measures points at every windowsize intervals.
@@ -80,7 +216,7 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 			int totalPoints = angleProfile.size();
 			int window = (int) (dataset.getAnalysisOptions().getProfileWindowProportion() * totalPoints);
 			// Get the distance between points
-			int distance = window;
+			double  distance = p2pProfile.get(start);
 
 			log("Setting distance between points to "+distance);
 
@@ -111,11 +247,11 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 			outline.lineTo( second.getX(), second.getY() );
 
 //			int finalPoint = 0;
-			for(int i=window, k=totalPoints,  j=1; i<totalPoints; i+=window, j++, k--){
+			for(int i=start+window, k=totalPoints,  j=1; i<totalPoints; i+=window, j++, k--){
 
-				double r = radiusProfile.get(i+1);
-				double a = angleProfile.get(i);
-				distance = window;
+				double r = radiusProfile.get(CellularComponent.wrapIndex(i+1, radiusProfile.size()));
+				double a = angleProfile.get( CellularComponent.wrapIndex(i+1, angleProfile.size()) );
+				distance = p2pProfile.get(   CellularComponent.wrapIndex(i+1, p2pProfile.size())   );
 
 				// In the  first iteration of the loop
 				// a is the angle from first to third via second
@@ -202,7 +338,7 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 			error("Profile refold error", e);
 		}
 	}
-
+	
 	private static boolean intersects(Path2D path, Line2D line) {
 	    double x1 = -1 ,y1 = -1 , x2= -1, y2 = -1;
 	    for (PathIterator pi = path.getPathIterator(null); !pi.isDone(); pi.next()) 

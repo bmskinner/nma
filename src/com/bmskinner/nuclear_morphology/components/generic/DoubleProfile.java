@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
@@ -315,7 +316,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 	public IProfile offset(int j) throws ProfileException {
 		double[] newArray = new double[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ DefaultCellularComponent.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ CellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new DoubleProfile(newArray);
 	}
@@ -356,7 +357,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 		for(int j=0;j<values.length;j++){
 
 			// If type was before, multiply by -1; if after, multiply by 1
-			int index = DefaultCellularComponent.wrapIndex( position + ((j+1)*type)  , this.size() );
+			int index = CellularComponent.wrapIndex( position + ((j+1)*type)  , this.size() );
 			values[j] = array[index];
 		}
 		return values;
@@ -431,8 +432,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 		//	  System.out.println("Set indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 		// wrap the arrays
-		indexLower  = DefaultCellularComponent.wrapIndex(indexLower , array.length);
-		indexHigher = DefaultCellularComponent.wrapIndex(indexHigher, array.length);
+		indexLower  = CellularComponent.wrapIndex(indexLower , array.length);
+		indexHigher = CellularComponent.wrapIndex(indexHigher, array.length);
 		//	  System.out.println("Wrapped indexes "+normIndex+": "+indexLower+"-"+indexHigher);
 
 		// get the values at these indexes
@@ -452,7 +453,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 
 		// add the offset to the lower index
 		double positionToFind = indexLower + offset;
-		positionToFind = (double) DefaultCellularComponent.wrapIndex(positionToFind , array.length);
+		positionToFind = (double) CellularComponent.wrapIndex(positionToFind , array.length);
 		//	  System.out.println("Position to find "+normIndex+": "+positionToFind);
 
 		// calculate the value to be added to the lower index value
@@ -544,8 +545,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 			// go through each lookup position and get the appropriate angles
 			for(int j=0;j<prevValues.length;j++){
 
-				int prev_i = DefaultCellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
-				int next_i = DefaultCellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
+				int prev_i = CellularComponent.wrapIndex( i-(j+1)  , this.size() ); // the index j+1 before i
+				int next_i = CellularComponent.wrapIndex( i+(j+1)  , this.size() ); // the index j+1 after i
 
 				// fill the lookup array
 				prevValues[j] = array[prev_i];
@@ -813,8 +814,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 
 		for (int i=0; i<array.length; i++) { // for each position in sperm
 
-			int prev_i = DefaultCellularComponent.wrapIndex( i-1  , this.size() ); // the index before
-			int next_i = DefaultCellularComponent.wrapIndex( i+1  , this.size() ); // the index after
+			int prev_i = CellularComponent.wrapIndex( i-1  , this.size() ); // the index before
+			int next_i = CellularComponent.wrapIndex( i+1  , this.size() ); // the index after
 
 
 			double delta = 	array[i]	-  array[prev_i] +

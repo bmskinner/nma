@@ -30,7 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -667,7 +667,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 					
 					// Since the segments have been offset to the RP, correct back
 					// to the actual nucleus index
-					int correctedIndex = DefaultCellularComponent
+					int correctedIndex = CellularComponent
 							.wrapIndex(index+nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
 					
 					finest("Fetching point at index "+correctedIndex);

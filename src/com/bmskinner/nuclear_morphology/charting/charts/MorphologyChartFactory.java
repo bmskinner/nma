@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.CellDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
@@ -321,7 +321,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 					int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 					// adjust the index to the offset
-					index = DefaultCellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
+					index = CellularComponent.wrapIndex( index - offset, collection.getProfileCollection().length());
 
 					double indexToDraw = index; // convert to a double to allow normalised positioning
 
@@ -456,7 +456,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 						int offset = collection.getProfileCollection().getIndex(options.getTag());
 
 						// adjust the index to the offset
-						index = DefaultCellularComponent.wrapIndex( index - offset, collection.getMedianArrayLength());
+						index = CellularComponent.wrapIndex( index - offset, collection.getMedianArrayLength());
 
 						
 						if(options.isNormalised()){ // set to the proportion of the point along the profile

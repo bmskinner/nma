@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -487,8 +487,8 @@ public interface IBorderSegment
 	
 //	static void nudgeUnlinked(IBorderSegment seg, int offset){
 //		
-//		int newStart = DefaultCellularComponent.wrapIndex(seg.getStartIndex()+offset, seg.getTotalLength());
-//		int newEnd   = DefaultCellularComponent.wrapIndex(seg.getEndIndex()+offset, seg.getTotalLength());
+//		int newStart = CellularComponent.wrapIndex(seg.getStartIndex()+offset, seg.getTotalLength());
+//		int newEnd   = CellularComponent.wrapIndex(seg.getEndIndex()+offset, seg.getTotalLength());
 //		
 //		seg.update(newStart, newEnd);
 //		if(seg.hasMergeSources()){
@@ -519,8 +519,8 @@ public interface IBorderSegment
 		
 		for(IBorderSegment segment : list){
 			
-			IBorderSegment newSeg = IBorderSegment.newSegment(DefaultCellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
-					DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value, 
+			IBorderSegment newSeg = IBorderSegment.newSegment(CellularComponent.wrapIndex(segment.getStartIndex()+value, segment.getTotalLength()), 
+					CellularComponent.wrapIndex(segment.getEndIndex()+value, 
 						segment.getTotalLength()), 
 						segment.getTotalLength(),
 						segment.getID());
@@ -562,10 +562,10 @@ public interface IBorderSegment
 			
 			int toWrap = segment.getStartIndex()+value;
 			
-			int newStart = DefaultCellularComponent.wrapIndex(toWrap,
+			int newStart = CellularComponent.wrapIndex(toWrap,
 					segment.getTotalLength());
 			
-			int newEnd = DefaultCellularComponent.wrapIndex(segment.getEndIndex()+value,
+			int newEnd = CellularComponent.wrapIndex(segment.getEndIndex()+value,
 					segment.getTotalLength());
 			
 			
@@ -623,7 +623,7 @@ public interface IBorderSegment
 			
 			int newSegLength =  (int) ( (double) newLength * proportion);
 			
-			int segEnd = DefaultCellularComponent.wrapIndex(segStart + newSegLength, newLength);
+			int segEnd = CellularComponent.wrapIndex(segStart + newSegLength, newLength);
 			
 			
 			IBorderSegment newSeg = IBorderSegment.newSegment(segStart, 

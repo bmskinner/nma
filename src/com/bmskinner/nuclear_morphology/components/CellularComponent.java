@@ -399,4 +399,47 @@ public interface CellularComponent
 	 */
 	void reverse();
 	
+	/**
+	  * Wrap arrays. If an index falls of the end, it is returned to the start and vice versa
+	 * @param i the index
+	 * @param length the array length
+	 * @return the index within the array
+	 */
+	static int wrapIndex(int i, int length){
+		 if(i<0){
+			 // if the inputs are (-336, 330), this will return -6. Recurse until positive
+			 i = length+i;
+			 return wrapIndex(i, length);
+		 }
+		 
+		 if(i<length){ // if not wrapping
+			 return i;
+		 }
+		 
+		 return i%length;
+	 }
+	
+	/**
+	 * Wrap arrays for doubles. This is used in interpolation. 
+	 * If an index falls of the end, it is returned to the start and vice versa
+	 * @param i the index
+	 * @param length the array length
+	 * @return the index within the array
+	 */
+	static double wrapIndex(double i, int length){
+		 if(i<0){
+			 i = length+i;
+			 return wrapIndex(i, length); // correct for values multiple profile lengths below zero
+		 }
+		 
+		 if(i<length){ // if not wrapping
+			 return i;
+		 }
+		 
+		// i is greater than array length
+		 
+		 return i % length;
+
+	 }
+	
 }

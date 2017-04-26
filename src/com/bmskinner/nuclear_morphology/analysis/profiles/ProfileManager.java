@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
@@ -136,7 +136,7 @@ public class ProfileManager implements Loggable {
 		
 		// check the index for wrapping - observed problem when OP==RP in rulesets
 		
-		index = DefaultCellularComponent.wrapIndex(index, getProfileLength());
+		index = CellularComponent.wrapIndex(index, getProfileLength());
 
 		for(ProfileType type : ProfileType.values()){
 			if(type.equals(ProfileType.FRANKEN)){
@@ -431,7 +431,7 @@ public class ProfileManager implements Loggable {
 					int oldIndex = pc.getIndex(test);
 					if(oldIndex!=-1){ // Only bother if the tag exists
 						
-						int newIndex = DefaultCellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
+						int newIndex = CellularComponent.wrapIndex( (oldIndex - index)  , pc.length()); // offset by 1
 						pc.addIndex(test, newIndex);
 						finer("Explicit setting of "+test+" index to "+newIndex+" from "+oldIndex);
 						

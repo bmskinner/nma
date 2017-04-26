@@ -18,13 +18,13 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import ij.IJ;
-
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.IJ;
 
 /**
  * Use to hold boolean results from a Profile
@@ -106,7 +106,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	public void set(int index, boolean b){
 		
 		if(index<0 || index >=array.length){
-			index = DefaultCellularComponent.wrapIndex(index, array.length);
+			index = CellularComponent.wrapIndex(index, array.length);
 		}
 		array[index] = b;
 	}
@@ -164,7 +164,7 @@ public class BooleanProfile implements Serializable, Loggable {
 	public BooleanProfile offset(int j) throws Exception{
 		boolean[] newArray = new boolean[this.size()];
 		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ DefaultCellularComponent.wrapIndex( i+j , this.size() ) ];
+			newArray[i] = this.array[ CellularComponent.wrapIndex( i+j , this.size() ) ];
 		}
 		return new BooleanProfile(newArray);
 	}

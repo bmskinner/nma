@@ -30,7 +30,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.DefaultCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
@@ -527,7 +527,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			throw new SegmentUpdateException("Error getting segment", e);
 		}
 
-		int newValue = DefaultCellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = CellularComponent.wrapIndex( segmentToUpdate.getStartIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
 	}
 
@@ -550,7 +550,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 			throw new SegmentUpdateException("Error getting segment");
 		}
 
-		int newValue = DefaultCellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
+		int newValue = CellularComponent.wrapIndex( segmentToUpdate.getEndIndex()+amount, segmentToUpdate.getTotalLength());
 		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
 	}
 
@@ -762,7 +762,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 		// get the region within the segment as a new profile
 		// Exclude the last index of each segment to avoid duplication
 		// the first index is kept, because the first index is used for border tags
-		int lastIndex = DefaultCellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
+		int lastIndex = CellularComponent.wrapIndex( testSeg.getEndIndex()-1, testSeg.getTotalLength());
 
 		IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
@@ -814,7 +814,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
 			// invert the segment by swapping start and end
 			int newStart = (this.size()-1) - seg.getEndIndex();
-			int newEnd   = DefaultCellularComponent.wrapIndex(newStart+seg.length(), this.size());
+			int newEnd   = CellularComponent.wrapIndex(newStart+seg.length(), this.size());
 			IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, this.size(), seg.getID());
 			//			newSeg.setName(seg.getName());
 			// since the order is reversed, add them to the top of the new list

@@ -82,6 +82,10 @@ public class ProfileCreator implements Loggable {
 					return calculateZahnRoskieProfile();
 				}
 				
+				case P2P:{
+					return calculatePointToPointDistanceProfile();
+				}
+				
 				
 				default:{
 					return calculateAngleProfile(); // Franken profiles will be angle until modified
@@ -302,6 +306,48 @@ public class ProfileCreator implements Loggable {
 		}
 
 		return new SegmentedFloatProfile(profile);
+	}
+	
+	/**
+	 * Calculate the distance between points separated by the windowsize
+	 * @return
+	 * @throws UnavailableBorderPointException
+	 */
+	public ISegmentedProfile calculatePointToPointDistanceProfile() throws UnavailableBorderPointException{
+		float[] profile = new float[target.getBorderLength()];
+		
+		int index = 0;
+		Iterator<IBorderPoint> it = target.getBorderList().iterator();
+		
+		int pointOffset = target.getWindowSize(ProfileType.ANGLE);
+		
+		if(pointOffset==0){
+			throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
+		}
+
+//		finer("Iterating border");
+		while(it.hasNext()){
+//			finest("Getting points");
+			
+			IBorderPoint point = it.next();
+
+			IBorderPoint pointBefore = point.prevPoint(pointOffset);
+
+//			IBorderPoint pointAfter  = point.nextPoint(pointOffset);
+			
+			double distance = point.getLengthTo(pointBefore);
+
+
+			profile[index] = (float) distance;
+
+			index++;
+		}
+//		finer("Making new profile");
+		// Make a new profile. This will have two segments by default
+		ISegmentedProfile newProfile = new SegmentedFloatProfile(profile);
+
+		return newProfile;
+		
 	}
 	
 }
