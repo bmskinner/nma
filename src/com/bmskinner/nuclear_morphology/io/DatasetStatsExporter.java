@@ -234,7 +234,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	}
 	
 	private void appendProfiles(StringBuilder outLine, Taggable c) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
-		for(ProfileType type : ProfileType.values()){
+		for(ProfileType type : ProfileType.exportValues()){
 			
 			IProfile p = c.getProfile(type, Tag.REFERENCE_POINT);
 			
