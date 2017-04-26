@@ -70,4 +70,9 @@ public enum ProfileType {
 	  public StatisticDimension getDimension(){
 		  return this.dimension;
 	  }
+	  
+	  public static ProfileType[] exportValues(){
+		  ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
+		  return array;
+	  }
   }

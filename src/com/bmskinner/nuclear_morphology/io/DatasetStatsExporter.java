@@ -3,12 +3,17 @@ package com.bmskinner.nuclear_morphology.io;
 import java.io.File;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -26,6 +31,8 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	private static final String EXPORT_MESSAGE = "Exporting stats...";
 	private File exportFile;
 	private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export"+Exporter.TAB_FILE_EXTENSION;
+	
+	private boolean includeProfiles = true;
 	
 	/**
 	 * Create specifying the folder stats will be exported into
@@ -54,7 +61,11 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		
 		StringBuilder outLine = new StringBuilder();
 		writeHeader(outLine);
-		export(d, outLine, exportFile);
+		try {
+			export(d, outLine, exportFile);
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			error("Error exporting dataset",e);
+		}
 		IJ.append(  outLine.toString(), exportFile.getAbsolutePath());
 		log("Exported stats to "+exportFile.getAbsolutePath());
 	}
@@ -71,8 +82,12 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 
 		writeHeader(outLine);
 		
-		for(IAnalysisDataset d : list){
-			export(d, outLine, exportFile);
+		try {
+			for(IAnalysisDataset d : list){
+				export(d, outLine, exportFile);
+			}
+		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+			error("Error exporting dataset",e);
 		}
 		IJ.append(  outLine.toString(), exportFile.getAbsolutePath());
 		log("Exported stats to "+exportFile.getAbsolutePath());
@@ -87,12 +102,37 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		outLine.append("Dataset\tCellID\tComponent\tImage\tCentre_of_mass\t");
 		
 		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
-			outLine.append(s.label(MeasurementScale.PIXELS)+"\t");
+			
+			String label = s.label(MeasurementScale.PIXELS)
+				.replaceAll(" ", "_")
+				.replaceAll("\\(", "_")
+				.replaceAll("\\)", "")
+				.replaceAll("__", "_");	
+			outLine.append(label+"\t");
 			
 			if(!s.isDimensionless() && !s.isAngle()){ // only give micron measurements when length or area
-				outLine.append(s.label(MeasurementScale.MICRONS)+"\t");
+				
+				label = s.label(MeasurementScale.MICRONS)
+						.replaceAll(" ", "_")
+						.replaceAll("\\(", "_")
+						.replaceAll("\\)", "")
+						.replaceAll("__", "_");	
+				
+				outLine.append(label+"\t");
 			}
 			
+		}
+		
+		if(includeProfiles){
+			for(ProfileType type : ProfileType.exportValues()){
+
+				String label = type.toString().replaceAll(" ", "_");
+				for(int i=0; i<100; i++){
+
+					outLine.append(label+"_"+i+"\t");
+				}
+
+			}
 		}
 		outLine.append(NEWLINE);
 	}
@@ -125,7 +165,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		
 	}
 	
-	public void export(IAnalysisDataset d, StringBuilder outLine, File exportFile){
+	public void export(IAnalysisDataset d, StringBuilder outLine, File exportFile) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
 //		log("Exporting stats...");
 
 		for(ICell cell : d.getCollection().getCells()){
@@ -152,6 +192,11 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 						.append(n.getSourceFileName()+"\t")
 						.append(n.getOriginalCentreOfMass().toString()+"\t");
 					appendNucleusStats(outLine, d, cell, n);
+					
+					if(includeProfiles){
+						appendProfiles(outLine, n);
+					}
+					
 					outLine.append(NEWLINE);
 				}
 				
@@ -159,7 +204,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 			
 		}
 	}
-	
+		
 	private void appendNucleusStats(StringBuilder outLine, IAnalysisDataset d, ICell cell, CellularComponent c){
 		
 		for(PlottableStatistic s : PlottableStatistic.getNucleusStats()){
@@ -185,7 +230,22 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 			if(!s.isDimensionless() && !s.isAngle()){
 				outLine.append(varM+"\t");
 			}
-		}		
+		}	
+	}
+	
+	private void appendProfiles(StringBuilder outLine, Taggable c) throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException{
+		for(ProfileType type : ProfileType.values()){
+			
+			IProfile p = c.getProfile(type, Tag.REFERENCE_POINT);
+			
+			for(int i=0; i<100; i++){
+				double idx = ((double) i) /100d;
+				
+				double value = p.get(idx);
+				outLine.append(value+"\t");
+			}
+			
+		}
 	}
 	
 //	private File makeFile(String fileName){
