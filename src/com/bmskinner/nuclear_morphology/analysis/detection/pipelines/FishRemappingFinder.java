@@ -66,7 +66,6 @@ public class FishRemappingFinder extends VoidFinder {
 
 	@Override
 	public Void findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
-		List<ICell> list = new ArrayList<>();
 		
 		ImageStack stack;
 		try {
