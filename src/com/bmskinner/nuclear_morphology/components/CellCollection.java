@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -749,16 +750,17 @@ public class CellCollection implements ICellCollection {
 	 * @throws UnavailableBorderTagException 
 	 * @throws Exception
 	 */
-	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) throws UnavailableBorderTagException{
+	@Override
+	public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException{
 		
 		IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
 		IProfile angleProfile;
 		
 		try {
-			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+			angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
 		} catch (ProfileException | UnavailableComponentException e) {
@@ -1082,7 +1084,7 @@ public class CellCollection implements ICellCollection {
 
 				double value;
 				try {
-					value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
+					value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c.getNucleus());
 				} catch (UnavailableBorderTagException e) {
 					warn("Cannot get variability score");
 					fine("Error getting difference to median profile", e);

@@ -20,6 +20,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -89,32 +90,32 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 		
 
 		for (int i=0; i < datasets.size(); i++) {
-			
+
 			ICellCollection c = datasets.get(i).getCollection();
 
 			// draw the segment itself
-			double[] xpoints = new double[c.size()];
-			double[] ypoints = new double[c.size()];
-			
-			List<ICell> cells = new ArrayList<ICell>(c.getCells());
-			// go through each index in the segment.
-			for(int j=0; j<cells.size();j++){
-				
+			double[] xpoints = new double[c.getNucleusCount()];
+			double[] ypoints = new double[c.getNucleusCount()];
+
+			int j=0;
+
+			for(Nucleus n : c.getNuclei()){
+
 				double statAValue;
 				double statBValue;
-				
+
 				try {
-					
+
 					if(statA.equals(PlottableStatistic.VARIABILITY)){
-						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
 					} else {
-						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
+						statAValue = n.getStatistic(statA, scale);
 					}
-					
+
 					if(statB.equals(PlottableStatistic.VARIABILITY)){
-						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
 					} else {
-						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
+						statBValue = n.getStatistic(statB, scale);
 					}
 				} catch(UnavailableBorderTagException e){
 					warn("Cannot get stats for cell");
@@ -122,15 +123,17 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
 					statAValue = 0;
 					statBValue = 0;
 				}
-				
+
 				xpoints[j] = statAValue;
 				ypoints[j] = statBValue;
 
+				j++;
 
 			}
 
 			double[][] data = { xpoints, ypoints };
 			ds.addSeries(c.getName(), data);
+
 		}
 
 		return ds;

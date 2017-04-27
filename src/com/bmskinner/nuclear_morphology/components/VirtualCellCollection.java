@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;
@@ -255,6 +256,11 @@ public class VirtualCellCollection implements ICellCollection {
 //		}
 
 		return result;
+	}
+	
+	@Override
+	public int getNucleusCount(){
+		return this.getNuclei().size();
 	}
 
 	@Override
@@ -707,29 +713,81 @@ public class VirtualCellCollection implements ICellCollection {
 	 * @return a new collection
 	 * @throws Exception 
 	 */
+//	@Override
+//	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
+//				
+//		DecimalFormat df = new DecimalFormat("#.##");
+//		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
+//
+//		List<ICell> filteredCells;
+//
+//		if(stat.equals(PlottableStatistic.VARIABILITY)){
+//			filteredCells = new ArrayList<ICell>();
+//			for(ICell c : this.getCells()){
+//				//			  Nucleus n = c.getNucleus();
+//
+//				double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
+//
+//				if(value>= lower && value<= upper){
+//					filteredCells.add(c);
+//				}  
+//			}
+//
+//		} else {
+//			
+//			// TODO: multiple nuclei
+//			filteredCells = getCells()
+//					.parallelStream()
+//					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
+//					.filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
+//					.collect(Collectors.toList());
+//		}
+//
+//		for(ICell cell : filteredCells){
+//			subCollection.addCell(new DefaultCell(cell));
+//		}
+//
+//		try {
+//			this.getProfileManager().copyCollectionOffsets(subCollection);
+//		} catch (ProfileException e) {
+//			warn("Error copying collection offsets");
+//			fine("Error in offsetting", e);
+//		}
+//
+//		this.getSignalManager().copySignalGroups(subCollection);
+//
+//		return subCollection;
+//	}
+	
 	@Override
 	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
-				
 		DecimalFormat df = new DecimalFormat("#.##");
 		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
 
 		List<ICell> filteredCells;
+		
+		finest("Filtering collection on "+stat);
 
 		if(stat.equals(PlottableStatistic.VARIABILITY)){
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
-				//			  Nucleus n = c.getNucleus();
 
-				double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
+				boolean include = true;
+				for(Nucleus n : c.getNuclei()){
+					double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
+					if(value< lower || value> upper){
+						include = false;
+					}
+					
+				}
 
-				if(value>= lower && value<= upper){
+				if(include){
 					filteredCells.add(c);
 				}  
 			}
 
 		} else {
 			
-			// TODO: multiple nuclei
 			filteredCells = getCells()
 					.parallelStream()
 					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
@@ -737,18 +795,22 @@ public class VirtualCellCollection implements ICellCollection {
 					.collect(Collectors.toList());
 		}
 
+		finest("Adding cells to new collection");
 		for(ICell cell : filteredCells){
 			subCollection.addCell(new DefaultCell(cell));
 		}
 
 		try {
+			
 			this.getProfileManager().copyCollectionOffsets(subCollection);
+			this.getSignalManager().copySignalGroups(subCollection);
+			
 		} catch (ProfileException e) {
 			warn("Error copying collection offsets");
-			fine("Error in offsetting", e);
+			stack("Error in offsetting", e);
 		}
 
-		this.getSignalManager().copySignalGroups(subCollection);
+		
 
 		return subCollection;
 	}
@@ -846,12 +908,11 @@ public class VirtualCellCollection implements ICellCollection {
 		int[] result = new int[this.getNuclei().size()];
 
 		int i=0;
-		for(ICell cell : getCells() ){ 
-			
-			for(Nucleus n : cell.getNuclei()){
-				result[i++] =  n.getBorderLength();
-			}
+
+		for(Nucleus n : this.getNuclei()){
+			result[i++] =  n.getBorderLength();
 		}
+		
 		return result;
 	}
 
@@ -1107,22 +1168,47 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 		
 
+//	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) {
+//		
+//		try {
+//			IProfile medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+//			IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+//			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
+//			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+//			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
+//			return rootDiff;
+//		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
+//			fine("Error getting difference to median profile for cell "+c.getNucleus().getNameAndNumber());
+//			return Double.MAX_VALUE;
+//		}
+//	}
+	
 	@Override
-	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) {
-		
+	public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t){
+		IProfile medianProfile;
 		try {
-			IProfile medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
-			IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+		} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
+			fine("Error getting median profile for collection", e);
+			return 0;
+		}
+		IProfile angleProfile;
+		try {
+			angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
+
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
-		} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
-			fine("Error getting difference to median profile for cell "+c.getNucleus().getNameAndNumber());
-			return Double.MAX_VALUE;
+		} catch (ProfileException | UnavailableComponentException e) {
+			fine("Error getting nucleus profile", e);
+			return Double.NaN;
 		}
 	}
+
 	
+	
+
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 	}

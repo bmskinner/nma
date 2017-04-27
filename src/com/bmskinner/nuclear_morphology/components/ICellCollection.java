@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -152,6 +153,12 @@ public interface ICellCollection
 	 * @return
 	 */
 	int size();
+	
+	/**
+	 * Get the number of nuclei in the collection
+	 * @return
+	 */
+	int getNucleusCount();
 
 	/**
 	 * Check if the collection contains cells
@@ -373,7 +380,7 @@ public interface ICellCollection
 	 * @return the variabililty score of the nucleus
 	 * @throws UnavailableBorderTagException 
 	 */
-	double getNormalisedDifferenceToMedian(Tag pointType, ICell c) throws UnavailableBorderTagException;
+	double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException;
 
 
 

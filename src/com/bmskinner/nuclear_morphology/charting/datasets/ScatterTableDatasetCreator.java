@@ -21,6 +21,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -78,11 +79,11 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 		if( ! options.hasDatasets()){
 			return createBlankTable();
 		}
-		
+
 		if(options.getStats().size()!=2){
 			return createBlankTable();
 		}
-		
+
 		DefaultTableModel model = new DefaultTableModel();
 
 		Vector<Object> names 	= new Vector<Object>();
@@ -97,34 +98,35 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
 		PlottableStatistic statA =stats.get(0);
 		PlottableStatistic statB =stats.get(1);
-		
+
 		for (int i=0; i < datasets.size(); i++) {
 
 			ICellCollection c = datasets.get(i).getCollection();
 
 			// draw the segment itself
-			double[] xpoints = new double[c.size()];
-			double[] ypoints = new double[c.size()];
+			double[] xpoints = new double[c.getNucleusCount()];
+			double[] ypoints = new double[c.getNucleusCount()];
 
-			List<ICell> cells = new ArrayList<ICell>(c.getCells());
-			// go through each index in the segment.
-			for(int j=0; j<cells.size();j++){
-				
+			int j=0;
+
+
+			for(Nucleus n : c.getNuclei()){
+
 				double statAValue;
 				double statBValue;
-				
+
 				try {
-					
+
 					if(statA.equals(PlottableStatistic.VARIABILITY)){
-						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+						statAValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
 					} else {
-						statAValue = cells.get(j).getNucleus().getStatistic(statA, scale);
+						statAValue = n.getStatistic(statA, scale);
 					}
-					
+
 					if(statB.equals(PlottableStatistic.VARIABILITY)){
-						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cells.get(j));
+						statBValue = c.getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
 					} else {
-						statBValue = cells.get(j).getNucleus().getStatistic(statB, scale);
+						statBValue = n.getStatistic(statB, scale);
 					}
 				} catch(UnavailableBorderTagException e){
 					warn("Cannot get stats for cell");
@@ -132,24 +134,25 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 					statAValue = 0;
 					statBValue = 0;
 				}
-				
+
 				xpoints[j] = statAValue;
 				ypoints[j] = statBValue;
-
+				j++;
 			}
+			//			}
 			names.add(c.getName());
-			
+
 			double rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
 			rho.add( DEFAULT_DECIMAL_FORMAT.format( rhoValue ));
-			
-//			double p = Stats.getSpearmanPValue(rhoValue, cells.size());
-//			pValue.add( df.format( p ));
+
+			//			double p = Stats.getSpearmanPValue(rhoValue, cells.size());
+			//			pValue.add( df.format( p ));
 		}
 
 
 		model.addColumn("Dataset", names);
 		model.addColumn("Spearman's Rho", rho);
-//		model.addColumn("p", pValue);
+		//		model.addColumn("p", pValue);
 		return model;
 
 	}

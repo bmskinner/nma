@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -429,6 +430,7 @@ public class DefaultCellCollection
 		return result;
 	}
 
+	@Override
 	public int getNucleusCount(){
 		return this.getNuclei().size();
 	}
@@ -665,7 +667,8 @@ public class DefaultCellCollection
 	 * @return the variabililty score of the nucleus
 	 * @throws Exception
 	 */
-	public double getNormalisedDifferenceToMedian(Tag pointType, ICell c){
+	@Override
+	public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t){
 		IProfile medianProfile;
 		try {
 			medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
@@ -675,10 +678,10 @@ public class DefaultCellCollection
 		}
 		IProfile angleProfile;
 		try {
-			angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE, pointType);
+			angleProfile = t.getProfile(ProfileType.ANGLE, pointType);
 
 			double diff = angleProfile.absoluteSquareDifference(medianProfile);		
-			diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
+			diff /= t.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise to the number of points in the perimeter (approximately 1 point per pixel)
 			double rootDiff = Math.sqrt(diff); // use the differences in degrees, rather than square degrees  
 			return rootDiff;
 		} catch (ProfileException | UnavailableComponentException e) {
@@ -991,10 +994,16 @@ public class DefaultCellCollection
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
 
+				boolean include = true;
+				for(Nucleus n : c.getNuclei()){
+					double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
+					if(value< lower || value> upper){
+						include = false;
+					}
+					
+				}
 
-				double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
-
-				if(value>= lower && value<= upper){
+				if(include){
 					filteredCells.add(c);
 				}  
 			}

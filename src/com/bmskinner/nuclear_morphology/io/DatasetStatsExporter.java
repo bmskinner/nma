@@ -214,7 +214,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 			if(s.equals(PlottableStatistic.VARIABILITY)){
 				
 				try {
-					varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, cell);
+					varP = d.getCollection().getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, (Taggable) c);
 					varM = varP;
 				} catch (UnavailableBorderTagException e) {
 					stack("Tag not present in component", e);
