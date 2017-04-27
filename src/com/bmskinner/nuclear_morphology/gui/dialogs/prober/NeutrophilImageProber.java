@@ -51,6 +51,7 @@ public class NeutrophilImageProber  extends IntegratedImageProber {
 					.addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm detection")
 					.addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
 					.addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
+					.addThresholdPanel(IAnalysisOptions.NUCLEUS, "Nucleus threshold")
 					.addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
 					.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
 					.build();

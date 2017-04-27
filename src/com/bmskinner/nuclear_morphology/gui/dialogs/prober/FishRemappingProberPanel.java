@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
@@ -143,23 +144,26 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 	protected void importAndDisplayImage(File imageFile){
 		
 		// Get the cells open in this image
-		openCells = dataset.getCollection().getCells(imageFile);
 		super.importAndDisplayImage(imageFile);
 		
-		ProberTableCell infoCell = (ProberTableCell) table.getModel()
-				.getValueAt(ORIGINAL_IMG_COL, ORIGINAL_IMG_ROW);
+		if(dataset.getCollection().hasCells(imageFile)){
+			openCells = dataset.getCollection().getCells(imageFile);
 
-		Image largeImage = infoCell.getLargeIcon().getImage();
+			ProberTableCell infoCell = (ProberTableCell) table.getModel()
+					.getValueAt(ORIGINAL_IMG_COL, ORIGINAL_IMG_ROW);
 
-		// Get the cells matching the imageFile
-		for(ICell c : openCells){
-			drawNucleus(c, largeImage);
+			Image largeImage = infoCell.getLargeIcon().getImage();
+
+			// Get the cells matching the imageFile
+			for(ICell c : openCells){
+				drawNucleus(c, largeImage);
+			}
+
+
+			// Update the small icon
+			infoCell.setSmallIcon( new ImageIcon(scaleImage( infoCell.getLargeIcon() )) );
+			table.repaint();
 		}
-
-
-		// Update the small icon
-		infoCell.setSmallIcon( new ImageIcon(scaleImage( infoCell.getLargeIcon() )) );
-		table.repaint();
 
 	}
 		
@@ -181,17 +185,20 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 		ProberTableCell selectedData = (ProberTableCell) table.getModel().getValueAt( row, col );
 		
 		for(ICell c : openCells){
-			if(c.getNucleus().containsOriginalPoint( p )){
-				
-				updateSelectedNuclei(e, c);
-				fine("Click is in nucleus");
+			
+			for(Nucleus n : c.getNuclei()){
+				if(n.containsOriginalPoint( p )){
 
-				drawNucleus(c, selectedData.getLargeIcon().getImage());
-				// Update the small icon
-				selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
-				table.repaint(cellRectangle); // repaint the affected cell only
-				return; // don't keep searching
+					updateSelectedNuclei(e, c);
+					fine("Click is in nucleus");
 
+					drawNucleus(c, selectedData.getLargeIcon().getImage());
+					// Update the small icon
+					selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
+					table.repaint(cellRectangle); // repaint the affected cell only
+					return; // don't keep searching
+
+				}
 			}
 			
 		}

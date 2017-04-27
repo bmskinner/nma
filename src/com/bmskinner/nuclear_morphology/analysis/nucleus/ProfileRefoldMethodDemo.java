@@ -13,18 +13,15 @@ import java.util.Map;
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -35,7 +32,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.CircleTools;
@@ -49,6 +45,8 @@ import ij.gui.Roi;
  *
  */
 public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
+	
+	private static final double PROFILE_LENGTH = 200d;
 	
 	public ProfileRefoldMethodDemo(IAnalysisDataset dataset) {
 		super(dataset);
@@ -157,9 +155,9 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 				IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
 
-				for(int i=0; i<100; i++){
+				for(int i=0; i<PROFILE_LENGTH; i++){
 
-					double d = ((double) i) /100d;
+					double d = ((double) i) /PROFILE_LENGTH;
 
 					if(map.get(d)==null){
 						map.put(d, new ArrayList<IPoint>());
@@ -182,9 +180,9 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 		});
 
 
-		for(int i=0; i<100; i++){
+		for(int i=0; i<PROFILE_LENGTH; i++){
 			
-			double d = ((double) i) /100d;
+			double d = ((double) i) /PROFILE_LENGTH;
 			List<IPoint> list = map.get(d);
 			result.add(calculateMedianPoint(list));
 			fireProgressEvent();

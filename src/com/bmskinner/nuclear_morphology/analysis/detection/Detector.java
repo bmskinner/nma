@@ -25,12 +25,14 @@
 */  
 package com.bmskinner.nuclear_morphology.analysis.detection;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.Roi;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
+import ij.plugin.frame.ThresholdAdjuster;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
@@ -69,7 +71,7 @@ public abstract class Detector implements Loggable {
 
 	private Integer  threshold;
 
-	private List<Roi> roiList; // the detected ROIs
+//	private List<Roi> roiList; // the detected ROIs
 	
 	/**
 	 * Set the minimum and maximum size ROIs to detect
@@ -145,8 +147,8 @@ public abstract class Detector implements Loggable {
 //		  warn("Using default theshold "+threshold);
 	  }
 
-	  findInImage(image);
-	  return roiList;
+	  return findInImage(image);
+//	  return roiList;
   }
   
   /**
@@ -187,7 +189,7 @@ public abstract class Detector implements Loggable {
    */
 
   
-  private void findInImage(ImageProcessor image){
+  private List<Roi> findInImage(ImageProcessor image){
 
 	  if( ! (image instanceof ByteProcessor  || image instanceof ShortProcessor) ){
 		  throw new IllegalArgumentException("Processor must be byte or short");
@@ -200,20 +202,29 @@ public abstract class Detector implements Loggable {
 //	  ImagePlus imp = new ImagePlus("Search Processor", searchProcessor.duplicate());	
 //	  imp.show();
 	  
-	  roiList = this.runAnalyser(searchProcessor);
+	 return this.runAnalyser(searchProcessor);
 	  
 	  //TODO: this needs to be figured out and removed
-	  if(roiList.size()==0){
-		  // As of 2017-04-15, manetheren needs this inversion to work, but other PCs don't. Don't yet know why.
-		  searchProcessor.invert();
-		  roiList = this.runAnalyser(searchProcessor);
-	  }
+//	  if(roiList.size()==0){
+//		  // As of 2017-04-15, manetheren needs this inversion to work, but other PCs don't. Don't yet know why.
+//		  searchProcessor.invert();
+//		  roiList = this.runAnalyser(searchProcessor);
+//	  }
+//	  return roiList;
   }
 
   private List<Roi> runAnalyser(ImageProcessor processor){
 	  ImagePlus image    = new ImagePlus(null, processor);
 	  RoiManager manager = new RoiManager(true);
 	 
+	  
+	  // Check the background colour settings
+      if ( ! Prefs.blackBackground){
+    	  Prefs.blackBackground = true;
+    	  ThresholdAdjuster.update();
+      }
+      	
+	  
 	  // run the particle analyser
 	  ResultsTable rt     = new ResultsTable();
 	  
@@ -226,6 +237,8 @@ public abstract class Detector implements Loggable {
 	  ParticleAnalyzer pa = new ParticleAnalyzer(options, 
 			  ParticleAnalyzer.FERET ,
 			  rt, minSize, maxSize, minCirc, maxCirc);
+	  
+
 	  
 	  try {
 		  ParticleAnalyzer.setRoiManager(manager);

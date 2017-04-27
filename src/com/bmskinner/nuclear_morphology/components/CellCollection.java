@@ -283,6 +283,16 @@ public class CellCollection implements ICellCollection {
 			return true;
 		}
 	}
+	
+	@Override
+	public boolean hasCells(File imageFile){
+		return getCells(imageFile).size()>0;
+	}
+	
+	@Override
+	public boolean hasNuclei(File imageFile){
+		return getNuclei(imageFile).size()>0;
+	}
 
 	public boolean hasLockedCells(){
 		for(Nucleus n : this.getNuclei()){

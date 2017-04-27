@@ -78,6 +78,13 @@ public interface ICellCollection
 	 * @return
 	 */
 	Set<ICell> getCells(File f);
+	
+	/**
+	 * Test if the collection contains cells from the given source file
+	 * @param imageFile
+	 * @return
+	 */
+	boolean hasCells(File imageFile);
 
 	/**
 	 * Get the UUIDs of all the cells in the collection
@@ -97,6 +104,13 @@ public interface ICellCollection
 	 * @return the nuclei, or an empty collection if no nuclei are present
 	 */
 	Set<Nucleus> getNuclei(File imageFile);
+	
+	/**
+	 * Test if the collection contains nuclei from the given source file
+	 * @param imageFile
+	 * @return
+	 */
+	boolean hasNuclei(File imageFile);
 
 	/**
 	 * Add the given cell to the collection

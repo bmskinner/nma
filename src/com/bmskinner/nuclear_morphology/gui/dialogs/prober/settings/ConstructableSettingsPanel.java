@@ -127,6 +127,32 @@ public class ConstructableSettingsPanel extends SettingsPanel {
 		return addEdgeThresholdSwitchPanel(optionsKey, OBJECT_FINDING_LBL);
 	}
 	
+	/**
+	 * Add a panel for threshold images
+	 * @param optionsKey the options subtype to select
+	 * @param label the label to give the panel
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addThresholdPanel(String optionsKey, String label) throws MissingOptionException{
+		IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
+		SettingsPanel panel  = new ThresholdSettingsPanel(subOptions);
+		panel.setBorder( BorderFactory.createTitledBorder(label));
+		this.addSubPanel(panel);
+		mainPanel.add(panel);
+		return this;
+	}
+	
+	
+	/**
+	 * Add a panel for threshold images with the default label
+	 * @param optionsKey the options subtype to select
+	 * @return
+	 * @throws MissingOptionException 
+	 */
+	public ConstructableSettingsPanel addThresholdPanel(String optionsKey) throws MissingOptionException{
+		return addThresholdPanel(optionsKey, THRESHOLDING_LBL);
+	}
 	
 	/**
 	 * Add a panel switching between thresholding and edge detection

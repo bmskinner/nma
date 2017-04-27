@@ -455,6 +455,16 @@ public class DefaultCellCollection
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean hasCells(File imageFile){
+		return getCells(imageFile).size()>0;
+	}
+	
+	@Override
+	public boolean hasNuclei(File imageFile){
+		return getNuclei(imageFile).size()>0;
+	}
 
 	/**
 	 * Get the nuclei in this collection

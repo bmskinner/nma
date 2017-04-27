@@ -165,7 +165,6 @@ public class NeutrophilFinder extends CellFinder {
 				fireDetectionEvent(ip.duplicate(), "Watershed");
 			} else {
 				ip = detectCytoplasmByThreshold(imageFile);
-				ip.invert();
 			}
 
 			
@@ -320,7 +319,7 @@ public class NeutrophilFinder extends CellFinder {
 			ContrastEnhancer ch = new  ContrastEnhancer();
 			ch.setNormalize(true);
 			ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
-//			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
+			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
 			
 			/*
 			 * Use a top hat filter to approximate cytoplasm
@@ -381,7 +380,7 @@ public class NeutrophilFinder extends CellFinder {
 			// Binarise for object detection
 			ImageProcessor lines = BinaryImages.binarize( watersheded );
 //			fireDetectionEvent(lines.duplicate(), "Binarized");
-			
+//			lines.invert();
 			return lines;
 
 		} catch (MissingOptionException e) {
@@ -471,8 +470,6 @@ public class NeutrophilFinder extends CellFinder {
 			int topHatRadius = nuclOptions.getInt(IDetectionOptions.TOP_HAT_RADIUS);
 			
 			int thresholdMin = nuclOptions.getThreshold();
-//			int thresholdMax = 255;
-			
 			
 
 			ImageProcessor test = new ImageConverter(ip)
@@ -480,7 +477,7 @@ public class NeutrophilFinder extends CellFinder {
 					.toProcessor();
 			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
 			ip = Morphology.blackTopHat(test, strel);
-//			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
+			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
 //			
 			
 			// Most remaining cytoplasm is weak, can can be thresholded away 
@@ -488,6 +485,10 @@ public class NeutrophilFinder extends CellFinder {
 //			ip.setMinAndMax(thresholdMin, thresholdMax);
 			bin.threshold(thresholdMin);
 
+//			bin.invert();
+			
+			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
+			
 			List<Nucleus> list = new ArrayList<>();
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(nuclOptions.getMinCirc(), nuclOptions.getMaxCirc());
@@ -584,98 +585,6 @@ public class NeutrophilFinder extends CellFinder {
 		return result;
 	}
 	
-	
-	private void detectLobes(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
-
-		boolean calculateDams  = true;
-		int gradientRadius     = 2;
-		int connectivity       = 6;
-		int bitDepth           = 32;
-		int dynamic            = 10; // the minimal difference between a minima and its boundary
-		int minArea            = 5;
-		int maxArea            = 3000;
-		
-		ImagePlus imp = new ImagePlus("Input image", ip);
-
-
-		// Copy the process used in the MorphoLbJ MorphologicalSegmentation plugin
-					
-		ImageStack image = new ImageStack(ip.getWidth(), ip.getHeight());
-		image.addSlice(ip);
-		
-		Strel strel = Strel.Shape.SQUARE.fromRadius( gradientRadius );
-		
-		/*
-		 * Computes the morphological gradient of the input image. 
-		 * The morphological gradient is obtained from the difference
-		 * of image dilation and image erosion computed with the 
-		 * same structuring element.
-		 * 
-    	 *	This effectively gets the borders of the nuclei in the image
-    	 * TODO: use the nuclei themselves as a mask 
-		 */
-		ImageProcessor gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
-		
-		fireDetectionEvent(gradient.duplicate(), "Gradient");
-		
-		// Make a stack for use in the minima detection
-		image = new ImageStack(image.getWidth(), image.getHeight());
-		image.addSlice(gradient); 
-		
-		/*
-		 * Computes the extended minima in grayscale  image, keeping minima 
-		 * with the specified dynamic, and using the specified connectivity.
-		 *     dynamic - the difference between maxima and maxima boundary
-    	 *	  conn - the connectivity for maxima, that should be either 6 or 26
-    	 *
-    	 *	This finds minima in the image where the difference between the minimum and maximum is greater than 
-    	 * a specified value. Big enough differences. Finds the regions inside the gradient circles - the interior of the nuclei
-    	 *
-		 */
-		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, dynamic, connectivity );
-
-		fireDetectionEvent(regionalMinima.getProcessor(1).duplicate(), "Regional minima");
-		
-		/*
-		 * Computes the labels in the binary 2D or 3D image contained 
-		 * in the given ImagePlus, and computes the maximum label 
-		 * to set up the display range of the resulting ImagePlus.
-		 * 
-		 * Used to restrict the watershed to only the bounds of the nuclei
-		 */
-		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, bitDepth );
-		ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
-		fireDetectionEvent(min.getProcessor().duplicate(), "Labelled minima");
-		
-		/*
-		 * Compute watershed with markers with a
-		 *  binary mask to restrict the regions of application
-		 */
-		ImagePlus resultStack = Watershed.computeWatershed( imp, min, 
-				connectivity, calculateDams );
-			fireDetectionEvent(resultStack.getProcessor().duplicate(), "Watershed");
-
-		final ImagePlus lines = BinaryImages.binarize( resultStack );
-
-		fireDetectionEvent(lines.getProcessor().duplicate(), "Binarized");
-
-		
-		ImageProcessor lp = lines.getProcessor();
-		lp.invert();
-		fireDetectionEvent(lp.duplicate(), "Lines");
-
-		
-		// Now take the watershed image, and detect the distinct lobes
-		
-		ImageFilterer ft = new ImageFilterer(lp);
-		ImageProcessor ws = ft.dilate(1).toProcessor(); // separate the lobes from each other
-//		ImageProcessor ws = ft.toProcessor();
-		
-		makeLobes(ws, list);
-		
-		
-	}
-	
 	/* 
 	 * 	Uses the Distance Transform watershed	
      * Take the distance map from the input.
@@ -691,7 +600,9 @@ public class NeutrophilFinder extends CellFinder {
 		
 		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
 		ImageProcessor mask = ip.duplicate();		
-		mask.threshold(20);// binarise
+
+		
+		mask.threshold(20);
 		fireDetectionEvent(mask.duplicate(), "Binarised input");
 					
 		// Calculate a distance map on the binarised input
@@ -714,6 +625,7 @@ public class NeutrophilFinder extends CellFinder {
 		lines = Morphology.erosion(lines, erosionStrel);
 		fireDetectionEvent(lines.duplicate(), "Eroded");
 		
+//		lines.invert();
 		
 		// Now take the watershed image, and detect the distinct lobes
 		makeLobes(lines, list);

@@ -159,6 +159,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth()*original.getHeight());
 		
 		ImageProcessor img = filt.toProcessor();
+
 		List<Roi> rois = gd.getRois(img.duplicate());
 		
 

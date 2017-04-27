@@ -19,6 +19,7 @@
 
 package components;
 
+import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
@@ -726,6 +727,18 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 
 	@Override
 	public Shape toShape(MeasurementScale scale) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Roi toRoi() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Roi toOriginalRoi() {
 		// TODO Auto-generated method stub
 		return null;
 	}

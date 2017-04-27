@@ -216,6 +216,16 @@ public class VirtualCellCollection implements ICellCollection {
 		}
 		return result;
 	}
+	
+	@Override
+	public boolean hasCells(File imageFile){
+		return getCells(imageFile).size()>0;
+	}
+	
+	@Override
+	public boolean hasNuclei(File imageFile){
+		return getNuclei(imageFile).size()>0;
+	}
 
 	@Override
 	public synchronized Set<UUID> getCellIDs() {
