@@ -319,7 +319,7 @@ public class NeutrophilFinder extends CellFinder {
 			ContrastEnhancer ch = new  ContrastEnhancer();
 			ch.setNormalize(true);
 			ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
-			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
+//			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
 			
 			/*
 			 * Use a top hat filter to approximate cytoplasm
@@ -328,10 +328,10 @@ public class NeutrophilFinder extends CellFinder {
 				
 				Strel strel = Strel.Shape.DISK.fromRadius(40);
 				ip = Morphology.blackTopHat(ip, strel);
-				fireDetectionEvent(ip.duplicate(), "Top hat");
+//				fireDetectionEvent(ip.duplicate(), "Top hat");
 				
 				ip = LabelImages.labelBoundaries(ip);
-				fireDetectionEvent(ip.duplicate(), "Boundaries");
+//				fireDetectionEvent(ip.duplicate(), "Boundaries");
 				ip.invert();
 				
 				strel = Strel.Shape.DISK.fromRadius(dilationRadius);
@@ -412,7 +412,7 @@ public class NeutrophilFinder extends CellFinder {
 					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
 					.convertToByteProcessor()
 					.toProcessor();
-			fireDetectionEvent(ip.duplicate(), "Colour threshold");
+//			fireDetectionEvent(ip.duplicate(), "Colour threshold");
 
 			return ip;
 			
@@ -477,7 +477,7 @@ public class NeutrophilFinder extends CellFinder {
 					.toProcessor();
 			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
 			ip = Morphology.blackTopHat(test, strel);
-			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
+//			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
 //			
 			
 			// Most remaining cytoplasm is weak, can can be thresholded away 
@@ -487,7 +487,7 @@ public class NeutrophilFinder extends CellFinder {
 
 //			bin.invert();
 			
-			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
+//			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
 			
 			List<Nucleus> list = new ArrayList<>();
 			GenericDetector gd = new GenericDetector();
@@ -598,32 +598,32 @@ public class NeutrophilFinder extends CellFinder {
 		int erosionDiameter    = 1;
 		int dynamic            = 1; // the minimal difference between a minima and its boundary
 		
-		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
+//		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
 		ImageProcessor mask = ip.duplicate();		
 
 		
 		mask.threshold(20);
-		fireDetectionEvent(mask.duplicate(), "Binarised input");
+//		fireDetectionEvent(mask.duplicate(), "Binarised input");
 					
 		// Calculate a distance map on the binarised input
 		float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
 		ImageProcessor dist =	BinaryImages.distanceMap( mask, floatWeights, NORMALISE_DISTANCE_MAP );
 		dist.invert();
-		fireDetectionEvent(dist.duplicate(), "Distance map");
+//		fireDetectionEvent(dist.duplicate(), "Distance map");
 
 		// Watershed the inverted map
 		ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
 				dist, mask, dynamic, CONNECTIIVITY, IS_VERBOSE );
-		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+//		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
 
 		// Binarise for object detection
 		ImageProcessor lines = BinaryImages.binarize( watersheded );
-		fireDetectionEvent(lines.duplicate(), "Binarized");
+//		fireDetectionEvent(lines.duplicate(), "Binarized");
 		
 		// Erode by 1 pixel to better separate lobes
 		Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
 		lines = Morphology.erosion(lines, erosionStrel);
-		fireDetectionEvent(lines.duplicate(), "Eroded");
+//		fireDetectionEvent(lines.duplicate(), "Eroded");
 		
 //		lines.invert();
 		
