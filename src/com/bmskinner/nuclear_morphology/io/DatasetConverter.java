@@ -721,37 +721,40 @@ public class DatasetConverter implements Loggable, Importer {
 		for(ProfileType type : ProfileType.values()){
 
 			fine("\nCopying profile type "+type);
-			try {
-				ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
-				ISegmentedProfile target  = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+			
+			if(template.hasProfile(type)){
+				try {
+					ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
+					ISegmentedProfile target  = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 
-				ISegmentedProfile newProfile;
-				
-				if(profile.size() != target.size()){
-//					log("Interpolating profile");
-//					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
-					newProfile = profile.interpolateSegments(target.size());
-//					fine("\tInterpolated profile has length "+target.size()+" with segment total length "+target.getSegments().get(0).getTotalLength());
-				} else {
-//					log("Not interpolating profile");
-					newProfile = ISegmentedProfile.makeNew(profile);
-				}
-				
-				if(newProfile.getSegmentCount() != profile.getSegmentCount()){
-					warn("Segment count mismatch: new has "+newProfile.getSegmentCount()+", target has "+profile.getSegmentCount() );
-					throw new DatasetConversionException("Error copying segments for nucleus "+template.getNameAndNumber());
-				}
+					ISegmentedProfile newProfile;
 
-				fine("\tSetting the profile "+type+" in the new nucleus");
-				newNucleus.setProfile(type, Tag.REFERENCE_POINT, newProfile);
+					if(profile.size() != target.size()){
+						//					log("Interpolating profile");
+						//					fine("\tNew nucleus profile length of "+target.size()+" : original nucleus was "+profile.size());
+						newProfile = profile.interpolateSegments(target.size());
+						//					fine("\tInterpolated profile has length "+target.size()+" with segment total length "+target.getSegments().get(0).getTotalLength());
+					} else {
+						//					log("Not interpolating profile");
+						newProfile = ISegmentedProfile.makeNew(profile);
+					}
 
-				
-				
+					if(newProfile.getSegmentCount() != profile.getSegmentCount()){
+						warn("Segment count mismatch: new has "+newProfile.getSegmentCount()+", target has "+profile.getSegmentCount() );
+						throw new DatasetConversionException("Error copying segments for nucleus "+template.getNameAndNumber());
+					}
 
-			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
-				stack("Error getting profile from template or target nucleus", e1);
-				throw new DatasetConversionException("Cannot convert nucleus", e1);
-			} 
+					fine("\tSetting the profile "+type+" in the new nucleus");
+					newNucleus.setProfile(type, Tag.REFERENCE_POINT, newProfile);
+
+
+
+
+				} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e1) {
+					stack("Error getting profile from template or target nucleus", e1);
+					throw new DatasetConversionException("Cannot convert nucleus", e1);
+				} 
+			}
 			
 			fine("Complete profile type "+type);
 		}

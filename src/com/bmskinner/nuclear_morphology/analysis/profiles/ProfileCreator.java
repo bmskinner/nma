@@ -82,9 +82,9 @@ public class ProfileCreator implements Loggable {
 					return calculateZahnRoskieProfile();
 				}
 				
-				case P2P:{
-					return calculatePointToPointDistanceProfile();
-				}
+//				case P2P:{
+//					return calculatePointToPointDistanceProfile();
+//				}
 				
 				
 				default:{
@@ -279,6 +279,15 @@ public class ProfileCreator implements Loggable {
 
 			
 		}
+		
+		// invert if needed
+		
+		if(profile[0] <0 ){
+			for(int i=0; i<profile.length; i++){
+				profile[i] = 0-profile[i];
+			}
+		}
+		
 		
 		return new SegmentedFloatProfile(profile);
 	}
