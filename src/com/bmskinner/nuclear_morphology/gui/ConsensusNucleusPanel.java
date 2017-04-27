@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.File;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
@@ -47,6 +48,8 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.SVGWriter;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
@@ -546,6 +549,23 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		}
 	}
 	
+	private void exportConsensusNuclei(){
+		if(activeDataset()!=null){
+
+			if(activeDataset().getCollection().hasConsensus()){
+
+				File exportFile = new File(activeDataset().getCollection().getOutputFolder(), activeDataset().getName()+Exporter.SVG_FILE_EXTENSION);
+				SVGWriter wr = new SVGWriter(exportFile);
+				
+				wr.export(activeDataset().getCollection().getConsensus());
+				
+			}
+		} else {
+			warn("Cannot export: must have one dataset selected");
+		}
+	}
+	
+	
 	@Override
 	public void signalChangeReceived(SignalChangeEvent event) {
 		
@@ -577,6 +597,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 			if(event.type().equals("OffsetReset")){
 				resetConsensusNucleusOffset();
 			}
+			if(event.type().equals(ConsensusNucleusChartPanel.EXPORT_SVG_LBL)){
+				exportConsensusNuclei();
+			}
+
+			
 			this.update(getDatasets());
 			
 		}

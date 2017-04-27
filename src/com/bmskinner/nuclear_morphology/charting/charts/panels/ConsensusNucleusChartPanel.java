@@ -45,6 +45,8 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
 	public static final String SOURCE_COMPONENT = "ConsensusNucleusChartPanel"; 
 	
+	public static final String EXPORT_SVG_LBL = "Export SVG"; 
+	
 	private boolean fillConsensus = true;
 
 	private ComponentOverlay consensusOverlay = null;
@@ -179,12 +181,20 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 		resetOffsetItem.addActionListener(this);
 		resetOffsetItem.setActionCommand("OffsetReset");
 		
+		
+		JMenuItem exportSvgItem = new JMenuItem(EXPORT_SVG_LBL);
+		exportSvgItem.addActionListener(this);
+		exportSvgItem.setActionCommand(EXPORT_SVG_LBL);
+		
 		popup.add(alignItem);
 		popup.add(rotateItem);
 		popup.add(resetItem);
 		popup.addSeparator();
 		popup.add(offsetItem);
 		popup.add(resetOffsetItem);
+		popup.addSeparator();
+		popup.add(exportSvgItem);
+		
 		return popup;
 	}
 	
@@ -219,7 +229,9 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 			fireSignalChangeEvent("OffsetReset");
 		}
 		
-		
+		if(arg0.getActionCommand().equals(EXPORT_SVG_LBL)){
+			fireSignalChangeEvent(EXPORT_SVG_LBL);
+		}
 		
 		
 	}

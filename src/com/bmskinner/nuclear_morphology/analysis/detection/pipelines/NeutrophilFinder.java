@@ -35,28 +35,17 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
-import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.ContrastEnhancer;
 import ij.process.ImageProcessor;
 import inra.ijpb.binary.BinaryImages;
 import inra.ijpb.binary.ChamferWeights;
-import inra.ijpb.binary.distmap.DistanceTransform;
-import inra.ijpb.binary.distmap.DistanceTransform5x5Float;
 import inra.ijpb.label.LabelImages;
-import inra.ijpb.math.ImageCalculator;
-import inra.ijpb.math.ImageCalculator.Operation;
 import inra.ijpb.morphology.GeodesicReconstruction;
-import inra.ijpb.morphology.MinimaAndMaxima;
-import inra.ijpb.morphology.MinimaAndMaxima3D;
 import inra.ijpb.morphology.Morphology;
 import inra.ijpb.morphology.Strel;
-import inra.ijpb.morphology.attrfilt.AreaOpening;
-import inra.ijpb.morphology.attrfilt.AreaOpeningNaive;
 import inra.ijpb.morphology.strel.DiskStrel;
 import inra.ijpb.watershed.ExtendedMinimaWatershed;
-import inra.ijpb.watershed.Watershed;
 
 /**
  * Detect neutrophils in H&E stained images
@@ -216,91 +205,11 @@ public class NeutrophilFinder extends CellFinder {
 		return result;
 		
 	}
-	
-	
-	private ImageProcessor detectCytoplasmBySegmentation(File imageFile) throws ComponentCreationException, ImageImportException{
 		
-		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-
-		
-		// Based on http://blogs.mathworks.com/steve/2013/11/19/watershed-transform-question-from-tech-support/
-		try {
-			IDetectionOptions main = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-			IPreprocessingOptions op = (IPreprocessingOptions) main.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-			
-			// Use colour thresholds to get rough cytoplasms
-
-			int minHue = op.getMinHue();
-			int maxHue = op.getMaxHue();
-			int minSat = op.getMinSaturation();
-			int maxSat = op.getMaxSaturation();
-			int minBri = op.getMinBrightness();
-			int maxBri = op.getMaxBrightness();
-			int connectivity = 8;
-
-			ip = new ImageFilterer(ip)
-					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
-					.convertToByteProcessor()
-					.toProcessor();
-
-			ip.invert();
-
-//			fireDetectionEvent(ip.duplicate(), "Colour threshold");
-			
-			// Fill area holes
-			AreaOpening ao = new AreaOpeningNaive();
-			ip = ao.process(ip, (int) main.getMinSize());
-
-//			fireDetectionEvent(ip.duplicate(), "Area opening");
-						
-			// Calculate a distance map
-			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
-			boolean normalize = true;
-			DistanceTransform dt = new DistanceTransform5x5Float(floatWeights, normalize);
-			ImageProcessor distance = dt.distanceMap(ip);
-//			distance.invert();
-//			fireDetectionEvent(distance.duplicate(), "Distance map");
-			
-			// Calculate extended minima
-			int dynamic = 2;
-			ImageProcessor minima = MinimaAndMaxima.extendedMinima( distance, dynamic, connectivity );
-//			minima.invert();
-
-//			fireDetectionEvent(minima.duplicate(), "Extended minima");
-			
-			// Impose the minima to the distnace map
-			ImageProcessor minimaDistance = MinimaAndMaxima.imposeMinima(distance, minima);
-			
-			
-			
-			// Watershed the image
-//			WatershedTransform2D wt = new WatershedTransform2D(result, null, connectivity);
-//			ImageProcessor watersheded = wt.apply();
-			
-			ImageProcessor watersheded = Watershed.computeWatershed(minimaDistance, null, connectivity);
-			
-//			fireDetectionEvent(watersheded.duplicate(), "Watershed");
-
-			
-			
-			ImageProcessor lines = BinaryImages.binarize( watersheded );
-				
-//			fireDetectionEvent(lines.duplicate(), "Binarized");
-			
-			return lines;
-		} catch (MissingOptionException e) {
-			error("Missing option", e);
-			return null;
-		}
-
-	}
-	
-	
 	
 	private ImageProcessor detectCytoplasmByWatershed(File imageFile) throws ComponentCreationException, ImageImportException{
 
 		ImageProcessor ip =  new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
-		ImageProcessor ann = ip.duplicate();
 //		fireDetectionEvent(ip.duplicate(), "Input");
 
 		try {

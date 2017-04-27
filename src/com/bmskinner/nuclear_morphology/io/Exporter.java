@@ -7,6 +7,7 @@ package com.bmskinner.nuclear_morphology.io;
  */
 public interface Exporter {
 	static final String TAB_FILE_EXTENSION = ".txt";
+	static final String SVG_FILE_EXTENSION = ".svg";
 	
 	static final String NEWLINE = System.getProperty("line.separator"); 
 }
