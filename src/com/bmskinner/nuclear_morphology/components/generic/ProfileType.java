@@ -44,20 +44,20 @@ public enum ProfileType {
 	 * @param label the label to use on chart axes with this profile
 	 * @param dimension the statistical dimension the profile covers
 	 */
-	ProfileType(String name, String label, StatisticDimension dimension){
+	  ProfileType(String name, String label, StatisticDimension dimension){
 		  this.name = name;
 		  this.label = label;
 		  this.dimension = dimension;
 	  }
-	  
+
 	  public String toString(){
 		  return this.name;
 	  }
-	  
+
 	  public String getLabel(){
 		  return this.label;
 	  }
-	  
+
 	  public static ProfileType fromString(String s){
 		  for(ProfileType p : ProfileType.values()){
 			  if(s.equals(p.name)){
@@ -66,13 +66,26 @@ public enum ProfileType {
 		  }
 		  return null;
 	  }
-	  
+
 	  public StatisticDimension getDimension(){
 		  return this.dimension;
 	  }
-	  
+
+	  /**
+	   * The profile types that should be exported to file
+	   * @return
+	   */
 	  public static ProfileType[] exportValues(){
 		  ProfileType[] array = { ANGLE, DIAMETER, RADIUS };
 		  return array;
 	  }
-  }
+
+	  /**
+	   * The profile types that should be displayed in the GUI
+	   * @return
+	   */
+	  public static ProfileType[] displayValues(){
+		  ProfileType[] array = { ANGLE, DIAMETER, RADIUS, ZAHN_ROSKIE };
+		  return array;
+	  }
+}

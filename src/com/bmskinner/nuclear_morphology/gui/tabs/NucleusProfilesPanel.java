@@ -38,7 +38,8 @@ public class NucleusProfilesPanel extends DetailPanel {
 		this.setLayout(new BorderLayout());
 		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 		
-		for(ProfileType type : ProfileType.values()){
+		for(ProfileType type : ProfileType.displayValues()){
+
 			DetailPanel panel = new ProfileDisplayPanel(type);
 			this.addSubPanel(panel);
 			tabPanel.addTab(type.toString(), panel);
