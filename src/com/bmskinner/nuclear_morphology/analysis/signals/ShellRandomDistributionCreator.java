@@ -52,6 +52,14 @@ public class ShellRandomDistributionCreator implements Loggable {
 		}
 		
 		// Make a list of random points
+		
+		double xCen = template.getBounds().getCenterX();
+		double yCen = template.getBounds().getCenterY();
+		double xMin = template.getBounds().getMinX();
+		double xMax = template.getBounds().getMaxX();
+		double yMin = template.getBounds().getMinY();
+		double yMax = template.getBounds().getMaxY();
+		
 		List<IPoint> list = new ArrayList<IPoint>();
 		for(int i=0; i<iterations; i++){
 			list.add(createRandomPoint(template));

@@ -263,6 +263,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		borderList.get(0).setPrevPoint(borderList.get(borderList.size()-1));
 		
 		moveCentreOfMass(oldCoM);
+//		bounds = smoothed.getFloatBounds(); 
 		calculateBounds();
 				
 	}
@@ -282,10 +283,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		
 		double w = xMax-xMin;
 		double h = yMax-yMin;
-		
-		
+
 		// Constructor for rectangle - upper-left point plus w and h;
-		bounds = new Rectangle2D.Double(xMin, yMax, w, h);
+		// Note that the coordinates have y increasing downwards, so the upper point is yMin
+		bounds = new Rectangle2D.Double(xMin, yMin, w, h);
+
 	}
 	
 	
@@ -745,7 +747,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		public boolean containsPoint(IPoint p){
 			
 			// Fast check - is the point within the bounding rectangle?
-			if( ! this.getBounds().contains(p.toPoint2D())){
+			if( ! bounds.contains(p.toPoint2D())){
 				return false;			
 			} 
 			
