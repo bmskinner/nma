@@ -563,63 +563,66 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			
 			for(ICell cell : cells){
-				fine("Drawing signals for cell "+cell.getNucleus().getNameAndNumber());
+				
+				for(Nucleus n : cell.getNuclei()){
+					fine("Drawing signals for "+n.getNameAndNumber());
 
-				Mesh<Nucleus> cellMesh;
-				try {
-					cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
-					
-					if(straighten){
-						cellMesh = cellMesh.straighten();
-					}
-					
-					// Get the image with the signal
-					ImageProcessor ip = cell.getNucleus().getSignalCollection().getImage(signalGroup);
-					finest("Image for "+cell.getNucleus().getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
-					
-					// Create NucleusMeshImage from nucleus.
-					finer("Making nucleus mesh image");
-					ImageProcessor warped;
+					Mesh<Nucleus> cellMesh;
 					try {
-						MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
+						cellMesh = new NucleusMesh(n, meshConsensus);
 
-						// Draw NucleusMeshImage onto consensus mesh.
-						finer("Warping image onto consensus mesh");
+						if(straighten){
+							cellMesh = cellMesh.straighten();
+						}
+
+						// Get the image with the signal
+						ImageProcessor ip = n.getSignalCollection().getImage(signalGroup);
+						finest("Image for "+n.getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
+
+						// Create NucleusMeshImage from nucleus.
+						finer("Making nucleus mesh image");
+						ImageProcessor warped;
+						try {
+							MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
+
+							// Draw NucleusMeshImage onto consensus mesh.
+							finer("Warping image onto consensus mesh");
 
 
 
-						warped = im.drawImage(meshConsensus);
-					} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-						fine("Cannot make mesh for "+cell.getNucleus().getNameAndNumber());
-						warped = null;
+							warped = im.drawImage(meshConsensus);
+						} catch (UncomparableMeshImageException | MeshImageCreationException e) {
+							fine("Cannot make mesh for "+n.getNameAndNumber());
+							warped = null;
+						}
+						finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
+						warpedImages[cellNumber] = warped;
+
+
+					} catch(IllegalArgumentException e){
+
+						fine("Error creating warping mesh");
+						warn(e.getMessage());
+
+						// Make a blank image for the array
+						warpedImages[cellNumber] = createBlankProcessor();
+
+
+					} catch (UnloadableImageException e) {
+						warn("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber());
+						stack("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber(), e);
+						warpedImages[cellNumber] = createBlankProcessor();
+					} catch (MeshCreationException e1) {
+						stack("Error creating mesh",e1);
+						warpedImages[cellNumber] = createBlankProcessor();
+					} finally {
+
+						mergedImage = combineImages();
+						mergedImage = rescaleImageIntensity();
+
+						finer("Completed cell "+cellNumber);
+						publish(cellNumber++);
 					}
-					finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
-					warpedImages[cellNumber] = warped;
-					
-					
-				} catch(IllegalArgumentException e){
-					
-					fine("Error creating warping mesh");
-					warn(e.getMessage());
-					
-					// Make a blank image for the array
-					warpedImages[cellNumber] = createBlankProcessor();
-					
-					
-				} catch (UnloadableImageException e) {
-					warn("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber());
-					stack("Unable to load signal image for signal group "+signalGroup+" in cell "+cell.getNucleus().getNameAndNumber(), e);
-					warpedImages[cellNumber] = createBlankProcessor();
-				} catch (MeshCreationException e1) {
-					stack("Error creating mesh",e1);
-					warpedImages[cellNumber] = createBlankProcessor();
-				} finally {
-					
-					mergedImage = combineImages();
-					mergedImage = rescaleImageIntensity();
-					
-					finer("Completed cell "+cellNumber);
-					publish(cellNumber++);
 				}
 				
 			}

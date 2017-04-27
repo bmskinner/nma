@@ -892,7 +892,15 @@ public class RoundNucleus extends AbstractCellularComponent
 				throw new UnavailableProfileTypeException("Error getting profile "+type);
 			}
 		} else {
-			throw new IllegalArgumentException("Profile type "+type+" is not found in this nucleus");
+			ProfileCreator pc = new ProfileCreator(this);
+			try {
+				profileMap.put(type, pc.createProfile(type));
+				return new SegmentedFloatProfile(this.profileMap.get(type));
+			} catch (ProfileException e) {
+				stack(e);
+				throw new UnavailableProfileTypeException("Profile type "+type+" missing and could not be created");
+			}
+			
 		}
 	}
 	
