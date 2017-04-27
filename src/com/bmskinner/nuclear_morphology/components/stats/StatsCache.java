@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -151,6 +152,24 @@ public class StatsCache {
 			Key key = new Key(stat, component, s);
 			values.remove(key);
 			cache.remove(key);
+		}
+	}
+	
+	/**
+	 * Clear the values for the given scale
+	 * @param scale
+	 * @param scale
+	 */
+	public void clear(MeasurementScale scale){
+		
+		Iterator<Key> it = values.keySet().iterator();
+		while(it.hasNext()){
+			Key key = it.next();
+
+			if(key.scale.equals(scale)){
+				it.remove();
+				cache.remove(key);
+			}
 		}
 	}
 	

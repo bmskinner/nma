@@ -887,7 +887,7 @@ public class MainWindow
 	private void recacheCharts(final List<IAnalysisDataset> list){
 		
 		Runnable task = () -> {
-			finer("Heard recache request for list of  "+list.size()+" datasets");
+			fine("Heard recache request for list of  "+list.size()+" datasets");
 			for(TabPanel panel : detailPanels){
 				panel.refreshChartCache(list);
 				panel.refreshTableCache(list);

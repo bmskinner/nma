@@ -774,6 +774,11 @@ public class DefaultCellCollection
 		statsCache.clear(stat, component);
 	}
 	
+	@Override
+	public void clear(MeasurementScale scale){
+		statsCache.clear(scale);
+	}
+	
 
 	@Override
 	public double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)  throws Exception {

@@ -39,6 +39,12 @@ public interface StatisticalCollection {
 	 * @param component the cellular component to fetch from
 	 */
 	void clear(PlottableStatistic stat, String component);
+	
+	/**
+	 * Force the statistics at the given scale to be recalculated
+	 * @param scale the scale to recalculate
+	 */
+	void clear(MeasurementScale scale);
 
 	/**
 	 * Get the median value of the given stat in the collection

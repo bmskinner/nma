@@ -23,6 +23,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.CellTableDatasetCreato
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -43,6 +44,13 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 	
 	private JButton scaleButton;
 	private JButton sourceButton;
+	
+	private static final String APPLY_SCALE_ALL_MESSAGE   = "Apply this scale to all cells in the dataset?";
+	private static final String APPLY_SCALE_ALL_HEADER    = "Apply to all?";
+	private static final String APPLY_SCALE_ALL_CELLS_LBL = "Apply to all cells";
+	private static final String APPLY_SCALE_ONE_CELLS_LBL = "Apply to only this cell";
+	private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
+
 	
 	
 	public CellStatsPanel(CellViewModel model) {
@@ -153,25 +161,26 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
 		int option = JOptionPane.showOptionDialog(null, 
 				spinner, 
-				"Choose the new scale: pixels per micron", 
+				CHOOSE_NEW_SCALE_LBL, 
 				JOptionPane.OK_CANCEL_OPTION, 
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 		if (option == JOptionPane.OK_OPTION) {
 			
 			//TODO: merged datasets - apply to merge source cells only or all cells
 
-			Object[] options = { "Apply to all cells" , "Apply to only this cell", };
-			int applyAllOption = JOptionPane.showOptionDialog(null, "Apply this scale to all cells in the dataset?", "Apply to all?",
+			Object[] options = { APPLY_SCALE_ALL_CELLS_LBL , APPLY_SCALE_ONE_CELLS_LBL, };
+			int applyAllOption = JOptionPane.showOptionDialog(null, APPLY_SCALE_ALL_MESSAGE, APPLY_SCALE_ALL_HEADER,
 
 					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
 
 					null, options, options[1]);
 
-			double scale = (Double) spinner.getModel().getValue();
+			double scale = (double) spinner.getModel().getValue();
 
 			if(scale>0){ // don't allow a scale to cause divide by zero errors
 				if(applyAllOption==0){ // button at index 1
 
+					activeDataset().getCollection().clear(MeasurementScale.MICRONS);
 					finest("Updating scale for all cells");
 					for(Nucleus n : activeDataset().getCollection().getNuclei()){
 						n.setScale(scale);
@@ -189,6 +198,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 						stack(e.getMessage(), e);
 					}
 					
+					
+					
 
 				} else {
 					finest("Updating scale for single cell");
@@ -205,6 +216,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 			}
 		}
 	}
+	
+
 	
 	@Override
 	public synchronized void refreshTableCache(){

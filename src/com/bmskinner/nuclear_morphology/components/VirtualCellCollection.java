@@ -925,6 +925,11 @@ public class VirtualCellCollection implements ICellCollection {
 	public void clear(PlottableStatistic stat, String component){
 		statsCache.clear(stat, component);
 	}
+	
+	@Override
+	public void clear(MeasurementScale scale){
+		statsCache.clear(scale);
+	}
 
 
 	@Override
