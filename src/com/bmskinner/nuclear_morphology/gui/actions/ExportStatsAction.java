@@ -24,8 +24,12 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 
@@ -56,20 +60,21 @@ public class ExportStatsAction extends ProgressableAction {
 			cancel();
 		}
 		
-		//TODO - select exact stats / components to be exported
-		if(datasets.size()==1){
-				new DatasetStatsExporter(file).export(datasets.get(0));
-				
-		} else {					
-			
-			if(file !=null){ // null if user cancels
-				new DatasetStatsExporter(file).export(datasets);
-			}
-		}
+		IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
+		worker = new DefaultAnalysisWorker(m, datasets.size());
+		worker.addPropertyChangeListener(this);
+		this.setProgressMessage("Exporting stats");
+		ThreadManager.getInstance().submit(worker);
+		
+	}
+	
+	@Override
+	public void finished(){
 		
 		this.cancel();
-
-		
+		fine("Refolding finished, cleaning up");
+		super.finished();
+		this.countdownLatch();
 	}
 	
 	private File chooseExportFile(){
@@ -84,7 +89,7 @@ public class ExportStatsAction extends ProgressableAction {
 			defaultFile = "Multiple_stats_export"+Exporter.TAB_FILE_EXTENSION;
 			dir =  IAnalysisDataset.commonPathOfFiles(datasets);
 			if( ! dir.exists() || ! dir.isDirectory()){
-				dir = new File(System.getProperty("user.home"));
+				dir = GlobalOptions.getInstance().getDefaultDir();
 			}
 		}
 

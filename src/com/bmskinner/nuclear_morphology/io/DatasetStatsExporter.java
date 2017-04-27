@@ -1,8 +1,13 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -26,7 +31,7 @@ import ij.IJ;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter implements Exporter, Loggable {
+public class DatasetStatsExporter extends AbstractAnalysisMethod implements Exporter, Loggable, IAnalysisMethod {
 	
 	private static final String EXPORT_MESSAGE = "Exporting stats...";
 	private File exportFile;
@@ -34,11 +39,33 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 	
 	private boolean includeProfiles = true;
 	
+	private List<IAnalysisDataset> list = new ArrayList<>();
+	
 	/**
 	 * Create specifying the folder stats will be exported into
 	 * @param folder
 	 */
-	public DatasetStatsExporter(File file){
+	public DatasetStatsExporter(File file, List<IAnalysisDataset> list){
+		super(null);
+		this.list = list;
+		if(file.isDirectory()){
+			file = new File(file, DEFAULT_MULTI_FILE_NAME);
+		}
+		exportFile = file;
+		
+		if(exportFile.exists()){
+			exportFile.delete();
+		}
+		
+	}
+	
+	/**
+	 * Create specifying the folder stats will be exported into
+	 * @param folder
+	 */
+	public DatasetStatsExporter(File file, IAnalysisDataset dataset){
+		super(null);
+		list.add(dataset);
 		
 		if(file.isDirectory()){
 			file = new File(file, DEFAULT_MULTI_FILE_NAME);
@@ -49,6 +76,13 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 			exportFile.delete();
 		}
 		
+	}
+	
+	@Override
+	public IAnalysisResult call(){
+		
+		export(list);
+		return new DefaultAnalysisResult(list);
 	}
 	
 	/**
@@ -85,6 +119,7 @@ public class DatasetStatsExporter implements Exporter, Loggable {
 		try {
 			for(IAnalysisDataset d : list){
 				export(d, outLine, exportFile);
+				fireProgressEvent();
 			}
 		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
 			error("Error exporting dataset",e);

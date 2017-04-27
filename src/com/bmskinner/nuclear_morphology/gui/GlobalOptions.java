@@ -153,6 +153,11 @@ public class GlobalOptions {
 		this.convertDatasets = convertDatasets;
 	}
 	
+	/**
+	 * Get the default directory for exporting results or beginning new analyses. 
+	 * If this has not been set in the config file, it defaults to the user home directory.
+	 * @return
+	 */
 	public synchronized File getDefaultDir() {
 		if(defaultDir.exists()){
 			return defaultDir;

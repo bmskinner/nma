@@ -1717,4 +1717,10 @@ public class CellCollection implements ICellCollection {
 		return 0;
 	}
 
+	@Override
+	public void clear(MeasurementScale scale) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
