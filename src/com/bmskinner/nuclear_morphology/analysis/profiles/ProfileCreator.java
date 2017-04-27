@@ -260,6 +260,15 @@ public class ProfileCreator implements Loggable {
 			
 			double angle = Math.toDegrees(rad);
 						
+			if(angle>180){
+				angle= -180 + (angle-180);
+			}
+		
+			if(angle<-180){
+				angle = 180 + (angle+180);
+//				angle = -180-angle;
+			}
+//			
 //			if(angle < 0){
 //				angle = 0-angle;
 //			}
