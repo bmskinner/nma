@@ -197,7 +197,7 @@ public class ImageImporter implements Loggable, Importer {
 		ip.invert();
 		return ip;
 	}
-	
+		
 	/**
 	 * Test if the given image can be read by this program
 	 * @param image

@@ -37,6 +37,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -140,6 +141,7 @@ public class ImagesTabPanel extends DetailPanel {
 		TreeModel model = new DefaultTreeModel(root);
 
 		tree.setModel(model);
+		label.setText(null);
 	}
 	
 	@Override
@@ -195,7 +197,13 @@ public class ImagesTabPanel extends DetailPanel {
 					}
 					
 					ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
-					ImageAnnotator an = new ImageAnnotator(ip);
+					
+
+					ImageConverter cn = new ImageConverter(ip); 
+					if(cn.isByteProcessor()){
+						cn.convertToColorProcessor();
+					}
+					ImageAnnotator an = cn.toAnnotator();
 					
 					for(ICell c : activeDataset().getCollection().getCells(data.getFile())){
 						an.annotateCellBorders(c);

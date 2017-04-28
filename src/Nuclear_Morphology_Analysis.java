@@ -74,7 +74,9 @@ implements PlugIn, Loggable
 			"swingx-all",
 			"weka",
 			"AnalyzeSkeleton",
-			"Gray_Morphology"
+			"Gray_Morphology",
+			"MorphoLibJ",
+			"jfreesvg"
 	};
 	
 	public static void main(String[] args){
@@ -333,8 +335,8 @@ implements PlugIn, Loggable
 		String pluginDirName = IJ.getDirectory("plugins");
 		
 		File pluginDir = new File(pluginDirName);
-		File oldJarDir = new File(pluginDirName+File.separator+"jars");
-		File jarDir    = new File(pluginDirName+File.separator+"Nuclear_Morphology_Analysis");
+		File oldJarDir = new File(pluginDirName, "jars");
+		File jarDir    = new File(pluginDirName, "Nuclear_Morphology_Analysis");
 		
 
 		// check the plugins directory directly

@@ -77,6 +77,30 @@ public abstract class AbstractImageFilterer implements Loggable {
 	}
 	
 	/**
+	 * Create an annotator containing this image
+	 * @return
+	 */
+	public ImageAnnotator toAnnotator(){
+		return new ImageAnnotator(ip);
+	}
+	
+	/**
+	 * Create a converter containing this image
+	 * @return
+	 */
+	public ImageConverter toConverter(){
+		return new ImageConverter(ip);
+	}
+	
+	/**
+	 * Create a converter containing this image
+	 * @return
+	 */
+	public ImageFilterer toFilterer(){
+		return new ImageFilterer(ip);
+	}
+	
+	/**
 	 * Get the current image processor
 	 * @return
 	 */

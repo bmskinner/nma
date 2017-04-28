@@ -56,7 +56,7 @@ public class BuildHierarchicalTreeAction extends ProgressableAction implements D
 			IAnalysisMethod m = clusterSetup.getMethod();//new TreeBuildingMethod(dataset, options);
 
 			int maxProgress = dataset.getCollection().size() * 2;
-			worker = new DefaultAnalysisWorker(m, maxProgress);
+			worker = new DefaultAnalysisWorker(m);
 			worker.addPropertyChangeListener(this);
 			ThreadManager.getInstance().submit(worker);
 
