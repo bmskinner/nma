@@ -50,7 +50,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		protected JPanel buttonPanel = new JPanel(new FlowLayout());
 		protected ExportableChartPanel chartPanel;
 		
-		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
+//		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
 		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
 		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 		
@@ -78,9 +78,9 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 			profileAlignmentOptionsPanel.addActionListener(this);
 			profileAlignmentOptionsPanel.setEnabled(false);
 			
-			buttonPanel.add(borderTagOptionsPanel);
-			borderTagOptionsPanel.addActionListener(this);
-			borderTagOptionsPanel.setEnabled(false);
+//			buttonPanel.add(borderTagOptionsPanel);
+//			borderTagOptionsPanel.addActionListener(this);
+//			borderTagOptionsPanel.setEnabled(false);
 			
 			buttonPanel.add(profileMarkersOptionsPanel);
 			profileMarkersOptionsPanel.addActionListener(this);
@@ -119,7 +119,7 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 		
 		public void setEnabled(boolean b){
 			profileAlignmentOptionsPanel.setEnabled(b);
-			borderTagOptionsPanel.setEnabled(b);
+//			borderTagOptionsPanel.setEnabled(b);
 			profileMarkersOptionsPanel.setEnabled(b);
 		}
 		

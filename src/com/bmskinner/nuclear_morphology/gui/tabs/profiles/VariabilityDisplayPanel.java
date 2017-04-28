@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
@@ -58,7 +59,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	protected ExportableChartPanel chartPanel;
 	private JSpinner pvalueSpinner;
 
-	private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
+//	private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
 	private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
@@ -77,9 +78,9 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 		chartPanel.getChartRenderingInfo().setEntityCollection(null);
 		this.add(chartPanel, BorderLayout.CENTER);
 
-		buttonPanel.add(borderTagOptionsPanel);
-		borderTagOptionsPanel.addActionListener(this);
-		borderTagOptionsPanel.setEnabled(false);
+//		buttonPanel.add(borderTagOptionsPanel);
+//		borderTagOptionsPanel.addActionListener(this);
+//		borderTagOptionsPanel.setEnabled(false);
 
 
 		pvalueSpinner = new JSpinner(new SpinnerNumberModel(SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL,	0d, 1d, 0.001d));
@@ -106,7 +107,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 
 	public void setEnabled(boolean b){
-		borderTagOptionsPanel.setEnabled(b);
+//		borderTagOptionsPanel.setEnabled(b);
 		profileCollectionTypeSettingsPanel.setEnabled(b);
 		profileMarkersOptionsPanel.setEnabled(b);
 		pvalueSpinner.setEnabled(b);
@@ -165,7 +166,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 
 			this.setEnabled(true);
 
-			BorderTagObject tag = borderTagOptionsPanel.getSelected();
+//			BorderTagObject tag = borderTagOptionsPanel.getSelected();
 			boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
 			ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
 
@@ -173,7 +174,7 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 				.setDatasets(getDatasets())
 				.setNormalised(true)
 				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(tag)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(showMarkers)
 				.setModalityPosition((Double) pvalueSpinner.getValue())
 				.setSwatch(GlobalOptions.getInstance().getSwatch())

@@ -25,6 +25,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
@@ -79,7 +80,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
 			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
 			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
-			BorderTagObject tag        = borderTagOptionsPanel.getSelected();
+//			BorderTagObject tag        = borderTagOptionsPanel.getSelected();
 			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
 			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
 			
@@ -89,7 +90,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 				.setDatasets(getDatasets())
 				.setNormalised(normalised)
 				.setAlignment(alignment)
-				.setTag(tag)
+				.setTag(Tag.REFERENCE_POINT)
 				.setShowMarkers(showMarkers)
 				.setHideProfiles(hideProfiles)
 				.setSwatch(GlobalOptions.getInstance().getSwatch())
