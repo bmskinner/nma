@@ -179,8 +179,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 						.getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
 						.getOrderedSegments();
 			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-//				warn("Unable to create median profile stats table");
-				fine("Error getting median profile", e);
+				stack("Error getting median profile", e);
 				return createBlankTable();
 			}
 			
@@ -198,10 +197,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 			model.addColumn("", fieldNames);
 						
-//			DecimalFormat df = new DecimalFormat("#.##");
-//			df.setMaximumFractionDigits(2);
-//			df.setMinimumFractionDigits(2);
-//			df.setMinimumIntegerDigits(1);
 			DecimalFormat pf = new DecimalFormat("#.###");
 
 			for(IBorderSegment segment : segments) {
@@ -560,6 +555,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			return createBlankTable();
 		} 
 		
+		final String NUCLEUS_LABEL = "Nuclei";
+		final String[] VALUE_LABELS = { " median",
+				" mean",
+				" S.E.M.",
+				" mean 95% CI",
+				" p(unimodal)"
+		};
+		
 		NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets()); // default, applies to everything
 
 		DefaultTableModel model = new DefaultTableModel();
@@ -567,21 +570,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		List<IAnalysisDataset> list = options.getDatasets();
 		
 		List<Object> columnData = new ArrayList<Object>();	
-		columnData.add("Nuclei");
+		columnData.add(NUCLEUS_LABEL);
 		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
-			columnData.add(stat.toString()+" median");
-			columnData.add(stat.toString()+" mean");
-			columnData.add(stat.toString()+" S.E.M.");
-			columnData.add(stat.toString()+" mean 95% CI");
-			columnData.add(stat.toString()+" p(unimodal)");
+			for(String value : VALUE_LABELS){
+				columnData.add(stat.toString()+value);
+			}
 		}
 
 
 		model.addColumn("", columnData.toArray());
 		
-		finest("Created model row headers");
 
-		finest("Making column for each dataset");
 		for(IAnalysisDataset dataset : list){
 			
 			finest("Making column for "+dataset.getName());
@@ -591,7 +590,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			model.addColumn(dataset.getName(), datasetData.toArray());
 			finest("Added column for "+dataset.getName());
 		}
-		finest("Created table model");
 		
 		return model;	
 	}
@@ -636,12 +634,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 				
 		if( ! options.hasDatasets()){
-			finest("No datasets, creating blank venn table");
 			return createBlankTable();
 		}
 		
 		if(options.isSingleDataset()){
-			finest("Single dataset, creating blank venn table");
 			return createBlankTable();
 		}
 		
@@ -829,29 +825,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		}
 		return  model;
 	}
-	
-	/**
-	 * Run a Wilcoxon test on the given datasets. 
-	 * @param dataset1
-	 * @param dataset2
-	 * @param getPValue
-	 * @return
-	 */
-	private double runWilcoxonTest(double[] dataset1, double[] dataset2, boolean getPValue){
-
-		double result = 0;
-		MannWhitneyUTest test = new MannWhitneyUTest(); // default, NaN's are left in place and ties get the average of applicable ranks
 		
-
-		if(getPValue){ // above diagonal, p-value
-			result = test.mannWhitneyUTest(dataset1, dataset2); // correct for the number of datasets tested
-
-		} else { // below diagonal, U statistic
-			result = test.mannWhitneyU(dataset1, dataset2);
-		}
-		return result;
-	}
-	
 	
 	/**
 	 * Carry out pairwise wilcoxon rank-sum test on the given stat of the given datasets
@@ -912,7 +886,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					
 					double[] d2Values = dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 					
-					double pValue = runWilcoxonTest( d1Values, d2Values, isGetPVal);
+					double pValue = Stats.runWilcoxonTest( d1Values, d2Values, isGetPVal);
 					
 					popData[i] = df.format( pValue  );
 				}
@@ -974,7 +948,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 						return createBlankTable();
 					}
 					
-					popData[i] = df.format( runWilcoxonTest( 
+					popData[i] = df.format( Stats.runWilcoxonTest( 
 							dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg1.getID()),
 
 							dataset2.getCollection().getMedianStatistics(PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg2.getID()),

@@ -80,6 +80,7 @@ import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.InterDatasetComparisonDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.MergesDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.NuclearStatisticsPanel;
@@ -124,7 +125,7 @@ public class MainWindow
 	private static final String SEGMENTS_TAB_LBL      = "Nuclear segments";
 	private static final String COMPARISONS_TAB_LBL   = "Comparisons";
 	private static final String EDITING_TAB_LBL       = "Editing";
-	
+	private static final String IMAGES_TAB_LBL        = "Images";
 	
 	private JTabbedPane 			tabbedPane;				// bottom panel tabs. Contains:
 	
@@ -138,6 +139,8 @@ public class MainWindow
 	private MergesDetailPanel		mergesDetailPanel;		// merges between populations
 	private InterDatasetComparisonDetailPanel comparisonsPanel;
 	private EditingDetailPanel		editingDetailPanel; 	// for altering data
+	private ImagesTabPanel		    imagesTabPanel; 	// for altering data
+	
 	
 	private List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
 	
@@ -341,6 +344,7 @@ public class MainWindow
 		segmentsDetailPanel  = new SegmentsDetailPanel();
 		comparisonsPanel     = new InterDatasetComparisonDetailPanel();
 		editingDetailPanel   = new EditingDetailPanel();
+		imagesTabPanel       = new ImagesTabPanel();
 		
 		detailPanels.add(analysisDetailPanel);
 		detailPanels.add(clusterDetailPanel);
@@ -352,8 +356,10 @@ public class MainWindow
 		detailPanels.add(segmentsDetailPanel);
 		detailPanels.add(comparisonsPanel);
 		detailPanels.add(editingDetailPanel);
+		detailPanels.add(imagesTabPanel);
 		
 		tabbedPane.addTab(ANALYSIS_SETUP_TAB_LBL, analysisDetailPanel);
+		tabbedPane.addTab(IMAGES_TAB_LBL, imagesTabPanel);
 
 		tabbedPane.addTab(CELLS_TAB_LBL, cellsDetailPanel);
 		
@@ -368,6 +374,9 @@ public class MainWindow
 		tabbedPane.addTab(MERGES_TAB_LBL, mergesDetailPanel);
 		
 		tabbedPane.addTab(EDITING_TAB_LBL, null, editingDetailPanel, null);
+		
+		
+		
 	}
 	
 	/**

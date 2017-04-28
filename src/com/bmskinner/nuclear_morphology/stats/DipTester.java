@@ -43,7 +43,7 @@ import jdistlib.disttest.NormalityTest;
  * what is the difference to the median at that point? Is the list of
  * differences bimodal?
  */
-public class DipTester implements Loggable {
+public class DipTester implements Loggable, SignificanceTest {
 	
 	private ICellCollection collection;
 	

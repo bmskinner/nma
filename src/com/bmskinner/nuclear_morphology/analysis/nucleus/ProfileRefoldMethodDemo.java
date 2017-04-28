@@ -194,7 +194,7 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 	private synchronized IPoint calculateMedianPoint(List<IPoint> list){
 		double[] xpoints = new double[list.size()];
 		double[] ypoints = new double[list.size()];
-
+		
 		for(int i=0; i<list.size(); i++){
 			IPoint p = list.get(i);
 			
