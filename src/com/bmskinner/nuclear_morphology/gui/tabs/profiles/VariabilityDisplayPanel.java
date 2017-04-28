@@ -49,9 +49,15 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagOptionsPa
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileCollectionTypeSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
+/**
+ * Display variabillity information about profiles
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class VariabilityDisplayPanel extends DetailPanel implements ActionListener, ChangeListener {
 	
@@ -60,7 +66,9 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
 	private JSpinner pvalueSpinner;
 
 //	private BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
-	private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+	private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
+	
+//	private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
 	private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
 	public VariabilityDisplayPanel(){

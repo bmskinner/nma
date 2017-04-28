@@ -23,6 +23,11 @@ import javax.swing.JComboBox;
 
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
+/**
+ * Provides a drop down list with the displayable profile types.
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 
@@ -34,15 +39,9 @@ public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 		// FrankenProfiles cause problems for individual nuclei, so disable for now
 		DefaultComboBoxModel<ProfileType> model = new DefaultComboBoxModel<ProfileType>();
 		
-		for(ProfileType type : ProfileType.values()){
-			if(type.equals(ProfileType.FRANKEN)){
-				continue;
-			}
+		for(ProfileType type : ProfileType.displayValues()){
 			model.addElement(type);
 		}
-//		
-//		model.addElement(ProfileType.DIAMETER);
-//		model.addElement(ProfileType.RADIUS);
 		
 		profileTypeBox = new JComboBox<ProfileType>(model);
 		

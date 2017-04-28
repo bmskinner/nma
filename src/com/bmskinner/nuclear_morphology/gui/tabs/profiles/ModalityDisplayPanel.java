@@ -26,9 +26,14 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
-import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileCollectionTypeSettingsPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
+/**
+ * Display modality information about profiles
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class ModalityDisplayPanel extends DetailPanel implements ActionListener, ListSelectionListener {
 		
@@ -36,7 +41,8 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 		private JList<Double> pointList;
 		private ExportableChartPanel angleDistributionPanel;
 		private ExportableChartPanel pValueChartPanel; // hold a chart showing p-values across the profile
-		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+//		private ProfileCollectionTypeSettingsPanel profileCollectionTypeSettingsPanel = new ProfileCollectionTypeSettingsPanel();
+		private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 		
 		public ModalityDisplayPanel(){
 			super();
