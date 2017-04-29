@@ -218,11 +218,7 @@ public abstract class Detector implements Loggable {
 	  RoiManager manager = new RoiManager(true);
 	 
 	  
-	  // Check the background colour settings
-      if ( ! Prefs.blackBackground){
-    	  Prefs.blackBackground = true;
-    	  ThresholdAdjuster.update();
-      }
+	  
       	
 	  
 	  // run the particle analyser

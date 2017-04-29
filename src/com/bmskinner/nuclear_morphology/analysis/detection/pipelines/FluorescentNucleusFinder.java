@@ -155,6 +155,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 			fireDetectionEvent(ip.duplicate(), "Thresholded");
 		}
 		
+		filt.invert();
+		
 		GenericDetector gd = new GenericDetector();
 		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth()*original.getHeight());
 		

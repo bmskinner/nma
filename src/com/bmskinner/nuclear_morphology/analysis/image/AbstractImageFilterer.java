@@ -136,6 +136,15 @@ public abstract class AbstractImageFilterer implements Loggable {
 	}
 	
 	/**
+	 * Invert the processor
+	 * @return
+	 */
+	public AbstractImageFilterer invert(){
+		ip.invert();
+		return this;
+	}
+	
+	/**
 	 * Convert the processor into a ByteProcessor. Has no effect
 	 * if the processor is already a ByteProcessor
 	 * @return

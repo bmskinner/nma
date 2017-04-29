@@ -165,6 +165,15 @@ public class ImageFilterer extends AbstractImageFilterer {
 //		return new ImageFilterer(result);
 	}
 	
+//	/**
+//	 * Invert the processor
+//	 * @return
+//	 */
+//	public ImageFilterer invert(){
+//		ip.invert();
+//		return this;
+//	}
+	
 	/**
 	 * Threshold based on HSV
 	 * @return a copy of the image processor, with thresholding applied

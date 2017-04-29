@@ -151,24 +151,24 @@ public class NeutrophilFinder extends CellFinder {
 			// Do the filtering. Returns binary images.
 			if(cytoOptions.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
 				ip = detectCytoplasmByWatershed(imageFile);
-				fireDetectionEvent(ip.duplicate(), "Watershed");
+//				fireDetectionEvent(ip.duplicate(), "Watershed");
 			} else {
 				ip = detectCytoplasmByThreshold(imageFile);
 			}
-
+//			fireDetectionEvent(ip.duplicate(), "Cytoplasm mask");
 			
 			// Find rois
 			GenericDetector gd = new GenericDetector();
 			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
 			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
 //			gd.setThreshold(cytoOptions.getThreshold());
-			List<Roi> rois = gd.getRois(ip);
+			List<Roi> rois = gd.getRois(ip.duplicate());
 
 			List<ICytoplasm> list = new ArrayList<>();
 			for(int i=0; i<rois.size(); i++){
 
 				Roi roi = rois.get(i);
-				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip, i, gd);
+				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip.duplicate(), i, gd);
 				list.add(cyto);
 
 			}
@@ -249,28 +249,6 @@ public class NeutrophilFinder extends CellFinder {
 				ip = Morphology.dilation(ip, strel);
 			}
 			
-			/*
-			 * Use the gradient to find edges
-			 */
-//			{
-//				Strel strel = Strel.Shape.DISK.fromRadius(dilationRadius);
-//				ip = Morphology.internalGradient(ip, strel);
-//	//			fireDetectionEvent(ip.duplicate(), "Internal gradient");
-//				
-//				ip = Morphology.dilation(ip, strel);
-//	//			fireDetectionEvent(ip.duplicate(), "Dilated");
-//				
-//				ip = MinimaAndMaxima.extendedMinima(ip, dynamic);
-//	//			ip.threshold(2);
-//				
-//	//			fireDetectionEvent(ip.duplicate(), "Thresholded to minima");
-//				
-//				ip = Morphology.erosion(ip, strel);
-//	//			fireDetectionEvent(ip.duplicate(), "Eroded");
-//				
-//	//			ip.invert();
-//	//			fireDetectionEvent(ip.duplicate(), "Inverted");
-//			}
 			
 			// Calculate a distance map on the binarised input
 			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
@@ -289,7 +267,7 @@ public class NeutrophilFinder extends CellFinder {
 			// Binarise for object detection
 			ImageProcessor lines = BinaryImages.binarize( watersheded );
 //			fireDetectionEvent(lines.duplicate(), "Binarized");
-//			lines.invert();
+			lines.invert();
 			return lines;
 
 		} catch (MissingOptionException e) {
@@ -303,7 +281,7 @@ public class NeutrophilFinder extends CellFinder {
 	private ImageProcessor detectCytoplasmByThreshold(File imageFile) throws ComponentCreationException, ImageImportException{
 
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-
+		fireDetectionEvent(ip.duplicate(), "Imported image");
 		try {
 			
 			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
@@ -317,11 +295,16 @@ public class NeutrophilFinder extends CellFinder {
 			int minBri = op.getMinBrightness();
 			int maxBri = op.getMaxBrightness();
 			
-			ip = new ImageFilterer(ip)
-					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
-					.convertToByteProcessor()
-					.toProcessor();
-//			fireDetectionEvent(ip.duplicate(), "Colour threshold");
+			ImageFilterer filt = new ImageFilterer(ip);
+						
+			filt.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri);
+			
+			// the resulting processor has white cells on black. Invert.
+			filt.invert();
+
+			
+			ip = filt.convertToByteProcessor().toProcessor();
+//			fireDetectionEvent(ip.duplicate(), "To byte");
 
 			return ip;
 			
@@ -393,8 +376,7 @@ public class NeutrophilFinder extends CellFinder {
 			ImageProcessor bin = ip.duplicate();
 //			ip.setMinAndMax(thresholdMin, thresholdMax);
 			bin.threshold(thresholdMin);
-
-//			bin.invert();
+			bin.invert();
 			
 //			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
 			
@@ -534,7 +516,7 @@ public class NeutrophilFinder extends CellFinder {
 		lines = Morphology.erosion(lines, erosionStrel);
 //		fireDetectionEvent(lines.duplicate(), "Eroded");
 		
-//		lines.invert();
+		lines.invert();
 		
 		// Now take the watershed image, and detect the distinct lobes
 		makeLobes(lines, list);

@@ -18,7 +18,9 @@
  *******************************************************************************/
 
 import ij.IJ;
+import ij.Prefs;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.ThresholdAdjuster;
 
 import java.io.File;
 import java.io.IOException;
@@ -206,6 +208,14 @@ implements PlugIn, Loggable
 			if(checkPlugins()){ 
 				// load the config file properties
 				new PropertiesReader();
+				
+				// Check the ImageJ background colour settings
+				// This must be made consistent on all platforms
+				if ( ! Prefs.blackBackground){
+					Prefs.blackBackground = true;
+					ThresholdAdjuster.update();
+				}
+				
 				loadMainWindow(false);
 
 			} else {
