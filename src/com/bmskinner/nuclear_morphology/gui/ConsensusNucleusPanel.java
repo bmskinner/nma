@@ -440,28 +440,33 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 		if(activeDataset()!=null){
 
 			if(activeDataset().getCollection().hasConsensus()){
+				
+				Nucleus cons = activeDataset()
+						.getCollection()
+						.getConsensus();
+				
+				
+				if(cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.TOP_VERTICAL)){
+					alignConsensusAlongVerticalPoints();
+					this.update(activeDatasetToList());
+					return;
+				}
 
-				IBorderPoint orientationPoint;
+					
 				try {
-					orientationPoint = activeDataset()
-							.getCollection()
-							.getConsensus()
-							.getBorderTag(Tag.ORIENTATION_POINT);
+					IBorderPoint orientationPoint = cons.getBorderTag(Tag.ORIENTATION_POINT);
 					
-					activeDataset().getCollection()
-					.getConsensus()
-					.rotatePointToBottom(orientationPoint);
-					
+					cons.rotatePointToBottom(orientationPoint);
+					this.update(activeDatasetToList());
+					return;
 				} catch (UnavailableBorderTagException e) {
 					fine("Cannot get OP index in nucleus profile", e);
 				}
-				
-				
-				
-				this.update(activeDatasetToList());
+
+
 			}
 		} else {
-			log(Level.WARNING, "Cannot rotate: must have one dataset selected");
+			warn("Cannot rotate: must have one dataset selected");
 		}
 	}
 	

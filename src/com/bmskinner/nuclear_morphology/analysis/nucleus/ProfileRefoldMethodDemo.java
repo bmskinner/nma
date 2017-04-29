@@ -105,35 +105,36 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 		NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
 		Nucleus n = fact.buildInstance(roi, new File("Empty"), 0, original, com);
 		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
-		
-		IProfile median = dataset.getCollection()
-				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-		
-		for(Tag tag : BorderTagObject.values()){
 
-			int newIndex  = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
-			n.setBorderTag(tag, newIndex);
+		DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
+
+		for(Tag tag : BorderTagObject.values()){
+			
+			if(Tag.INTERSECTION_POINT.equals(tag)){
+				continue;
+			}
+			IProfile median = dataset.getCollection()
+					.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
+			int newIndex  = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+
+			cons.setBorderTag(tag, newIndex);
 		}
 		
 		
 //		// Adjust segments to fit size
-		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 		List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
 		List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
 		profile.setSegments(newSegs);
-		n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+		cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
 		
+		if(cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+			cons.alignPointsOnVertical(cons.getBorderTag(Tag.TOP_VERTICAL), cons.getBorderTag(Tag.BOTTOM_VERTICAL));
 
-		DefaultConsensusNucleus cons = new DefaultConsensusNucleus(n, dataset.getCollection().getNucleusType());
-
-		
-		if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
-			n.alignPointsOnVertical(n.getBorderTag(Tag.TOP_VERTICAL), n.getBorderTag(Tag.BOTTOM_VERTICAL));
-
-			if(n.getBorderPoint(Tag.REFERENCE_POINT).getX()>n.getCentreOfMass().getX()){
+			if(cons.getBorderPoint(Tag.REFERENCE_POINT).getX()>cons.getCentreOfMass().getX()){
 				// need to flip about the CoM
-				n.flipXAroundPoint(n.getCentreOfMass());
+				cons.flipXAroundPoint(cons.getCentreOfMass());
 			}
 
 		}
