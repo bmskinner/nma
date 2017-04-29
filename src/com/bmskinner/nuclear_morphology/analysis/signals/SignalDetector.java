@@ -145,6 +145,7 @@ public class SignalDetector extends Detector {
 		try{
 			
 			ImageProcessor ip = stack.getProcessor(stackNumber);
+			ip.invert();
 			roiList = detectRois(ip);
 			
 		} catch(Exception e){
