@@ -44,11 +44,11 @@ import ij.gui.Roi;
  * @author ben
  *
  */
-public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
+public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 	
 	private static final double PROFILE_LENGTH = 200d;
 	
-	public ProfileRefoldMethodDemo(IAnalysisDataset dataset) {
+	public ConsensusAveragingMethod(IAnalysisDataset dataset) {
 		super(dataset);
 	}
 
@@ -102,7 +102,7 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 		
 		int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(), (int) bounds.getHeight() };
 		
-		NucleusFactory fact = new NucleusFactory(dataset.getCollection().getNucleusType());
+		NucleusFactory fact = new NucleusFactory(  dataset.getCollection().getNucleusType()  );
 		Nucleus n = fact.buildInstance(roi, new File("Empty"), 0, original, com);
 		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 
@@ -117,9 +117,22 @@ public class ProfileRefoldMethodDemo extends AbstractAnalysisMethod {
 					.getProfileCollection()
 					.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
 			int newIndex  = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
-
+			int newIndexN  = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
 			cons.setBorderTag(tag, newIndex);
+			n.setBorderTag(tag, newIndexN);
+
 		}
+		
+//		IProfile median = dataset.getCollection()
+//				.getProfileCollection()
+//				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+//		IProfile nucProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//		double diff = median.absoluteSquareDifference(nucProfile);
+//		log("Difference to median: "+diff);
+//		for(int i=0; i<nucProfile.size(); i++){
+//			double d = nucProfile.get(i);
+//			log("Position "+i+"\t"+d);
+//		}
 		
 		
 //		// Adjust segments to fit size

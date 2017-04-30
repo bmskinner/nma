@@ -22,8 +22,11 @@ import java.util.concurrent.CountDownLatch;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethodDemo;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.CurveRefoldingMode;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
@@ -31,13 +34,14 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
  * Refold the consensus nucleus for the selected dataset using default parameters
  */
 public class RefoldNucleusAction extends ProgressableAction {
+	
+	private static final String PROGRESS_LBL = "Refolding";
 
 	/**
 	 * Refold the given selected dataset
 	 */
-	
 	public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
-		super(dataset, "Refolding", mw);
+		super(dataset, PROGRESS_LBL, mw);
 		this.setLatch(doneSignal);
 	}
 	
@@ -47,13 +51,18 @@ public class RefoldNucleusAction extends ProgressableAction {
 		try{
 
 			this.setProgressBarIndeterminate();
-			IAnalysisMethod m = new ProfileRefoldMethodDemo(dataset);
-//			IAnalysisMethod m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+			
+			IAnalysisMethod m;
+			if(dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)){
+				m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+			} else {
+				m = new ConsensusAveragingMethod(dataset);
+			}
+			
 			worker = new DefaultAnalysisWorker(m, 100);
-//			worker = new DefaultAnalysisWorker(m, CurveRefoldingMode.FAST.maxIterations());
-
 			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Refolding: "+dataset.getName());
+			
+			this.setProgressMessage(PROGRESS_LBL+": "+dataset.getName());
 			ThreadManager.getInstance().submit(worker);
 
 		} catch(Exception e1){

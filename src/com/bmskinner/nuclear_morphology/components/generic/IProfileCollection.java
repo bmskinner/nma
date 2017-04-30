@@ -60,10 +60,11 @@ public interface IProfileCollection extends Serializable, Loggable{
 	/**
 	 * Get the requested profile from the cached profiles, or
 	 * generate it from the ProfileAggregate if it is not cached.
-	 * @param tag the BorderTagObject to use as index zero
+	 * @param type the type of profile to fetch
+	 * @param tag the Tag to use as index zero
 	 * @param quartile the collection quartile to return (0-100) 
 	 * @return the quartile profile from the given tag
-	 * @throws UnavailableBorderTagException  when the tag is not present as an offset
+	 * @throws UnavailableBorderTagException  when the tag is not present
 	 * @throws ProfileException 
 	 * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
 	 */
