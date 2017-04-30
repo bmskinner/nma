@@ -5,6 +5,7 @@ import java.util.logging.Level;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 
@@ -13,10 +14,19 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
  * @author bms41
  *
  */
-public class GlobalOptions {
+@SuppressWarnings("serial")
+public class GlobalOptions extends AbstractHashOptions {
 	
 	private static volatile GlobalOptions instance;
 	private static final Object lockObject = new Object(); // synchronisation
+	
+	public static final String DEFAULT_IMAGE_SCALE_KEY = "DEFAULT_IMAGE_SCALE";
+	public static final String DEFAULT_FILL_CONSENSUS_KEY = "FILL_CONSENSUS"; // Should the consensus nucleus plots be filled, or empty
+	public static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
+	public static final String REFOLD_OVERRIDE_KEY = "REFOLD_OVERRIDE";
+	public static final String IS_VIOLIN_KEY = "IS_VIOLIN"; // show violin plots or just boxplots
+	public static final String IS_USE_ANTIALIASING = "USE_ANTIALIASING";
+	
 	
 	private File defaultDir; // where to fall back to for finding images or saving files
 	
@@ -25,22 +35,17 @@ public class GlobalOptions {
 	private Level logLevel;
 	
 	private ColourSwatch swatch;
-	
-	private boolean violinPlots; // show violin plots or just boxplots
-	
-	private boolean antiAliasing = false;
-	
+		
 	private boolean convertDatasets = true;
 	
 	private static double DEFAULT_SCALE = 1;
-	private double scaleValue;
-	
+		
 	private NucleusType defaultType;
 	
 	/**
-	 * Should the consensus nucleus plots be filled, or empty
+	 * 
 	 */
-	private boolean fillConsensus;
+
 	
 	/**
 	 * Get the global options for the program.
@@ -71,12 +76,13 @@ public class GlobalOptions {
 		this.logLevel    = Level.INFO;
 		this.scale       = MeasurementScale.PIXELS;
 		this.swatch      = ColourSwatch.REGULAR_SWATCH;
-		this.violinPlots = true;
-		this.fillConsensus = true;
-		this.antiAliasing  = false;
-		this.scaleValue = DEFAULT_SCALE;
+		setBoolean(IS_VIOLIN_KEY, true);
+		setBoolean(DEFAULT_FILL_CONSENSUS_KEY, true);
+		setBoolean(IS_USE_ANTIALIASING, true);
+		setDouble(DEFAULT_IMAGE_SCALE_KEY, DEFAULT_SCALE);
 		this.defaultDir = new File(System.getProperty("user.home"));
 		this.defaultType = NucleusType.RODENT_SPERM;
+		setBoolean(REFOLD_OVERRIDE_KEY, false);
 	}
 	
 	
@@ -98,11 +104,12 @@ public class GlobalOptions {
 	}
 	
 	public synchronized double getImageScale() {
-		return scaleValue;
+		
+		return getDouble(DEFAULT_IMAGE_SCALE_KEY);
 	}
 	
 	public void setImageScale(double scale) {
-		this.scaleValue = scale;
+		setDouble(DEFAULT_IMAGE_SCALE_KEY, scale);
 	}
 
 	public synchronized Level getLogLevel() {
@@ -122,27 +129,27 @@ public class GlobalOptions {
 	}
 
 	public synchronized boolean isViolinPlots() {
-		return violinPlots;
+		return getBoolean(IS_VIOLIN_KEY);
 	}
 
 	public void setViolinPlots(boolean violinPlots) {
-		this.violinPlots = violinPlots;
+		setBoolean(IS_VIOLIN_KEY, violinPlots);
 	}
 	
 	public synchronized boolean isFillConsensus() {
-		return fillConsensus;
+		return getBoolean(DEFAULT_FILL_CONSENSUS_KEY);
 	}
 
 	public synchronized void setFillConsensus(boolean fillConsensus) {
-		this.fillConsensus = fillConsensus;
+		setBoolean(DEFAULT_FILL_CONSENSUS_KEY, fillConsensus);
 	}
 	
 	public synchronized boolean isAntiAlias() {
-		return antiAliasing;
+		return getBoolean(IS_USE_ANTIALIASING);
 	}
 
 	public synchronized void setAntiAlias(boolean antiAliasing) {
-		this.antiAliasing = antiAliasing;
+		setBoolean(IS_USE_ANTIALIASING, antiAliasing);
 	}
 
 	public synchronized boolean isConvertDatasets() {

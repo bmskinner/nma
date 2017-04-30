@@ -48,6 +48,7 @@ public class PropertiesReader implements Loggable {
 	private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
 	private static final String DEFAULT_SWATCH_KEY = "DEFAULT_COLOUR_SWATCH";
 	private static final String DEFAULT_NUCLEUS_TYPE_KEY = "DEFAULT_NUCLEUS_TYPE";
+	private static final String REFOLD_OVERRIDE_KEY = "REFOLD_OVERRIDE";
 
 	public PropertiesReader() {
 		try {
@@ -89,6 +90,7 @@ public class PropertiesReader implements Loggable {
 		properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
 		properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
 		properties.setProperty(DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
+		properties.setProperty(REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
 		
 		
 		return properties;
@@ -130,6 +132,10 @@ public class PropertiesReader implements Loggable {
 			
 			if(DEFAULT_NUCLEUS_TYPE_KEY.equals(key)){
 				op.setDefaultType(NucleusType.valueOf(value));
+			}
+			
+			if(REFOLD_OVERRIDE_KEY.equals(key)){
+				op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
 			}
 
 		}

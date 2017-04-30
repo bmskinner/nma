@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.Cur
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
@@ -52,8 +53,11 @@ public class RefoldNucleusAction extends ProgressableAction {
 
 			this.setProgressBarIndeterminate();
 			
+			boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
+						
 			IAnalysisMethod m;
-			if(dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)){
+						
+			if(override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)){
 				m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
 			} else {
 				m = new ConsensusAveragingMethod(dataset);
