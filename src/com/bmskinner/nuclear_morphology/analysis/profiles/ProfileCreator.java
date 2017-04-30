@@ -78,7 +78,7 @@ public class ProfileCreator implements Loggable {
 					return calculateRadiusProfile();
 				}
 				
-				case ZAHN_ROSKIE:{
+				case ZAHN_ROSKIES:{
 					return calculateZahnRoskieProfile();
 				}
 				

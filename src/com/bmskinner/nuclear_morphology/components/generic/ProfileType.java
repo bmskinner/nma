@@ -32,7 +32,7 @@ public enum ProfileType {
 	  DIAMETER( "Diameter profile" , "Distance across CoM", StatisticDimension.LENGTH),
 	  RADIUS(   "Radius profile"   , "Distance from CoM"  , StatisticDimension.LENGTH),
 //	  P2P   (   "P2P length profile"   , "Distance from previous"  , StatisticDimension.LENGTH),
-	  ZAHN_ROSKIE("Zahn-Roskie profile", "Angle delta"    , StatisticDimension.DIMENSIONLESS);
+	  ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta"    , StatisticDimension.DIMENSIONLESS);
 	  
 	  private String name;
 	  private String label;
@@ -85,7 +85,7 @@ public enum ProfileType {
 	   * @return
 	   */
 	  public static ProfileType[] displayValues(){
-		  ProfileType[] array = { ANGLE, DIAMETER, RADIUS, ZAHN_ROSKIE };
+		  ProfileType[] array = { ANGLE, DIAMETER, RADIUS, ZAHN_ROSKIES };
 		  return array;
 	  }
 }
