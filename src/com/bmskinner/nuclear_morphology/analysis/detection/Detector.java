@@ -195,6 +195,7 @@ public abstract class Detector implements Loggable {
 		  throw new IllegalArgumentException("Processor must be byte or short");
 	  }
 	  
+
 	  
 	  ImageProcessor searchProcessor = image.duplicate();
 
@@ -205,6 +206,8 @@ public abstract class Detector implements Loggable {
 	 return this.runAnalyser(searchProcessor);
 	  
 	  //TODO: this needs to be figured out and removed
+	 // There is a link to Prefs.blackBackground, but setting this explicitly is not enough 
+	 // when the jar is created
 //	  if(roiList.size()==0){
 //		  // As of 2017-04-15, manetheren needs this inversion to work, but other PCs don't. Don't yet know why.
 //		  searchProcessor.invert();
@@ -218,7 +221,8 @@ public abstract class Detector implements Loggable {
 	  RoiManager manager = new RoiManager(true);
 	 
 	  
-	  
+	  Prefs.blackBackground = true;
+//	  ThresholdAdjuster.update();
       	
 	  
 	  // run the particle analyser

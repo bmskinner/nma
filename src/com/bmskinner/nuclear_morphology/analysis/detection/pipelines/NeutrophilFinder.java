@@ -267,7 +267,7 @@ public class NeutrophilFinder extends CellFinder {
 			// Binarise for object detection
 			ImageProcessor lines = BinaryImages.binarize( watersheded );
 //			fireDetectionEvent(lines.duplicate(), "Binarized");
-			lines.invert();
+//			lines.invert();
 			return lines;
 
 		} catch (MissingOptionException e) {
@@ -376,7 +376,7 @@ public class NeutrophilFinder extends CellFinder {
 			ImageProcessor bin = ip.duplicate();
 //			ip.setMinAndMax(thresholdMin, thresholdMax);
 			bin.threshold(thresholdMin);
-			bin.invert();
+//			bin.invert();
 			
 //			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
 			
@@ -516,7 +516,7 @@ public class NeutrophilFinder extends CellFinder {
 		lines = Morphology.erosion(lines, erosionStrel);
 //		fireDetectionEvent(lines.duplicate(), "Eroded");
 		
-		lines.invert();
+//		lines.invert();
 		
 		// Now take the watershed image, and detect the distinct lobes
 		makeLobes(lines, list);

@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
+import ij.Prefs;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
@@ -155,7 +156,9 @@ public class FluorescentNucleusFinder extends CellFinder {
 			fireDetectionEvent(ip.duplicate(), "Thresholded");
 		}
 		
-		filt.invert();
+
+		
+//		filt.invert();
 		
 		GenericDetector gd = new GenericDetector();
 		gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth()*original.getHeight());

@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+import ij.Prefs;
 import ij.process.ImageProcessor;
 
 /**
@@ -61,7 +62,9 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
 	 */
 	public AbstractFinder(IAnalysisOptions op){
 		options = op;
+		Prefs.blackBackground = true;
 	}
+	
 	
 	/*
 	 * METHODS IMPLEMENTING THE FINDER INTERFACE

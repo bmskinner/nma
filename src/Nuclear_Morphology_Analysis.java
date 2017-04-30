@@ -211,10 +211,9 @@ implements PlugIn, Loggable
 				
 				// Check the ImageJ background colour settings
 				// This must be made consistent on all platforms
-				if ( ! Prefs.blackBackground){
-					Prefs.blackBackground = true;
-					ThresholdAdjuster.update();
-				}
+				Prefs.blackBackground = true;
+//				ThresholdAdjuster.update();
+
 				
 				loadMainWindow(false);
 
