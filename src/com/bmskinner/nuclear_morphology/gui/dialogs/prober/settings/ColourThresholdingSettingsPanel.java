@@ -30,6 +30,8 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.jdesktop.swingx.JXMultiThumbSlider;
+
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
@@ -81,6 +83,9 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel  {
 	 */
 	private void createSpinners(){
 		
+
+		JXMultiThumbSlider sl = new JXMultiThumbSlider();
+
 		minHueSpinner  = new JSpinner(new SpinnerNumberModel(
 				Integer.valueOf(options.getInt(PreprocessingOptions.MIN_HUE)),	
 				THRESHOLD_MIN, 
