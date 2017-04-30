@@ -281,7 +281,7 @@ public class NeutrophilFinder extends CellFinder {
 	private ImageProcessor detectCytoplasmByThreshold(File imageFile) throws ComponentCreationException, ImageImportException{
 
 		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-		fireDetectionEvent(ip.duplicate(), "Imported image");
+//		fireDetectionEvent(ip.duplicate(), "Imported image");
 		try {
 			
 			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
