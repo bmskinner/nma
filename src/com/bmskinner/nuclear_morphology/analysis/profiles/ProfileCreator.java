@@ -155,12 +155,14 @@ public class ProfileCreator implements Loggable {
 			IBorderPoint pointBefore = point.prevPoint(pointOffset);
 
 			IBorderPoint pointAfter  = point.nextPoint(pointOffset);
+			
+//			double rad = AngleTools.angleBetweenLines(pointBefore, point, point, pointAfter);
+//			 float angle = (float) Math.toDegrees(rad);
+//			angles[index] = angle;
 
-//			finest("Got points");
 			// Get the smallest angle between the points
 			float angle = (float) point.findAngle(pointBefore, pointAfter);
 			
-//			finest("Got angle");
 			// Now discover if this measured angle is inside or outside the object
 			
 			// find the halfway point between the first and last points.
