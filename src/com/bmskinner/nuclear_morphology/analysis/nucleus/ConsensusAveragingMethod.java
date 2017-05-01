@@ -1,13 +1,11 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +13,8 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -31,7 +27,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPoin
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -41,12 +36,11 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.utility.CircleTools;
 
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-
 /**
- * Testing new ways to refold profiles
+ * This method refolds the consensus nucleus based on averaging the positions
+ * of equally spaced points around the perimeter of each vertical nucleus in the dataset.
  * @author ben
+ * @since 1.13.5
  *
  */
 public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
@@ -88,33 +82,13 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 		
 	}
 	
-	private Roi makeAverageRoi(List<IPoint> list){
-		float[] xpoints = new float[list.size()];
-		float[] ypoints = new float[list.size()];
-		
-		for(int i=0; i<list.size(); i++){
-			IPoint p = list.get(i);
-			
-			xpoints[i] = (float) p.getX();
-			ypoints[i] = (float) p.getY();
-		}
-		
-		Roi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
-		return roi;
-	}
 	
 	private Nucleus makeConsensus(List<IPoint> list) throws UnprofilableObjectException, MissingOptionException, ComponentCreationException, UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException{
-		
-		Roi roi = makeAverageRoi(list);
-		
+				
 		IPoint com = IPoint.makeNew(0, 0);
-		
-		Rectangle bounds = roi.getBounds();
-		
-		int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(), (int) bounds.getHeight() };
-		
+				
 		NucleusFactory fact = new NucleusFactory(  dataset.getCollection().getNucleusType()  );
-		Nucleus n = fact.buildInstance(roi, new File("Empty"), 0, original, com);
+		Nucleus n = fact.buildInstance(list, new File("Empty"), 0, com);
 		
 		// Calculate the stats for the new consensus
 		// Required for angle window size calculation
@@ -126,7 +100,7 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 
 		for(Tag tag : BorderTagObject.values()){
 			
-			if(Tag.INTERSECTION_POINT.equals(tag)){
+			if(Tag.INTERSECTION_POINT.equals(tag)){ // not relevant here
 				continue;
 			}
 			IProfile median = dataset.getCollection()
@@ -139,25 +113,13 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 		
 		// Check the profile generated
 		
-//		ProfileCreator pc = new ProfileCreator(cons);
-//		IProfile ap = pc.createProfile(ProfileType.ANGLE);
-//		
-//		IProfile median = dataset.getCollection()
-//				.getProfileCollection()
-//				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-////		IProfile nucProfile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-//		double diff = median.absoluteSquareDifference(ap);
-//		log("Difference to median: "+diff);
-//		for(int i=0; i<ap.size(); i++){
-//			double d = ap.get(i);
-//			log("\t"+i+"\t"+d);
-//		}
-//		log("##############");
-//		Iterator<IBorderPoint> it = cons.getBorderList().iterator();
-//		while(it.hasNext()){			
-//			IBorderPoint point = it.next();
-//			log("\t"+point.getX()+"\t"+point.getY());
-//		}
+		IProfile median = dataset.getCollection()
+				.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+		IProfile nucProfile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+		double diff = median.absoluteSquareDifference(nucProfile);
+		fine("Difference to median: "+diff);
+
 		
 		
 //		// Adjust segments to fit size

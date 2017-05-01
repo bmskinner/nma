@@ -55,6 +55,17 @@ public interface IPoint {
 	}
 	
 	/**
+	 * Create a new point of the default type
+	 * based on the given point
+	 * @param x the x position
+	 * @param y the y position
+	 * @return a point at the specified position
+	 */
+	static IPoint makeNew(Point2D a){
+		return makeNew( a.getX(), a.getY());
+	}
+	
+	/**
 	 * Get the x-value 
 	 *
 	 * @return the x-value of the point

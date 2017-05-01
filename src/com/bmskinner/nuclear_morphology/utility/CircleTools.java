@@ -19,6 +19,14 @@
 
 package com.bmskinner.nuclear_morphology.utility;
 
+import java.awt.Point;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -55,6 +63,63 @@ public class CircleTools {
 	public static boolean circleIsEnclosed(IPoint com1, double r1, IPoint com2, double r2){
 		double d = com1.getLengthTo(com2); 
 		return d < Math.abs(r1 - r2);
+	}
+	
+	
+	/**
+	 * Get the intersections of a circle with the given line segment
+	 * @param line the line segment
+	 * @param center the centre of the circle
+	 * @param radius the radius of the circle
+	 * @return
+	 */
+	public static List<IPoint> getCircleLineIntersectionPoint(Line2D line, IPoint center, double radius) {
+		
+		Point2D pointA = line.getP1();
+		Point2D pointB = line.getP2();
+		
+        double baX = pointB.getX() - pointA.getX();
+        double baY = pointB.getY() - pointA.getY();
+        double caX = center.getX() - pointA.getX();
+        double caY = center.getY() - pointA.getY();
+
+        double a = baX * baX + baY * baY;
+        double bBy2 = baX * caX + baY * caY;
+        double c = caX * caX + caY * caY - radius * radius;
+
+        double pBy2 = bBy2 / a;
+        double q = c / a;
+
+        double disc = pBy2 * pBy2 - q;
+        if (disc < 0) {
+            return Collections.emptyList();
+        }
+        // if disc == 0 ... dealt with later
+        double tmpSqrt = Math.sqrt(disc);
+        double abScalingFactor1 = -pBy2 + tmpSqrt;
+        double abScalingFactor2 = -pBy2 - tmpSqrt;
+
+        IPoint p1 = IPoint.makeNew(pointA.getX() - baX * abScalingFactor1, pointA.getY()
+                - baY * abScalingFactor1);
+        if (disc == 0) { // abScalingFactor1 == abScalingFactor2
+            return Collections.singletonList(p1);
+        }
+        IPoint p2 = IPoint.makeNew(pointA.getX() - baX * abScalingFactor2, pointA.getY()
+                - baY * abScalingFactor2);
+        return Arrays.asList(p1,p2);
+    }
+	
+	/**
+	 * Test if the given line segment intersects the border of the circle defined by
+	 * the given radius and cenre point
+	 * @param com the centre of the circle
+	 * @param r the radius of the circle
+	 * @param line the line segment to test
+	 * @return true if the line crosses the border of the circle
+	 */
+	public static boolean intersects(IPoint com, double r, Line2D line){
+		return !getCircleLineIntersectionPoint(line, com, r).isEmpty();
+		
 	}
 	
 	/**
