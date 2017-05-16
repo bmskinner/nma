@@ -478,7 +478,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
 		}
 		if(collection == null){
-			throw new IllegalArgumentException("CellCollection or ProfileType is null");
+			throw new IllegalArgumentException("CellCollection is null");
+		}
+		
+		if(collection.size()==0){
+			throw new IllegalArgumentException("Cell collection is empty");
 		}
 		
 		this.length = length;

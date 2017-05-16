@@ -84,8 +84,6 @@ public class VirtualCellCollection implements ICellCollection {
 	//this holds the mapping of tail indexes etc in the median profile arrays
 	private volatile IProfileCollection profileCollection = new DefaultProfileCollection();
 	
-//	protected final Map<ProfileType, IProfileCollection> profileCollections = new HashMap<ProfileType, IProfileCollection>();
-
 	private volatile Nucleus consensusNucleus; 	// the refolded consensus nucleus
 	
 	// We need to store signal groups separately to allow shell results etc to be kept
@@ -123,24 +121,7 @@ public class VirtualCellCollection implements ICellCollection {
 		this.parent = parent;
 		this.name = name == null ? "Undefined dataset name" : name;
 		this.uuid = id;
-		
-		// Add the signal groups from the parent
-		
-//		for(UUID signalGroup : parent.getCollection().getSignalGroupIDs()){
-//			try {
-//				ISignalGroup group = parent.getCollection().getSignalGroup(signalGroup);
-//				
-//				if(group.hasShellResult()){
-//					shellResults.put(signalGroup, group.)
-//				}
-//				ISignalGroup newGroup = new SignalGroup(group);
-//				newGroup.setShellResult(null);
-//				this.addSignalGroup(signalGroup, newGroup);
-//				
-//			} catch (UnavailableSignalGroupException e) {
-//				stack("Error copying signal group to virtual collection", e);
-//			}
-//		}
+
 	}
 	
 	/**
@@ -298,7 +279,9 @@ public class VirtualCellCollection implements ICellCollection {
 	}
 
 	@Override
-	public void replaceCell(ICell c) {}
+	public void replaceCell(ICell c) {
+		warn("Not implemented for virtual collections");
+	}
 
 	@Override
 	public ICell getCell(UUID id) {

@@ -122,6 +122,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 			this.createEdgesAndFaces();
 
 		} catch(IllegalArgumentException e){
+			stack("Error creating mesh", e);
 			throw new MeshCreationException("Unable to create mesh for nucleus "+n.getNameAndNumber(), e);
 		}
 	}

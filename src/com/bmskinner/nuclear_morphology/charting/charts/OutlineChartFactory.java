@@ -633,14 +633,14 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				
 				if(key.startsWith(CellularComponent.NUCLEAR_LOBE)){
 //					rend.setSeriesShape(series, ChartComponents.DEFAULT_POINT_SHAPE);
-					rend.setSeriesPaint(series, Color.RED);				
+					rend.setSeriesPaint(series, ColourSelecter.DEFAULT_LOBE_OUTLINE);				
 				}
 				
 				/*
 				 * Cytoplasm outline
 				 */
 				if(key.startsWith(CellularComponent.CYTOPLASM)){
-					rend.setSeriesPaint(series, Color.CYAN);					
+					rend.setSeriesPaint(series, ColourSelecter.DEFAULT_CELL_OUTLINE);					
 				}
 				
 				

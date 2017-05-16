@@ -23,6 +23,11 @@ import java.awt.Color;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
 public class ColourSelecter {
+	
+	public static final Color DEFAULT_CELL_OUTLINE = Color.CYAN;
+	public static final Color DEFAULT_NUCLEUS_OUTLINE = Color.ORANGE;
+	public static final Color DEFAULT_LOBE_OUTLINE = Color.GREEN;
+	
 
 	public static Color[] segmentColourList = {
 			

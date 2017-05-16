@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -379,6 +380,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 			}
 			result.add(subCollectionRight);
 		}
+
 		return result;
 	}
 	
