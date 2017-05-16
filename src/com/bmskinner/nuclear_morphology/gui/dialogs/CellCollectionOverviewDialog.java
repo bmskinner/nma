@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -202,10 +203,15 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
 		}
 		log("Added "+cells.size()+" cells to new collection");
 		
+		// We don;t want to run a new profling because this will bugger up the segment patterns of
+		// the original cells. We need to copy the segments over as with FISH remapping
+		
+		
 		if(cells.size()>0){
 			dataset.addChildCollection(newCollection);
-			fine("Firing dataset events");
-			fireDatasetEvent(DatasetEvent.PROFILING_ACTION, dataset.getChildDataset(newCollection.getID()));
+			List<IAnalysisDataset> list = new ArrayList<>();
+			list.add(dataset.getChildDataset(newCollection.getID()));
+			fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, list, dataset);
 		}
 	}
 	

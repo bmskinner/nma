@@ -98,8 +98,8 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction imple
 	@Override
 	public void datasetEventReceived(DatasetEvent event) {
 		finest("BuildHierarchicalTreeAction heard dataset event");
-		if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
-			fireDatasetEvent(DatasetEvent.COPY_MORPHOLOGY, event.getDatasets(), event.secondaryDataset());
+		if(event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)){
+			fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
 		}
 		
 	}

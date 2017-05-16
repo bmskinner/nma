@@ -30,6 +30,9 @@ public class LogPanelFormatter extends Formatter {
 	
 	private static final String SEPARATOR = " | ";
 	
+	private static final String INFO_LEVEL_LBL = "log";
+	private static final String FINE_LEVEL_LBL = "fine";
+	
 	
 	@Override
 	public String format(LogRecord record) {
@@ -72,21 +75,40 @@ public class LogPanelFormatter extends Formatter {
 		String sourceMethod = record.getSourceMethodName();
 		String sourceClass  = record.getSourceClassName();
 		
-		if(sourceMethod.equals("log") || sourceMethod.startsWith("fine")  ){
+		if(sourceMethod.equals(INFO_LEVEL_LBL) || sourceMethod.startsWith(FINE_LEVEL_LBL)  ){
 			// work back to the actual calling method
 			// this should be before the Loggable call
 
 			StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			sourceMethod = array[9].getMethodName();
 			
-			for(int i=0; i< array.length; i++){
+			// find the array index with the source method
+			boolean useLine = false;
+			int useIndex = 0;
+			for(int i=0; i<array.length; i++){
+				if(useLine){
+					continue;
+				}
 				StackTraceElement e = array[i];
 				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
-					sourceMethod = array[i+1].getMethodName();
-					sourceClass  = array[i+1].getClassName();
-					break;
+					useIndex = i;
+					useLine = true;
 				}
+				
 			}
+			
+
+
+			sourceMethod = array[useIndex+1].getMethodName();
+			sourceClass  = array[useIndex+1].getClassName();
+//			for(int i=0; i< array.length; i++){
+//				StackTraceElement e = array[i];
+//				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
+//					sourceMethod = array[i+1].getMethodName();
+//					sourceClass  = array[i+1].getClassName();
+//					break;
+//				}
+//			}
+			
 		}
 
 		StringBuffer buffer = new StringBuffer();

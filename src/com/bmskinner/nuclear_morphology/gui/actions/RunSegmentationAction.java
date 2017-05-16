@@ -35,6 +35,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	
+	private static final String PROGRESS_LBL = "Segmentation analysis";
 	private IAnalysisDataset source = null;
 	private CountDownLatch latch   = null;
 	
@@ -45,13 +46,13 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	 * @param downFlag the next analyses to perform
 	 */
 	public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw, CountDownLatch latch){
-		super(dataset, "Segmentation analysis", mw, downFlag);
+		super(dataset, PROGRESS_LBL, mw, downFlag);
 		this.mode = mode;
 		this.latch = latch;
 	}
 	
 	public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag, MainWindow mw){
-		super(list, "Segmentation analysis", mw, downFlag);
+		super(list, PROGRESS_LBL, mw, downFlag);
 		this.mode = mode;
 	}
 	
@@ -70,7 +71,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
 	 * @param source
 	 */
 	public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, Integer downFlag, MainWindow mw){
-		super(list, "Segmentation analysis", mw);
+		super(list, PROGRESS_LBL, mw);
 		this.downFlag = downFlag;
 		this.mode = MorphologyAnalysisMode.COPY;
 		this.source = source;

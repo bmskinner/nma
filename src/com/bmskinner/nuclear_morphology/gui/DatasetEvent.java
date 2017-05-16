@@ -32,7 +32,11 @@ public class DatasetEvent extends EventObject {
 	
 	public static final String PROFILING_ACTION    = "Profiling action";
 	public static final String NEW_MORPHOLOGY      = "New morphology";
-	public static final String COPY_MORPHOLOGY     = "Copy morphology";
+	
+	/**
+	 * Signal that segments should be copied from the secondary dataset in the action to all primary datasets listed
+	 */
+	public static final String COPY_PROFILE_SEGMENTATION     = "Copy profile segmentation";
 	
 	public static final String REFRESH_MORPHOLOGY  = "Refresh morphology";
 	

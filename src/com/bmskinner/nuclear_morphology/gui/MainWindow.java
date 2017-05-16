@@ -523,13 +523,13 @@ public class MainWindow
 				return new ShellAnalysisAction(event.firstDataset(), MainWindow.this);
 			}
 			
-			if(event.method().equals(DatasetEvent.COPY_MORPHOLOGY)){
+			if(event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)){
 				
 				final IAnalysisDataset source = event.secondaryDataset();
 				if(source==null){
 					return null;
 				}
-				return new RunSegmentationAction(selectedDatasets, source, null, MainWindow.this);
+				return new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.ADD_POPULATION, MainWindow.this);
 			}
 			
 						
