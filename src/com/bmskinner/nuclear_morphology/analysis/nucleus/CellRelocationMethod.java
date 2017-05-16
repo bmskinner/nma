@@ -18,7 +18,6 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
@@ -29,6 +28,11 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
  *
  */
 public class CellRelocationMethod extends AbstractAnalysisMethod {
+	
+	private static final String TAB          = "\\t";
+	private static final String UUID_KEY     = "UUID";
+	private static final String NAME_KEY     = "Name";
+	private static final String CHILD_OF_KEY = "ChildOf";
 	
 	private File inputFile = null;
 	
@@ -128,12 +132,12 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	    	 */
 	    	
 	    	String line = scanner.nextLine();
-	    	if(line.startsWith("UUID")){
+	    	if(line.startsWith(UUID_KEY)){
 	    		
 	    		/*
 	    		 * New dataset found
 	    		 */
-	    		activeID = UUID.fromString( line.split("\\t")[1] );
+	    		activeID = UUID.fromString( line.split(TAB)[1] );
 	    		
 	    		if(dataset.getUUID().equals(activeID) || dataset.hasChild(activeID)){
 	    			// the dataset already exists with this id - we must fail
@@ -146,12 +150,12 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	    		continue;
 	    	}
 	    	
-	    	if(line.startsWith("Name")){
+	    	if(line.startsWith(NAME_KEY)){
 	    		/*
 	    		 * Name of new dataset
 	    		 */
 	    		
-	    		activeName =  line.split("\\t")[1];
+	    		activeName =  line.split(TAB)[1];
 	    		
 	    		ICellCollection c = new VirtualCellCollection(dataset, 
 	    				  activeName, 
@@ -172,11 +176,11 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	    		continue;
 	    	}
 	    	
-	    	if(line.startsWith("ChildOf")){
+	    	if(line.startsWith(CHILD_OF_KEY)){
 	    		/*
 	    		 * Parent dataset
 	    		 */
-	    		UUID parentID = UUID.fromString( line.split("\\t")[1] );
+	    		UUID parentID = UUID.fromString( line.split(TAB)[1] );
 	    		
 	    		if(parentID.equals(activeID)){
 	    			dataset.addChildDataset(map.get(activeID));
@@ -269,7 +273,7 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 		for(ICell c : cells){
 
 			if(c.getNucleus().containsOriginalPoint(com)){
-//				return new DefaultCell(c);
+
 				return c;
 			}
 		}
