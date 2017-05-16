@@ -156,7 +156,6 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	    		ICellCollection c = new VirtualCellCollection(dataset, 
 	    				  activeName, 
 	    				  activeID);
-	    		c.createProfileCollection();
 	    		
 	    		IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
 	    		
@@ -197,6 +196,13 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 	        }
 	    }
 	    fine("All cells found");
+	    
+	    // Make the profile collections for the new datasets
+	    
+	    for(IAnalysisDataset d : map.values()){
+	    	d.getCollection().createProfileCollection();
+	    }
+	    
 	    scanner.close();
 	    return map.keySet();
 	  }
