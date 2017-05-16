@@ -32,6 +32,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -148,6 +149,10 @@ public class DefaultNucleus
 
 		} catch(UnavailableProfileTypeException e){
 			stack("Error getting profile type", e);
+		} catch (NoDetectedIndexException e) {
+			fine("Unable to detect RP in nucleus");
+			setBorderTag(Tag.REFERENCE_POINT, 0);		
+			setBorderTag(Tag.ORIENTATION_POINT, 0);
 		}
 	}
 	

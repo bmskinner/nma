@@ -26,6 +26,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Profile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -36,45 +37,8 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 @Deprecated
 public class PigSpermNucleus 
     extends SpermNucleus  {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	/**
-    * The point of the nucleus orthogonal to the narrowest
-    * diameter, through the centre of mass.
-    * Used in tail identification functions only.
-    */
-//    private BorderPoint orthPoint1;
 
-  /**
-  * Constructor using a Nucleus; passes up
-  * to the SpermNucleus constructor
-  *
-  * @param n the Nucleus to construct from
- * @throws Exception 
-  */
-//    public PigSpermNucleus(Nucleus n) {
-//      super(n);
-//    }
-//
-//    public PigSpermNucleus() {
-//    	super();
-//    }
-//
-////    public PigSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-////		super(roi, file, number, position);
-////	}
-//    
-//    public PigSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
-//		super(roi, file, number, position, centreOfMass);
-//	}
-//    
-//    public Nucleus duplicate(){
-//    	PigSpermNucleus duplicate = new PigSpermNucleus(this);
-//    	return duplicate;
-//	}
-    
+	private static final long serialVersionUID = 1L;
 
     
   /**
@@ -121,6 +85,10 @@ public class PigSpermNucleus
 
 		} catch(UnavailableProfileTypeException e){
 			stack("Error getting profile type", e);
+		} catch (NoDetectedIndexException e) {
+			fine("Unable to detect RP in nucleus");
+			setBorderTag(Tag.REFERENCE_POINT, 0);		
+			setBorderTag(Tag.ORIENTATION_POINT, 0);
 		}
 
     }

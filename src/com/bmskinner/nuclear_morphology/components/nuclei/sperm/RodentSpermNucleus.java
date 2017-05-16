@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
@@ -56,55 +57,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 	private static final long serialVersionUID = 1L;
 	
-//	public RodentSpermNucleus(Nucleus n) {
-//		super(n);
-//		this.splitNucleusToHeadAndHump();
-//	}
-//	
-//	protected RodentSpermNucleus(){
-//		super();
-//	}
-//	
-////	public RodentSpermNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-////		super(roi, file, number, position);
-////	}
-//	
-//	public RodentSpermNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
-//		super(roi, file, number, position, centreOfMass);
-//	}
-//	
-//	@Override
-//	public Nucleus duplicate(){
-//		RodentSpermNucleus duplicate = new RodentSpermNucleus(this);			
-//		return duplicate;
-//
-//	}
 	
 	@Override
 	protected double calculateStatistic(PlottableStatistic stat){
 		double result = super.calculateStatistic(stat);
-//		finest("Calculating stat in rodent sperm nucleus: "+stat);
-		
-//		try {
-//			
-//		
-//		switch(stat){
-//			
-//			case HOOK_LENGTH:
-//				result = getHookOrBodyLength(true);
-//				break;
-//			case BODY_WIDTH:
-//				result = getHookOrBodyLength(false);
-//				break;
-//			default:
-//				return result;
-//		
-//		}
-//		} catch (UnavailableBorderTagException e) {
-//			return 0;
-//		}
-		
-//		finest("Calculated stat in rodent sperm nucleus: "+stat);
 		return result;
 		
 	}
@@ -413,6 +369,10 @@ public class RodentSpermNucleus extends SpermNucleus {
 
 		} catch(UnavailableProfileTypeException e){
 			stack("Error getting profile type", e);
+		} catch (NoDetectedIndexException e) {
+			fine("Unable to detect RP in nucleus");
+			setBorderTag(Tag.REFERENCE_POINT, 0);		
+			setBorderTag(Tag.ORIENTATION_POINT, 0);
 		}
 	}
 

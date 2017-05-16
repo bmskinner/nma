@@ -45,6 +45,7 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalAnalyser;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
@@ -205,6 +206,7 @@ public class RoundNucleus extends AbstractCellularComponent
 			RuleSet rpSet = RuleSet.roundRPRuleSet();
 			IProfile p = this.getProfile(rpSet.getType());
 			ProfileIndexFinder f = new ProfileIndexFinder();
+						
 			int rpIndex = f.identifyIndex(p, rpSet);
 
 
@@ -215,9 +217,15 @@ public class RoundNucleus extends AbstractCellularComponent
 			if(!this.isProfileOrientationOK()){
 				this.reverse();
 			}  
+			
+			
 
 		} catch(UnavailableProfileTypeException e){
 			stack("Error getting profile type", e);
+		} catch (NoDetectedIndexException e) {
+			fine("Unable to detect RP in nucleus");
+			setBorderTag(Tag.REFERENCE_POINT, 0);		
+			setBorderTag(Tag.ORIENTATION_POINT, 0);
 		}
 		
 	}

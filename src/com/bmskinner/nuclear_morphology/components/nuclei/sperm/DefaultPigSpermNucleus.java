@@ -23,6 +23,7 @@ package com.bmskinner.nuclear_morphology.components.nuclei.sperm;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -116,6 +117,10 @@ public class DefaultPigSpermNucleus extends AbstractAsymmetricNucleus {
 
 		} catch(UnavailableProfileTypeException e){
 			stack("Error getting profile type", e);
+		} catch (NoDetectedIndexException e) {
+			fine("Unable to detect RP in nucleus");
+			setBorderTag(Tag.REFERENCE_POINT, 0);		
+			setBorderTag(Tag.ORIENTATION_POINT, 0);
 		}
 
 	}

@@ -31,6 +31,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -281,12 +282,13 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 
 		if(tag!=null){
 			ProfileIndexFinder finder = new ProfileIndexFinder();
-			
+			try {
+				
 				int newTagIndex = finder.identifyIndex(dataset.getCollection(), tag);
 
 				log("Updating "+tag+" to index "+newTagIndex);
 
-				try {
+				
 					dataset
 						.getCollection()
 						.getProfileManager()
@@ -294,6 +296,10 @@ public class RulesetDialog extends LoadingIconDialog implements  TreeSelectionLi
 				} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 					warn("Unable to update border tag index");
 					stack("Profile error", e);
+					return;
+				} catch (NoDetectedIndexException e) {
+					warn("Unable to update border tag index - cannot find index with given ruleset");
+					stack("Unable to find matching index", e);
 					return;
 				}
 								

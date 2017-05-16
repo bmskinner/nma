@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
@@ -375,24 +376,34 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 			RuleSet rpSet = RuleSet.mouseSpermRPRuleSet();
 			IProfile p     = this.getProfile(rpSet.getType());
 			ProfileIndexFinder f = new ProfileIndexFinder();
-			int tipIndex = f.identifyIndex(p, rpSet);
+
+			try {
+				
+				int tipIndex = f.identifyIndex(p, rpSet);
+				
+				// find tip - use the least angle method
+				setBorderTag(Tag.REFERENCE_POINT, tipIndex);
+
+				// decide if the profile is right or left handed; flip if needed
+				if(!this.isProfileOrientationOK() && canReverse){
+					this.reverse(); // reverses all profiles, border array and tagged points
+
+					// the number of border points can change when reversing
+					// due to float interpolation from different starting positions
+					// so do the whole thing again
+					initialise(this.getWindowProportion(ProfileType.ANGLE));
+					canReverse = false;
+					findPointsAroundBorder();
+				}  
+				
+			} catch (NoDetectedIndexException e) {
+				fine("Unable to detect RP in nucleus");
+				setBorderTag(Tag.REFERENCE_POINT, 0);
+			}
+			
 
 
-			// find tip - use the least angle method
-			//		int tipIndex = identifyBorderTagIndex(BorderTag.REFERENCE_POINT);
-			setBorderTag(Tag.REFERENCE_POINT, tipIndex);
-
-			// decide if the profile is right or left handed; flip if needed
-			if(!this.isProfileOrientationOK() && canReverse){
-				this.reverse(); // reverses all profiles, border array and tagged points
-
-				// the number of border points can change when reversing
-				// due to float interpolation from different starting positions
-				// so do the whole thing again
-				initialise(this.getWindowProportion(ProfileType.ANGLE));
-				canReverse = false;
-				findPointsAroundBorder();
-			}  
+			
 
 
 			/*

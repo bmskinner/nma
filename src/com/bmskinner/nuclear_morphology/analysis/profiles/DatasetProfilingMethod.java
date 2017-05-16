@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
@@ -138,26 +139,24 @@ public class DatasetProfilingMethod extends AbstractAnalysisMethod {
 					continue; 
 				}
 				
-					
-				int index = finder.identifyIndex(collection, tag);
+				int index = 0;
+				
+				try {
 
-				if( index == ProfileIndexFinder.NO_RULESETS){
+					index = finder.identifyIndex(collection, tag);
+
+				} catch (NoDetectedIndexException e) {
+					warn("Unable to detect "+tag+" using default ruleset");
+
+					if(tag.type().equals(com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType.CORE)){
+						warn("Falling back on reference point");
+					}
+					continue;
+				} catch( IllegalArgumentException e){
 					fine("No ruleset for "+tag+"; skipping");
 					continue;
 				}
 				
-					
-				if( index == ProfileIndexFinder.NO_INDEX_FOUND){
-					warn("Unable to detect "+tag+" using default ruleset");
-					
-					if(tag.type().equals(com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType.CORE)){
-						warn("Falling back on reference point");
-						index = 0;
-						//TODO - index is never used
-					}
-					continue;
-					
-				}
 					
 				// Add the index to the median profiles
 				collection.getProfileManager()
@@ -188,7 +187,7 @@ public class DatasetProfilingMethod extends AbstractAnalysisMethod {
 		}
 	}
 	
-	private int coerceRPToZero(ICellCollection collection){
+	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException{
 		
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 		

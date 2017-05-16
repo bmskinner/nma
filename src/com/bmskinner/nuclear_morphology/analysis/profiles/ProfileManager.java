@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -189,15 +190,12 @@ public class ProfileManager implements Loggable {
 
 		fine("Detecting top and bottom verticals in collection");
 
+		
+		try {
 		ProfileIndexFinder finder = new ProfileIndexFinder();
 
 		int topIndex = finder.identifyIndex(collection, Tag.TOP_VERTICAL);
 		int btmIndex = finder.identifyIndex(collection, Tag.BOTTOM_VERTICAL);
-
-		if(topIndex == ProfileIndexFinder.NO_INDEX_FOUND || btmIndex == ProfileIndexFinder.NO_INDEX_FOUND){
-			fine("Cannot find TV or BV in median profile");
-			return;
-		}
 
 		fine("TV in median is located at index "+topIndex);
 		fine("BV in median is located at index "+btmIndex);
@@ -205,6 +203,11 @@ public class ProfileManager implements Loggable {
 		updateProfileCollectionOffsets(Tag.TOP_VERTICAL, topIndex);
 
 		updateProfileCollectionOffsets(Tag.BOTTOM_VERTICAL, btmIndex);
+		
+		} catch (NoDetectedIndexException e) {
+			fine("Cannot find TV or BV in median profile");
+			return;			
+		}
 
 
 		fine("Updating nuclei");
