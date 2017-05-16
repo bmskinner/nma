@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
-public class ShellAnalysisAction extends ProgressableAction {
+public class ShellAnalysisAction extends SingleDatasetResultAction {
 
 	public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Shell analysis", mw);

@@ -9,7 +9,7 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LobeDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
-public class LobeDetectionAction extends ProgressableAction {
+public class LobeDetectionAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
 	

@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.io.Importer;
  * Call an open dialog to choose a saved .nbd dataset. The opened dataset
  * will be added to the bottom of the dataset list.
  */
-public class PopulationImportAction extends ProgressableAction {
+public class PopulationImportAction extends VoidResultAction {
 
 	private final File file;
 	private static final String PROGRESS_BAR_LABEL = "Opening file...";

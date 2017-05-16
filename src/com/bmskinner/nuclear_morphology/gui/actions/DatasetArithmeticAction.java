@@ -29,17 +29,15 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
 
-public class DatasetArithmeticAction extends ProgressableAction {
+public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
 	private IAnalysisDataset datasetOne = null;
 	
-	private List<IAnalysisDataset> list;
+	private static final String PROGRESS_LBL = "Dataset arithmetic";
 	
 	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
-		super("Dataset arithmetic", mw);
+		super(list, PROGRESS_LBL, mw);
 		this.setProgressBarIndeterminate();
-		this.list = list;
-
 	} 
 	
 	@Override
@@ -51,7 +49,7 @@ public class DatasetArithmeticAction extends ProgressableAction {
 			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
 			 */
 
-			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(list, mw);
+			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets, mw);
 
 			if(dialog.isReadyToRun()){
 
@@ -134,9 +132,9 @@ public class DatasetArithmeticAction extends ProgressableAction {
 			
 
 
-			int flag = ProgressableAction.ADD_POPULATION;
-			flag |= ProgressableAction.SAVE_DATASET;
-			flag |= ProgressableAction.ASSIGN_SEGMENTS;
+			int flag = SingleDatasetResultAction.ADD_POPULATION;
+			flag |= SingleDatasetResultAction.SAVE_DATASET;
+			flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
 			RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
 			
 			ThreadManager.getInstance().execute(pr);

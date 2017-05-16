@@ -37,7 +37,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
  * @author ben
  *
  */
-public class ClusterAnalysisAction extends ProgressableAction {
+public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_BAR_LABEL = "Clustering cells";
 	

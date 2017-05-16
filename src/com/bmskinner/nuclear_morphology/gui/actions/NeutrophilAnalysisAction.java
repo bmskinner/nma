@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.io.Importer;
 
 import ij.ImagePlus;
 
-public class NeutrophilAnalysisAction extends ProgressableAction {
+public class NeutrophilAnalysisAction extends VoidResultAction {
 
 	private IMutableAnalysisOptions options;
 	private Date startTime;

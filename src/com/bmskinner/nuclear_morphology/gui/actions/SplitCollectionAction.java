@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
-public class SplitCollectionAction extends ProgressableAction {
+public class SplitCollectionAction extends SingleDatasetResultAction {
 
 	public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Splitting collection", mw);

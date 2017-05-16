@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TailDetectionSettingsDialog;
 
-public class AddTailStainAction extends ProgressableAction {
+public class AddTailStainAction extends SingleDatasetResultAction {
 
 	public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Tail detection", mw);

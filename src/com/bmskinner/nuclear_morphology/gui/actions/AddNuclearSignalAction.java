@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
  * @author ben
  *
  */
-public class AddNuclearSignalAction extends ProgressableAction {
+public class AddNuclearSignalAction extends SingleDatasetResultAction {
 	
 	private File folder;
 

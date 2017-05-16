@@ -16,6 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.awt.event.MouseEvent;
@@ -34,34 +35,25 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Contains a progress bar and handling methods for when an action
- * is triggered as a SwingWorker. Subclassed for each action type.
+ * The base of all progressible actions. Handles progress bars and workers
+ * @author bms41
+ * @since 1.13.6
  *
  */
-public abstract class ProgressableAction 
+public abstract class VoidResultAction 
 	implements PropertyChangeListener, 
-	           Loggable, 
-	           MouseListener,
-	           Runnable {
-	
-	// Flags to pass to ProgressableActions to determine the analyses
-	// to carry out in subsequently
-	public static final int NO_FLAG     		 = 0;
-	public static final int ADD_POPULATION		 = 1;
-	public static final int STATS_EXPORT 		 = 2;
-	public static final int NUCLEUS_ANNOTATE	 = 4;
-	public static final int CURVE_REFOLD 		 = 8;
-	public static final int EXPORT_COMPOSITE	 = 16;
-	public static final int SAVE_DATASET		 = 32;
-	public static final int ASSIGN_SEGMENTS		 = 64;
+	Loggable, 
+	MouseListener,
+	Runnable {
 
+	
 	protected IAnalysisDataset dataset = null; // the dataset being worked on
 	private JProgressBar progressBar = null;
 	
@@ -72,9 +64,6 @@ public abstract class ProgressableAction
 	protected MainWindow mw;
 	private CountDownLatch latch = null; // allow threads to wait for the analysis to complete
 	
-
-	private List<IAnalysisDataset> processList = new ArrayList<IAnalysisDataset>(0); // list of datasets that need processing after this
-	
 	private List<Object> interfaceListeners = new ArrayList<Object>();
 	private List<Object> datasetListeners = new ArrayList<Object>();
 	
@@ -83,13 +72,8 @@ public abstract class ProgressableAction
 	 * @param barMessage
 	 * @param mw
 	 */
-	protected ProgressableAction(String barMessage, MainWindow mw){
-		this( (IAnalysisDataset) null, barMessage, mw);
-	}
-	
-	public ProgressableAction(IAnalysisDataset dataset, String barMessage, MainWindow mw){
+	protected VoidResultAction(String barMessage, MainWindow mw){
 		
-		this.dataset 		= dataset;
 		this.progressBar 	= new JProgressBar(0, 100);
 		this.progressBar.setString(barMessage);
 		this.progressBar.setStringPainted(true);
@@ -109,41 +93,6 @@ public abstract class ProgressableAction
 
 	}
 	
-	/**
-	 * Construct using a list of datasets to be processed. The first is analysed, and the rest stored.
-	 * @param list
-	 * @param barMessage
-	 * @param mw
-	 */
-	public ProgressableAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw){
-		this(list.get(0), barMessage, mw);
-		processList = list;
-		processList.remove(0); // remove the first entry
-	}
-	
-	/**
-	 * Construct using a list of datasets to be processed. The first is analysed, and the rest stored.
-	 * @param list
-	 * @param barMessage
-	 * @param mw
-	 * @param flag
-	 */
-	public ProgressableAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw, int flag){
-		this(list, barMessage, mw);
-		this.downFlag = flag;
-	}
-	
-	/**
-	 * Constructor including a flag for downstream analyses to be carried out
-	 * @param dataset
-	 * @param barMessage
-	 * @param mw
-	 * @param flag
-	 */
-	public ProgressableAction(IAnalysisDataset dataset, String barMessage, MainWindow mw, int flag){
-		this(dataset, barMessage, mw);
-		this.downFlag = flag;
-	}
 		
 	protected void setLatch(CountDownLatch latch){
 		this.latch = latch;
@@ -154,15 +103,7 @@ public abstract class ProgressableAction
 			latch.countDown();
 		}
 	}
-	
-	protected List<IAnalysisDataset> getRemainingDatasetsToProcess(){
-		return this.processList;
-	}
-	
-	protected boolean hasRemainingDatasetsToProcess(){
-		return processList.size()>0;
-	}
-		
+			
 	/**
 	 * Change the progress message from the default in the constructor
 	 * @param messsage the string to display
@@ -355,5 +296,4 @@ public abstract class ProgressableAction
 		// TODO Auto-generated method stub
 		
 	}
-	
 }

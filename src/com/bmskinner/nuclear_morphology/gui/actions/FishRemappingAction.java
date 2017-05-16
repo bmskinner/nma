@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import ij.io.DirectoryChooser;
-
 import java.io.File;
 import java.util.List;
 
@@ -31,12 +29,15 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
 
+import ij.io.DirectoryChooser;
+
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
  * sub-populations
  */
-public class FishRemappingAction extends ProgressableAction {
+public class FishRemappingAction extends SingleDatasetResultAction {
 	
+	private static final String PROGRESS_LBL           = "Remapping";
 	private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
 	
 	private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
@@ -47,7 +48,7 @@ public class FishRemappingAction extends ProgressableAction {
 	private File fishDir;
 
 	public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-		super(datasets, "Remapping", mw);
+		super(datasets, PROGRESS_LBL, mw);
 		
 	}
 	

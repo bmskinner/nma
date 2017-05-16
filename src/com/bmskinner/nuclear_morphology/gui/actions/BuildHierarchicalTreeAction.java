@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
  * @author ben
  *
  */
-public class BuildHierarchicalTreeAction extends ProgressableAction implements DatasetEventListener, InterfaceEventListener {
+public class BuildHierarchicalTreeAction extends SingleDatasetResultAction implements DatasetEventListener, InterfaceEventListener {
 
 	private static final String PROGRESS_BAR_LABEL = "Building tree";
 	

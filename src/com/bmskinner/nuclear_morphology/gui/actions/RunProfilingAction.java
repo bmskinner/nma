@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
-public class RunProfilingAction extends ProgressableAction {
+public class RunProfilingAction extends SingleDatasetResultAction {
 	
 	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
 		super(dataset, "Profiling", mw, downFlag);

@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.io.Importer;
 /**
  * Run a new analysis
  */
-public class NewAnalysisAction extends ProgressableAction {
+public class NewAnalysisAction extends VoidResultAction {
 			
 	private IMutableAnalysisOptions options;
 	private Date startTime;

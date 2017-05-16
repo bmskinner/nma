@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 /**
  * Refold the consensus nucleus for the selected dataset using default parameters
  */
-public class RefoldNucleusAction extends ProgressableAction {
+public class RefoldNucleusAction extends SingleDatasetResultAction {
 	
 	private static final String PROGRESS_LBL = "Refolding";
 

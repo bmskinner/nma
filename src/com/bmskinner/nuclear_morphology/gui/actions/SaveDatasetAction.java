@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
-public class SaveDatasetAction extends ProgressableAction {
+public class SaveDatasetAction extends SingleDatasetResultAction {
 	
 	private File saveFile = null;
 	

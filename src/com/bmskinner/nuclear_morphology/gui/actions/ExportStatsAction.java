@@ -39,16 +39,12 @@ import com.bmskinner.nuclear_morphology.io.Exporter;
  * @since 1.13.4
  *
  */
-public class ExportStatsAction extends ProgressableAction {
+public class ExportStatsAction extends MultiDatasetResultAction {
 	
 	private static final String PROGRESS_LBL = "Exporting stats";
-	
-	private final List<IAnalysisDataset> datasets;
-	
-	public ExportStatsAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
-		super(PROGRESS_LBL, mw);
-		this.datasets = datasets;
-
+		
+	public ExportStatsAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
+		super(datasets, PROGRESS_LBL, mw);
 	}
 
 	@Override

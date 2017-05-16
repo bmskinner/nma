@@ -43,17 +43,14 @@ import com.bmskinner.nuclear_morphology.io.Importer;
  * @author ben
  *
  */
-public class MergeCollectionAction extends ProgressableAction {
+public class MergeCollectionAction extends MultiDatasetResultAction {
 	
-	private final List<IAnalysisDataset> datasets;
-	
+	private static final String PROGRESS_LBL  = "Merging";
 	private final String SAVE_DIALOG_TITLE    = "Save merged dataset as...";
 	private final String DEFAULT_DATASET_NAME = "Merge_of_datasets";
 
 	public MergeCollectionAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
-		super("Merging", mw);
-		this.datasets = datasets;
-
+		super(datasets, PROGRESS_LBL, mw);
 	}
 	
 	@Override
@@ -174,9 +171,9 @@ public class MergeCollectionAction extends ProgressableAction {
 			return;
 		}
 
-		int flag = ProgressableAction.ADD_POPULATION;
-		flag |= ProgressableAction.ASSIGN_SEGMENTS;
-		flag |= ProgressableAction.SAVE_DATASET;
+		int flag = SingleDatasetResultAction.ADD_POPULATION;
+		flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
+		flag |= SingleDatasetResultAction.SAVE_DATASET;
 		RunProfilingAction pr = new RunProfilingAction(datasets, flag, mw);
 		ThreadManager.getInstance().execute(pr);
 

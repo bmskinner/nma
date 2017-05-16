@@ -1026,9 +1026,15 @@ public class DefaultCellCollection
 		for(ICell cell : filteredCells){
 			subCollection.addCell(new DefaultCell(cell));
 		}
+		
+		if(subCollection.size()==0){
+			warn("No cells in collection");
+		}
+		
 
 		try {
 			
+			//TODO - this fails on converted collections from (at least) 1.13.0 with no profiles in aggregate
 			this.getProfileManager().copyCollectionOffsets(subCollection);
 			this.getSignalManager().copySignalGroups(subCollection);
 			

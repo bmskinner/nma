@@ -25,7 +25,7 @@ import java.io.File;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
-public class ReplaceSourceImageDirectoryAction extends ProgressableAction {
+public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
 
 	public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
 		super(dataset, "Replacing images", mw);

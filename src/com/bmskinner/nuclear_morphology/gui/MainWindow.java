@@ -64,7 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ProgressableAction;
+import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
@@ -487,14 +487,14 @@ public class MainWindow
 				fine("Creating new profiling and segmentation");
 
 				int flag = 0; // set the downstream analyses to run
-				flag |= ProgressableAction.ADD_POPULATION;
-				flag |= ProgressableAction.STATS_EXPORT;
-				flag |= ProgressableAction.NUCLEUS_ANNOTATE;
-				flag |= ProgressableAction.ASSIGN_SEGMENTS;
+				flag |= SingleDatasetResultAction.ADD_POPULATION;
+				flag |= SingleDatasetResultAction.STATS_EXPORT;
+				flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
+				flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
 
 				try {
 					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-						flag |= ProgressableAction.CURVE_REFOLD;
+						flag |= SingleDatasetResultAction.CURVE_REFOLD;
 					}
 				} catch (MissingOptionException e) {
 					warn("Missing analysis options");
@@ -508,7 +508,7 @@ public class MainWindow
 			
 			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
 				log("Running new morphology analysis");
-				final int flag = ProgressableAction.ADD_POPULATION;
+				final int flag = SingleDatasetResultAction.ADD_POPULATION;
 				
 				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
 			}
@@ -547,7 +547,7 @@ public class MainWindow
 			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
 				fine("Recalculating the median for the given datasets");
 
-				return new RunProfilingAction(selectedDatasets, ProgressableAction.NO_FLAG, MainWindow.this);
+				return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, MainWindow.this);
 			}
 			
 			

@@ -17,7 +17,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
-public class RelocateFromFileAction extends ProgressableAction {
+public class RelocateFromFileAction extends SingleDatasetResultAction {
 
 	public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
 		super(dataset, "Relocating cells", mw);

@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
-public class RunSegmentationAction extends ProgressableAction {
+public class RunSegmentationAction extends SingleDatasetResultAction {
 	
 	private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
 	

@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 
-public class SaveWorkspaceAction extends ProgressableAction {
+public class SaveWorkspaceAction extends VoidResultAction {
 	
 	private static final String PROGRESS_LBL = "Saving workspace";
 	
