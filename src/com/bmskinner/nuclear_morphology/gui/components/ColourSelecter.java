@@ -60,6 +60,23 @@ public class ColourSelecter {
 			Color.decode("#741472")
 	};
 	
+	
+	// AI generated colour names from a neural network:
+	// http://lewisandquark.tumblr.com/post/160776374467/new-paint-colors-invented-by-neural-network
+	public static Color[] aiSwatchList = {
+			new Color(48, 94, 83),    // Grade Bat
+			new Color(112, 113, 84),  // Clardic Fug
+			new Color(216, 200, 185), // Stummy Beige
+			new Color(61, 63, 66),    // Dorkwood
+			new Color(176, 99, 108),  // Grass Bat
+			new Color(204, 205, 194), // Sindis Poop
+			new Color(190, 164, 116), // Turdly
+			new Color(201, 199, 165), // Snowbonk
+			new Color(197, 162, 171)  // Stanky Bean
+			
+	};
+	
+	
 	public static Color[] blackList = {
 			Color.BLACK
 	};
@@ -74,6 +91,7 @@ public class ColourSelecter {
 	public enum ColourSwatch {
 		REGULAR_SWATCH 	  ("Regular"), 
 		NO_SWATCH		  ("No colours"),
+		AI_SWATCH         ("AI swatch"),
 		ACCESSIBLE_SWATCH ("Acessible colours");
 		
 	    private final String  name;   
@@ -107,6 +125,9 @@ public class ColourSelecter {
 		case REGULAR_SWATCH:
 			color = getRegularColor(i);
 			break;
+		case AI_SWATCH:
+			color = getAIColor(i);
+			break;
 		default:
 			color = getRegularColor(i);
 			break;
@@ -115,6 +136,16 @@ public class ColourSelecter {
 		
 		
 		return color;
+	}
+	
+	/**
+	 * Get an appropriate colour for the given number from
+	 * the AI colour set. Loops through 8 colours.
+	 * @param i the number of the colour to return
+	 * @return a colour
+	 */
+	private static Color getAIColor(int i){		
+		return ColourSelecter.aiSwatchList[i % ColourSelecter.aiSwatchList.length];
 	}
 	
 	/**
