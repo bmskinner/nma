@@ -53,7 +53,6 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	
 	private SignalDetector detector;
 	final private INuclearSignalOptions signalOptions;
-//	final private int channel;
 	final private ICellCollection collection;
 	
 	public SignalFinder(IAnalysisOptions op, INuclearSignalOptions signalOptions, ICellCollection collection) {
@@ -161,6 +160,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 	
 	public List<INuclearSignal> findInImage(File imageFile, Nucleus n) throws ImageImportException{
 
+		detector = new SignalDetector(signalOptions, signalOptions.getChannel());
+		
 		List<INuclearSignal> list = new ArrayList<>();
 		ImageStack stack =  new ImageImporter(imageFile).importToStack();
 

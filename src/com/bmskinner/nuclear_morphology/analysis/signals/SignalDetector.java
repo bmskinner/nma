@@ -129,7 +129,7 @@ public class SignalDetector extends Detector {
 	 * @throws Exception 
 	 */
 	private List<INuclearSignal> detectForwardThresholdSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception{
-//		SignalCollection signalCollection = n.getSignalCollection();
+
 		
 		// choose the right stack number for the channel
 		int stackNumber = ImageImporter.rgbToStack(channel);
@@ -145,7 +145,7 @@ public class SignalDetector extends Detector {
 		try{
 			
 			ImageProcessor ip = stack.getProcessor(stackNumber);
-			ip.invert();
+//			ip.invert();
 			roiList = detectRois(ip);
 			
 		} catch(Exception e){
@@ -180,12 +180,6 @@ public class SignalDetector extends Detector {
 						channel, 
 						originalPosition, 
 						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()));
-				
-//				INuclearSignal s = new DefaultNuclearSignal( r,
-//						IPoint.makeNew(values.get(StatsMap.COM_X).floatValue(), values.get(StatsMap.COM_Y).floatValue()), 
-//						sourceFile, 
-//						channel, 
-//						originalPosition);
 
 				s.setScale(n.getScale()); // copy scaling information from source nucleus
 
