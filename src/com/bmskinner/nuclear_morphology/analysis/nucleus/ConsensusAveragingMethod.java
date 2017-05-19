@@ -103,11 +103,15 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 			if(Tag.INTERSECTION_POINT.equals(tag)){ // not relevant here
 				continue;
 			}
-			IProfile median = dataset.getCollection()
-					.getProfileCollection()
-					.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
-			int newIndex  = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
-			cons.setBorderTag(tag, newIndex);
+			
+			if(dataset.getCollection().getProfileCollection().hasBorderTag(tag)){
+				IProfile median = dataset.getCollection()
+						.getProfileCollection()
+						.getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
+				int newIndex  = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
+				cons.setBorderTag(tag, newIndex);
+			}
+			
 
 		}
 		
