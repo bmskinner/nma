@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -732,10 +731,12 @@ public class DefaultCellCollection
 	 * @throws UnavailableProfileTypeException 
 	 */
 	public Nucleus getNucleusMostSimilarToMedian(Tag pointType) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
-
-		if(cells.size()==1){
-			for(ICell c : cells){
-				return c.getNucleus();
+		Set<Nucleus> list = this.getNuclei();
+		
+		// No need to check profiles if there is only one nucleus
+		if(list.size()==1){
+			for(Nucleus p : list){
+				return p;
 			}
 		}
 
@@ -746,7 +747,7 @@ public class DefaultCellCollection
 		Nucleus n=null;
 		
 		double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
-		for(Nucleus p : this.getNuclei()){
+		for(Nucleus p : list){
 			IProfile angleProfile = p.getProfile(ProfileType.ANGLE, pointType);
 			double nDifference = angleProfile.absoluteSquareDifference(medianProfile);
 			if(nDifference<difference){
@@ -989,13 +990,16 @@ public class DefaultCellCollection
 	@Override
 	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
 		DecimalFormat df = new DecimalFormat("#.##");
-		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
+		
+		// Make the new collection,  named with the filter
+		String name = "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper);
+		ICellCollection subCollection = new DefaultCellCollection(this, name);
 
 		List<ICell> filteredCells;
 		
 		finest("Filtering collection on "+stat);
 
-		if(stat.equals(PlottableStatistic.VARIABILITY)){
+		if(stat.equals(PlottableStatistic.VARIABILITY)){ // the variability must be handled differently
 			filteredCells = new ArrayList<ICell>();
 			for(ICell c : this.getCells()){
 

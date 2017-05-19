@@ -119,7 +119,7 @@ public class DoubleEquation implements LineEquation {
 	 */
 	@Override
 	public boolean isOnLine(IPoint p){
-		return p.getY() == (   (m * p.getX())    +c);
+		return Math.abs(   p.getY() - ( (m * p.getX())  +c)) < .0000001;
 	}
 
 	/* (non-Javadoc)
@@ -201,7 +201,7 @@ public class DoubleEquation implements LineEquation {
 	public boolean intersects(DoubleEquation eq){
 		
 		if(Math.abs(m - eq.m) < 0.000001){// they are parallel within the bounds of FP calculations
-			return c==eq.c; 
+			return Math.abs(   c - eq.c) < .0000001;
 		}
 		return true;
 	}

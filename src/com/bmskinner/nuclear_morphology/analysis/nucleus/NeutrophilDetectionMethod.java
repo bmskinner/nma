@@ -287,8 +287,15 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	 * @return the number of analysable image files
 	 */
 	public static int countSuitableImages(File folder){
-
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
+		
 		File[] listOfFiles = folder.listFiles();
+		
+		if(listOfFiles==null){
+			return 0;
+		}
 
 		int result = 0;
 
@@ -315,6 +322,10 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	 * @param folder the folder of images to be analysed
 	 */
 	protected void processFolder(File folder){
+		
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 
 		finest("Processing folder "+folder.getAbsolutePath());
 		File[] listOfFiles = folder.listFiles();

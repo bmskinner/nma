@@ -685,8 +685,16 @@ public class DefaultAnalysisDataset
 	 * @return
 	 */
 	private boolean checkHasImages(File expectedImageDirectory){
+		
+		if(expectedImageDirectory==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 
 		File[] listOfFiles = expectedImageDirectory.listFiles();
+		
+		if(listOfFiles==null){
+			return false;
+		}
 
 		int result = 0;
 
@@ -698,12 +706,7 @@ public class DefaultAnalysisDataset
 				result++;
 			}
 		} 
-		
-		if(result>0){
-			return true;
-		} else {
-			return false;
-		}
+		return result>0;
 	}
 	
 

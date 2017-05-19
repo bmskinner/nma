@@ -36,6 +36,9 @@ public abstract class MultiDatasetResultAction extends VoidResultAction {
 	
 	public MultiDatasetResultAction(final List<IAnalysisDataset> datasets, final String barMessage, final MainWindow mw) {
 		super(barMessage, mw);
+		if(datasets==null){
+			throw new IllegalArgumentException("Cannot have null dataset list");
+		}
 		this.datasets = datasets;
 	}
 

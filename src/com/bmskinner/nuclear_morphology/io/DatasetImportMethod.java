@@ -182,8 +182,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			}
 		};
 
+		File[] files = dir.listFiles(filter);
 		
-		for(File lockFile : dir.listFiles(filter)){
+		if(files==null){
+			return;
+		}
+		
+		for(File lockFile : files){
 			
 			lockFile.delete();
 			

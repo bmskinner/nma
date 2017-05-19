@@ -114,10 +114,7 @@ public class FloatEquation implements LineEquation {
 	 */
 	@Override
 	public boolean isOnLine(IPoint p){
-		// Handle conversion of float and double points here
-		
-		
-		return  (float) p.getY() == (   (m * (float) p.getX()) +c);
+		return Math.abs(   p.getY() - ( (m * p.getX())  +c)) < .0000001;
 	}
 
 	/* (non-Javadoc)
@@ -198,7 +195,7 @@ public class FloatEquation implements LineEquation {
 	@Override
 	public boolean intersects(DoubleEquation eq){
 		if(Math.abs(m - eq.m) < 0.000001){ // they are parallel
-			return c==eq.c; 
+			return Math.abs(c - eq.c) < 0.000001;
 		}
 		return true;
 	}

@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -92,7 +93,7 @@ public class RandomSampler extends AnalysisWorker {
 		ICellCollection second = new VirtualCellCollection( this.getDataset(), "second");
 		finer("Created new collections");
 		
-		List<Cell> cells = new ArrayList(this.getDataset().getCollection().getCells());
+		List<ICell> cells = new ArrayList<>(this.getDataset().getCollection().getCells());
 		Collections.shuffle(cells);
 		finer("Shuffled cells");
 		

@@ -209,9 +209,9 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 *  @param file a folder to be analysed
 	 *  @param collection the collection of nuclei found
 	 */
-	private void addNucleusCollection(File file, ICellCollection collection){
-		this.collectionGroup.put(file, collection);
-	}
+//	private void addNucleusCollection(File file, ICellCollection collection){
+//		this.collectionGroup.put(file, collection);
+//	}
 
 
 	/**
@@ -264,8 +264,16 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 * @return the number of analysable image files
 	 */
 	private static int countSuitableImages(File folder){
+		
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 
 		File[] listOfFiles = folder.listFiles();
+		
+		if(listOfFiles==null){
+			return 0;
+		}
 
 		int result = 0;
 
@@ -292,6 +300,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 	 * @param folder the folder of images to be analysed
 	 */
 	protected void processFolder(File folder){
+		
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 		
 		// Recurse over all folders in the supplied folder
 		for(File f : folder.listFiles()){

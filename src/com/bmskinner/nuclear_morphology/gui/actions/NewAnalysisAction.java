@@ -111,6 +111,10 @@ public class NewAnalysisAction extends VoidResultAction {
 				warn("Missing nucleus options");
 				this.cancel();
 			}
+			
+			if(directory==null){
+				this.cancel();
+			}
 
 			log("Directory: "+directory.getName());
 

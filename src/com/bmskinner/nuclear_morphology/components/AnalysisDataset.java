@@ -869,10 +869,18 @@ public class AnalysisDataset implements IAnalysisDataset {
 	 * @return
 	 */
 	private boolean checkHasImages(File expectedImageDirectory){
+		
+		if(expectedImageDirectory==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 
 		File[] listOfFiles = expectedImageDirectory.listFiles();
 
 		int result = 0;
+		
+		if(listOfFiles==null){
+			return false;
+		}
 
 		for (File file : listOfFiles) {
 
@@ -882,12 +890,8 @@ public class AnalysisDataset implements IAnalysisDataset {
 				result++;
 			}
 		} 
-		
-		if(result>0){
-			return true;
-		} else {
-			return false;
-		}
+
+		return result>0;
 	}
 	
 

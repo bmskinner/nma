@@ -49,6 +49,11 @@ import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 
+/**
+ * The detector for nuclear signals.
+ * @author bms41
+ *
+ */
 public class SignalDetector extends Detector {
 	
 	private INuclearSignalOptions options;
@@ -62,6 +67,14 @@ public class SignalDetector extends Detector {
 	 * @param channel the RGB channel
 	 */
 	public SignalDetector(INuclearSignalOptions options, int channel){
+		
+		if(options==null){
+			throw new IllegalArgumentException("Detection options cannot be null");
+		}
+		
+		if(channel<0){
+			throw new IllegalArgumentException("Channel must be greater or equal to 0");
+		}
 		this.options = options;
 		this.channel = channel;
 		this.minThreshold = options.getThreshold();

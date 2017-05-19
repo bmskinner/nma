@@ -1215,7 +1215,7 @@ public class FloatProfile implements IProfile {
 	@Override
 	public IProfile multiply(double multiplier){
 		
-		if( Double.NaN == multiplier || Double.POSITIVE_INFINITY==multiplier || Double.NEGATIVE_INFINITY==multiplier ){
+		if( Double.isNaN(multiplier) || Double.isInfinite(multiplier) ){
 			throw new IllegalArgumentException("Cannot add NaN or infinity");
 		}
 		
@@ -1249,7 +1249,7 @@ public class FloatProfile implements IProfile {
 	@Override
 	public IProfile divide(double divider){
 		
-		if( Double.NaN == divider || Double.POSITIVE_INFINITY==divider || Double.NEGATIVE_INFINITY==divider ){
+		if( Double.isNaN(divider) || Double.isInfinite(divider) ){
 			throw new IllegalArgumentException("Cannot add NaN or infinity");
 		}
 		
@@ -1299,7 +1299,7 @@ public class FloatProfile implements IProfile {
 	@Override
 	public IProfile add(double value){
 
-		if( Double.NaN == value || Double.POSITIVE_INFINITY==value || Double.NEGATIVE_INFINITY==value ){
+		if( Double.isNaN(value) || Double.isInfinite(value) ){
 			throw new IllegalArgumentException("Cannot add NaN or infinity");
 		}
 		

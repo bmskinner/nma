@@ -31,23 +31,17 @@ import javax.swing.JFileChooser;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.DemoProber;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
 import com.bmskinner.nuclear_morphology.io.Importer;
-
-import ij.ImagePlus;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 
@@ -119,7 +113,9 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 				this.cancel();
 			}
 			
-
+			if(directory==null){
+				this.cancel();
+			}
 
 			log("Directory: "+directory.getName());
 

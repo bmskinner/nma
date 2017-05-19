@@ -19,6 +19,10 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
  */
 public abstract class CellFinder extends AbstractFinder<List<ICell>> {
 
+	/**
+	 * Construct the finder using an options
+	 * @param op
+	 */
 	public CellFinder(IAnalysisOptions op) {
 		super(op);
 
@@ -26,6 +30,10 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
 	
 	@Override
 	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
+		
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
 		List<ICell> list = new ArrayList<>();
 		
 		List<File> files = Arrays.asList(folder.listFiles());

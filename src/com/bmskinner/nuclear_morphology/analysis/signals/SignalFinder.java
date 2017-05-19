@@ -69,6 +69,11 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
 	@Override
 	public List<INuclearSignal> findInFolder(File folder) throws ImageImportException, ComponentCreationException {
+		
+		if(folder==null){
+			throw new IllegalArgumentException("Folder cannot be null");
+		}
+		
 		List<INuclearSignal> list = new ArrayList<>();
 		
 		List<File> files = Arrays.asList(folder.listFiles());

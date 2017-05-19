@@ -172,7 +172,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 		File[] files = folder.listFiles();
 		
 		// There must be items in the folder
-		if(files.length==0){
+		if(files==null || files.length==0){
 			return false;
 		}
 		
