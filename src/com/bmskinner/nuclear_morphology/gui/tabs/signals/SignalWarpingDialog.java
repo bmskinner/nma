@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -554,6 +555,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				meshConsensus = meshConsensus.straighten();
 			}
 			
+			Rectangle r = meshConsensus.toPath().getBounds();
+			
+			// The new image size
+			int w = r.width  ;
+			int h = r.height ;
+			
 
 			
 			Set<ICell> cells = getCells(cellsWithSignals);
@@ -605,21 +612,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 						warn(e.getMessage());
 
 						// Make a blank image for the array
-						warpedImages[cellNumber] = createBlankProcessor();
+						warpedImages[cellNumber] = createBlankProcessor(w,h);
 
 
 					} catch (UnloadableImageException e) {
 						warn("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber());
 						stack("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber(), e);
-						warpedImages[cellNumber] = createBlankProcessor();
+						fine("Making blank processor");
+						warpedImages[cellNumber] = createBlankProcessor(w,h);
 					} catch (MeshCreationException e1) {
 						stack("Error creating mesh",e1);
-						warpedImages[cellNumber] = createBlankProcessor();
+						fine("Making blank processor");
+						warpedImages[cellNumber] = createBlankProcessor(w,h);
 					} finally {
 
-						mergedImage = combineImages();
+						mergedImage = combineImages(w, h);
 						mergedImage = rescaleImageIntensity();
-
 						finer("Completed cell "+cellNumber);
 						publish(cellNumber++);
 					}
@@ -646,6 +654,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		
 		private ImageProcessor createBlankProcessor(){
+			
+			if(warpedImages[0]==null){
+				warn("No template for blank processor");
+			}
 			int w = warpedImages[0].getWidth();
 			int h = warpedImages[0].getHeight();
 			
@@ -669,16 +681,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		 * Create a new image processor with the average of all warped images
 		 * @return
 		 */
-		private ImageProcessor combineImages(){
+		private ImageProcessor combineImages(int w, int h){
 			
 			
 			// Create an empty white processor of the correct dimensions
-			ImageProcessor mergeProcessor = createBlankProcessor();
-						
-			int w = warpedImages[0].getWidth();
-			int h = warpedImages[0].getHeight();
-
-			
+			ImageProcessor mergeProcessor = createBlankProcessor(w, h);
 			
 			int nonNull = 0;
 			
@@ -689,12 +696,18 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				}
 				nonNull++;
 				if(ip.getHeight()!=h && ip.getWidth()!=w){
-					return null;
+					warn("Sizes of warped images do not match");
+					return mergeProcessor;
 				}
 			}
 			
-			// Average the pixels
+
 			
+			if(nonNull==0){
+				return mergeProcessor;
+			}
+			
+			// Average the pixels
 			for(int x=0; x<w; x++){
 				for(int y=0; y<h; y++){
 
