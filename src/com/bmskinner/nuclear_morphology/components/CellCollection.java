@@ -1112,6 +1112,8 @@ public class CellCollection implements ICellCollection {
 			public boolean test(ICell t) {
 				
 				for(Nucleus n : t.getNuclei()){
+					
+					try {
 
 					double value = stat.equals(PlottableStatistic.VARIABILITY) 
 							     ? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n)
@@ -1124,6 +1126,10 @@ public class CellCollection implements ICellCollection {
 				     if(value > upper){
 				    	 return false;
 				     }
+					} catch (UnavailableBorderTagException e) {
+						stack(e);
+						return false;
+					}
 
 				}
 				return true;

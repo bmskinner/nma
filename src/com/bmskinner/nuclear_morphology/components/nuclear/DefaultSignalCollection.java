@@ -361,14 +361,25 @@ public class DefaultSignalCollection implements ISignalCollection {
 	 * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
 	 */
 	@Override
-	public ImageProcessor getImage(UUID signalGroup) throws UnloadableImageException{
+	public ImageProcessor getImage(final UUID signalGroup) throws UnloadableImageException{
+		
+		if(signalGroup==null){
+			throw new  UnloadableImageException("Signal group is null");
+		}
+		
 		File f = this.getSourceFile(signalGroup);
+		
+		// Will be null if no signals were reported for the cell with this collection
+		if(f==null){
+			throw new  UnloadableImageException("File for signal group is null");
+		}
+		
 		int c  = this.getSourceChannel(signalGroup);
 		
 		try {
 			return new ImageImporter(f).importImage(c);
 		} catch (ImageImportException e) {
-			fine("Error importing image source file "+f.getAbsolutePath(), e);
+			stack("Error importing image source file "+f.getAbsolutePath(), e);
 			throw new  UnloadableImageException("Unable to load signal image",e);
 		}
 	}
