@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -743,48 +744,31 @@ public class VirtualCellCollection implements ICellCollection {
 //	}
 	
 	@Override
-	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
-		DecimalFormat df = new DecimalFormat("#.##");
-		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
-
-		List<ICell> filteredCells;
+	public ICellCollection filter(Predicate<ICell> predicate){
 		
-		finest("Filtering collection on "+stat);
-
-		if(stat.equals(PlottableStatistic.VARIABILITY)){
-			filteredCells = new ArrayList<ICell>();
-			for(ICell c : this.getCells()){
-
-				boolean include = true;
-				for(Nucleus n : c.getNuclei()){
-					double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
-					if(value< lower || value> upper){
-						include = false;
-					}
-					
-				}
-
-				if(include){
-					filteredCells.add(c);
-				}  
-			}
-
-		} else {
-			
-			filteredCells = getCells()
-					.parallelStream()
-					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
-					.filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
-					.collect(Collectors.toList());
-		}
-
+		String name = "Filtered_"+predicate.toString();
+		
+		ICellCollection subCollection = new DefaultCellCollection(this, name);
+		
+		List<ICell> list = getCells()
+				.parallelStream()
+				.filter(predicate)
+				.collect(Collectors.toList());
+				
+	
 		finest("Adding cells to new collection");
-		for(ICell cell : filteredCells){
+		for(ICell cell : list){
 			subCollection.addCell(new DefaultCell(cell));
 		}
+		
+		if(subCollection.size()==0){
+			warn("No cells in collection");
+		}
+		
 
 		try {
 			
+			//TODO - this fails on converted collections from (at least) 1.13.0 with no profiles in aggregate
 			this.getProfileManager().copyCollectionOffsets(subCollection);
 			this.getSignalManager().copySignalGroups(subCollection);
 			
@@ -797,6 +781,100 @@ public class VirtualCellCollection implements ICellCollection {
 
 		return subCollection;
 	}
+	
+	
+	@Override
+	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
+		DecimalFormat df = new DecimalFormat("#.##");
+		
+		
+		Predicate<ICell> pred = new Predicate<ICell>() {
+			@Override
+			public boolean test(ICell t) {
+				
+				for(Nucleus n : t.getNuclei()){
+
+					double value = stat.equals(PlottableStatistic.VARIABILITY) 
+							     ? getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n)
+							    : n.getStatistic(stat, scale);
+					
+				     if(value < lower){
+				    	 return false;
+				     }
+
+				     if(value > upper){
+				    	 return false;
+				     }
+
+				}
+				return true;
+			}
+			
+			@Override
+			public String toString(){
+				return stat.toString()+"_"+df.format(lower)+"-"+df.format(upper);
+			}
+			
+		};
+		
+		return filter(pred);
+	}
+	
+//	@Override
+//	public ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper) {
+//		DecimalFormat df = new DecimalFormat("#.##");
+//		ICellCollection subCollection = new DefaultCellCollection(this, "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
+//
+//		List<ICell> filteredCells;
+//		
+//		finest("Filtering collection on "+stat);
+//
+//		if(stat.equals(PlottableStatistic.VARIABILITY)){
+//			filteredCells = new ArrayList<ICell>();
+//			for(ICell c : this.getCells()){
+//
+//				boolean include = true;
+//				for(Nucleus n : c.getNuclei()){
+//					double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
+//					if(value< lower || value> upper){
+//						include = false;
+//					}
+//					
+//				}
+//
+//				if(include){
+//					filteredCells.add(c);
+//				}  
+//			}
+//
+//		} else {
+//			
+//			filteredCells = getCells()
+//					.parallelStream()
+//					.filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
+//					.filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
+//					.collect(Collectors.toList());
+//		}
+//
+//		finest("Adding cells to new collection");
+//		for(ICell cell : filteredCells){
+//			subCollection.addCell(new DefaultCell(cell));
+//		}
+//
+//		try {
+//			
+//			this.getProfileManager().copyCollectionOffsets(subCollection);
+//			this.getSignalManager().copySignalGroups(subCollection);
+//			
+//		} catch (ProfileException e) {
+//			warn("Error copying collection offsets");
+//			stack("Error in offsetting", e);
+//		}
+//
+//		
+//
+//		return subCollection;
+//	}
 
 	@Override
 	public int countShared(IAnalysisDataset d2) {

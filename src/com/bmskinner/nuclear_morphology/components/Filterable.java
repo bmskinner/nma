@@ -19,7 +19,10 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
+import java.util.function.Predicate;
+
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
@@ -68,4 +71,13 @@ public interface Filterable {
 	 */
 	ICellCollection filterCollection(PlottableStatistic stat,
 			MeasurementScale scale, double lower, double upper);
+	
+	/**
+	 * Filter the collection for cells that
+	 * match the given predicate
+	 * @param predicate
+	 * @return
+	 */
+	ICellCollection filter(Predicate<ICell> predicate);
+	
 }
