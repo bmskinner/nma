@@ -71,7 +71,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 	 * Duplicate the filterer - use the template processor and stack
 	 * @param f the template filterer
 	 */
-	public AbstractImageFilterer(AbstractImageFilterer f){
+	public AbstractImageFilterer(final AbstractImageFilterer f){
 		this.ip = f.ip;
 		this.st = f.st;
 	}
@@ -207,6 +207,21 @@ public abstract class AbstractImageFilterer implements Loggable {
 		return new ImageIcon( ip.getBufferedImage() );
 	}
 	
-	
+	/**
+	 * Create an empty white byte processor
+	 * @param w the width
+	 * @param h the height
+	 * @return
+	 */
+	public static ImageProcessor createBlankByteProcessor(int w, int h){
+		
+		// Create an empty white processor
+		ImageProcessor ip = new ByteProcessor(w, h);
+		for(int i=0; i<ip.getPixelCount(); i++){
+			ip.set(i, 255); // set all to white initially
+		}
+		
+		return ip;
+	}
 	
 }

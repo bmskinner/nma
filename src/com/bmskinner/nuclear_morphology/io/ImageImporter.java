@@ -67,7 +67,7 @@ public class ImageImporter implements Loggable, Importer {
 	 */
 	public ImageImporter(final File f){
 		if( ! Importer.isSuitableImportFile(f)){
-			throw new IllegalArgumentException(INVALID_FILE_ERROR);
+			throw new IllegalArgumentException(f.getAbsolutePath()+": "+INVALID_FILE_ERROR);
 		}
 		
 		this.f = f;

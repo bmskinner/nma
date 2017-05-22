@@ -27,12 +27,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -47,6 +45,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
@@ -63,7 +62,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
@@ -103,16 +101,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private int cellsDone  = 0; // Progress through cells in the signal group
 
 	
-	public SignalWarpingDialog(List<IAnalysisDataset> datasets){
+	public SignalWarpingDialog(final List<IAnalysisDataset> datasets){
 		super();
-		finest("Creating signal warping dialog");
 		this.datasets = datasets;
 		createUI();
 		this.setModal(false);
 		this.pack();
+		
 		chartPanel.restoreAutoBounds();
 		this.setVisible(true);
-		finest("Created signal warping dialog");
 	}
 	
 	private void createUI(){
@@ -542,7 +539,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		private void generateImages(){
 			finer("Generating warped images for "+sourceDataset.getName());
-			finest("Fetching consensus nucleus from target dataset");
+
 			Mesh<Nucleus> meshConsensus;
 			try {
 				meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensus());
@@ -594,41 +591,35 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 							// Draw NucleusMeshImage onto consensus mesh.
 							finer("Warping image onto consensus mesh");
-
-
-
 							warped = im.drawImage(meshConsensus);
+							
 						} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-							fine("Cannot make mesh for "+n.getNameAndNumber());
+							stack("Cannot make mesh for "+n.getNameAndNumber(), e);
 							warped = null;
 						}
-						finest("Warped image is "+ip.getWidth()+"x"+ip.getHeight());
+
 						warpedImages[cellNumber] = warped;
 
 
 					} catch(IllegalArgumentException e){
 
-						fine("Error creating warping mesh");
+						stack(e.getMessage(), e);
 						warn(e.getMessage());
 
 						// Make a blank image for the array
-						warpedImages[cellNumber] = createBlankProcessor(w,h);
+						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 
 
 					} catch (UnloadableImageException e) {
-						warn("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber());
 						stack("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber(), e);
-						fine("Making blank processor");
-						warpedImages[cellNumber] = createBlankProcessor(w,h);
+						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 					} catch (MeshCreationException e1) {
 						stack("Error creating mesh",e1);
-						fine("Making blank processor");
-						warpedImages[cellNumber] = createBlankProcessor(w,h);
+						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 					} finally {
 
 						mergedImage = combineImages(w, h);
 						mergedImage = rescaleImageIntensity();
-						finer("Completed cell "+cellNumber);
 						publish(cellNumber++);
 					}
 				}
@@ -637,6 +628,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 		}
 		
+		/**
+		 * Get the cells to be used for the warping
+		 * @param withSignalsOnly
+		 * @return
+		 */
 		private Set<ICell> getCells(boolean withSignalsOnly){
 			
 			SignalManager m =  sourceDataset.getCollection().getSignalManager();
@@ -652,31 +648,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			return cells;
 		}
 		
-		
-		private ImageProcessor createBlankProcessor(){
-			
-			if(warpedImages[0]==null){
-				warn("No template for blank processor");
-			}
-			int w = warpedImages[0].getWidth();
-			int h = warpedImages[0].getHeight();
-			
-			// Create an empty white processor
-			return createBlankProcessor(w, h);
-		}
-		
-		private ImageProcessor createBlankProcessor(int w, int h){
-			
-			// Create an empty white processor
-			ImageProcessor ip = new ByteProcessor(w, h);
-			for(int i=0; i<ip.getPixelCount(); i++){
-				ip.set(i, 255); // set all to white initially
-			}
-			
-			return ip;
-		}
-		
-		
 		/**
 		 * Create a new image processor with the average of all warped images
 		 * @return
@@ -685,7 +656,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			
 			// Create an empty white processor of the correct dimensions
-			ImageProcessor mergeProcessor = createBlankProcessor(w, h);
+			ImageProcessor mergeProcessor = ImageFilterer.createBlankByteProcessor(w, h);
 			
 			int nonNull = 0;
 			
