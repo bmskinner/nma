@@ -16,7 +16,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface IAnalysisMethod extends Callable<IAnalysisResult>, Loggable {
-		
+	
 	/**
 	 * Add a listener for progress through an analysis. 
 	 * Use e.g. to update progress bars
