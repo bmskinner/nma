@@ -96,7 +96,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection>{
 				if(failCollection!=null){
 					failCollection.addCell(new DefaultCell(c));
 				}
-				collection.removeCell(c);
+//				collection.removeCell(c);
 				it.remove();
 				
 			}

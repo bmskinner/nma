@@ -356,7 +356,7 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 	protected void analyseFile(File file, ICellCollection collection){
 		
 		finest("Analysing file "+file.getAbsolutePath());
-		boolean ok = checkFile(file);
+		boolean ok = ImageImporter.fileIsImportable(file);
 
 		if(!ok){
 			return;
