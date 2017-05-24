@@ -28,6 +28,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -96,6 +98,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JButton runButton;
 	private JCheckBox cellsWithSignalsBox;
 	private JCheckBox straightenMeshBox;
+	private JCheckBox addToImage;
 	
 	private SignalWarper warper;
 	
@@ -103,6 +106,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private int totalCells = 0; // The cells in the signal group being processed
 	private int cellsDone  = 0; // Progress through cells in the signal group
+	
+	private boolean isAddToImage = false;
+	
+	final private List<ImageProcessor> mergableImages = new ArrayList<>(); 
 
 	
 	public SignalWarpingDialog(final List<IAnalysisDataset> datasets){
@@ -189,12 +196,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 		straightenMeshBox = new JCheckBox(STRAIGHTEN_MESH_LBL, false);
 		straightenMeshBox.addActionListener(this);
-//		upperPanel.add(straightenMeshBox);
 		
 		
 		lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
 		lowerPanel.add(datasetBoxTwo);
-		
+				
 		runButton = new JButton(RUN_LBL);
 		
 		runButton.addActionListener( e -> {
@@ -208,6 +214,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		});	
 
 		lowerPanel.add(runButton);
+		
+		addToImage = new JCheckBox("Add to image", false);
+		addToImage.addActionListener(this);
+		lowerPanel.add(addToImage);
 		
 		if(! signalBox.hasSelection()){
 			runButton.setEnabled(false);
@@ -227,6 +237,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private void runWarping(){
 		
 		finest("Running warping");
+		if(!isAddToImage){
+			mergableImages.clear();
+		} 
 		progressBar.setString("0 of "+totalCells);
 		progressBar.setValue(0);
 		
@@ -280,6 +293,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		runButton.setEnabled(b);
 		datasetBoxOne.setEnabled(b);
 		datasetBoxTwo.setEnabled(b);
+		addToImage.setEnabled(b);
 	}
 	
 	
@@ -316,6 +330,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	}
 	
 	private void updateOutlineChart(){
+
+		if(isAddToImage){
+			return;
+		}
 		JFreeChart chart = null;
 		if(straightenMeshBox.isSelected()){
 			
@@ -385,7 +403,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		if(e.getSource()==datasetBoxTwo){
 			updateOutlineChart();
 		}
-						
+		
+		if(e.getSource()==addToImage){
+			isAddToImage = addToImage.isSelected();
+		}
+								
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		
 		totalCells = cellsWithSignals 
@@ -483,7 +505,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	        	
 	        }
 	        
-	        updateChart();
+//	        updateChart();
 	                
 	        
 	    }
@@ -492,7 +514,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	    public void done() {
 	    	
 	    	finest("Worker completed task");
-
+	    	updateChart();
 	    	 try {
 	            if(this.get()){
 	            	finest("Firing trigger for sucessful task");
@@ -538,15 +560,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					.setShowBounds(false)
 					.setStraightenMesh(straighten)
 					.build();
+				
+				
+				if(!isAddToImage){
+					mergableImages.clear();
+				} 
+				
+				mergableImages.add(recoloured);
+				ImageProcessor averaged = mergeImages(mergableImages);
 
-				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(recoloured);
-						
+				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(averaged);
 				Runnable update = () -> { 
 					chartPanel.setChart(chart);
 					chartPanel.restoreAutoBounds();
 				};
 				SwingUtilities.invokeLater( update );
-				
+
 			};
 			Thread thr = new Thread(task);
 			thr.start();		
@@ -583,6 +612,63 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				
 			}
 
+			return cp;
+		}
+		
+		/**
+		 * Merge the given list of images by averaging the RGB values
+		 * @param list
+		 * @return
+		 */
+		private ImageProcessor mergeImages(List<ImageProcessor> list){
+			
+			if(list==null || list.isEmpty()){
+				throw new IllegalArgumentException("List null or empty");
+			}
+			
+			// Check images are same dimensions
+			int w = list.get(0).getWidth();
+			int h = list.get(0).getHeight();
+			
+			for(ImageProcessor ip : list){
+				if(w!=ip.getWidth() || h!=ip.getHeight()){
+					throw new IllegalArgumentException("Dimensions do not match");
+				}
+			}
+			
+			ImageProcessor cp = new ColorProcessor(w, h);
+			
+			// Average the colours at each pixel
+			int pixelCount = w*h;
+			for(int i=0; i<pixelCount; i++){
+				
+				int r=0, g=0, b=0;
+				for(ImageProcessor ip : list){
+					int pixel = ip.get(i);
+					
+					if(ip instanceof ColorProcessor){
+						r += (pixel >> 16) & 0xFF;
+						g += (pixel >> 8) & 0xFF;
+						b += pixel & 0xFF;
+					} else {
+						r+=pixel;
+						g+=pixel;
+						b+=pixel;
+					}
+					
+				}
+				
+				r/=list.size();
+				g/=list.size();
+				b/=list.size();
+					
+				int rgb = r;
+				rgb = (rgb << 8) + g;
+				rgb = (rgb << 8) + b;
+				cp.set(i, rgb);
+				
+			}
+			
 			return cp;
 		}
 		

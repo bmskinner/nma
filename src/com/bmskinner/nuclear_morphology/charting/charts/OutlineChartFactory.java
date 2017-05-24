@@ -140,10 +140,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
 	}
 	
+	
 	/**
 	 * Draw the given images onto a consensus outline nucleus.
 	 * @param image the image processor to be drawn
-//	 * @param color the solid color to draw the image - this will be made partially transparent 
 	 * @return
 	 */
 	public JFreeChart makeSignalWarpChart(ImageProcessor image){
@@ -765,8 +765,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
 				Color col=null;
 				
 				if(ip instanceof ColorProcessor){
-					col = new Color(pixel);
-					col = ColourSelecter.getTransparentColour(col, true, alpha);
+					if(pixel < 16777215){
+						col = new Color(pixel);
+						col = ColourSelecter.getTransparentColour(col, true, alpha);
+					}
+					
 					
 				} else {
 					if(pixel<255){// Ignore anything that is not signal - the background is already white
