@@ -81,6 +81,7 @@ import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -141,8 +142,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
 	
 	/**
 	 * Draw the given images onto a consensus outline nucleus.
-	 * @param options
-	 * @param images
+	 * @param image the image processor to be drawn
+//	 * @param color the solid color to draw the image - this will be made partially transparent 
 	 * @return
 	 */
 	public JFreeChart makeSignalWarpChart(ImageProcessor image){
@@ -761,27 +762,29 @@ public class OutlineChartFactory extends AbstractChartFactory {
 			for(int y=0; y<ip.getHeight(); y++){
 
 				int pixel = ip.get(x, y);
+				Color col=null;
 				
-				if(pixel<255){// Ignore anything that is not signal - the background is already white
+				if(ip instanceof ColorProcessor){
+					col = new Color(pixel);
+					col = ColourSelecter.getTransparentColour(col, true, alpha);
+					
+				} else {
+					if(pixel<255){// Ignore anything that is not signal - the background is already white
+						col = new Color(pixel, pixel, pixel, alpha);
+					}
+				}
 				
-					Color col = new Color(pixel, pixel, pixel, alpha);
-
+				if(col==null && showBounds){
+					col = new Color(255, 0, 0, alpha);
+				}
+				
+				if(col!=null){
 					// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
 					Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
 					XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
 
 					rend.addAnnotation(a, Layer.BACKGROUND);
-				} else {
-					if(showBounds){
-						Color col = new Color(255, 0, 0, alpha);
-
-						// Ensure the 'pixels' overlap to avoid lines of background colour seeping through
-						Rectangle2D r = new Rectangle2D.Double(x+xOffset-0.1, y+yOffset-0.1, 1.2, 1.2);
-						XYShapeAnnotation a = new XYShapeAnnotation(r, null, null, col);
-
-						rend.addAnnotation(a, Layer.BACKGROUND);
-					}
-				}
+				} 
 			}
 		}
 		

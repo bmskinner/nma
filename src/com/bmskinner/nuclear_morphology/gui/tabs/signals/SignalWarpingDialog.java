@@ -21,6 +21,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -61,6 +62,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
@@ -68,7 +70,9 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPa
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
+import ij.ImagePlus;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 @SuppressWarnings("serial")
@@ -511,6 +515,19 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		private void updateChart(){
 			
 			Runnable task = () -> { 
+				
+				Color colour = Color.WHITE;
+				try {
+					colour = sourceDataset.getCollection().getSignalGroup(signalGroup).getGroupColour();
+					if(colour==null){
+						colour = Color.WHITE;
+					}
+				} catch (UnavailableSignalGroupException e) {
+					stack(e);
+					colour = Color.WHITE;
+				}
+				
+				ImageProcessor recoloured = recolorImage(mergedImage, colour);
 								
 				boolean straighten = straightenMeshBox.isSelected();
 				
@@ -522,7 +539,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					.setStraightenMesh(straighten)
 					.build();
 
-				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(mergedImage);
+				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(recoloured);
 						
 				Runnable update = () -> { 
 					chartPanel.setChart(chart);
@@ -533,6 +550,40 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			};
 			Thread thr = new Thread(task);
 			thr.start();		
+		}
+		
+	
+		/**
+		 * Recolour the given image to use the given colour, weighting the
+		 * greyscale values by the HSB saturation level
+		 * @param ip
+		 * @param colour
+		 * @return
+		 */
+		private ImageProcessor recolorImage(ImageProcessor ip, Color colour){
+			
+			float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
+			
+			// Scale the brightness from 0-bri across the image
+			ColorProcessor cp = new ColorProcessor(ip.getWidth(), ip.getHeight());
+			
+			for(int i=0; i<mergedImage.getPixelCount(); i++){
+				int pixel = mergedImage.get(i);
+				
+				if(pixel==255){ // skip fully white pixels
+					int full = 16777215;
+					cp.set(i, full);
+				} else {
+					float pct = (float)(255f - (255f-pixel )) / 255f;
+					pct = 1f-pct;
+					int full = Color.HSBtoRGB(hsb[0], pct, 1); // if issues, replace 1 with the hsb[2] - for now it keeps the white border
+					cp.set(i, full);
+				}
+				
+				
+			}
+
+			return cp;
 		}
 		
 	
