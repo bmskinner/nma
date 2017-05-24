@@ -950,11 +950,11 @@ public class DefaultCellCollection
 		
 		double[] result = null;
 		
-		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
-			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
-		
-		} else {
-			
+//		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
+//			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
+//		
+//		} else {
+//			
 			result = getNuclei().parallelStream()
 				.mapToDouble( n-> {
 						IBorderSegment segment;
@@ -976,8 +976,8 @@ public class DefaultCellCollection
 				.toArray();
 			Arrays.sort(result);
 			
-			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
-		}
+//			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
+//		}
 		
 		return result;
 	}

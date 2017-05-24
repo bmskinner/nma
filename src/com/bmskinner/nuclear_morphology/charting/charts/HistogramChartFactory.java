@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCr
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -514,7 +515,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 		finer("Creating histogram for Seg_"+options.getSegPosition());
 		
 		
-		JFreeChart chart = createHistogram(ds, "Seg_"+options.getSegPosition()+" length ("+options.getScale()+")", "Nuclei" );
+		JFreeChart chart = createHistogram(ds, IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+" length ("+options.getScale()+")", "Nuclei" );
 		
 		if(ds!=null && options.hasDatasets()){
 						
@@ -528,7 +529,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 				plot.getRenderer().setSeriesStroke(j, ChartComponents.MARKER_STROKE);
 
 				String seriesKey = (String) ds.getSeriesKey(j);
-				String seriesName = seriesKey.replaceFirst("Seg_"+options.getSegPosition()+"_", "");
+				String seriesName = seriesKey.replaceFirst(IBorderSegment.SEGMENT_PREFIX+options.getSegPosition()+"_", "");
 				
 				for(IAnalysisDataset dataset : options.getDatasets()){
 					

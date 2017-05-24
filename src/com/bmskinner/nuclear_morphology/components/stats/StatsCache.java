@@ -19,10 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.components.stats;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -199,6 +197,13 @@ public class StatsCache {
 
 	}
 	
+	/**
+	 * Check if the cache has raw values for the give stat
+	 * @param stat
+	 * @param component
+	 * @param scale
+	 * @return
+	 */
 	public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale){
 		
 		Key key = new Key(stat, component, scale);

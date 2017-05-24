@@ -1049,11 +1049,11 @@ public class VirtualCellCollection implements ICellCollection {
 	private synchronized double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) throws Exception{
 
 		double[] result = null;
-		
-		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
-			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
-		
-		} else {
+//		
+//		if(statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
+//			return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
+//		
+//		} else {
 			
 			result = getNuclei().parallelStream()
 				.mapToDouble( n-> {
@@ -1074,8 +1074,8 @@ public class VirtualCellCollection implements ICellCollection {
 					})
 				.toArray();
 			Arrays.sort(result);
-			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
-		}
+//			statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, result);
+//		}
 		
 		return result;
 	}
