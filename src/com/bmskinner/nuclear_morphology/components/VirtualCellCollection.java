@@ -402,6 +402,11 @@ public class VirtualCellCollection implements ICellCollection {
 	public File getOutputFolder() {
 		return parent.getCollection().getOutputFolder();
 	}
+	
+	@Override
+	public void setOutputFolder(File folder){
+		parent.getCollection().setOutputFolder(folder);
+	}
 
 	@Override
 	public Set<File> getImageFiles() {

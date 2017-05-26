@@ -608,7 +608,7 @@ public class MainWindow
 				
 		if(event.type().equals("SaveCellLocations")){
 			log("Exporting cell locations...");
-			if(MappingFileExporter.exportCellLocations(selectedDataset)){
+			if(new MappingFileExporter().exportCellLocations(selectedDataset)){
 				log( "Export complete");
 			} else {
 				log("Export failed");

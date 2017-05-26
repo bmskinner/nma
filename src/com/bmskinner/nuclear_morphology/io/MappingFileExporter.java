@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Export the locations of the centre of mass of nuclei in a dataset
@@ -36,9 +37,9 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @author ben
  *
  */
-public class MappingFileExporter implements Exporter {
+public class MappingFileExporter implements Exporter, Loggable {
 		
-	public static boolean exportCellLocations(IAnalysisDataset d){
+	public boolean exportCellLocations(IAnalysisDataset d){
 		
 		File exportFile = new File(d.getCollection().getOutputFolder()
 				+File.separator
@@ -46,6 +47,13 @@ public class MappingFileExporter implements Exporter {
 				+"."
 				+Importer.LOC_FILE_EXTENSION);
 		
+		
+		if( ! exportFile.getParentFile().isDirectory()){
+			// the desired output folder does not exist - create
+			
+			exportFile = new File("C:\\Software\\"+d.getName()+"."+Importer.LOC_FILE_EXTENSION);
+			warn("Exporting to "+exportFile.getAbsolutePath());
+		}
 		
 		if(exportFile.exists()){
 			exportFile.delete();
@@ -68,9 +76,9 @@ public class MappingFileExporter implements Exporter {
 		try {
 			export(builder.toString(), exportFile);
 		} catch (FileNotFoundException e) {
+			stack(e);
 			return false;
 		}
-//		IJ.log("Exported");
 		return true;
 	}
 	

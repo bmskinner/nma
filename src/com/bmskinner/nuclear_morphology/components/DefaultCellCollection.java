@@ -380,6 +380,12 @@ public class DefaultCellCollection
 		}
 		return result;
 	}
+	
+	@Override
+	public void setOutputFolder(File folder){
+		this.folder = folder;
+		this.outputFolder = null;
+	}
 
 
 	/**

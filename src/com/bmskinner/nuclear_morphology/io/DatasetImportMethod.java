@@ -100,6 +100,15 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 				fine("Version check OK");
 				dataset.setRoot(true);
+				
+				File exportFolder = dataset.getCollection().getOutputFolder();
+				if( ! exportFolder.exists()){
+					// the nmd has probably been copied from another computer
+					// update to the current file path
+					exportFolder = file.getParentFile();
+					dataset.getCollection().setOutputFolder(exportFolder);
+					log("Updated output folder to "+exportFolder);
+				}
 
 				File logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
 				// update the log file to the same folder as the dataset
@@ -358,9 +367,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 		
 		// Replace existing save file path with the path to the file that has been opened
 		finest("Checking file path");
-		if(!dataset.getSavePath().equals(inputFile)){
+		if( ! dataset.getSavePath().equals(inputFile)){
 			log("Old save path: "+dataset.getSavePath().getAbsolutePath());
-			log("Input file   :"+inputFile.getAbsolutePath());
+			log("Input file: "+inputFile.getAbsolutePath());
 			updateSavePath(inputFile, dataset);
 		}
 		
@@ -406,7 +415,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 	private void updateSavePath(File inputFile, IAnalysisDataset dataset) {
 		
 		fine("File path has changed: attempting to relocate images");
-		
+
 		// Check if the original image paths are still correct/
 		// If not, proceed with the relocate below
 		
@@ -425,7 +434,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
 		dataset.setSavePath(inputFile);
 		
-		if(!dataset.hasMergeSources()){
+		if( ! dataset.hasMergeSources()){
 
 			// This should be /ImageDir/DateTimeDir/
 			File expectedAnalysisDirectory = inputFile.getParentFile();
@@ -436,7 +445,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 			try {
 				dataset.updateSourceImageDirectory(expectedImageDirectory);
 			} catch (IllegalArgumentException e){
-				warn("Cannot update save path: "+e.getMessage());
+				warn("Cannot update image file paths: "+e.getMessage());
 			}
 			
 			fine("Checking if signal folders need updating");

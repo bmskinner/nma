@@ -229,6 +229,11 @@ public interface ICellCollection
 	 * @return the folder
 	 */
 	File getOutputFolder();
+	
+	/**
+	 * Set the output folder of the collection
+	 */
+	void setOutputFolder(File folder);
 
 	/**
 	 * Get the distinct source image file list for all nuclei in the collection 
