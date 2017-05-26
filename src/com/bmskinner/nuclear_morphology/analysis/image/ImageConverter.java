@@ -47,67 +47,6 @@ public class ImageConverter extends AbstractImageFilterer {
 		super(st);
 	}
 	
-	/**
-	 * Merge the given list of images by averaging the RGB values
-	 * @param list
-	 * @return a new colour processor with the averaged values
-	 */
-	public static ImageProcessor averageImages(List<ImageProcessor> list){
-		
-		if(list==null || list.isEmpty()){
-			throw new IllegalArgumentException("List null or empty");
-		}
-		
-		// Check images are same dimensions
-		int w = list.get(0).getWidth();
-		int h = list.get(0).getHeight();
-		
-		for(ImageProcessor ip : list){
-			if(w!=ip.getWidth() || h!=ip.getHeight()){
-				throw new IllegalArgumentException("Dimensions do not match");
-			}
-		}
-		
-		ImageProcessor cp = new ColorProcessor(w, h);
-		
-		// Average the colours at each pixel
-		// White counts as empty here
-		int pixelCount = w*h;
-		for(int i=0; i<pixelCount; i++){
-			
-			int r=0, g=0, b=0; // c is count of images with pixel value here
-			for(ImageProcessor ip : list){
-				int pixel = ip.get(i);
-				
-				if(ip instanceof ColorProcessor){
-					r += (pixel >> 16) & 0xFF;
-					g += (pixel >> 8) & 0xFF;
-					b += pixel & 0xFF;
-					
-				} else {
-					r+=pixel;
-					g+=pixel;
-					b+=pixel;
-				}
-				
-			}
-
-			r/=list.size();
-			g/=list.size();
-			b/=list.size();
-				
-			int rgb = r;
-			rgb = (rgb << 8) + g;
-			rgb = (rgb << 8) + b;
-			cp.set(i, rgb);
-			
-		}
-		
-		return cp;
-	}
-	
-	
-		
 	
 	/**
 	 * Create a blank byte processor image of the specified dimensions

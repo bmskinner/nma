@@ -29,6 +29,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -86,8 +87,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private static final String ADD_TO_IMAGE_LBL    = "Add to image";
 	private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
 	private static final String RUN_LBL             = "Run";
-	
-	private static final int RGB_WHITE = 16777215;
 	
 	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanel;
@@ -545,7 +544,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					colour = Color.WHITE;
 				}
 				
-				ImageProcessor recoloured = recolorImage(mergedImage, colour);
+				ImageProcessor recoloured = ImageFilterer.recolorImage(mergedImage, colour);
 								
 				boolean straighten = straightenMeshBox.isSelected();
 				
@@ -563,54 +562,20 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				} 
 				
 				mergableImages.add(recoloured);
-				ImageProcessor averaged = ImageConverter.averageImages(mergableImages);
+				ImageProcessor averaged = ImageConverter.averageRGBImages(mergableImages);
 
 				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(averaged);
-//				Runnable update = () -> { 
-					chartPanel.setChart(chart);
-					chartPanel.restoreAutoBounds();
-//				};
-//				SwingUtilities.invokeLater( update );
+
+				chartPanel.setChart(chart);
+				chartPanel.restoreAutoBounds();
+
 
 			};
 			Thread thr = new Thread(task);
 			thr.start();		
 		}
 		
-	
-		/**
-		 * Recolour the given image to use the given colour, weighting the
-		 * greyscale values by the HSB saturation level
-		 * @param ip
-		 * @param colour
-		 * @return
-		 */
-		private ImageProcessor recolorImage(ImageProcessor ip, Color colour){
-			
-			float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
-			
-			// Scale the brightness from 0-bri across the image
-			ColorProcessor cp = new ColorProcessor(ip.getWidth(), ip.getHeight());
-			
-			for(int i=0; i<mergedImage.getPixelCount(); i++){
-				int pixel = mergedImage.get(i);
-				
-				if(pixel==255){ // skip fully white pixels
-					int full = RGB_WHITE;
-					cp.set(i, full);
-				} else {
-					float pct = (float)(255f - (255f-pixel )) / 255f;
-					pct = 1f-pct;
-					int full = Color.HSBtoRGB(hsb[0], pct, 1); // if issues, replace 1 with the hsb[2] - for now it keeps the white border
-					cp.set(i, full);
-				}
-				
-				
-			}
-
-			return cp;
-		}
-				
+					
 		private void generateImages(){
 			finer("Generating warped images for "+sourceDataset.getName());
 
@@ -692,8 +657,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
 					} finally {
 
-						mergedImage = combineImages(w, h);
-						mergedImage = rescaleImageIntensity();
+						List<ImageProcessor> list = Arrays.asList(warpedImages);
+						mergedImage = ImageFilterer.averageByteImages(list);
+						mergedImage = ImageFilterer.rescaleImageIntensity(mergedImage);
 						publish(cellNumber++);
 					}
 				}
@@ -722,95 +688,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			return cells;
 		}
 		
-		/**
-		 * Create a new image processor with the average of all warped images
-		 * @return
-		 */
-		private ImageProcessor combineImages(int w, int h){
-			
-			
-			// Create an empty white processor of the correct dimensions
-			ImageProcessor mergeProcessor = ImageFilterer.createBlankByteProcessor(w, h);
-			
-			int nonNull = 0;
-			
-			// check sizes match
-			for(ImageProcessor ip : warpedImages){
-				if(ip==null){
-					continue;
-				}
-				nonNull++;
-				if(ip.getHeight()!=h && ip.getWidth()!=w){
-					warn("Sizes of warped images do not match");
-					return mergeProcessor;
-				}
-			}
-			
-
-			
-			if(nonNull==0){
-				return mergeProcessor;
-			}
-			
-			// Average the pixels
-			for(int x=0; x<w; x++){
-				for(int y=0; y<h; y++){
-
-					int pixelTotal = 0;
-					for(ImageProcessor ip : warpedImages){
-						if(ip==null){
-							continue;
-						}
-						pixelTotal += ip.get(x, y);
-					}
-					
-					pixelTotal /= nonNull; // scale back down to 0-255;
-					
-					if(pixelTotal<255){// Ignore anything that is not signal - the background is already white
-						mergeProcessor.set(x, y, pixelTotal);
-					} 
-				}
-			}
-			return mergeProcessor;
-		}
 		
-		/**
-		 * Adjust the merged image so that the brightet pixel is at 255
-		 * @return
-		 */
-		private ImageProcessor rescaleImageIntensity(){
-			finer("Rescaling image intensities to take full range");
-			ImageProcessor result = new ByteProcessor(mergedImage.getWidth(), mergedImage.getHeight());
-			// Find the range in the image	
-			
-			double maxIntensity = 0;
-			double minIntensity = 255;
-			for(int i=0; i<mergedImage.getPixelCount(); i++){
-				int pixel = mergedImage.get(i);
-				maxIntensity = pixel > maxIntensity ? pixel : maxIntensity;
-				minIntensity = pixel < minIntensity ? pixel : minIntensity;
-			}
-			
-			if(maxIntensity==0){
-				return mergedImage;
-			}
-			
-			double range        = maxIntensity - minIntensity;
-			finest("Image intensity runs "+minIntensity+"-"+maxIntensity);
-			
-			// Adjust each pixel to the proportion in range 0-255
-			for(int i=0; i<mergedImage.getPixelCount(); i++){
-				int pixel = mergedImage.get(i);
-
-				double proportion = ( (double) pixel - minIntensity) / range;
-				
-				int newPixel  = (int) (255 * proportion);
-				finest("Converting pixel: "+pixel+" -> "+newPixel);
-				result.set(i, newPixel);
-			}
-			return result;
-		}
-
+		
 	}
 	
 }
