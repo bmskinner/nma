@@ -58,6 +58,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -101,6 +102,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JCheckBox straightenMeshBox;
 	private JCheckBox addToImage;
 	
+//	private SignalWarper warper;
 	private SignalWarper warper;
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
@@ -235,7 +237,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		if(!isAddToImage){
 			mergableImages.clear();
 		} 
-		progressBar.setString("0 of "+totalCells);
+//		progressBar.setString("0 of "+totalCells);
 		progressBar.setValue(0);
 		
 		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
@@ -250,6 +252,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				: sourceDataset.getCollection().size();
 				
 //		log("Found "+totalCells+" using signals only = "+cellsWithSignals);
+				
+		Nucleus target = targetDataset.getCollection().getConsensus();
 						
 		finest("Signal group: "+signalBox.getSelectedGroup());
 		try {
@@ -261,8 +265,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			progressBar.setVisible(true);
 			
 			
-
-			warper = new SignalWarper( signalBox.getSelectedID(), cellsWithSignals, straighten, chartPanel);
+			warper = new SignalWarper( sourceDataset, target, signalBox.getSelectedID(), cellsWithSignals, straighten);
+//			warper = new SignalWarper( signalBox.getSelectedID(), cellsWithSignals, straighten, chartPanel);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -294,7 +298,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	public void finished(){
 		try {
-//			updateChart();
+			updateChart(warper.get());
 			
 			setEnabled(true);
 			setStatusLoaded();
@@ -308,10 +312,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
-//		if(evt.getNewValue() instanceof Integer){
-//			int value = (Integer) evt.getNewValue(); // should be percent
-//			finest("Property change: "+value);
-//		}
+		if(evt.getNewValue() instanceof Integer){
+			int percent = (Integer) evt.getNewValue(); // should be percent
+			if(percent >= 0 && percent <=100){       							
+					if(progressBar.isIndeterminate()){
+						progressBar.setIndeterminate(false);
+					}
+					progressBar.setValue(percent);
+//					int cellNumber = i+1;
+//					progressBar.setString(cellNumber+" of "+totalCells);	
+	        }
+		}
 		
 
 		if(evt.getPropertyName().equals("Finished")){
@@ -322,6 +333,54 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			finished();
 		}
 		
+	}
+	
+	private void updateChart(ImageProcessor mergedImage){
+		
+		Runnable task = () -> { 
+			
+			Color colour = Color.WHITE;
+			try {
+				colour = datasetBoxOne.getSelectedDataset().getCollection()
+						.getSignalGroup(signalBox.getSelectedID())
+						.getGroupColour();
+				if(colour==null){
+					colour = Color.WHITE;
+				}
+			} catch (UnavailableSignalGroupException e) {
+				stack(e);
+				colour = Color.WHITE;
+			}
+			
+			ImageProcessor recoloured = ImageFilterer.recolorImage(mergedImage, colour);
+							
+			boolean straighten = straightenMeshBox.isSelected();
+			
+			ChartOptions options = new ChartOptionsBuilder()
+				.setDatasets(datasetBoxTwo.getSelectedDataset())
+				.setShowXAxis(false)
+				.setShowYAxis(false)
+				.setShowBounds(false)
+				.setStraightenMesh(straighten)
+				.build();
+			
+			
+			if(!isAddToImage){
+				mergableImages.clear();
+			} 
+			
+			mergableImages.add(recoloured);
+			ImageProcessor averaged = ImageConverter.averageRGBImages(mergableImages);
+
+			final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(averaged);
+
+			chartPanel.setChart(chart);
+			chartPanel.restoreAutoBounds();
+
+
+		};
+		Thread thr = new Thread(task);
+		thr.start();		
 	}
 	
 	private void updateOutlineChart(){
@@ -412,284 +471,5 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		
 	}
 
-	
-	private class SignalWarper extends SwingWorker<Boolean, Integer> {
-		
-		private IAnalysisDataset sourceDataset;
-		private IAnalysisDataset targetDataset;
-		private UUID signalGroup;
-		private boolean cellsWithSignals; // Only warp the cell images with detected signals
-		private boolean straighten; // Straighten the meshes
-		ImageProcessor[] warpedImages;
-		private ChartPanel chartPanel;
-		
-		ImageProcessor mergedImage = null;
-			
-		public SignalWarper(UUID signalGroup, boolean cellsWithSignals, boolean straighten, ChartPanel chartPanel){
-			
-			this.sourceDataset    = datasetBoxOne.getSelectedDataset();
-			this.targetDataset    = datasetBoxTwo.getSelectedDataset();
-			this.signalGroup      = signalGroup;
-			this.cellsWithSignals = cellsWithSignals;
-			this.straighten       = straighten;
-			this.chartPanel       = chartPanel;
-			
-			// Count the number of cells to include
-
-			Set<ICell> cells;
-			if(cellsWithSignals){
-				SignalManager m =  sourceDataset.getCollection().getSignalManager();
-				cells = m.getCellsWithNuclearSignals(signalGroup, true);
-				
-			} else {
-				cells = sourceDataset.getCollection().getCells();
-			}
-			int count = cells.size();
-
-			
-			warpedImages = new ImageProcessor[ count ];
-			
-			
-			fine("Created signal warper for "+sourceDataset.getName()+" signal group "+signalGroup+" with "+count+" cells");
-		}
-		
-
-		@Override
-		protected Boolean doInBackground() throws Exception {
-
-			try {
-				finer("Running warper");
-				
-				if( ! targetDataset.getCollection().hasConsensus()){
-					warn("No consensus nucleus in dataset");
-					return false;
-				} else {
-					generateImages();
-				}
-				
-			} catch (Exception e){
-				warn("Error in warper");
-				stack("Error in signal warper", e);
-				return false;
-			} 
-			
-			return true;
-			
-		}
-		
-		
-		@Override
-	    protected void process( List<Integer> chunks ) {
-	        
-			
-	        for(Integer i : chunks){
-	        	
-	        	int percent = (int) ( (double) i / (double) totalCells * 100);
-		        
-		        if(percent >= 0 && percent <=100){
-		        	setProgress(percent); // the integer representation of the percent
-		        							
-						if(progressBar.isIndeterminate()){
-							progressBar.setIndeterminate(false);
-						}
-						progressBar.setValue(percent);
-						int cellNumber = i+1;
-						progressBar.setString(cellNumber+" of "+totalCells);	
-		        }
-		        
-	        	
-	        }
-	        
-//	        updateChart();
-	                
-	        
-	    }
-		
-		@Override
-	    public void done() {
-	    	
-	    	finest("Worker completed task");
-	    	updateChart();
-	    	 try {
-	            if(this.get()){
-	            	finest("Firing trigger for sucessful task");
-	                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);            
-
-	            } else {
-	            	finest("Firing trigger for failed task");
-	                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-	            }
-	        } catch (InterruptedException e) {
-	        	error("Interruption error in worker", e);
-	        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-	        } catch (ExecutionException e) {
-	        	error("Execution error in worker", e);
-	        	firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-	       }
-
-	    } 
-		
-		private void updateChart(){
-			
-			Runnable task = () -> { 
-				
-				Color colour = Color.WHITE;
-				try {
-					colour = sourceDataset.getCollection().getSignalGroup(signalGroup).getGroupColour();
-					if(colour==null){
-						colour = Color.WHITE;
-					}
-				} catch (UnavailableSignalGroupException e) {
-					stack(e);
-					colour = Color.WHITE;
-				}
-				
-				ImageProcessor recoloured = ImageFilterer.recolorImage(mergedImage, colour);
-								
-				boolean straighten = straightenMeshBox.isSelected();
-				
-				ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(datasetBoxTwo.getSelectedDataset())
-					.setShowXAxis(false)
-					.setShowYAxis(false)
-					.setShowBounds(false)
-					.setStraightenMesh(straighten)
-					.build();
-				
-				
-				if(!isAddToImage){
-					mergableImages.clear();
-				} 
-				
-				mergableImages.add(recoloured);
-				ImageProcessor averaged = ImageConverter.averageRGBImages(mergableImages);
-
-				final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(averaged);
-
-				chartPanel.setChart(chart);
-				chartPanel.restoreAutoBounds();
-
-
-			};
-			Thread thr = new Thread(task);
-			thr.start();		
-		}
-		
-					
-		private void generateImages(){
-			finer("Generating warped images for "+sourceDataset.getName());
-
-			Mesh<Nucleus> meshConsensus;
-			try {
-				meshConsensus = new NucleusMesh( targetDataset.getCollection().getConsensus());
-			} catch (MeshCreationException e2) {
-				stack("Error creating mesh",e2);
-				return;
-			}
-			
-			if(straighten){
-				meshConsensus = meshConsensus.straighten();
-			}
-			
-			Rectangle r = meshConsensus.toPath().getBounds();
-			
-			// The new image size
-			int w = r.width  ;
-			int h = r.height ;
-			
-
-			
-			Set<ICell> cells = getCells(cellsWithSignals);
-
-			
-			int cellNumber = 0;
-			
-			
-			for(ICell cell : cells){
-				
-				for(Nucleus n : cell.getNuclei()){
-					fine("Drawing signals for "+n.getNameAndNumber());
-
-					Mesh<Nucleus> cellMesh;
-					try {
-						cellMesh = new NucleusMesh(n, meshConsensus);
-
-						if(straighten){
-							cellMesh = cellMesh.straighten();
-						}
-
-						// Get the image with the signal
-						ImageProcessor ip = n.getSignalCollection().getImage(signalGroup);
-						finest("Image for "+n.getNameAndNumber()+" is "+ip.getWidth()+"x"+ip.getHeight());
-
-						// Create NucleusMeshImage from nucleus.
-						finer("Making nucleus mesh image");
-						ImageProcessor warped;
-						try {
-							MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh,ip);
-
-							// Draw NucleusMeshImage onto consensus mesh.
-							finer("Warping image onto consensus mesh");
-							warped = im.drawImage(meshConsensus);
-							
-						} catch (UncomparableMeshImageException | MeshImageCreationException e) {
-							stack("Cannot make mesh for "+n.getNameAndNumber(), e);
-							warped = null;
-						}
-
-						warpedImages[cellNumber] = warped;
-
-
-					} catch(IllegalArgumentException e){
-
-						stack(e.getMessage(), e);
-						warn(e.getMessage());
-
-						// Make a blank image for the array
-						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-
-
-					} catch (UnloadableImageException e) {
-						stack("Unable to load signal image for signal group "+signalGroup+" in nucleus "+n.getNameAndNumber(), e);
-						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-					} catch (MeshCreationException e1) {
-						stack("Error creating mesh",e1);
-						warpedImages[cellNumber] = ImageFilterer.createBlankByteProcessor(w, h);
-					} finally {
-
-						List<ImageProcessor> list = Arrays.asList(warpedImages);
-						mergedImage = ImageFilterer.averageByteImages(list);
-						mergedImage = ImageFilterer.rescaleImageIntensity(mergedImage);
-						publish(cellNumber++);
-					}
-				}
-				
-			}
-			
-		}
-		
-		/**
-		 * Get the cells to be used for the warping
-		 * @param withSignalsOnly
-		 * @return
-		 */
-		private Set<ICell> getCells(boolean withSignalsOnly){
-			
-			SignalManager m =  sourceDataset.getCollection().getSignalManager();
-			Set<ICell> cells;
-			if(withSignalsOnly){
-				finer("Only fetching cells with signals");
-				cells = m.getCellsWithNuclearSignals(signalGroup, true);
-			} else {
-				finer("Fetching all cells");
-				cells = sourceDataset.getCollection().getCells();
-				
-			}
-			return cells;
-		}
-		
-		
-		
-	}
 	
 }

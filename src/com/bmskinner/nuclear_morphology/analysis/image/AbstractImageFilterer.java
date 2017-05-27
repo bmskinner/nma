@@ -344,6 +344,9 @@ public abstract class AbstractImageFilterer implements Loggable {
 		int h = list.get(0).getHeight();
 		
 		for(ImageProcessor ip : list){
+			if(ip==null){
+				continue;
+			}
 			if(w!=ip.getWidth() || h!=ip.getHeight()){
 				throw new IllegalArgumentException("Dimensions do not match");
 			}
