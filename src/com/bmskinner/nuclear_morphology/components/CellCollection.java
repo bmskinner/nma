@@ -433,6 +433,12 @@ public class CellCollection implements ICellCollection {
 		}
 		return result;
 	}
+	
+	@Override
+	public void setOutputFolder(File folder){
+		this.folder = folder;
+		this.outputFolder = null;
+	}
 
 
 	/**

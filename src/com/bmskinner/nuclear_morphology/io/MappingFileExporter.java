@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -41,17 +42,18 @@ public class MappingFileExporter implements Exporter, Loggable {
 		
 	public boolean exportCellLocations(IAnalysisDataset d){
 		
-		File exportFile = new File(d.getCollection().getOutputFolder()
-				+File.separator
-				+d.getName()
-				+"."
-				+Importer.LOC_FILE_EXTENSION);
+		String fileName = d.getName()+"."+Importer.LOC_FILE_EXTENSION;
+		File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
+
 		
 		
 		if( ! exportFile.getParentFile().isDirectory()){
-			// the desired output folder does not exist - create
+			// the desired output folder does not exist
+			warn("The intended export folder does not exist");
 			
-			exportFile = new File("C:\\Software\\"+d.getName()+"."+Importer.LOC_FILE_EXTENSION);
+			File folder = GlobalOptions.getInstance().getDefaultDir();
+//			warn("Defaulting to: "+folder.getAbsolutePath());
+			exportFile = new File(folder, fileName);
 			warn("Exporting to "+exportFile.getAbsolutePath());
 		}
 		

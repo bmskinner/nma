@@ -17,8 +17,11 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.CollectionFilteringException;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.CellCollectionFilterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer;
+import com.bmskinner.nuclear_morphology.analysis.nucleus.Filterer.CollectionFilteringException;
+//import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer;
+//import com.bmskinner.nuclear_morphology.analysis.nucleus.CollectionFilterer.CollectionFilteringException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ScatterChartFactory;
@@ -191,7 +194,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 		}
 		finer("Gating datasets on "+statABox.getSelectedItem().toString()+" and "+statBBox.getSelectedItem().toString());
 		
-		CollectionFilterer f = new CollectionFilterer();
+		Filterer<ICellCollection> f = new CellCollectionFilterer();
 		
 		for(IAnalysisDataset d : getDatasets()){
 			

@@ -18,8 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.io;
 
-import ij.IJ;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
