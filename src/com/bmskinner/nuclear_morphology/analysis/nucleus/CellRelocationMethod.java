@@ -18,6 +18,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
@@ -232,7 +233,7 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 			File newFolder = dataset.getCollection().getFolder();
 			if(newFolder.exists()){
 				fine("Updating folder to "+newFolder.getAbsolutePath());
-				file = new File(newFolder+File.separator+file.getName());
+				file = new File(newFolder, file.getName());
 				fine("Updating path to "+file);
 			} else {
 				fine("File does not exist or is malformed: "+file.toString());
@@ -271,23 +272,26 @@ public class CellRelocationMethod extends AbstractAnalysisMethod {
 		Set<ICell> cells = this.dataset.getCollection().getCells(f);
 
 		for(ICell c : cells){
+			
+			for(Nucleus n : c.getNuclei()){
+				if(n.containsOriginalPoint(com)){
 
-			if(c.getNucleus().containsOriginalPoint(com)){
-
-				return c;
+					return c;
+				}
 			}
+			
 		}
 		return null;
 	}
 	
 	private File getFile(String line) {
-		String[] array = line.split("\\t");
+		String[] array = line.split(TAB);
 		File f = new File(array[0]);
 		return f;
 	}
 	
 	private IPoint getPosition(String line) throws Exception {
-		String[] array = line.split("\\t");
+		String[] array = line.split(TAB);
 		String position = array[1];
 		
 		String[] posArray = position.split("-");

@@ -17,10 +17,17 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
+/**
+ * Creates child datasets from a .cell mapping file
+ * @author ben
+ *
+ */
 public class RelocateFromFileAction extends SingleDatasetResultAction {
 
+	private static final String PROGRESS_LBL = "Relocating cells";
+	
 	public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
-		super(dataset, "Relocating cells", mw);
+		super(dataset, PROGRESS_LBL, mw);
 		this.setLatch(latch);
 		setProgressBarIndeterminate();
 		
@@ -48,7 +55,6 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
 			worker.addPropertyChangeListener(this);
 			
 			this.setProgressMessage("Locating cells...");
-			log("Locating cells...");
 			ThreadManager.getInstance().submit(worker);
 		} else {
 			fine( "Cancelled");
@@ -82,7 +88,7 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
 		}
 
 
-		JFileChooser fc = new JFileChooser("Select a file...");
+		JFileChooser fc;
 		if(defaultDir.exists()){
 			fc = new JFileChooser(defaultDir);
 		} else {
