@@ -20,6 +20,8 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,37 +44,47 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetValidator implements Loggable {
 	
+	public static final List<String> errorList = new ArrayList<>();
+	
 	public DatasetValidator(){
 		
+	}
+	
+	public List<String> getErrors(){
+		return errorList;
 	}
 	
 	/**
 	 * Run validation on the given dataset
 	 * @param d
 	 */
-	public void validate(final IAnalysisDataset d){
+	public boolean validate(final IAnalysisDataset d){
+		
+		errorList.clear();
 		
 		if( ! d.isRoot() ){
-			log("Dataset not checked - not root");
-			return;
+			errorList.add(d.getName()+": Dataset not checked - not root");
+			return false;
 		}
 		
 		int errors = 0;
 		
 		if(!checkSegmentsAreConsistentInProfileCollections(d)){
-			warn("Error in segmentation between datasets");
+			errorList.add("Error in segmentation between datasets");
 			errors++;
 		}
 		
 		if( ! checkSegmentsAreConsistentInAllCells(d)){
-			warn("Error in segmentation between cells");
+			errorList.add("Error in segmentation between cells");
 			errors++;
 		}
 		
 		if(errors==0){
-			log("Dataset OK");
+			errorList.add("Dataset OK");
+			return true;
 		} else {
-			log("Dataset failed validation");
+			errorList.add("Dataset failed validation");
+			return false;
 		}
 		
 	}
@@ -97,7 +109,7 @@ public class DatasetValidator implements Loggable {
 			// check all parent segments are in child
 			for(UUID id : idList){
 				if( ! childList.contains(id) ){
-					warn("Segment "+id+" not found in child "+child.getName());
+					errorList.add("Segment "+id+" not found in child "+child.getName());
 					return false;
 				}
 			}
@@ -105,7 +117,7 @@ public class DatasetValidator implements Loggable {
 			// Check all child segments are in parent
 			for(UUID id : childList){
 				if( ! idList.contains(id) ){
-					warn(child.getName()+" segment "+id+" not found in parent");
+					errorList.add(child.getName()+" segment "+id+" not found in parent");
 					return false;
 				}
 			}
@@ -135,7 +147,7 @@ public class DatasetValidator implements Loggable {
 				// Check all nucleus segments are in root dataset
 				for(UUID id : childList){
 					if( ! idList.contains(id) ){
-						warn("Nucleus "+n.getNameAndNumber()+" has segment "+id+" not found in parent");
+						errorList.add("Nucleus "+n.getNameAndNumber()+" has segment "+id+" not found in parent");
 						return false;
 					}
 				}
@@ -143,12 +155,12 @@ public class DatasetValidator implements Loggable {
 				// Check all root dataset segments are in nucleus
 				for(UUID id : idList){
 					if( ! childList.contains(id) ){
-						warn("Segment "+id+" not found in child "+n.getNameAndNumber());
+						errorList.add("Segment "+id+" not found in child "+n.getNameAndNumber());
 						return false;
 					}
 				}
 			} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-				warn("Error getting segments");
+				errorList.add("Error getting segments");
 				stack(e);
 				return false;
 			}

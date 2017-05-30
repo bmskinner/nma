@@ -12,6 +12,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
@@ -162,6 +163,27 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 					warn("Error updating vertical nuclei");
 					stack("Error updating vertical nuclei", e);
 				}
+				
+				
+				// Check the validity of the loaded dataset
+				DatasetValidator dv = new DatasetValidator();
+				if (! dv.validate(dataset)){
+					for(String s : dv.getErrors()){
+						warn(s);
+					}
+					warn("Dataset is corrupted" );
+					warn("Saving child dataset info");
+					new MappingFileExporter().exportCellLocations(dataset);
+					
+					
+					warn("Curated cells saved" );
+					warn("Redetect cells and import the ."+Importer.LOC_FILE_EXTENSION+" file" );
+					
+					JOptionPane.showMessageDialog(null, "Corruption in dataset "+dataset.getName()+".\n"
+							+ "Curated and remapped cell locations have been saved.\n"
+							+ "Please redetect nuclei and apply the saved .cell file.");
+				}
+				
 
 				
 			} else {
