@@ -54,8 +54,9 @@ public class MappingFileExporter implements Exporter, Loggable {
 			File folder = GlobalOptions.getInstance().getDefaultDir();
 //			warn("Defaulting to: "+folder.getAbsolutePath());
 			exportFile = new File(folder, fileName);
-			warn("Exporting to "+exportFile.getAbsolutePath());
 		}
+		
+		log("Exporting to "+exportFile.getAbsolutePath());
 		
 		if(exportFile.exists()){
 			exportFile.delete();

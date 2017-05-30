@@ -493,7 +493,7 @@ public class GenericImageProberPanel  extends JPanel
 				
 				setHorizontalAlignment(JLabel.CENTER);
 				setVerticalAlignment(JLabel.CENTER); // image has no offset
-				setBackground(Color.WHITE);
+				setBackground(Color.LIGHT_GRAY); // contrast to images with white background
 				setText("");
 
 				if(info==null){
