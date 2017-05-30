@@ -28,8 +28,9 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -40,7 +41,6 @@ import javax.swing.JProgressBar;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalWarper;
@@ -59,6 +59,11 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelecti
 
 import ij.process.ImageProcessor;
 
+/**
+ * Displays signals warped onto the consensus nucleus of a dataset
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class SignalWarpingDialog extends LoadingIconDialog implements PropertyChangeListener, ActionListener{
 	
@@ -69,6 +74,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private static final String ADD_TO_IMAGE_LBL    = "Add to image";
 	private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
 	private static final String RUN_LBL             = "Run";
+	private static final String DIALOG_TITLE        = "Signal warping";
 	
 	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanel;
@@ -83,19 +89,19 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JCheckBox straightenMeshBox;
 	private JCheckBox addToImage;
 	
-//	private SignalWarper warper;
 	private SignalWarper warper;
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
-	private int totalCells = 0; // The cells in the signal group being processed
-	private int cellsDone  = 0; // Progress through cells in the signal group
-	
 	private boolean isAddToImage = true;
 	
-	final private List<ImageProcessor> mergableImages = new ArrayList<>(); 
+	final private Map<ImageProcessor, Color> mergableImages = new HashMap<>(); // hold all the warped images that have been generated 
 
 	
+	/**
+	 * Construct with a list of datasets available to warp signals to and from
+	 * @param datasets
+	 */
 	public SignalWarpingDialog(final List<IAnalysisDataset> datasets){
 		super();
 		this.datasets = datasets;
@@ -109,12 +115,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private void createUI(){
 		this.setLayout(new BorderLayout());
-		this.setTitle("Signal warping");
+		this.setTitle(DIALOG_TITLE);
 		
 		
 		JPanel header = createHeader();
 		this.add(header, BorderLayout.NORTH);
-		finest("Created header");
 		
 		ChartOptions options = new ChartOptionsBuilder()
 			.setDatasets(datasets.get(0))
@@ -123,12 +128,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 		chartPanel = new ExportableChartPanel(chart);
 		chartPanel.setFixedAspectRatio(true);
-
-		finest("Created empty chart");
 		this.add(chartPanel, BorderLayout.CENTER);
 		
 	}
 	
+	/**
+	 * Create the settings header panel
+	 * @return
+	 */
 	private JPanel createHeader(){
 		
 		JPanel headerPanel = new JPanel();
@@ -143,20 +150,24 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		datasetBoxOne.setSelectedDataset(datasets.get(0));
 		datasetBoxTwo.setSelectedDataset(datasets.get(0));
 		
-		datasetBoxOne.addActionListener(this);
-		datasetBoxTwo.addActionListener(this);
+		datasetBoxOne.addActionListener( e ->{
+			if( datasetBoxOne.getSelectedDataset()
+					.getCollection()
+					.getSignalManager().hasSignals()){
+
+				signalBox.setDataset(datasetBoxOne.getSelectedDataset());
+			}
+		});
+		datasetBoxTwo.addActionListener( e -> {
+			updateBlankChart();
+		});
 		
 		upperPanel.add(new JLabel(SOURCE_DATASET_LBL));
 		upperPanel.add(datasetBoxOne);
 		
-		SignalManager m =  datasets.get(0).getCollection().getSignalManager();
-
 		signalBox = new SignalGroupSelectionPanel(datasetBoxOne.getSelectedDataset());
 		
-		if(signalBox.hasSelection()){
-			UUID id   = signalBox.getSelectedID();
-			totalCells = m.getNumberOfCellsWithNuclearSignals(id);
-		} else {
+		if( ! signalBox.hasSelection()){
 			signalBox.setEnabled(false);
 		}
 
@@ -171,11 +182,15 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		upperPanel.add(cellsWithSignalsBox);
 		
 		addToImage = new JCheckBox(ADD_TO_IMAGE_LBL, true);
-		addToImage.addActionListener(this);
+		addToImage.addActionListener( e -> {
+			isAddToImage = addToImage.isSelected();
+		});
 		upperPanel.add(addToImage);
 		
 		straightenMeshBox = new JCheckBox(STRAIGHTEN_MESH_LBL, false);
-		straightenMeshBox.addActionListener(this);
+		straightenMeshBox.addActionListener( e -> {
+			updateBlankChart();
+		});
 		
 		
 		lowerPanel.add(new JLabel(TARGET_DATASET_LBL));
@@ -212,27 +227,24 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		return headerPanel;
 	} 
 	
+	/**
+	 * Run the warper with the currently selected settings
+	 */
 	private void runWarping(){
 		
 		finest("Running warping");
 		if(!isAddToImage){
 			mergableImages.clear();
 		} 
-//		progressBar.setString("0 of "+totalCells);
+
 		progressBar.setValue(0);
 		
 		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
 		IAnalysisDataset targetDataset = datasetBoxTwo.getSelectedDataset();
 		
-//		SignalIDToGroup group    = (SignalIDToGroup) signalGroupSelectedBox.getSelectedItem();
 		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
 		boolean straighten       = straightenMeshBox.isSelected();
-		
-		totalCells = cellsWithSignals 
-				? sourceDataset.getCollection().getSignalManager().getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
-				: sourceDataset.getCollection().size();
-				
-//		log("Found "+totalCells+" using signals only = "+cellsWithSignals);
+
 				
 		Nucleus target = targetDataset.getCollection().getConsensus();
 						
@@ -247,7 +259,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			
 			
 			warper = new SignalWarper( sourceDataset, target, signalBox.getSelectedID(), cellsWithSignals, straighten);
-//			warper = new SignalWarper( signalBox.getSelectedID(), cellsWithSignals, straighten, chartPanel);
 			warper.addPropertyChangeListener(this);
 			warper.execute();
 			
@@ -277,9 +288,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	}
 	
 	
+	
+	/**
+	 * Run when the warper is finished. Create the final image for display
+	 * and set the chart
+	 */
 	public void finished(){
 		try {
-			updateChart(warper.get());
+
+			assignDisplayColour(warper.get());
+			updateChart(createDisplayImage());
 			
 			setEnabled(true);
 			setStatusLoaded();
@@ -289,20 +307,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		}
 	}
 	
-	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 
 		if(evt.getNewValue() instanceof Integer){
 			int percent = (Integer) evt.getNewValue(); // should be percent
 			if(percent >= 0 && percent <=100){       							
-					if(progressBar.isIndeterminate()){
-						progressBar.setIndeterminate(false);
-					}
-					progressBar.setValue(percent);
-//					int cellNumber = i+1;
-//					progressBar.setString(cellNumber+" of "+totalCells);	
-	        }
+				if(progressBar.isIndeterminate()){
+					progressBar.setIndeterminate(false);
+				}
+				progressBar.setValue(percent);
+			}
 		}
 		
 
@@ -310,31 +325,79 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			finest("Worker signaled finished");
 			progressBar.setValue(0);
 			progressBar.setVisible(false);
-			cellsDone = 0;
 			finished();
 		}
 		
 	}
 	
-	private void updateChart(ImageProcessor mergedImage){
+	
+	private void assignDisplayColour(final ImageProcessor image){
 		
-		Runnable task = () -> { 
-			
-			Color colour = Color.WHITE;
-			try {
-				colour = datasetBoxOne.getSelectedDataset().getCollection()
-						.getSignalGroup(signalBox.getSelectedID())
-						.getGroupColour();
-				if(colour==null){
-					colour = Color.WHITE;
-				}
-			} catch (UnavailableSignalGroupException e) {
-				stack(e);
+		Color colour = Color.WHITE;
+		try {
+			colour = datasetBoxOne.getSelectedDataset().getCollection()
+					.getSignalGroup(signalBox.getSelectedID())
+					.getGroupColour();
+			if(colour==null){
 				colour = Color.WHITE;
 			}
+		} catch (UnavailableSignalGroupException e) {
+			stack(e);
+			colour = Color.WHITE;
+		}
+				
+		if(!isAddToImage){
+			mergableImages.clear();
+		} 
+		mergableImages.put(image, colour);
+		
+	}
+	
+	
+	/**
+	 * Create an image for display based on the given greyscale image
+	 * @param image
+	 * @return
+	 */
+	private ImageProcessor createDisplayImage(){
+		
+		
+		
+		
+		// TODO: add check for averaging versus colocalisation
+		
+		// Recolour each of the grey images according to the stored colours
+		List<ImageProcessor> recoloured = new ArrayList<>();
+		
+		for(ImageProcessor ip : mergableImages.keySet()){
+			// The image from the warper is greyscale. Change to use the signal colour			
+			recoloured.add(ImageFilterer.recolorImage(ip, mergableImages.get(ip)));
+		}
+				
+		// If multiple images are in the list, make an average of their RGB values
+		// so territories can be compared
+		try {
 			
-			ImageProcessor recoloured = ImageFilterer.recolorImage(mergedImage, colour);
-							
+			ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
+			return averaged;
+			
+		} catch(Exception e){
+			warn("Error averaging images");
+			stack(e);
+			return ImageFilterer.createBlankByteProcessor(100,  100);
+		}
+
+	}
+	
+	/**
+	 * Update the  chart to display the given image over the nucleus
+	 * outline for dataset two
+	 * @param image
+	 */
+	private void updateChart(final ImageProcessor image){
+		
+		Runnable task = () -> { 
+									
 			boolean straighten = straightenMeshBox.isSelected();
 			
 			ChartOptions options = new ChartOptionsBuilder()
@@ -345,26 +408,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 				.setStraightenMesh(straighten)
 				.build();
 			
-			
-			if(!isAddToImage){
-				mergableImages.clear();
-			} 
-			
-			mergableImages.add(recoloured);
-			ImageProcessor averaged = ImageConverter.averageRGBImages(mergableImages);
-
-			final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(averaged);
+			final JFreeChart chart = new OutlineChartFactory(options).makeSignalWarpChart(image);
 
 			chartPanel.setChart(chart);
 			chartPanel.restoreAutoBounds();
 
 
 		};
-		Thread thr = new Thread(task);
-		thr.start();		
+		ThreadManager.getInstance().submit(task);
+	
 	}
 	
-	private void updateOutlineChart(){
+	/**
+	 * Display the nucleus outline for dataset two
+	 * 
+	 */
+	private void updateBlankChart(){
 
 		if(isAddToImage){
 			return;
@@ -418,38 +477,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			runButton.setEnabled(true);
 			datasetBoxTwo.setEnabled(true);
 		}
-		
-		if(e.getSource()==datasetBoxOne){
-			
-			if( m.hasSignals()){
 				
-				signalBox.setDataset(sourceDataset);
-			}
-
-			
-		}
-		
-		if(e.getSource()==straightenMeshBox){
-			
-			updateOutlineChart();
-			
-		}
-		
-		if(e.getSource()==datasetBoxTwo){
-			updateOutlineChart();
-		}
-		
-		if(e.getSource()==addToImage){
-			isAddToImage = addToImage.isSelected();
-		}
-								
-		boolean cellsWithSignals = cellsWithSignalsBox.isSelected();
-		
-		totalCells = cellsWithSignals 
-				? m.getNumberOfCellsWithNuclearSignals(signalBox.getSelectedID()) 
-				: datasets.get(0).getCollection().size();
-				
-		
 	}
 
 	

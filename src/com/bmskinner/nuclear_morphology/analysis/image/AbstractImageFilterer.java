@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.plugin.ImageCalculator;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
@@ -28,6 +29,7 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import ij.process.TypeConverter;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.util.List;
 
@@ -393,6 +395,51 @@ public abstract class AbstractImageFilterer implements Loggable {
 	}
 	
 	/**
+	 * Calculate a measure of the colocalisation of values in the given image list.
+	 * The absolute intensities of the images are multiplied, and used to create a
+	 * new 8-bit image showing levels of colocalisation
+	 * @param list
+	 * @return
+	 */
+	public static ImageProcessor colocalisationOfImages(List<ImageProcessor> list){
+		
+		if(list==null || list.isEmpty()){
+			throw new IllegalArgumentException("List null or empty");
+		}
+				
+		
+		// Check images are same dimensions
+		int w = list.get(0).getWidth();
+		int h = list.get(0).getHeight();
+		
+		for(ImageProcessor ip : list){
+			
+			if(ip==null){
+				throw new IllegalArgumentException("Null image in list");
+			}
+			
+			if(w!=ip.getWidth() || h!=ip.getHeight()){
+				throw new IllegalArgumentException("Dimensions do not match");
+			}
+		}
+		
+		ImageProcessor bp = new ByteProcessor(w, h);
+		
+		for(int i=0; i<w*h; i++){
+			
+			int pixel = 0;
+			for(ImageProcessor ip : list){
+				pixel += ip.get(i);
+			}
+			pixel/=list.size();
+			bp.set(i, pixel);
+		}
+		
+		return bp;
+		
+	}
+	
+	/**
 	 * Merge the given list of images by averaging the RGB values
 	 * @param list
 	 * @return a new colour processor with the averaged values
@@ -402,41 +449,67 @@ public abstract class AbstractImageFilterer implements Loggable {
 		if(list==null || list.isEmpty()){
 			throw new IllegalArgumentException("List null or empty");
 		}
+				
 		
 		// Check images are same dimensions
 		int w = list.get(0).getWidth();
 		int h = list.get(0).getHeight();
 		
 		for(ImageProcessor ip : list){
+			
+			if(ip==null){
+				throw new IllegalArgumentException("Null image in list");
+			}
+			
 			if(w!=ip.getWidth() || h!=ip.getHeight()){
 				throw new IllegalArgumentException("Dimensions do not match");
 			}
 		}
 		
 		ImageProcessor cp = new ColorProcessor(w, h);
-		
+				
 		// Average the colours at each pixel
 		// White counts as empty here
-		int pixelCount = w*h;
-		for(int i=0; i<pixelCount; i++){
+		for(int i=0; i<w*h; i++){
 			
-			int r=0, g=0, b=0; // c is count of images with pixel value here
+//			int rt=0, gt=0, bt=0; // count of images with pixel value
+			int r=0, g=0, b=0; // total pixel values
+			
 			for(ImageProcessor ip : list){
 				int pixel = ip.get(i);
 				
+				
 				if(ip instanceof ColorProcessor){
-					r += (pixel >> 16) & 0xFF;
-					g += (pixel >> 8) & 0xFF;
-					b += pixel & 0xFF;
+					// pixel values for this image
+					int rp = (pixel >> 16) & 0xFF;
+					int gp = (pixel >> 8) & 0xFF;
+					int bp = pixel & 0xFF; 
+					
+//					rt = rp<255 ? rt+1 : rt;
+//					gt = gp<255 ? gt+1 : gt;
+//					bt = bp<255 ? bt+1 : bt;
+					
+					r +=rp;
+					g +=gp;
+					b +=bp;
 					
 				} else {
 					r+=pixel;
 					g+=pixel;
 					b+=pixel;
+//					rt++;
+//					gt++;
+//					bt++;
 				}
+				
+				
 				
 			}
 
+//			r/=rt;
+//			g/=gt;
+//			b/=bt;
+			
 			r/=list.size();
 			g/=list.size();
 			b/=list.size();
@@ -450,5 +523,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 		
 		return cp;
 	}
+	
+	
 	
 }
