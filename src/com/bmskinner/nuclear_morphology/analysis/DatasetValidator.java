@@ -46,6 +46,10 @@ public class DatasetValidator implements Loggable {
 		
 	}
 	
+	/**
+	 * Run validation on the given dataset
+	 * @param d
+	 */
 	public void validate(final IAnalysisDataset d){
 		
 		if( ! d.isRoot() ){
