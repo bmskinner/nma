@@ -68,6 +68,7 @@ import javax.swing.text.StyledDocument;
 
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -88,6 +89,15 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	private static final String NEXT_HISTORY_ACTION = "Next";
 	private static final String PREV_HISTORY_ACTION = "Prev";
 	
+	private static final String CHECK_CMD = "check";
+	private static final String HELP_CMD  = "help";
+	private static final String CLEAR_CMD = "clear";
+	private static final String THROW_CMD = "throw";
+	private static final String LIST_CMD  = "list";
+	private static final String KILL_CMD  = "kill";
+	
+	private static final Map<String, Runnable> LOCAL_CMDS  = new HashMap<>();
+		
 	private JTextPane  textArea = new JTextPane();
 	
 	private JPanel 					logPanel;				// messages and errors
@@ -98,6 +108,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	private SimpleAttributeSet attrs; // the styling attributes
 	
 	private Map<String, InterfaceMethod> commandMap = new HashMap<String, InterfaceMethod>();
+	
+	
 	
 	int historyIndex = -1;
 	List<String> history = new LinkedList<String>();
@@ -140,6 +152,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		super();
 		this.setLayout(new BorderLayout());
 		this.logPanel = createLogPanel();
+		makeCommandList();
 		this.add(logPanel, BorderLayout.CENTER);
 	}
 	
@@ -212,6 +225,37 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
 		return panel;
 	}
+	
+	
+	
+	/**
+	 * Make the list of local commands to run
+	 */
+	private void makeCommandList(){
+		LOCAL_CMDS.put(CHECK_CMD, () -> { validateDatasets(); }   );
+		LOCAL_CMDS.put(HELP_CMD,  () -> {
+			log("Available commands: ");
+			for(String key : commandMap.keySet()){
+				InterfaceMethod im = commandMap.get(key);
+				log(" "+key+" - "+im.toString());
+			}
+			log(" build - show the version info ");
+			log(" check - validate the open root datasets");
+			log(" list  - list the open root datasets");
+		});
+		LOCAL_CMDS.put(CLEAR_CMD, () -> { clear();});
+		LOCAL_CMDS.put(THROW_CMD, () -> {
+			log("Throwing exception");
+			try {
+				throw new IllegalArgumentException("Throwing an exception");
+			} catch(Exception e){
+				error("Caught expected exception", e);
+			}
+		});
+		LOCAL_CMDS.put(LIST_CMD, () -> { listDatasets(); }   );
+		LOCAL_CMDS.put(KILL_CMD, () -> { killAllTasks(); });
+	}
+	
 	
 	private DropTarget makePanelDropTarget(){
 		DropTarget d = new DropTarget(){
@@ -421,52 +465,33 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 	}
 	
+	
+	private void validateDatasets(){
+		
+		DatasetValidator v = new DatasetValidator();
+		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
+			log("Validating "+d.getName());
+			v.validate(d);
+		}
+		
+	}
+	
+	
+	
+	/**
+	 * Run the given command from the console
+	 * @param command
+	 */
 	private void runCommand(String command){
 		
 		if(commandMap.containsKey(command)){
 			fireInterfaceEvent(commandMap.get(command));
 		} else {
 			
-			switch(command){
-			
-				case "help": {
-					log("Available commands: ");
-					for(String key : commandMap.keySet()){
-						InterfaceMethod im = commandMap.get(key);
-						log(" "+key+" - "+im.toString());
-					}
-					log(" build - show the version info ");
-					break;
-				}
-								
-				case "clear":{
-					clear();
-					break;
-				}
-				
-				case "throw":{
-					log("Throwing exception");
-					try {
-						throw new IllegalArgumentException("Throwing an exception");
-					} catch(Exception e){
-						error("Throwing expected exception", e);
-					}
-				}
-				
-				case "list datasets":{
-					listDatasets();
-					break;
-				}
-				
-				case "kill":{
-					killAllTasks();
-					break;
-				}
-				
-				default: {
-					log("Command not recognised");
-					break;
-				}
+			if(LOCAL_CMDS.containsKey(command)){
+				LOCAL_CMDS.get(command).run();
+			} else {
+				log("Command not recognised");
 			}
 						
 		}		
