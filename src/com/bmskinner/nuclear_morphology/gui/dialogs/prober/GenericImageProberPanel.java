@@ -107,7 +107,7 @@ public class GenericImageProberPanel  extends JPanel
 	
 	protected final File folder; // the folder of files
 	
-	public GenericImageProberPanel(File folder, Finder finder, Window parent) throws MissingOptionException{
+	public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException{
 		
 		this.folder = folder;
 		this.parent = parent;

@@ -66,7 +66,6 @@ public class SignalImageProber extends IntegratedImageProber {
 			
 			Finder<?> finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
 			imageProberPanel = new GenericImageProberPanel(folder, finder, this);
-//			imageProberPanel     = new SignalImageProberPanel(this, options, ImageSet.SIGNAL_IMAGE_SET, dataset);
 			JPanel footerPanel   = createFooter();
 			
 			this.add(optionsSettingsPanel, BorderLayout.WEST);

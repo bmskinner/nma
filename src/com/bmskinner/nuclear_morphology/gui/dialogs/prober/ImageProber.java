@@ -531,6 +531,11 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	}
 	
 
+	/**
+	 * The renderer for cells in the image prober table
+	 * @author bms41
+	 *
+	 */
 	public class IconCellRenderer extends DefaultTableCellRenderer	{
 	    @Override
 	    public Component getTableCellRendererComponent(
@@ -543,7 +548,7 @@ public abstract class ImageProber extends LoadingIconDialog implements PropertyC
 	        setHorizontalTextPosition(JLabel.CENTER);
 	        setVerticalTextPosition(JLabel.BOTTOM);
 	        setVerticalAlignment(JLabel.TOP); // image has no offset
-	        setBackground(Color.WHITE);
+	        setBackground(Color.LIGHT_GRAY); // contrast for image
 	        
 	        if(info==null){
 	        	setText("");

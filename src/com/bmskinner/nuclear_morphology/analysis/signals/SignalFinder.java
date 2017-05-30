@@ -106,10 +106,18 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		
 		ImageStack stack =  new ImageImporter(imageFile).importToStack();
 		
+		
+		
 		// Find the processor number in the stack to use
 		int stackNumber = ImageImporter.rgbToStack(signalOptions.getChannel());
+		
+		// Ignore incorrect channel selections
+		if(stack.getSize() < stackNumber){
+			fine("Channel not available");
+			return list;
+		}
 
-		finer("Converting image");
+		fine("Converting image");
 		// Get the greyscale processor for the signal channel
 		ImageProcessor greyProcessor = stack.getProcessor(stackNumber);
 
@@ -123,18 +131,28 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		
 		ImageAnnotator in = new ImageAnnotator(ip);
 		ImageAnnotator an = new ImageAnnotator(ap);
-				
-		Set<Nucleus> nuclei = collection.getNuclei(imageFile);
 		
-//		Map<Nucleus, List<INuclearSignal>> map = new HashMap<Nucleus, List<INuclearSignal>>();
+		// The given image file may not be the same image that the nucleus was detected in.
+		// Take the image name only, and add onto the DAPI folder name.
+		// This requires that the signal file name is identical to the dapi file name
+		
+		String imageName = imageFile.getName();
+		File dapiFolder = collection.getFolder();
+		
+		File dapiFile = new File(dapiFolder, imageName);
+		
+		Set<Nucleus> nuclei = collection.getNuclei(dapiFile);
+
+		fine("Detecting signals in "+nuclei.size()+" nuclei");
 		
 		for(Nucleus n : nuclei){
 			try {
 				// The detector also creates and adds the signals currently
 				List<INuclearSignal> temp = detector.detectSignal(imageFile, stack, n);
-//				map.put(n, temp);
+
 				
 				if(hasDetectionListeners()){
+					fine("Drawing signals for "+n.getNameAndNumber());
 					drawSignals(n, temp, in, false);
 					drawSignals(n, temp, an, true);
 				}
