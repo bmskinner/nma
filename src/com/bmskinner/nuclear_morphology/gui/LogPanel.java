@@ -34,9 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -57,7 +55,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.TableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.Document;
@@ -66,11 +63,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import org.jfree.chart.JFreeChart;
-
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
-import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
-import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -115,15 +108,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
 	List<String> history = new LinkedList<String>();
 	
 	{
-//		commandMap.put("list datasets", InterfaceMethod.LIST_DATASETS);
 		commandMap.put("list selected", InterfaceMethod.LIST_SELECTED_DATASETS);
-//		commandMap.put("unfuck", InterfaceMethod.RESEGMENT_SELECTED_DATASET);
 		commandMap.put("recache charts", InterfaceMethod.RECACHE_CHARTS);
 		commandMap.put("refresh", InterfaceMethod.UPDATE_PANELS);
 		commandMap.put("nucleus history", InterfaceMethod.DUMP_LOG_INFO);
-		commandMap.put("info", InterfaceMethod.INFO);
-//		commandMap.put("kill", InterfaceMethod.KILL_ALL_TASKS);
-		
+		commandMap.put("info", InterfaceMethod.INFO);		
 	}
 	
 	private void listDatasets(){
@@ -470,8 +459,15 @@ public class LogPanel extends DetailPanel implements ActionListener {
 		
 		DatasetValidator v = new DatasetValidator();
 		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
-			log("Validating "+d.getName());
-			v.validate(d);
+			log("Validating "+d.getName()+"...");
+			if( ! v.validate(d)){
+				for(String s : v.getErrors()){
+					warn(s);
+				}
+			} else {
+				log("Dataset OK");
+			}
+			
 		}
 		
 	}
