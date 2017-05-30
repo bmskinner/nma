@@ -100,5 +100,6 @@ public interface LineEquation {
 	 * @return
 	 */
 	double getClosestDistanceToPoint(IPoint p);
+	
 
 }

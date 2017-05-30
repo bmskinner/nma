@@ -158,5 +158,21 @@ public interface IPoint {
 	int hashCode();
 
 	boolean equals(Object obj);
+	
+	/**
+	 * Get the midpoint of the two points
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	static IPoint getMidpoint(IPoint a, IPoint b){
+		if(a==null || b==null){
+			throw new IllegalArgumentException("Points cannot be null");
+		}
+		
+		double nx = (a.getX()+b.getX()) /2;
+		double ny = (a.getY()+b.getY()) /2;
+		return IPoint.makeNew(nx, ny);
+	}
 
 }
