@@ -252,7 +252,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 				int full = RGB_WHITE;
 				cp.set(i, full);
 			} else {
-				float pct = (float)(255f - (255f-pixel )) / 255f;
+				float pct = getSaturationFromIntensity(pixel);
 				pct = 1f-pct;
 				int full = Color.HSBtoRGB(hsb[0], pct, 1); // if issues, replace 1 with the hsb[2] - for now it keeps the white border
 				cp.set(i, full);
@@ -395,48 +395,90 @@ public abstract class AbstractImageFilterer implements Loggable {
 	}
 	
 	/**
-	 * Calculate a measure of the colocalisation of values in the given image list.
-	 * The absolute intensities of the images are multiplied, and used to create a
-	 * new 8-bit image showing levels of colocalisation
-	 * @param list
+	 * Calculate a measure of the colocalisation of values in the given images. ImageA
+	 * is coloured red, imageB is coloured blue, and regions of colocalisation will be purple
+	 * @param imageA the first image
+	 * @param imageB the second image
+	 * @return an image showing colocalisation of pixels
+	 */
+	public static ImageProcessor cowarpalise(ImageProcessor imageA, ImageProcessor imageB){
+		
+		if(imageA==null || imageB==null){
+			throw new IllegalArgumentException("Image(s) null");
+		}
+		
+		// Check images are same dimensions	
+		if(imageA.getWidth()!=imageB.getWidth() || imageA.getHeight()!=imageB.getHeight()){
+			throw new IllegalArgumentException("Dimensions do not match");
+		}
+		
+		// Set the saturation scaled by intensity
+		
+		ImageProcessor cp = new ColorProcessor(imageA.getWidth(), imageA.getHeight());
+		
+		for(int i=0; i<imageA.getPixelCount(); i++){
+			int r = imageA.get(i);
+			int b = imageB.get(i);
+
+			
+			if(r==255 && b==255){
+				cp.set(i, rgbToInt(255, 255, 255));
+				continue;
+			}
+			
+			float diff = (float)(r-b);
+			float scaled = Math.abs(diff) / 255f; // fraction of 8bit space
+			float ranged = 0.17f * scaled;
+			
+			// Scale to fit in hue range 240-360
+			
+			// Needs to be a fractional number that can be multiplied by 360
+			// Therefore range is 0.66-1
+			float h = diff<0 ? 0.83f - ranged : 0.83f + ranged;
+//			float h = 0.83f + diff; // start at purple, variation of up to 128
+//			float h = 300f + diff; // start at purple, variation of up to 128
+			
+
+			float s = diff < 0 ? 1-((float)b / 255f) : 1-((float)r / 255f);
+
+
+			
+			
+			float v = 1f;
+			
+//			System.out.println("Chosen colour "+h+" - "+s+" - "+v);
+			
+			int rgb = Color.HSBtoRGB(h, s, v);
+			cp.set(i, rgb);
+
+			
+		}
+		
+		return cp;
+		
+	}
+	
+	/**
+	 * Combine individual channel data to an int
+	 * @param r
+	 * @param g
+	 * @param b
 	 * @return
 	 */
-	public static ImageProcessor colocalisationOfImages(List<ImageProcessor> list){
-		
-		if(list==null || list.isEmpty()){
-			throw new IllegalArgumentException("List null or empty");
-		}
-				
-		
-		// Check images are same dimensions
-		int w = list.get(0).getWidth();
-		int h = list.get(0).getHeight();
-		
-		for(ImageProcessor ip : list){
-			
-			if(ip==null){
-				throw new IllegalArgumentException("Null image in list");
-			}
-			
-			if(w!=ip.getWidth() || h!=ip.getHeight()){
-				throw new IllegalArgumentException("Dimensions do not match");
-			}
-		}
-		
-		ImageProcessor bp = new ByteProcessor(w, h);
-		
-		for(int i=0; i<w*h; i++){
-			
-			int pixel = 0;
-			for(ImageProcessor ip : list){
-				pixel += ip.get(i);
-			}
-			pixel/=list.size();
-			bp.set(i, pixel);
-		}
-		
-		return bp;
-		
+	protected static int rgbToInt(int r, int g, int b){
+		int rgb = r;
+		rgb = (rgb << 8) + g;
+		rgb = (rgb << 8) + b;
+		return rgb;
+	}
+	
+	/**
+	 * Express the given pixel intensity as a fraction of 255
+	 * @param i the pixel value
+	 * @return a value from 0-1
+	 */
+	protected static float getSaturationFromIntensity(int i){
+		return (float)(255f - (255f-i )) / 255f;
 	}
 	
 	/**
@@ -514,9 +556,7 @@ public abstract class AbstractImageFilterer implements Loggable {
 			g/=list.size();
 			b/=list.size();
 				
-			int rgb = r;
-			rgb = (rgb << 8) + g;
-			rgb = (rgb << 8) + b;
+			int rgb = rgbToInt(r, 255, b);
 			cp.set(i, rgb);
 			
 		}

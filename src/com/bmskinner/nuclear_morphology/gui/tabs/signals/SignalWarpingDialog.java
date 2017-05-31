@@ -75,6 +75,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
 	private static final String RUN_LBL             = "Run";
 	private static final String DIALOG_TITLE        = "Signal warping";
+	private static final String COW_LBL             = "Co-warpalise";
 	
 	private List<IAnalysisDataset> datasets;
 	private ExportableChartPanel chartPanel;
@@ -88,6 +89,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JCheckBox cellsWithSignalsBox;
 	private JCheckBox straightenMeshBox;
 	private JCheckBox addToImage;
+	private JButton cowarpaliseBtn;
 	
 	private SignalWarper warper;
 	
@@ -209,17 +211,34 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		});	
 
 		lowerPanel.add(runButton);
-		
-
-		
+				
 		if(! signalBox.hasSelection()){
 			runButton.setEnabled(false);
 		}
 		
+		cowarpaliseBtn = new JButton(COW_LBL);
+		cowarpaliseBtn.addActionListener( e-> {
+			
+			if(mergableImages.size()==2){
+				List<ImageProcessor> list = new ArrayList<>(mergableImages.keySet());
+				
+				ImageProcessor a = list.get(0);
+				ImageProcessor b = list.get(1);
+				
+				ImageProcessor w = ImageFilterer.cowarpalise(a, b);
+				updateChart(w);
+			}
+		});
+		lowerPanel.add(cowarpaliseBtn);
+		cowarpaliseBtn.setEnabled(false);
+		
 		lowerPanel.add(progressBar);
 		progressBar.setVisible(false);
-		
+				
 		lowerPanel.add(this.getLoadingLabel());
+		
+		
+
 		
 		headerPanel.add(upperPanel);
 		headerPanel.add(lowerPanel);
@@ -235,6 +254,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		finest("Running warping");
 		if(!isAddToImage){
 			mergableImages.clear();
+			cowarpaliseBtn.setEnabled(false);
 		} 
 
 		progressBar.setValue(0);
@@ -285,6 +305,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		datasetBoxOne.setEnabled(b);
 		datasetBoxTwo.setEnabled(b);
 		addToImage.setEnabled(b);
+		cowarpaliseBtn.setEnabled(b);
 	}
 	
 	
@@ -300,6 +321,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			updateChart(createDisplayImage());
 			
 			setEnabled(true);
+			if(mergableImages.size()!=2){
+				cowarpaliseBtn.setEnabled(false);
+			}
 			setStatusLoaded();
 			
 		} catch (Exception e) {
@@ -351,6 +375,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		} 
 		mergableImages.put(image, colour);
 		
+		if(mergableImages.size()==2){
+			cowarpaliseBtn.setEnabled(true);
+		} else {
+			cowarpaliseBtn.setEnabled(false);
+		}
+		
 	}
 	
 	
@@ -361,8 +391,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 */
 	private ImageProcessor createDisplayImage(){
 		
-		
-		
+
 		
 		// TODO: add check for averaging versus colocalisation
 		
