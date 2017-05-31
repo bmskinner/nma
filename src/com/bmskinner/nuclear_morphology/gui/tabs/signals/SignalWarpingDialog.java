@@ -23,14 +23,21 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -38,6 +45,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
 
 import org.jfree.chart.JFreeChart;
 
@@ -50,12 +61,16 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel.NodeData;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingDialog.ImageCache.Key;
 
 import ij.process.ImageProcessor;
 
@@ -97,8 +112,19 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	
 	private boolean isAddToImage = true;
 	
-	final private Map<ImageProcessor, Color> mergableImages = new HashMap<>(); // hold all the warped images that have been generated 
-
+	private JTree tree;
+	
+	final private Map<ImageProcessor, Color> mergableImages = new HashMap<>(); // hold all the warped images that have been generated
+	private ImageCache cache = new ImageCache();
+	final private List<ImageProcessor> displayImages = new ArrayList<>();
+	
+	private boolean ctrlPressed = false;
+    
+	public boolean isCtrlPressed() {
+		synchronized (PopulationsPanel.class) {
+			return ctrlPressed;
+		}
+	}
 	
 	/**
 	 * Construct with a list of datasets available to warp signals to and from
@@ -108,11 +134,39 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		super();
 		this.datasets = datasets;
 		createUI();
+		addCtrlPressListener();
 		this.setModal(false);
 		this.pack();
 		
 		chartPanel.restoreAutoBounds();
 		this.setVisible(true);
+	}
+	
+	private void addCtrlPressListener(){
+		// Track when the Ctrl key is down
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent ke) {
+				synchronized (PopulationsPanel.class) {
+					switch (ke.getID()) {
+					case KeyEvent.KEY_PRESSED:
+						if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
+							ctrlPressed = true;
+						}
+						break;
+
+					case KeyEvent.KEY_RELEASED:
+						if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
+							ctrlPressed = false;
+						}
+						break;
+					}
+					return false;
+				}
+			}
+
+		});
 	}
 	
 	private void createUI(){
@@ -132,6 +186,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		chartPanel.setFixedAspectRatio(true);
 		this.add(chartPanel, BorderLayout.CENTER);
 		
+		
+		JPanel westPanel = createWestPanel();
+		this.add(westPanel, BorderLayout.WEST);
+				
 	}
 	
 	/**
@@ -220,13 +278,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		cowarpaliseBtn.addActionListener( e-> {
 			
 			if(mergableImages.size()==2){
-				List<ImageProcessor> list = new ArrayList<>(mergableImages.keySet());
 				
-				ImageProcessor a = list.get(0);
-				ImageProcessor b = list.get(1);
+				ImageProcessor a = displayImages.get(0);
+				ImageProcessor b = displayImages.get(1);
 				
 				ImageProcessor w = ImageFilterer.cowarpalise(a, b);
-				updateChart(w);
+				
+				//TODO - check same target
+//				updateChart(w);
 			}
 		});
 		lowerPanel.add(cowarpaliseBtn);
@@ -246,6 +305,76 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		return headerPanel;
 	} 
 	
+	
+	
+	/**
+	 * Create the list of saved warp images
+	 * @return
+	 */
+	private JPanel createWestPanel(){
+		JPanel panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		
+		tree = new JTree();
+		
+		updateTree();
+		
+		tree.addTreeSelectionListener( e -> {
+			
+			//TODO multiple selected images
+			
+			if( ! isCtrlPressed()){
+				displayImages.clear();
+			}
+			
+			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+			
+			Object obj = node.getUserObject();
+			if(obj instanceof Key){
+				ImageProcessor ip = cache.get( (Key)obj );
+//				ip = ImageFilterer.recolorImage(ip, mergableImages.get(ip));
+				
+				displayImages.add(ip);
+				
+				updateChart(createDisplayImage(), ((Key)obj).target);
+			}
+			
+			if(displayImages.size()!=2){
+				cowarpaliseBtn.setEnabled(false);
+			}
+			
+		});
+		
+		panel.add(tree, BorderLayout.CENTER);
+		return panel;
+	}
+	
+	private void updateTree(){
+		
+		DefaultMutableTreeNode root =
+				new DefaultMutableTreeNode( "Targets" );
+
+		for(IAnalysisDataset d : cache.getTargets()){
+			
+			DefaultMutableTreeNode m = new DefaultMutableTreeNode( d.getName() );
+			root.add(m);
+			for(Key k : cache.getKeys(d)){
+		    	m.add(new DefaultMutableTreeNode( k ));
+		    }
+			
+		}
+		
+		
+		TreeModel model = new DefaultTreeModel(root);
+		tree.setModel(model);
+
+		for(int i=0; i<tree.getRowCount(); i++){
+			tree.expandRow(i);
+		}
+		
+		
+	}
+		
 	/**
 	 * Run the warper with the currently selected settings
 	 */
@@ -317,11 +446,20 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	public void finished(){
 		try {
 
-			assignDisplayColour(warper.get());
-			updateChart(createDisplayImage());
+			ImageProcessor image = warper.get();
+			cache.add(datasetBoxTwo.getSelectedDataset(), 
+					datasetBoxOne.getSelectedDataset(), 
+					signalBox.getSelectedID(),
+					image);
+			
+			updateTree();
+			
+			displayImages.add(image);
+			assignDisplayColour(image);
+			updateChart(createDisplayImage(), datasetBoxTwo.getSelectedDataset());
 			
 			setEnabled(true);
-			if(mergableImages.size()!=2){
+			if(displayImages.size()!=2){
 				cowarpaliseBtn.setEnabled(false);
 			}
 			setStatusLoaded();
@@ -370,12 +508,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			colour = Color.WHITE;
 		}
 				
-		if(!isAddToImage){
-			mergableImages.clear();
-		} 
+//		if(!isAddToImage){
+//			mergableImages.clear();
+//		} 
+		
+				
 		mergableImages.put(image, colour);
 		
-		if(mergableImages.size()==2){
+		if(displayImages.size()==2){
 			cowarpaliseBtn.setEnabled(true);
 		} else {
 			cowarpaliseBtn.setEnabled(false);
@@ -391,14 +531,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 */
 	private ImageProcessor createDisplayImage(){
 		
-
-		
-		// TODO: add check for averaging versus colocalisation
-		
 		// Recolour each of the grey images according to the stored colours
 		List<ImageProcessor> recoloured = new ArrayList<>();
 		
-		for(ImageProcessor ip : mergableImages.keySet()){
+		for(ImageProcessor ip : displayImages){
 			// The image from the warper is greyscale. Change to use the signal colour			
 			recoloured.add(ImageFilterer.recolorImage(ip, mergableImages.get(ip)));
 		}
@@ -423,14 +559,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 * outline for dataset two
 	 * @param image
 	 */
-	private void updateChart(final ImageProcessor image){
+	private void updateChart(final ImageProcessor image, IAnalysisDataset target){
 		
 		Runnable task = () -> { 
 									
 			boolean straighten = straightenMeshBox.isSelected();
 			
 			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(datasetBoxTwo.getSelectedDataset())
+				.setDatasets(target)
 				.setShowXAxis(false)
 				.setShowYAxis(false)
 				.setShowBounds(false)
@@ -508,6 +644,117 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		}
 				
 	}
+	
+	/**
+	 * Store the warped images 
+	 * @author ben
+	 * @since 1.13.7
+	 *
+	 */
+	public class ImageCache {
+		
+		final private Map<Key, ImageProcessor> map = new HashMap<>();
+		
+		
+		public void add(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId, ImageProcessor ip){
+			map.put(new Key(target, template, signalGroupId), ip);
+		}
+		
+		public ImageProcessor get(Key k){
+			return map.get(k);
+		}
+		
+		public List<IAnalysisDataset> getTargets(){
+			return map.keySet()
+					.stream().map( k -> {
+						return k.target;
+					} )
+					.distinct()
+					.collect(Collectors.toList());
+		}
+		
+		public List<Key> getKeys(IAnalysisDataset n){
+			return map.keySet().stream()
+					.filter( k -> k.target.getUUID().equals(n.getUUID()))
+					.collect(Collectors.toList());
+		}
+		
+		
+		/**
+		 * Key to store warped images
+		 * @author ben
+		 *
+		 */
+		public class Key {
+			
+			private IAnalysisDataset target;
+			private IAnalysisDataset template;
+			private UUID signalGroupId;
+			
+			public Key(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId){
+				this.target = target;
+				this.template = template;
+				this.signalGroupId = signalGroupId;
+			}
+			
+			@Override
+			public int hashCode() {
+				final int prime = 31;
+				int result = 1;
+				result = prime * result + getOuterType().hashCode();
+				result = prime * result + ((signalGroupId == null) ? 0 : signalGroupId.hashCode());
+				result = prime * result + ((target == null) ? 0 : target.hashCode());
+				result = prime * result + ((template == null) ? 0 : template.hashCode());
+				return result;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				if (this == obj)
+					return true;
+				if (obj == null)
+					return false;
+				if (getClass() != obj.getClass())
+					return false;
+				Key other = (Key) obj;
+				if (!getOuterType().equals(other.getOuterType()))
+					return false;
+				if (signalGroupId == null) {
+					if (other.signalGroupId != null)
+						return false;
+				} else if (!signalGroupId.equals(other.signalGroupId))
+					return false;
+				if (target == null) {
+					if (other.target != null)
+						return false;
+				} else if (!target.equals(other.target))
+					return false;
+				if (template == null) {
+					if (other.template != null)
+						return false;
+				} else if (!template.equals(other.template))
+					return false;
+				return true;
+			}
+
+			private SignalWarpingDialog getOuterType() {
+				return SignalWarpingDialog.this;
+			}
+			
+			@Override
+			public String toString(){
+				try {
+					return template.getName()+" - "+template.getCollection().getSignalManager().getSignalGroupName(signalGroupId);
+				} catch (UnavailableSignalGroupException e) {
+					return template.getName()+" - Unknown signal group";
+				}
+			}
+			
+		}
+		
+	}
+	
+	
 
 	
 }

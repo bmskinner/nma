@@ -253,7 +253,15 @@ public abstract class AbstractImageFilterer implements Loggable {
 				cp.set(i, full);
 			} else {
 				float pct = getSaturationFromIntensity(pixel);
+				
+				// The saturation is scaled with percent - lower values give whiter image 
+				// The value is scaled with percent - lower values give whiter image
+				//TODO: check calculations
+				float vScale = 1f - hsb[2]; // range for value scaling between 0 and 1
+				float v = (vScale*pct) + hsb[2]; // hsb[2] can only be increased with intensity
+				
 				pct = 1f-pct;
+
 				int full = Color.HSBtoRGB(hsb[0], pct, 1); // if issues, replace 1 with the hsb[2] - for now it keeps the white border
 				cp.set(i, full);
 			}
