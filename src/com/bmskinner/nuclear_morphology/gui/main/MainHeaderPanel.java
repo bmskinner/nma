@@ -111,7 +111,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 		JButton btnSavePopulation = new JButton(SAVE_ALL_LBL);
 		btnSavePopulation.addActionListener( e -> {
 					log("Saving root populations...");
-					mw.saveRootDatasets();
+					mw.getEventHandler().saveRootDatasets();
 				}
 		);
 
@@ -123,8 +123,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
 		JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
 		btnSaveWorkspace.addActionListener( e -> {
-//					mw.saveWorkspace();
-					mw.signalChangeReceived(new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
+				mw.getEventHandler().signalChangeReceived(new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
 			}
 		);
 
@@ -136,13 +135,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 				e -> { 
 
 					MainOptionsDialog dialog = new MainOptionsDialog(mw);
-					dialog.addInterfaceEventListener(mw);
+					dialog.addInterfaceEventListener(mw.getEventHandler());
 			}
 		);		
 		add(optionsButton);
 		
 		MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
-		unitsPanel.addInterfaceEventListener(mw);
+		unitsPanel.addInterfaceEventListener(mw.getEventHandler());
 		add(unitsPanel);
 
 	}

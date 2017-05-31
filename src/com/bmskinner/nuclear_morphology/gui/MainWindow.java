@@ -74,6 +74,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
@@ -105,7 +106,7 @@ import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
 @SuppressWarnings("serial")
 public class MainWindow 
 	extends JFrame 
-	implements SignalChangeListener, DatasetEventListener, InterfaceEventListener, Loggable {
+	implements Loggable {
 				
 	private JPanel contentPane;
 	
@@ -144,9 +145,11 @@ public class MainWindow
 	
 	private List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
 	
-	private List<Object> updateListeners = new ArrayList<Object>();
+//	private List<Object> updateListeners = new ArrayList<Object>();
 	
 	private List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
+	
+	private EventHandler eh = new EventHandler(this);
 	
 	
 	private boolean isStandalone = false;
@@ -173,6 +176,8 @@ public class MainWindow
 		createWindowListeners();
 		
 		createUI();
+		
+		createEventHandling();
 	
 	}
 	
@@ -240,10 +245,8 @@ public class MainWindow
 			// Create the log panel
 			//---------------
 			logPanel = new LogPanel();
-			logPanel.addDatasetEventListener(this);
-			logPanel.addInterfaceEventListener(this);
-			logPanel.addSignalChangeListener(this);
-			this.addDatasetUpdateEventListener(logPanel);
+			
+//			this.addDatasetUpdateEventListener(logPanel);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
 			programLogger.addHandler(textHandler);
@@ -253,9 +256,9 @@ public class MainWindow
 			// Create the consensus chart
 			//---------------
 			populationsPanel = new PopulationsPanel();
-			populationsPanel.addSignalChangeListener(this);
-			populationsPanel.addDatasetEventListener(this);
-			populationsPanel.addInterfaceEventListener(this);
+//			populationsPanel.addSignalChangeListener(this);
+//			populationsPanel.addDatasetEventListener(this);
+//			populationsPanel.addInterfaceEventListener(this);
 //			this.addDatasetUpdateEventListener(populationsPanel);
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
@@ -299,12 +302,12 @@ public class MainWindow
 			// Register change listeners
 			//---------------
 			
-			for(TabPanel d : detailPanels){
-				d.addDatasetEventListener(this);
-				d.addInterfaceEventListener(this);
-				d.addSignalChangeListener(this);
-				this.addDatasetUpdateEventListener(d);
-			}
+//			for(TabPanel d : detailPanels){
+//				d.addDatasetEventListener(this);
+//				d.addInterfaceEventListener(this);
+//				d.addSignalChangeListener(this);
+//				this.addDatasetUpdateEventListener(d);
+//			}
 			
 			
 			signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
@@ -379,6 +382,26 @@ public class MainWindow
 		
 	}
 	
+	
+	private void createEventHandling(){
+		logPanel.addDatasetEventListener(eh);
+		logPanel.addInterfaceEventListener(eh);
+		logPanel.addSignalChangeListener(eh);
+		eh.addDatasetUpdateEventListener(logPanel);
+		
+		populationsPanel.addSignalChangeListener(eh);
+		populationsPanel.addDatasetEventListener(eh);
+		populationsPanel.addInterfaceEventListener(eh);
+		
+		for(TabPanel d : detailPanels){
+			d.addDatasetEventListener(eh);
+			d.addInterfaceEventListener(eh);
+			d.addSignalChangeListener(eh);
+			eh.addDatasetUpdateEventListener(d);
+		}
+	}
+	
+	
 	/**
 	 * Check if the program has been started as a plugin to ImageJ
 	 * or as standalone 
@@ -396,713 +419,28 @@ public class MainWindow
 		return this.logPanel;
 	}
 	
-	/**
-	 * Map events to the actions they should trigger
-	 * @author bms41
-	 * @since 1.13.4
-	 *
-	 */
-	private class ActionFactory {
-		final IAnalysisDataset selectedDataset;
-		List<IAnalysisDataset> selectedDatasets;
-		
-		public ActionFactory(){
-						
-			selectedDatasets = populationsPanel.getSelectedDatasets();
-			selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
-					? null 
-					: populationsPanel.getSelectedDatasets().get(0);
-			
-		}
-		
-		/**
-		 * Create a runnable action for the given event 
-		 * @param event
-		 * @return
-		 */
-		public Runnable create(final SignalChangeEvent event){
-			
-			if(event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)){
-				return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), MainWindow.this); 
-			}
-			
-			if(event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC)){
-				return new DatasetArithmeticAction(selectedDatasets, MainWindow.this); 
-			}
-			
-			if(event.type().equals("ChangeNucleusFolderAction")){
-				return new ReplaceSourceImageDirectoryAction(selectedDataset, MainWindow.this);
-			}
-			
-			if(event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL)){
-				return new AddNuclearSignalAction(selectedDataset,  MainWindow.this);
-			}
-			
-			if(event.type().equals(SignalChangeEvent.POST_FISH_MAPPING)){
-				return new FishRemappingAction(selectedDatasets, MainWindow.this);
-			}
-			
-			if(event.type().equals(SignalChangeEvent.EXPORT_STATS)){
-				
-				return new ExportStatsAction(selectedDatasets, MainWindow.this);
-			}
-			
-			if(event.type().equals(SignalChangeEvent.LOBE_DETECTION)){
-				return new LobeDetectionAction(selectedDataset, MainWindow.this);
-			}
-			
-			if(event.type().startsWith("Open|")){
-				String s = event.type().replace("Open|", "");
-				File f = new File(s);
-				
-				return new PopulationImportAction(MainWindow.this, f);
-			}
-			
-			
-			if(event.type().startsWith("New|")){
-				String s = event.type().replace("New|", "");
-				File f = new File(s);
-				
-				return new NewAnalysisAction(MainWindow.this, f);
-			}
-			
-			return null;
-		}
-		
-		
-		/**
-		 * Create a runnable action for the given event 
-		 * @param event
-		 * @return
-		 */
-		public Runnable create(final DatasetEvent event){
-			
-			if(event.getDatasets().isEmpty()){
-				return null;
-			}
-			
-			selectedDatasets = event.getDatasets();
-			
-			if(event.method().equals(DatasetEvent.PROFILING_ACTION)){
-				fine("Creating new profiling and segmentation");
-
-				int flag = 0; // set the downstream analyses to run
-				flag |= SingleDatasetResultAction.ADD_POPULATION;
-				flag |= SingleDatasetResultAction.STATS_EXPORT;
-				flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
-				flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-
-				try {
-					if(event.firstDataset().getAnalysisOptions().refoldNucleus()){
-						flag |= SingleDatasetResultAction.CURVE_REFOLD;
-					}
-				} catch (MissingOptionException e) {
-					warn("Missing analysis options");
-					stack(e.getMessage(), e);
-					return null;
-				}
-				// begin a recursive morphology analysis
-				return new RunProfilingAction(selectedDatasets, flag, MainWindow.this);
-			}
-			
-			
-			if(event.method().equals(DatasetEvent.NEW_MORPHOLOGY)){
-				log("Running new morphology analysis");
-				final int flag = SingleDatasetResultAction.ADD_POPULATION;
-				
-				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, MainWindow.this);
-			}
-			
-			if(event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)){
-				finer("Refreshing segmentation across nuclei using existing border tags");
-				final int flag = 0;
-				return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, MainWindow.this);
-			}
-			
-			if(event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)){
-				return new ShellAnalysisAction(event.firstDataset(), MainWindow.this);
-			}
-			
-			if(event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)){
-				
-				final IAnalysisDataset source = event.secondaryDataset();
-				if(source==null){
-					return null;
-				}
-				return new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.ADD_POPULATION, MainWindow.this);
-			}
-			
-						
-			if(event.method().equals(DatasetEvent.CLUSTER)){
-				log("Clustering dataset");
-				return new ClusterAnalysisAction(event.firstDataset(),  MainWindow.this);
-			
-			}
-			
-			if(event.method().equals(DatasetEvent.BUILD_TREE)){
-				log("Building a tree from dataset");
-				return new BuildHierarchicalTreeAction(event.firstDataset(), MainWindow.this);
-			}
-			
-			if(event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)){
-				fine("Recalculating the median for the given datasets");
-
-				return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, MainWindow.this);
-			}
-			
-			
-			return null;
-		}
-
-		
-		/**
-		 * Create and run an action for the given event
-		 * @param event
-		 */
-		public void run(final SignalChangeEvent event){
-			Runnable r = create(event);
-			if(r!=null){
-				r.run();
-			}
-		}
-		
-		/**
-		 * Create and run an action for the given event
-		 * @param event
-		 */
-		public void run(final DatasetEvent event){
-			Runnable r = create(event);
-			if(r!=null){
-				r.run();
-			}
-		}
+	public List<TabPanel> getTabPanels(){
+		return this.detailPanels;
 	}
 	
-				
-	@Override
-	public void signalChangeReceived(final SignalChangeEvent event) {
-		
-		finer("Heard signal change event: "+event.type());
-
-		final IAnalysisDataset selectedDataset = populationsPanel.getSelectedDatasets().isEmpty() 
-				? null 
-				: populationsPanel.getSelectedDatasets().get(0);
-		
-		// Try to launch via factory
-		new ActionFactory().run(event);
-
-		if(event.type().equals("MergeCollectionAction")){
-			
-			Runnable task = new MergeCollectionAction(populationsPanel.getSelectedDatasets(), MainWindow.this); 
-			threadManager.execute(task);
-		}
-
-		
-		if(event.type().equals("CurateCollectionAction")){
-
-				CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(populationsPanel.getSelectedDatasets().get(0));
-				d.addDatasetEventListener(this);
-
-		}
-				
-				
-		if(event.type().equals("SaveCellLocations")){
-			log("Exporting cell locations...");
-			if(new MappingFileExporter().exportCellLocations(selectedDataset)){
-				log( "Export complete");
-			} else {
-				log("Export failed");
-			}
-			
-		}
-		
-		if(event.type().equals("RelocateCellsAction")){
-			
-			CountDownLatch latch = new CountDownLatch(1);
-			Runnable r = new RelocateFromFileAction(selectedDataset, MainWindow.this, latch);
-			r.run();
-			
-		}
-		
-		if(event.type().equals("AddTailStainAction")){
-			new AddTailStainAction(selectedDataset, this);
-		}
-		
-		if(event.type().equals("UpdatePanels")){
-			fireDatasetUpdateEvent(populationsPanel.getSelectedDatasets());
-		}
-		
-		if(event.type().equals("UpdatePanelsNull")){
-			fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-		}
-		
-		if(event.type().equals("UpdatePopulationPanel")){
-			this.populationsPanel.update(populationsPanel.getSelectedDatasets());
-		}
-				
-		if(event.type().equals("SaveCollectionAction")){
-			
-			this.saveDataset(selectedDataset, true);
-		}
-				
+	public EventHandler getEventHandler(){
+		return eh;
 	}
-
-	@Override
-	public void datasetEventReceived(final DatasetEvent event) {
-
-		// Try to launch via factory
-		new ActionFactory().run(event);
-		
-		// Remaining methods
-		final List<IAnalysisDataset> list = event.getDatasets();
-		if(!list.isEmpty()){
-						
-			if(event.method().equals(DatasetEvent.REFOLD_CONSENSUS)){
-				refoldConsensus(event.firstDataset());		
-			}
-			
-			if(event.method().equals(DatasetEvent.SELECT_DATASETS)){
-				populationsPanel.selectDatasets(event.getDatasets());
-			}
-			
-			if(event.method().equals(DatasetEvent.SELECT_ONE_DATASET)){
-				populationsPanel.selectDataset(event.firstDataset());				
-			}
-			
-			if(event.method().equals(DatasetEvent.SAVE)){
-				saveDataset(event.firstDataset(), false);
-			}
-			
-			if(event.method().equals(DatasetEvent.EXTRACT_SOURCE)){
-				MergeSourceExtractor ext = new MergeSourceExtractor(list);
-				ext.addDatasetEventListener(this);
-				ext.extractSourceDataset();;
-				
-			}
-			
-			if(event.method().equals(DatasetEvent.REFRESH_CACHE)){
-				recacheCharts(list);				
-			}
-			
-			if(event.method().equals(DatasetEvent.CLEAR_CACHE)){
-				
-				clearChartCache(list);
-				
-			}
-			
-			if(event.method().equals(DatasetEvent.ADD_DATASET)){
-				addDataset(event.firstDataset());
-			}
-						
-		}
-		
-	}
+	
 		
 	public void addWorkspace(IWorkspace w){
 		this.workspaces.add(w);
 	}
 	
-	/**
-	 * Add the given dataset and all its children to the 
-	 * populations panel
-	 * @param dataset
-	 */
-	private void addDataset(final IAnalysisDataset dataset){
 
-		fine("Adding dataset");
-
-		populationsPanel.addDataset(dataset);
-		for(IAnalysisDataset child : dataset.getAllChildDatasets() ){
-			populationsPanel.addDataset(child);
-		}
-
-		finer("Ordering update of populations panel");
-		
-		// This will also trigger a dataset update event as the dataset
-		// is selected, so don't trigger another update here.
-		populationsPanel.update(dataset);
-	}
-	
-	
-	/**
-	 * Begin a refolding of the consensus nucleus for the 
-	 * given dataset
-	 * @param dataset
-	 */
-	private void refoldConsensus(final IAnalysisDataset dataset){
-		fine("Refolding consensus");
-		finest("Refold consensus dataset method is EDT: "+SwingUtilities.isEventDispatchThread());
-		
-		Runnable r = () -> {
-			/*
-			 * The refold action needs to be able to hold up a series
-			 * of following actions, when it is being used in a New Analysis.
-			 * The countdown latch does nothing here, but must be retained for
-			 * compatibility.
-			 */
-			fine("Clearing chart cache for consensus charts");
-			
-			final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-			list.add(dataset);
-			segmentsDetailPanel.clearChartCache(list);  // segment positions charts need updating
-			nuclearChartsPanel.clearChartCache(list); // overlaid nuclei need updating
-			signalsDetailPanel.clearChartCache(list);   // signal consensus needs updating
-			consensusNucleusPanel.clearChartCache(list);    // consensus panel needs updating
-
-			final CountDownLatch latch = new CountDownLatch(1);
-			finest("Created latch: "+latch.getCount());
-			Runnable task = new RefoldNucleusAction(dataset, MainWindow.this, latch);
-			task.run();
-			finest("Running refolding");
-			try {
-				fine("Awaiting latch");
-				latch.await();
-				fine("Latch has released from refolding");
-				if(dataset.hasAnalysisOptions()){
-					
-					IMutableAnalysisOptions op;
-					try {
-						op = (IMutableAnalysisOptions) dataset.getAnalysisOptions();
-						op.setRefoldNucleus(true);
-						fine("Set refold status in options");
-					} catch (MissingOptionException e) {
-						warn("Missing analysis options");
-						stack(e.getMessage(), e);
-
-					}
-					
-				} else {
-					fine("Dataset has no analysis options, cannot set refold state");
-				}
-
-				populationsPanel.selectDataset(dataset);
-
-			} catch (InterruptedException e) {
-				error("Interruption to thread", e);
-			}
-		};
-			
-		threadManager.execute(r);
-	}
-	
-	
-	
-	/**
-	 * Save all the root datasets in the populations panel
-	 */
-	public void saveRootDatasets(){
-		
-		Runnable r = () -> {
-			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
-				final CountDownLatch latch = new CountDownLatch(1);
-
-				Runnable task = new SaveDatasetAction(root, MainWindow.this, latch, false);
-				task.run();
-				try {
-					latch.await();
-				} catch (InterruptedException e) {
-					error("Interruption to thread", e);
-				}
-			}
-			fine("All root datasets attempted to be saved");
-		};
-			
-		threadManager.execute(r);
-	}
-
-	
-	/**
-	 * Save the given dataset. If it is root, save directly.
-	 * If it is not root, find the root parent and save it.
-	 * @param d
-	 * @param saveAs should the action ask for a directory
-	 */	
-	public void saveDataset(final IAnalysisDataset d, boolean saveAs){
-		
-		if(d.isRoot()){
-			finer("Dataset is root");
-			finest("Creating latch");
-			final CountDownLatch latch = new CountDownLatch(1);
-
-			Runnable r = new SaveDatasetAction(d, MainWindow.this, latch, saveAs);
-			finest("Passing save action to executor service");
-			r.run();
-
-			fine("Root dataset saved");
-		} else {
-			finest("Not a root dataset, checking for parent");
-			IAnalysisDataset target = null; 
-			for(IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()){
-				//					for(AnalysisDataset root : populationsPanel.getRootDatasets()){
-
-				for(IAnalysisDataset child : root.getAllChildDatasets()){
-					if(child.getUUID().equals(d.getUUID())){
-						target = root;
-						break;
-					}
-				}
-				if(target!=null){
-					break;
-				}
-			}
-			if(target!=null){
-				saveDataset(target, saveAs);
-			}
-		}
-	}
-	
-	
-	/*
-	 * Trigger a recache of all charts and datasets 
-	 */
-	private void recacheCharts(){
-		
-		Runnable task = () -> {
-			for(TabPanel panel : detailPanels){
-				panel.refreshChartCache();
-				panel.refreshTableCache();
-			}
-		};
-		threadManager.execute(task);
-	}
-	
-	private void clearChartCache(){
-		for(TabPanel panel : detailPanels){
-			panel.clearChartCache();
-			panel.clearTableCache();
-		}	
-	}
-	
-
-	private void clearChartCache(final List<IAnalysisDataset> list){
-		
-		if(list==null || list.isEmpty()){
-			warn("A cache clear was requested for a specific list, which was null or empty");
-			clearChartCache();
-			return;
-		}
-		for(TabPanel panel : detailPanels){
-			panel.clearChartCache(list);
-			panel.clearTableCache(list);
-		}		
-	}
-	
-//	private void recacheCharts(final AnalysisDataset dataset){
-//		final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-//		list.add(dataset);
-//		recacheCharts(list);
-//	}
-	
-	private void recacheCharts(final List<IAnalysisDataset> list){
-		
-		Runnable task = () -> {
-			fine("Heard recache request for list of  "+list.size()+" datasets");
-			for(TabPanel panel : detailPanels){
-				panel.refreshChartCache(list);
-				panel.refreshTableCache(list);
-			}
-		};
-		threadManager.submit(task);
-
-	}
-	
-	
-	@Override
-	public void interfaceEventReceived(final InterfaceEvent event) {
-		
-		InterfaceMethod method = event.method();
-		finest("Heard interface event: "+event.method().toString());
-		
-		switch(method){
-		
-		case REFRESH_POPULATIONS:
-			populationsPanel.update(populationsPanel.getSelectedDatasets()); // ensure all child datasets are included
-			break;
-			
-		case SAVE_ROOT:
-			saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL LOCK THE PROGRESS BAR
-
-			break;
-			
-		case UPDATE_PANELS:{
-			List<IAnalysisDataset> list = populationsPanel.getSelectedDatasets();
-			finer("Updating tab panels with list of "+list.size()+" datasets");
-			fireDatasetUpdateEvent(list);
-//			threadManager.executeAndCancelUpdate( new PanelUpdateTask(list) );
-//			this.updatePanels(list);
-			break;
-		}
-			
-			
-		case RECACHE_CHARTS:
-			recacheCharts();
-			break;				
-		case LIST_SELECTED_DATASETS:
-			int count=0;
-			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
-				log(count+"\t"+d.getName());
-				count++;
-			}
-			break;
-			
-		case CLEAR_LOG_WINDOW:
-			logPanel.clear();
-			break;
-			
-		case UPDATE_IN_PROGRESS:
-			for(TabPanel panel : this.detailPanels){
-				panel.setAnalysing(true);
-			}
-			this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			break;
-			
-		case UPDATE_COMPLETE:
-			for(TabPanel panel : this.detailPanels){
-				panel.setAnalysing(false);
-			}
-			this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			break;
-			
-			
-		case DUMP_LOG_INFO:
-			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
-				
-				for(Nucleus n : d.getCollection().getNuclei()){
-					log(n.toString());
-				}
-			}
-			break;
-			
-		case INFO:
-			for(IAnalysisDataset d : populationsPanel.getSelectedDatasets()){
-				
-				log(d.getCollection().toString());
-			}
-			break;
-						
-		default:
-			break;
-
-		}		
-	}	
 	
 	@Override
 	public void dispose(){
-//		threadManager.shutdownNow();
 		super.dispose();
 	}
 	
 	public boolean hasOpenDatasets(){
 		return DatasetListManager.getInstance().getAllDatasets().size()>0;
 	}
-	
-	/**
-     * Signal listeners that the given datasets should be displayed
-     * @param list
-     */
-    public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list){
-		fine("Heard dataset update event fire");
-    	PanelUpdater r = new PanelUpdater(list);
-    	threadManager.executeAndCancelUpdate(r);
-    }
-    
-       
-    public class PanelUpdater implements CancellableRunnable {
-    	private final List<IAnalysisDataset> list;
-    	
-    	private AtomicBoolean isCancelled = new AtomicBoolean(false);
-    	
-    	public PanelUpdater(final List<IAnalysisDataset> list){ 
-    		this.list = list;
-    	}
-
-		@Override
-		public void run() {
-			PanelLoadingUpdater loader = new PanelLoadingUpdater();
-
-    		try {
-    			
-    			Future<?> f = threadManager.submit( loader );
-    			
-    			// Wait for loading state to be set
-    			while(!f.isDone() && !isCancelled.get()){
-    				fine("Waiting for chart loading set...");
-    				Thread.sleep(1);
-    			}
-    			
-    			if(isCancelled.get()){
-    				return;
-    			}
-    			
-    			Boolean ok = (Boolean) f.get();
-    			fine("Chart loading is set: "+ok );
-    			
-    		} catch (InterruptedException e1) {
-    			warn("Interrupted update");
-    			error("Error setting loading state", e1);
-    			error("Cause of loading state error", e1.getCause());
-    			return;
-    		} catch (ExecutionException e1) {
-    			error("Error setting loading state", e1);
-    			error("Cause of loading state error", e1.getCause());
-    			return;
-    		}
-
-    		// Now fire the update
-    		fine("Firing general update for "+list.size()+" datasets");
-    		DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-    		Iterator<Object> iterator = updateListeners.iterator();
-    		while( iterator.hasNext() ) {
-    			if(isCancelled.get()){
-    				return;
-    			}
-    			( (DatasetUpdateEventListener) iterator.next() ).datasetUpdateEventReceived( e );
-    		}
-			
-		}
-
-		@Override
-		public void cancel() {
-			fine("Cancelling thread");
-			isCancelled.set(true);
-//			Thread.currentThread().interrupt();
-			
-		}
-    	
-    	
-    }
-    
-    public class PanelLoadingUpdater implements Callable {
-    	public PanelLoadingUpdater(){
-    		
-    	}
-    	
-    	@Override
-    	public Boolean call() {
-
-
-//    		log("Setting charts and tables loading");
-    		// Update charts and panels to loading
-
-    		for(TabPanel p : detailPanels){
-    			p.setChartsAndTablesLoading();
-    		}
-    		return true;
-
-    	}
-    	
-    }
-    
-    /**
-     * Add a listener for dataset update events.
-     * @param l
-     */
-    public synchronized void addDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
-    	updateListeners.add( l );
-    }
-    
-    public synchronized void removeDatasetUpdateEventListener( DatasetUpdateEventListener l ) {
-    	updateListeners.remove( l );
-    }
-    
+	    
 }

@@ -87,8 +87,8 @@ public abstract class VoidResultAction
 		logPanel.revalidate();
 		logPanel.repaint();
 
-		this.addInterfaceEventListener(mw);
-		this.addDatasetEventListener(mw);
+		this.addInterfaceEventListener(mw.getEventHandler());
+		this.addDatasetEventListener(mw.getEventHandler());
 		finest( "Created progressable action");
 
 	}
@@ -124,8 +124,8 @@ public abstract class VoidResultAction
 	public void cancel(){
 		finest( "Removing interface and dataset listeners");
 		removeProgressBar();
-		removeDatasetEventListener(mw);
-		removeInterfaceEventListener(mw);
+		removeDatasetEventListener(mw.getEventHandler());
+		removeInterfaceEventListener(mw.getEventHandler());
 	}
 	
 	protected void setProgressBarVisible(boolean b){
@@ -192,8 +192,8 @@ public abstract class VoidResultAction
 		finer("Removed property change listener from worker");
 		removeProgressBar();		
 		
-		this.removeInterfaceEventListener(mw);
-		this.removeDatasetEventListener(mw);
+		this.removeInterfaceEventListener(mw.getEventHandler());
+		this.removeDatasetEventListener(mw.getEventHandler());
 		finer("Removed event listeners from action");
 	}
 	
