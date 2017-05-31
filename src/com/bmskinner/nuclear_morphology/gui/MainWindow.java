@@ -383,6 +383,9 @@ public class MainWindow
 	}
 	
 	
+	/**
+	 * Set the event listeners for each tab panel
+	 */
 	private void createEventHandling(){
 		logPanel.addDatasetEventListener(eh);
 		logPanel.addInterfaceEventListener(eh);
@@ -423,6 +426,10 @@ public class MainWindow
 		return this.detailPanels;
 	}
 	
+	/**
+	 * Get the event handler that dispatches messages and analyses
+	 * @return
+	 */
 	public EventHandler getEventHandler(){
 		return eh;
 	}
@@ -438,9 +445,5 @@ public class MainWindow
 	public void dispose(){
 		super.dispose();
 	}
-	
-	public boolean hasOpenDatasets(){
-		return DatasetListManager.getInstance().getAllDatasets().size()>0;
-	}
-	    
+		    
 }

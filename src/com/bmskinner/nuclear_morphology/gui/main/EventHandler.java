@@ -46,14 +46,13 @@ import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
-import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
@@ -80,13 +79,19 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Listens to messages from the UI and launches actions
+ * @author bms41
+ * @since 1.13.7
+ *
+ */
 public class EventHandler implements Loggable, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 	
 	private final MainWindow mw;
 	
 	private List<Object> updateListeners = new ArrayList<Object>();
 	
-	public EventHandler(MainWindow mw){
+	public EventHandler(final MainWindow mw){
 		this.mw = mw;
 	}
 	
@@ -124,7 +129,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 				return new DatasetArithmeticAction(selectedDatasets, mw); 
 			}
 			
-			if(event.type().equals("ChangeNucleusFolderAction")){
+			if(event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER)){
 				return new ReplaceSourceImageDirectoryAction(selectedDataset, mw);
 			}
 			
@@ -317,10 +322,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 			r.run();
 			
 		}
-		
-//		if(event.type().equals("AddTailStainAction")){
-//			new AddTailStainAction(selectedDataset, this);
-//		}
+
 		
 		if(event.type().equals("UpdatePanels")){
 			fireDatasetUpdateEvent(mw.getPopulationsPanel().getSelectedDatasets());

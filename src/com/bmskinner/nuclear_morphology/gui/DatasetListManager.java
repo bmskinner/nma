@@ -131,7 +131,7 @@ public final class DatasetListManager implements Loggable {
 	public synchronized boolean hasDatasets(){
 		return map.size()>0;
 	}
-	
+		
 	/**
 	 * Update the cluster groups for each root dataset and its children.
 	 * This will remove any cluster groups with no member datasets. 
