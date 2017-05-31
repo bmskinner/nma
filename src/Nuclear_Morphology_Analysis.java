@@ -17,14 +17,8 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-import ij.IJ;
-import ij.Prefs;
-import ij.plugin.PlugIn;
-import ij.plugin.frame.ThresholdAdjuster;
-
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,11 +33,16 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.IJ;
+import ij.Prefs;
+import ij.plugin.PlugIn;
 
 /**
  * This is designed to work as a plugin for ImageJ - this
@@ -54,20 +53,25 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public class Nuclear_Morphology_Analysis
-implements PlugIn, Loggable
-
-{
+	implements PlugIn, Loggable {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
 	
+	/*
+	 * Keep a strong reference to the loggers so they can be accessed
+	 * by all other classes implementing the Loggable interface
+	 */
+	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);	
 	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
+	
+	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 	
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
 	
 	
 	// The plugins that are needed for the program to start
-	private String[] fileNames = { "commons-math3",
+	private static String[] fileNames = { "commons-math3",
 			"commons-math3",
 			"jcommon",
 			"jdistlib",
@@ -293,6 +297,10 @@ implements PlugIn, Loggable
 		List<String> toCheck = Arrays.stream(fileNames)
 			.filter( s -> requiredFiles.get(s)==false )
 			.collect(Collectors.toList());
+		
+		if(dir.listFiles()==null){
+			return;
+		}
 				
 
 		for(File file : dir.listFiles()){

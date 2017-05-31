@@ -19,21 +19,13 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,39 +33,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
-import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
-import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
-import com.bmskinner.nuclear_morphology.gui.actions.AddTailStainAction;
-import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
-import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
-import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
-import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
-import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
-import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
-import com.bmskinner.nuclear_morphology.gui.actions.RelocateFromFileAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryAction;
-import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
-import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
-import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
-import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
-import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
@@ -91,7 +54,6 @@ import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
-import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
@@ -143,28 +105,15 @@ public class MainWindow
 	private ImagesTabPanel		    imagesTabPanel; 	// for altering data
 	
 	
-	private List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
+	private final List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store panels for iterating messsages
+		
+	private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 	
-//	private List<Object> updateListeners = new ArrayList<Object>();
-	
-	private List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
-	
-	private EventHandler eh = new EventHandler(this);
+	private final EventHandler eh = new EventHandler(this);
 	
 	
 	private boolean isStandalone = false;
 	
-	/*
-	 * Keep a strong reference to the program logger so it can be accessed
-	 * by all other classes implementing the Loggable interface
-	 */
-	private static final Logger programLogger =
-	        Logger.getLogger(Loggable.PROGRAM_LOGGER);
-	
-	
-	private static final ThreadManager threadManager = ThreadManager.getInstance();		
-	
-
 	/**
 	 * Create the frame.
 	 * @param standalone is the frame a standalone app, or launched within ImageJ?
@@ -246,20 +195,15 @@ public class MainWindow
 			//---------------
 			logPanel = new LogPanel();
 			
-//			this.addDatasetUpdateEventListener(logPanel);
 			TextAreaHandler textHandler = new TextAreaHandler(logPanel);
 			textHandler.setFormatter(new LogPanelFormatter());
-			programLogger.addHandler(textHandler);
-			programLogger.setLevel(Level.INFO); // by default do not log everything 
+			Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
+			Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO); // by default do not log everything 
 			
 			//---------------
 			// Create the consensus chart
 			//---------------
 			populationsPanel = new PopulationsPanel();
-//			populationsPanel.addSignalChangeListener(this);
-//			populationsPanel.addDatasetEventListener(this);
-//			populationsPanel.addInterfaceEventListener(this);
-//			this.addDatasetUpdateEventListener(populationsPanel);
 			consensusNucleusPanel = new ConsensusNucleusPanel();
 			detailPanels.add(consensusNucleusPanel);
 
@@ -300,15 +244,7 @@ public class MainWindow
 			
 			//---------------
 			// Register change listeners
-			//---------------
-			
-//			for(TabPanel d : detailPanels){
-//				d.addDatasetEventListener(this);
-//				d.addInterfaceEventListener(this);
-//				d.addSignalChangeListener(this);
-//				this.addDatasetUpdateEventListener(d);
-//			}
-			
+			//---------------		
 			
 			signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
 			editingDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow the panels to communicate colour updates
@@ -320,9 +256,7 @@ public class MainWindow
 					topRow, tabbedPane);
 			
 			contentPane.add(panelMain, BorderLayout.CENTER);
-			
-//			checkUpdatingState();
-			
+						
 			this.pack();
 			consensusNucleusPanel.restoreAutoBounds();
 
