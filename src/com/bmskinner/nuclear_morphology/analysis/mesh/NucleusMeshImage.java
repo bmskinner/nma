@@ -152,43 +152,43 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
 		return missingPixels;
 	}
 	
-	/**
-	 * Get the size of the resulting image for the given mesh
-	 * @param mesh
-	 * @return
-	 */
-	private int[] findImageDimensions(Mesh<Nucleus> mesh){
-		
-		int maxX = 0;
-		int minX = Integer.MAX_VALUE;
-		
-		int maxY = 0;
-		int minY = Integer.MAX_VALUE;
-		
-		for(MeshFace f : map.keySet()){
-			
-			List<MeshPixel> faceMap = map.get(f);
-
-			for(MeshPixel c : faceMap ){
-
-				IPoint p = c.getCoordinate().getCartesianCoordinate(mesh.getFace(f));
-				
-				
-				maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
-				minX = p.getXAsInt() < minX ? p.getXAsInt() : minX;
-				
-				maxY = p.getYAsInt() > maxY ? p.getYAsInt() : maxY;
-				minY = p.getYAsInt() < minY ? p.getYAsInt() : minY;
-						
-			}
-			
-		}
-		
-		int xRange = maxX - minX;
-		int yRange = maxY - minY;
-		int[] result =  {xRange, yRange};
-		return result;
-	}
+//	/**
+//	 * Get the size of the resulting image for the given mesh
+//	 * @param mesh
+//	 * @return
+//	 */
+//	private int[] findImageDimensions(Mesh<Nucleus> mesh){
+//		
+//		int maxX = 0;
+//		int minX = Integer.MAX_VALUE;
+//		
+//		int maxY = 0;
+//		int minY = Integer.MAX_VALUE;
+//		
+//		for(MeshFace f : map.keySet()){
+//			
+//			List<MeshPixel> faceMap = map.get(f);
+//
+//			for(MeshPixel c : faceMap ){
+//
+//				IPoint p = c.getCoordinate().getCartesianCoordinate(mesh.getFace(f));
+//				
+//				
+//				maxX = p.getXAsInt() > maxX ? p.getXAsInt() : maxX;
+//				minX = p.getXAsInt() < minX ? p.getXAsInt() : minX;
+//				
+//				maxY = p.getYAsInt() > maxY ? p.getYAsInt() : maxY;
+//				minY = p.getYAsInt() < minY ? p.getYAsInt() : minY;
+//						
+//			}
+//			
+//		}
+//		
+//		int xRange = maxX - minX;
+//		int yRange = maxY - minY;
+//		int[] result =  {xRange, yRange};
+//		return result;
+//	}
 	
 	/**
 	 * Make a ByteProcessor of the given dimensions with all

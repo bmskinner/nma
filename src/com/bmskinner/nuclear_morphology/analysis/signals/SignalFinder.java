@@ -76,6 +76,10 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		
 		List<INuclearSignal> list = new ArrayList<>();
 		
+		if(folder.listFiles()==null){
+			return list;
+		}
+		
 		List<File> files = Arrays.asList(folder.listFiles());
 
 		files.parallelStream().forEach( f -> {

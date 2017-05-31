@@ -36,7 +36,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
@@ -78,6 +77,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 	private JLabel headerText;
 	
 	private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
+	private static final String WARP_LBL = "Warp signals";
 	
 //	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
 	
@@ -142,11 +142,17 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 								
 				// double click
 				if (e.getClickCount() == 2) {
+					
+					IAnalysisDataset d = getDatasets().get(column-1);
 
 					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
 					if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
 						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
-						updateSignalColour( signalGroup );
+						
+						SignalColourChanger sc = new SignalColourChanger(SignalsOverviewPanel.this);
+						sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+						update(getDatasets());
+						fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
 					}
 											
 				}
@@ -158,36 +164,12 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		return scrollPane;
 	}
 	
+	
 	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
 		return (SignalTableCell) table.getModel().getValueAt(row, column);
 	}
 	
-	
-	/**
-	 * Update the colour of the clicked signal group
-	 * @param row the row selected (the colour bar, one above the group name)
-	 */
-	private void updateSignalColour(SignalTableCell signalGroup){
-		
-		try {
-			Color oldColour = signalGroup.getColor();
-
-			Color newColor = JColorChooser.showDialog(
-					this,
-					"Choose signal Color",
-					oldColour);
-
-			if(newColor != null){
-				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
-				this.update(getDatasets());
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-			}
-		} catch(UnavailableSignalGroupException e){
-			warn("Cannot change signal colour");
-			stack("Error getting signal group", e);
-		}
-	}
-			
+				
 	/**
 	 * Create the checkboxes that set each signal channel visible or not
 	 */
@@ -195,6 +177,19 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 		JPanel panel = new JPanel();
 		
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+		
+		warpButton = new JButton(WARP_LBL);
+		warpButton.setToolTipText("Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
+		warpButton.addActionListener( e -> { 
+			
+				new SignalWarpingDialog(  getDatasets() );
+			}  
+		);
+
+		warpButton.setEnabled(false);
+		
+
+		panel.add(warpButton);
 		
 
 		if(isSingleDataset()){
@@ -218,11 +213,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
 				// Don't enable when the consensus is missing
                 box.setEnabled(activeDataset().getCollection().hasConsensus());
-   
 
-
-				// apply the appropriate action 
-//				box.setActionCommand(SET_SIGNAL_GROUP_VISIBLE_ACTION+signalGroup);
 				box.addActionListener( e ->{
 					try {
 						activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
@@ -242,23 +233,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
 
 		}
-		
-		warpButton = new JButton("Warp signals");
-		warpButton.setToolTipText("Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
-		warpButton.addActionListener( e -> { 
-			
-				new SignalWarpingDialog(  getDatasets() );
-			}  
-		);
-
-		warpButton.setEnabled(false);
-		
-
-		panel.add(warpButton);
-		
+				
 		headerText = new JLabel("");
 		headerText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		panel.add(headerText);
+		panel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 		
 		return panel;
 	}

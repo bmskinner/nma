@@ -85,8 +85,6 @@ public abstract class DetailPanel
 	private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
 	private final List<Object> updateListeners    = new CopyOnWriteArrayList<Object>();
 	
-//	private volatile List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-	
 	private final List<TabPanel> subPanels = new  ArrayList<TabPanel>();
 	
 	// The chart cache holds rendered charts for all selected options, until a change is made to a dataset

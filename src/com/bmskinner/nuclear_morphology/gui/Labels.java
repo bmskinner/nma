@@ -93,6 +93,17 @@ public class Labels {
 	public static final String SINGLE_DATASET = "Single dataset selected";
 	public static final String MULTIPLE_DATASETS = "Multiple datasets selected";
 	public static final String NULL_DATASETS = "No datasets selected";
+	public static final String NO_SIGNAL_GROUPS = "No signal groups in datasets";
 	
 	public static final String SIGNAL_GROUP_LABEL = "Signal group";
+	public static final String NUMBER_OF_SIGNAL_GROUPS = "Number of signal groups";
+	public static final String SIGNALS_LABEL = "Signals";
+	public static final String SIGNALS_PER_NUCLEUS = "Signals per nucleus";
+	
+	public static final String DATASET     = "Dataset";
+	public static final String PROBABILITY = "p";
+	public static final String NA          = "N/A";
+	
+	public static final String CHOOSE_SIGNAL_COLOUR = "Choose signal color";
+	
 }

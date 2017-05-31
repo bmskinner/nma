@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
@@ -56,12 +57,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				
 		// find the collection with the most channels
 		// this defines  the number of rows
-			
-		int maxChannels = 0;
-		for(IAnalysisDataset dataset : list){
-			ICellCollection collection = dataset.getCollection();
-			maxChannels = Math.max(collection.getSignalManager().getSignalGroupIDs().size(), maxChannels);
-		}
+		int maxChannels = list.stream().mapToInt( d -> d.getCollection().getSignalManager().getSignalGroupCount()).max().orElse(0);
 		
 		if(maxChannels==0){
 			return createBlankTable();
@@ -82,7 +78,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		};
 
 		// create the row names
-		fieldNames.add("Number of signal groups");
+		fieldNames.add(Labels.NUMBER_OF_SIGNAL_GROUPS);
 
 		for(int i=0;i<maxChannels;i++){
 
@@ -92,7 +88,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		}
 
 		int numberOfRowsPerSignalGroup = rowNameBlock.length;
-		model.addColumn("", fieldNames.toArray(new Object[0])); // separate row block for each channel
+		model.addColumn(EMPTY_STRING, fieldNames.toArray(new Object[0])); // separate row block for each channel
 
 		// make a new column for each collection
 		for(IAnalysisDataset dataset : list){
@@ -107,7 +103,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 
     /**
-     * Create a column of signal group information for the given dataset. 
+     * Create a column of signal group detection information for the given dataset. 
      * If the number of signal groups in the dataset is less than the number
      * of signal groups in the table total, then the empty spaces will be 
      * added explicitly to the column 
@@ -119,7 +115,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
     private List<Object> makeDetectionSettingsColumn(IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
                         
         List<Object> rowData = new ArrayList<Object>(0);
-        rowData.add(signalGroupCount);
+        
+        int signalGroupsInDataset = dataset.getCollection().getSignalManager().getSignalGroupCount();
+        
+        rowData.add(signalGroupsInDataset);
         
         /*
          * If the dataset is a merge, then the analysis options will be null.
@@ -152,6 +151,13 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         return rowData;
     }
     
+    /**
+     * Fill a list with rows describing each signal group in a merged dataset
+     * @param rowData the list to add rows to
+     * @param dataset the dataset with signals
+     * @param signalGroupCount the total number of signal groups in the table
+     * @param rowsPerSignalGroup the number of rows each signal group requires
+     */    
     private void addMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
     	ICellCollection collection = dataset.getCollection();
     	Collection<ISignalGroup> signalGroups = collection.getSignalManager().getSignalGroups();
@@ -171,12 +177,12 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
     					colour);
 
 
-    					rowData.add("");// empty row for colour
+    					rowData.add(EMPTY_STRING);// empty row for colour
     					rowData.add(cell);  // group name
 
 
 				for(int i=0; i<rowsPerSignalGroup-2;i++){ // rest are NA
-					rowData.add("N/A - merge");
+					rowData.add(Labels.NA+" - merge");
 				}
 
     		} catch (UnavailableSignalGroupException e){
@@ -190,12 +196,19 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         int remaining = signalGroupCount - signalGroups.size();
         for(int i=0;i<remaining;i++){
           for(int k=0; k<rowsPerSignalGroup;k++){
-              rowData.add("");
+              rowData.add(EMPTY_STRING);
           }
       }
     }
 
     
+    /**
+     * Fill a list with rows describing each signal group in a dataset
+     * @param rowData the list to add rows to
+     * @param dataset the dataset with signals
+     * @param signalGroupCount the total number of signal groups in the table
+     * @param rowsPerSignalGroup the number of rows each signal group requires
+     */
     private void addNonMergedSignalData(List<Object> rowData, IAnalysisDataset dataset, int signalGroupCount, int rowsPerSignalGroup){
     	
     	ICellCollection collection = dataset.getCollection();
@@ -227,38 +240,30 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 					
 				} catch (MissingOptionException e) {
 					for(int i=0; i<rowsPerSignalGroup;i++){
-						rowData.add("");
+						rowData.add(EMPTY_STRING);
 					}
 				}
 
 				if(ns==null){ // occurs when no signals are present? Should never occur with the new SignalGroup system
 					
 					for(int i=0; i<rowsPerSignalGroup;i++){
-						rowData.add("");
+						rowData.add(EMPTY_STRING);
 					}
 
 				} else {
 					Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
-							? ns.getThreshold()
-									: "Variable";
+							? ns.getThreshold()	: "Variable";
 
-							Object signalMode = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
-									? "Forward"
-											: ns.getDetectionMode().equals(SignalDetectionMode.REVERSE)
-											? "Reverse"
-													: "Adaptive";                    
-
-
-							rowData.add("");
-							rowData.add(cell);
-							rowData.add(ns.getChannel());
-							rowData.add(ns.getFolder());
-							rowData.add(  signalThreshold );
-							rowData.add(ns.getMinSize());
-							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxFraction()));
-							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMinCirc()));
-							rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxCirc()));
-							rowData.add(signalMode);
+					rowData.add(EMPTY_STRING);
+					rowData.add(cell);
+					rowData.add(ns.getChannel());
+					rowData.add(ns.getFolder());
+					rowData.add(  signalThreshold );
+					rowData.add(ns.getMinSize());
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxFraction()));
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMinCirc()));
+					rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxCirc()));
+					rowData.add(ns.getDetectionMode().toString());
 				}
 
         	} catch (UnavailableSignalGroupException e){
@@ -278,7 +283,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
             // There will be empty rows in the table. Fill the blanks
             for(int i = signalGroupNumber+1; i<=signalGroupCount;i++){
                 for(int k = 0; k<rowsPerSignalGroup;k++){
-                    rowData.add("");
+                    rowData.add(EMPTY_STRING);
                 }
             }                
         }
@@ -295,25 +300,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 	public TableModel createSignalStatsTable() {			
 		return createMultiDatasetSignalStatsTable();
 	}
-	
-	/**
-	 * Find the number of signal groups in a list of datasets that must be drawn 
-	 * to include all groups
-	 * @param list
-	 * @return
-	 */
-	private int getSignalGroupCount(List<IAnalysisDataset> list){
-		int maxSignalGroup = 0;
-
-		for(IAnalysisDataset dataset : list){
-			ICellCollection collection = dataset.getCollection();
-			if(collection.getSignalManager().hasSignals()){
-				maxSignalGroup = Math.max(collection.getSignalManager().getSignalGroupCount(), maxSignalGroup);
-			}
-		}
-		return maxSignalGroup;
-	}
-		
+			
 	/**
 	 * Create the signal statistics table for the given options
 	 * @param options
@@ -322,45 +309,49 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 	private TableModel createMultiDatasetSignalStatsTable() {
 
 		DefaultTableModel model = new DefaultTableModel();
+		
+		int signalGroupTotal = options.getDatasets().stream().mapToInt( d -> d.getCollection().getSignalManager().getSignalGroupCount()).max().orElse(0);
 
-		int signalGroupCount = getSignalGroupCount(options.getDatasets());
+//		int signalGroupCount = getSignalGroupCount(options.getDatasets());
 
-		finest("Selected collections have "+signalGroupCount+" signal groups");
+		finest("Selected collections have "+signalGroupTotal+" signal groups");
 
-		if(signalGroupCount<=0){
+		if(signalGroupTotal<=0){
 			
 			finest("No signal groups to show");
-			model.addColumn("No signal groups in datasets");
+			model.addColumn(Labels.NO_SIGNAL_GROUPS);
 			return model;
 		}
+		
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
 			
 		
 		// Make an instance of row names
 		List<Object> rowNames = new ArrayList<Object>();
-		rowNames.add("");
+		rowNames.add(EMPTY_STRING);
 		rowNames.add(Labels.SIGNAL_GROUP_LABEL);
-		rowNames.add("Signals");
-		rowNames.add("Signals per nucleus");
+		rowNames.add(Labels.SIGNALS_LABEL);
+		rowNames.add(Labels.SIGNALS_PER_NUCLEUS);
 
 		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
-			rowNames.add(  stat.label(MeasurementScale.PIXELS) );
+			rowNames.add(  stat.label(scale) );
 		}
 
 		// Make the full column of row names for each signal group
 		List<Object> firstColumn = new ArrayList<Object>(0);
-		firstColumn.add("Number of signal groups");
-		for(int i=0;i<signalGroupCount;i++){
+		firstColumn.add(Labels.NUMBER_OF_SIGNAL_GROUPS);
+		for(int i=0;i<signalGroupTotal;i++){
 			firstColumn.addAll(rowNames);
 		}
 
 
 		int numberOfRowsPerSignalGroup = rowNames.size();
-		model.addColumn("", firstColumn.toArray(new Object[0])); // separate row block for each channel
+		model.addColumn(EMPTY_STRING, firstColumn.toArray(new Object[0])); // separate row block for each channel
 
 		// make a new column for each collection
 		for(IAnalysisDataset dataset : options.getDatasets()){
 
-			List<Object> rowData = addSignalDataColumn(dataset, numberOfRowsPerSignalGroup, signalGroupCount);
+			List<Object> rowData = addSignalDataColumn(dataset, numberOfRowsPerSignalGroup, signalGroupTotal);
 			model.addColumn(dataset.getName(), rowData.toArray(new Object[0])); // separate row block for each channel
 		}
 
@@ -376,7 +367,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 	 */
 	private List<Object> addSignalDataColumn(IAnalysisDataset dataset, int numberOfRowsPerSignalGroup, int maxSignalGroup){
 		ICellCollection collection = dataset.getCollection();
-		
+		MeasurementScale scale = GlobalOptions.getInstance().getScale();
 		int signalGroupCount = collection.getSignalManager().getSignalGroupCount();
 		
 		List<Object> rowData = new ArrayList<Object>(0);
@@ -389,7 +380,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 				if( collection.getSignalManager().getSignalCount(signalGroup)==0){ // Signal group has no signals
 					for(int j = 0; j<numberOfRowsPerSignalGroup;j++){ // Make a blank block of cells
-						temp.add("");
+						temp.add(EMPTY_STRING);
 					}
 					continue;
 				}
@@ -402,29 +393,29 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 						collection.getSignalManager().getSignalGroupName(signalGroup), colour);
 
 
-				temp.add("");
+				temp.add(EMPTY_STRING);
 				temp.add(cell);
 				temp.add(collection.getSignalManager().getSignalCount(signalGroup));
 				double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
 				temp.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
 
 				for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
-					double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.PIXELS, signalGroup);
+					double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
+					temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
 
-
-					if(stat.isDimensionless()){
-						temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
-					} else {
-						double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
-						temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
-					}
+//					if(stat.isDimensionless()){
+//						temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel) );
+//					} else {
+//						double micron = collection.getSignalManager().getMedianSignalStatistic(stat, MeasurementScale.MICRONS, signalGroup);
+//						temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel) +" ("+ DEFAULT_DECIMAL_FORMAT.format(micron)+ " "+ stat.units(MeasurementScale.MICRONS)+")");
+//					}
 				}
 
 			} catch (UnavailableSignalGroupException e){
 				stack("Signal group "+signalGroup+" is not present in collection", e);
 				temp = new ArrayList<Object>(0);
 				for(int j = 0; j<numberOfRowsPerSignalGroup;j++){ // Make a blank block of cells
-					temp.add("");
+					temp.add(EMPTY_STRING);
 				}
 			} finally {
 				rowData.addAll(temp);
@@ -437,7 +428,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 			// There will be empty rows in the table. Fill the blanks
 			for(int i = signalGroupCount+1; i<=maxSignalGroup;i++){
 				for(int j = 0; j<numberOfRowsPerSignalGroup;j++){
-					rowData.add("");
+					rowData.add(EMPTY_STRING);
 				}
 			}
 			
@@ -463,10 +454,9 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 		DecimalFormat pFormat = new DecimalFormat("#0.000"); 
 		
 		Object[] columnNames = {
-				
-				"Dataset",
-				"Signal group",
-				"p"
+				Labels.DATASET,
+				Labels.SIGNAL_GROUP_LABEL,
+				Labels.PROBABILITY,
 		};
 		
 		model.setColumnIdentifiers(columnNames);
@@ -539,7 +529,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 			firstColumnData.add(primaryName);
 		}
 		
-		model.addColumn("Signal group", firstColumnData.toArray());
+		model.addColumn(Labels.SIGNAL_GROUP_LABEL, firstColumnData.toArray());
 		
 		for(UUID primaryID : ps.getIDs()){
 			
@@ -552,7 +542,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 			for(UUID secondaryID : ps.getIDs()){
 				
 				if(primaryID.equals(secondaryID)){
-					columnData.add("");
+					columnData.add(EMPTY_STRING);
 					continue;
 				}
 				
@@ -562,16 +552,12 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				List<Double> values = ps.getValues(primaryID, secondaryID);
 								
 				if(values == null){
-					columnData.add("N/A");
+					columnData.add(Labels.NA);
 					continue;
 				}
 				
 				double median  = new Quartile(values, Quartile.MEDIAN).doubleValue();
-//				double stdev = new StDev(values).doubleValue();
 				columnData.add( DEFAULT_DECIMAL_FORMAT.format(median) );
-//						+ " [ " 
-//						+ DEFAULT_DECIMAL_FORMAT.format(stdev)
-//						+ " ]" );
 				
 			}
 

@@ -19,12 +19,10 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
-import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -36,10 +34,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalTableCrea
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -91,9 +90,15 @@ public class SignalsAnalysisPanel extends DetailPanel {
                     
                     String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
                     if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
+                    	IAnalysisDataset d = getDatasets().get(column-1);
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
-                        updateSignalColour( signalGroup );
+                        SignalColourChanger sc = new SignalColourChanger(SignalsAnalysisPanel.this);
+    					sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+    					update(getDatasets());
+    					fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
+                    
+                    
 
                         
                 }
@@ -118,30 +123,30 @@ public class SignalsAnalysisPanel extends DetailPanel {
      * Update the colour of the clicked signal group
      * @param row the row selected (the colour bar, one above the group name)
      */
-    private void updateSignalColour(SignalTableCell signalGroup){
-        
-    	if(isSingleDataset()){
-
-    		try {
-    			Color oldColour = signalGroup.getColor();
-
-    			Color newColor = JColorChooser.showDialog(
-    					this,
-    					"Choose signal Color",
-    					oldColour);
-
-    			if(newColor != null){
-    				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
-    				this.update(getDatasets());
-    				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-    			}
-
-    		} catch(UnavailableSignalGroupException e){
-    			warn("Cannot change signal colour");
-    			fine("Error getting signal group", e);
-    		}
-    	}
-    }
+//    private void updateSignalColour(SignalTableCell signalGroup){
+//        
+//    	if(isSingleDataset()){
+//
+//    		try {
+//    			Color oldColour = signalGroup.getColor();
+//
+//    			Color newColor = JColorChooser.showDialog(
+//    					this,
+//    					"Choose signal Color",
+//    					oldColour);
+//
+//    			if(newColor != null){
+//    				activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
+//    				this.update(getDatasets());
+//    				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//    			}
+//
+//    		} catch(UnavailableSignalGroupException e){
+//    			warn("Cannot change signal colour");
+//    			fine("Error getting signal group", e);
+//    		}
+//    	}
+//    }
     
 
     

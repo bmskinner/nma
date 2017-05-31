@@ -161,22 +161,22 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 		
 	}
 	
-	/**
-	 * Get the vertex opposite the given edge. This is the vertex
-	 * that does not contain the edge.
-	 * @param e
-	 * @return
-	 */
-	private MeshVertex getOppositeVertex(MeshEdge e){
-
-		for(MeshVertex v : vertices){
-			if( ! v.getEdges().contains(e)){
-				return v;
-			}
-		}
-		
-		return null;
-	}
+//	/**
+//	 * Get the vertex opposite the given edge. This is the vertex
+//	 * that does not contain the edge.
+//	 * @param e
+//	 * @return
+//	 */
+//	private MeshVertex getOppositeVertex(MeshEdge e){
+//
+//		for(MeshVertex v : vertices){
+//			if( ! v.getEdges().contains(e)){
+//				return v;
+//			}
+//		}
+//		
+//		return null;
+//	}
 	
 	/**
 	 * Get the edge opposite the given vertex. This is the edge

@@ -74,6 +74,12 @@ public class TableOptionsBuilder {
 		return this;
 	}
 	
+	/**
+	 * Set the table renderer to use
+	 * @param column the column to apply the renderer to
+	 * @param r the renderer
+	 * @return
+	 */
 	public TableOptionsBuilder setRenderer(int column, TableCellRenderer r) {
 		options.setRenderer(column, r);
 		return this;

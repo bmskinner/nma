@@ -28,6 +28,8 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 	
 	protected final E options;
 	
+	protected static final String EMPTY_STRING = "" ;
+	
 	public AbstractDatasetCreator(final E options){
 		if(options==null){
 			throw new IllegalArgumentException("Options cannot be null");
