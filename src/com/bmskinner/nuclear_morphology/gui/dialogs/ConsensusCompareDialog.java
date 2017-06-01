@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 
 /**

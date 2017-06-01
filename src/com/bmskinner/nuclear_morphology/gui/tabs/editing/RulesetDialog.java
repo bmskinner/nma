@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")

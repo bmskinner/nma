@@ -662,11 +662,9 @@ public class DefaultNucleus
 		return true;
 	}
 	
-	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		
 		in.defaultReadObject();
-		
-		
 	    this.verticalNucleus    = null;
 	}
 }

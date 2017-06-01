@@ -151,11 +151,11 @@ public class ViolinChartFactory extends AbstractChartFactory {
 				stack("Error making chart dataset", e);
 				return makeErrorChart();
 			}
+		} else {
+			return makeEmptyChart();
 		}
 
 		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
-
-//		log("Making violin chart");
 		
 		CategoryPlot plot = chart.getCategoryPlot();
 		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -195,6 +195,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
 				stack("Error making chart dataset", e);
 				return makeErrorChart();
 			}
+		} else {
+			return makeEmptyChart();
 		}
 
 		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
@@ -245,6 +247,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
 				stack("Error making chart dataset", e);
 				return makeErrorChart();
 			}
+		} else {
+			return makeEmptyChart();
 		}
 		
 		JFreeChart chart = createViolinChart(null, 

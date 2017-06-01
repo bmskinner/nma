@@ -177,15 +177,15 @@ public class ColourThresholder {
 			//This is just for a hue histogram for the plot.  Do not show it.
 			//ByteProcessor bpHue = new ByteProcessor(width,height,h,cm);
 			ByteProcessor bpHue = new ByteProcessor(width,height,hSource,cm);
-			ImagePlus impHue = new ImagePlus("Hue",bpHue);
+//			ImagePlus impHue = new ImagePlus("Hue",bpHue);
 
 
 			ByteProcessor bpSat = new ByteProcessor(width,height,sSource,cm);
-			ImagePlus impSat = new ImagePlus("Sat",bpSat);
+//			ImagePlus impSat = new ImagePlus("Sat",bpSat);
 
 
 			ByteProcessor bpBri = new ByteProcessor(width,height,bSource,cm);
-			ImagePlus impBri = new ImagePlus("Bri",bpBri);
+//			ImagePlus impBri = new ImagePlus("Bri",bpBri);
 
 		return ip!=null;
 	}

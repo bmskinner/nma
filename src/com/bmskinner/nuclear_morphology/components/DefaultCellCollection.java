@@ -1472,11 +1472,10 @@ public class DefaultCellCollection
 		out.defaultWriteObject();
 	}
 
-	private synchronized void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 		in.defaultReadObject();
 		isRefolding = false;
-//		vennCache   = new HashMap<UUID, Integer>(); // cache the number of shared nuclei with other datasets
 
 		if(ruleSets==null || ruleSets.isEmpty()){
 			log("Creating default ruleset for collection");

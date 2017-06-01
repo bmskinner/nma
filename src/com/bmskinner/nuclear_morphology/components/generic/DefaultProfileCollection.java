@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2015, 2016 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -11,7 +11,7 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details. Gluten-free. May contain 
+ *     GNU General Public License for more details. Gluten-free. May contain
  *     traces of LDL asbestos. Avoid children using heavy machinery while under the
  *     influence of alcohol.
  *
@@ -35,202 +35,220 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
- * Holds the ProfileAggregate with individual nucleus values,
- * and stores the indexes of BorderTags within the profile.
- * Provides methods to get the median and other quartiles from 
- * the collection. The Reference Point is always at the zero index
- * of the collection.
- * 
+ * Holds the ProfileAggregate with individual nucleus values, and stores the
+ * indexes of BorderTags within the profile. Provides methods to get the median
+ * and other quartiles from the collection. The Reference Point is always at the
+ * zero index of the collection.
+ *
  * Also stores the NucleusBorderSegments within the profile, and provides
- * methods to transform the segments to fit profiles offset from given 
- * border tags.
- * 
+ * methods to transform the segments to fit profiles offset from given border
+ * tags.
+ *
  * An internal ProfileCache holds average profiles to save repeated calculation
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class DefaultProfileCollection implements IProfileCollection {
-		
+
 	private static final long serialVersionUID = 1L;
-		
-	private Map<Tag, Integer>    indexes  = new HashMap<Tag, Integer>();
-	private IBorderSegment[]     segments = null;
-	
+
+	private Map<Tag, Integer> indexes = new HashMap<Tag, Integer>();
+	private IBorderSegment[] segments = null;
+
 	private transient int length;
 	private transient Map<ProfileType, IProfileAggregate> map = new HashMap<ProfileType, IProfileAggregate>();
 	private transient ProfileCache cache = new ProfileCache();
-	
 
 	/**
 	 * Create an empty profile collection
 	 */
-	public DefaultProfileCollection(){
+	public DefaultProfileCollection() {
 		indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
-		
+
 	}
-			
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getIndex(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.generic.IProfileCollection#getIndex(components.generic.
+	 * BorderTagObject)
 	 */
 	@Override
-	public int getIndex(Tag pointType){
-		if(pointType==null){
-			throw new IllegalArgumentException("The requested offset key is null: "+pointType);
+	public int getIndex(Tag pointType) {
+		if (pointType == null) {
+			throw new IllegalArgumentException("The requested offset key is null: " + pointType);
 		}
-		if(indexes.containsKey(pointType)){	
+		if (indexes.containsKey(pointType)) {
 			return indexes.get(pointType);
 		} else {
 			return -1;
 		}
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#getBorderTags()
 	 */
 	@Override
-	public List<Tag> getBorderTags(){
+	public List<Tag> getBorderTags() {
 		List<Tag> result = new ArrayList<Tag>();
-		for(Tag s: indexes.keySet()){
+		for (Tag s : indexes.keySet()) {
 			result.add(s);
 		}
 		return result;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#hasBorderTag(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#hasBorderTag(components.generic.
+	 * BorderTagObject)
 	 */
 	@Override
-	public boolean hasBorderTag(Tag tag){
+	public boolean hasBorderTag(Tag tag) {
 		return indexes.keySet().contains(tag);
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getProfile(components.generic.BorderTagObject, double)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.generic.IProfileCollection#getProfile(components.generic.
+	 * BorderTagObject, double)
 	 */
 	@Override
-	public IProfile getProfile(ProfileType type, Tag tag, double quartile) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
-		
-		if(type==null){
+	public IProfile getProfile(ProfileType type, Tag tag, double quartile)
+			throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
+
+		if (type == null) {
 			throw new IllegalArgumentException("Type cannot be null");
 		}
-		
-		if(tag==null){
+
+		if (tag == null) {
 			throw new IllegalArgumentException("Tag cannot be null");
 		}
-		
-		if(  ! this.hasBorderTag(tag)){
-			throw new UnavailableBorderTagException("Tag is not present: "+tag.toString());
+
+		if (!this.hasBorderTag(tag)) {
+			throw new UnavailableBorderTagException("Tag is not present: " + tag.toString());
 		}
-		
-		if( ! map.containsKey(type)){
-			throw new UnavailableProfileTypeException("Profile type is not present: "+type.toString());
+
+		if (!map.containsKey(type)) {
+			throw new UnavailableProfileTypeException("Profile type is not present: " + type.toString());
 		}
-		
-		
+
 		IProfile p = cache.getProfile(type, quartile, tag);
-		
-		if(p==null){ // profile not yet in cache
+
+		if (p == null) { // profile not yet in cache
 			IProfileAggregate agg = map.get(type);
 
 			try {
-				
+
 				p = agg.getQuartile(quartile);
-			
+
 			} catch (NullPointerException e) {
-				warn("Cannot get profile for "+quartile);
+				warn("Cannot get profile for " + quartile);
 				stack("Error fetching quartile", e);
 				throw new ProfileException("Null pointer exception getting quartile from aggregate");
 			}
-			
+
 			int offset = indexes.get(tag);
 			p = p.offset(offset);
 			cache.addProfile(type, quartile, tag, p);
 		}
-		
+
 		return p;
-	
-		
+
 	}
-	
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getSegmentedProfile(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getSegmentedProfile(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
-	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile) 
-			throws UnavailableBorderTagException, 
-				   ProfileException, 
-			       UnavailableProfileTypeException, 
-			       UnsegmentedProfileException {
-		
-		if(tag==null || type==null){
+	public ISegmentedProfile getSegmentedProfile(ProfileType type, Tag tag, double quartile)
+			throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
+			UnsegmentedProfileException {
+
+		if (tag == null || type == null) {
 			throw new IllegalArgumentException("A profile type and tag is required");
 		}
-		
-		if(quartile < 0 || quartile > 100){
+
+		if (quartile < 0 || quartile > 100) {
 			throw new IllegalArgumentException("Quartile must be between 0-100");
 		}
-		
+
 		// get the profile array
 		IProfile p = getProfile(type, tag, quartile);
-		fine("Making segmented profile of type "+type+" from "+tag+" with q"+quartile);
+		fine("Making segmented profile of type " + type + " from " + tag + " with q" + quartile);
 
 		try {
-			if(segments[0]==null){
+			if (segments[0] == null) {
 				throw new UnsegmentedProfileException("No segments assigned to profile collection");
 			}
-		} catch(NullPointerException e){
-			//			error("No segments assigned to profile collection", e);
+		} catch (NullPointerException e) {
+			// error("No segments assigned to profile collection", e);
 			throw new UnsegmentedProfileException("No segments assigned to profile collection", e);
 		}
 
 		ISegmentedProfile result;
 		try {
 			result = new SegmentedFloatProfile(p, getSegments(tag));
-		} catch(IndexOutOfBoundsException e){
+		} catch (IndexOutOfBoundsException e) {
 			stack("Cannot create segmented profile due to segment/profile mismatch", e);
 			throw new ProfileException("Cannot create segmented profile; segment lengths do not match array", e);
 		}
 		return result;
 	}
-	
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.ISegmentedProfile#getSegmentIDs()
 	 */
 	@Override
-	public synchronized List<UUID> getSegmentIDs(){
+	public synchronized List<UUID> getSegmentIDs() {
 		List<UUID> result = new ArrayList<UUID>();
-		if(segments==null){
+		if (segments == null) {
 			return result;
 		}
-		for(IBorderSegment seg : this.segments){
+		for (IBorderSegment seg : this.segments) {
 			result.add(seg.getID());
 		}
 		return result;
 	}
-	
+
 	@Override
-	public synchronized IBorderSegment getSegmentAt(Tag tag, int position){
+	public synchronized IBorderSegment getSegmentAt(Tag tag, int position) {
 		return this.getSegments(tag).get(position);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#length()
 	 */
 	@Override
-	public int length(){
+	public int length() {
 		return length;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getSegments(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getSegments(components.generic.
+	 * BorderTagObject)
 	 */
 	@Override
 	public synchronized List<IBorderSegment> getSegments(Tag tag) {
-		if(tag==null){
-			throw new IllegalArgumentException("The requested segment key is null: "+tag);
+		if (tag == null) {
+			throw new IllegalArgumentException("The requested segment key is null: " + tag);
 		}
 
 		// this must be negative offset for segments
@@ -239,10 +257,10 @@ public class DefaultProfileCollection implements IProfileCollection {
 		int offset = -getIndex(tag);
 
 		List<IBorderSegment> result;
-		if(segments==null){
+		if (segments == null) {
 			return new ArrayList<IBorderSegment>(0);
 		}
-		
+
 		try {
 			result = IBorderSegment.nudge(segments, offset);
 		} catch (ProfileException e) {
@@ -252,104 +270,126 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 		return result;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#hasSegmentStartingWith(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#hasSegmentStartingWith(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public boolean hasSegmentStartingWith(Tag tag) throws UnsegmentedProfileException {
-		
-		if(getSegmentStartingWith( tag) == null){
+
+		if (getSegmentStartingWith(tag) == null) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getSegmentStartingWith(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getSegmentStartingWith(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public IBorderSegment getSegmentStartingWith(Tag tag) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(tag);
-		
-		if(segments.size()==0){
+
+		if (segments.size() == 0) {
 			throw new UnsegmentedProfileException("No segments assigned to profile collection");
 		}
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(IBorderSegment seg : segments){
+		for (IBorderSegment seg : segments) {
 
-			if(  seg.getStartIndex()==ZERO_INDEX ){
+			if (seg.getStartIndex() == ZERO_INDEX) {
 				result = seg;
 			}
 		}
-		
+
 		return result;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#hasSegmentEndingWith(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#hasSegmentEndingWith(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public boolean hasSegmentEndingWith(Tag tag) throws UnsegmentedProfileException {
-		
-		if(getSegmentEndingWith( tag) == null){
+
+		if (getSegmentEndingWith(tag) == null) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getSegmentEndingWith(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getSegmentEndingWith(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public IBorderSegment getSegmentEndingWith(Tag tag) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(tag);
 
-		if(segments.size()==0){
+		if (segments.size() == 0) {
 			throw new UnsegmentedProfileException("No segments assigned to profile collection");
 		}
-		
+
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(IBorderSegment seg : segments){
+		for (IBorderSegment seg : segments) {
 
-			if(  seg.getEndIndex()==ZERO_INDEX ){
+			if (seg.getEndIndex() == ZERO_INDEX) {
 				result = seg;
 			}
 		}
-		
+
 		return result;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#getSegmentContaining(int)
 	 */
 	@Override
 	public IBorderSegment getSegmentContaining(int index) throws UnsegmentedProfileException {
 		List<IBorderSegment> segments = this.getSegments(Tag.REFERENCE_POINT);
-		
-		if(segments.size()==0){
+
+		if (segments.size() == 0) {
 			throw new UnsegmentedProfileException("No segments assigned to profile collection");
 		}
-		
+
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(IBorderSegment seg : segments){
+		for (IBorderSegment seg : segments) {
 
-			if(  seg.contains(index) ){
+			if (seg.contains(index)) {
 				result = seg;
 			}
 		}
-		
+
 		return result;
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getSegmentContaining(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getSegmentContaining(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public IBorderSegment getSegmentContaining(Tag tag) throws ProfileException {
@@ -357,79 +397,82 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 		IBorderSegment result = null;
 		// get the name of the segment with the tag at the start
-		for(IBorderSegment seg : segments){
+		for (IBorderSegment seg : segments) {
 
-			if(  seg.contains(ZERO_INDEX) ){
+			if (seg.contains(ZERO_INDEX)) {
 				result = seg;
 			}
 		}
-		
+
 		return result;
 	}
-			
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#addIndex(components.generic.BorderTagObject, int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see components.generic.IProfileCollection#addIndex(components.generic.
+	 * BorderTagObject, int)
 	 */
 	@Override
-	public void addIndex(Tag tag, int offset){
-		if(tag==null){
+	public void addIndex(Tag tag, int offset) {
+		if (tag == null) {
 			throw new IllegalArgumentException("BorderTagObject is null");
 		}
-		
+
 		// Cannot move the RP from zero
-		if(tag.equals(Tag.REFERENCE_POINT)){
+		if (tag.equals(Tag.REFERENCE_POINT)) {
 			return;
 		}
 		cache.remove(tag);
 		indexes.put(tag, offset);
-		
+
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#addSegments(java.util.List)
 	 */
 	@Override
-	public void addSegments(List<IBorderSegment> n){
-		if(n==null || n.isEmpty()){
+	public void addSegments(List<IBorderSegment> n) {
+		if (n == null || n.isEmpty()) {
 			throw new IllegalArgumentException("Segment list is null or empty");
 		}
-		
-		if(this.length() != n.get(0).getTotalLength() ){
-			throw new IllegalArgumentException("Segments total length ("
-							+n.get(0).getTotalLength()
-							+") does not fit aggregate ("+
-							+this.length()
-							+")");
+
+		if (this.length() != n.get(0).getTotalLength()) {
+			throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+					+ ") does not fit aggregate (" + +this.length() + ")");
 		}
-		
+
 		this.segments = new IBorderSegment[n.size()];
-		
-		for(int i=0; i<segments.length; i++){
+
+		for (int i = 0; i < segments.length; i++) {
 			segments[i] = n.get(i);
 		}
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#addSegments(components.generic.BorderTagObject, java.util.List)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#addSegments(components.generic.
+	 * BorderTagObject, java.util.List)
 	 */
 	@Override
 	public void addSegments(Tag tag, List<IBorderSegment> n) {
-		if(n==null || n.isEmpty()){
+		if (n == null || n.isEmpty()) {
 			throw new IllegalArgumentException("String or segment list is null or empty");
 		}
-		
-		if(this.length() != n.get(0).getTotalLength() ){
-			throw new IllegalArgumentException("Segments total length ("
-							+n.get(0).getTotalLength()
-							+") does not fit aggregate ("+
-							+this.length()
-							+")");
+
+		if (this.length() != n.get(0).getTotalLength()) {
+			throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+					+ ") does not fit aggregate (" + +this.length() + ")");
 		}
-		
+
 		/*
 		 * The segments coming in are zeroed to the given pointType pointIndex
-		 * This means the indexes must be moved forwards appropriately.
-		 * Hence, add a positive offset.
+		 * This means the indexes must be moved forwards appropriately. Hence,
+		 * add a positive offset.
 		 */
 		int offset = getIndex(tag);
 
@@ -440,141 +483,153 @@ public class DefaultProfileCollection implements IProfileCollection {
 			stack("Error offsetting segments", e);
 			return;
 		}
-		
+
 		this.segments = new IBorderSegment[n.size()];
 
-		for(int i=0; i<segments.length; i++){
+		for (int i = 0; i < segments.length; i++) {
 			segments[i] = result.get(i);
 		}
 	}
-	
+
 	@Override
-	public double[] getValuesAtPosition(ProfileType type, double position) throws UnavailableProfileTypeException{
-		
+	public double[] getValuesAtPosition(ProfileType type, double position) throws UnavailableProfileTypeException {
+
 		double[] result = map.get(type).getValuesAtPosition(position);
-		
-		if(result==null){
-			
+
+		if (result == null) {
+
 			result = new double[length()];
-			for(int i=0; i<result.length; i++){
+			for (int i = 0; i < result.length; i++) {
 				result[i] = 0;
 			}
 		}
 
 		return result;
 	}
-	
+
 	@Override
-	public List<Double> getXKeyset(ProfileType type){
+	public List<Double> getXKeyset(ProfileType type) {
 		return map.get(type).getXKeyset();
 	}
-			
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType, int)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#createProfileAggregate(components.
+	 * CellCollection, components.generic.ProfileType, int)
 	 */
 	@Override
 	public void createProfileAggregate(ICellCollection collection, int length) {
-		if(length<=0){
+		if (length <= 0) {
 			throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
 		}
-		if(collection == null){
+		if (collection == null) {
 			throw new IllegalArgumentException("CellCollection is null");
 		}
-		
-		if(collection.size()==0){
+
+		if (collection.size() == 0) {
 			throw new IllegalArgumentException("Cell collection is empty");
 		}
-		
+
 		this.length = length;
-		
-		if(segments!=null && length != segments[0].getTotalLength()){
-			
+
+		if (segments != null && length != segments[0].getTotalLength()) {
+
 			Exception e = new Exception("Creating profile aggregate will invalidate segments");
 			stack("Segments exist at different length to created aggregate", e);
 			segments = null;
 		}
 
-		for(ProfileType type : ProfileType.values()){
+		for (ProfileType type : ProfileType.values()) {
 
 			IProfileAggregate agg = new DefaultProfileAggregate(length, collection.size());
 
 			map.put(type, agg);
 			try {
-				for(Nucleus n : collection.getNuclei()){
+				for (Nucleus n : collection.getNuclei()) {
 
-					switch(type){
+					switch (type) {
 					case FRANKEN:
 
 						agg.addValues(n.getProfile(type));
 
 						break;
 					default:
-						agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT)); 
+						agg.addValues(n.getProfile(type, Tag.REFERENCE_POINT));
 						break;
 
 					}
 				}
 
-			} catch(ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e){
+			} catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
 				stack("Error making aggregate", e);
 			}
 
 		}
-		
+
 	}
-	
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#createProfileAggregate(components.CellCollection, components.generic.ProfileType)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#createProfileAggregate(components.
+	 * CellCollection, components.generic.ProfileType)
 	 */
-//	@Override
+	// @Override
 	public void createProfileAggregate(ICellCollection collection) {
-		
+
 		createProfileAggregate(collection, collection.getMedianArrayLength());
 
 	}
-	
+
+	@Override
 	public void createAndRestoreProfileAggregate(ICellCollection collection) {
 
-		if(segments==null){
+		if (segments == null) {
 			createProfileAggregate(collection, collection.getMedianArrayLength());
 		} else {
 			int length = segments[0].getTotalLength();
 			createProfileAggregate(collection, length);
 		}
 	}
-		
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#tagString()
 	 */
 	@Override
-	public String tagString(){
-		
+	public String tagString() {
+
 		StringBuilder builder = new StringBuilder();
 
 		builder.append("\tPoint types:");
-		for(Tag tag : this.indexes.keySet()){
-			builder.append("\t"+tag+": "+this.indexes.get(tag));
+		for (Tag tag : this.indexes.keySet()) {
+			builder.append("\t" + tag + ": " + this.indexes.get(tag));
 		}
 		return builder.toString();
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see components.generic.IProfileCollection#toString()
 	 */
 	@Override
-	public String toString(){
+	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(this.tagString());
 
 		try {
 
-			for(Tag tag : this.indexes.keySet()){
-				if(tag.type().equals(com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType.CORE)){
-					builder.append("\r\nSegments from "+tag+":\r\n");
-					for(IBorderSegment s : this.getSegments(tag)){
-						builder.append(s.toString()+"\r\n");
+			for (Tag tag : this.indexes.keySet()) {
+				if (tag.type()
+						.equals(com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType.CORE)) {
+					builder.append("\r\nSegments from " + tag + ":\r\n");
+					for (IBorderSegment s : this.getSegments(tag)) {
+						builder.append(s.toString() + "\r\n");
 					}
 				}
 			}
@@ -584,38 +639,47 @@ public class DefaultProfileCollection implements IProfileCollection {
 		}
 
 		return builder.toString();
-		
+
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#getIQRProfile(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#getIQRProfile(components.generic.
+	 * BorderTagObject)
 	 */
 	@Override
-	public IProfile getIQRProfile(ProfileType type, Tag tag) throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
-				
+	public IProfile getIQRProfile(ProfileType type, Tag tag)
+			throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
+
 		IProfile q25 = getProfile(type, tag, Quartile.LOWER_QUARTILE);
 		IProfile q75 = getProfile(type, tag, Quartile.UPPER_QUARTILE);
-		
-		if(q25==null || q75==null){ // if something goes wrong, return a zero profile
-			
-			warn("Problem calculating the IQR - setting to zero");			
+
+		if (q25 == null || q75 == null) { // if something goes wrong, return a
+											// zero profile
+
+			warn("Problem calculating the IQR - setting to zero");
 			return new FloatProfile(0, length);
 		}
-		
 
 		return q75.subtract(q25);
 	}
-	
-	/* (non-Javadoc)
-	 * @see components.generic.IProfileCollection#findMostVariableRegions(components.generic.BorderTagObject)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * components.generic.IProfileCollection#findMostVariableRegions(components.
+	 * generic.BorderTagObject)
 	 */
 	@Override
 	public List<Integer> findMostVariableRegions(ProfileType type, Tag tag) {
-		
+
 		List<Integer> result = new ArrayList<Integer>(0);
-		
+
 		// get the IQR and maxima
-		
+
 		IProfile iqrProfile;
 		try {
 			iqrProfile = getIQRProfile(type, tag);
@@ -626,12 +690,11 @@ public class DefaultProfileCollection implements IProfileCollection {
 
 		BooleanProfile maxima = iqrProfile.smooth(3).getLocalMaxima(3);
 
-		
 		// given the list of maxima, find the highest 3 regions
 		// store the rank (1-3) and the index of the position at this rank
 		// To future me: I am sorry about this.
 		Map<Integer, Integer> values = new HashMap<Integer, Integer>(0);
-		
+
 		int minIndex = -1;
 		try {
 			minIndex = iqrProfile.getIndexOfMin();
@@ -639,24 +702,22 @@ public class DefaultProfileCollection implements IProfileCollection {
 			stack("Error getting index", e);
 			return result;
 		} // ensure that our has begins with lowest data
-		
-		
-		
+
 		values.put(1, minIndex);
 		values.put(2, minIndex);
 		values.put(3, minIndex);
-		for(int i=0; i<maxima.size();i++ ){
-			if(maxima.get(i)==true){
-				if(iqrProfile.get(i)>iqrProfile.get(values.get(1))){
-					values.put(3,  values.get(2));
-					values.put(2,  values.get(1));
+		for (int i = 0; i < maxima.size(); i++) {
+			if (maxima.get(i) == true) {
+				if (iqrProfile.get(i) > iqrProfile.get(values.get(1))) {
+					values.put(3, values.get(2));
+					values.put(2, values.get(1));
 					values.put(1, i);
 				} else {
-					if(iqrProfile.get(i)>iqrProfile.get(values.get(2))){
-						values.put(3,  values.get(2));
+					if (iqrProfile.get(i) > iqrProfile.get(values.get(2))) {
+						values.put(3, values.get(2));
 						values.put(2, i);
 					} else {
-						if(iqrProfile.get(i)>iqrProfile.get(values.get(3))){
+						if (iqrProfile.get(i) > iqrProfile.get(values.get(3))) {
 							values.put(3, i);
 						}
 					}
@@ -665,34 +726,35 @@ public class DefaultProfileCollection implements IProfileCollection {
 			}
 		}
 
-		for(int i : values.keySet()){
+		for (int i : values.keySet()) {
 			result.add(values.get(i));
-//			IJ.log("    Variable index "+values.get(i));
-		}		
+			// IJ.log(" Variable index "+values.get(i));
+		}
 		return result;
 	}
-	
+
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
 		map = new HashMap<ProfileType, IProfileAggregate>();
 		cache = new ProfileCache();
 	}
-	
+
 	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
 	}
-	
-	
+
 	/**
 	 * The cache for profiles
+	 * 
 	 * @author bms41
 	 * @since 1.13.4
 	 *
 	 */
 	private class ProfileCache {
-		
+
 		/**
 		 * The key used to store values in the cache
+		 * 
 		 * @author bms41
 		 * @since 1.13.4
 		 *
@@ -701,22 +763,22 @@ public class DefaultProfileCollection implements IProfileCollection {
 			private final ProfileType type;
 			private final double quartile;
 			private final Tag tag;
-			
+
 			public ProfileKey(final ProfileType type, final double quartile, final Tag tag) {
 
 				this.type = type;
 				this.quartile = quartile;
 				this.tag = tag;
 			}
-			
-			public boolean has(ProfileType t){
+
+			public boolean has(ProfileType t) {
 				return type.equals(t);
 			}
-			
-			public boolean has(Tag t){
+
+			public boolean has(Tag t) {
 				return tag.equals(t);
 			}
-			
+
 			@Override
 			public int hashCode() {
 				final int prime = 31;
@@ -756,51 +818,56 @@ public class DefaultProfileCollection implements IProfileCollection {
 			private DefaultProfileCollection getOuterType() {
 				return DefaultProfileCollection.this;
 			}
-			
-			
+
 		}
-		
+
 		private Map<ProfileKey, IProfile> map = new HashMap<ProfileKey, IProfile>();
-		
-		public ProfileCache(){}
-		
+
+		public ProfileCache() {
+		}
+
 		/**
 		 * Add a profile with the given keys
-		 * @param type the profile type
-		 * @param quartile the quartile of the dataset
-		 * @param tag the tag
-		 * @param profile the profile to save
+		 * 
+		 * @param type
+		 *            the profile type
+		 * @param quartile
+		 *            the quartile of the dataset
+		 * @param tag
+		 *            the tag
+		 * @param profile
+		 *            the profile to save
 		 */
-		public void addProfile(final ProfileType type, final double quartile, final Tag tag, IProfile profile){
+		public void addProfile(final ProfileType type, final double quartile, final Tag tag, IProfile profile) {
 			ProfileKey key = new ProfileKey(type, quartile, tag);
 			map.put(key, profile);
 		}
-		
-		public boolean hasProfile(final ProfileType type, final double quartile, final Tag tag){
+
+		public boolean hasProfile(final ProfileType type, final double quartile, final Tag tag) {
 			ProfileKey key = new ProfileKey(type, quartile, tag);
 			return map.containsKey(key);
 		}
-		
-		public IProfile getProfile(final ProfileType type, final double quartile, final Tag tag){
+
+		public IProfile getProfile(final ProfileType type, final double quartile, final Tag tag) {
 			ProfileKey key = new ProfileKey(type, quartile, tag);
 			return map.get(key);
 		}
-		
-		public void remove(final ProfileType type, final double quartile, final Tag tag){
+
+		public void remove(final ProfileType type, final double quartile, final Tag tag) {
 			ProfileKey key = new ProfileKey(type, quartile, tag);
 			map.remove(key);
 		}
-		
-		public void remove(final Tag t){
-			
+
+		public void remove(final Tag t) {
+
 			Iterator<ProfileKey> it = map.keySet().iterator();
-			while(it.hasNext()){
+			while (it.hasNext()) {
 				ProfileKey k = it.next();
-				if(k.has(t)){
+				if (k.has(t)) {
 					it.remove();
 				}
 			}
-			
+
 		}
 	}
 

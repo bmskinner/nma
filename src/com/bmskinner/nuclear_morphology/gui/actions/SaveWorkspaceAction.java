@@ -55,6 +55,7 @@ public class SaveWorkspaceAction extends VoidResultAction {
 		
 		if(file==null){
 			cancel();
+			return;
 		}
 
 		

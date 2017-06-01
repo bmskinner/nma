@@ -22,9 +22,9 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.AbstractFinder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
@@ -79,10 +79,8 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 		if(folder.listFiles()==null){
 			return list;
 		}
-		
-		List<File> files = Arrays.asList(folder.listFiles());
 
-		files.parallelStream().forEach( f -> {
+		Stream.of(folder.listFiles()).parallel().forEach( f -> {
 			if( ! f.isDirectory()){
 				
 				if(ImageImporter.fileIsImportable(f)){

@@ -115,6 +115,7 @@ public class ProfileOffsetter implements Loggable {
 
 				if(nucleusSegment==null){
 					warn("Error updating nucleus, segment "+segID+" not found");
+					throw new UnavailableComponentException("Segment "+segID+" not found");
 				} else {
 					finest("Using nucleus segment "+nucleusSegment.getID());
 				}

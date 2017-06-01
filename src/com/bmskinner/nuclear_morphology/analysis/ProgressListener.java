@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2016 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -19,17 +19,19 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 /**
- * This interface allows AnalysisWorkers to detect progress through
- * a multithreaded task run in an AbstractProgressAction.
+ * This interface allows AnalysisWorkers to detect progress through a
+ * multithreaded task run in an AbstractProgressAction.
+ * 
  * @author ben
  * @since 1.12.0
  *
  */
 public interface ProgressListener {
 
-	/**
-	 * The action to take when a progress event is heard by this listener
-	 * @param event
-	 */
-	public void progressEventReceived(ProgressEvent event);
+    /**
+     * The action to take when a progress event is heard by this listener
+     * 
+     * @param event
+     */
+    public void progressEventReceived(ProgressEvent event);
 }

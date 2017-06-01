@@ -2,11 +2,11 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -35,10 +35,12 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
 			throw new IllegalArgumentException("Folder cannot be null");
 		}
 		List<ICell> list = new ArrayList<>();
-		
-		List<File> files = Arrays.asList(folder.listFiles());
+		File[] arr = folder.listFiles();
+		if(arr==null){
+			return null;
+		}
 
-		files.parallelStream().forEach( f -> {
+		Stream.of(arr).parallel().forEach( f -> {
 			if( ! f.isDirectory()){
 				
 				if(ImageImporter.fileIsImportable(f)){

@@ -5,7 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 /**

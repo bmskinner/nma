@@ -54,6 +54,7 @@ public class ExportStatsAction extends MultiDatasetResultAction {
 		
 		if(file==null){
 			cancel();
+			return;
 		}
 		
 		IAnalysisMethod m = new DatasetStatsExporter(file, datasets);

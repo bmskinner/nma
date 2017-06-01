@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2016 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -44,148 +44,142 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Extracts source datasets from merged datasets, and restores original 
+ * Extracts source datasets from merged datasets, and restores original
  * segmentation patterns.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class MergeSourceExtractor implements Loggable {
 
-	private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
-	private final List<IAnalysisDataset> list;
-	
-	/**
-	 * Construct with a list of datasets that are to be extracted from 
-	 * their parents.
-	 * @param list the merge source datasets
-	 */
-	public MergeSourceExtractor( final List<IAnalysisDataset> list ){
-		this.list = list;
-	}
-		
-	/**
-	 * Create a new root dataset for each merge source in this extractor
-	 * and add it to the populations panel.
-	 */
-	public void extractSourceDataset(){
-		Runnable task = () -> { 
-			log("Recovering source dataset");
-			for(IAnalysisDataset virtualMergeSource : list){
-				
-				ICellCollection templateCollection = virtualMergeSource.getCollection();
-				// Make a new real cell collection from the virtual collection
-				ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), 
-						null, 
-						templateCollection.getName(), 
-						templateCollection.getNucleusType()
-						);
-				
-				for(ICell c : templateCollection.getCells()){
-					
-					newCollection.addCell(new DefaultCell(c));
-				}
-				
-				IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
-				newDataset.setRoot(true);
-				
-				// Copy over the profile collections
-				newDataset.getCollection().createProfileCollection();
+    private final List<Object>           datasetListeners = new CopyOnWriteArrayList<Object>();
+    private final List<IAnalysisDataset> list;
 
-				// Copy the merged dataset segmentation into the new dataset.
-				// This wil match cell segmentations by default, since the cells 
-				// have been copied from the merged dataset.
-				if(virtualMergeSource instanceof MergeSourceAnalysisDataset){
-
-					MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
-					
-					try {
-						log("Copying profile offsets");
-						d.getParent().getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
-						
-						
-					} catch (ProfileException e) {
-						error("Cannot copy profile offsets to recovered merge source", e);
-					}
-				}
-				
-				
-				
-				// Copy over the signal collections where appropriate
-				
-//				templateCollection.getSignalManager().copySignalGroups(newCollection);
-				for(UUID signalGroupId : templateCollection.getSignalGroupIDs()){
-					
-					ISignalGroup newGroup;
-					try {
-						
-						// We only want to make a signal group if a cell with the signal
-						// is present in the merge source.
-						boolean addSignalGroup = false;
-						 for(Nucleus n : newCollection.getNuclei()){
-							  addSignalGroup |=  n.getSignalCollection().hasSignal(signalGroupId);
-						  } 
-						 
-						if(addSignalGroup){
-							newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
-							newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
-						}
-
-						
-					} catch (UnavailableSignalGroupException e) {
-						warn("Unable to copy signal groups");
-						fine("Signal group not present", e);
-					}
-					
-				}
-				
-				
-				
-				
-				try {
-					newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
-				} catch (MissingOptionException e) {
-					warn("Missing analysis options");
-					stack(e.getMessage(), e);
-				}
-
-
-				fireDatasetEvent(DatasetEvent.ADD_DATASET, newDataset);
-
-			}
-
-		};
-		ThreadManager.getInstance().execute(task);
-	}
-	            
-    public synchronized void addDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.add( l );
+    /**
+     * Construct with a list of datasets that are to be extracted from their
+     * parents.
+     * 
+     * @param list
+     *            the merge source datasets
+     */
+    public MergeSourceExtractor(final List<IAnalysisDataset> list) {
+        this.list = list;
     }
 
-    public synchronized void removeDatasetEventListener( DatasetEventListener l ) {
-    	datasetListeners.remove( l );
+    /**
+     * Create a new root dataset for each merge source in this extractor and add
+     * it to the populations panel.
+     */
+    public void extractSourceDataset() {
+        Runnable task = () -> {
+            log("Recovering source dataset");
+            for (IAnalysisDataset virtualMergeSource : list) {
+
+                ICellCollection templateCollection = virtualMergeSource.getCollection();
+                // Make a new real cell collection from the virtual collection
+                ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
+                        templateCollection.getName(), templateCollection.getNucleusType());
+
+                for (ICell c : templateCollection.getCells()) {
+
+                    newCollection.addCell(new DefaultCell(c));
+                }
+
+                IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
+                newDataset.setRoot(true);
+
+                // Copy over the profile collections
+                newDataset.getCollection().createProfileCollection();
+
+                // Copy the merged dataset segmentation into the new dataset.
+                // This wil match cell segmentations by default, since the cells
+                // have been copied from the merged dataset.
+                if (virtualMergeSource instanceof MergeSourceAnalysisDataset) {
+
+                    MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
+
+                    try {
+                        log("Copying profile offsets");
+                        d.getParent().getCollection().getProfileManager()
+                                .copyCollectionOffsets(newDataset.getCollection());
+
+                    } catch (ProfileException e) {
+                        error("Cannot copy profile offsets to recovered merge source", e);
+                    }
+                }
+
+                // Copy over the signal collections where appropriate
+
+                // templateCollection.getSignalManager().copySignalGroups(newCollection);
+                for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
+
+                    ISignalGroup newGroup;
+                    try {
+
+                        // We only want to make a signal group if a cell with
+                        // the signal
+                        // is present in the merge source.
+                        boolean addSignalGroup = false;
+                        for (Nucleus n : newCollection.getNuclei()) {
+                            addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
+                        }
+
+                        if (addSignalGroup) {
+                            newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
+                            newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
+                        }
+
+                    } catch (UnavailableSignalGroupException e) {
+                        warn("Unable to copy signal groups");
+                        fine("Signal group not present", e);
+                    }
+
+                }
+
+                try {
+                    newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
+                } catch (MissingOptionException e) {
+                    warn("Missing analysis options");
+                    stack(e.getMessage(), e);
+                }
+
+                fireDatasetEvent(DatasetEvent.ADD_DATASET, newDataset);
+
+            }
+
+        };
+        ThreadManager.getInstance().execute(task);
+    }
+
+    public synchronized void addDatasetEventListener(DatasetEventListener l) {
+        datasetListeners.add(l);
+    }
+
+    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
+        datasetListeners.remove(l);
     }
 
     /**
      * Fire an event on a single dataset.
+     * 
      * @param method
      * @param dataset
      */
     private synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
 
-    	List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-    	list.add(dataset);
-    	fireDatasetEvent(method, list);
+        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        list.add(dataset);
+        fireDatasetEvent(method, list);
     }
 
     private synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
 
-    	DatasetEvent event = new DatasetEvent( this, method, this.getClass().getSimpleName(), list);
-    	Iterator<Object> iterator = datasetListeners.iterator();
-    	while( iterator.hasNext() ) {
-    		( (DatasetEventListener) iterator.next() ).datasetEventReceived( event );
-    	}
+        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
+        Iterator<Object> iterator = datasetListeners.iterator();
+        while (iterator.hasNext()) {
+            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
+        }
     }
-
 
 }

@@ -305,8 +305,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 			throw new IllegalArgumentException("Folder cannot be null");
 		}
 		
+		File[] arr = folder.listFiles();
+		if(arr==null){
+			return;
+		}
+		
 		// Recurse over all folders in the supplied folder
-		for(File f : folder.listFiles()){
+		for(File f : arr){
 			if(f.isDirectory()){
 				processFolder(f);
 			}

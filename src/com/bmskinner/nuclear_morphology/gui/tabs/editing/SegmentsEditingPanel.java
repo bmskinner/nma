@@ -44,7 +44,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -54,14 +53,15 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
 import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
@@ -75,16 +75,13 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		private JButton unmergeButton;
 		private JButton splitButton;
 		private JButton windowSizeButton;
-		private JButton updatewindowButton;
-		private JButton reprofileButton;
-		
+		private JButton updatewindowButton;	
 		
 		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
 		private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
 		private static final String STR_SPLIT_SEGMENT     = "Split segment";
 		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
 		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
-		private static final String STR_REPROFILE         = "Recalculate median profiles";
 		
 				
 		public SegmentsEditingPanel(){
@@ -163,10 +160,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
 			updatewindowButton.addActionListener(this);
 			panel.add(updatewindowButton);
-			
-//			reprofileButton = new JButton(STR_REPROFILE);
-//			reprofileButton.addActionListener(this);
-//			panel.add(reprofileButton);
 
 			return panel;
 			
@@ -372,8 +365,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			
 			// Update cells
 			
-			for(ICell c : activeDataset().getCollection().getCells()){
-				c.getNucleus().setWindowProportion(ProfileType.ANGLE, windowSize);
+			for(Nucleus n : activeDataset().getCollection().getNuclei()){
+				n.setWindowProportion(ProfileType.ANGLE, windowSize);
 			}
 
 			// recalc the aggregate
@@ -391,12 +384,12 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 			// Make a fitter
 			SegmentFitter fitter = new SegmentFitter(medianProfile);
 
-			for(ICell c : activeDataset().getCollection().getCells()){
+			for(Nucleus n : activeDataset().getCollection().getNuclei()){
 
 				// recombine the segments at the lengths of the median profile segments
-				ISegmentedProfile frankenProfile = fitter.recombine(c.getNucleus(), Tag.REFERENCE_POINT);
+				ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
-				c.getNucleus().setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
+				n.setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
 
 			}
 			
@@ -449,13 +442,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
 					updateCollectionWindowSize();
 				}
-				
-				if(e.getSource()==reprofileButton){
-					
-					activeDataset().getCollection().getProfileManager().recalculateProfileAggregates();
-					fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-				}
-				
+								
 			} catch (Exception e1) {
 				warn("Error in action");
 				stack("Error in action", e1);
@@ -527,13 +514,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 		
 		
 		private void splitAction(ISegmentedProfile medianProfile) throws Exception{
-
-//			List<IBorderSegment> names = new ArrayList<IBorderSegment>();
-//
-//			// Put the names of the mergable segments into a list
-//			for(IBorderSegment seg : medianProfile.getSegments()){
-//					names.add(seg);		
-//			}
 
 			IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
 

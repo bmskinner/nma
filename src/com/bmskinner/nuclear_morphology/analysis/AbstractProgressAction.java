@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2016 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -26,8 +26,9 @@ import java.util.concurrent.RecursiveAction;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * The abstract class for actions that can be split into fork-join tasks. Progress
- * through a task can be signalled to listeners via ProgressEvents.
+ * The abstract class for actions that can be split into fork-join tasks.
+ * Progress through a task can be signalled to listeners via ProgressEvents.
+ * 
  * @author bms41
  * @since 1.12.0
  *
@@ -35,28 +36,28 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class AbstractProgressAction extends RecursiveAction implements ProgressListener, Loggable {
 
-	private final List<Object> listeners = new ArrayList<Object>();
-	
-	public synchronized void addProgressListener( ProgressListener l ) {
-		listeners.add( l );
-	}
+    private final List<Object> listeners = new ArrayList<Object>();
 
-	public synchronized void removeProgressListener( ProgressListener l ) {
-		listeners.remove( l );
-	}
+    public synchronized void addProgressListener(ProgressListener l) {
+        listeners.add(l);
+    }
 
-	protected synchronized void fireProgressEvent() {
+    public synchronized void removeProgressListener(ProgressListener l) {
+        listeners.remove(l);
+    }
 
-		ProgressEvent event = new ProgressEvent( this);
-		Iterator<Object> iterator = listeners.iterator();
-		while( iterator.hasNext() ) {
-			( (ProgressListener) iterator.next() ).progressEventReceived( event );
-		}
-	}
+    protected synchronized void fireProgressEvent() {
 
-	@Override
-	public void progressEventReceived(ProgressEvent event) {
-		fireProgressEvent();
-	}
+        ProgressEvent event = new ProgressEvent(this);
+        Iterator<Object> iterator = listeners.iterator();
+        while (iterator.hasNext()) {
+            ((ProgressListener) iterator.next()).progressEventReceived(event);
+        }
+    }
+
+    @Override
+    public void progressEventReceived(ProgressEvent event) {
+        fireProgressEvent();
+    }
 
 }

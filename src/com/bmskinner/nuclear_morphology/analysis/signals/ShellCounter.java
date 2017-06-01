@@ -179,6 +179,10 @@ public class ShellCounter implements Loggable {
 					values = getNormNucleusShell(i);
 					break;
 				}
+				default:{
+					values = getNormNucleusShell(i);
+					break;
+				}
 			}
 			double mean = DoubleStream.of(values).average().orElse(0);
 			result.add( mean );

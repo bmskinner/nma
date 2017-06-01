@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -233,9 +234,12 @@ public class GenericImageProberPanel  extends JPanel
 	private List<File> importImages(final File folder){
 
 		List<File> files = new ArrayList<File>();
+		if(folder.listFiles()==null){
+			return files;
+		}
 
-		for (File file :  folder.listFiles()) {
-
+		Stream.of(folder.listFiles()).forEach( file -> {
+			
 			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
 
 			if(ok){
@@ -245,7 +249,21 @@ public class GenericImageProberPanel  extends JPanel
 			if(file.isDirectory()){
 				files.addAll(importImages(file));
 			}
-		}
+			
+		});
+
+//		for (File file :  folder.listFiles()) {
+//
+//			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
+//
+//			if(ok){
+//				files.add(file);
+//			}
+//			
+//			if(file.isDirectory()){
+//				files.addAll(importImages(file));
+//			}
+//		}
 		return files;
 	}
 	

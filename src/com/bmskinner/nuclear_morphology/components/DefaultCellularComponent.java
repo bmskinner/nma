@@ -1232,7 +1232,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 		 * 
 		 */
 		
-		private synchronized void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 			in.defaultReadObject();
 			
@@ -1241,9 +1241,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 			imageRef = new SoftReference<ImageProcessor>(null);
 			shapeCache = new ShapeCache();
 			
-			// needs to be traced to allow interpolation into the border list
-//			PolygonRoi roi = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.TRACED_ROI);
-						
+			// needs to be traced to allow interpolation into the border list						
 			makeBorderList(); // This will update the border to the original CoM saved
 
 			Set<PlottableStatistic> set = new HashSet<PlottableStatistic>(statistics.keySet());

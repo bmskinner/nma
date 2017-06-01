@@ -121,7 +121,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                         	ctrlPressed = false;
                         }
                         break;
+                    default:{ 
+                		break;
+                	}
                     }
+                	
                     return false;
               }
             }

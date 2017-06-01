@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2015, 2016 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -11,7 +11,7 @@
  *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details. Gluten-free. May contain 
+ *     GNU General Public License for more details. Gluten-free. May contain
  *     traces of LDL asbestos. Avoid children using heavy machinery while under the
  *     influence of alcohol.
  *
@@ -27,69 +27,67 @@ import java.util.Set;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
- * This is a grouping of open AnalysisDatasets,
- * which can act as a shortcut to opening a lot
- * of nmd files in one go. 
+ * This is a grouping of open AnalysisDatasets, which can act as a shortcut to
+ * opening a lot of nmd files in one go.
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class DefaultWorkspace implements IWorkspace {
 
-	Set<File> datasets = new HashSet<File>();
-	
-	File saveFile = null;
-	
-	public DefaultWorkspace(File f){
-		this.saveFile = f;
-	}
+    Set<File> datasets = new HashSet<File>();
 
-	@Override
-	public void add(IAnalysisDataset d) {
-		if(d.isRoot()){
-			datasets.add(d.getSavePath());
-		}
-		
-		//TODO: warn or get root
-	}
-	
-	@Override
-	public void add(File f) {
-		datasets.add(f);
-	}
+    File saveFile = null;
 
-	@Override
-	public void remove(IAnalysisDataset d) {
-		datasets.remove(d.getSavePath());
-	}
-	
-	@Override
-	public void remove(File f) {
-		datasets.remove(f);
-	}
+    public DefaultWorkspace(File f) {
+        this.saveFile = f;
+    }
 
-	@Override
-	public Set<File> getFiles() {
-		return datasets;
-	}
+    @Override
+    public void add(IAnalysisDataset d) {
+        if (d.isRoot()) {
+            datasets.add(d.getSavePath());
+        }
 
-	@Override
-	public void setSaveFile(File f) {
-		saveFile = f;
-		
-	}
+        // TODO: warn or get root
+    }
 
-	@Override
-	public File getSaveFile() {
-		return saveFile;
-	}
-	
-	@Override
-	public void save() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	
-	
+    @Override
+    public void add(File f) {
+        datasets.add(f);
+    }
+
+    @Override
+    public void remove(IAnalysisDataset d) {
+        datasets.remove(d.getSavePath());
+    }
+
+    @Override
+    public void remove(File f) {
+        datasets.remove(f);
+    }
+
+    @Override
+    public Set<File> getFiles() {
+        return datasets;
+    }
+
+    @Override
+    public void setSaveFile(File f) {
+        saveFile = f;
+
+    }
+
+    @Override
+    public File getSaveFile() {
+        return saveFile;
+    }
+
+    @Override
+    public void save() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

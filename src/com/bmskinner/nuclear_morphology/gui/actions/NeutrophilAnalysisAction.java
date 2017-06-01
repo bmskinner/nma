@@ -115,6 +115,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 			
 			if(directory==null){
 				this.cancel();
+				return;
 			}
 
 			log("Directory: "+directory.getName());

@@ -1307,10 +1307,12 @@ public class RoundNucleus extends AbstractCellularComponent
 		
 		
 		// Check the segmented profiles
-		for(Map.Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()){
+		if(profileMap!=null){
+			for(Map.Entry<ProfileType, ISegmentedProfile> entry : profileMap.entrySet()){
 
-			result = prime * result
-					+ ((entry == null) ? 0 : entry.getValue().hashCode());
+				result = prime * result
+						+ ((entry == null) ? 0 : entry.getValue().hashCode());
+			}
 		}
 		
 		

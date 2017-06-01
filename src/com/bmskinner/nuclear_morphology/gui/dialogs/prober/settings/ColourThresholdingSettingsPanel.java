@@ -84,7 +84,7 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel  {
 	private void createSpinners(){
 		
 
-		JXMultiThumbSlider sl = new JXMultiThumbSlider();
+//		JXMultiThumbSlider sl = new JXMultiThumbSlider();
 
 		minHueSpinner  = new JSpinner(new SpinnerNumberModel(
 				Integer.valueOf(options.getInt(PreprocessingOptions.MIN_HUE)),	

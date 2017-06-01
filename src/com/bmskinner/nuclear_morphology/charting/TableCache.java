@@ -1,6 +1,6 @@
 /*******************************************************************************
  *  	Copyright (C) 2015 Ben Skinner
- *   
+ *
  *     This file is part of Nuclear Morphology Analysis.
  *
  *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
@@ -35,105 +35,113 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 
-
 public class TableCache implements Cache {
-	private Map<TableOptions, TableModel> tableMap = new HashMap<TableOptions, TableModel>();
-	
-	public TableCache(){
-		
-	}
-	
-	public synchronized void add(TableOptions options, TableModel model){
-		tableMap.put(options, model);
-	}
-	
-	public synchronized void add(ChartOptions options, JFreeChart chart){}
-	
-	
-	public TableModel get(TableOptions options){
-		return tableMap.get(options);
-	}
-	
-	public boolean has(TableOptions options){
-		return tableMap.containsKey(options);
-	}
-	
-	/**
-	 * Remove all cached charts
-	 */
-	public void purge(){
-		tableMap = new HashMap<TableOptions, TableModel>();
-	}
-	
-	/**
-	 * Remove all cached charts
-	 */
-	public void clear(){
-		this.purge();
-	}
-	
-	/**
-	 * Remove caches containing any of the given datasets.
-	 * These will be recalculated at next call
-	 * @param list
-	 */
-	public void clear(List<IAnalysisDataset> list){
-		
-		if(list==null || list.isEmpty()){
-			purge();
-			return;
-		}
-		
-		Set<DisplayOptions> toRemove = new HashSet<DisplayOptions>();
-		
-		// Find the options with the datasets
-		for(IAnalysisDataset d : list){
-			for(DisplayOptions op : tableMap.keySet()){
-				
-				if( ! op.hasDatasets()){
-					continue;
-				}
-				if(op.getDatasets().contains(d)){
-						toRemove.add(op);
-				}
-			}
-		}
-		
-		//Remove the options with the datasets
-		for(DisplayOptions op : toRemove){
-			tableMap.remove(op);
-		}
-	}
+    private Map<TableOptions, TableModel> tableMap = new HashMap<TableOptions, TableModel>();
 
-	@Override
-	public boolean has(ChartOptions options) {
-		return false;
-		
-	}
+    public TableCache() {
 
-	@Override
-	public JFreeChart get(ChartOptions options) {
-		return null;
-	}
-	
-	public synchronized void clear(ICell cell){
-		if(cell==null){
-			return;
-		}
-		
-		// Make a list of the options that need removed
-		// These are the options that contain the datasets in the list
-//		Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
+    }
 
-		Iterator<TableOptions> it = tableMap.keySet().iterator();
+    @Override
+    public synchronized void add(TableOptions options, TableModel model) {
+        tableMap.put(options, model);
+    }
 
-		while(it.hasNext()){
-			TableOptions op = it.next();
-			if(op.getCell()==cell){
+    @Override
+    public synchronized void add(ChartOptions options, JFreeChart chart) {
+    }
 
-				tableMap.remove(op);
-			}
-		}
-		
-	}
+    @Override
+    public TableModel get(TableOptions options) {
+        return tableMap.get(options);
+    }
+
+    @Override
+    public boolean has(TableOptions options) {
+        return tableMap.containsKey(options);
+    }
+
+    /**
+     * Remove all cached charts
+     */
+    @Override
+    public void purge() {
+        tableMap = new HashMap<TableOptions, TableModel>();
+    }
+
+    /**
+     * Remove all cached charts
+     */
+    @Override
+    public void clear() {
+        this.purge();
+    }
+
+    /**
+     * Remove caches containing any of the given datasets. These will be
+     * recalculated at next call
+     * 
+     * @param list
+     */
+    @Override
+    public void clear(List<IAnalysisDataset> list) {
+
+        if (list == null || list.isEmpty()) {
+            purge();
+            return;
+        }
+
+        Set<DisplayOptions> toRemove = new HashSet<DisplayOptions>();
+
+        // Find the options with the datasets
+        for (IAnalysisDataset d : list) {
+            for (DisplayOptions op : tableMap.keySet()) {
+
+                if (!op.hasDatasets()) {
+                    continue;
+                }
+                if (op.getDatasets().contains(d)) {
+                    toRemove.add(op);
+                }
+            }
+        }
+
+        // Remove the options with the datasets
+        for (DisplayOptions op : toRemove) {
+            tableMap.remove(op);
+        }
+    }
+
+    @Override
+    public boolean has(ChartOptions options) {
+        return false;
+
+    }
+
+    @Override
+    public JFreeChart get(ChartOptions options) {
+        return null;
+    }
+
+    @Override
+    public synchronized void clear(ICell cell) {
+        if (cell == null) {
+            return;
+        }
+
+        // Make a list of the options that need removed
+        // These are the options that contain the datasets in the list
+        // Set<ChartOptions> toRemove = new HashSet<ChartOptions>();
+
+        Iterator<TableOptions> it = tableMap.keySet().iterator();
+
+        while (it.hasNext()) {
+            TableOptions op = it.next();
+            if (op.getCell() == cell) {
+
+                tableMap.remove(op);
+            }
+        }
+
+    }
 }

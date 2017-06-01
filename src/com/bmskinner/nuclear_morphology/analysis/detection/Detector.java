@@ -128,10 +128,10 @@ public abstract class Detector implements Loggable {
 		  throw new IllegalArgumentException("No image to analyse");
 	  }
 	  
-	  if( Double.isNaN(this.minSize) || 
-			  Double.isNaN(this.maxSize) ||
-			  Double.isNaN(this.minCirc) ||
-			  Double.isNaN(this.maxCirc)){
+	  if( Double.isNaN(this.minSize) 
+			  || Double.isNaN(this.maxSize)
+			  || Double.isNaN(this.minCirc) 
+			  || Double.isNaN(this.maxCirc)){
 		  throw new IllegalArgumentException("Detection parameters not set");
 	  }
 	  

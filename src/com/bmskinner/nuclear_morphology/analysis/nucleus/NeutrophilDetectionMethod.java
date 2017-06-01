@@ -328,7 +328,10 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 		}
 
 		finest("Processing folder "+folder.getAbsolutePath());
-		File[] listOfFiles = folder.listFiles();
+		File[] arrOfFiles = folder.listFiles();
+		if(arrOfFiles==null){
+			return;
+		}
 
 		ICellCollection folderCollection = new DefaultCellCollection(folder, 
 				outputFolder, 
@@ -338,11 +341,9 @@ public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 		collectionMap.put(folder, folderCollection);
 
 		finest("Invoking recursive detection task");
-//		NeutrophilDetectionTask task = new NeutrophilDetectionTask(folder, listOfFiles, folderCollection, outputFolder, analysisOptions);
-//		task.addProgressListener(this);
-//		task.invoke();
 
-		for(File f : listOfFiles){
+
+		for(File f : arrOfFiles){
 			if(f.isDirectory()){
 				processFolder(f); // recurse over each folder
 			} else {

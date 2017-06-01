@@ -1,8 +1,7 @@
 package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.List;
+import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -24,9 +23,13 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
 
 	@Override
 	public Void findInFolder(File folder) throws ImageImportException, ComponentCreationException {
-		List<File> files = Arrays.asList(folder.listFiles());
+		
+		File[] arr = folder.listFiles();
+		if(arr==null){
+			return null;
+		}
 
-		files.parallelStream().forEach( f -> {
+		Stream.of(arr).parallel().forEach( f -> {
 			if( ! f.isDirectory()){
 				
 				if(ImageImporter.fileIsImportable(f)){

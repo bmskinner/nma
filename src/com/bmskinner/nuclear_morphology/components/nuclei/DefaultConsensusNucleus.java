@@ -137,25 +137,11 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 		return this.toShape();
 	}
 	
-	private synchronized void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
 		
 		in.defaultReadObject();
-		
-		// After loading, the border list has been constructed wrt to the
-		// int array, and so is offset from the 0,0 origin.
-		
-		// Reposition the border list so the CoM is at the origin,
 				
-		// Note - the CoM has been saved as 0,0. Use the original CoM for positioning
-				
-//		double  diffX = getCentreOfMass().getX() - getOriginalCentreOfMass().getX();
-//		double  diffY = getCentreOfMass().getY() - getOriginalCentreOfMass().getY();
-//		
-//		// Apply the offset to the border list
-//		this.offset(diffX, diffY);
-////		this.setCentreOfMassDirectly(IPoint.makeNew(0,0));
-		
 		this.alignVertically();
 		
 		// Check that the horizontal orientation is correct

@@ -114,6 +114,7 @@ public class NewAnalysisAction extends VoidResultAction {
 			
 			if(directory==null){
 				this.cancel();
+				return;
 			}
 
 			log("Directory: "+directory.getName());

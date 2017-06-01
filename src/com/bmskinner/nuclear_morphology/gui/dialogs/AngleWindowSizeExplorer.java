@@ -55,7 +55,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 

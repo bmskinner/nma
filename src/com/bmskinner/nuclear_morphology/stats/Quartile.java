@@ -57,7 +57,8 @@ public class Quartile extends DescriptiveStatistic {
 		  System.arraycopy(values, 0, v, 0, values.length);
 		  Arrays.sort(v);
 
-		  int n = (int) Math.round(v.length * quartile / 100);
+		  int n = Math.round(  ((float) v.length * quartile) / 100);
+//		  int n = (int) Math.round(v.length * quartile / 100);
 
 		  return v[n];
 	}
@@ -88,7 +89,7 @@ public class Quartile extends DescriptiveStatistic {
 		  System.arraycopy(values, 0, v, 0, values.length);
 		  Arrays.sort(v);
 
-		  int n = (int) Math.round(v.length * quartile / 100);
+		  int n = Math.round(  ((float) v.length * quartile) / 100);
 
 		  return v[n];
 	}

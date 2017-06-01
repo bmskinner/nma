@@ -167,7 +167,7 @@ public class TailDetector extends Detector {
 		ImagePlus binaryImage = new ImagePlus("binary image", binaryProcessor);
 //		binaryImage.show();
 		
-		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions(); 
+//		IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions(); 
 //		IMutableDetectionOptions op = new DefaultTailDetectionOptions((File)null);
 //		op.getCannyOptions().setClosingObjectRadius(5);
 //		options.setDetectionOptions(IAnalysisOptions.SPERM_TAIL, op);
@@ -378,7 +378,7 @@ public class TailDetector extends Detector {
 		SkeletonResult result = an.run(1, false, true, image, true, false);
 
 		ImageStack labelledStack = an.getLabeledSkeletons();
-		ImagePlus labelledImage = new ImagePlus("pruned image", labelledStack.getProcessor(1));
+//		ImagePlus labelledImage = new ImagePlus("pruned image", labelledStack.getProcessor(1));
 //		labelledImage.show();
 		return labelledStack;
 	}

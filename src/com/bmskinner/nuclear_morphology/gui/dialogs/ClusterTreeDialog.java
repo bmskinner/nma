@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
