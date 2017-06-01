@@ -84,10 +84,10 @@ public class Stats implements Loggable {
     }
 
     /**
-     * Calculate the variance of an array of values
+     * Calculate the variance of an array of values.
      * 
-     * @param m
-     * @return
+     * @param m the array
+     * @return the variance
      */
     public static double variance(double[] m) {
         if (m == null || m.length == 0) {
@@ -99,8 +99,9 @@ public class Stats implements Loggable {
         }
         double mean = DoubleStream.of(m).average().orElse(0);
         double temp = 0;
-        for (double d : m)
+        for (double d : m){
             temp += Math.pow(mean - d, 2);
+        }
         return temp / m.length;
     }
 

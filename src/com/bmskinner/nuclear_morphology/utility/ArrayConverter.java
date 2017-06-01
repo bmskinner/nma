@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
+ *      Copyright (C) 2016 Ben Skinner
  *   
  *     This file is part of Nuclear Morphology Analysis.
  *
@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This utility class handles conversions of arrays from primitives to Objects
+ * This utility class handles conversions of arrays from primitives to Objects.
  * 
  * @author bms41
  *
@@ -33,6 +33,10 @@ public class ArrayConverter {
 
     List<Object> data = new ArrayList<Object>();
 
+    /**
+     * Create with an int array.
+     * @param d the int array
+     */
     public ArrayConverter(int[] d) {
 
         for (Object o : d) {
@@ -41,6 +45,10 @@ public class ArrayConverter {
 
     }
 
+    /**
+     * Create with a float array.
+     * @param d the float array
+     */
     public ArrayConverter(float[] d) {
 
         for (float o : d) {
@@ -49,6 +57,10 @@ public class ArrayConverter {
 
     }
 
+    /**
+     * Create with an Integer array.
+     * @param d the array
+     */
     public ArrayConverter(Integer[] d) {
 
         for (Object o : d) {
@@ -56,6 +68,10 @@ public class ArrayConverter {
         }
     }
 
+    /**
+     * Create with a Double array.
+     * @param d the array
+     */
     public ArrayConverter(Double[] d) {
 
         for (Object o : d) {
@@ -63,6 +79,10 @@ public class ArrayConverter {
         }
     }
 
+    /**
+     * Create with a double array.
+     * @param d the array
+     */
     public ArrayConverter(double[] d) {
 
         for (Object o : d) {
@@ -70,6 +90,10 @@ public class ArrayConverter {
         }
     }
 
+    /**
+     * Create with an arbitrary collection.
+     * @param d the collection
+     */
     public ArrayConverter(Collection<? extends Object> d) {
 
         for (Object o : d) {
@@ -79,9 +103,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a Double[]
+     * Convert the given data to a Double[].
      * 
-     * @return
+     * @return a Double array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -110,9 +134,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a double[]
+     * Convert the given data to a double[].
      * 
-     * @return
+     * @return a double array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -140,9 +164,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a String[]
+     * Convert the given data to a String[].
      * 
-     * @return
+     * @return a String array
      */
     public String[] toStringArray() {
 
@@ -156,9 +180,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a Integer[]
+     * Convert the given data to a Integer[].
      * 
-     * @return
+     * @return an Integer array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -187,9 +211,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a int[]
+     * Convert the given data to a int[].
      * 
-     * @return
+     * @return an int array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -217,9 +241,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a Float[]
+     * Convert the given data to a Float[].
      * 
-     * @return
+     * @return a Float array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -248,9 +272,9 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the given data to a float[]
+     * Convert the given data to a float[].
      * 
-     * @return
+     * @return a float array
      * @throws ArrayConversionException
      *             if the data are not Numbers
      */
@@ -276,6 +300,11 @@ public class ArrayConverter {
         }
     }
 
+    /**
+     * Return as a list of Doubles.
+     * @return a Double list
+     * @throws ArrayConversionException if the conversion fails
+     */
     public List<Double> toDoubleList() throws ArrayConversionException {
 
         List<Double> result = new ArrayList<Double>();
@@ -289,6 +318,11 @@ public class ArrayConverter {
 
     }
 
+    /**
+     * Return as a list.
+     * @return an Integer list
+     * @throws ArrayConversionException  if the conversion fails
+     */
     public List<Integer> toIntegerList() throws ArrayConversionException {
 
         List<Integer> result = new ArrayList<Integer>();
@@ -303,20 +337,20 @@ public class ArrayConverter {
     }
 
     /**
-     * Convert the data in this converter to a tab delimited string
+     * Convert the data in this converter to a tab delimited string.
      * 
-     * @return
+     * @return a tab delimited string
      */
     public String toString() {
         return toString("\t");
     }
 
     /**
-     * Convert the data in this converter to a delimited string
+     * Convert the data in this converter to a delimited string.
      * 
      * @param delimiter
      *            the separator between values
-     * @return
+     * @return a delimited string
      */
     public String toString(String delimiter) {
         StringBuilder b = new StringBuilder();

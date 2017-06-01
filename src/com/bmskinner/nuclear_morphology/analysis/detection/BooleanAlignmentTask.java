@@ -13,11 +13,12 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 
     final BooleanAligner     aligner;
     final Mask               reference;
-    final int                low, high;
+    final int                low , high;
     final Nucleus[]          nuclei;
     private static final int THRESHOLD = 30;
 
-    protected BooleanAlignmentTask(Mask reference, Nucleus[] nuclei, int low, int high) throws Exception {
+    protected BooleanAlignmentTask(Mask reference, Nucleus[] nuclei, int low, int high) 
+            throws Exception {
 
         this.reference = reference;
         this.low = low;
@@ -31,14 +32,14 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
     }
 
     protected void compute() {
-        if (high - low < THRESHOLD)
+        if (high - low < THRESHOLD){
             try {
                 processNuclei();
             } catch (Exception e) {
                 warn("Error processing nuclei");
                 stack("Error processing nuclei", e);
             }
-        else {
+        } else {
             int mid = (low + high) >>> 1;
 
             List<BooleanAlignmentTask> tasks = new ArrayList<BooleanAlignmentTask>();
@@ -65,7 +66,7 @@ public class BooleanAlignmentTask extends AbstractProgressAction {
 
     /**
      * From the calculated median profile segments, assign segments to each
-     * nucleus based on the best offset fit of the start and end indexes
+     * nucleus based on the best offset fit of the start and end indexes.
      */
     private void processNuclei() throws Exception {
 
