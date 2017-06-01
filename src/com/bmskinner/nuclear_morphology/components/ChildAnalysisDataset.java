@@ -34,300 +34,307 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
- * This is the virtual child dataset, which retains only the pointer
- * to its parent, a list of the ICell IDs it contains, and stats / profile
- * caches.
+ * This is the virtual child dataset, which retains only the pointer to its
+ * parent, a list of the ICell IDs it contains, and stats / profile caches.
+ * 
  * @author ben
  * @since 1.13.3
  */
 public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
-	private static final long serialVersionUID = 1L;
-	
-	private IAnalysisDataset parent;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Construct from a parent dataset (of which this will be a child) and a cell collection
-	 * @param parent
-	 * @param collection
-	 */
-	public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection){
-		super(collection);
-		this.parent = parent;
-	}
+    private IAnalysisDataset parent;
 
-	@Override
-	public IAnalysisDataset duplicate() throws Exception {
-		
-		throw new Exception("Not yet implemented");
-	}
+    /**
+     * Construct from a parent dataset (of which this will be a child) and a
+     * cell collection
+     * 
+     * @param parent
+     * @param collection
+     */
+    public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection) {
+        super(collection);
+        this.parent = parent;
+    }
 
-	@Override
-	public Handler getLogHandler() throws Exception {
-		return parent.getLogHandler();
-	}
+    @Override
+    public IAnalysisDataset duplicate() throws Exception {
 
-	@Override
-	public void addChildCollection(ICellCollection collection) {
-		if(collection==null){
-			throw new IllegalArgumentException("Nucleus collection is null");
-		}
+        throw new Exception("Not yet implemented");
+    }
 
-		IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
-		this.childDatasets.add( childDataset );
-		
-	}
+    @Override
+    public Handler getLogHandler() throws Exception {
+        return parent.getLogHandler();
+    }
 
-	@Override
-	public void addChildDataset(IAnalysisDataset dataset) {
-		childDatasets.add(dataset);
-		
-	}
+    @Override
+    public void addChildCollection(ICellCollection collection) {
+        if (collection == null) {
+            throw new IllegalArgumentException("Nucleus collection is null");
+        }
 
-	@Override
-	public File getSavePath() {
-		return parent.getSavePath();
-	}
+        IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
+        this.childDatasets.add(childDataset);
 
-	@Override
-	public void setSavePath(File file) {}
+    }
 
-	@Override
-	public File getDebugFile() {
-		return parent.getDebugFile();
-	}
+    @Override
+    public void addChildDataset(IAnalysisDataset dataset) {
+        childDatasets.add(dataset);
 
-	@Override
-	public void setDebugFile(File f) {}
+    }
 
-	@Override
-	public Set<UUID> getChildUUIDs() {
-		Set<UUID> result = new HashSet<UUID>(childDatasets.size());
-		for(IAnalysisDataset c : childDatasets){
-			result.add(c.getUUID());
-		}
-		
-		return result;
-	}
+    @Override
+    public File getSavePath() {
+        return parent.getSavePath();
+    }
 
-	@Override
-	public Set<UUID> getAllChildUUIDs() {
-		Set<UUID> result = new HashSet<UUID>();
-		
-		Set<UUID> idlist = getChildUUIDs();
-		result.addAll(idlist);
-		
-		for(UUID id : idlist){
-			IAnalysisDataset d = getChildDataset(id);
-			
-			result.addAll(d.getAllChildUUIDs());
-		}
-		return result;
-	}
+    @Override
+    public void setSavePath(File file) {
+    }
 
-	@Override
-	public IAnalysisDataset getChildDataset(UUID id) {
-		if(this.hasChild(id)){
-			
-			for(IAnalysisDataset c : childDatasets){
-				if(c.getUUID().equals(id)){
-					return c;
-				}
-			}
-			
-		} else {
-			for(IAnalysisDataset child : this.getAllChildDatasets()){
-				if(child.getUUID().equals(id)){
-					return child;
-				}
-			}
-		}
-		return null;
-	}
+    @Override
+    public File getDebugFile() {
+        return parent.getDebugFile();
+    }
 
-	@Override
-	public IAnalysisDataset getMergeSource(UUID id) {
-		return null;
-	}
+    @Override
+    public void setDebugFile(File f) {
+    }
 
-	@Override
-	public Set<IAnalysisDataset> getAllMergeSources() {
-		return new HashSet<IAnalysisDataset>(0);
-	}
+    @Override
+    public Set<UUID> getChildUUIDs() {
+        Set<UUID> result = new HashSet<UUID>(childDatasets.size());
+        for (IAnalysisDataset c : childDatasets) {
+            result.add(c.getUUID());
+        }
 
-	@Override
-	public void addMergeSource(IAnalysisDataset dataset) {}
+        return result;
+    }
 
-	@Override
-	public Set<IAnalysisDataset> getMergeSources() {
-		return new HashSet<IAnalysisDataset>(0);
-	}
+    @Override
+    public Set<UUID> getAllChildUUIDs() {
+        Set<UUID> result = new HashSet<UUID>();
 
-	@Override
-	public Set<UUID> getMergeSourceIDs() {
-		return new HashSet<UUID>(0);
-	}
+        Set<UUID> idlist = getChildUUIDs();
+        result.addAll(idlist);
 
-	@Override
-	public Set<UUID> getAllMergeSourceIDs() {
-		return new HashSet<UUID>(0);
-	}
+        for (UUID id : idlist) {
+            IAnalysisDataset d = getChildDataset(id);
 
-	@Override
-	public boolean hasMergeSource(UUID id) {
-		return false;
-	}
+            result.addAll(d.getAllChildUUIDs());
+        }
+        return result;
+    }
 
-	@Override
-	public boolean hasMergeSource(IAnalysisDataset dataset) {
-		return false;
-	}
+    @Override
+    public IAnalysisDataset getChildDataset(UUID id) {
+        if (this.hasChild(id)) {
 
-	@Override
-	public boolean hasMergeSources() {
-		return false;
-	}
+            for (IAnalysisDataset c : childDatasets) {
+                if (c.getUUID().equals(id)) {
+                    return c;
+                }
+            }
 
-	@Override
-	public int getChildCount() {
-		return childDatasets.size();
-	}
+        } else {
+            for (IAnalysisDataset child : this.getAllChildDatasets()) {
+                if (child.getUUID().equals(id)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public boolean hasChildren() {
-		return !childDatasets.isEmpty();
-	}
+    @Override
+    public IAnalysisDataset getMergeSource(UUID id) {
+        return null;
+    }
 
-	@Override
-	public Collection<IAnalysisDataset> getChildDatasets() {
-		return childDatasets;
-	}
+    @Override
+    public Set<IAnalysisDataset> getAllMergeSources() {
+        return new HashSet<IAnalysisDataset>(0);
+    }
 
-	@Override
-	public List<IAnalysisDataset> getAllChildDatasets() {
-		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
-		
-//		log(this.getName());
-//	    log("Has children: "+this.hasChildren());
-		
-		if( ! childDatasets.isEmpty()){
-			
-			for(IAnalysisDataset d : childDatasets){
-				result.add(d);
-				result.addAll(d.getAllChildDatasets());
-			}
-		}		
-		return result;
-	}
+    @Override
+    public void addMergeSource(IAnalysisDataset dataset) {
+    }
 
-	@Override
-	public ICellCollection getCollection() {
-		return cellCollection;
-	}
+    @Override
+    public Set<IAnalysisDataset> getMergeSources() {
+        return new HashSet<IAnalysisDataset>(0);
+    }
 
-	@Override
-	public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
-		return parent.getAnalysisOptions();
-	}
+    @Override
+    public Set<UUID> getMergeSourceIDs() {
+        return new HashSet<UUID>(0);
+    }
 
-	@Override
-	public boolean hasAnalysisOptions() {
-		return parent.hasAnalysisOptions();
-	}
+    @Override
+    public Set<UUID> getAllMergeSourceIDs() {
+        return new HashSet<UUID>(0);
+    }
 
-	@Override
-	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {}
+    @Override
+    public boolean hasMergeSource(UUID id) {
+        return false;
+    }
 
-	@Override
-	public void refreshClusterGroups() {
-		if(this.hasClusters()){
-			// Find the groups that need removing
-			List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
-			for(IClusterGroup g : this.getClusterGroups()){
-				boolean clusterRemains = false;
+    @Override
+    public boolean hasMergeSource(IAnalysisDataset dataset) {
+        return false;
+    }
 
-				for(UUID childID : g.getUUIDs()){
-					if(this.hasChild(childID)){
-						clusterRemains = true;
-					}
-				}
-				if(!clusterRemains){
-					groupsToDelete.add(g);
-				}
-			}
+    @Override
+    public boolean hasMergeSources() {
+        return false;
+    }
 
-			// Remove the groups
-			for(IClusterGroup g : groupsToDelete){
-				this.deleteClusterGroup(g);
-			}
+    @Override
+    public int getChildCount() {
+        return childDatasets.size();
+    }
 
+    @Override
+    public boolean hasChildren() {
+        return !childDatasets.isEmpty();
+    }
 
-		}
+    @Override
+    public Collection<IAnalysisDataset> getChildDatasets() {
+        return childDatasets;
+    }
 
-	}
+    @Override
+    public List<IAnalysisDataset> getAllChildDatasets() {
+        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
 
-	@Override
-	public boolean isRoot() {
-		return false;
-	}
+        // log(this.getName());
+        // log("Has children: "+this.hasChildren());
 
-	@Override
-	public void setRoot(boolean b) {}
+        if (!childDatasets.isEmpty()) {
 
-	@Override
-	public void deleteChild(UUID id) {
-		Iterator<IAnalysisDataset> it = childDatasets.iterator();
+            for (IAnalysisDataset d : childDatasets) {
+                result.add(d);
+                result.addAll(d.getAllChildDatasets());
+            }
+        }
+        return result;
+    }
 
-		while (it.hasNext()){
-			IAnalysisDataset child = it.next();
+    @Override
+    public ICellCollection getCollection() {
+        return cellCollection;
+    }
 
-			if(child.getUUID().equals(id)){
-				for(IClusterGroup g : clusterGroups){
-					if(g.hasDataset(id)){
-						g.removeDataset(id);
-					}
-				}				
-				it.remove();
-				break;
-			}
-		}		
-	}
+    @Override
+    public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
+        return parent.getAnalysisOptions();
+    }
 
-	@Override
-	public void deleteClusterGroup(IClusterGroup group) {
-		if(hasClusterGroup(group)){
+    @Override
+    public boolean hasAnalysisOptions() {
+        return parent.hasAnalysisOptions();
+    }
 
-			for(UUID id : group.getUUIDs()){
-				if(hasChild(id)){
-					this.deleteChild(id);
-				}
-			}
-			this.clusterGroups.remove(group);
-		}
-	}
+    @Override
+    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    }
 
-	@Override
-	public void deleteMergeSource(UUID id) {}
+    @Override
+    public void refreshClusterGroups() {
+        if (this.hasClusters()) {
+            // Find the groups that need removing
+            List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+            for (IClusterGroup g : this.getClusterGroups()) {
+                boolean clusterRemains = false;
 
-	@Override
-	public boolean hasChild(UUID id) {
-		
-		for(IAnalysisDataset child : childDatasets){
-			if(child.getUUID().equals(id)){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	@Override
-	public void updateSourceImageDirectory(File expectedImageDirectory) {
-		parent.updateSourceImageDirectory(expectedImageDirectory);
-		
-	}
-	
-	public String toString(){
-		return this.cellCollection.getName();
-	}
+                for (UUID childID : g.getUUIDs()) {
+                    if (this.hasChild(childID)) {
+                        clusterRemains = true;
+                    }
+                }
+                if (!clusterRemains) {
+                    groupsToDelete.add(g);
+                }
+            }
+
+            // Remove the groups
+            for (IClusterGroup g : groupsToDelete) {
+                this.deleteClusterGroup(g);
+            }
+
+        }
+
+    }
+
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
+    public void setRoot(boolean b) {
+    }
+
+    @Override
+    public void deleteChild(UUID id) {
+        Iterator<IAnalysisDataset> it = childDatasets.iterator();
+
+        while (it.hasNext()) {
+            IAnalysisDataset child = it.next();
+
+            if (child.getUUID().equals(id)) {
+                for (IClusterGroup g : clusterGroups) {
+                    if (g.hasDataset(id)) {
+                        g.removeDataset(id);
+                    }
+                }
+                it.remove();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void deleteClusterGroup(IClusterGroup group) {
+        if (hasClusterGroup(group)) {
+
+            for (UUID id : group.getUUIDs()) {
+                if (hasChild(id)) {
+                    this.deleteChild(id);
+                }
+            }
+            this.clusterGroups.remove(group);
+        }
+    }
+
+    @Override
+    public void deleteMergeSource(UUID id) {
+    }
+
+    @Override
+    public boolean hasChild(UUID id) {
+
+        for (IAnalysisDataset child : childDatasets) {
+            if (child.getUUID().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void updateSourceImageDirectory(File expectedImageDirectory) {
+        parent.updateSourceImageDirectory(expectedImageDirectory);
+
+    }
+
+    public String toString() {
+        return this.cellCollection.getName();
+    }
 
 }

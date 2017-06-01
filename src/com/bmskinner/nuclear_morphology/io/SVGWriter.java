@@ -33,70 +33,71 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Write a component to svg format. 
+ * Write a component to svg format.
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 public class SVGWriter implements Exporter, Loggable {
-	
-	private File file;
-	
-	/**
-	 * Create with a destination file
-	 * @param f
-	 */
-	public SVGWriter(File f){
-		
-		if(f==null){
-			throw new IllegalArgumentException("File cannot be null");
-		}
-		file = f;
-	}
-	
 
-	/**
-	 * Export the given component outline to file
-	 * @param c
-	 */
-	public void export(CellularComponent c){
+    private File file;
 
-		if(c==null){
-			throw new IllegalArgumentException("Component cannot be null");
-		}
+    /**
+     * Create with a destination file
+     * 
+     * @param f
+     */
+    public SVGWriter(File f) {
 
-		Shape s = c.toShape();
+        if (f == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        file = f;
+    }
 
-		// Flip vertically because awt graphics count y from top to bottom
-		AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-		s = at.createTransformedShape(s);
+    /**
+     * Export the given component outline to file
+     * 
+     * @param c
+     */
+    public void export(CellularComponent c) {
 
-		// Make a canvas of the correct size
-		Rectangle2D r = s.getBounds();
-		SVGGraphics2D g2 = new SVGGraphics2D( (int) r.getWidth(), (int) r.getHeight());
+        if (c == null) {
+            throw new IllegalArgumentException("Component cannot be null");
+        }
 
-		// Centre the shape on the canvas
-		double minX = r.getMinX();
-		double minY = r.getMinY();
-		at = AffineTransform.getTranslateInstance(-minX, -minY);
+        Shape s = c.toShape();
 
-		//Draw the shape	
-		g2.setPaint(Color.BLACK);
-		g2.setTransform(at);
-		g2.draw(s);
+        // Flip vertically because awt graphics count y from top to bottom
+        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
+        s = at.createTransformedShape(s);
 
-		String svgElement = g2.getSVGElement();
+        // Make a canvas of the correct size
+        Rectangle2D r = s.getBounds();
+        SVGGraphics2D g2 = new SVGGraphics2D((int) r.getWidth(), (int) r.getHeight());
 
-		try (PrintWriter out = new PrintWriter(file)){
+        // Centre the shape on the canvas
+        double minX = r.getMinX();
+        double minY = r.getMinY();
+        at = AffineTransform.getTranslateInstance(-minX, -minY);
 
-			out.println(svgElement);
-			log("SVG exported to "+file.getAbsolutePath());
+        // Draw the shape
+        g2.setPaint(Color.BLACK);
+        g2.setTransform(at);
+        g2.draw(s);
 
-		} catch (FileNotFoundException e) {
-			warn("File not found");
-			stack(e);
-		}
-	}
+        String svgElement = g2.getSVGElement();
 
+        try (PrintWriter out = new PrintWriter(file)) {
+
+            out.println(svgElement);
+            log("SVG exported to " + file.getAbsolutePath());
+
+        } catch (FileNotFoundException e) {
+            warn("File not found");
+            stack(e);
+        }
+    }
 
 }

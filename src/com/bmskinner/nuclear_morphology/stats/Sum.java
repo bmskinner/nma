@@ -23,47 +23,46 @@ import java.util.List;
 
 @SuppressWarnings("serial")
 public class Sum extends DescriptiveStatistic {
-	
-	public Sum(int[] array){
-		int c = 0;
-		for(int i : array){
-			c+=i;
-		}
-		value = c;
-	}
-	
-	
-	public Sum(double[] array){
-		double c = 0;
-		for(double i : array){
-			c+=i;
-		}
-		value = c;
-	}
-	
-	public Sum(float[] array){
-		float c = 0;
-		for(float i : array){
-			c+=i;
-		}
-		value = c;
-	}
-	
-	public Sum(long[] array){
-		long c = 0;
-		for(long i : array){
-			c+=i;
-		}
-		value = c;
-	}
-	
-	public Sum(List<? extends Number> list){
-		
-		Double d = 0d;
-		for(Number n : list){
-			d +=n.doubleValue();
-		}
-		value = d;
-	}
+
+    public Sum(int[] array) {
+        int c = 0;
+        for (int i : array) {
+            c += i;
+        }
+        value = c;
+    }
+
+    public Sum(double[] array) {
+        double c = 0;
+        for (double i : array) {
+            c += i;
+        }
+        value = c;
+    }
+
+    public Sum(float[] array) {
+        float c = 0;
+        for (float i : array) {
+            c += i;
+        }
+        value = c;
+    }
+
+    public Sum(long[] array) {
+        long c = 0;
+        for (long i : array) {
+            c += i;
+        }
+        value = c;
+    }
+
+    public Sum(List<? extends Number> list) {
+
+        Double d = 0d;
+        for (Number n : list) {
+            d += n.doubleValue();
+        }
+        value = d;
+    }
 
 }

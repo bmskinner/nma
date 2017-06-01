@@ -19,12 +19,13 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 /**
- * Signal change listeners allow signal colour changes to be 
- * propagated between tab panels.
+ * Signal change listeners allow signal colour changes to be propagated between
+ * tab panels.
+ * 
  * @author ben
  *
  */
 public interface SignalChangeListener {
 
-	void signalChangeReceived(SignalChangeEvent event);
+    void signalChangeReceived(SignalChangeEvent event);
 }

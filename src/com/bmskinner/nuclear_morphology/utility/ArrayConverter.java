@@ -24,300 +24,326 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This utility class handles conversions of arrays from
- * primitives to Objects
+ * This utility class handles conversions of arrays from primitives to Objects
+ * 
  * @author bms41
  *
  */
 public class ArrayConverter {
-	
-	List<Object> data = new ArrayList<Object>();
-	
-	public ArrayConverter(int[] d){
-		
-		for(Object o : d){
-			data.add(o);
-		}
-		
-	}
-	
-	public ArrayConverter(float[] d){
 
-		for(float o : d){
-			data.add(o);
-		}
+    List<Object> data = new ArrayList<Object>();
 
-	}
-	
-	public ArrayConverter(Integer[] d){
+    public ArrayConverter(int[] d) {
 
-		for(Object o : d){
-			data.add(o);
-		}
-	}
+        for (Object o : d) {
+            data.add(o);
+        }
 
-	public ArrayConverter(Double[] d){
+    }
 
-		for(Object o : d){
-			data.add(o);
-		}
-	}
+    public ArrayConverter(float[] d) {
 
-	public ArrayConverter(double[] d){
+        for (float o : d) {
+            data.add(o);
+        }
 
-		for(Object o : d){
-			data.add(o);
-		}
-	}
+    }
 
-	public ArrayConverter(Collection<? extends Object> d){
-		
-		for(Object o : d){
-			data.add(o);
-		}
-		
-	}
-	
-	/**
-	 * Convert the given data to a Double[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public Double[] toDoubleObjectArray() throws ArrayConversionException {
-		
-		if(data.isEmpty()){
-			return new Double[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			Double[] result = new Double[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).doubleValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-		
-	}
-	
-	/**
-	 * Convert the given data to a double[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public double[] toDoubleArray() throws ArrayConversionException {
-		
-		if(data.isEmpty()){
-			return new double[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			double[] result = new double[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).doubleValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-	}
-	
-	/**
-	 * Convert the given data to a String[]
-	 * @return
-	 */
-	public String[] toStringArray() {
+    public ArrayConverter(Integer[] d) {
 
-		String[] result = new String[data.size()];
+        for (Object o : d) {
+            data.add(o);
+        }
+    }
 
-		for(int i=0; i<data.size(); i++){
-			result[i] = data.get(i).toString();
-		}
-		return result;
+    public ArrayConverter(Double[] d) {
 
-	}
+        for (Object o : d) {
+            data.add(o);
+        }
+    }
 
-	
-	/**
-	 * Convert the given data to a Integer[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public Integer[] toIntegerObjectArray() throws ArrayConversionException {
-		
-		if(data.isEmpty()){
-			return new Integer[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			Integer[] result = new Integer[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).intValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-		
-	}
-	
-	/**
-	 * Convert the given data to a int[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public int[] toIntArray() throws ArrayConversionException {
-		
-		if(data.isEmpty()){
-			return new int[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			int[] result = new int[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).intValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-	}
-	
-	/**
-	 * Convert the given data to a Float[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public Float[] toFloatObjectArray() throws ArrayConversionException {
-		
-		if(data.isEmpty()){
-			return new Float[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			Float[] result = new Float[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).floatValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-		
-	}
-	
-	/**
-	 * Convert the given data to a float[]
-	 * @return
-	 * @throws ArrayConversionException if the data are not Numbers
-	 */
-	public float[] toFloatArray() throws ArrayConversionException {
-		if(data.isEmpty()){
-			return new float[0];
-//			throw new ArrayConversionException("Cannot convert empty list");
-		}
-		
-		Object first = data.get(0);
-		
-		if(first instanceof Number){
-			
-			float[] result = new float[data.size()];
-			
-			for(int i=0; i<data.size(); i++){
-				result[i] = ( (Number) data.get(i)).floatValue();
-			}
-			return result;
-			
-		} else {
-			throw new ArrayConversionException("Data is not a number");
-		}
-	}
-	
-	public List<Double> toDoubleList() throws ArrayConversionException{
-		
-		List<Double> result = new ArrayList<Double>();
-		
-		Double[] arr = this.toDoubleObjectArray();
-		
-		for(Double d : arr){
-			result.add(d);
-		}
-		return result;
-		
-	}
+    public ArrayConverter(double[] d) {
 
-	public List<Integer> toIntegerList() throws ArrayConversionException{
-		
-		List<Integer> result = new ArrayList<Integer>();
-		
-		Integer[] arr = this.toIntegerObjectArray();
-		
-		for(Integer d : arr){
-			result.add(d);
-		}
-		return result;
-		
-	}
-	
-	/**
-	 * Convert the data in this converter to a tab delimited string
-	 * @return
-	 */
-	public String toString(){
-		return toString("\t");
-	}
-	
-	/**
-	 * Convert the data in this converter to a delimited string
-	 * @param delimiter the separator between values
-	 * @return
-	 */
-	public String toString(String delimiter){
-		StringBuilder b = new StringBuilder();
-		for(Object o : data){
-			b.append(o.toString()+delimiter);
-		}
-		return b.toString();
-	}
+        for (Object o : d) {
+            data.add(o);
+        }
+    }
 
-	 @SuppressWarnings("serial")
-	 public class ArrayConversionException extends Exception {
+    public ArrayConverter(Collection<? extends Object> d) {
 
-		 public ArrayConversionException() { super(); }
-		 public ArrayConversionException(String message) { super(message); }
-		 public ArrayConversionException(String message, Throwable cause) { super(message, cause); }
-		 public ArrayConversionException(Throwable cause) { super(cause); }
-	 }
+        for (Object o : d) {
+            data.add(o);
+        }
+
+    }
+
+    /**
+     * Convert the given data to a Double[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public Double[] toDoubleObjectArray() throws ArrayConversionException {
+
+        if (data.isEmpty()) {
+            return new Double[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            Double[] result = new Double[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).doubleValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+
+    }
+
+    /**
+     * Convert the given data to a double[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public double[] toDoubleArray() throws ArrayConversionException {
+
+        if (data.isEmpty()) {
+            return new double[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            double[] result = new double[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).doubleValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+    }
+
+    /**
+     * Convert the given data to a String[]
+     * 
+     * @return
+     */
+    public String[] toStringArray() {
+
+        String[] result = new String[data.size()];
+
+        for (int i = 0; i < data.size(); i++) {
+            result[i] = data.get(i).toString();
+        }
+        return result;
+
+    }
+
+    /**
+     * Convert the given data to a Integer[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public Integer[] toIntegerObjectArray() throws ArrayConversionException {
+
+        if (data.isEmpty()) {
+            return new Integer[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            Integer[] result = new Integer[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).intValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+
+    }
+
+    /**
+     * Convert the given data to a int[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public int[] toIntArray() throws ArrayConversionException {
+
+        if (data.isEmpty()) {
+            return new int[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            int[] result = new int[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).intValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+    }
+
+    /**
+     * Convert the given data to a Float[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public Float[] toFloatObjectArray() throws ArrayConversionException {
+
+        if (data.isEmpty()) {
+            return new Float[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            Float[] result = new Float[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).floatValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+
+    }
+
+    /**
+     * Convert the given data to a float[]
+     * 
+     * @return
+     * @throws ArrayConversionException
+     *             if the data are not Numbers
+     */
+    public float[] toFloatArray() throws ArrayConversionException {
+        if (data.isEmpty()) {
+            return new float[0];
+            // throw new ArrayConversionException("Cannot convert empty list");
+        }
+
+        Object first = data.get(0);
+
+        if (first instanceof Number) {
+
+            float[] result = new float[data.size()];
+
+            for (int i = 0; i < data.size(); i++) {
+                result[i] = ((Number) data.get(i)).floatValue();
+            }
+            return result;
+
+        } else {
+            throw new ArrayConversionException("Data is not a number");
+        }
+    }
+
+    public List<Double> toDoubleList() throws ArrayConversionException {
+
+        List<Double> result = new ArrayList<Double>();
+
+        Double[] arr = this.toDoubleObjectArray();
+
+        for (Double d : arr) {
+            result.add(d);
+        }
+        return result;
+
+    }
+
+    public List<Integer> toIntegerList() throws ArrayConversionException {
+
+        List<Integer> result = new ArrayList<Integer>();
+
+        Integer[] arr = this.toIntegerObjectArray();
+
+        for (Integer d : arr) {
+            result.add(d);
+        }
+        return result;
+
+    }
+
+    /**
+     * Convert the data in this converter to a tab delimited string
+     * 
+     * @return
+     */
+    public String toString() {
+        return toString("\t");
+    }
+
+    /**
+     * Convert the data in this converter to a delimited string
+     * 
+     * @param delimiter
+     *            the separator between values
+     * @return
+     */
+    public String toString(String delimiter) {
+        StringBuilder b = new StringBuilder();
+        for (Object o : data) {
+            b.append(o.toString() + delimiter);
+        }
+        return b.toString();
+    }
+
+    @SuppressWarnings("serial")
+    public class ArrayConversionException extends Exception {
+
+        public ArrayConversionException() {
+            super();
+        }
+
+        public ArrayConversionException(String message) {
+            super(message);
+        }
+
+        public ArrayConversionException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ArrayConversionException(Throwable cause) {
+            super(cause);
+        }
+    }
 
 }

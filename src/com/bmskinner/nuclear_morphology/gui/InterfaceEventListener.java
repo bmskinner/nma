@@ -19,13 +19,14 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 /**
- * Allows the implementing class to respond to interface events. These
- * control the look of the charts without relating to any specific datasets.
+ * Allows the implementing class to respond to interface events. These control
+ * the look of the charts without relating to any specific datasets.
+ * 
  * @author ben
  *
  */
 public interface InterfaceEventListener {
-	
-	void interfaceEventReceived(InterfaceEvent event);
-		
+
+    void interfaceEventReceived(InterfaceEvent event);
+
 }

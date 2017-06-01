@@ -29,47 +29,47 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * The default implementation of ICytoplasm.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public class DefaultCytoplasm 
-	extends DefaultCellularComponent 
-	implements ICytoplasm {
+public class DefaultCytoplasm extends DefaultCellularComponent implements ICytoplasm {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Construct with an ROI, a source image and channel, and the original position in the source image
-	 * @param roi
-	 * @param f
-	 * @param channel
-	 * @param position
-	 * @param centreOfMass
-	 */
-	public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
-		super(roi, centreOfMass, f, channel, position  );
-	}
-		
-	protected DefaultCytoplasm(ICytoplasm n) {
-		super( n);
-	}
-	
-	@Override
-	public ICytoplasm duplicate(){
-		return new DefaultCytoplasm(this);
-	}
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image
+     * 
+     * @param roi
+     * @param f
+     * @param channel
+     * @param position
+     * @param centreOfMass
+     */
+    public DefaultCytoplasm(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
+        super(roi, centreOfMass, f, channel, position);
+    }
 
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-		
-	}
+    protected DefaultCytoplasm(ICytoplasm n) {
+        super(n);
+    }
 
-	@Override
-	public int compareTo(ICytoplasm o) {
-		return 0;
-	}
-	
-	
+    @Override
+    public ICytoplasm duplicate() {
+        return new DefaultCytoplasm(this);
+    }
+
+    @Override
+    public void alignVertically() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public int compareTo(ICytoplasm o) {
+        return 0;
+    }
+
 }

@@ -21,13 +21,12 @@ package com.bmskinner.nuclear_morphology.gui;
 
 import java.util.EventObject;
 
-
 @SuppressWarnings("serial")
 public class ChartSetEvent extends EventObject {
-	
-	public ChartSetEvent(Object source){
-		super(source); 
 
-	}
+    public ChartSetEvent(Object source) {
+        super(source);
+
+    }
 
 }

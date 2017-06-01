@@ -12,60 +12,63 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Load a workspace
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class WorkspaceImporter implements Loggable, Importer {
-	
-	private final File file;
-	public final String CHARSET = "ISO-8859-1";
-	
-	/**
-	 * Construct with a file to import. 
-	 * @param f the file
-	 * @throws IllegalArgumentException if the file is null, a folder, or otherwise not a valid file
-	 */
-	public WorkspaceImporter(final File f){
-		if( ! Importer.isSuitableImportFile(f)){
-			throw new IllegalArgumentException(INVALID_FILE_ERROR);
-		}
 
-		file = f;
-	}
-	
-	/**
-	 * Import the workspace described by this importer.
-	 * @return a workspace
-	 */
-	public IWorkspace importWorkspace(){
-		
-		IWorkspace w = new DefaultWorkspace(file);
-		try {
-			
-			FileInputStream fstream = new FileInputStream(file);
-			BufferedReader br = new BufferedReader(
-					new InputStreamReader(fstream, Charset.forName(CHARSET)));
+    private final File  file;
+    public final String CHARSET = "ISO-8859-1";
 
-			int i = 0;
-			String strLine;
-			while (( strLine = br.readLine()) != null) {
-				i++; 
-				
-				File f = new File(strLine);
-				
-				if(f.exists()){
-					w.add(f);
-				}
+    /**
+     * Construct with a file to import.
+     * 
+     * @param f
+     *            the file
+     * @throws IllegalArgumentException
+     *             if the file is null, a folder, or otherwise not a valid file
+     */
+    public WorkspaceImporter(final File f) {
+        if (!Importer.isSuitableImportFile(f)) {
+            throw new IllegalArgumentException(INVALID_FILE_ERROR);
+        }
 
-			}
-			fstream.close();
-		}
-		catch (Exception e) {
-			error("Error parsing workspace file", e);
-		}
-		
-		return w;
-	}
+        file = f;
+    }
+
+    /**
+     * Import the workspace described by this importer.
+     * 
+     * @return a workspace
+     */
+    public IWorkspace importWorkspace() {
+
+        IWorkspace w = new DefaultWorkspace(file);
+        try {
+
+            FileInputStream fstream = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fstream, Charset.forName(CHARSET)));
+
+            int i = 0;
+            String strLine;
+            while ((strLine = br.readLine()) != null) {
+                i++;
+
+                File f = new File(strLine);
+
+                if (f.exists()) {
+                    w.add(f);
+                }
+
+            }
+            fstream.close();
+        } catch (Exception e) {
+            error("Error parsing workspace file", e);
+        }
+
+        return w;
+    }
 
 }

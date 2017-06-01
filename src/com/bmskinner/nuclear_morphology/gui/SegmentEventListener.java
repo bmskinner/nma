@@ -21,5 +21,5 @@ package com.bmskinner.nuclear_morphology.gui;
 
 public interface SegmentEventListener {
 
-	public void segmentEventReceived(SegmentEvent event);
+    public void segmentEventReceived(SegmentEvent event);
 }

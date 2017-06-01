@@ -23,66 +23,79 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * This interface allows for the retrieval of statistics from cells and
- * their components
+ * This interface allows for the retrieval of statistics from cells and their
+ * components
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public interface Statistical {
-	
-	static final double ERROR_CALCULATING_STAT   = -1d;
-	static final double STAT_NOT_CALCULATED      = -3d;
-	
-	/**
-	 * Check if the given stat is present
-	 * @param stat
-	 * @return
-	 */
-	boolean hasStatistic(PlottableStatistic stat);
-	
-	/**
-	 * Get the value of the given statistic for this component.
-	 * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, 
-	 * as this must be calculated at the collection level
-	 * @param stat the statistic to fetch
-	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals(PlottableStatistic.VARIABILILTY)==true
-	 * @throws Exception 
-	 */
-	double getStatistic(PlottableStatistic stat, MeasurementScale scale);
-	
-	/**
-	 * Get the value of the given {@link PlottableStatistic} for this nucleus.
-	 * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, 
-	 * as this must be calculated at the collection level, not the object level. 
-	 * This method converts exceptions from {@link CellularComponent#getStatistic()} into RuntimeExceptions,
-	 *  so the method can be used in streams
-	 * @param stat the statistic to fetch
-	 * @param scale the units to return values in
-	 * @return the value or zero if stat.equals( {@link NucleusStatistic.VARIABILILTY})==true
-	 */
-//	public double getSafeStatistic(PlottableStatistic stat, MeasurementScale scale);
-	
-	
-	/**
-	 * Get the statistic at the default scale ({@link MeasurementScale.PIXELS})
-	 * @param stat
-	 * @return
-	 */
-	double getStatistic(PlottableStatistic stat);
-	
-	/**
-	 * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
-	 * @param stat
-	 * @param d
-	 */
-	void setStatistic(PlottableStatistic stat, double d);
-	
-	/**
-	 * Get all the statistics in this object
-	 * @return
-	 */
-	PlottableStatistic[] getStatistics();
+
+    static final double ERROR_CALCULATING_STAT = -1d;
+    static final double STAT_NOT_CALCULATED    = -3d;
+
+    /**
+     * Check if the given stat is present
+     * 
+     * @param stat
+     * @return
+     */
+    boolean hasStatistic(PlottableStatistic stat);
+
+    /**
+     * Get the value of the given statistic for this component. Note that
+     * {@link PlottableStatistic.VARIABILILTY} returns zero, as this must be
+     * calculated at the collection level
+     * 
+     * @param stat
+     *            the statistic to fetch
+     * @param scale
+     *            the units to return values in
+     * @return the value or zero if
+     *         stat.equals(PlottableStatistic.VARIABILILTY)==true
+     * @throws Exception
+     */
+    double getStatistic(PlottableStatistic stat, MeasurementScale scale);
+
+    /**
+     * Get the value of the given {@link PlottableStatistic} for this nucleus.
+     * Note that {@link PlottableStatistic.VARIABILILTY} returns zero, as this
+     * must be calculated at the collection level, not the object level. This
+     * method converts exceptions from {@link CellularComponent#getStatistic()}
+     * into RuntimeExceptions, so the method can be used in streams
+     * 
+     * @param stat
+     *            the statistic to fetch
+     * @param scale
+     *            the units to return values in
+     * @return the value or zero if stat.equals(
+     *         {@link NucleusStatistic.VARIABILILTY})==true
+     */
+    // public double getSafeStatistic(PlottableStatistic stat, MeasurementScale
+    // scale);
+
+    /**
+     * Get the statistic at the default scale ({@link MeasurementScale.PIXELS})
+     * 
+     * @param stat
+     * @return
+     */
+    double getStatistic(PlottableStatistic stat);
+
+    /**
+     * Set the statistic at the default scale ({@link MeasurementScale.PIXELS})
+     * 
+     * @param stat
+     * @param d
+     */
+    void setStatistic(PlottableStatistic stat, double d);
+
+    /**
+     * Get all the statistics in this object
+     * 
+     * @return
+     */
+    PlottableStatistic[] getStatistics();
 
 }

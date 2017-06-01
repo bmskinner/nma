@@ -36,177 +36,170 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * This is the most primitive information an analysis dataset requires.
- * This does not implement the IAnalysisDataset interface itself - 
- * it is the responsibility of extending classes to add the remaining
- * fields and methods.	
+ * This is the most primitive information an analysis dataset requires. This
+ * does not implement the IAnalysisDataset interface itself - it is the
+ * responsibility of extending classes to add the remaining fields and methods.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public abstract class AbstractAnalysisDataset implements Serializable, Loggable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	protected final Version version;
-	
-	protected Set<IAnalysisDataset> childDatasets  = new HashSet<IAnalysisDataset>(1); // direct child collections
-	
-	protected ICellCollection cellCollection;
-	
-	protected Paint datasetColour = null;
-	
-	protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold groups of cluster results
-		
-	/**
-	 * Create a dataset from a cell collection
-	 * @param collection
-	 */
-	protected AbstractAnalysisDataset(ICellCollection collection){
-		this.cellCollection = collection;
-		this.version        = Version.currentVersion();
-	}
-	
-	
-	public Version getVersion() {
-		return this.version;
-	}
-	
-	public UUID getUUID() {
-		return cellCollection.getID();
-	}
-	
 
-	public String getName(){
-		return cellCollection.getName();
-	}
-	
-	public void setName(String s){
-		cellCollection.setName(s);
-	}
-	
-	public void setDatasetColour(Paint colour) {
-		datasetColour = colour;
-		
-	}
+    private static final long serialVersionUID = 1L;
 
-	public Paint getDatasetColour() {
-		return datasetColour;
-	}
+    protected final Version version;
 
-	public boolean hasDatasetColour() {
-		return datasetColour!=null;
-	}
-	
-	public boolean hasChild(IAnalysisDataset child) {
-		return childDatasets.contains(child);
-	}
-	
+    protected Set<IAnalysisDataset> childDatasets = new HashSet<IAnalysisDataset>(1); // direct
+                                                                                      // child
+                                                                                      // collections
 
-	public abstract Set<UUID> getChildUUIDs();
-	
-	public boolean hasChild(UUID child){
-		return this.getChildUUIDs().contains(child);
-	}
+    protected ICellCollection cellCollection;
 
-	public boolean hasRecursiveChild(IAnalysisDataset child) {
-		if(hasChild(child)){
-			return true;
-		}
-		for(IAnalysisDataset c : childDatasets){
-			if(c.hasRecursiveChild(child)){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public abstract void deleteClusterGroup(IClusterGroup group);
-	
+    protected Paint datasetColour = null;
 
-	public void addClusterGroup(IClusterGroup group){
-		this.clusterGroups.add(group);
-	}
-	
+    protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold
+                                                                                   // groups
+                                                                                   // of
+                                                                                   // cluster
+                                                                                   // results
 
-	public int getMaxClusterGroupNumber(){
-		int number = 0;
-		
-		if(this.hasClusters()){
+    /**
+     * Create a dataset from a cell collection
+     * 
+     * @param collection
+     */
+    protected AbstractAnalysisDataset(ICellCollection collection) {
+        this.cellCollection = collection;
+        this.version = Version.currentVersion();
+    }
 
-			for (IClusterGroup g :  this.getClusterGroups()){
+    public Version getVersion() {
+        return this.version;
+    }
 
-				String name = g.getName();
+    public UUID getUUID() {
+        return cellCollection.getID();
+    }
 
-				Pattern p = Pattern.compile("^"+IClusterGroup.CLUSTER_GROUP_PREFIX+"_(\\d+)$");
+    public String getName() {
+        return cellCollection.getName();
+    }
 
-				Matcher m = p.matcher(name);
-				if(m.find()){
-					String s = m.group(1);
+    public void setName(String s) {
+        cellCollection.setName(s);
+    }
 
-					int n = Integer.valueOf(s);
-					if(n>number){
-						number=n;
-					}
-				}
-			}
-		}
-		return number;
-	}
+    public void setDatasetColour(Paint colour) {
+        datasetColour = colour;
 
+    }
 
-	
-	public boolean hasCluster(UUID id){
-		
-		boolean result = false;
-		for(IClusterGroup g : this.clusterGroups){
-			if(g.hasDataset(id)){
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
-	
+    public Paint getDatasetColour() {
+        return datasetColour;
+    }
 
-	public List<IClusterGroup> getClusterGroups(){
-		return  this.clusterGroups;
-	}
-	
+    public boolean hasDatasetColour() {
+        return datasetColour != null;
+    }
 
-	public List<UUID> getClusterIDs(){
-		List<UUID> result = new ArrayList<UUID>();
-		for(IClusterGroup g : this.clusterGroups){
-			result.addAll(g.getUUIDs());
-		}
-		return result;
-	}
-	
+    public boolean hasChild(IAnalysisDataset child) {
+        return childDatasets.contains(child);
+    }
 
-	public boolean hasClusters(){
-		if(this.clusterGroups != null && this.clusterGroups.size()>0){
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
+    public abstract Set<UUID> getChildUUIDs();
 
-	public boolean hasClusterGroup(IClusterGroup group){
-		return clusterGroups.contains(group);
-	}
-	
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	    
+    public boolean hasChild(UUID child) {
+        return this.getChildUUIDs().contains(child);
+    }
 
-		
-		in.defaultReadObject();
-	    
-		if(cellCollection==null){
-			warn("Missing cell collection");
-		}
-	
-	}
+    public boolean hasRecursiveChild(IAnalysisDataset child) {
+        if (hasChild(child)) {
+            return true;
+        }
+        for (IAnalysisDataset c : childDatasets) {
+            if (c.hasRecursiveChild(child)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public abstract void deleteClusterGroup(IClusterGroup group);
+
+    public void addClusterGroup(IClusterGroup group) {
+        this.clusterGroups.add(group);
+    }
+
+    public int getMaxClusterGroupNumber() {
+        int number = 0;
+
+        if (this.hasClusters()) {
+
+            for (IClusterGroup g : this.getClusterGroups()) {
+
+                String name = g.getName();
+
+                Pattern p = Pattern.compile("^" + IClusterGroup.CLUSTER_GROUP_PREFIX + "_(\\d+)$");
+
+                Matcher m = p.matcher(name);
+                if (m.find()) {
+                    String s = m.group(1);
+
+                    int n = Integer.valueOf(s);
+                    if (n > number) {
+                        number = n;
+                    }
+                }
+            }
+        }
+        return number;
+    }
+
+    public boolean hasCluster(UUID id) {
+
+        boolean result = false;
+        for (IClusterGroup g : this.clusterGroups) {
+            if (g.hasDataset(id)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public List<IClusterGroup> getClusterGroups() {
+        return this.clusterGroups;
+    }
+
+    public List<UUID> getClusterIDs() {
+        List<UUID> result = new ArrayList<UUID>();
+        for (IClusterGroup g : this.clusterGroups) {
+            result.addAll(g.getUUIDs());
+        }
+        return result;
+    }
+
+    public boolean hasClusters() {
+        if (this.clusterGroups != null && this.clusterGroups.size() > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean hasClusterGroup(IClusterGroup group) {
+        return clusterGroups.contains(group);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        if (cellCollection == null) {
+            warn("Missing cell collection");
+        }
+
+    }
 
 }

@@ -32,156 +32,156 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
- * The sperm tail is a specialised type of flagellum. It is anchored at
- * the tail end of the sperm nucleus, and contains a midpiece (with mitochondria
+ * The sperm tail is a specialised type of flagellum. It is anchored at the tail
+ * end of the sperm nucleus, and contains a midpiece (with mitochondria
  * attached) and a long thin tail. Cytoplasmic droplets may be present. Imaged
  * tails often overlap themselves and other tails. Common stain - anti-tubulin.
+ * 
  * @author bms41
  *
  */
 @Deprecated
 public class SpermTail extends AbstractCellularComponent implements Serializable, Flagellum {
-			
-		private static final long serialVersionUID = 1L;
 
-		protected double length; // the length of the skeleton
-		
-		protected IPoint nucleusIntersection; // the position where the tail intersects the nucleus
-		
-		protected List<IPoint> skeletonPoints = new ArrayList<IPoint>(0); 
-		protected List<IPoint> borderPoints   = new ArrayList<IPoint>(0); 
-		
-		public SpermTail(File source, int channel, Roi skeleton, Roi border){
-			super();
+    private static final long serialVersionUID = 1L;
 
-			this.setSourceFolder(source.getParentFile());
-			this.setSourceFileName(source.getName());
-			this.setChannel(channel);
-			
-//			this.setPosition( new int[] { (int) border.getPolygon().getBounds().getMinX(),
-//					 (int) border.getPolygon().getBounds().getMinY(),
-//					 (int) border.getPolygon().getBounds().getWidth(),
-//					 (int) border.getPolygon().getBounds().getHeight()});
-			
-			
-			FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
-			for(int i=0; i<skeletonPolygon.npoints; i++){
-				skeletonPoints.add(IPoint.makeNew( skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
-			}
-			
-			FloatPolygon borderPolygon = border.getInterpolatedPolygon(1, true);
-			for(int i=0; i<borderPolygon.npoints; i++){
-				borderPoints.add(IPoint.makeNew( borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
-			}
-						
-			this.length = skeleton.getLength();
-			
-		}
-		
-		public SpermTail(final SpermTail t){
-			super(t);			
-			this.borderPoints = t.getBorder();
-			this.skeletonPoints = t.getSkeleton();
-									
-			this.length = t.getLength();
-		}
-				
-		public List<IPoint> getSkeleton(){
-			return this.skeletonPoints;
-		}
-		
-		/**
-		 * Fetch the skeleton offset to zero
-		 * @return
-		 */
-		public List<IPoint> getOffsetSkeleton(){
-			List<IPoint> result = new ArrayList<IPoint>(0);
-			for(IPoint p : skeletonPoints){
-				result.add(IPoint.makeNew( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
-			}
-			return result;
-		}
-		
-		public List<IPoint> getBorder(){
-			return this.borderPoints;
-		}
-		
-		// positions are offset by the bounding rectangle for easier plotting
-		public List<IPoint> getOffsetBorder(){
-			List<IPoint> result = new ArrayList<IPoint>(0);
-			for(IPoint p : borderPoints){
-				result.add(IPoint.makeNew( p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
-			}
-			return result;
-		}
-		
-		public double getLength(){
-			return this.length;
-		}
-		
+    protected double length; // the length of the skeleton
 
-		@Override
-		public boolean equals(CellularComponent c) {
-			if(c.getClass()==SpermTail.class){
-				return true;
-			} else {
-				return false;
-			}
-		}
-		
-		private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-			finest("\tWriting sperm tail");
-			out.defaultWriteObject();
-			finest("\tWrote sperm tail");
-		}
+    protected IPoint nucleusIntersection; // the position where the tail
+                                          // intersects the nucleus
 
-		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-			finest("\tReading sperm tail");
-			in.defaultReadObject();
-			finest("\tRead sperm tail"); 
-		}
+    protected List<IPoint> skeletonPoints = new ArrayList<IPoint>(0);
+    protected List<IPoint> borderPoints   = new ArrayList<IPoint>(0);
 
-		@Override
-		public void alignVertically() {
-			// TODO Auto-generated method stub
-			
-		}
+    public SpermTail(File source, int channel, Roi skeleton, Roi border) {
+        super();
 
-		@Override
-		public Flagellum duplicate() {
-			return new SpermTail(this);
-		}
+        this.setSourceFolder(source.getParentFile());
+        this.setSourceFileName(source.getName());
+        this.setChannel(channel);
 
-		@Override
-		public String getSourceFileNameWithoutExtension() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        // this.setPosition( new int[] { (int)
+        // border.getPolygon().getBounds().getMinX(),
+        // (int) border.getPolygon().getBounds().getMinY(),
+        // (int) border.getPolygon().getBounds().getWidth(),
+        // (int) border.getPolygon().getBounds().getHeight()});
 
-		@Override
-		public boolean isSmoothByDefault() {
-			// TODO Auto-generated method stub
-			return false;
-		}
+        FloatPolygon skeletonPolygon = skeleton.getInterpolatedPolygon(1, true);
+        for (int i = 0; i < skeletonPolygon.npoints; i++) {
+            skeletonPoints.add(IPoint.makeNew(skeletonPolygon.xpoints[i], skeletonPolygon.ypoints[i]));
+        }
 
-		@Override
-		public ImageProcessor getRGBImage() throws UnloadableImageException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        FloatPolygon borderPolygon = border.getInterpolatedPolygon(1, true);
+        for (int i = 0; i < borderPolygon.npoints; i++) {
+            borderPoints.add(IPoint.makeNew(borderPolygon.xpoints[i], borderPolygon.ypoints[i]));
+        }
 
-		@Override
-		public ImageProcessor getComponentRGBImage()
-				throws UnloadableImageException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        this.length = skeleton.getLength();
 
-		@Override
-		public void updateSourceFolder(File newFolder) {
-			// TODO Auto-generated method stub
-			
-		}
+    }
 
+    public SpermTail(final SpermTail t) {
+        super(t);
+        this.borderPoints = t.getBorder();
+        this.skeletonPoints = t.getSkeleton();
+
+        this.length = t.getLength();
+    }
+
+    public List<IPoint> getSkeleton() {
+        return this.skeletonPoints;
+    }
+
+    /**
+     * Fetch the skeleton offset to zero
+     * 
+     * @return
+     */
+    public List<IPoint> getOffsetSkeleton() {
+        List<IPoint> result = new ArrayList<IPoint>(0);
+        for (IPoint p : skeletonPoints) {
+            result.add(IPoint.makeNew(p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+        }
+        return result;
+    }
+
+    public List<IPoint> getBorder() {
+        return this.borderPoints;
+    }
+
+    // positions are offset by the bounding rectangle for easier plotting
+    public List<IPoint> getOffsetBorder() {
+        List<IPoint> result = new ArrayList<IPoint>(0);
+        for (IPoint p : borderPoints) {
+            result.add(IPoint.makeNew(p.getX() - this.getPosition()[X_BASE], p.getY() - this.getPosition()[Y_BASE]));
+        }
+        return result;
+    }
+
+    public double getLength() {
+        return this.length;
+    }
+
+    @Override
+    public boolean equals(CellularComponent c) {
+        if (c.getClass() == SpermTail.class) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        finest("\tWriting sperm tail");
+        out.defaultWriteObject();
+        finest("\tWrote sperm tail");
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        finest("\tReading sperm tail");
+        in.defaultReadObject();
+        finest("\tRead sperm tail");
+    }
+
+    @Override
+    public void alignVertically() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Flagellum duplicate() {
+        return new SpermTail(this);
+    }
+
+    @Override
+    public String getSourceFileNameWithoutExtension() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isSmoothByDefault() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public ImageProcessor getRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateSourceFolder(File newFolder) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

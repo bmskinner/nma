@@ -38,41 +38,45 @@ import org.jfree.ui.RectangleEdge;
 
 /**
  * This renderer is designed for showing shell results. The expected
- * distribution is on the negative y axis, and must keep full bar width. 
+ * distribution is on the negative y axis, and must keep full bar width.
  * Observed series are positive, and cna have shrinking widths.
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class ShellResultBarRenderer extends LayeredBarRenderer {
-	
-	public ShellResultBarRenderer(){
-		super();
-	}
-	
-	 /**
+
+    public ShellResultBarRenderer() {
+        super();
+    }
+
+    /**
      * Draws the bar for a single (series, category) data item.
      *
-     * @param g2  the graphics device.
-     * @param state  the renderer state.
-     * @param dataArea  the data area.
-     * @param plot  the plot.
-     * @param domainAxis  the domain axis.
-     * @param rangeAxis  the range axis.
-     * @param dataset  the dataset.
-     * @param row  the row index (zero-based).
-     * @param column  the column index (zero-based).
+     * @param g2
+     *            the graphics device.
+     * @param state
+     *            the renderer state.
+     * @param dataArea
+     *            the data area.
+     * @param plot
+     *            the plot.
+     * @param domainAxis
+     *            the domain axis.
+     * @param rangeAxis
+     *            the range axis.
+     * @param dataset
+     *            the dataset.
+     * @param row
+     *            the row index (zero-based).
+     * @param column
+     *            the column index (zero-based).
      */
-	@Override
-    protected void drawVerticalItem(Graphics2D g2,
-                                    CategoryItemRendererState state,
-                                    Rectangle2D dataArea,
-                                    CategoryPlot plot,
-                                    CategoryAxis domainAxis,
-                                    ValueAxis rangeAxis,
-                                    CategoryDataset dataset,
-                                    int row,
-                                    int column) {
+    @Override
+    protected void drawVerticalItem(Graphics2D g2, CategoryItemRendererState state, Rectangle2D dataArea,
+            CategoryPlot plot, CategoryAxis domainAxis, ValueAxis rangeAxis, CategoryDataset dataset, int row,
+            int column) {
 
         // nothing is drawn for null values...
         Number dataValue = dataset.getValue(row, column);
@@ -81,8 +85,8 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         }
 
         // BAR X
-        double rectX = domainAxis.getCategoryMiddle(column, getColumnCount(),
-                dataArea, plot.getDomainAxisEdge()) - state.getBarWidth() / 2.0;
+        double rectX = domainAxis.getCategoryMiddle(column, getColumnCount(), dataArea, plot.getDomainAxisEdge())
+                - state.getBarWidth() / 2.0;
 
         int seriesCount = getRowCount();
 
@@ -92,7 +96,7 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         double lclip = getLowerClip();
         double uclip = getUpperClip();
 
-        if (uclip <= 0.0) {  // cases 1, 2, 3 and 4
+        if (uclip <= 0.0) { // cases 1, 2, 3 and 4
             if (value >= uclip) {
                 return; // bar is not visible
             }
@@ -100,24 +104,21 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
             if (value <= lclip) {
                 value = lclip;
             }
-        }
-        else if (lclip <= 0.0) { // cases 5, 6, 7 and 8
+        } else if (lclip <= 0.0) { // cases 5, 6, 7 and 8
             if (value >= uclip) {
                 value = uclip;
-            }
-            else {
+            } else {
                 if (value <= lclip) {
                     value = lclip;
                 }
             }
-        }
-        else { // cases 9, 10, 11 and 12
+        } else { // cases 9, 10, 11 and 12
             if (value <= lclip) {
                 return; // bar is not visible
             }
             base = getLowerClip();
             if (value >= uclip) {
-               value = uclip;
+                value = uclip;
             }
         }
 
@@ -132,36 +133,34 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         // draw the bar...
         double shift = 0.0;
         double widthFactor = 1.0;
-        double seriesBarWidth = getSeriesBarWidth(row); 
+        double seriesBarWidth = getSeriesBarWidth(row);
         if (!Double.isNaN(seriesBarWidth)) {
             widthFactor = seriesBarWidth;
         }
         rectWidth = widthFactor * state.getBarWidth();
         rectX = rectX + (1 - widthFactor) * state.getBarWidth() / 2.0;
         if (seriesCount > 1) {
-        	
-        	// Negative values do not need shifting - the bar is full width
-        	if(dataset.getValue(row, column).doubleValue()<0){
-        		shift = 0;
-        	}
+
+            // Negative values do not need shifting - the bar is full width
+            if (dataset.getValue(row, column).doubleValue() < 0) {
+                shift = 0;
+            }
             // needs to be improved !!!
             shift = rectWidth * 0.20 / (seriesCount - 1);
         }
-        
+
         // Choose the width of the bar, incorporating reductions
         double barWidth = rectWidth - (seriesCount - 1 - row) * shift * 2;
-        if(dataset.getValue(row, column).doubleValue()<0){
-        	barWidth = rectWidth; // Negative values do not reduce bar width
-    	}
-        
-        double barXAnchor = rectX + ((seriesCount - 1 - row) * shift);
-        if(dataset.getValue(row, column).doubleValue()<0){
-        	barXAnchor = rectX; // Negative values do not reduce bar width
-    	}
+        if (dataset.getValue(row, column).doubleValue() < 0) {
+            barWidth = rectWidth; // Negative values do not reduce bar width
+        }
 
-        Rectangle2D bar = new Rectangle2D.Double(
-            (barXAnchor), rectY,
-            (barWidth), rectHeight);
+        double barXAnchor = rectX + ((seriesCount - 1 - row) * shift);
+        if (dataset.getValue(row, column).doubleValue() < 0) {
+            barXAnchor = rectX; // Negative values do not reduce bar width
+        }
+
+        Rectangle2D bar = new Rectangle2D.Double((barXAnchor), rectY, (barWidth), rectHeight);
         Paint itemPaint = getItemPaint(row, column);
         GradientPaintTransformer t = getGradientPaintTransformer();
         if (t != null && itemPaint instanceof GradientPaint) {
@@ -171,8 +170,7 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         g2.fill(bar);
 
         // draw the outline...
-        if (isDrawBarOutline()
-                && state.getBarWidth() > BAR_OUTLINE_WIDTH_THRESHOLD) {
+        if (isDrawBarOutline() && state.getBarWidth() > BAR_OUTLINE_WIDTH_THRESHOLD) {
             Stroke stroke = getItemOutlineStroke(row, column);
             Paint paint = getItemOutlinePaint(row, column);
             if (stroke != null && paint != null) {
@@ -186,11 +184,9 @@ public class ShellResultBarRenderer extends LayeredBarRenderer {
         double transX1 = rangeAxis.valueToJava2D(base, dataArea, edge);
         double transX2 = rangeAxis.valueToJava2D(value, dataArea, edge);
 
-        CategoryItemLabelGenerator generator
-            = getItemLabelGenerator(row, column);
+        CategoryItemLabelGenerator generator = getItemLabelGenerator(row, column);
         if (generator != null && isItemLabelVisible(row, column)) {
-            drawItemLabel(g2, dataset, row, column, plot, generator, bar,
-                    (transX1 > transX2));
+            drawItemLabel(g2, dataset, row, column, plot, generator, bar, (transX1 > transX2));
         }
 
         // collect entity and tool tip information...

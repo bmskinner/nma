@@ -23,30 +23,29 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public abstract class DescriptiveStatistic extends Number implements Loggable {
-	
-	public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
-	public static final String NULL_OR_EMPTY_LIST_ERROR  = "The data list either is null or does not contain any data.";
 
-	
-	protected Number value;
-	
-	@Override
-	public double doubleValue() {
-		return value.doubleValue();
-	}
+    public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
+    public static final String NULL_OR_EMPTY_LIST_ERROR  = "The data list either is null or does not contain any data.";
 
-	@Override
-	public float floatValue() {
-		return value.floatValue();
-	}
+    protected Number value;
 
-	@Override
-	public int intValue() {
-		return value.intValue();
-	}
+    @Override
+    public double doubleValue() {
+        return value.doubleValue();
+    }
 
-	@Override
-	public long longValue() {
-		return value.longValue();
-	}
+    @Override
+    public float floatValue() {
+        return value.floatValue();
+    }
+
+    @Override
+    public int intValue() {
+        return value.intValue();
+    }
+
+    @Override
+    public long longValue() {
+        return value.longValue();
+    }
 }

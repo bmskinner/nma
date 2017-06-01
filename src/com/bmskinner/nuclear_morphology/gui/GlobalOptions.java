@@ -8,174 +8,186 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.AbstractHashOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
-
 /**
  * This holds the options set globally for the program
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class GlobalOptions extends AbstractHashOptions {
-	
-	private static volatile GlobalOptions instance;
-	private static final Object lockObject = new Object(); // synchronisation
-	
-	public static final String DEFAULT_IMAGE_SCALE_KEY = "DEFAULT_IMAGE_SCALE";
-	public static final String DEFAULT_FILL_CONSENSUS_KEY = "FILL_CONSENSUS"; // Should the consensus nucleus plots be filled, or empty
-	public static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
-	public static final String REFOLD_OVERRIDE_KEY = "REFOLD_OVERRIDE";
-	public static final String IS_VIOLIN_KEY = "IS_VIOLIN"; // show violin plots or just boxplots
-	public static final String IS_USE_ANTIALIASING = "USE_ANTIALIASING";
-	
-	
-	private File defaultDir; // where to fall back to for finding images or saving files
-	
-	private MeasurementScale scale;
-	
-	private Level logLevel;
-	
-	private ColourSwatch swatch;
-		
-	private boolean convertDatasets = true;
-	
-	private static double DEFAULT_SCALE = 1;
-		
-	private NucleusType defaultType;
-	
-	/**
-	 * 
-	 */
 
-	
-	/**
-	 * Get the global options for the program.
-	 * @return
-	 */
-	public static GlobalOptions getInstance(){
-		
-		if(instance!=null){
-			return instance;
-		} else {
-			
-			synchronized(lockObject){
-				if(instance==null){
-					instance = new GlobalOptions();
-				}
-			}
-			
-			return instance;
-		}
+    private static volatile GlobalOptions instance;
+    private static final Object           lockObject = new Object(); // synchronisation
 
-	}
-	
-	private GlobalOptions(){
-		setDefaults();
-	}
-	
-	public void setDefaults(){
-		this.logLevel    = Level.INFO;
-		this.scale       = MeasurementScale.PIXELS;
-		this.swatch      = ColourSwatch.REGULAR_SWATCH;
-		setBoolean(IS_VIOLIN_KEY, true);
-		setBoolean(DEFAULT_FILL_CONSENSUS_KEY, true);
-		setBoolean(IS_USE_ANTIALIASING, true);
-		setDouble(DEFAULT_IMAGE_SCALE_KEY, DEFAULT_SCALE);
-		this.defaultDir = new File(System.getProperty("user.home"));
-		this.defaultType = NucleusType.RODENT_SPERM;
-		setBoolean(REFOLD_OVERRIDE_KEY, false);
-	}
-	
-	
+    public static final String DEFAULT_IMAGE_SCALE_KEY      = "DEFAULT_IMAGE_SCALE";
+    public static final String DEFAULT_FILL_CONSENSUS_KEY   = "FILL_CONSENSUS";     // Should
+                                                                                    // the
+                                                                                    // consensus
+                                                                                    // nucleus
+                                                                                    // plots
+                                                                                    // be
+                                                                                    // filled,
+                                                                                    // or
+                                                                                    // empty
+    public static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
+    public static final String REFOLD_OVERRIDE_KEY          = "REFOLD_OVERRIDE";
+    public static final String IS_VIOLIN_KEY                = "IS_VIOLIN";          // show
+                                                                                    // violin
+                                                                                    // plots
+                                                                                    // or
+                                                                                    // just
+                                                                                    // boxplots
+    public static final String IS_USE_ANTIALIASING          = "USE_ANTIALIASING";
 
-	public NucleusType getDefaultType() {
-		return defaultType;
-	}
+    private File defaultDir; // where to fall back to for finding images or
+                             // saving files
 
-	public void setDefaultType(NucleusType defaultType) {
-		this.defaultType = defaultType;
-	}
+    private MeasurementScale scale;
 
-	public synchronized MeasurementScale getScale() {
-		return scale;
-	}
+    private Level logLevel;
 
-	public void setScale(MeasurementScale scale) {
-		this.scale = scale;
-	}
-	
-	public synchronized double getImageScale() {
-		
-		return getDouble(DEFAULT_IMAGE_SCALE_KEY);
-	}
-	
-	public void setImageScale(double scale) {
-		setDouble(DEFAULT_IMAGE_SCALE_KEY, scale);
-	}
+    private ColourSwatch swatch;
 
-	public synchronized Level getLogLevel() {
-		return logLevel;
-	}
+    private boolean convertDatasets = true;
 
-	public void setLogLevel(Level logLevel) {
-		this.logLevel = logLevel;
-	}
+    private static double DEFAULT_SCALE = 1;
 
-	public synchronized ColourSwatch getSwatch() {
-		return swatch;
-	}
+    private NucleusType defaultType;
 
-	public void setSwatch(ColourSwatch swatch) {
-		this.swatch = swatch;
-	}
+    /**
+     * 
+     */
 
-	public synchronized boolean isViolinPlots() {
-		return getBoolean(IS_VIOLIN_KEY);
-	}
+    /**
+     * Get the global options for the program.
+     * 
+     * @return
+     */
+    public static GlobalOptions getInstance() {
 
-	public void setViolinPlots(boolean violinPlots) {
-		setBoolean(IS_VIOLIN_KEY, violinPlots);
-	}
-	
-	public synchronized boolean isFillConsensus() {
-		return getBoolean(DEFAULT_FILL_CONSENSUS_KEY);
-	}
+        if (instance != null) {
+            return instance;
+        } else {
 
-	public synchronized void setFillConsensus(boolean fillConsensus) {
-		setBoolean(DEFAULT_FILL_CONSENSUS_KEY, fillConsensus);
-	}
-	
-	public synchronized boolean isAntiAlias() {
-		return getBoolean(IS_USE_ANTIALIASING);
-	}
+            synchronized (lockObject) {
+                if (instance == null) {
+                    instance = new GlobalOptions();
+                }
+            }
 
-	public synchronized void setAntiAlias(boolean antiAliasing) {
-		setBoolean(IS_USE_ANTIALIASING, antiAliasing);
-	}
+            return instance;
+        }
 
-	public synchronized boolean isConvertDatasets() {
-		return convertDatasets;
-	}
+    }
 
-	public synchronized void setConvertDatasets(boolean convertDatasets) {
-		this.convertDatasets = convertDatasets;
-	}
-	
-	/**
-	 * Get the default directory for exporting results or beginning new analyses. 
-	 * If this has not been set in the config file, it defaults to the user home directory.
-	 * @return
-	 */
-	public synchronized File getDefaultDir() {
-		if(defaultDir.exists()){
-			return defaultDir;
-		} else {
-			return new File(System.getProperty("user.home"));
-		}
-	}
-	
-	public synchronized void setDefaultDir(File f) {
-		this.defaultDir = f;
-	}
-	
+    private GlobalOptions() {
+        setDefaults();
+    }
+
+    public void setDefaults() {
+        this.logLevel = Level.INFO;
+        this.scale = MeasurementScale.PIXELS;
+        this.swatch = ColourSwatch.REGULAR_SWATCH;
+        setBoolean(IS_VIOLIN_KEY, true);
+        setBoolean(DEFAULT_FILL_CONSENSUS_KEY, true);
+        setBoolean(IS_USE_ANTIALIASING, true);
+        setDouble(DEFAULT_IMAGE_SCALE_KEY, DEFAULT_SCALE);
+        this.defaultDir = new File(System.getProperty("user.home"));
+        this.defaultType = NucleusType.RODENT_SPERM;
+        setBoolean(REFOLD_OVERRIDE_KEY, false);
+    }
+
+    public NucleusType getDefaultType() {
+        return defaultType;
+    }
+
+    public void setDefaultType(NucleusType defaultType) {
+        this.defaultType = defaultType;
+    }
+
+    public synchronized MeasurementScale getScale() {
+        return scale;
+    }
+
+    public void setScale(MeasurementScale scale) {
+        this.scale = scale;
+    }
+
+    public synchronized double getImageScale() {
+
+        return getDouble(DEFAULT_IMAGE_SCALE_KEY);
+    }
+
+    public void setImageScale(double scale) {
+        setDouble(DEFAULT_IMAGE_SCALE_KEY, scale);
+    }
+
+    public synchronized Level getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    public synchronized ColourSwatch getSwatch() {
+        return swatch;
+    }
+
+    public void setSwatch(ColourSwatch swatch) {
+        this.swatch = swatch;
+    }
+
+    public synchronized boolean isViolinPlots() {
+        return getBoolean(IS_VIOLIN_KEY);
+    }
+
+    public void setViolinPlots(boolean violinPlots) {
+        setBoolean(IS_VIOLIN_KEY, violinPlots);
+    }
+
+    public synchronized boolean isFillConsensus() {
+        return getBoolean(DEFAULT_FILL_CONSENSUS_KEY);
+    }
+
+    public synchronized void setFillConsensus(boolean fillConsensus) {
+        setBoolean(DEFAULT_FILL_CONSENSUS_KEY, fillConsensus);
+    }
+
+    public synchronized boolean isAntiAlias() {
+        return getBoolean(IS_USE_ANTIALIASING);
+    }
+
+    public synchronized void setAntiAlias(boolean antiAliasing) {
+        setBoolean(IS_USE_ANTIALIASING, antiAliasing);
+    }
+
+    public synchronized boolean isConvertDatasets() {
+        return convertDatasets;
+    }
+
+    public synchronized void setConvertDatasets(boolean convertDatasets) {
+        this.convertDatasets = convertDatasets;
+    }
+
+    /**
+     * Get the default directory for exporting results or beginning new
+     * analyses. If this has not been set in the config file, it defaults to the
+     * user home directory.
+     * 
+     * @return
+     */
+    public synchronized File getDefaultDir() {
+        if (defaultDir.exists()) {
+            return defaultDir;
+        } else {
+            return new File(System.getProperty("user.home"));
+        }
+    }
+
+    public synchronized void setDefaultDir(File f) {
+        this.defaultDir = f;
+    }
 
 }

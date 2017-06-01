@@ -20,9 +20,21 @@
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 public class ChartCreationException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public ChartCreationException() { super(); }
-	public ChartCreationException(String message) { super(message); }
-	public ChartCreationException(String message, Throwable cause) { super(message, cause); }
-	public ChartCreationException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public ChartCreationException() {
+        super();
+    }
+
+    public ChartCreationException(String message) {
+        super(message);
+    }
+
+    public ChartCreationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ChartCreationException(Throwable cause) {
+        super(cause);
+    }
 }

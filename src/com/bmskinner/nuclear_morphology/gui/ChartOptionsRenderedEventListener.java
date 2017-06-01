@@ -19,7 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.gui;
 
-
 public interface ChartOptionsRenderedEventListener {
-	public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e);
+    public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e);
 }

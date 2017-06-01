@@ -32,113 +32,112 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwat
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Read the config file and assign values to the global options of the program  
+ * Read the config file and assign values to the global options of the program
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class PropertiesReader implements Loggable {
-	
-	public static final String INI_FILE = "config.ini";
-	
-	private static final String DEFAULT_DIR_KEY   = "DEFAULT_DIR";
-	private static final String DEFAULT_IMAGE_SCALE_KEY = "DEFAULT_IMAGE_SCALE";
-	private static final String DEFAULT_DISPLAY_SCALE_KEY = "DEFAULT_DISPLAY_SCALE";
-	private static final String DEFAULT_FILL_CONSENSUS_KEY = "FILL_CONSENSUS";
-	private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
-	private static final String DEFAULT_SWATCH_KEY = "DEFAULT_COLOUR_SWATCH";
-	private static final String DEFAULT_NUCLEUS_TYPE_KEY = "DEFAULT_NUCLEUS_TYPE";
-	private static final String REFOLD_OVERRIDE_KEY = "REFOLD_OVERRIDE";
 
-	public PropertiesReader() {
-		try {
+    public static final String INI_FILE = "config.ini";
 
-			// Get the location of the jar file
-			File dir =  Importer.getProgramDir();
-			
-			File ini = new File(dir, INI_FILE);
-			System.out.println("ini: "+ini.getAbsolutePath());
-			
-			if(ini.exists()){
-				// Read the properties
-				Properties properties = new Properties();
-	
-				properties.load(new FileInputStream(ini));
-	
-				assignOptions(properties);
-			} else {
-				log("No ini file: creating default");
-				Properties properties = createDefaultProperties();
-				properties.store(new FileOutputStream(ini), null);
-			}
+    private static final String DEFAULT_DIR_KEY              = "DEFAULT_DIR";
+    private static final String DEFAULT_IMAGE_SCALE_KEY      = "DEFAULT_IMAGE_SCALE";
+    private static final String DEFAULT_DISPLAY_SCALE_KEY    = "DEFAULT_DISPLAY_SCALE";
+    private static final String DEFAULT_FILL_CONSENSUS_KEY   = "FILL_CONSENSUS";
+    private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
+    private static final String DEFAULT_SWATCH_KEY           = "DEFAULT_COLOUR_SWATCH";
+    private static final String DEFAULT_NUCLEUS_TYPE_KEY     = "DEFAULT_NUCLEUS_TYPE";
+    private static final String REFOLD_OVERRIDE_KEY          = "REFOLD_OVERRIDE";
 
-		} catch (IOException e) {
-			stack("Error reading ini file", e);
-		}
+    public PropertiesReader() {
+        try {
 
-	}
-	
-	private Properties createDefaultProperties(){
-		Properties properties = new Properties();
-		
-		GlobalOptions op = GlobalOptions.getInstance();
-		
-		properties.setProperty(DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
-		properties.setProperty(DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
-		properties.setProperty(DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
-		properties.setProperty(DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
-		properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
-		properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
-		properties.setProperty(DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
-		properties.setProperty(REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
-		
-		
-		return properties;
-		
-	}
-	
-	private void assignOptions(Properties properties){
-		
-		GlobalOptions op = GlobalOptions.getInstance();
-		
-		for(String key : properties.stringPropertyNames()) {
+            // Get the location of the jar file
+            File dir = Importer.getProgramDir();
 
-			
-			String value = properties.getProperty(key);
-			
-			if(DEFAULT_DIR_KEY.equals(key)){
-				op.setDefaultDir( new File(value));
-			}
-			
-			if(DEFAULT_IMAGE_SCALE_KEY.equals(key)){
-				op.setImageScale(Double.valueOf(value));
-			}
-			
-			if(DEFAULT_DISPLAY_SCALE_KEY.equals(key)){
-				op.setScale(MeasurementScale.valueOf(value));
-			}
-			
-			if(DEFAULT_FILL_CONSENSUS_KEY.equals(key)){
-				op.setFillConsensus(Boolean.valueOf(value));
-			}
-			
-			if(DEFAULT_USE_ANTIALIASING_KEY.equals(key)){
-				op.setAntiAlias(Boolean.valueOf(value));
-			}
-			
-			if(DEFAULT_SWATCH_KEY.equals(key)){
-				op.setSwatch(ColourSwatch.valueOf(value));
-			}
-			
-			if(DEFAULT_NUCLEUS_TYPE_KEY.equals(key)){
-				op.setDefaultType(NucleusType.valueOf(value));
-			}
-			
-			if(REFOLD_OVERRIDE_KEY.equals(key)){
-				op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
-			}
+            File ini = new File(dir, INI_FILE);
+            System.out.println("ini: " + ini.getAbsolutePath());
 
-		}
-	}
+            if (ini.exists()) {
+                // Read the properties
+                Properties properties = new Properties();
+
+                properties.load(new FileInputStream(ini));
+
+                assignOptions(properties);
+            } else {
+                log("No ini file: creating default");
+                Properties properties = createDefaultProperties();
+                properties.store(new FileOutputStream(ini), null);
+            }
+
+        } catch (IOException e) {
+            stack("Error reading ini file", e);
+        }
+
+    }
+
+    private Properties createDefaultProperties() {
+        Properties properties = new Properties();
+
+        GlobalOptions op = GlobalOptions.getInstance();
+
+        properties.setProperty(DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
+        properties.setProperty(DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
+        properties.setProperty(DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
+        properties.setProperty(DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
+        properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
+        properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
+        properties.setProperty(DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
+        properties.setProperty(REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
+
+        return properties;
+
+    }
+
+    private void assignOptions(Properties properties) {
+
+        GlobalOptions op = GlobalOptions.getInstance();
+
+        for (String key : properties.stringPropertyNames()) {
+
+            String value = properties.getProperty(key);
+
+            if (DEFAULT_DIR_KEY.equals(key)) {
+                op.setDefaultDir(new File(value));
+            }
+
+            if (DEFAULT_IMAGE_SCALE_KEY.equals(key)) {
+                op.setImageScale(Double.valueOf(value));
+            }
+
+            if (DEFAULT_DISPLAY_SCALE_KEY.equals(key)) {
+                op.setScale(MeasurementScale.valueOf(value));
+            }
+
+            if (DEFAULT_FILL_CONSENSUS_KEY.equals(key)) {
+                op.setFillConsensus(Boolean.valueOf(value));
+            }
+
+            if (DEFAULT_USE_ANTIALIASING_KEY.equals(key)) {
+                op.setAntiAlias(Boolean.valueOf(value));
+            }
+
+            if (DEFAULT_SWATCH_KEY.equals(key)) {
+                op.setSwatch(ColourSwatch.valueOf(value));
+            }
+
+            if (DEFAULT_NUCLEUS_TYPE_KEY.equals(key)) {
+                op.setDefaultType(NucleusType.valueOf(value));
+            }
+
+            if (REFOLD_OVERRIDE_KEY.equals(key)) {
+                op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
+            }
+
+        }
+    }
 
 }

@@ -19,44 +19,51 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-
 /**
- * Provides methods relating to the abillity to refold consensus shapes for a component 
+ * Provides methods relating to the abillity to refold consensus shapes for a
+ * component
+ * 
  * @author bms41
  * @since 1.13.4
  *
- * @param <E> the component that can be refolded
+ * @param <E>
+ *            the component that can be refolded
  */
 public interface Refoldable<E extends CellularComponent> {
-	
-	/**
-	 * Check if the collection has a consensus component of type <b>E</b>
-	 * @return
-	 */
-	boolean hasConsensus();
 
-	/**
-	 * Set the consensus nucleus for the collection
-	 * @param n
-	 */
-	void setConsensus(E component);
-	
-	/**
-	 * Get the consensus nucleus if set
-	 * @return the consensus, or null if not present
-	 */
-	E getConsensus();
-	
-	/**
-	 * Set the refolding state
-	 * @param b
-	 */
-	void setRefolding(boolean b);
-	
-	/**
-	 * Test if the consensus is being refolded
-	 * @return
-	 */
-	boolean isRefolding();
+    /**
+     * Check if the collection has a consensus component of type <b>E</b>
+     * 
+     * @return
+     */
+    boolean hasConsensus();
+
+    /**
+     * Set the consensus nucleus for the collection
+     * 
+     * @param n
+     */
+    void setConsensus(E component);
+
+    /**
+     * Get the consensus nucleus if set
+     * 
+     * @return the consensus, or null if not present
+     */
+    E getConsensus();
+
+    /**
+     * Set the refolding state
+     * 
+     * @param b
+     */
+    void setRefolding(boolean b);
+
+    /**
+     * Test if the consensus is being refolded
+     * 
+     * @return
+     */
+    boolean isRefolding();
 
 }

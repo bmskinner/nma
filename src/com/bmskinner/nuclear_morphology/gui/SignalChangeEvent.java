@@ -21,54 +21,56 @@ package com.bmskinner.nuclear_morphology.gui;
 import java.util.EventObject;
 
 public class SignalChangeEvent extends EventObject {
-	
-	public static final String SIGNAL_COLOUR_CHANGE = "SignalColourUpdate";
-	public static final String GROUP_VISIBLE_PREFIX = "GroupVisble_";
-	public static final String POST_FISH_MAPPING = "PostFISHRemappingAction";
-	
-	public static final String LOBE_DETECTION = "LobeDetection";
-	public static final String EXPORT_STATS   = "ExportStatsAction";
-	public static final String EXPORT_WORKSPACE = "ExportWorkspace";
-	public static final String ADD_NUCLEAR_SIGNAL = "AddNuclearSignalAction";
-	public static final String DATASET_ARITHMETIC = "DatasetArithmeticAction";
-	public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
-	
-	private static final long serialVersionUID = 1L;
-	private String message;
-	private String sourceName;
 
-	/**
-	 * Create an event from a source, with the given message
-	 * @param source
-	 * @param type
-	 */
-	public SignalChangeEvent( Object source, String message, String sourceName ) {
-		super( source );
-		this.message 	= message;
-		this.sourceName = sourceName;
-	}
-	
-	public SignalChangeEvent( Object source, SignalChangeEvent event ) {
-		super( event.getSource() );
-		this.message 	= event.type();
-		this.sourceName = event.sourceName();
-	}
-	
-	/**
-	 * The type of event, or other message to carry
-	 * @return
-	 */
-	public String type() {
-		return message;
-	}
-	
-	/**
-	 * The name of the component that fired the event
-	 * @return
-	 */
-	public String sourceName(){
-		return this.sourceName;
-	}
+    public static final String SIGNAL_COLOUR_CHANGE = "SignalColourUpdate";
+    public static final String GROUP_VISIBLE_PREFIX = "GroupVisble_";
+    public static final String POST_FISH_MAPPING    = "PostFISHRemappingAction";
+
+    public static final String LOBE_DETECTION              = "LobeDetection";
+    public static final String EXPORT_STATS                = "ExportStatsAction";
+    public static final String EXPORT_WORKSPACE            = "ExportWorkspace";
+    public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
+    public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
+    public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
+
+    private static final long serialVersionUID = 1L;
+    private String            message;
+    private String            sourceName;
+
+    /**
+     * Create an event from a source, with the given message
+     * 
+     * @param source
+     * @param type
+     */
+    public SignalChangeEvent(Object source, String message, String sourceName) {
+        super(source);
+        this.message = message;
+        this.sourceName = sourceName;
+    }
+
+    public SignalChangeEvent(Object source, SignalChangeEvent event) {
+        super(event.getSource());
+        this.message = event.type();
+        this.sourceName = event.sourceName();
+    }
+
+    /**
+     * The type of event, or other message to carry
+     * 
+     * @return
+     */
+    public String type() {
+        return message;
+    }
+
+    /**
+     * The name of the component that fired the event
+     * 
+     * @return
+     */
+    public String sourceName() {
+        return this.sourceName;
+    }
 
 }
-

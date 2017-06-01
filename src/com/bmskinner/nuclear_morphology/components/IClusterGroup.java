@@ -10,80 +10,92 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 /**
  * The cluster group saves a list of child datasets with a group name and a
  * Newick tree of the clustered nuclei within the datasets.
+ * 
  * @author ben
  *
  */
 public interface IClusterGroup extends Serializable, Loggable {
-	
-	static final String CLUSTER_GROUP_PREFIX = "Group";
-	
-	/**
-	 * Get the public name of the cluster groups
-	 * @return
-	 */
-	String getName();
 
-	/**
-	 * Get the number of datasets in the group
-	 * @return
-	 */
-	int size();
+    static final String CLUSTER_GROUP_PREFIX = "Group";
 
-	/**
-	 * Get the Newick tree for the cluster if set, or null
-	 * @return
-	 */
-	String getTree();
+    /**
+     * Get the public name of the cluster groups
+     * 
+     * @return
+     */
+    String getName();
 
-	/**
-	 * Get the IDs of the datasets in the group
-	 * @return
-	 */
-	List<UUID> getUUIDs();
+    /**
+     * Get the number of datasets in the group
+     * 
+     * @return
+     */
+    int size();
 
-	/**
-	 * Add a dataset as a cluster in the group
-	 * @param dataset
-	 */
-	void addDataset(IAnalysisDataset dataset);
+    /**
+     * Get the Newick tree for the cluster if set, or null
+     * 
+     * @return
+     */
+    String getTree();
 
-	/**
-	 * Add a cell collection as a cluster in the group
-	 * @param collection
-	 */
-	void addDataset(ICellCollection collection);
+    /**
+     * Get the IDs of the datasets in the group
+     * 
+     * @return
+     */
+    List<UUID> getUUIDs();
 
-	/**
-	 * Remove the selected dataset from the cluster group
-	 * @param dataset
-	 */
-	void removeDataset(IAnalysisDataset dataset);
+    /**
+     * Add a dataset as a cluster in the group
+     * 
+     * @param dataset
+     */
+    void addDataset(IAnalysisDataset dataset);
 
-	/**
-	 * Remove the selected dataset id from the cluster group
-	 * @param dataset
-	 */
-	void removeDataset(UUID id);
+    /**
+     * Add a cell collection as a cluster in the group
+     * 
+     * @param collection
+     */
+    void addDataset(ICellCollection collection);
 
-	/**
-	 * Get the options used to make this cluster group
-	 * @return
-	 */
-	IClusteringOptions getOptions();
+    /**
+     * Remove the selected dataset from the cluster group
+     * 
+     * @param dataset
+     */
+    void removeDataset(IAnalysisDataset dataset);
 
-	/** 
-	 * Test if this group contains the given dataset id
-	 * @param id
-	 * @return
-	 */
-	boolean hasDataset(UUID id);
+    /**
+     * Remove the selected dataset id from the cluster group
+     * 
+     * @param dataset
+     */
+    void removeDataset(UUID id);
 
-	/**
-	 * Check if there is a tree in this cluster group
-	 * @return
-	 */
-	boolean hasTree();
+    /**
+     * Get the options used to make this cluster group
+     * 
+     * @return
+     */
+    IClusteringOptions getOptions();
 
-	String toString();
+    /**
+     * Test if this group contains the given dataset id
+     * 
+     * @param id
+     * @return
+     */
+    boolean hasDataset(UUID id);
+
+    /**
+     * Check if there is a tree in this cluster group
+     * 
+     * @return
+     */
+    boolean hasTree();
+
+    String toString();
 
 }

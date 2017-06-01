@@ -27,122 +27,127 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * All cell types implement this interface. A cell can have a nucleus,
- * and zero, one or many acrosomes, flagella and mitochondria.
+ * All cell types implement this interface. A cell can have a nucleus, and zero,
+ * one or many acrosomes, flagella and mitochondria.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface ICell 
-	extends Serializable, 
-			Loggable,
-			Statistical,
-			Comparable<ICell> {
+public interface ICell extends Serializable, Loggable, Statistical, Comparable<ICell> {
 
-	/**
-	 * Get the ID of the cell
-	 * @return
-	 */
-	UUID getId();
+    /**
+     * Get the ID of the cell
+     * 
+     * @return
+     */
+    UUID getId();
 
-	/**
-	 * Get the first nucleus of the cell. Use {@link #getNuclei()} instead
-	 * to ensure cells with multiple nuclei are handled correctly
-	 * @return
-	 * @deprecated from 1.13.5
-	 */
-	Nucleus getNucleus();
-	
-	/**
-	 * Get the nuclei of the cell
-	 * @return
-	 */
-	List<Nucleus> getNuclei();
+    /**
+     * Get the first nucleus of the cell. Use {@link #getNuclei()} instead to
+     * ensure cells with multiple nuclei are handled correctly
+     * 
+     * @return
+     * @deprecated from 1.13.5
+     */
+    Nucleus getNucleus();
 
-	
-	/**
-	 * Set the nucleus of the cell
-	 */
-	void setNucleus(Nucleus n);
-	
-	/**
-	 * Add a nucleus to the cell
-	 * @param n
-	 */
-	void addNucleus(Nucleus n);
+    /**
+     * Get the nuclei of the cell
+     * 
+     * @return
+     */
+    List<Nucleus> getNuclei();
 
-	
+    /**
+     * Set the nucleus of the cell
+     */
+    void setNucleus(Nucleus n);
 
-	/**
-	 * Get the mitochondria of the cell
-	 * @return
-	 */
-	List<IMitochondrion> getMitochondria();
+    /**
+     * Add a nucleus to the cell
+     * 
+     * @param n
+     */
+    void addNucleus(Nucleus n);
 
-	/**
-	 * Set the mitochondria of the cell
-	 * @param mitochondria
-	 */
-	void setMitochondria(List<IMitochondrion> mitochondria);
+    /**
+     * Get the mitochondria of the cell
+     * 
+     * @return
+     */
+    List<IMitochondrion> getMitochondria();
 
-	
+    /**
+     * Set the mitochondria of the cell
+     * 
+     * @param mitochondria
+     */
+    void setMitochondria(List<IMitochondrion> mitochondria);
 
-	/**
-	 * Get the flagella in the cell
-	 * @return
-	 */
-	List<Flagellum> getFlagella();
+    /**
+     * Get the flagella in the cell
+     * 
+     * @return
+     */
+    List<Flagellum> getFlagella();
 
+    /**
+     * Get the acrosomes for the cell
+     * 
+     * @return
+     */
+    List<IAcrosome> getAcrosomes();
 
-	/**
-	 * Get the acrosomes for the cell
-	 * @return
-	 */
-	List<IAcrosome> getAcrosomes();
+    /**
+     * Add an acrosome to the cell
+     * 
+     * @param acrosome
+     */
+    void addAcrosome(IAcrosome acrosome);
 
-	/**
-	 * Add an acrosome to the cell
-	 * @param acrosome
-	 */
-	void addAcrosome(IAcrosome acrosome);
-	
-	/**
-	 * Get the cytoplasm of the cell
-	 * @return the cytoplasm, or null if not present
-	 */
-	ICytoplasm getCytoplasm();
+    /**
+     * Get the cytoplasm of the cell
+     * 
+     * @return the cytoplasm, or null if not present
+     */
+    ICytoplasm getCytoplasm();
 
-	/**
-	 * Test if the cell has a nucleus
-	 * @return
-	 */
-	boolean hasNucleus();
+    /**
+     * Test if the cell has a nucleus
+     * 
+     * @return
+     */
+    boolean hasNucleus();
 
-	/**
-	 * Test if the cell has a flagellum
-	 * @return
-	 */
-	boolean hasFlagellum();
+    /**
+     * Test if the cell has a flagellum
+     * 
+     * @return
+     */
+    boolean hasFlagellum();
 
-	/**
-	 * Test if the cell has mitochondria
-	 * @return
-	 */
-	boolean hasMitochondria();
-	
-	/**
-	 * Test if the cell has an acrosome
-	 * @return
-	 */
-	boolean hasAcrosome();
-	
-	/**
-	 * Test if the cell has a cytoplasm
-	 * @return
-	 */
-	boolean hasCytoplasm();
+    /**
+     * Test if the cell has mitochondria
+     * 
+     * @return
+     */
+    boolean hasMitochondria();
 
-	int compareTo(ICell o);
+    /**
+     * Test if the cell has an acrosome
+     * 
+     * @return
+     */
+    boolean hasAcrosome();
 
+    /**
+     * Test if the cell has a cytoplasm
+     * 
+     * @return
+     */
+    boolean hasCytoplasm();
+
+    int compareTo(ICell o);
 
 }

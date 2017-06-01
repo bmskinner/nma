@@ -42,808 +42,864 @@ import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 
 /**
  * This is the replacement analysis dataset designed to use less memory from
- * versions 1.14.0 onwards. The first field in the object is the version, allowing
- * deserialisation to choose an appropriate path in the future.
+ * versions 1.14.0 onwards. The first field in the object is the version,
+ * allowing deserialisation to choose an appropriate path in the future.
  * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public class DefaultAnalysisDataset 
-	extends AbstractAnalysisDataset 
-	implements IAnalysisDataset {
-	
-	private static final long serialVersionUID = 1L;
-		
-	private boolean isRoot = false;	// is this a root dataset
+public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
-	/**
-	 * Other datasets associated with this dataset, that will need to be saved out.
-	 * Includes merge sources presently, with scope for expansion
-	 */
-	private Set<IAnalysisDataset> otherDatasets = new HashSet<IAnalysisDataset>();
-	
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * The ids of datasets merged to create this dataset. 
-	 * The IDs must be present in otherCollections.
-	 */
-	private Set<UUID> mergeSources	  = new HashSet<UUID>(0);
-	
-	private File savePath; // the file to save this dataset to
-	
-	private IMutableAnalysisOptions analysisOptions; // the setup for this analysis
+    private boolean isRoot = false; // is this a root dataset
 
-	/*
-	 * TRANSIENT FIELDS
-	 */
-	
-	private transient File debugFile;
-	
+    /**
+     * Other datasets associated with this dataset, that will need to be saved
+     * out. Includes merge sources presently, with scope for expansion
+     */
+    private Set<IAnalysisDataset> otherDatasets = new HashSet<IAnalysisDataset>();
 
-		
-	/**
-	 * Create a dataset from a cell collection. The save file is
-	 * set as the output folder of the collection
-	 * @param collection
-	 */
-	public DefaultAnalysisDataset(ICellCollection collection){
-		this(collection, new File(collection.getOutputFolder(),
-				collection.getName()+Importer.SAVE_FILE_EXTENSION));
-	}
-	
-	/**
-	 * Create a dataset from a cell collection, with a defined
-	 * save file
-	 * @param collection
-	 */
-	public DefaultAnalysisDataset(ICellCollection collection, File saveFile){
-		super(collection);
-		this.savePath     = saveFile;
-		this.debugFile    = Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION);
-		this.isRoot       = false;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#duplicate()
-	 */
-	@Override
-	public IAnalysisDataset duplicate() throws Exception {
-		IAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
-		
-		for(ICell c : cellCollection.getCells()){
-	
-			result.getCollection().addCell(new DefaultCell(c));
-		}
-		
-//		TODO: Add child collections, clusters etc
-		
-		return result;
-	}
-		
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getLogHandler()
-	 */
-	@Override
-	public Handler getLogHandler() throws Exception {
+    /**
+     * The ids of datasets merged to create this dataset. The IDs must be
+     * present in otherCollections.
+     */
+    private Set<UUID> mergeSources = new HashSet<UUID>(0);
 
-		if(debugFile == null || !debugFile.exists()){
-			return null;
-		}
-		
-		Handler fileHandler = new DebugFileHandler(this.getDebugFile());
-		fileHandler.setFormatter(new DebugFileFormatter());
+    private File savePath; // the file to save this dataset to
 
-		return fileHandler;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#addChildCollection(components.CellCollection)
-	 */
-	@Override
-	public void addChildCollection(ICellCollection collection){
-		if(collection==null){
-			throw new IllegalArgumentException("Nucleus collection is null");
-		}
-		
-		IAnalysisDataset childDataset;
-		
-		if(collection instanceof VirtualCellCollection){
-			childDataset = new ChildAnalysisDataset(this, collection);
-		} else {
-			childDataset = new DefaultAnalysisDataset(collection, this.savePath);
-			childDataset.setRoot(false);
-			
-			try {
-				childDataset.setAnalysisOptions(this.getAnalysisOptions());
-			} catch (MissingOptionException e) {
-				warn("Missing analysis options");
-				stack(e.getMessage(), e);
-			}
-		}
+    private IMutableAnalysisOptions analysisOptions; // the setup for this
+                                                     // analysis
 
-		this.childDatasets.add( childDataset);
+    /*
+     * TRANSIENT FIELDS
+     */
 
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#addChildDataset(analysis.AnalysisDataset)
-	 */
-	@Override
-	public void addChildDataset(IAnalysisDataset dataset){
-		if(dataset==null){
-			throw new IllegalArgumentException("Nucleus collection is null");
-		}
-		dataset.setRoot(false);
-		this.childDatasets.add(dataset);
-	}
-	
-	/**
-	 * Remove the child dataset with the given UUID
-	 * @param id the child ID to be deleted
-	 */
-	private void removeChildCollection(UUID id){
+    private transient File debugFile;
 
-		Iterator<IAnalysisDataset> it = childDatasets.iterator();
+    /**
+     * Create a dataset from a cell collection. The save file is set as the
+     * output folder of the collection
+     * 
+     * @param collection
+     */
+    public DefaultAnalysisDataset(ICellCollection collection) {
+        this(collection, new File(collection.getOutputFolder(), collection.getName() + Importer.SAVE_FILE_EXTENSION));
+    }
 
-		while (it.hasNext()){
-			IAnalysisDataset child = it.next();
+    /**
+     * Create a dataset from a cell collection, with a defined save file
+     * 
+     * @param collection
+     */
+    public DefaultAnalysisDataset(ICellCollection collection, File saveFile) {
+        super(collection);
+        this.savePath = saveFile;
+        this.debugFile = Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION,
+                Importer.LOG_FILE_EXTENSION);
+        this.isRoot = false;
+    }
 
-			if(child.getUUID().equals(id)){
-				for(IClusterGroup g : clusterGroups){
-					if(g.hasDataset(id)){
-						g.removeDataset(id);
-					}
-				}				
-				it.remove();
-				break;
-			}
-		}
-	}
-	
-	
-	/**
-	 * Add the given dataset as an associated dataset.
-	 * This is not a child, and must be added to an 
-	 * appropriate identifier list; this is handled by
-	 * the public functions calling this method
-	 * @param dataset the dataset to add
-	 */
-	private void addAssociatedDataset(IAnalysisDataset dataset){
-		if(dataset==null){
-			throw new IllegalArgumentException("Dataset is null");
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#duplicate()
+     */
+    @Override
+    public IAnalysisDataset duplicate() throws Exception {
+        IAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
 
-		this.otherDatasets.add(dataset);
-	}
-	
-	/**
-	 * Get the associated dataset with the given id. Not public
-	 * beacause each associated dataset should have a further
-	 * classification, and should be retrieved through its own
-	 * method
-	 * @param id the dataset to get
-	 * @return the dataset or null
-	 */
-	private IAnalysisDataset getAssociatedDataset(UUID id){
-		
-		for(IAnalysisDataset c : otherDatasets){
-			if(c.getUUID().equals(id)){
-				return c;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Remove the given dataset from the list of parents
-	 * and any lists that depend on parents
-	 * @param id the UUID to remove
-	 */
-	private void removeAssociatedDataset(UUID id){
-		
-		IAnalysisDataset d = getAssociatedDataset(id);
-		
-		if( d != null){
-			otherDatasets.remove(d);
+        for (ICell c : cellCollection.getCells()) {
 
-		}
-	}
+            result.getCollection().addCell(new DefaultCell(c));
+        }
 
-		
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getSavePath()
-	 */
-	@Override
-	public File getSavePath(){
-		return savePath;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#setSavePath(java.io.File)
-	 */
-	@Override
-	public void setSavePath(File file){
-		savePath = file;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getDebugFile()
-	 */
-	@Override
-	public File getDebugFile(){
-		return debugFile;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#setDebugFile(java.io.File)
-	 */
-	@Override
-	public void setDebugFile(File f){
-		try {
-			if(!f.exists()){
-				f.createNewFile();
-			}
-			if(f.canWrite()){
-				this.debugFile = f;
-			}
-		} catch (IOException e) {
-			warn("Unable to update debug file location");
-			fine("IO error setting file location", e);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getChildUUIDs()
-	 */
-	@Override
-	public Set<UUID> getChildUUIDs(){
-		Set<UUID> result = new HashSet<UUID>(childDatasets.size());
-		for(IAnalysisDataset c : childDatasets){
-			result.add(c.getUUID());
-		}
-		
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getAllChildUUIDs()
-	 */
-	@Override
-	public Set<UUID> getAllChildUUIDs(){
-		
-		Set<UUID> result = new HashSet<UUID>();
-		
-		Set<UUID> idlist = getChildUUIDs();
-		result.addAll(idlist);
-		
-		for(UUID id : idlist){
-			IAnalysisDataset d = getChildDataset(id);
-			
-			result.addAll(d.getAllChildUUIDs());
-		}
-		return result;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getChildDataset(java.util.UUID)
-	 */
-	@Override
-	public IAnalysisDataset getChildDataset(UUID id){
-		if(this.hasChild(id)){
-			
-			for(IAnalysisDataset c : childDatasets){
-				if(c.getUUID().equals(id)){
-					return c;
-				}
-			}
-			
-		} else {
-			for(IAnalysisDataset child : this.getAllChildDatasets()){
-				if(child.getUUID().equals(id)){
-					return child;
-				}
-			}
-		}
-		return null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getMergeSource(java.util.UUID)
-	 */
-	@Override
-	public IAnalysisDataset getMergeSource(UUID id){
-		if(this.mergeSources.contains(id)){
-		return this.getAssociatedDataset(id);
-		} else {
-			return null;
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getAllMergeSources()
-	 */
-	@Override
-	public Set<IAnalysisDataset> getAllMergeSources(){
-		
-		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
-		
-		for(UUID id : getMergeSourceIDs()){
-			
-			IAnalysisDataset source = this.getAssociatedDataset(id);
-			if(source.hasMergeSources()){
-				result.addAll(source.getAllMergeSources());
-			} else {
-				result.add(source);
-			}
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * 
-	 * For default analysis datasets, attempting to add a merge source will create
-	 * a new virtual collection of cells from the source dataset.
-	 * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
-	 */
-	@Override
-	public void addMergeSource(IAnalysisDataset dataset){
-		
-		IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(this, dataset);
-		this.mergeSources.add(mergeSource.getUUID());
-		this.addAssociatedDataset(mergeSource);
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getMergeSources()
-	 */
-	@Override
-	public Set<IAnalysisDataset> getMergeSources(){
-		Set<IAnalysisDataset>  result = new HashSet<IAnalysisDataset>();
-		
-		for(UUID id : mergeSources){
-			result.add(this.getAssociatedDataset(id));	
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getMergeSourceIDs()
-	 */
-	@Override
-	public Set<UUID> getMergeSourceIDs(){
-		return this.mergeSources;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
-	 */
-	@Override
-	public Set<UUID> getAllMergeSourceIDs(){
-		
-		Set<UUID> result = new HashSet<UUID>();
-		
-		for(UUID id : this.getMergeSourceIDs()){
-			result.addAll(getMergeSource(id).getAllMergeSourceIDs());
-		}
+        // TODO: Add child collections, clusters etc
 
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hasMergeSource(java.util.UUID)
-	 */
-	@Override
-	public boolean hasMergeSource(UUID id){
-		return mergeSources.contains(id);
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hasMergeSource(analysis.IAnalysisDataset)
-	 */
-	@Override
-	public boolean hasMergeSource(IAnalysisDataset dataset){
-		return this.hasMergeSource(dataset.getUUID());
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hasMergeSources()
-	 */
-	@Override
-	public boolean hasMergeSources(){
-		return !mergeSources.isEmpty();
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getChildCount()
-	 */
-	@Override
-	public int getChildCount(){
-		return this.childDatasets.size();
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hasChildren()
-	 */
-	@Override
-	public boolean hasChildren(){
-		return !childDatasets.isEmpty();
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getChildDatasets()
-	 */
-	@Override
-	public Collection<IAnalysisDataset> getChildDatasets(){
-		return childDatasets;			
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getAllChildDatasets()
-	 */
-	@Override
-	public List<IAnalysisDataset> getAllChildDatasets(){
+        return result;
+    }
 
-		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(childDatasets.size());
-		
-		if( ! childDatasets.isEmpty()){
-			for(IAnalysisDataset d : childDatasets){
-				result.add(d);
-				result.addAll(d.getAllChildDatasets());
-			}
-			
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getCollection()
-	 */
-	@Override
-	public ICellCollection getCollection(){
-		return this.cellCollection;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getLogHandler()
+     */
+    @Override
+    public Handler getLogHandler() throws Exception {
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#getAnalysisOptions()
-	 */
-	@Override
-	public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
-		return analysisOptions;
-	}
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hasAnalysisOptions()
-	 */
-	@Override
-	public boolean hasAnalysisOptions(){
-		return analysisOptions!=null;
-	}
+        if (debugFile == null || !debugFile.exists()) {
+            return null;
+        }
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
-	 */
-	@Override
-	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
-		this.analysisOptions = analysisOptions;
-	}
-		
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#refreshClusterGroups()
-	 */
-	@Override
-	public void refreshClusterGroups(){
+        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
+        fileHandler.setFormatter(new DebugFileFormatter());
 
-		if(this.hasClusters()){
-			// Find the groups that need removing
-			List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
-			for(IClusterGroup g : this.getClusterGroups()){
-				boolean clusterRemains = false;
+        return fileHandler;
+    }
 
-				for(UUID childID : g.getUUIDs()){
-					if(this.hasChild(childID)){
-						clusterRemains = true;
-					}
-				}
-				if(!clusterRemains){
-					groupsToDelete.add(g);
-				}
-			}
-			
-			// Remove the groups
-			for(IClusterGroup g : groupsToDelete){
-				this.deleteClusterGroup(g);
-			}
-			
-			
-		}
-	}
-	
-	@Override
-	public void deleteClusterGroup(IClusterGroup group){
-		
-		if(hasClusterGroup(group)){
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * analysis.IAnalysisDataset#addChildCollection(components.CellCollection)
+     */
+    @Override
+    public void addChildCollection(ICellCollection collection) {
+        if (collection == null) {
+            throw new IllegalArgumentException("Nucleus collection is null");
+        }
 
-			for(UUID id : group.getUUIDs()){
-				if(hasChild(id)){
-					this.deleteChild(id);
-				}
-			}
-			this.clusterGroups.remove(group);
-		}
-	}
+        IAnalysisDataset childDataset;
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#isRoot()
-	 */
-	@Override
-	public boolean isRoot(){
-		return isRoot;
-	}
+        if (collection instanceof VirtualCellCollection) {
+            childDataset = new ChildAnalysisDataset(this, collection);
+        } else {
+            childDataset = new DefaultAnalysisDataset(collection, this.savePath);
+            childDataset.setRoot(false);
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#setRoot(boolean)
-	 */
-	@Override
-	public void setRoot(boolean b){
-		isRoot = b;
-	}
+            try {
+                childDataset.setAnalysisOptions(this.getAnalysisOptions());
+            } catch (MissingOptionException e) {
+                warn("Missing analysis options");
+                stack(e.getMessage(), e);
+            }
+        }
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#deleteChild(java.util.UUID)
-	 */
-	@Override
-	public void deleteChild(UUID id){
-		if(this.hasChild(id)){
-			this.removeChildCollection(id);
-		}
-	}
-		
-		
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#deleteMergeSource(java.util.UUID)
-	 */
-	@Override
-	public void deleteMergeSource(UUID id){
-		if(this.mergeSources.contains(id)){
-			this.removeAssociatedDataset(id);
-		}
-	}
-	
-		
-	@Override
-	public String toString(){
-		return this.getName();
-	}
+        this.childDatasets.add(childDataset);
 
+    }
 
-	
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#updateSourceImageDirectory(java.io.File)
-	 */
-	@Override
-	public void updateSourceImageDirectory(File expectedImageDirectory) {
-		
-		fine("Searching "+expectedImageDirectory.getAbsolutePath());
-		
-		if( ! expectedImageDirectory.exists()){
-			throw new IllegalArgumentException("Requested directory does not exist: "+expectedImageDirectory);
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#addChildDataset(analysis.AnalysisDataset)
+     */
+    @Override
+    public void addChildDataset(IAnalysisDataset dataset) {
+        if (dataset == null) {
+            throw new IllegalArgumentException("Nucleus collection is null");
+        }
+        dataset.setRoot(false);
+        this.childDatasets.add(dataset);
+    }
 
-		// Is the name of the expectedImageDirectory the same as the dataset image directory?
-		if( ! checkName(expectedImageDirectory, this)){
-			throw new IllegalArgumentException("Dataset name does not match new folder");
-		}
-		fine("Dataset name matches new folder");
-			
-		// Does expectedImageDirectory contain image files?
-		if( ! checkHasImages(expectedImageDirectory)){
-			throw new IllegalArgumentException("Target folder contains no images");
-		}
-		
-		fine("Target folder contains at least one image");
+    /**
+     * Remove the child dataset with the given UUID
+     * 
+     * @param id
+     *            the child ID to be deleted
+     */
+    private void removeChildCollection(UUID id) {
 
-		fine("Updating dataset image paths");
-		boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
-		if(!ok){
-			warn("Error updating dataset image paths; update cancelled");
-		}
+        Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
-		fine("Updating child dataset image paths");
-		for(IAnalysisDataset child : this.getAllChildDatasets()){
-			ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
-			if(!ok){
-				warn("Error updating child dataset image paths; update cancelled");
-			}
-		}
+        while (it.hasNext()) {
+            IAnalysisDataset child = it.next();
 
-		log("Updated image paths to new folder location");
-	}
-	
-	/**
-	 * Check that the new image directory has the same name as the old image directory.
-	 * If the nmd has been copied to the wrong folder, don't update nuclei
-	 * @param expectedImageDirectory
-	 * @param dataset
-	 * @return
-	 */
-	private boolean checkName(File expectedImageDirectory, IAnalysisDataset dataset){
-		if(dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())){
-			return true;
-		} else {
-			return false;
-		}
-		
-	}
-	
-	/**
-	 * Check that the given directory contains >0 image files
-	 * suitable for the morphology analysis
-	 * @param expectedImageDirectory
-	 * @return
-	 */
-	private boolean checkHasImages(File expectedImageDirectory){
-		
-		if(expectedImageDirectory==null){
-			throw new IllegalArgumentException("Folder cannot be null");
-		}
+            if (child.getUUID().equals(id)) {
+                for (IClusterGroup g : clusterGroups) {
+                    if (g.hasDataset(id)) {
+                        g.removeDataset(id);
+                    }
+                }
+                it.remove();
+                break;
+            }
+        }
+    }
 
-		File[] listOfFiles = expectedImageDirectory.listFiles();
-		
-		if(listOfFiles==null){
-			return false;
-		}
+    /**
+     * Add the given dataset as an associated dataset. This is not a child, and
+     * must be added to an appropriate identifier list; this is handled by the
+     * public functions calling this method
+     * 
+     * @param dataset
+     *            the dataset to add
+     */
+    private void addAssociatedDataset(IAnalysisDataset dataset) {
+        if (dataset == null) {
+            throw new IllegalArgumentException("Dataset is null");
+        }
 
-		int result = 0;
+        this.otherDatasets.add(dataset);
+    }
 
-		for (File file : listOfFiles) {
+    /**
+     * Get the associated dataset with the given id. Not public beacause each
+     * associated dataset should have a further classification, and should be
+     * retrieved through its own method
+     * 
+     * @param id
+     *            the dataset to get
+     * @return the dataset or null
+     */
+    private IAnalysisDataset getAssociatedDataset(UUID id) {
 
-			boolean ok = ImageImporter.fileIsImportable(file);
+        for (IAnalysisDataset c : otherDatasets) {
+            if (c.getUUID().equals(id)) {
+                return c;
+            }
+        }
+        return null;
+    }
 
-			if(ok){
-				result++;
-			}
-		} 
-		return result>0;
-	}
-	
+    /**
+     * Remove the given dataset from the list of parents and any lists that
+     * depend on parents
+     * 
+     * @param id
+     *            the UUID to remove
+     */
+    private void removeAssociatedDataset(UUID id) {
 
-	
+        IAnalysisDataset d = getAssociatedDataset(id);
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result
-				+ ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
-		result = prime
-				* result
-				+ ((childDatasets == null) ? 0 : childDatasets.hashCode());
-		result = prime * result
-				+ ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
-		result = prime * result
-				+ ((datasetColour == null) ? 0 : datasetColour.hashCode());
-		result = prime * result
-				+ ((debugFile == null) ? 0 : debugFile.hashCode());
-		result = prime * result + (isRoot ? 1231 : 1237);
-		result = prime * result
-				+ ((mergeSources == null) ? 0 : mergeSources.hashCode());
-		result = prime
-				* result
-				+ ((otherDatasets == null) ? 0 : otherDatasets.hashCode());
-		result = prime * result
-				+ ((savePath == null) ? 0 : savePath.hashCode());
-		result = prime * result
-				+ ((cellCollection == null) ? 0 : cellCollection.hashCode());
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		return result;
-	}
+        if (d != null) {
+            otherDatasets.remove(d);
 
-	/* (non-Javadoc)
-	 * @see analysis.IAnalysisDataset#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		DefaultAnalysisDataset other = (DefaultAnalysisDataset) obj;
-		if (analysisOptions == null) {
-			if (other.analysisOptions != null)
-				return false;
-		} else if (!analysisOptions.equals(other.analysisOptions))
-			return false;
-		if (childDatasets == null) {
-			if (other.childDatasets != null)
-				return false;
-		} else if (!childDatasets.equals(other.childDatasets))
-			return false;
-		if (clusterGroups == null) {
-			if (other.clusterGroups != null)
-				return false;
-		} else if (!clusterGroups.equals(other.clusterGroups))
-			return false;
-		if (datasetColour == null) {
-			if (other.datasetColour != null)
-				return false;
-		} else if (!datasetColour.equals(other.datasetColour))
-			return false;
-		if (debugFile == null) {
-			if (other.debugFile != null)
-				return false;
-		} else if (!debugFile.equals(other.debugFile))
-			return false;
-		if (isRoot != other.isRoot)
-			return false;
-		if (mergeSources == null) {
-			if (other.mergeSources != null)
-				return false;
-		} else if (!mergeSources.equals(other.mergeSources))
-			return false;
-		if (otherDatasets == null) {
-			if (other.otherDatasets != null)
-				return false;
-		} else if (!otherDatasets.equals(other.otherDatasets))
-			return false;
-		if (savePath == null) {
-			if (other.savePath != null)
-				return false;
-		} else if (!savePath.equals(other.savePath))
-			return false;
-		if (cellCollection == null) {
-			if (other.cellCollection != null)
-				return false;
-		} else if (!cellCollection.equals(other.cellCollection))
-			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
-			return false;
-		return true;
-	}
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-	    		
-		in.defaultReadObject();
-		
-		if(cellCollection==null){
-			warn("No cell collection could be read in dataset");
-		}
-	    
-		IProfileCollection pc = cellCollection.getProfileCollection();
-		if(pc==null){
-			warn("Missing profile collection");
-		}
-		
-	    int length = pc.length();
-	    // Update all children to have the same profile lengths and offsets
-	    
-	    if(! childDatasets.isEmpty()){
-	    	for(IAnalysisDataset child : getAllChildDatasets()){
-	    		child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);			
-	    	}
-	    }
-	    
-	    if(! otherDatasets.isEmpty()){
-	    	for(IAnalysisDataset child : otherDatasets){
-	    		child.getCollection()
-	    			.getProfileCollection()
-	    			.createAndRestoreProfileAggregate(child.getCollection());			
-	    	}
-	    }
-	}
-	
-	private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		out.defaultWriteObject();
-		
-	}
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getSavePath()
+     */
+    @Override
+    public File getSavePath() {
+        return savePath;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#setSavePath(java.io.File)
+     */
+    @Override
+    public void setSavePath(File file) {
+        savePath = file;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getDebugFile()
+     */
+    @Override
+    public File getDebugFile() {
+        return debugFile;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#setDebugFile(java.io.File)
+     */
+    @Override
+    public void setDebugFile(File f) {
+        try {
+            if (!f.exists()) {
+                f.createNewFile();
+            }
+            if (f.canWrite()) {
+                this.debugFile = f;
+            }
+        } catch (IOException e) {
+            warn("Unable to update debug file location");
+            fine("IO error setting file location", e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getChildUUIDs()
+     */
+    @Override
+    public Set<UUID> getChildUUIDs() {
+        Set<UUID> result = new HashSet<UUID>(childDatasets.size());
+        for (IAnalysisDataset c : childDatasets) {
+            result.add(c.getUUID());
+        }
+
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getAllChildUUIDs()
+     */
+    @Override
+    public Set<UUID> getAllChildUUIDs() {
+
+        Set<UUID> result = new HashSet<UUID>();
+
+        Set<UUID> idlist = getChildUUIDs();
+        result.addAll(idlist);
+
+        for (UUID id : idlist) {
+            IAnalysisDataset d = getChildDataset(id);
+
+            result.addAll(d.getAllChildUUIDs());
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getChildDataset(java.util.UUID)
+     */
+    @Override
+    public IAnalysisDataset getChildDataset(UUID id) {
+        if (this.hasChild(id)) {
+
+            for (IAnalysisDataset c : childDatasets) {
+                if (c.getUUID().equals(id)) {
+                    return c;
+                }
+            }
+
+        } else {
+            for (IAnalysisDataset child : this.getAllChildDatasets()) {
+                if (child.getUUID().equals(id)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getMergeSource(java.util.UUID)
+     */
+    @Override
+    public IAnalysisDataset getMergeSource(UUID id) {
+        if (this.mergeSources.contains(id)) {
+            return this.getAssociatedDataset(id);
+        } else {
+            return null;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getAllMergeSources()
+     */
+    @Override
+    public Set<IAnalysisDataset> getAllMergeSources() {
+
+        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+
+        for (UUID id : getMergeSourceIDs()) {
+
+            IAnalysisDataset source = this.getAssociatedDataset(id);
+            if (source.hasMergeSources()) {
+                result.addAll(source.getAllMergeSources());
+            } else {
+                result.add(source);
+            }
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * For default analysis datasets, attempting to add a merge source will
+     * create a new virtual collection of cells from the source dataset.
+     * 
+     * @see analysis.IAnalysisDataset#addMergeSource(analysis.AnalysisDataset)
+     */
+    @Override
+    public void addMergeSource(IAnalysisDataset dataset) {
+
+        IAnalysisDataset mergeSource = new MergeSourceAnalysisDataset(this, dataset);
+        this.mergeSources.add(mergeSource.getUUID());
+        this.addAssociatedDataset(mergeSource);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getMergeSources()
+     */
+    @Override
+    public Set<IAnalysisDataset> getMergeSources() {
+        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
+
+        for (UUID id : mergeSources) {
+            result.add(this.getAssociatedDataset(id));
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getMergeSourceIDs()
+     */
+    @Override
+    public Set<UUID> getMergeSourceIDs() {
+        return this.mergeSources;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getAllMergeSourceIDs()
+     */
+    @Override
+    public Set<UUID> getAllMergeSourceIDs() {
+
+        Set<UUID> result = new HashSet<UUID>();
+
+        for (UUID id : this.getMergeSourceIDs()) {
+            result.addAll(getMergeSource(id).getAllMergeSourceIDs());
+        }
+
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hasMergeSource(java.util.UUID)
+     */
+    @Override
+    public boolean hasMergeSource(UUID id) {
+        return mergeSources.contains(id);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hasMergeSource(analysis.IAnalysisDataset)
+     */
+    @Override
+    public boolean hasMergeSource(IAnalysisDataset dataset) {
+        return this.hasMergeSource(dataset.getUUID());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hasMergeSources()
+     */
+    @Override
+    public boolean hasMergeSources() {
+        return !mergeSources.isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getChildCount()
+     */
+    @Override
+    public int getChildCount() {
+        return this.childDatasets.size();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hasChildren()
+     */
+    @Override
+    public boolean hasChildren() {
+        return !childDatasets.isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getChildDatasets()
+     */
+    @Override
+    public Collection<IAnalysisDataset> getChildDatasets() {
+        return childDatasets;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getAllChildDatasets()
+     */
+    @Override
+    public List<IAnalysisDataset> getAllChildDatasets() {
+
+        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>(childDatasets.size());
+
+        if (!childDatasets.isEmpty()) {
+            for (IAnalysisDataset d : childDatasets) {
+                result.add(d);
+                result.addAll(d.getAllChildDatasets());
+            }
+
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getCollection()
+     */
+    @Override
+    public ICellCollection getCollection() {
+        return this.cellCollection;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#getAnalysisOptions()
+     */
+    @Override
+    public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
+        return analysisOptions;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hasAnalysisOptions()
+     */
+    @Override
+    public boolean hasAnalysisOptions() {
+        return analysisOptions != null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
+     */
+    @Override
+    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+        this.analysisOptions = analysisOptions;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#refreshClusterGroups()
+     */
+    @Override
+    public void refreshClusterGroups() {
+
+        if (this.hasClusters()) {
+            // Find the groups that need removing
+            List<IClusterGroup> groupsToDelete = new ArrayList<IClusterGroup>();
+            for (IClusterGroup g : this.getClusterGroups()) {
+                boolean clusterRemains = false;
+
+                for (UUID childID : g.getUUIDs()) {
+                    if (this.hasChild(childID)) {
+                        clusterRemains = true;
+                    }
+                }
+                if (!clusterRemains) {
+                    groupsToDelete.add(g);
+                }
+            }
+
+            // Remove the groups
+            for (IClusterGroup g : groupsToDelete) {
+                this.deleteClusterGroup(g);
+            }
+
+        }
+    }
+
+    @Override
+    public void deleteClusterGroup(IClusterGroup group) {
+
+        if (hasClusterGroup(group)) {
+
+            for (UUID id : group.getUUIDs()) {
+                if (hasChild(id)) {
+                    this.deleteChild(id);
+                }
+            }
+            this.clusterGroups.remove(group);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#isRoot()
+     */
+    @Override
+    public boolean isRoot() {
+        return isRoot;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#setRoot(boolean)
+     */
+    @Override
+    public void setRoot(boolean b) {
+        isRoot = b;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#deleteChild(java.util.UUID)
+     */
+    @Override
+    public void deleteChild(UUID id) {
+        if (this.hasChild(id)) {
+            this.removeChildCollection(id);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#deleteMergeSource(java.util.UUID)
+     */
+    @Override
+    public void deleteMergeSource(UUID id) {
+        if (this.mergeSources.contains(id)) {
+            this.removeAssociatedDataset(id);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.getName();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#updateSourceImageDirectory(java.io.File)
+     */
+    @Override
+    public void updateSourceImageDirectory(File expectedImageDirectory) {
+
+        fine("Searching " + expectedImageDirectory.getAbsolutePath());
+
+        if (!expectedImageDirectory.exists()) {
+            throw new IllegalArgumentException("Requested directory does not exist: " + expectedImageDirectory);
+        }
+
+        // Is the name of the expectedImageDirectory the same as the dataset
+        // image directory?
+        if (!checkName(expectedImageDirectory, this)) {
+            throw new IllegalArgumentException("Dataset name does not match new folder");
+        }
+        fine("Dataset name matches new folder");
+
+        // Does expectedImageDirectory contain image files?
+        if (!checkHasImages(expectedImageDirectory)) {
+            throw new IllegalArgumentException("Target folder contains no images");
+        }
+
+        fine("Target folder contains at least one image");
+
+        fine("Updating dataset image paths");
+        boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
+        if (!ok) {
+            warn("Error updating dataset image paths; update cancelled");
+        }
+
+        fine("Updating child dataset image paths");
+        for (IAnalysisDataset child : this.getAllChildDatasets()) {
+            ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
+            if (!ok) {
+                warn("Error updating child dataset image paths; update cancelled");
+            }
+        }
+
+        log("Updated image paths to new folder location");
+    }
+
+    /**
+     * Check that the new image directory has the same name as the old image
+     * directory. If the nmd has been copied to the wrong folder, don't update
+     * nuclei
+     * 
+     * @param expectedImageDirectory
+     * @param dataset
+     * @return
+     */
+    private boolean checkName(File expectedImageDirectory, IAnalysisDataset dataset) {
+        if (dataset.getCollection().getFolder().getName().equals(expectedImageDirectory.getName())) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Check that the given directory contains >0 image files suitable for the
+     * morphology analysis
+     * 
+     * @param expectedImageDirectory
+     * @return
+     */
+    private boolean checkHasImages(File expectedImageDirectory) {
+
+        if (expectedImageDirectory == null) {
+            throw new IllegalArgumentException("Folder cannot be null");
+        }
+
+        File[] listOfFiles = expectedImageDirectory.listFiles();
+
+        if (listOfFiles == null) {
+            return false;
+        }
+
+        int result = 0;
+
+        for (File file : listOfFiles) {
+
+            boolean ok = ImageImporter.fileIsImportable(file);
+
+            if (ok) {
+                result++;
+            }
+        }
+        return result > 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((analysisOptions == null) ? 0 : analysisOptions.hashCode());
+        result = prime * result + ((childDatasets == null) ? 0 : childDatasets.hashCode());
+        result = prime * result + ((clusterGroups == null) ? 0 : clusterGroups.hashCode());
+        result = prime * result + ((datasetColour == null) ? 0 : datasetColour.hashCode());
+        result = prime * result + ((debugFile == null) ? 0 : debugFile.hashCode());
+        result = prime * result + (isRoot ? 1231 : 1237);
+        result = prime * result + ((mergeSources == null) ? 0 : mergeSources.hashCode());
+        result = prime * result + ((otherDatasets == null) ? 0 : otherDatasets.hashCode());
+        result = prime * result + ((savePath == null) ? 0 : savePath.hashCode());
+        result = prime * result + ((cellCollection == null) ? 0 : cellCollection.hashCode());
+        result = prime * result + ((version == null) ? 0 : version.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.IAnalysisDataset#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultAnalysisDataset other = (DefaultAnalysisDataset) obj;
+        if (analysisOptions == null) {
+            if (other.analysisOptions != null)
+                return false;
+        } else if (!analysisOptions.equals(other.analysisOptions))
+            return false;
+        if (childDatasets == null) {
+            if (other.childDatasets != null)
+                return false;
+        } else if (!childDatasets.equals(other.childDatasets))
+            return false;
+        if (clusterGroups == null) {
+            if (other.clusterGroups != null)
+                return false;
+        } else if (!clusterGroups.equals(other.clusterGroups))
+            return false;
+        if (datasetColour == null) {
+            if (other.datasetColour != null)
+                return false;
+        } else if (!datasetColour.equals(other.datasetColour))
+            return false;
+        if (debugFile == null) {
+            if (other.debugFile != null)
+                return false;
+        } else if (!debugFile.equals(other.debugFile))
+            return false;
+        if (isRoot != other.isRoot)
+            return false;
+        if (mergeSources == null) {
+            if (other.mergeSources != null)
+                return false;
+        } else if (!mergeSources.equals(other.mergeSources))
+            return false;
+        if (otherDatasets == null) {
+            if (other.otherDatasets != null)
+                return false;
+        } else if (!otherDatasets.equals(other.otherDatasets))
+            return false;
+        if (savePath == null) {
+            if (other.savePath != null)
+                return false;
+        } else if (!savePath.equals(other.savePath))
+            return false;
+        if (cellCollection == null) {
+            if (other.cellCollection != null)
+                return false;
+        } else if (!cellCollection.equals(other.cellCollection))
+            return false;
+        if (version == null) {
+            if (other.version != null)
+                return false;
+        } else if (!version.equals(other.version))
+            return false;
+        return true;
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        if (cellCollection == null) {
+            warn("No cell collection could be read in dataset");
+        }
+
+        IProfileCollection pc = cellCollection.getProfileCollection();
+        if (pc == null) {
+            warn("Missing profile collection");
+        }
+
+        int length = pc.length();
+        // Update all children to have the same profile lengths and offsets
+
+        if (!childDatasets.isEmpty()) {
+            for (IAnalysisDataset child : getAllChildDatasets()) {
+                child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);
+            }
+        }
+
+        if (!otherDatasets.isEmpty()) {
+            for (IAnalysisDataset child : otherDatasets) {
+                child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
+            }
+        }
+    }
+
+    private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+
+    }
 }

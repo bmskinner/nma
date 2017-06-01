@@ -20,15 +20,16 @@
 package com.bmskinner.nuclear_morphology.components;
 
 /**
- * The cytoplasm marks the bounds of the cell as a whole. It is provided as a discrete 
- * component so that an ICell does not need to implement CellularComponent, and can thus be
- * constructed with only a Nucleus.
+ * The cytoplasm marks the bounds of the cell as a whole. It is provided as a
+ * discrete component so that an ICell does not need to implement
+ * CellularComponent, and can thus be constructed with only a Nucleus.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface ICytoplasm extends CellularComponent, Comparable<ICytoplasm>{
-	
-	ICytoplasm duplicate();
+public interface ICytoplasm extends CellularComponent, Comparable<ICytoplasm> {
+
+    ICytoplasm duplicate();
 
 }

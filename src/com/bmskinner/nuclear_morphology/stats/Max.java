@@ -24,112 +24,115 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 
 /**
- * This is an OO replacement for the static  Stats.max(list) method
+ * This is an OO replacement for the static Stats.max(list) method
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class Max extends DescriptiveStatistic {
-		
-	/**
-	 * Calculate the maximum value of the two integers
-	 * @param list
-	 */
-	public Max(int a, int b){
-		value = a > b ? a : b;
-	}
-	
-	/**
-	 * Calculate the maximum value of the two integers
-	 * @param list
-	 */
-	public Max(double a, double b){
-		value = a > b ? a : b;
-	}
-	
-	/**
-	 * Calculate the maximum value of the two integers
-	 * @param list
-	 */
-	public Max(Number[] array){
-		if(array == null || array.length==0){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-		}
-		List<? extends Number> list = Arrays.asList(array);
-		compareList(list);
-	}
-	
-	
-	
-	/**
-	 * Calculate the maximum value in the given list
-	 * @param list
-	 */
-	public Max(List<? extends Number> list){
-		if(list == null || list.isEmpty()){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_LIST_ERROR);
-		}
-		
-		compareList(list);
-	}
-		
-	private void compareList(List<? extends Number> list){
-		Object firstEntry = list.get(0);
-		
-		if(firstEntry instanceof Double){
-			value = compareDouble(list);
-		}
-		
-		if(firstEntry instanceof Float){
-			value = compareFloat(list);
-		}
-		
-		if(firstEntry instanceof Integer){
-			value = compareInt(list);
-		}
-		
-		if(firstEntry instanceof Long){
-			value = compareLong(list);
-		}
-	}
-	
-	private Number compareDouble(List<? extends Number> list){
-		Number result = Double.MIN_VALUE; 
-		for(Number n : list){
-			if(n.doubleValue()>result.doubleValue()){
-				result=n;
-			}
-		}
-		return result;
-	}
 
-	private Number compareFloat(List<? extends Number> list){
-		Number result = Float.MIN_VALUE; 
-		for(Number n : list){
-			if(n.floatValue()>result.floatValue()){
-				result=n;
-			}
-		}
-		return result;
-	}
-	
-	private Number compareInt(List<? extends Number> list){
-		Number result = Integer.MIN_VALUE; 
-		for(Number n : list){
-			if(n.intValue()>result.intValue()){
-				result=n;
-			}
-		}
-		return result;
-	}
-	
-	private Number compareLong(List<? extends Number> list){
-		Number result = Long.MIN_VALUE; 
-		for(Number n : list){
-			if(n.longValue()>result.longValue()){
-				result=n;
-			}
-		}
-		return result;
-	}
+    /**
+     * Calculate the maximum value of the two integers
+     * 
+     * @param list
+     */
+    public Max(int a, int b) {
+        value = a > b ? a : b;
+    }
+
+    /**
+     * Calculate the maximum value of the two integers
+     * 
+     * @param list
+     */
+    public Max(double a, double b) {
+        value = a > b ? a : b;
+    }
+
+    /**
+     * Calculate the maximum value of the two integers
+     * 
+     * @param list
+     */
+    public Max(Number[] array) {
+        if (array == null || array.length == 0) {
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        }
+        List<? extends Number> list = Arrays.asList(array);
+        compareList(list);
+    }
+
+    /**
+     * Calculate the maximum value in the given list
+     * 
+     * @param list
+     */
+    public Max(List<? extends Number> list) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException(NULL_OR_EMPTY_LIST_ERROR);
+        }
+
+        compareList(list);
+    }
+
+    private void compareList(List<? extends Number> list) {
+        Object firstEntry = list.get(0);
+
+        if (firstEntry instanceof Double) {
+            value = compareDouble(list);
+        }
+
+        if (firstEntry instanceof Float) {
+            value = compareFloat(list);
+        }
+
+        if (firstEntry instanceof Integer) {
+            value = compareInt(list);
+        }
+
+        if (firstEntry instanceof Long) {
+            value = compareLong(list);
+        }
+    }
+
+    private Number compareDouble(List<? extends Number> list) {
+        Number result = Double.MIN_VALUE;
+        for (Number n : list) {
+            if (n.doubleValue() > result.doubleValue()) {
+                result = n;
+            }
+        }
+        return result;
+    }
+
+    private Number compareFloat(List<? extends Number> list) {
+        Number result = Float.MIN_VALUE;
+        for (Number n : list) {
+            if (n.floatValue() > result.floatValue()) {
+                result = n;
+            }
+        }
+        return result;
+    }
+
+    private Number compareInt(List<? extends Number> list) {
+        Number result = Integer.MIN_VALUE;
+        for (Number n : list) {
+            if (n.intValue() > result.intValue()) {
+                result = n;
+            }
+        }
+        return result;
+    }
+
+    private Number compareLong(List<? extends Number> list) {
+        Number result = Long.MIN_VALUE;
+        for (Number n : list) {
+            if (n.longValue() > result.longValue()) {
+                result = n;
+            }
+        }
+        return result;
+    }
 }

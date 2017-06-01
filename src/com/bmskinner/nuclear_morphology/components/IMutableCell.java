@@ -22,42 +22,49 @@ package com.bmskinner.nuclear_morphology.components;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
- * This extension to the ICell interface adds the setters, enabling 
- * modification of the cell.
+ * This extension to the ICell interface adds the setters, enabling modification
+ * of the cell.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface IMutableCell extends ICell {
-	
-	/**
-	 * Set the first nucleus of the cell
-	 * @param nucleus
-	 */
-	void setNucleus(Nucleus nucleus);
-	
-	/**
-	 * Add a nucleus to the cell
-	 * @param nucleus
-	 */
-	void addNucleus(Nucleus nucleus);
-	
-	/**
-	 * Add a new mitochondrion to the cell
-	 * @param mitochondrion
-	 */
-	void addMitochondrion(IMitochondrion mitochondrion);
-	
-	/**
-	 * Add a flagellum to the cell
-	 * @param tail
-	 */
-	void addFlagellum(Flagellum tail);
-	
-	/**
-	 * Set the cytoplasm of the cell
-	 * @param cytoplasm the cytoplasm
-	 */
-	void setCytoplasm(ICytoplasm cytoplasm);
+
+    /**
+     * Set the first nucleus of the cell
+     * 
+     * @param nucleus
+     */
+    void setNucleus(Nucleus nucleus);
+
+    /**
+     * Add a nucleus to the cell
+     * 
+     * @param nucleus
+     */
+    void addNucleus(Nucleus nucleus);
+
+    /**
+     * Add a new mitochondrion to the cell
+     * 
+     * @param mitochondrion
+     */
+    void addMitochondrion(IMitochondrion mitochondrion);
+
+    /**
+     * Add a flagellum to the cell
+     * 
+     * @param tail
+     */
+    void addFlagellum(Flagellum tail);
+
+    /**
+     * Set the cytoplasm of the cell
+     * 
+     * @param cytoplasm
+     *            the cytoplasm
+     */
+    void setCytoplasm(ICytoplasm cytoplasm);
 
 }

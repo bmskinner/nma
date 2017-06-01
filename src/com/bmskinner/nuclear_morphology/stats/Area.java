@@ -28,85 +28,85 @@ import ij.process.FloatPolygon;
 
 @SuppressWarnings("serial")
 public class Area extends DescriptiveStatistic {
-	
-	public Area(Roi r){
-		
-		if( ! r.isArea()){
-			throw new IllegalArgumentException("Roi is not an area");
-		}
-		
-		value = calculatePolygonArea(r);
-		
-	}
-	
-	public Area(Shape s){
 
-		value = calculateShapeIntArea(s);
-		
-	}
-	
-	/**
-	 * Calculate the integer area of the shape. Checks each pixel
-	 * for belonging to the shape.
-	 * @param s
-	 * @return
-	 */
-	private int calculateShapeIntArea(Shape s){
-		int count = 0;
-		Rectangle roiBounds = s.getBounds();
-		// get the bounding box of the intersection
-		// test each pixel for overlaps
-		int minX = (int) roiBounds.getX();
-		int maxX = minX + (int) roiBounds.getWidth();
+    public Area(Roi r) {
 
-		int minY = (int) roiBounds.getY();
-		int maxY = minY + (int) roiBounds.getHeight();
-		
-		for(int x=minX; x<=maxX; x++){
-			for(int y=minY; y<=maxY; y++){
+        if (!r.isArea()) {
+            throw new IllegalArgumentException("Roi is not an area");
+        }
 
-				if(s.contains(x, y)){
-					count++;
-				}
-			}
-		}
-		
-		return count;		
-		
-	}
-	
-//	private float calculatePolygonArea(Shape s){
-//		
-//		PathIterator it = s.getPathIterator(null);
-//		float[] coords = new float[2];
-//		while(it.isDone()==false){
-//		    it.currentSegment(coords);
-//		    /* prints points of intersection b.n the 2 polygons */
-//		    System.out.println(Arrays.toString(coords));
-//		    it.next();
-//		}
-//		
-//		FloatPolygon f = r.getFloatPolygon();
-//		
-//		float sum = 0;
-//		for (int i = 0; i < f.npoints -1; i++) {
-//		    sum = sum + f.xpoints[i]*f.ypoints[i+1] - f.ypoints[i]*f.xpoints[i+1];
-//		}
-//		
-//		return Math.abs( sum/2);		
-//	}
-		
-	private float calculatePolygonArea(Roi r){
-		
-		
-		FloatPolygon f = r.getFloatPolygon();
-		
-		float sum = 0;
-		for (int i = 0; i < f.npoints -1; i++) {
-		    sum = sum + f.xpoints[i]*f.ypoints[i+1] - f.ypoints[i]*f.xpoints[i+1];
-		}
-		
-		return Math.abs( sum/2);		
-	}
+        value = calculatePolygonArea(r);
+
+    }
+
+    public Area(Shape s) {
+
+        value = calculateShapeIntArea(s);
+
+    }
+
+    /**
+     * Calculate the integer area of the shape. Checks each pixel for belonging
+     * to the shape.
+     * 
+     * @param s
+     * @return
+     */
+    private int calculateShapeIntArea(Shape s) {
+        int count = 0;
+        Rectangle roiBounds = s.getBounds();
+        // get the bounding box of the intersection
+        // test each pixel for overlaps
+        int minX = (int) roiBounds.getX();
+        int maxX = minX + (int) roiBounds.getWidth();
+
+        int minY = (int) roiBounds.getY();
+        int maxY = minY + (int) roiBounds.getHeight();
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+
+                if (s.contains(x, y)) {
+                    count++;
+                }
+            }
+        }
+
+        return count;
+
+    }
+
+    // private float calculatePolygonArea(Shape s){
+    //
+    // PathIterator it = s.getPathIterator(null);
+    // float[] coords = new float[2];
+    // while(it.isDone()==false){
+    // it.currentSegment(coords);
+    // /* prints points of intersection b.n the 2 polygons */
+    // System.out.println(Arrays.toString(coords));
+    // it.next();
+    // }
+    //
+    // FloatPolygon f = r.getFloatPolygon();
+    //
+    // float sum = 0;
+    // for (int i = 0; i < f.npoints -1; i++) {
+    // sum = sum + f.xpoints[i]*f.ypoints[i+1] - f.ypoints[i]*f.xpoints[i+1];
+    // }
+    //
+    // return Math.abs( sum/2);
+    // }
+
+    private float calculatePolygonArea(Roi r) {
+
+        FloatPolygon f = r.getFloatPolygon();
+
+        float sum = 0;
+        for (int i = 0; i < f.npoints - 1; i++) {
+            sum = sum + f.xpoints[i] * f.ypoints[i + 1] - f.ypoints[i] * f.xpoints[i + 1];
+        }
+
+        return Math.abs(sum / 2);
+    }
 
 }

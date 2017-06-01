@@ -22,371 +22,407 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * This interface will provides the primary access to cell data,
- * as well as the aggregate statistics and profile collection.
+ * This interface will provides the primary access to cell data, as well as the
+ * aggregate statistics and profile collection.
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
-public interface ICellCollection 
-	extends Serializable, 
-			Loggable,
-			Filterable,
-			StatisticalCollection,
-			Refoldable<Nucleus> {
+public interface ICellCollection
+        extends Serializable, Loggable, Filterable, StatisticalCollection, Refoldable<Nucleus> {
 
+    /**
+     * Set the name of the collection
+     * 
+     * @param s
+     */
+    void setName(String s);
 
-	/**
-	 * Set the name of the collection
-	 * @param s
-	 */
-	void setName(String s);
-	
-	/**
-	 * Check if the collection has real cells, or is a virtual collection
-	 * with pointers to real cells in another collection
-	 * @return true if the collection is virtual
-	 */
-	boolean isVirtual();
-	
-	/**
-	 * Check if the collection has real cells, or is a virtual collection
-	 * with pointers to real cells in another collection
-	 * @return true if the collection is real
-	 */
-	boolean isReal();
+    /**
+     * Check if the collection has real cells, or is a virtual collection with
+     * pointers to real cells in another collection
+     * 
+     * @return true if the collection is virtual
+     */
+    boolean isVirtual();
 
-	/**
-	 * Get the name of the collection
-	 * @return
-	 */
-	String getName();
+    /**
+     * Check if the collection has real cells, or is a virtual collection with
+     * pointers to real cells in another collection
+     * 
+     * @return true if the collection is real
+     */
+    boolean isReal();
 
-	/**
-	 * Get the ID of the collection
-	 * @return
-	 */
-	UUID getID();
-		
-	/**
-	 * Get the cells in the collection
-	 * @return
-	 */
-	Set<ICell> getCells();
-	
-	/**
-	 * Get the cells in the collection within the given file
-	 * @return
-	 */
-	Set<ICell> getCells(File f);
-	
-	/**
-	 * Test if the collection contains cells from the given source file
-	 * @param imageFile
-	 * @return
-	 */
-	boolean hasCells(File imageFile);
+    /**
+     * Get the name of the collection
+     * 
+     * @return
+     */
+    String getName();
 
-	/**
-	 * Get the UUIDs of all the cells in the collection
-	 * @return
-	 */
-	Set<UUID> getCellIDs();
+    /**
+     * Get the ID of the collection
+     * 
+     * @return
+     */
+    UUID getID();
 
-	/**
-	 * Get the nuclei in this collection.
-	 * @return the nuclei, or an empty collection if no nuclei are present
-	 */
-	Set<Nucleus> getNuclei();
+    /**
+     * Get the cells in the collection
+     * 
+     * @return
+     */
+    Set<ICell> getCells();
 
-	/**
-	 * Get the nuclei within the specified image
-	 * @param image the file to search
-	 * @return the nuclei, or an empty collection if no nuclei are present
-	 */
-	Set<Nucleus> getNuclei(File imageFile);
-	
-	/**
-	 * Test if the collection contains nuclei from the given source file
-	 * @param imageFile
-	 * @return
-	 */
-	boolean hasNuclei(File imageFile);
+    /**
+     * Get the cells in the collection within the given file
+     * 
+     * @return
+     */
+    Set<ICell> getCells(File f);
 
-	/**
-	 * Add the given cell to the collection
-	 * @param r
-	 */
-	void addCell(ICell c);
+    /**
+     * Test if the collection contains cells from the given source file
+     * 
+     * @param imageFile
+     * @return
+     */
+    boolean hasCells(File imageFile);
 
-	/**
-	 * Replace the cell with the same ID as the given cell with
-	 * the new copy
-	 * @param c the replacement cell
-	 */
-	void replaceCell(ICell c);
+    /**
+     * Get the UUIDs of all the cells in the collection
+     * 
+     * @return
+     */
+    Set<UUID> getCellIDs();
 
-	/**
-	 * Get the cell with the given UUID
-	 * @param id
-	 * @return
-	 */
-	ICell getCell(UUID id);
+    /**
+     * Get the nuclei in this collection.
+     * 
+     * @return the nuclei, or an empty collection if no nuclei are present
+     */
+    Set<Nucleus> getNuclei();
 
+    /**
+     * Get the nuclei within the specified image
+     * 
+     * @param image
+     *            the file to search
+     * @return the nuclei, or an empty collection if no nuclei are present
+     */
+    Set<Nucleus> getNuclei(File imageFile);
 
-	/**
-	 * Get the type of nucleus this collection should contain
-	 * @return
-	 */
-	NucleusType getNucleusType();
+    /**
+     * Test if the collection contains nuclei from the given source file
+     * 
+     * @param imageFile
+     * @return
+     */
+    boolean hasNuclei(File imageFile);
 
-	/**
-	 * Remove the given cell from the collection. If the cell is
-	 * null, has no effect. If the cell is not in the collection, has
-	 * no effect. 
-	 * @param c the cell to remove
-	 */
-	void removeCell(ICell c);
+    /**
+     * Add the given cell to the collection
+     * 
+     * @param r
+     */
+    void addCell(ICell c);
 
-	/**
-	 * Get the number of cells in the collection
-	 * @return
-	 */
-	int size();
-	
-	/**
-	 * Get the number of nuclei in the collection
-	 * @return
-	 */
-	int getNucleusCount();
+    /**
+     * Replace the cell with the same ID as the given cell with the new copy
+     * 
+     * @param c
+     *            the replacement cell
+     */
+    void replaceCell(ICell c);
 
-	/**
-	 * Check if the collection contains cells
-	 * @return
-	 */
-	public boolean hasCells();
-	
-	/**
-	 * Test if the given cell is present in the collection
-	 * (ID comparison test).
-	 * @param cell
-	 * @return
-	 */
-	boolean contains(ICell cell);
-	
-	boolean contains(UUID cellID);
-	
-	/**
-	 * Test if the given cell object is present
-	 * (== test)
-	 * @param cell
-	 * @return
-	 */
-	boolean containsExact(ICell cell);
+    /**
+     * Get the cell with the given UUID
+     * 
+     * @param id
+     * @return
+     */
+    ICell getCell(UUID id);
 
-	/**
-	 * Check if the collection contains cells locked from editing
-	 * @return
-	 */
-	boolean hasLockedCells();
+    /**
+     * Get the type of nucleus this collection should contain
+     * 
+     * @return
+     */
+    NucleusType getNucleusType();
 
-	/**
-	 * Set a lock on all cells for editing
-	 * @param b
-	 */
-	void setCellsLocked(boolean b);
+    /**
+     * Remove the given cell from the collection. If the cell is null, has no
+     * effect. If the cell is not in the collection, has no effect.
+     * 
+     * @param c
+     *            the cell to remove
+     */
+    void removeCell(ICell c);
 
+    /**
+     * Get the number of cells in the collection
+     * 
+     * @return
+     */
+    int size();
 
-	/**
-	 * Get the profile collection of the given type
-	 * @param type
-	 * @return
-	 */
-	IProfileCollection getProfileCollection();
-	
-	/**
-	 * Generate the profile collection and aggregates
-	 * based on the profile length of the population.
-	 */
-	void createProfileCollection();
+    /**
+     * Get the number of nuclei in the collection
+     * 
+     * @return
+     */
+    int getNucleusCount();
 
-	/**
-	 * Get the folder the nuclei in the collection were imaged from
-	 * @return
-	 */
-	File getFolder();
+    /**
+     * Check if the collection contains cells
+     * 
+     * @return
+     */
+    public boolean hasCells();
 
-	/**
-	 * Get the name of the analysis output folder
-	 * @return
-	 */
-	String getOutputFolderName();
+    /**
+     * Test if the given cell is present in the collection (ID comparison test).
+     * 
+     * @param cell
+     * @return
+     */
+    boolean contains(ICell cell);
 
+    boolean contains(UUID cellID);
 
-	/**
-	 * Get the output folder (e.g. to save the dataset into).
-	 * If an output folder name (such as a date) has been input, it will be included 
-	 * @return the folder
-	 */
-	File getOutputFolder();
-	
-	/**
-	 * Set the output folder of the collection
-	 */
-	void setOutputFolder(File folder);
+    /**
+     * Test if the given cell object is present (== test)
+     * 
+     * @param cell
+     * @return
+     */
+    boolean containsExact(ICell cell);
 
-	/**
-	 * Get the distinct source image file list for all nuclei in the collection 
-	 * @return
-	 */
-	Set<File> getImageFiles();
+    /**
+     * Check if the collection contains cells locked from editing
+     * 
+     * @return
+     */
+    boolean hasLockedCells();
 
-	
-	/*
-	 * METHODS FOR HANDLING SIGNALS
-	 */
-	
-	/**
-	 * Get the IDs of the signal groups in the collection
-	 * @return
-	 */
-	Set<UUID> getSignalGroupIDs();
+    /**
+     * Set a lock on all cells for editing
+     * 
+     * @param b
+     */
+    void setCellsLocked(boolean b);
 
-	/**
-	 * Remove the signal group with the given ID if present
-	 * @param id
-	 */
-	void removeSignalGroup(UUID id);
+    /**
+     * Get the profile collection of the given type
+     * 
+     * @param type
+     * @return
+     */
+    IProfileCollection getProfileCollection();
 
-	/**
-	 * Get the signal group with the given ID, if present
-	 * @param signalGroup
-	 * @return the signal group, or null if not present
-	 */
-	ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException;
+    /**
+     * Generate the profile collection and aggregates based on the profile
+     * length of the population.
+     */
+    void createProfileCollection();
 
-	/**
-	 * Test if the collection has a signal group with the given ID
-	 * @param signalGroup
-	 * @return
-	 */
-	boolean hasSignalGroup(UUID signalGroup);
+    /**
+     * Get the folder the nuclei in the collection were imaged from
+     * 
+     * @return
+     */
+    File getFolder();
 
-	/**
-	 * Get the signal groups in this collection
-	 * @return
-	 */
-	Collection<ISignalGroup> getSignalGroups();
+    /**
+     * Get the name of the analysis output folder
+     * 
+     * @return
+     */
+    String getOutputFolderName();
 
-	/**
-	 * Add the given signal group to the collection
-	 * @param newID
-	 * @param newGroup
-	 */
-	void addSignalGroup(UUID newID, ISignalGroup newGroup);
+    /**
+     * Get the output folder (e.g. to save the dataset into). If an output
+     * folder name (such as a date) has been input, it will be included
+     * 
+     * @return the folder
+     */
+    File getOutputFolder();
 
+    /**
+     * Set the output folder of the collection
+     */
+    void setOutputFolder(File folder);
 
-	/**
-	 * Get the signal manager for the collection
-	 * @return
-	 */
-	SignalManager getSignalManager();
-	
-	
-	/*
-	 * METHODS FOR HANDLING RULES
-	 */
+    /**
+     * Get the distinct source image file list for all nuclei in the collection
+     * 
+     * @return
+     */
+    Set<File> getImageFiles();
 
-	/**
-	 * Get the rulesets for this collection
-	 * @return
-	 */
-	RuleSetCollection getRuleSetCollection();
+    /*
+     * METHODS FOR HANDLING SIGNALS
+     */
 
-	/**
-	 * Force a recalculation of vertically oriented nuclei
-	 */
-	void updateVerticalNuclei();
+    /**
+     * Get the IDs of the signal groups in the collection
+     * 
+     * @return
+     */
+    Set<UUID> getSignalGroupIDs();
 
-	/**
-	 * Attempt to update the source image folder to the given directory
-	 * @param expectedImageDirectory
-	 * @return true on success
-	 */
-	boolean updateSourceFolder(File expectedImageDirectory);
+    /**
+     * Remove the signal group with the given ID if present
+     * 
+     * @param id
+     */
+    void removeSignalGroup(UUID id);
 
-	/**
-	 * Get the nucleus in the collection most similar to the 
-	 * median profile
-	 * @param referencePoint the tag to zero the profile against
-	 * @return
-	 * @throws ProfileException 
-	 * @throws UnavailableBorderTagException 
-	 * @throws UnavailableProfileTypeException 
-	 */
-	Nucleus getNucleusMostSimilarToMedian(Tag referencePoint) throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
+    /**
+     * Get the signal group with the given ID, if present
+     * 
+     * @param signalGroup
+     * @return the signal group, or null if not present
+     */
+    ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException;
 
-	/**
-	 * Get the profile manager for the collection
-	 * @return
-	 */
-	ProfileManager getProfileManager();
-	
-	
-	/**
-	 * Count the number of cells shared between this collection
-	 * and another dataset.
-	 * @param d2
-	 * @return
-	 */
-	int countShared(IAnalysisDataset d2);
-	
-	/**
-	 * Count the number of cells shared between this collection
-	 * and another collection.
-	 * @param d2
-	 * @return
-	 */
-	int countShared(ICellCollection d2);
-	
-	/**
-	 * Set the number of cells in the collection that are shared with
-	 * another collection. This can be used to reduce calculation times
-	 * @param d2 the other collection 
-	 * @param i the number of shared nuclei
-	 */
-	void setSharedCount(ICellCollection d2, int i);
+    /**
+     * Test if the collection has a signal group with the given ID
+     * 
+     * @param signalGroup
+     * @return
+     */
+    boolean hasSignalGroup(UUID signalGroup);
 
-		
-	/*
-	 * METHODS FOR GETTING COLLECTION STATISTICS
-	 */
+    /**
+     * Get the signal groups in this collection
+     * 
+     * @return
+     */
+    Collection<ISignalGroup> getSignalGroups();
 
-	/**
-	 * Get the median array size of the collection, for producing
-	 * profile aggregates
-	 * @return
-	 */
-	int getMedianArrayLength();
-	
-	/**
-	 * Get the length of the longest profile in the collection
-	 * @return
-	 */
-	int getMaxProfileLength();
-	
-//	double getMedianPathLength();
-	
-	/**
-	 * Get the perimeter normalised veriabililty of a nucleus angle profile compared to the
-	 * median profile of the collection
-	 * @param pointType the tag to use as index 0
-	 * @param c the cell to test
-	 * @return the variabililty score of the nucleus
-	 * @throws UnavailableBorderTagException 
-	 */
-	double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException;
+    /**
+     * Add the given signal group to the collection
+     * 
+     * @param newID
+     * @param newGroup
+     */
+    void addSignalGroup(UUID newID, ISignalGroup newGroup);
 
+    /**
+     * Get the signal manager for the collection
+     * 
+     * @return
+     */
+    SignalManager getSignalManager();
 
+    /*
+     * METHODS FOR HANDLING RULES
+     */
+
+    /**
+     * Get the rulesets for this collection
+     * 
+     * @return
+     */
+    RuleSetCollection getRuleSetCollection();
+
+    /**
+     * Force a recalculation of vertically oriented nuclei
+     */
+    void updateVerticalNuclei();
+
+    /**
+     * Attempt to update the source image folder to the given directory
+     * 
+     * @param expectedImageDirectory
+     * @return true on success
+     */
+    boolean updateSourceFolder(File expectedImageDirectory);
+
+    /**
+     * Get the nucleus in the collection most similar to the median profile
+     * 
+     * @param referencePoint
+     *            the tag to zero the profile against
+     * @return
+     * @throws ProfileException
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     */
+    Nucleus getNucleusMostSimilarToMedian(Tag referencePoint)
+            throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
+
+    /**
+     * Get the profile manager for the collection
+     * 
+     * @return
+     */
+    ProfileManager getProfileManager();
+
+    /**
+     * Count the number of cells shared between this collection and another
+     * dataset.
+     * 
+     * @param d2
+     * @return
+     */
+    int countShared(IAnalysisDataset d2);
+
+    /**
+     * Count the number of cells shared between this collection and another
+     * collection.
+     * 
+     * @param d2
+     * @return
+     */
+    int countShared(ICellCollection d2);
+
+    /**
+     * Set the number of cells in the collection that are shared with another
+     * collection. This can be used to reduce calculation times
+     * 
+     * @param d2
+     *            the other collection
+     * @param i
+     *            the number of shared nuclei
+     */
+    void setSharedCount(ICellCollection d2, int i);
+
+    /*
+     * METHODS FOR GETTING COLLECTION STATISTICS
+     */
+
+    /**
+     * Get the median array size of the collection, for producing profile
+     * aggregates
+     * 
+     * @return
+     */
+    int getMedianArrayLength();
+
+    /**
+     * Get the length of the longest profile in the collection
+     * 
+     * @return
+     */
+    int getMaxProfileLength();
+
+    // double getMedianPathLength();
+
+    /**
+     * Get the perimeter normalised veriabililty of a nucleus angle profile
+     * compared to the median profile of the collection
+     * 
+     * @param pointType
+     *            the tag to use as index 0
+     * @param c
+     *            the cell to test
+     * @return the variabililty score of the nucleus
+     * @throws UnavailableBorderTagException
+     */
+    double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException;
 
 }

@@ -19,24 +19,25 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 /**
- * This details the rotations that can be applied to nuclei
- * for display purposes.
+ * This details the rotations that can be applied to nuclei for display
+ * purposes.
+ * 
  * @author ben
  * @since 1.11.5
  *
  */
 public enum RotationMode {
-	
-	ACTUAL ("Actual"), VERTICAL("Vertical");
-	
-	private String name;
-	
-	private RotationMode(String name){
-		this.name = name;
-	}
-	
-	public String toString(){
-		return this.name;
-	}
+
+    ACTUAL("Actual"), VERTICAL("Vertical");
+
+    private String name;
+
+    private RotationMode(String name) {
+        this.name = name;
+    }
+
+    public String toString() {
+        return this.name;
+    }
 
 }

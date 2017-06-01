@@ -25,66 +25,86 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * Describes the methods for retrieving aggregate stats from collections of objects
- * implementing the Statistical interface
+ * Describes the methods for retrieving aggregate stats from collections of
+ * objects implementing the Statistical interface
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public interface StatisticalCollection {
-	
-	/**
-	 * Force the given statistic to be recalculated
-	 * @param stat the statistic to recalculate
-	 * @param component the cellular component to fetch from
-	 */
-	void clear(PlottableStatistic stat, String component);
-	
-	/**
-	 * Force the statistics at the given scale to be recalculated
-	 * @param scale the scale to recalculate
-	 */
-	void clear(MeasurementScale scale);
 
-	/**
-	 * Get the median value of the given stat in the collection
-	 * @param stat the statistic to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale the scale to convert values to
-	 * @return the median statistic value
-	 * @throws Exception
-	 */
-	double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)  throws Exception;
+    /**
+     * Force the given statistic to be recalculated
+     * 
+     * @param stat
+     *            the statistic to recalculate
+     * @param component
+     *            the cellular component to fetch from
+     */
+    void clear(PlottableStatistic stat, String component);
 
-	/**
-	 * Get the median stat for a value with an ID - i.e. a nuclear signal or a segment
-	 * @param stat
-	 * @param scale
-	 * @param id
-	 * @return
-	 * @throws Exception
-	 */
-	double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)  throws Exception;
+    /**
+     * Force the statistics at the given scale to be recalculated
+     * 
+     * @param scale
+     *            the scale to recalculate
+     */
+    void clear(MeasurementScale scale);
 
-	
-		
-	/**
-	 * Get the raw values for the given stat for each object in the collection
-	 * @param stat the statistic to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale the scale to convert values to
-	 * @return the values in the collection
-	 */
-	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale);
-	
-	
-	/**
-	 * Get the raw values for the given stat for each object in the collectionw ith an ID - i.e. a nuclear signal or a segment
-	 * @param stat the statistic to fetch
-	 * @param component the cellular component to fetch from
-	 * @param scale the scale to convert values to
-	 * @param id the id of the compenent to fetch
-	 * @return the values in the collection
-	 */
-	double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    /**
+     * Get the median value of the given stat in the collection
+     * 
+     * @param stat
+     *            the statistic to fetch
+     * @param component
+     *            the cellular component to fetch from
+     * @param scale
+     *            the scale to convert values to
+     * @return the median statistic value
+     * @throws Exception
+     */
+    double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
+
+    /**
+     * Get the median stat for a value with an ID - i.e. a nuclear signal or a
+     * segment
+     * 
+     * @param stat
+     * @param scale
+     * @param id
+     * @return
+     * @throws Exception
+     */
+    double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
+            throws Exception;
+
+    /**
+     * Get the raw values for the given stat for each object in the collection
+     * 
+     * @param stat
+     *            the statistic to fetch
+     * @param component
+     *            the cellular component to fetch from
+     * @param scale
+     *            the scale to convert values to
+     * @return the values in the collection
+     */
+    double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale);
+
+    /**
+     * Get the raw values for the given stat for each object in the collectionw
+     * ith an ID - i.e. a nuclear signal or a segment
+     * 
+     * @param stat
+     *            the statistic to fetch
+     * @param component
+     *            the cellular component to fetch from
+     * @param scale
+     *            the scale to convert values to
+     * @param id
+     *            the id of the compenent to fetch
+     * @return the values in the collection
+     */
+    double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
 }

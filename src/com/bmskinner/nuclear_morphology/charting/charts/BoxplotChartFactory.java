@@ -42,240 +42,225 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
  * This factory creates boxplot charts.
+ * 
  * @author bms41
  *
  */
 public class BoxplotChartFactory extends AbstractChartFactory {
 
-	public BoxplotChartFactory(ChartOptions o){
-		super(o);
-	}
-	
-	/**
-	 * Create an empty boxplot
-	 * @return
-	 */
-	public static JFreeChart makeEmptyChart(){
-		
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
-				null, 
-				null,
-				new DefaultBoxAndWhiskerCategoryDataset(), 
-				false);	
-		
-		formatBoxplot(boxplot);
-		return boxplot;
-	}
-	
-	public JFreeChart createStatisticBoxplot(String component) {
-		
-		if(!options.hasDatasets()){
-			return makeEmptyChart();
-		}
-		
-		if(CellularComponent.NUCLEUS.equals(component)){
-			return createNucleusStatisticBoxplot();
-		}
+    public BoxplotChartFactory(ChartOptions o) {
+        super(o);
+    }
 
-		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
-			return createSignalStatisticBoxplot();
-		}
+    /**
+     * Create an empty boxplot
+     * 
+     * @return
+     */
+    public static JFreeChart makeEmptyChart() {
 
-		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
-			return createSegmentBoxplot();
-		}
-				
-		return makeEmptyChart();
-		
-	}
-	
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 */
+        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null, null,
+                new DefaultBoxAndWhiskerCategoryDataset(), false);
 
-	private JFreeChart createNucleusStatisticBoxplot() {
-		
-		BoxAndWhiskerCategoryDataset ds = null;
-		if(options.getDatasets()!=null){
-			 try {
-				ds = new NucleusDatasetCreator(options).createBoxplotDataset();
-			} catch (ChartDatasetCreationException e) {
-				fine("Error creating boxplot", e);
-				return makeErrorChart();
-			}
-		}
+        formatBoxplot(boxplot);
+        return boxplot;
+    }
 
-		
-		String yLabel = options.getStat().label(options.getScale());
+    public JFreeChart createStatisticBoxplot(String component) {
 
-		JFreeChart 	boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false); 
-		formatBoxplotChart(boxplotChart, options.getDatasets());
-		return boxplotChart;
-		
-	}
-	
-	
-	/**
-	 * Create a segment length boxplot for the given segment name
-	 * @param ds the dataset
-	 * @return
-	 */
-	private JFreeChart createSegmentBoxplot() {
+        if (!options.hasDatasets()) {
+            return makeEmptyChart();
+        }
 
-		PlottableStatistic stat = options.getStat();
-		
-		BoxAndWhiskerCategoryDataset ds;
-		try {
-			ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
-		} catch (ChartDatasetCreationException e) {
-			fine("Error creating boxplot", e);
-			return makeErrorChart();
-		}
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
-				null, 
-				"Segment "+stat.label(options.getScale())
-				, ds
-				, false);	
-		
-		formatBoxplot(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		
-		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+        if (CellularComponent.NUCLEUS.equals(component)) {
+            return createNucleusStatisticBoxplot();
+        }
 
-			BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+            return createSignalStatisticBoxplot();
+        }
 
-			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+            return createSegmentBoxplot();
+        }
 
-				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getColor(series)
-								: options.getDatasets().get(series).getDatasetColour();
+        return makeEmptyChart();
 
-						renderer.setSeriesPaint(series, color);
-						renderer.setSeriesOutlinePaint(series, Color.BLACK);
-			}
+    }
 
-			renderer.setMeanVisible(false);
-			renderer.setUseOutlinePaintForWhiskers(true);
-			plot.setRenderer(datasetIndex, renderer);
-		}
-			
-		return boxplot;
-	}
-		
-	/**
-	 * Create a signal boxplot with the given options
-	 * @param options
-	 * @return
-	 * @throws Exception
-	 */
-	private JFreeChart createSignalStatisticBoxplot(){
-		
-		BoxAndWhiskerCategoryDataset ds;
-		try {
-			ds = new NuclearSignalDatasetCreator(options).createSignalStatisticBoxplotDataset();
-		} catch (ChartDatasetCreationException e) {
-			return makeErrorChart();
-		}
+    /*
+     * 
+     * PRIVATE METHODS
+     * 
+     */
 
-		
-		JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, 
-				null, 
-				options.getStat().label(options.getScale()), 
-				ds, 
-				false);
-		
-		formatBoxplot(boxplot);
-		
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		
-		plot.getDomainAxis().setCategoryMargin(0.10);
-		plot.getDomainAxis().setLowerMargin(0.05);
-		plot.getDomainAxis().setUpperMargin(0.05);
-		
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-		renderer.setItemMargin(0.05);
-		renderer.setMaximumBarWidth(0.5);
+    private JFreeChart createNucleusStatisticBoxplot() {
 
+        BoxAndWhiskerCategoryDataset ds = null;
+        if (options.getDatasets() != null) {
+            try {
+                ds = new NucleusDatasetCreator(options).createBoxplotDataset();
+            } catch (ChartDatasetCreationException e) {
+                fine("Error creating boxplot", e);
+                return makeErrorChart();
+            }
+        }
 
+        String yLabel = options.getStat().label(options.getScale());
 
-		
-		int series=0;
-		for(int column=0; column<ds.getColumnCount(); column++){
-	
-			// The column is the dataset
-//			String datasetName = ds.getColumnKey(column).toString();
-//			log("Looking at dataset "+datasetName);
-			IAnalysisDataset d  = options.getDatasets().get(column);
-						
-			for(int row=0; row<ds.getRowCount(); row++){
-												
-//				log("Series "+series);
-				String name = (String) ds.getRowKey(row);
-//				log("Looking at row "+name);
-				
-				UUID signalGroup = getSignalGroupFromLabel(name);
-				
-				// Not every dataset will have every row.
-				if(d.getCollection().hasSignalGroup(signalGroup)){
-					Paint color = ColourSelecter.getColor(row);
-					try {
+        JFreeChart boxplotChart = ChartFactory.createBoxAndWhiskerChart(null, null, yLabel, ds, false);
+        formatBoxplotChart(boxplotChart, options.getDatasets());
+        return boxplotChart;
 
+    }
 
-					color = d.getCollection().getSignalGroup(signalGroup).hasColour()
-							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: color;
-							    
-					   
-					} catch (UnavailableSignalGroupException e){
-	        			fine("Signal group "+signalGroup+" is not present in collection", e);
-	        		} finally {
-	        			renderer.setSeriesPaint(series, color);
-	        			series++;
-	        		}
-				}
+    /**
+     * Create a segment length boxplot for the given segment name
+     * 
+     * @param ds
+     *            the dataset
+     * @return
+     */
+    private JFreeChart createSegmentBoxplot() {
 
-				
-			}		
-		}
-		return boxplot;
-	}
-		
-	/**
-	 * Apply the default formatting to a boxplot with list
-	 * @param boxplot
-	 */
-	private void formatBoxplotChart(JFreeChart boxplot, List<IAnalysisDataset> list){
-		formatBoxplot(boxplot);
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
-		
-		for(int i=0;i<plot.getDataset().getRowCount();i++){
-			
-			IAnalysisDataset d = list.get(i);
+        PlottableStatistic stat = options.getStat();
 
-			Paint color = d.hasDatasetColour()
-						? d.getDatasetColour()
-						: ColourSelecter.getColor(i);
-						
-						renderer.setSeriesPaint(i, color);
-		}
-	}
-	
-	/**
-	 * Apply basic formatting to the charts, without any series added
-	 * @param boxplot
-	 */
-	private static void formatBoxplot(JFreeChart boxplot){
-		CategoryPlot plot = boxplot.getCategoryPlot();
-		plot.setBackgroundPaint(Color.WHITE);
-		BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
-		plot.setRenderer(renderer);
-		renderer.setUseOutlinePaintForWhiskers(true);   
-		renderer.setBaseOutlinePaint(Color.BLACK);
-		renderer.setBaseFillPaint(Color.LIGHT_GRAY);
-		renderer.setMeanVisible(false);
-	}
+        BoxAndWhiskerCategoryDataset ds;
+        try {
+            ds = new NucleusDatasetCreator(options).createSegmentStatDataset();
+        } catch (ChartDatasetCreationException e) {
+            fine("Error creating boxplot", e);
+            return makeErrorChart();
+        }
+        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,
+                "Segment " + stat.label(options.getScale()), ds, false);
+
+        formatBoxplot(boxplot);
+        CategoryPlot plot = boxplot.getCategoryPlot();
+
+        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
+
+            BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+
+            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
+
+                Paint color = options.getDatasets().get(series).getDatasetColour() == null
+                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+
+                renderer.setSeriesPaint(series, color);
+                renderer.setSeriesOutlinePaint(series, Color.BLACK);
+            }
+
+            renderer.setMeanVisible(false);
+            renderer.setUseOutlinePaintForWhiskers(true);
+            plot.setRenderer(datasetIndex, renderer);
+        }
+
+        return boxplot;
+    }
+
+    /**
+     * Create a signal boxplot with the given options
+     * 
+     * @param options
+     * @return
+     * @throws Exception
+     */
+    private JFreeChart createSignalStatisticBoxplot() {
+
+        BoxAndWhiskerCategoryDataset ds;
+        try {
+            ds = new NuclearSignalDatasetCreator(options).createSignalStatisticBoxplotDataset();
+        } catch (ChartDatasetCreationException e) {
+            return makeErrorChart();
+        }
+
+        JFreeChart boxplot = ChartFactory.createBoxAndWhiskerChart(null, null,
+                options.getStat().label(options.getScale()), ds, false);
+
+        formatBoxplot(boxplot);
+
+        CategoryPlot plot = boxplot.getCategoryPlot();
+
+        plot.getDomainAxis().setCategoryMargin(0.10);
+        plot.getDomainAxis().setLowerMargin(0.05);
+        plot.getDomainAxis().setUpperMargin(0.05);
+
+        BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+        renderer.setItemMargin(0.05);
+        renderer.setMaximumBarWidth(0.5);
+
+        int series = 0;
+        for (int column = 0; column < ds.getColumnCount(); column++) {
+
+            // The column is the dataset
+            // String datasetName = ds.getColumnKey(column).toString();
+            // log("Looking at dataset "+datasetName);
+            IAnalysisDataset d = options.getDatasets().get(column);
+
+            for (int row = 0; row < ds.getRowCount(); row++) {
+
+                // log("Series "+series);
+                String name = (String) ds.getRowKey(row);
+                // log("Looking at row "+name);
+
+                UUID signalGroup = getSignalGroupFromLabel(name);
+
+                // Not every dataset will have every row.
+                if (d.getCollection().hasSignalGroup(signalGroup)) {
+                    Paint color = ColourSelecter.getColor(row);
+                    try {
+
+                        color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour() : color;
+
+                    } catch (UnavailableSignalGroupException e) {
+                        fine("Signal group " + signalGroup + " is not present in collection", e);
+                    } finally {
+                        renderer.setSeriesPaint(series, color);
+                        series++;
+                    }
+                }
+
+            }
+        }
+        return boxplot;
+    }
+
+    /**
+     * Apply the default formatting to a boxplot with list
+     * 
+     * @param boxplot
+     */
+    private void formatBoxplotChart(JFreeChart boxplot, List<IAnalysisDataset> list) {
+        formatBoxplot(boxplot);
+        CategoryPlot plot = boxplot.getCategoryPlot();
+        BoxAndWhiskerRenderer renderer = (BoxAndWhiskerRenderer) plot.getRenderer();
+
+        for (int i = 0; i < plot.getDataset().getRowCount(); i++) {
+
+            IAnalysisDataset d = list.get(i);
+
+            Paint color = d.hasDatasetColour() ? d.getDatasetColour() : ColourSelecter.getColor(i);
+
+            renderer.setSeriesPaint(i, color);
+        }
+    }
+
+    /**
+     * Apply basic formatting to the charts, without any series added
+     * 
+     * @param boxplot
+     */
+    private static void formatBoxplot(JFreeChart boxplot) {
+        CategoryPlot plot = boxplot.getCategoryPlot();
+        plot.setBackgroundPaint(Color.WHITE);
+        BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        plot.setRenderer(renderer);
+        renderer.setUseOutlinePaintForWhiskers(true);
+        renderer.setBaseOutlinePaint(Color.BLACK);
+        renderer.setBaseFillPaint(Color.LIGHT_GRAY);
+        renderer.setMeanVisible(false);
+    }
 
 }

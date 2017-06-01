@@ -1,5 +1,5 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
+ *     Copyright (C) 2016 Ben Skinner
  *
  *     This file is part of Nuclear Morphology Analysis.
  *

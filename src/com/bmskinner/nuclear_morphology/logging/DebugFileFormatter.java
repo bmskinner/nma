@@ -18,102 +18,83 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.logging;
 
-
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-
 public class DebugFileFormatter extends Formatter {
-	
-	private static final String NEWLINE = System.getProperty("line.separator");
-	private static final String SEPARATOR = "\t";
-	private static final String STACK = "STACK";
-	
-	@Override
-	public String format(LogRecord record) {
 
-		StringBuffer buffer = new StringBuffer();
+    private static final String NEWLINE   = System.getProperty("line.separator");
+    private static final String SEPARATOR = "\t";
+    private static final String STACK     = "STACK";
 
-		/*
-		 * The source method name can be obscured by the log functions.
-		 * Get the stack trace and find the previous calling method.
-		 */
+    @Override
+    public String format(LogRecord record) {
 
-		String sourceMethod = record.getSourceMethodName();
-		String sourceClass  = record.getSourceClassName();
+        StringBuffer buffer = new StringBuffer();
 
-		if(sourceMethod.equals("log") || sourceMethod.startsWith("stack") || sourceMethod.startsWith("error") ){
-			// work back to the actual calling method
-			// this should be before the Loggable call
+        /*
+         * The source method name can be obscured by the log functions. Get the
+         * stack trace and find the previous calling method.
+         */
 
-			StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			sourceMethod = array[9].getMethodName();
+        String sourceMethod = record.getSourceMethodName();
+        String sourceClass = record.getSourceClassName();
 
-			for(int i=0; i< array.length; i++){
-				StackTraceElement e = array[i];
-				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
-					sourceMethod = array[i+1].getMethodName();
-					sourceClass  = array[i+1].getClassName();
-					break;
-				}
-			}
-		}
+        if (sourceMethod.equals("log") || sourceMethod.startsWith("stack") || sourceMethod.startsWith("error")) {
+            // work back to the actual calling method
+            // this should be before the Loggable call
 
-		if(sourceMethod.equals("log")){
-			StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			sourceMethod = array[8].getMethodName();
+            StackTraceElement[] array = Thread.currentThread().getStackTrace();
+            sourceMethod = array[9].getMethodName();
 
-		}
+            for (int i = 0; i < array.length; i++) {
+                StackTraceElement e = array[i];
+                if (e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")) {
+                    sourceMethod = array[i + 1].getMethodName();
+                    sourceClass = array[i + 1].getClassName();
+                    break;
+                }
+            }
+        }
 
-		String date = calcDate(record.getMillis());
+        if (sourceMethod.equals("log")) {
+            StackTraceElement[] array = Thread.currentThread().getStackTrace();
+            sourceMethod = array[8].getMethodName();
 
-		buffer.append(date)
-			.append(SEPARATOR)
-			.append(record.getLevel())
-			.append(SEPARATOR)
-			.append(sourceClass)
-			.append(SEPARATOR)
-			.append(sourceMethod)
-			.append(SEPARATOR)
-			.append(record.getMessage())
-			.append(NEWLINE);
+        }
 
-		if(record.getLevel()==Level.SEVERE || record.getLevel()==Loggable.TRACE){
+        String date = calcDate(record.getMillis());
 
-			if(record.getThrown()!=null){
-				Throwable t = record.getThrown();
+        buffer.append(date).append(SEPARATOR).append(record.getLevel()).append(SEPARATOR).append(sourceClass)
+                .append(SEPARATOR).append(sourceMethod).append(SEPARATOR).append(record.getMessage()).append(NEWLINE);
 
-				buffer.append(date)
-					.append(SEPARATOR)
-					.append(STACK)	
-					.append(SEPARATOR)
-					.append(t.getMessage())
-					.append(NEWLINE);
+        if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.TRACE) {
 
-				for(StackTraceElement el : t.getStackTrace()){
+            if (record.getThrown() != null) {
+                Throwable t = record.getThrown();
 
-					buffer.append(date)
-						.append(SEPARATOR)
-						.append(STACK)
-						.append(SEPARATOR)
-						.append(el.toString() )
-						.append(NEWLINE);
-				}
-			}
+                buffer.append(date).append(SEPARATOR).append(STACK).append(SEPARATOR).append(t.getMessage())
+                        .append(NEWLINE);
 
-		}
-		return buffer.toString();
-	}
-	 
-	 private String calcDate(long millisecs) {
+                for (StackTraceElement el : t.getStackTrace()) {
 
-		 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
-		 Date date = new Date(millisecs);
-		 return df.format(date);
-	 }
+                    buffer.append(date).append(SEPARATOR).append(STACK).append(SEPARATOR).append(el.toString())
+                            .append(NEWLINE);
+                }
+            }
+
+        }
+        return buffer.toString();
+    }
+
+    private String calcDate(long millisecs) {
+
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss.SSS");
+        Date date = new Date(millisecs);
+        return df.format(date);
+    }
 
 }
-

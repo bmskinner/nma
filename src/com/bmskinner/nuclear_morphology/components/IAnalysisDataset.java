@@ -39,542 +39,596 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * This describes an analysis dataset, which packages a collection
- * of cells with clusters, merge sources, and the options used for
- * the detection of the cells.
+ * This describes an analysis dataset, which packages a collection of cells with
+ * clusters, merge sources, and the options used for the detection of the cells.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface IAnalysisDataset extends Serializable, Loggable  {
-
-	/**
-	 * Make a copy of the cells in this dataset. Does not yet include
-	 * child datasets, clusters or signal groups
-	 * @return
-	 * @throws Exception 
-	 */
-	IAnalysisDataset duplicate() throws Exception;
-
-	/**
-	 * Get the file handler for this dataset. Create a handler
-	 * if needed.
-	 * @return
-	 */
-	Handler getLogHandler() throws Exception;
-
-	/**
-	 * Get the software version used to create the dataset
-	 * @return
-	 */
-	Version getVersion();
-
-	/**
-	 * Add the given cell collection as a child to this dataset. A
-	 * new dataset is contructed to hold it.
-	 * @param collection the collection to add
-	 */
-	void addChildCollection(ICellCollection collection);
-
-	/**
-	 * Add the given dataset as a child of this dataset
-	 * @param dataset
-	 */
-	void addChildDataset(IAnalysisDataset dataset);
-
-	UUID getUUID();
-
-	/**
-	 * Get the name of the dataset. Passes through to
-	 * CellCollection
-	 * @return
-	 * @see CellCollection
-	 */
-	String getName();
-
-	/**
-	 * Set the name of the dataset. Passes through
-	 * to the CellCollection
-	 * @param s
-	 * @see CellCollection
-	 */
-	void setName(String s);
-
-	/**
-	 * Get the save file location
-	 * @return
-	 */
-	File getSavePath();
-
-	/**
-	 * Set the path to save the dataset
-	 * @param file
-	 */
-	void setSavePath(File file);
-
-	/**
-	 * Get the log file for the dataset.
-	 * @return
-	 * @see CellCollection
-	 */
-	File getDebugFile();
-
-	/**
-	 * Allow the collection to update the debug file location
-	 * @param f the new file
-	 */
-	void setDebugFile(File f);
-
-	/**
-	 * Get all the direct children of this dataset
-	 * @return
-	 */
-	Set<UUID> getChildUUIDs();
-
-	/**
-	 * Recursive version of getChildUUIDs.
-	 * Get the children of this dataset, and all
-	 * their children
-	 * @return
-	 */
-	Set<UUID> getAllChildUUIDs();
-
-	/**
-	 * Get the specificed child
-	 * @param id the child UUID
-	 * @return
-	 */
-	IAnalysisDataset getChildDataset(UUID id);
-
-	/**
-	 * Get the AnalysisDataset with the given id
-	 * that is a merge source to this dataset. 
-	 * @param id the UUID of the dataset
-	 * @return the dataset or null
-	 */
-	IAnalysisDataset getMergeSource(UUID id);
-
-	/**
-	 * Recursively fetch all the merge sources for this dataset.
-	 * Only includes the root sources (not intermediate merges)
-	 * @return
-	 */
-	Set<IAnalysisDataset> getAllMergeSources();
-
-	/**
-	 * Add the given dataset as a merge source
-	 * @param dataset
-	 */
-	void addMergeSource(IAnalysisDataset dataset);
-
-	/**
-	 * Get all datasets considered direct merge sources to this
-	 * dataset
-	 * @return
-	 */
-	Set<IAnalysisDataset> getMergeSources();
-
-	/**
-	 * Get the ids of all datasets considered merge sources to this
-	 * dataset
-	 * @return
-	 */
-	Set<UUID> getMergeSourceIDs();
-
-	/**
-	 * Get the ids of all datasets considered merge sources to this
-	 * dataset, recursively (that is, if the merge source is a merge, get
-	 * the sources of that merge)
-	 * @return
-	 */
-	Set<UUID> getAllMergeSourceIDs();
-
-	/**
-	 * Test if a dataset with the given id is present
-	 * as a merge source
-	 * @param id the UUID to test
-	 * @return
-	 */
-	boolean hasMergeSource(UUID id);
-
-	/**
-	 * Test if a dataset is present
-	 * as a merge source
-	 * @param dataset the dataset to test
-	 * @return
-	 */
-	boolean hasMergeSource(IAnalysisDataset dataset);
-
-	/**
-	 * Test if the dataset has merge sources
-	 * @return
-	 */
-	boolean hasMergeSources();
-
-	/**
-	 * Get the number of direct children of this dataset
-	 * @return
-	 */
-	int getChildCount();
-
-	/**
-	 * Check if the dataset has children
-	 * @return
-	 */
-	boolean hasChildren();
-
-	/**
-	 * Get all the direct children of this dataset
-	 * @return
-	 */
-	Collection<IAnalysisDataset> getChildDatasets();
-
-	/**
-	 * Recursive version of get child datasets
-	 * Get all the direct children of this dataset, 
-	 * and all their children.
-	 * @return
-	 */
-	List<IAnalysisDataset> getAllChildDatasets();
-
-	/**
-	 * Get the collection in this dataset
-	 * @return
-	 */
-	ICellCollection getCollection();
-
-	/**
-	 * Get the analysis options from this dataset
-	 * @return
-	 */
-	IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException;
-
-	/**
-	 * Test if the dataset has analysis options set.
-	 * This is not the case for (for example) merge sources
-	 * @return
-	 */
-	boolean hasAnalysisOptions();
-
-	/**
-	 * Set the analysis options for the dataset
-	 * @param analysisOptions
-	 */
-	void setAnalysisOptions(IMutableAnalysisOptions analysisOptions);
-
-	/**
-	 * Add the given dataset as a cluster result.
-	 * This is a form of child dataset
-	 * @param dataset
-	 */
-	void addClusterGroup(IClusterGroup group);
-
-	/**
-	 * Check the list of cluster groups, and return the highest
-	 * cluster group number present
-	 * @return
-	 */
-	int getMaxClusterGroupNumber();
-
-	/**
-	 * Check if the dataset id is in a cluster
-	 * @param id
-	 * @return
-	 */
-	boolean hasCluster(UUID id);
-
-	List<IClusterGroup> getClusterGroups();
-
-	/**
-	 * Get the UUIDs of all datasets in clusters
-	 * @return
-	 */
-	List<UUID> getClusterIDs();
-
-	/**
-	 * Check if the dataset has clusters
-	 * @return
-	 */
-	boolean hasClusters();
-
-	/**
-	 * Test if the given group is present in this dataset
-	 * @param group
-	 * @return
-	 */
-	boolean hasClusterGroup(IClusterGroup group);
-
-	/**
-	 * Check that all cluster groups have child members present;
-	 * if cluster groups do not have children, remove the group
-	 */
-	void refreshClusterGroups();
-
-	/**
-	 * Check if the dataset is root
-	 * @return
-	 */
-	boolean isRoot();
-
-	/**
-	 * Set the dataset root status
-	 * @param b is the dataset root
-	 */
-	void setRoot(boolean b);
-
-	/**
-	 * Delete the child AnalysisDataset specified
-	 * @param id the UUID of the child to delete
-	 */
-	void deleteChild(UUID id);
-
-	/**
-	 * Delete the cluster with the given id
-	 * @param id
-	 */
-	void deleteClusterGroup(IClusterGroup group);
-
-	/**
-	 * Delete an associated dataset
-	 * @param id
-	 */
-	void deleteMergeSource(UUID id);
-
-	/**
-	 * Check if the given dataset is a child dataset of this
-	 * @param child the dataset to test
-	 * @return
-	 */
-	boolean hasChild(IAnalysisDataset child);
-
-	/**
-	 * Test if the given dataset is a child of this dataset or
-	 * of one of its children
-	 * @param child
-	 * @return
-	 */
-	boolean hasRecursiveChild(IAnalysisDataset child);
-
-	/**
-	 * Check if the given dataset is a child dataset of this
-	 * @param child
-	 * @return
-	 */
-	boolean hasChild(UUID child);
-
-	/**
-	 * Set the dataset colour (used in comparisons between datasets)
-	 * @param colour the new colour
-	 */
-	void setDatasetColour(Paint colour);
-
-	/**
-	 * Get the currently set dataset colour, or null if not set
-	 * @return colour or null
-	 */
-	Paint getDatasetColour();
-
-	/**
-	 * Test if the dataset colour is set or null
-	 * @return
-	 */
-	boolean hasDatasetColour();
-
-	/**
-	 * Get the swatch, or null if the swatch is not set. 
-	 * Transient, not saved to nmd
-	 * @return
-	 */
-	//	public ColourSwatch getSwatch() {
-	//		return swatch;
-	//	}
-
-	String toString();
-
-	/**
-	 * Update the source image paths in the dataset and its children
-	 * to use the given directory 
-	 * @param expectedImageDirectory
-	 * @param dataset
-	 * @throws Exception
-	 */
-	void updateSourceImageDirectory(File expectedImageDirectory);
-
-	/**
-	 * Test if all the datasets in the list have a consensus nucleus
-	 * @param list
-	 * @return
-	 */
-	static boolean haveConsensusNuclei(List<IAnalysisDataset> list){
-		for(IAnalysisDataset d : list){
-			if( ! d.getCollection().hasConsensus()){
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Test if all the datasets have the same type of nucleus
-	 * @param list
-	 * @return
-	 */
-	static boolean areSameNucleusType(List<IAnalysisDataset> list){
-		
-		NucleusType type = list.get(0).getCollection().getNucleusType();
-		
-		for(IAnalysisDataset d : list){
-			NucleusType next = d.getCollection().getNucleusType();
-			if(! next.equals(type)){
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * Test if the merge sources of a dataset have the same analysis options
-	 * TODO: make recursive; what happens when two merged datsets are merged?
-	 * @param dataset
-	 * @return the common options, or null if an options is different
-	 */
-	static boolean mergedSourceOptionsAreSame(IAnalysisDataset dataset){
-
-		Set<IAnalysisDataset> list = dataset.getMergeSources();
-		
-		boolean ok = true;
-
-		for(IAnalysisDataset d1 : list){
-			
-			/*
-			 * If the dataset has merge sources, the options are null
-			 * In this case, recursively go through the dataset's merge sources
-			 * until the root datasets are found with analysis options
-			 */
-			if( d1.hasMergeSources() ){
-				ok = mergedSourceOptionsAreSame(d1);
-				
-			} else {
-				
-				for(IAnalysisDataset d2 : list){
-					if(d1==d2){
-						continue; // ignore self self comparisons
-					}
-					
-					// ignore d2 with a merge source - it will be covered in the d1 loop
-					if(d2.hasMergeSources()){
-						continue;
-					}
-
-					
-					try{
-						IAnalysisOptions a1 = d1.getAnalysisOptions();
-						IAnalysisOptions a2 = d2.getAnalysisOptions();
-
-					
-
-						if(a1==null || a2==null){
-							ok = false;
-							continue;
-						}
-
-						if( ! a1.equals(a2) ){
-							ok = false;
-						}
-					} catch (MissingOptionException e) {
-						ok = false;
-					}
-
-				}
-
-			}
-
-		}
-		return ok;
-	}
-	
-	/**
-	 * Get the nucleus type that is applicable to all datasets in the list
-	 * @param list
-	 * @return
-	 */
-	static NucleusType getBroadestNucleusType(List<IAnalysisDataset> list){
-		
-		NucleusType type = list.get(0).getCollection().getNucleusType();
-		if(areSameNucleusType(list)){
-			return type;
-		}
-		
-		return NucleusType.ROUND;
-	}
-	
-	/**
-	 * Get the most recent common ancestor of the dataset save file paths
-	 * @param datasets the list of datasets. 
-	 * @return a file for the common directory. Check that the path exists and 
-	 * is a directory before using this.
-	 */
-	static File commonPathOfFiles(List<IAnalysisDataset> datasets){
-		
-		List<File> files = new ArrayList<File>(datasets.size());
-		for(IAnalysisDataset d : datasets){
-			files.add( d.getSavePath());
-		}
-		
-		String[][] folders = new String[files.size()][];
-		
-		int k=0;
-		
-		// Split out the path elements to an array
-		for(File f : files){
-
-			Path p = f.toPath();
-			
-			
-			Iterator<Path> it = p.iterator();
-			List<String> s = new ArrayList<String>();
-			s.add(p.getRoot().toString());
-			while(it.hasNext()){
-				Path n = it.next();
-				s.add(n.toString());
-				
-			}
-			folders[k++] = s.toArray(new String[0]);
-			
-		}
-		
-		boolean breakLoop = false;
-		List<String> common = new ArrayList<String>();
-		for(int col=0; col<folders[0].length; col++){
-			
-			if(breakLoop){
-				break;
-			}
-			// Get first row
-			String s = folders[0][col];
-			
-			for(int row=1; row<files.size(); row++){
-				if(!s.equals(folders[row][col])){
-					breakLoop = true;
-					break;
-				}
-			}
-			if(breakLoop==false)
-				common.add(s);
-			
-		}
-		
-		String commonPath = "";
-		for(int i=0; i<common.size(); i++){
-			
-			commonPath += common.get(i);
-			if(i>0 && i<common.size()-1){ // don't add separator after root or at the end
-				commonPath += File.separator;
-			}
-		}
-		
-
-		return new File(commonPath);		
-	}
+public interface IAnalysisDataset extends Serializable, Loggable {
+
+    /**
+     * Make a copy of the cells in this dataset. Does not yet include child
+     * datasets, clusters or signal groups
+     * 
+     * @return
+     * @throws Exception
+     */
+    IAnalysisDataset duplicate() throws Exception;
+
+    /**
+     * Get the file handler for this dataset. Create a handler if needed.
+     * 
+     * @return
+     */
+    Handler getLogHandler() throws Exception;
+
+    /**
+     * Get the software version used to create the dataset
+     * 
+     * @return
+     */
+    Version getVersion();
+
+    /**
+     * Add the given cell collection as a child to this dataset. A new dataset
+     * is contructed to hold it.
+     * 
+     * @param collection
+     *            the collection to add
+     */
+    void addChildCollection(ICellCollection collection);
+
+    /**
+     * Add the given dataset as a child of this dataset
+     * 
+     * @param dataset
+     */
+    void addChildDataset(IAnalysisDataset dataset);
+
+    UUID getUUID();
+
+    /**
+     * Get the name of the dataset. Passes through to CellCollection
+     * 
+     * @return
+     * @see CellCollection
+     */
+    String getName();
+
+    /**
+     * Set the name of the dataset. Passes through to the CellCollection
+     * 
+     * @param s
+     * @see CellCollection
+     */
+    void setName(String s);
+
+    /**
+     * Get the save file location
+     * 
+     * @return
+     */
+    File getSavePath();
+
+    /**
+     * Set the path to save the dataset
+     * 
+     * @param file
+     */
+    void setSavePath(File file);
+
+    /**
+     * Get the log file for the dataset.
+     * 
+     * @return
+     * @see CellCollection
+     */
+    File getDebugFile();
+
+    /**
+     * Allow the collection to update the debug file location
+     * 
+     * @param f
+     *            the new file
+     */
+    void setDebugFile(File f);
+
+    /**
+     * Get all the direct children of this dataset
+     * 
+     * @return
+     */
+    Set<UUID> getChildUUIDs();
+
+    /**
+     * Recursive version of getChildUUIDs. Get the children of this dataset, and
+     * all their children
+     * 
+     * @return
+     */
+    Set<UUID> getAllChildUUIDs();
+
+    /**
+     * Get the specificed child
+     * 
+     * @param id
+     *            the child UUID
+     * @return
+     */
+    IAnalysisDataset getChildDataset(UUID id);
+
+    /**
+     * Get the AnalysisDataset with the given id that is a merge source to this
+     * dataset.
+     * 
+     * @param id
+     *            the UUID of the dataset
+     * @return the dataset or null
+     */
+    IAnalysisDataset getMergeSource(UUID id);
+
+    /**
+     * Recursively fetch all the merge sources for this dataset. Only includes
+     * the root sources (not intermediate merges)
+     * 
+     * @return
+     */
+    Set<IAnalysisDataset> getAllMergeSources();
+
+    /**
+     * Add the given dataset as a merge source
+     * 
+     * @param dataset
+     */
+    void addMergeSource(IAnalysisDataset dataset);
+
+    /**
+     * Get all datasets considered direct merge sources to this dataset
+     * 
+     * @return
+     */
+    Set<IAnalysisDataset> getMergeSources();
+
+    /**
+     * Get the ids of all datasets considered merge sources to this dataset
+     * 
+     * @return
+     */
+    Set<UUID> getMergeSourceIDs();
+
+    /**
+     * Get the ids of all datasets considered merge sources to this dataset,
+     * recursively (that is, if the merge source is a merge, get the sources of
+     * that merge)
+     * 
+     * @return
+     */
+    Set<UUID> getAllMergeSourceIDs();
+
+    /**
+     * Test if a dataset with the given id is present as a merge source
+     * 
+     * @param id
+     *            the UUID to test
+     * @return
+     */
+    boolean hasMergeSource(UUID id);
+
+    /**
+     * Test if a dataset is present as a merge source
+     * 
+     * @param dataset
+     *            the dataset to test
+     * @return
+     */
+    boolean hasMergeSource(IAnalysisDataset dataset);
+
+    /**
+     * Test if the dataset has merge sources
+     * 
+     * @return
+     */
+    boolean hasMergeSources();
+
+    /**
+     * Get the number of direct children of this dataset
+     * 
+     * @return
+     */
+    int getChildCount();
+
+    /**
+     * Check if the dataset has children
+     * 
+     * @return
+     */
+    boolean hasChildren();
+
+    /**
+     * Get all the direct children of this dataset
+     * 
+     * @return
+     */
+    Collection<IAnalysisDataset> getChildDatasets();
+
+    /**
+     * Recursive version of get child datasets Get all the direct children of
+     * this dataset, and all their children.
+     * 
+     * @return
+     */
+    List<IAnalysisDataset> getAllChildDatasets();
+
+    /**
+     * Get the collection in this dataset
+     * 
+     * @return
+     */
+    ICellCollection getCollection();
+
+    /**
+     * Get the analysis options from this dataset
+     * 
+     * @return
+     */
+    IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException;
+
+    /**
+     * Test if the dataset has analysis options set. This is not the case for
+     * (for example) merge sources
+     * 
+     * @return
+     */
+    boolean hasAnalysisOptions();
+
+    /**
+     * Set the analysis options for the dataset
+     * 
+     * @param analysisOptions
+     */
+    void setAnalysisOptions(IMutableAnalysisOptions analysisOptions);
+
+    /**
+     * Add the given dataset as a cluster result. This is a form of child
+     * dataset
+     * 
+     * @param dataset
+     */
+    void addClusterGroup(IClusterGroup group);
+
+    /**
+     * Check the list of cluster groups, and return the highest cluster group
+     * number present
+     * 
+     * @return
+     */
+    int getMaxClusterGroupNumber();
+
+    /**
+     * Check if the dataset id is in a cluster
+     * 
+     * @param id
+     * @return
+     */
+    boolean hasCluster(UUID id);
+
+    List<IClusterGroup> getClusterGroups();
+
+    /**
+     * Get the UUIDs of all datasets in clusters
+     * 
+     * @return
+     */
+    List<UUID> getClusterIDs();
+
+    /**
+     * Check if the dataset has clusters
+     * 
+     * @return
+     */
+    boolean hasClusters();
+
+    /**
+     * Test if the given group is present in this dataset
+     * 
+     * @param group
+     * @return
+     */
+    boolean hasClusterGroup(IClusterGroup group);
+
+    /**
+     * Check that all cluster groups have child members present; if cluster
+     * groups do not have children, remove the group
+     */
+    void refreshClusterGroups();
+
+    /**
+     * Check if the dataset is root
+     * 
+     * @return
+     */
+    boolean isRoot();
+
+    /**
+     * Set the dataset root status
+     * 
+     * @param b
+     *            is the dataset root
+     */
+    void setRoot(boolean b);
+
+    /**
+     * Delete the child AnalysisDataset specified
+     * 
+     * @param id
+     *            the UUID of the child to delete
+     */
+    void deleteChild(UUID id);
+
+    /**
+     * Delete the cluster with the given id
+     * 
+     * @param id
+     */
+    void deleteClusterGroup(IClusterGroup group);
+
+    /**
+     * Delete an associated dataset
+     * 
+     * @param id
+     */
+    void deleteMergeSource(UUID id);
+
+    /**
+     * Check if the given dataset is a child dataset of this
+     * 
+     * @param child
+     *            the dataset to test
+     * @return
+     */
+    boolean hasChild(IAnalysisDataset child);
+
+    /**
+     * Test if the given dataset is a child of this dataset or of one of its
+     * children
+     * 
+     * @param child
+     * @return
+     */
+    boolean hasRecursiveChild(IAnalysisDataset child);
+
+    /**
+     * Check if the given dataset is a child dataset of this
+     * 
+     * @param child
+     * @return
+     */
+    boolean hasChild(UUID child);
+
+    /**
+     * Set the dataset colour (used in comparisons between datasets)
+     * 
+     * @param colour
+     *            the new colour
+     */
+    void setDatasetColour(Paint colour);
+
+    /**
+     * Get the currently set dataset colour, or null if not set
+     * 
+     * @return colour or null
+     */
+    Paint getDatasetColour();
+
+    /**
+     * Test if the dataset colour is set or null
+     * 
+     * @return
+     */
+    boolean hasDatasetColour();
+
+    /**
+     * Get the swatch, or null if the swatch is not set. Transient, not saved to
+     * nmd
+     * 
+     * @return
+     */
+    // public ColourSwatch getSwatch() {
+    // return swatch;
+    // }
+
+    String toString();
+
+    /**
+     * Update the source image paths in the dataset and its children to use the
+     * given directory
+     * 
+     * @param expectedImageDirectory
+     * @param dataset
+     * @throws Exception
+     */
+    void updateSourceImageDirectory(File expectedImageDirectory);
+
+    /**
+     * Test if all the datasets in the list have a consensus nucleus
+     * 
+     * @param list
+     * @return
+     */
+    static boolean haveConsensusNuclei(List<IAnalysisDataset> list) {
+        for (IAnalysisDataset d : list) {
+            if (!d.getCollection().hasConsensus()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Test if all the datasets have the same type of nucleus
+     * 
+     * @param list
+     * @return
+     */
+    static boolean areSameNucleusType(List<IAnalysisDataset> list) {
+
+        NucleusType type = list.get(0).getCollection().getNucleusType();
+
+        for (IAnalysisDataset d : list) {
+            NucleusType next = d.getCollection().getNucleusType();
+            if (!next.equals(type)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Test if the merge sources of a dataset have the same analysis options
+     * TODO: make recursive; what happens when two merged datsets are merged?
+     * 
+     * @param dataset
+     * @return the common options, or null if an options is different
+     */
+    static boolean mergedSourceOptionsAreSame(IAnalysisDataset dataset) {
+
+        Set<IAnalysisDataset> list = dataset.getMergeSources();
+
+        boolean ok = true;
+
+        for (IAnalysisDataset d1 : list) {
+
+            /*
+             * If the dataset has merge sources, the options are null In this
+             * case, recursively go through the dataset's merge sources until
+             * the root datasets are found with analysis options
+             */
+            if (d1.hasMergeSources()) {
+                ok = mergedSourceOptionsAreSame(d1);
+
+            } else {
+
+                for (IAnalysisDataset d2 : list) {
+                    if (d1 == d2) {
+                        continue; // ignore self self comparisons
+                    }
+
+                    // ignore d2 with a merge source - it will be covered in the
+                    // d1 loop
+                    if (d2.hasMergeSources()) {
+                        continue;
+                    }
+
+                    try {
+                        IAnalysisOptions a1 = d1.getAnalysisOptions();
+                        IAnalysisOptions a2 = d2.getAnalysisOptions();
+
+                        if (a1 == null || a2 == null) {
+                            ok = false;
+                            continue;
+                        }
+
+                        if (!a1.equals(a2)) {
+                            ok = false;
+                        }
+                    } catch (MissingOptionException e) {
+                        ok = false;
+                    }
+
+                }
+
+            }
+
+        }
+        return ok;
+    }
+
+    /**
+     * Get the nucleus type that is applicable to all datasets in the list
+     * 
+     * @param list
+     * @return
+     */
+    static NucleusType getBroadestNucleusType(List<IAnalysisDataset> list) {
+
+        NucleusType type = list.get(0).getCollection().getNucleusType();
+        if (areSameNucleusType(list)) {
+            return type;
+        }
+
+        return NucleusType.ROUND;
+    }
+
+    /**
+     * Get the most recent common ancestor of the dataset save file paths
+     * 
+     * @param datasets
+     *            the list of datasets.
+     * @return a file for the common directory. Check that the path exists and
+     *         is a directory before using this.
+     */
+    static File commonPathOfFiles(List<IAnalysisDataset> datasets) {
+
+        List<File> files = new ArrayList<File>(datasets.size());
+        for (IAnalysisDataset d : datasets) {
+            files.add(d.getSavePath());
+        }
+
+        String[][] folders = new String[files.size()][];
+
+        int k = 0;
+
+        // Split out the path elements to an array
+        for (File f : files) {
+
+            Path p = f.toPath();
+
+            Iterator<Path> it = p.iterator();
+            List<String> s = new ArrayList<String>();
+            s.add(p.getRoot().toString());
+            while (it.hasNext()) {
+                Path n = it.next();
+                s.add(n.toString());
+
+            }
+            folders[k++] = s.toArray(new String[0]);
+
+        }
+
+        boolean breakLoop = false;
+        List<String> common = new ArrayList<String>();
+        for (int col = 0; col < folders[0].length; col++) {
+
+            if (breakLoop) {
+                break;
+            }
+            // Get first row
+            String s = folders[0][col];
+
+            for (int row = 1; row < files.size(); row++) {
+                if (!s.equals(folders[row][col])) {
+                    breakLoop = true;
+                    break;
+                }
+            }
+            if (breakLoop == false)
+                common.add(s);
+
+        }
+
+        String commonPath = "";
+        for (int i = 0; i < common.size(); i++) {
+
+            commonPath += common.get(i);
+            if (i > 0 && i < common.size() - 1) { // don't add separator after
+                                                  // root or at the end
+                commonPath += File.separator;
+            }
+        }
+
+        return new File(commonPath);
+    }
 
 }

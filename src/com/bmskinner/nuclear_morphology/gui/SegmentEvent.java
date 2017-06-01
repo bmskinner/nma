@@ -24,43 +24,47 @@ import java.util.UUID;
 
 @SuppressWarnings("serial")
 public class SegmentEvent extends EventObject {
-	
-	private UUID id;
-	private int index;
-	private int type;
-	
-	public static final int MOVE_START_INDEX = 0;
-	
-	/**
-	 * Create an event from a source, with the given message
-	 * @param source the source of the datasets
-	 * @param message the instruction on what to do with the datasets
-	 * @param sourceName the name of the object or component generating the datasets
-	 * @param list the datasets to carry
-	 */
-	public SegmentEvent( Object source, UUID id, int index, int type ) {
-		super( source );
-		this.id = id;
-		this.index = index;
-		this.type = type;
-	}
 
-	public UUID getId() {
-		return id;
-	}
+    private UUID id;
+    private int  index;
+    private int  type;
 
-	public int getIndex() {
-		return index;
-	}
+    public static final int MOVE_START_INDEX = 0;
 
-	/**
-	 * The type of action to take - see the static ints
-	 * of SegmentEvent
-	 * @return
-	 */
-	public int getType() {
-		return type;
-	}
-	
+    /**
+     * Create an event from a source, with the given message
+     * 
+     * @param source
+     *            the source of the datasets
+     * @param message
+     *            the instruction on what to do with the datasets
+     * @param sourceName
+     *            the name of the object or component generating the datasets
+     * @param list
+     *            the datasets to carry
+     */
+    public SegmentEvent(Object source, UUID id, int index, int type) {
+        super(source);
+        this.id = id;
+        this.index = index;
+        this.type = type;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    /**
+     * The type of action to take - see the static ints of SegmentEvent
+     * 
+     * @return
+     */
+    public int getType() {
+        return type;
+    }
 
 }

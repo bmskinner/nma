@@ -25,26 +25,28 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 
 /**
  * This event is fired when a chart has been rendered for a given set of options
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
 public class ChartOptionsRenderedEvent extends EventObject {
-	
-	private ChartOptions options;
-	
-	/**
-	 * Create with a source component and the options that have been rendered
-	 * @param source
-	 * @param options
-	 */
-	public ChartOptionsRenderedEvent(Object source, ChartOptions options){
-		super(source);
-		this.options = options;
-		
-	}
 
-	public ChartOptions getOptions() {
-		return options;
-	}	
+    private ChartOptions options;
+
+    /**
+     * Create with a source component and the options that have been rendered
+     * 
+     * @param source
+     * @param options
+     */
+    public ChartOptionsRenderedEvent(Object source, ChartOptions options) {
+        super(source);
+        this.options = options;
+
+    }
+
+    public ChartOptions getOptions() {
+        return options;
+    }
 }

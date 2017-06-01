@@ -20,348 +20,330 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 public class ViolinChartFactory extends AbstractChartFactory {
-		
-	public ViolinChartFactory(ChartOptions o){
-		super(o);
-	}
-	
-	public JFreeChart makeEmptyChart(){
-		
-		return BoxplotChartFactory.makeEmptyChart(); 
-	}
-	
-	/**
-	 * Create a statistic plot for the given component.
-	 * @param component the component. Specified defaults are in {@link CellularComponent}
-	 * @return
-	 */
-	public JFreeChart createStatisticPlot(String component) {
-		finest("Making violin plot for "+component);
-		
-		if(!options.hasDatasets()){
-			return makeEmptyChart();
-		}
-			
-		try {
-			
-			if(CellularComponent.WHOLE_CELL.equals(component)){
-				return createCellStatisticPlot();
-			}
-		
-			if(CellularComponent.NUCLEUS.equals(component)){
-				return createNucleusStatisticPlot();
-			}
 
-			if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
-				return createSignalStatisticPlot();
-			}
+    public ViolinChartFactory(ChartOptions o) {
+        super(o);
+    }
 
-			if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
-				return createSegmentPlot();
-			}
-			
-		} catch(Exception e){
-			stack("Error making violin chart", e);
-			return makeErrorChart();
-		}
-		
-		fine("No chart of type "+component);
-		
-		return makeEmptyChart();
-		
-	}
-	
-	
-	/**
-	 * Create a segment length boxplot for the given segment name
-	 * @param ds the dataset
-	 * @return
-	 */
-	public JFreeChart createSignalColocalisationViolinChart() {
-		
-		ViolinCategoryDataset ds = null;
-		if(options.hasDatasets()){
-			 try {
-				ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
-			} catch (ChartDatasetCreationException e) {
-				stack("Error creating volin dataset", e);
-				return makeErrorChart();
-			}
-		}
-		
-		String scaleString = options.getScale().toString().toLowerCase();
-		
-		JFreeChart chart = createViolinChart(null, 
-				null, 
-				"Distance between signal pairs ("+scaleString+")", 
-				ds, 
-				false);
-		
+    public JFreeChart makeEmptyChart() {
 
-		CategoryPlot plot = chart.getCategoryPlot();
-		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+        return BoxplotChartFactory.makeEmptyChart();
+    }
 
-		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+    /**
+     * Create a statistic plot for the given component.
+     * 
+     * @param component
+     *            the component. Specified defaults are in
+     *            {@link CellularComponent}
+     * @return
+     */
+    public JFreeChart createStatisticPlot(String component) {
+        finest("Making violin plot for " + component);
 
-			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+        if (!options.hasDatasets()) {
+            return makeEmptyChart();
+        }
 
-				renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
-				renderer.setSeriesOutlinePaint(series, Color.BLACK);
-			}
+        try {
 
-		}
-			
-		return chart;
-	}
-	
-	
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 */
-	
-	private static JFreeChart createViolinChart(String title,
-            String categoryAxisLabel, String valueAxisLabel,
+            if (CellularComponent.WHOLE_CELL.equals(component)) {
+                return createCellStatisticPlot();
+            }
+
+            if (CellularComponent.NUCLEUS.equals(component)) {
+                return createNucleusStatisticPlot();
+            }
+
+            if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+                return createSignalStatisticPlot();
+            }
+
+            if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+                return createSegmentPlot();
+            }
+
+        } catch (Exception e) {
+            stack("Error making violin chart", e);
+            return makeErrorChart();
+        }
+
+        fine("No chart of type " + component);
+
+        return makeEmptyChart();
+
+    }
+
+    /**
+     * Create a segment length boxplot for the given segment name
+     * 
+     * @param ds
+     *            the dataset
+     * @return
+     */
+    public JFreeChart createSignalColocalisationViolinChart() {
+
+        ViolinCategoryDataset ds = null;
+        if (options.hasDatasets()) {
+            try {
+                ds = new SignalViolinDatasetCreator(options).createSignalColocalisationViolinDataset();
+            } catch (ChartDatasetCreationException e) {
+                stack("Error creating volin dataset", e);
+                return makeErrorChart();
+            }
+        }
+
+        String scaleString = options.getScale().toString().toLowerCase();
+
+        JFreeChart chart = createViolinChart(null, null, "Distance between signal pairs (" + scaleString + ")", ds,
+                false);
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+
+        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
+
+            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
+
+                renderer.setSeriesPaint(series, Color.LIGHT_GRAY);
+                renderer.setSeriesOutlinePaint(series, Color.BLACK);
+            }
+
+        }
+
+        return chart;
+    }
+
+    /*
+     * 
+     * PRIVATE METHODS
+     * 
+     */
+
+    private static JFreeChart createViolinChart(String title, String categoryAxisLabel, String valueAxisLabel,
             ViolinCategoryDataset dataset, boolean legend) {
-        
+
         CategoryAxis categoryAxis = new CategoryAxis(categoryAxisLabel);
         NumberAxis valueAxis = new NumberAxis(valueAxisLabel);
         valueAxis.setAutoRangeIncludesZero(false);
-        
+
         ViolinRenderer renderer = new ViolinRenderer();
-           
-        CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, 
-                renderer);
-        return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, 
-                legend);
-    } 
 
-	/**
-	 * Create a violin plot for whole cell data
-	 * @return
-	 */
-	private JFreeChart createCellStatisticPlot() {
-		
-		ViolinCategoryDataset ds = null;
-		if(options.hasDatasets()){
-			try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.WHOLE_CELL);
-			} catch (ChartDatasetCreationException e) {
-				stack("Error making chart dataset", e);
-				return makeErrorChart();
-			}
-		} else {
-			return makeEmptyChart();
-		}
+        CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis, renderer);
+        return new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, legend);
+    }
 
-		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
-		
-		CategoryPlot plot = chart.getCategoryPlot();
-		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
-		
-		plot.setDomainGridlinesVisible(false);
-		plot.setRangeGridlinesVisible(true);
+    /**
+     * Create a violin plot for whole cell data
+     * 
+     * @return
+     */
+    private JFreeChart createCellStatisticPlot() {
 
-		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+        ViolinCategoryDataset ds = null;
+        if (options.hasDatasets()) {
+            try {
+                ds = new ViolinDatasetCreator(options)
+                        .createPlottableStatisticViolinDataset(CellularComponent.WHOLE_CELL);
+            } catch (ChartDatasetCreationException e) {
+                stack("Error making chart dataset", e);
+                return makeErrorChart();
+            }
+        } else {
+            return makeEmptyChart();
+        }
 
-			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
 
-				renderer.setSeriesVisibleInLegend(series, false);
-				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getColor(series)
-								: options.getDatasets().get(series).getDatasetColour();
+        CategoryPlot plot = chart.getCategoryPlot();
+        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
-						renderer.setSeriesPaint(series, color);
-						renderer.setSeriesOutlinePaint(series, Color.BLACK);
-			}
-		}
-		
-		if(ds.hasProbabilities()){
-			plot.getRangeAxis().setRange(ds.getProbabiltyRange());
-		}
-				
-		return chart;
-		
-	}
-	
-	private JFreeChart createNucleusStatisticPlot() {
-		
-		ViolinCategoryDataset ds = null;
-		if(options.hasDatasets()){
-			try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
-			} catch (ChartDatasetCreationException e) {
-				stack("Error making chart dataset", e);
-				return makeErrorChart();
-			}
-		} else {
-			return makeEmptyChart();
-		}
+        plot.setDomainGridlinesVisible(false);
+        plot.setRangeGridlinesVisible(true);
 
-		JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
 
-//		log("Making violin chart");
-		
-		CategoryPlot plot = chart.getCategoryPlot();
-		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
-		
-		plot.setDomainGridlinesVisible(false);
-		plot.setRangeGridlinesVisible(true);
+            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+                renderer.setSeriesVisibleInLegend(series, false);
+                Paint color = options.getDatasets().get(series).getDatasetColour() == null
+                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
 
-			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+                renderer.setSeriesPaint(series, color);
+                renderer.setSeriesOutlinePaint(series, Color.BLACK);
+            }
+        }
 
-				renderer.setSeriesVisibleInLegend(series, false);
-				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getColor(series)
-								: options.getDatasets().get(series).getDatasetColour();
+        if (ds.hasProbabilities()) {
+            plot.getRangeAxis().setRange(ds.getProbabiltyRange());
+        }
 
-						renderer.setSeriesPaint(series, color);
-						renderer.setSeriesOutlinePaint(series, Color.BLACK);
-			}
-		}
-		
-		if(ds.hasProbabilities()){
-			plot.getRangeAxis().setRange(ds.getProbabiltyRange());
-		}
-				
-		return chart;
-		
-	}
-	
-	/**
-	 * Create a signal boxplot with the given options
-	 * @param options
-	 * @return
-	 * @throws Exception
-	 */
-	private JFreeChart createSignalStatisticPlot(){
-		
-		ViolinCategoryDataset ds = null;
-		if(options.hasDatasets()){
-			try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
-			} catch (ChartDatasetCreationException e) {
-				stack("Error making chart dataset", e);
-				return makeErrorChart();
-			}
-		} else {
-			return makeEmptyChart();
-		}
-		
-		JFreeChart chart = createViolinChart(null, 
-				null, 
-				options.getStat().label(options.getScale()), 
-				ds, 
-				false);
-		
-		
-		CategoryPlot plot = chart.getCategoryPlot();
-		
-		plot.getDomainAxis().setCategoryMargin(0.10);
-		plot.getDomainAxis().setLowerMargin(0.05);
-		plot.getDomainAxis().setUpperMargin(0.05);
-		plot.setDomainGridlinesVisible(false);
-		plot.setRangeGridlinesVisible(true);
-		
-		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
-		renderer.setItemMargin(0.05);
-		renderer.setMaximumBarWidth(0.5);
+        return chart;
 
+    }
 
+    private JFreeChart createNucleusStatisticPlot() {
 
-		
-		int series=0;
-		for(int column=0; column<ds.getColumnCount(); column++){
-	
-			// The column is the dataset
-//			String datasetName = ds.getColumnKey(column).toString();
-//			log("Looking at dataset "+datasetName);
-			IAnalysisDataset d  = options.getDatasets().get(column);
-						
-			for(int row=0; row<ds.getRowCount(); row++){
-												
-//				log("Series "+series);
-				String name = (String) ds.getRowKey(row);
-//				log("Looking at row "+name);
-				
-				UUID signalGroup = getSignalGroupFromLabel(name);
-				
-				// Not every dataset will have every row.
-				if(d.getCollection().hasSignalGroup(signalGroup)){
-					Paint color =ColourSelecter.getColor(row);
-					try {
+        ViolinCategoryDataset ds = null;
+        if (options.hasDatasets()) {
+            try {
+                ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
+            } catch (ChartDatasetCreationException e) {
+                stack("Error making chart dataset", e);
+                return makeErrorChart();
+            }
+        } else {
+            return makeEmptyChart();
+        }
 
+        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
 
-						color = d.getCollection().getSignalGroup(signalGroup).hasColour()
-							    ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-								: color;
-							    
-					    
-						
-					} catch (UnavailableSignalGroupException e){
-	        			fine("Signal group "+signalGroup+" is not present in collection", e);
-	        		} finally {
-	        			renderer.setSeriesPaint(series, color);
-						series++;
-	        		}
-				}
+        // log("Making violin chart");
 
-				
-			}		
-		}
-		
-		if(ds.hasProbabilities()){
-			plot.getRangeAxis().setRange(ds.getProbabiltyRange());
-		}
-		
-		return chart;
-	}
-	
-	/**
-	 * Create a segment length boxplot for the given segment name
-	 * @param ds the dataset
-	 * @return
-	 */
-	private JFreeChart createSegmentPlot() {
-		
-		ViolinCategoryDataset ds = null;
-		if(options.hasDatasets()){
-			 try {
-				ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
-			} catch (ChartDatasetCreationException e) {
-				fine("Error creating volin dataset", e);
-				return makeErrorChart();
-			}
-		}
-		
-		JFreeChart chart = createViolinChart(null, 
-				null, 
-				options.getStat().label(options.getScale()), 
-				ds, 
-				false);
-		
+        CategoryPlot plot = chart.getCategoryPlot();
+        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
 
-		CategoryPlot plot = chart.getCategoryPlot();
-		ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
-		
-		for(int datasetIndex = 0; datasetIndex< plot.getDatasetCount(); datasetIndex++){
+        plot.setDomainGridlinesVisible(false);
+        plot.setRangeGridlinesVisible(true);
 
-			for(int series=0;series<plot.getDataset(datasetIndex).getRowCount();series++){
+        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
 
-				Paint color = options.getDatasets().get(series).getDatasetColour() == null 
-						? ColourSelecter.getColor(series)
-								: options.getDatasets().get(series).getDatasetColour();
+            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-						renderer.setSeriesPaint(series, color);
-						renderer.setSeriesOutlinePaint(series, Color.BLACK);
-			}
+                renderer.setSeriesVisibleInLegend(series, false);
+                Paint color = options.getDatasets().get(series).getDatasetColour() == null
+                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
 
-		}
-			
-		return chart;
-	}
-	
+                renderer.setSeriesPaint(series, color);
+                renderer.setSeriesOutlinePaint(series, Color.BLACK);
+            }
+        }
+
+        if (ds.hasProbabilities()) {
+            plot.getRangeAxis().setRange(ds.getProbabiltyRange());
+        }
+
+        return chart;
+
+    }
+
+    /**
+     * Create a signal boxplot with the given options
+     * 
+     * @param options
+     * @return
+     * @throws Exception
+     */
+    private JFreeChart createSignalStatisticPlot() {
+
+        ViolinCategoryDataset ds = null;
+        if (options.hasDatasets()) {
+            try {
+                ds = new ViolinDatasetCreator(options)
+                        .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_SIGNAL);
+            } catch (ChartDatasetCreationException e) {
+                stack("Error making chart dataset", e);
+                return makeErrorChart();
+            }
+        } else {
+            return makeEmptyChart();
+        }
+
+        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+
+        CategoryPlot plot = chart.getCategoryPlot();
+
+        plot.getDomainAxis().setCategoryMargin(0.10);
+        plot.getDomainAxis().setLowerMargin(0.05);
+        plot.getDomainAxis().setUpperMargin(0.05);
+        plot.setDomainGridlinesVisible(false);
+        plot.setRangeGridlinesVisible(true);
+
+        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+        renderer.setItemMargin(0.05);
+        renderer.setMaximumBarWidth(0.5);
+
+        int series = 0;
+        for (int column = 0; column < ds.getColumnCount(); column++) {
+
+            // The column is the dataset
+            // String datasetName = ds.getColumnKey(column).toString();
+            // log("Looking at dataset "+datasetName);
+            IAnalysisDataset d = options.getDatasets().get(column);
+
+            for (int row = 0; row < ds.getRowCount(); row++) {
+
+                // log("Series "+series);
+                String name = (String) ds.getRowKey(row);
+                // log("Looking at row "+name);
+
+                UUID signalGroup = getSignalGroupFromLabel(name);
+
+                // Not every dataset will have every row.
+                if (d.getCollection().hasSignalGroup(signalGroup)) {
+                    Paint color = ColourSelecter.getColor(row);
+                    try {
+
+                        color = d.getCollection().getSignalGroup(signalGroup).hasColour()
+                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour() : color;
+
+                    } catch (UnavailableSignalGroupException e) {
+                        fine("Signal group " + signalGroup + " is not present in collection", e);
+                    } finally {
+                        renderer.setSeriesPaint(series, color);
+                        series++;
+                    }
+                }
+
+            }
+        }
+
+        if (ds.hasProbabilities()) {
+            plot.getRangeAxis().setRange(ds.getProbabiltyRange());
+        }
+
+        return chart;
+    }
+
+    /**
+     * Create a segment length boxplot for the given segment name
+     * 
+     * @param ds
+     *            the dataset
+     * @return
+     */
+    private JFreeChart createSegmentPlot() {
+
+        ViolinCategoryDataset ds = null;
+        if (options.hasDatasets()) {
+            try {
+                ds = new ViolinDatasetCreator(options)
+                        .createPlottableStatisticViolinDataset(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+            } catch (ChartDatasetCreationException e) {
+                fine("Error creating volin dataset", e);
+                return makeErrorChart();
+            }
+        }
+
+        JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
+
+        CategoryPlot plot = chart.getCategoryPlot();
+        ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
+
+        for (int datasetIndex = 0; datasetIndex < plot.getDatasetCount(); datasetIndex++) {
+
+            for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
+
+                Paint color = options.getDatasets().get(series).getDatasetColour() == null
+                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+
+                renderer.setSeriesPaint(series, color);
+                renderer.setSeriesOutlinePaint(series, Color.BLACK);
+            }
+
+        }
+
+        return chart;
+    }
+
 }

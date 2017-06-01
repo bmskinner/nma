@@ -36,272 +36,282 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptio
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
- * This provides a virtual dataset view for merge sources. 
+ * This provides a virtual dataset view for merge sources.
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
-public class MergeSourceAnalysisDataset 
-	extends AbstractAnalysisDataset
-	implements IAnalysisDataset {
-	
-	private static final long serialVersionUID = 1L;
+public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implements IAnalysisDataset {
 
-	private IAnalysisDataset parent; // the 'parent to this dataset; the merged dataset with the real cells
-				
-	private IMutableAnalysisOptions analysisOptions; // the analysis options for the merge source 
-	
-	
-	/**
-	 * Create a merge source for the given merged dataset, providing a source template.
-	 * A new virtual cell collection will be created from the merge source dataset.
-	 * @param merged the dataset to which this dataset will belong
-	 * @param mergeSource the original dataset which was merged
-	 */	
-	public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource){
-		super(new VirtualCellCollection(merged,
-				mergeSource.getName(), 
-				mergeSource.getUUID(), 
-				mergeSource.getCollection())
-		
-		);
+    private static final long serialVersionUID = 1L;
 
-		this.parent          = merged;
-		try {
-			this.analysisOptions = mergeSource.getAnalysisOptions();
-		} catch (MissingOptionException e1) {
-			stack(e1.getMessage(), e1);
-		}
-		this.datasetColour   = mergeSource.getDatasetColour();
-		
-		this.getCollection().createProfileCollection();
-		try {
-			mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
-		} catch (ProfileException e) {
-			warn("Unable to create merge source dataset");
-			fine("Error copying offsets", e);
-		}
-		
-		
-			
-	}	
-	
-	/**
-	 * Get the parent dataset (in this case, the merged dataset)
-	 * @return the parent dataset
-	 */
-	public IAnalysisDataset getParent(){
-		return parent;
-	}
+    private IAnalysisDataset parent; // the 'parent to this dataset; the merged
+                                     // dataset with the real cells
 
-	@Override
-	public IAnalysisDataset duplicate() throws Exception {
-		throw new Exception("Not yet implemented");
-	}
+    private IMutableAnalysisOptions analysisOptions; // the analysis options for
+                                                     // the merge source
 
-	@Override
-	public Handler getLogHandler() throws Exception {
-		return parent.getLogHandler();
-	}
+    /**
+     * Create a merge source for the given merged dataset, providing a source
+     * template. A new virtual cell collection will be created from the merge
+     * source dataset.
+     * 
+     * @param merged
+     *            the dataset to which this dataset will belong
+     * @param mergeSource
+     *            the original dataset which was merged
+     */
+    public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
+        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getUUID(),
+                mergeSource.getCollection())
 
-	@Override
-	public void addChildCollection(ICellCollection collection) {}
+        );
 
-	@Override
-	public void addChildDataset(IAnalysisDataset dataset) {}
+        this.parent = merged;
+        try {
+            this.analysisOptions = mergeSource.getAnalysisOptions();
+        } catch (MissingOptionException e1) {
+            stack(e1.getMessage(), e1);
+        }
+        this.datasetColour = mergeSource.getDatasetColour();
 
-	@Override
-	public File getSavePath() {
-		return parent.getSavePath();
-	}
+        this.getCollection().createProfileCollection();
+        try {
+            mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
+        } catch (ProfileException e) {
+            warn("Unable to create merge source dataset");
+            fine("Error copying offsets", e);
+        }
 
-	@Override
-	public void setSavePath(File file) {}
+    }
 
-	@Override
-	public File getDebugFile() {
-		return parent.getDebugFile();
-	}
+    /**
+     * Get the parent dataset (in this case, the merged dataset)
+     * 
+     * @return the parent dataset
+     */
+    public IAnalysisDataset getParent() {
+        return parent;
+    }
 
-	@Override
-	public void setDebugFile(File f) {}
+    @Override
+    public IAnalysisDataset duplicate() throws Exception {
+        throw new Exception("Not yet implemented");
+    }
 
-	@Override
-	public Set<UUID> getAllChildUUIDs() {
-		return new HashSet<UUID>(0);
-	}
+    @Override
+    public Handler getLogHandler() throws Exception {
+        return parent.getLogHandler();
+    }
 
-	@Override
-	public IAnalysisDataset getChildDataset(UUID id) {
-		return null;
-	}
+    @Override
+    public void addChildCollection(ICellCollection collection) {
+    }
 
-	@Override
-	public IAnalysisDataset getMergeSource(UUID id) {
-		if(this.hasMergeSource(id)){
-			
-			for(IAnalysisDataset c : childDatasets){
-				if(c.getUUID().equals(id)){
-					return c;
-				}
-			}
-			
-		} else {
-			for(IAnalysisDataset child : this.getAllMergeSources()){
-				if(child.getUUID().equals(id)){
-					return child;
-				}
-			}
-		}
-		return null;
-	}
+    @Override
+    public void addChildDataset(IAnalysisDataset dataset) {
+    }
 
-	@Override
-	public Set<IAnalysisDataset> getAllMergeSources() {
-		Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>(childDatasets.size());
-		
-		if( ! childDatasets.isEmpty()){
-			
-			for(IAnalysisDataset d : childDatasets){
-				result.add(d);
-				result.addAll(d.getAllChildDatasets());
-			}
-		}		
-		return result;
-	}
+    @Override
+    public File getSavePath() {
+        return parent.getSavePath();
+    }
 
-	@Override
-	public void addMergeSource(IAnalysisDataset dataset) {
-		childDatasets.add( new MergeSourceAnalysisDataset(this, dataset));
-	}
+    @Override
+    public void setSavePath(File file) {
+    }
 
-	@Override
-	public Set<IAnalysisDataset> getMergeSources() {
-		return childDatasets;
-	}
+    @Override
+    public File getDebugFile() {
+        return parent.getDebugFile();
+    }
 
-	@Override
-	public Set<UUID> getMergeSourceIDs() {
-		Set<UUID> result = new HashSet<UUID>(childDatasets.size());
-		for(IAnalysisDataset c : childDatasets){
-			result.add(c.getUUID());
-		}
-		
-		return result;
-	}
+    @Override
+    public void setDebugFile(File f) {
+    }
 
-	@Override
-	public Set<UUID> getAllMergeSourceIDs() {
-		Set<UUID> result = new HashSet<UUID>();
-		
-		Set<UUID> idlist = getMergeSourceIDs();
-		result.addAll(idlist);
-		
-		for(UUID id : idlist){
-			IAnalysisDataset d = getMergeSource(id);
-			
-			result.addAll(d.getAllMergeSourceIDs());
-		}
-		return result;
-	}
+    @Override
+    public Set<UUID> getAllChildUUIDs() {
+        return new HashSet<UUID>(0);
+    }
 
-	@Override
-	public boolean hasMergeSource(UUID id) {
-		for(IAnalysisDataset child : childDatasets){
-			if(child.getUUID().equals(id)){
-				return true;
-			}
-		}
-		return false;
-	}
+    @Override
+    public IAnalysisDataset getChildDataset(UUID id) {
+        return null;
+    }
 
-	@Override
-	public boolean hasMergeSource(IAnalysisDataset dataset) {
-		return childDatasets.contains(dataset);
-	}
+    @Override
+    public IAnalysisDataset getMergeSource(UUID id) {
+        if (this.hasMergeSource(id)) {
 
-	@Override
-	public boolean hasMergeSources() {
-		return !childDatasets.isEmpty();
-	}
+            for (IAnalysisDataset c : childDatasets) {
+                if (c.getUUID().equals(id)) {
+                    return c;
+                }
+            }
 
-	@Override
-	public int getChildCount() {
-		return 0;
-	}
+        } else {
+            for (IAnalysisDataset child : this.getAllMergeSources()) {
+                if (child.getUUID().equals(id)) {
+                    return child;
+                }
+            }
+        }
+        return null;
+    }
 
-	@Override
-	public boolean hasChildren() {
-		return false;
-	}
+    @Override
+    public Set<IAnalysisDataset> getAllMergeSources() {
+        Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>(childDatasets.size());
 
-	@Override
-	public Collection<IAnalysisDataset> getChildDatasets() {
-		return new ArrayList<IAnalysisDataset>(0);
-	}
+        if (!childDatasets.isEmpty()) {
 
-	@Override
-	public List<IAnalysisDataset> getAllChildDatasets() {
-		return new ArrayList<IAnalysisDataset>(0);
-	}
+            for (IAnalysisDataset d : childDatasets) {
+                result.add(d);
+                result.addAll(d.getAllChildDatasets());
+            }
+        }
+        return result;
+    }
 
-	@Override
-	public ICellCollection getCollection() {
-		return cellCollection;
-	}
+    @Override
+    public void addMergeSource(IAnalysisDataset dataset) {
+        childDatasets.add(new MergeSourceAnalysisDataset(this, dataset));
+    }
 
-	@Override
-	public IMutableAnalysisOptions getAnalysisOptions() {
-		return analysisOptions;
-	}
+    @Override
+    public Set<IAnalysisDataset> getMergeSources() {
+        return childDatasets;
+    }
 
-	@Override
-	public boolean hasAnalysisOptions() {
-		return analysisOptions!=null;
-	}
+    @Override
+    public Set<UUID> getMergeSourceIDs() {
+        Set<UUID> result = new HashSet<UUID>(childDatasets.size());
+        for (IAnalysisDataset c : childDatasets) {
+            result.add(c.getUUID());
+        }
 
-	@Override
-	public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
-		this.analysisOptions = analysisOptions;
-		
-	}
+        return result;
+    }
 
-	@Override
-	public void refreshClusterGroups() {}
+    @Override
+    public Set<UUID> getAllMergeSourceIDs() {
+        Set<UUID> result = new HashSet<UUID>();
 
-	@Override
-	public boolean isRoot() {
-		return false;
-	}
+        Set<UUID> idlist = getMergeSourceIDs();
+        result.addAll(idlist);
 
-	@Override
-	public void setRoot(boolean b) {}
+        for (UUID id : idlist) {
+            IAnalysisDataset d = getMergeSource(id);
 
-	@Override
-	public void deleteChild(UUID id) {}
+            result.addAll(d.getAllMergeSourceIDs());
+        }
+        return result;
+    }
 
-	@Override
-	public void deleteMergeSource(UUID id) {
-		
-		Iterator<IAnalysisDataset> it = childDatasets.iterator();
-		
-		while(it.hasNext()){
-			IAnalysisDataset child = it.next();
-			if(child.getUUID().equals(id)){
-				it.remove();
-			}
-		}
-	}
+    @Override
+    public boolean hasMergeSource(UUID id) {
+        for (IAnalysisDataset child : childDatasets) {
+            if (child.getUUID().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	@Override
-	public void updateSourceImageDirectory(File expectedImageDirectory) {}
+    @Override
+    public boolean hasMergeSource(IAnalysisDataset dataset) {
+        return childDatasets.contains(dataset);
+    }
 
-	@Override
-	public Set<UUID> getChildUUIDs() {
-		return new HashSet<UUID>(0);
-	}
+    @Override
+    public boolean hasMergeSources() {
+        return !childDatasets.isEmpty();
+    }
 
-	@Override
-	public void deleteClusterGroup(IClusterGroup group) {}
+    @Override
+    public int getChildCount() {
+        return 0;
+    }
+
+    @Override
+    public boolean hasChildren() {
+        return false;
+    }
+
+    @Override
+    public Collection<IAnalysisDataset> getChildDatasets() {
+        return new ArrayList<IAnalysisDataset>(0);
+    }
+
+    @Override
+    public List<IAnalysisDataset> getAllChildDatasets() {
+        return new ArrayList<IAnalysisDataset>(0);
+    }
+
+    @Override
+    public ICellCollection getCollection() {
+        return cellCollection;
+    }
+
+    @Override
+    public IMutableAnalysisOptions getAnalysisOptions() {
+        return analysisOptions;
+    }
+
+    @Override
+    public boolean hasAnalysisOptions() {
+        return analysisOptions != null;
+    }
+
+    @Override
+    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+        this.analysisOptions = analysisOptions;
+
+    }
+
+    @Override
+    public void refreshClusterGroups() {
+    }
+
+    @Override
+    public boolean isRoot() {
+        return false;
+    }
+
+    @Override
+    public void setRoot(boolean b) {
+    }
+
+    @Override
+    public void deleteChild(UUID id) {
+    }
+
+    @Override
+    public void deleteMergeSource(UUID id) {
+
+        Iterator<IAnalysisDataset> it = childDatasets.iterator();
+
+        while (it.hasNext()) {
+            IAnalysisDataset child = it.next();
+            if (child.getUUID().equals(id)) {
+                it.remove();
+            }
+        }
+    }
+
+    @Override
+    public void updateSourceImageDirectory(File expectedImageDirectory) {
+    }
+
+    @Override
+    public Set<UUID> getChildUUIDs() {
+        return new HashSet<UUID>(0);
+    }
+
+    @Override
+    public void deleteClusterGroup(IClusterGroup group) {
+    }
 
 }

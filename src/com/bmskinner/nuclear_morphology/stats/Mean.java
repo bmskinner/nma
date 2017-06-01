@@ -26,43 +26,44 @@ import java.util.stream.DoubleStream;
 
 @SuppressWarnings("serial")
 public class Mean extends DescriptiveStatistic {
-		
-	public Mean(Number[] array){
-		if(array == null || array.length==0){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-		}
-		List<? extends Number> list = Arrays.asList(array);
-		compareList(list);
-	}		
-	
-	/**
-	 * Calculate the mean value in the given list
-	 * @param list
-	 */
-	public Mean(List<? extends Number> list){
-		if(list == null || list.isEmpty()){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_LIST_ERROR);
-		}
-		
-		compareList(list);
-	}
-		
-	private void compareList(List<? extends Number> list){
-			 
-		if(list.size()==0){
-			throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-		}
-		
-	    if(list.size()==1){
-	    	value = list.get(0);
-	    	return;
-	    }
-	    
-	    double sum = 0;
-	    for(Number d : list){
-	    	sum += d.doubleValue();
-	    }
-	    value = sum / list.size();
-		
-	}
+
+    public Mean(Number[] array) {
+        if (array == null || array.length == 0) {
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        }
+        List<? extends Number> list = Arrays.asList(array);
+        compareList(list);
+    }
+
+    /**
+     * Calculate the mean value in the given list
+     * 
+     * @param list
+     */
+    public Mean(List<? extends Number> list) {
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException(NULL_OR_EMPTY_LIST_ERROR);
+        }
+
+        compareList(list);
+    }
+
+    private void compareList(List<? extends Number> list) {
+
+        if (list.size() == 0) {
+            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
+        }
+
+        if (list.size() == 1) {
+            value = list.get(0);
+            return;
+        }
+
+        double sum = 0;
+        for (Number d : list) {
+            sum += d.doubleValue();
+        }
+        value = sum / list.size();
+
+    }
 }

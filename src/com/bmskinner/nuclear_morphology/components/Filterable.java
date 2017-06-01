@@ -26,58 +26,72 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * Methods for filtering,  dividing and combining collections
+ * Methods for filtering, dividing and combining collections
+ * 
  * @author bms41
  * @since 1.13.4
  */
 public interface Filterable {
-	
-	/**
-	 * Return a collection of cells present in both collections
-	 * @param other the other collection
-	 * @return
-	 */
-	ICellCollection and(ICellCollection collection);
-	
-	/**
-	 * Return a collection of cells present this collection but not the other
-	 * @param other the other collection
-	 * @return
-	 */
-	ICellCollection not(ICellCollection collection);
-	
-	/**
-	 * Return a collection of cells present this collection or the other but not both
-	 * @param other the other collection
-	 * @return a new collection with cells not shared between datasets
-	 */
-	ICellCollection xor(ICellCollection collection);
-	
-	/**
-	 * Return a collection containing cell in either dataset. 
-	 * Cells in both datasets are not duplicated. 
-	 * @param collection the comparison dataset
-	 * @return a new collection with cells from either dataset
-	 */
-	ICellCollection or(ICellCollection collection);
-	
-	/**
-	 * Filter the collection on the given statistic
-	 * @param stat the stat to filter on
-	 * @param scale the measurement scale of the bounds
-	 * @param lower the lower bound for the stat
-	 * @param upper the upper bound for the stat
-	 * @return a new collection with only cells matching the filter
-	 */
-	ICellCollection filterCollection(PlottableStatistic stat,
-			MeasurementScale scale, double lower, double upper);
-	
-	/**
-	 * Filter the collection for cells that
-	 * match the given predicate
-	 * @param predicate
-	 * @return
-	 */
-	ICellCollection filter(Predicate<ICell> predicate);
-	
+
+    /**
+     * Return a collection of cells present in both collections
+     * 
+     * @param other
+     *            the other collection
+     * @return
+     */
+    ICellCollection and(ICellCollection collection);
+
+    /**
+     * Return a collection of cells present this collection but not the other
+     * 
+     * @param other
+     *            the other collection
+     * @return
+     */
+    ICellCollection not(ICellCollection collection);
+
+    /**
+     * Return a collection of cells present this collection or the other but not
+     * both
+     * 
+     * @param other
+     *            the other collection
+     * @return a new collection with cells not shared between datasets
+     */
+    ICellCollection xor(ICellCollection collection);
+
+    /**
+     * Return a collection containing cell in either dataset. Cells in both
+     * datasets are not duplicated.
+     * 
+     * @param collection
+     *            the comparison dataset
+     * @return a new collection with cells from either dataset
+     */
+    ICellCollection or(ICellCollection collection);
+
+    /**
+     * Filter the collection on the given statistic
+     * 
+     * @param stat
+     *            the stat to filter on
+     * @param scale
+     *            the measurement scale of the bounds
+     * @param lower
+     *            the lower bound for the stat
+     * @param upper
+     *            the upper bound for the stat
+     * @return a new collection with only cells matching the filter
+     */
+    ICellCollection filterCollection(PlottableStatistic stat, MeasurementScale scale, double lower, double upper);
+
+    /**
+     * Filter the collection for cells that match the given predicate
+     * 
+     * @param predicate
+     * @return
+     */
+    ICellCollection filter(Predicate<ICell> predicate);
+
 }

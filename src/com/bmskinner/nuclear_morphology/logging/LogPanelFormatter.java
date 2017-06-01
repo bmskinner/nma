@@ -25,112 +25,107 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 public class LogPanelFormatter extends Formatter {
-	
-	private static final String NEWLINE = System.getProperty("line.separator");
-	
-	private static final String SEPARATOR = " | ";
-	
-	private static final String INFO_LEVEL_LBL = "log";
-	private static final String FINE_LEVEL_LBL = "fine";
-	
-	
-	@Override
-	public String format(LogRecord record) {
-		
-		StringBuffer buffer = new StringBuffer();
 
-		String date = calcDate(record.getMillis());
+    private static final String NEWLINE = System.getProperty("line.separator");
 
-		buffer.append(date);
-		buffer.append(" ");
-		
-		if(record.getLevel() == Level.FINE || record.getLevel()==Level.FINER || record.getLevel()==Level.FINEST){
-			
-			buffer.append(formatFinest(record));
-		} else {
-			buffer.append(record.getMessage());
-		}
+    private static final String SEPARATOR = " | ";
 
-		if(record.getThrown()!=null){
-			Throwable t = record.getThrown();
-			buffer.append( " ");
-			buffer.append( t.getClass().getSimpleName());
-			buffer.append( ": ");
-			buffer.append(t.getMessage() );
-			buffer.append( NEWLINE );
+    private static final String INFO_LEVEL_LBL = "log";
+    private static final String FINE_LEVEL_LBL = "fine";
 
-			for(StackTraceElement el : t.getStackTrace()){
-				buffer.append( el.toString() );
-				buffer.append( NEWLINE );
-			}
-		}
-		
-		buffer.append(NEWLINE);
+    @Override
+    public String format(LogRecord record) {
 
-		return buffer.toString();
-	}
-	
-	private String formatFinest(LogRecord record){
-		
-		String sourceMethod = record.getSourceMethodName();
-		String sourceClass  = record.getSourceClassName();
-		
-		if(sourceMethod.equals(INFO_LEVEL_LBL) || sourceMethod.startsWith(FINE_LEVEL_LBL)  ){
-			// work back to the actual calling method
-			// this should be before the Loggable call
+        StringBuffer buffer = new StringBuffer();
 
-			StackTraceElement[] array = Thread.currentThread().getStackTrace();
-			
-			// find the array index with the source method
-			boolean useLine = false;
-			int useIndex = 0;
-			for(int i=0; i<array.length; i++){
-				if(useLine){
-					continue;
-				}
-				StackTraceElement e = array[i];
-				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
-					useIndex = i;
-					useLine = true;
-				}
-				
-			}
-			
+        String date = calcDate(record.getMillis());
 
+        buffer.append(date);
+        buffer.append(" ");
 
-			sourceMethod = array[useIndex+1].getMethodName();
-			sourceClass  = array[useIndex+1].getClassName();
-//			for(int i=0; i< array.length; i++){
-//				StackTraceElement e = array[i];
-//				if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
-//					sourceMethod = array[i+1].getMethodName();
-//					sourceClass  = array[i+1].getClassName();
-//					break;
-//				}
-//			}
-			
-		}
+        if (record.getLevel() == Level.FINE || record.getLevel() == Level.FINER || record.getLevel() == Level.FINEST) {
 
-		StringBuffer buffer = new StringBuffer();
+            buffer.append(formatFinest(record));
+        } else {
+            buffer.append(record.getMessage());
+        }
 
-		buffer.append(record.getMessage());
-		buffer.append(SEPARATOR);
-		buffer.append(sourceClass);
-		buffer.append(SEPARATOR);
-		buffer.append(sourceMethod);
-		buffer.append(SEPARATOR);
-		buffer.append(record.getThreadID());
+        if (record.getThrown() != null) {
+            Throwable t = record.getThrown();
+            buffer.append(" ");
+            buffer.append(t.getClass().getSimpleName());
+            buffer.append(": ");
+            buffer.append(t.getMessage());
+            buffer.append(NEWLINE);
 
+            for (StackTraceElement el : t.getStackTrace()) {
+                buffer.append(el.toString());
+                buffer.append(NEWLINE);
+            }
+        }
 
-		return buffer.toString();
-	}
-	
-	 
-	 private String calcDate(long millisecs) {
+        buffer.append(NEWLINE);
 
-		 SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-		 Date date = new Date(millisecs);
-		 return df.format(date);
-	 }
+        return buffer.toString();
+    }
+
+    private String formatFinest(LogRecord record) {
+
+        String sourceMethod = record.getSourceMethodName();
+        String sourceClass = record.getSourceClassName();
+
+        if (sourceMethod.equals(INFO_LEVEL_LBL) || sourceMethod.startsWith(FINE_LEVEL_LBL)) {
+            // work back to the actual calling method
+            // this should be before the Loggable call
+
+            StackTraceElement[] array = Thread.currentThread().getStackTrace();
+
+            // find the array index with the source method
+            boolean useLine = false;
+            int useIndex = 0;
+            for (int i = 0; i < array.length; i++) {
+                if (useLine) {
+                    continue;
+                }
+                StackTraceElement e = array[i];
+                if (e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")) {
+                    useIndex = i;
+                    useLine = true;
+                }
+
+            }
+
+            sourceMethod = array[useIndex + 1].getMethodName();
+            sourceClass = array[useIndex + 1].getClassName();
+            // for(int i=0; i< array.length; i++){
+            // StackTraceElement e = array[i];
+            // if(e.getClassName().equals("com.bmskinner.nuclear_morphology.logging.Loggable")){
+            // sourceMethod = array[i+1].getMethodName();
+            // sourceClass = array[i+1].getClassName();
+            // break;
+            // }
+            // }
+
+        }
+
+        StringBuffer buffer = new StringBuffer();
+
+        buffer.append(record.getMessage());
+        buffer.append(SEPARATOR);
+        buffer.append(sourceClass);
+        buffer.append(SEPARATOR);
+        buffer.append(sourceMethod);
+        buffer.append(SEPARATOR);
+        buffer.append(record.getThreadID());
+
+        return buffer.toString();
+    }
+
+    private String calcDate(long millisecs) {
+
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+        Date date = new Date(millisecs);
+        return df.format(date);
+    }
 
 }

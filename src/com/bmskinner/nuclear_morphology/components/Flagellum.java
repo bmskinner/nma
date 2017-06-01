@@ -23,30 +23,30 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
- * There can be many types of flagellum; the type of interest mainly
- * is the sperm tail.
+ * There can be many types of flagellum; the type of interest mainly is the
+ * sperm tail.
+ * 
  * @author bms41
  *
  */
 public interface Flagellum extends CellularComponent {
-			
-	
-	public List<IPoint> getSkeleton();
-	
-	/**
-	 * Fetch the skeleton offset to zero
-	 * @return
-	 */
-	List<IPoint> getOffsetSkeleton();
-	
-	List<IPoint> getBorder();
-	
-	// positions are offset by the bounding rectangle for easier plotting
-	List<IPoint> getOffsetBorder();
-	
-	double getLength();
-	
-	Flagellum duplicate();
 
+    public List<IPoint> getSkeleton();
+
+    /**
+     * Fetch the skeleton offset to zero
+     * 
+     * @return
+     */
+    List<IPoint> getOffsetSkeleton();
+
+    List<IPoint> getBorder();
+
+    // positions are offset by the bounding rectangle for easier plotting
+    List<IPoint> getOffsetBorder();
+
+    double getLength();
+
+    Flagellum duplicate();
 
 }

@@ -28,80 +28,83 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 @Deprecated
 public class Mitochondrion extends AbstractCellularComponent implements IMitochondrion {
 
-	private static final long serialVersionUID = 1L;
-	
-	public Mitochondrion(){
-		super();
-	}
-	
-	public Mitochondrion(final IMitochondrion m){
-		super(m);
-	} 
-	
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		finest("\tWriting mitochondrion");
-		out.defaultWriteObject();
-		finest("\tWrote mitochondrion");
-	}
+    private static final long serialVersionUID = 1L;
 
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		finest("Reading mitochondrion");
-		in.defaultReadObject();
-		finest("Read mitochondrion"); 
-	}
+    public Mitochondrion() {
+        super();
+    }
 
-	/* (non-Javadoc)
-	 * @see components.I#alignVertically()
-	 */
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-		
-	}
+    public Mitochondrion(final IMitochondrion m) {
+        super(m);
+    }
 
-	/* (non-Javadoc)
-	 * @see components.I#duplicate()
-	 */
-	@Override
-	public IMitochondrion duplicate() {
-		return new Mitochondrion(this);
-	}
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        finest("\tWriting mitochondrion");
+        out.defaultWriteObject();
+        finest("\tWrote mitochondrion");
+    }
 
-	@Override
-	public String getSourceFileNameWithoutExtension() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        finest("Reading mitochondrion");
+        in.defaultReadObject();
+        finest("Read mitochondrion");
+    }
 
-	@Override
-	public boolean isSmoothByDefault() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.I#alignVertically()
+     */
+    @Override
+    public void alignVertically() {
+        // TODO Auto-generated method stub
 
-	@Override
-	public int compareTo(IMitochondrion o) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    }
 
-	@Override
-	public ImageProcessor getRGBImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.I#duplicate()
+     */
+    @Override
+    public IMitochondrion duplicate() {
+        return new Mitochondrion(this);
+    }
 
-	@Override
-	public ImageProcessor getComponentRGBImage()
-			throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public String getSourceFileNameWithoutExtension() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public void updateSourceFolder(File newFolder) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public boolean isSmoothByDefault() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public int compareTo(IMitochondrion o) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public ImageProcessor getRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateSourceFolder(File newFolder) {
+        // TODO Auto-generated method stub
+
+    }
 
 }

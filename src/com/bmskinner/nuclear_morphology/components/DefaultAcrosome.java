@@ -29,50 +29,53 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * A default implementation of the IAcrosome interface
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public class DefaultAcrosome 
-	extends DefaultCellularComponent 
-	implements IAcrosome {
-	
-	private static final long serialVersionUID = 1L;
+public class DefaultAcrosome extends DefaultCellularComponent implements IAcrosome {
 
-	/**
-	 * Construct with an ROI, a source image and channel, and the original position in the source image
-	 * @param roi
-	 * @param f
-	 * @param channel
-	 * @param position
-	 * @param centreOfMass
-	 */
-	public DefaultAcrosome(Roi roi, IPoint centreOfMass, File f, int channel, int[] position){
-		super(roi, centreOfMass, f, channel, position );
-	}
-		
-	/**
-	 * Construct from an existing acrosome 
-	 * @param n the template acrosome
-	 */
-	protected DefaultAcrosome(IAcrosome n) {
-		super( n);
-	}
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public int compareTo(IAcrosome arg0) {
-		return 0;
-	}
+    /**
+     * Construct with an ROI, a source image and channel, and the original
+     * position in the source image
+     * 
+     * @param roi
+     * @param f
+     * @param channel
+     * @param position
+     * @param centreOfMass
+     */
+    public DefaultAcrosome(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
+        super(roi, centreOfMass, f, channel, position);
+    }
 
-	@Override
-	public IAcrosome duplicate() {
-		return new DefaultAcrosome(this);
-	}
+    /**
+     * Construct from an existing acrosome
+     * 
+     * @param n
+     *            the template acrosome
+     */
+    protected DefaultAcrosome(IAcrosome n) {
+        super(n);
+    }
 
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public int compareTo(IAcrosome arg0) {
+        return 0;
+    }
+
+    @Override
+    public IAcrosome duplicate() {
+        return new DefaultAcrosome(this);
+    }
+
+    @Override
+    public void alignVertically() {
+        // TODO Auto-generated method stub
+
+    }
 
 }

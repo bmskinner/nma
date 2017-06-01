@@ -33,160 +33,159 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Export the locations of the centre of mass of nuclei in a dataset
- * to a file
+ * Export the locations of the centre of mass of nuclei in a dataset to a file
+ * 
  * @author ben
  *
  */
 public class MappingFileExporter implements Exporter, Loggable {
-		
-	public boolean exportCellLocations(IAnalysisDataset d){
-		
-		String fileName = d.getName()+"."+Importer.LOC_FILE_EXTENSION;
-		File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
 
-		
-		
-		if( ! exportFile.getParentFile().isDirectory()){
-			// the desired output folder does not exist
-			warn("The intended export folder does not exist");
-			
-			File folder = GlobalOptions.getInstance().getDefaultDir();
-//			warn("Defaulting to: "+folder.getAbsolutePath());
-			exportFile = new File(folder, fileName);
-		}
-		
-		log("Exporting to "+exportFile.getAbsolutePath());
-		
-		if(exportFile.exists()){
-			exportFile.delete();
-		}
-		
-		StringBuilder builder = new StringBuilder();
-		
-		/*
-		 * Add the cells from the root dataset
-		 */
-		builder.append(makeDatasetHeaderString(d, d.getUUID()));
-		builder.append(makeDatasetCellsString(d));
-		
-		/*
-		 * Add cells from all child datasets
-		 */
-		builder.append(makeChildString(d));
+    public boolean exportCellLocations(IAnalysisDataset d) {
 
-		
-		try {
-			export(builder.toString(), exportFile);
-		} catch (FileNotFoundException e) {
-			stack(e);
-			return false;
-		}
-		return true;
-	}
-	
-	/**
-	 * Add the cells from all child datasets recursively
-	 * @param d
-	 * @return
-	 */
-	private static String makeChildString(IAnalysisDataset d){
-		StringBuilder builder = new StringBuilder();
-		
-		for(IAnalysisDataset child : d.getChildDatasets()){
-			builder.append( makeDatasetHeaderString(child, d.getUUID() ) );
-			builder.append( makeDatasetCellsString( child ) );
-			
-			if(child.hasChildren()){
-				builder.append(  makeChildString(child) );
-			}
-		}
-		
-		return builder.toString();
-	}
-	
-	/**
-	 * Add the cell positions and image names
-	 * @param d
-	 * @return
-	 */
-	private static String makeDatasetCellsString(IAnalysisDataset d){
-		StringBuilder builder = new StringBuilder();
-		
-		for(ICell c : d.getCollection().getCells()){
-			
-//			IJ.log("Cell "+c.getNucleus().getNameAndNumber());
-			
-			int[] originalPosition = c.getNucleus().getPosition();
+        String fileName = d.getName() + "." + Importer.LOC_FILE_EXTENSION;
+        File exportFile = new File(d.getCollection().getOutputFolder(), fileName);
 
-			IPoint com = c.getNucleus().getCentreOfMass();
-			
-			double x = com.getX()+originalPosition[CellularComponent.X_BASE];
-			double y = com.getY()+originalPosition[CellularComponent.Y_BASE];
-			
-			
-//			IJ.log("   Found position: "+x+"-"+y);
-			
-			try{
-			
-				if(c.getNucleus().getSourceFile()!=null){
-					
-//					IJ.log("   Found nucleus source image: "+c.getNucleus().getSourceFile().getAbsolutePath());
-				
-					builder.append( c.getNucleus().getSourceFile().getAbsolutePath() );
-					builder.append( "\t" );
-					builder.append( x );
-					builder.append( "-" );
-					builder.append( y );
-					
-//					IJ.log("   Added all but newline");
-					
-					builder.append( NEWLINE );
-					
+        if (!exportFile.getParentFile().isDirectory()) {
+            // the desired output folder does not exist
+            warn("The intended export folder does not exist");
 
-//					IJ.log("   Appended position");
-				} else {
-//					IJ.log("   Cannot get nucleus image path");
-				}
-			} catch(Exception e){
-//				IJ.log("Cannot make line: "+e.getMessage());
-				return null;
-			}
-			
-		}
-		return builder.toString();
-	}
-	
-	/**
-	 * Add the dataset id, name, and parent
-	 * @param child
-	 * @param parent
-	 * @return
-	 */
-	private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent){
-		StringBuilder builder = new StringBuilder();
+            File folder = GlobalOptions.getInstance().getDefaultDir();
+            // warn("Defaulting to: "+folder.getAbsolutePath());
+            exportFile = new File(folder, fileName);
+        }
 
-		builder.append("UUID\t");
-		builder.append(child.getUUID().toString());
-		builder.append(NEWLINE);
-		
-		builder.append("Name\t");
-		builder.append(child.getName());
-		builder.append(NEWLINE);
-		
-		builder.append("ChildOf\t");
-		builder.append(parent.toString());
-		builder.append(NEWLINE);
-		return builder.toString();
-	}
-	
-	private static void export(String s, File f) throws FileNotFoundException{
+        log("Exporting to " + exportFile.getAbsolutePath());
 
-		PrintWriter out;
-		out = new PrintWriter(f);
-		out.print(s);
-		out.close();
-		
-	}
+        if (exportFile.exists()) {
+            exportFile.delete();
+        }
+
+        StringBuilder builder = new StringBuilder();
+
+        /*
+         * Add the cells from the root dataset
+         */
+        builder.append(makeDatasetHeaderString(d, d.getUUID()));
+        builder.append(makeDatasetCellsString(d));
+
+        /*
+         * Add cells from all child datasets
+         */
+        builder.append(makeChildString(d));
+
+        try {
+            export(builder.toString(), exportFile);
+        } catch (FileNotFoundException e) {
+            stack(e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Add the cells from all child datasets recursively
+     * 
+     * @param d
+     * @return
+     */
+    private static String makeChildString(IAnalysisDataset d) {
+        StringBuilder builder = new StringBuilder();
+
+        for (IAnalysisDataset child : d.getChildDatasets()) {
+            builder.append(makeDatasetHeaderString(child, d.getUUID()));
+            builder.append(makeDatasetCellsString(child));
+
+            if (child.hasChildren()) {
+                builder.append(makeChildString(child));
+            }
+        }
+
+        return builder.toString();
+    }
+
+    /**
+     * Add the cell positions and image names
+     * 
+     * @param d
+     * @return
+     */
+    private static String makeDatasetCellsString(IAnalysisDataset d) {
+        StringBuilder builder = new StringBuilder();
+
+        for (ICell c : d.getCollection().getCells()) {
+
+            // IJ.log("Cell "+c.getNucleus().getNameAndNumber());
+
+            int[] originalPosition = c.getNucleus().getPosition();
+
+            IPoint com = c.getNucleus().getCentreOfMass();
+
+            double x = com.getX() + originalPosition[CellularComponent.X_BASE];
+            double y = com.getY() + originalPosition[CellularComponent.Y_BASE];
+
+            // IJ.log(" Found position: "+x+"-"+y);
+
+            try {
+
+                if (c.getNucleus().getSourceFile() != null) {
+
+                    // IJ.log(" Found nucleus source image:
+                    // "+c.getNucleus().getSourceFile().getAbsolutePath());
+
+                    builder.append(c.getNucleus().getSourceFile().getAbsolutePath());
+                    builder.append("\t");
+                    builder.append(x);
+                    builder.append("-");
+                    builder.append(y);
+
+                    // IJ.log(" Added all but newline");
+
+                    builder.append(NEWLINE);
+
+                    // IJ.log(" Appended position");
+                } else {
+                    // IJ.log(" Cannot get nucleus image path");
+                }
+            } catch (Exception e) {
+                // IJ.log("Cannot make line: "+e.getMessage());
+                return null;
+            }
+
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Add the dataset id, name, and parent
+     * 
+     * @param child
+     * @param parent
+     * @return
+     */
+    private static String makeDatasetHeaderString(IAnalysisDataset child, UUID parent) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("UUID\t");
+        builder.append(child.getUUID().toString());
+        builder.append(NEWLINE);
+
+        builder.append("Name\t");
+        builder.append(child.getName());
+        builder.append(NEWLINE);
+
+        builder.append("ChildOf\t");
+        builder.append(parent.toString());
+        builder.append(NEWLINE);
+        return builder.toString();
+    }
+
+    private static void export(String s, File f) throws FileNotFoundException {
+
+        PrintWriter out;
+        out = new PrintWriter(f);
+        out.print(s);
+        out.close();
+
+    }
 
 }

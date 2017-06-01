@@ -20,12 +20,13 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 /**
- * This listener receives ChartSetEvents. These events are fired
- * by ExportableChartPanels when setChart() is invoked, and allows
- * the UI to update chart panels as soon as the new chart is in place
+ * This listener receives ChartSetEvents. These events are fired by
+ * ExportableChartPanels when setChart() is invoked, and allows the UI to update
+ * chart panels as soon as the new chart is in place
+ * 
  * @author bms41
  *
  */
 public interface ChartSetEventListener {
-	public void chartSetEventReceived(ChartSetEvent e);
+    public void chartSetEventReceived(ChartSetEvent e);
 }

@@ -23,26 +23,26 @@ import java.util.logging.StreamHandler;
 
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 
-public class TextAreaHandler  extends StreamHandler{
+public class TextAreaHandler extends StreamHandler {
 
-//	    JTextArea textArea = null;
-	    LogPanel logPanel; // the log panel to log to
-	    
-	    public TextAreaHandler(LogPanel logPanel){
-	    	this.logPanel = logPanel;
-	    }
+    // JTextArea textArea = null;
+    LogPanel logPanel; // the log panel to log to
 
-	    public void setTextArea(LogPanel logPanel) {
-	        this.logPanel = logPanel;
-	    }
+    public TextAreaHandler(LogPanel logPanel) {
+        this.logPanel = logPanel;
+    }
 
-	    @Override
-	    public void publish(LogRecord record) {
-	        super.publish(record);
-	        flush();
+    public void setTextArea(LogPanel logPanel) {
+        this.logPanel = logPanel;
+    }
 
-	        if (logPanel != null) {
-	        	logPanel.print(getFormatter().format(record));
-	        }
-	    }
-	}
+    @Override
+    public void publish(LogRecord record) {
+        super.publish(record);
+        flush();
+
+        if (logPanel != null) {
+            logPanel.print(getFormatter().format(record));
+        }
+    }
+}

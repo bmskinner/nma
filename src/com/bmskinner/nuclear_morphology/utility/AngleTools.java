@@ -23,89 +23,98 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * Calculate the x and y components of a vector
+ * 
  * @author ben
  *
  */
 public class AngleTools {
-	
-	public AngleTools(){}
-	
-	/**
-	  * Find the length on the x-axis of a line at a given angle
-	 * @param length the line length
-	 * @param angle the angle from 0 relative to positive x axis in degrees
-	 * @return the x distance
-	 */
-	public static double getXComponentOfAngle(double length, double angle){
-		 // cos(angle) = x / h
-		 // x = cos(a)*h
-		 double x = length * Math.cos(Math.toRadians(angle));
-		 return x;
-	 }
 
-	/**
-	  * Find the length on the y-axis of a line at a given angle
-	 * @param length the line length
-	 * @param angle the angle from 0 relative to positive x axis in degrees
-	 * @return the y distance
-	 */
-	 public static double getYComponentOfAngle(double length, double angle){
-		 double y = length * Math.sin(Math.toRadians(angle));
-		 return y;
-	 }
-	 
-	 /**
-	  * Rotate the given point about a centre
-	 * @param p the point to be moved
-	 * @param centre the centre of rotation
-	 * @param angle the angle to rotate in degrees
-	 * @return
-	 */
-	public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle){
-		 // get the distance from the point to the centre of mass
-		 double distance = p.getLengthTo(centre);
+    public AngleTools() {
+    }
 
-		 // get the angle between the centre of mass (C), the point (P) and a
-		 // point directly under the centre of mass (V)
+    /**
+     * Find the length on the x-axis of a line at a given angle
+     * 
+     * @param length
+     *            the line length
+     * @param angle
+     *            the angle from 0 relative to positive x axis in degrees
+     * @return the x distance
+     */
+    public static double getXComponentOfAngle(double length, double angle) {
+        // cos(angle) = x / h
+        // x = cos(a)*h
+        double x = length * Math.cos(Math.toRadians(angle));
+        return x;
+    }
 
-		 /*
-		  *      C
-		  *      |\  
-		  *      V P
-		  * 
-		  */
-		 double oldAngle = centre.findAngle( p,
-				 IPoint.makeNew(centre.getX(),-10));
+    /**
+     * Find the length on the y-axis of a line at a given angle
+     * 
+     * @param length
+     *            the line length
+     * @param angle
+     *            the angle from 0 relative to positive x axis in degrees
+     * @return the y distance
+     */
+    public static double getYComponentOfAngle(double length, double angle) {
+        double y = length * Math.sin(Math.toRadians(angle));
+        return y;
+    }
 
+    /**
+     * Rotate the given point about a centre
+     * 
+     * @param p
+     *            the point to be moved
+     * @param centre
+     *            the centre of rotation
+     * @param angle
+     *            the angle to rotate in degrees
+     * @return
+     */
+    public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle) {
+        // get the distance from the point to the centre of mass
+        double distance = p.getLengthTo(centre);
 
-		 if(p.getX()<centre.getX()){
-			 oldAngle = 360-oldAngle;
-		 }
+        // get the angle between the centre of mass (C), the point (P) and a
+        // point directly under the centre of mass (V)
 
-		 double newAngle = oldAngle + angle;
-		 double newX = AngleTools.getXComponentOfAngle(distance, newAngle) + centre.getX();
-		 double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + centre.getY();
-		 return IPoint.makeNew(newX, newY);
-	 }
-	
-	/**
-	 * Calculate the angle between two lines in radians
-	 * @param line1Start
-	 * @param line1End
-	 * @param line2Start
-	 * @param line2End
-	 * @return
-	 */
-	public static double angleBetweenLines(IPoint line1Start, IPoint line1End, IPoint line2Start, IPoint line2End){
-	    double a = line1End.getX() - line1Start.getX();
-	    double b = line1End.getY() - line1Start.getY();
-	    double c = line2End.getX() - line2Start.getX();
-	    double d = line2End.getY() - line2Start.getY();
+        /*
+         * C |\ V P
+         * 
+         */
+        double oldAngle = centre.findAngle(p, IPoint.makeNew(centre.getX(), -10));
 
-	    double atanA = Math.atan2(a, b);
-	    double atanB = Math.atan2(c, d);
+        if (p.getX() < centre.getX()) {
+            oldAngle = 360 - oldAngle;
+        }
 
-	    return atanA - atanB;
-	}
-	 
+        double newAngle = oldAngle + angle;
+        double newX = AngleTools.getXComponentOfAngle(distance, newAngle) + centre.getX();
+        double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + centre.getY();
+        return IPoint.makeNew(newX, newY);
+    }
+
+    /**
+     * Calculate the angle between two lines in radians
+     * 
+     * @param line1Start
+     * @param line1End
+     * @param line2Start
+     * @param line2End
+     * @return
+     */
+    public static double angleBetweenLines(IPoint line1Start, IPoint line1End, IPoint line2Start, IPoint line2End) {
+        double a = line1End.getX() - line1Start.getX();
+        double b = line1End.getY() - line1Start.getY();
+        double c = line2End.getX() - line2Start.getX();
+        double d = line2End.getY() - line2Start.getY();
+
+        double atanA = Math.atan2(a, b);
+        double atanB = Math.atan2(c, d);
+
+        return atanA - atanB;
+    }
+
 }
