@@ -105,15 +105,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
 	private JTree tree;
-	
-	final private Map<ImageProcessor, Color> imageColours = new HashMap<>(); // hold all the warped images that have been generated
+
 	private ImageCache cache = new ImageCache();
 	
 	
 	private boolean ctrlPressed = false;
     
-	public boolean isCtrlPressed() {
-		synchronized (PopulationsPanel.class) {
+	private boolean isCtrlPressed() {
+		synchronized (SignalWarpingDialog.class) {
 			return ctrlPressed;
 		}
 	}
@@ -140,7 +139,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
 			@Override
 			public boolean dispatchKeyEvent(KeyEvent ke) {
-				synchronized (PopulationsPanel.class) {
+				synchronized (SignalWarpingDialog.class) {
 					switch (ke.getID()) {
 					case KeyEvent.KEY_PRESSED:
 						if (ke.getKeyCode() == KeyEvent.VK_CONTROL) {
@@ -264,15 +263,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		cowarpaliseBtn.addActionListener( e-> {
 			
 			if(cache.displayCount()==2){
+				ImageProcessor w = null;
+				Key k0 = cache.getDisplayKeys().get(0);
+				Key k1 = cache.getDisplayKeys().get(1);
+				
+				if( ! k0.target.equals(k1.target)){
+					updateBlankChart();
+				} else {
+					
+					ImageProcessor a = cache.get(k0);
+					ImageProcessor b = cache.get(k1);
+					w = ImageFilterer.cowarpalise(a, b);
+					updateChart(w, k0.target);
+				}
+
 				
 				
-				ImageProcessor a = cache.getDisplayImages().get(0);
-				ImageProcessor b = cache.getDisplayImages().get(1);
-				
-				ImageProcessor w = ImageFilterer.cowarpalise(a, b);
-				
-				//TODO - check same target
-//				updateChart(w);
 			}
 		});
 		lowerPanel.add(cowarpaliseBtn);
@@ -317,14 +323,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			Object obj = node.getUserObject();
 			if(obj instanceof Key){
 				
-				Key k = (Key)obj;
-				ImageProcessor ip = cache.get( k);
-				
+				Key k = (Key)obj;	
 				
 				if( isCtrlPressed() && cache.hasDisplayImage(k)){
 					cache.removeDisplayImage(k);
 				} else{
-					cache.addDisplayImage(k, ip);
+					cache.addDisplayImage(k);
 				}
 				
 				updateChart(createDisplayImage(), k.target);
@@ -432,18 +436,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		try {
 
 			ImageProcessor image = warper.get();
-			cache.add(datasetBoxTwo.getSelectedDataset(), 
-					datasetBoxOne.getSelectedDataset(), 
-					signalBox.getSelectedID(),
-					image);
 			
-			cache.addDisplayImage(datasetBoxTwo.getSelectedDataset(), 
+			Key k = cache.new Key(datasetBoxTwo.getSelectedDataset(), 
 					datasetBoxOne.getSelectedDataset(), 
-					signalBox.getSelectedID(),
-					image);
+					signalBox.getSelectedID());
+			
+			cache.add(k, image);
+			
+			cache.addDisplayImage(k);
 			
 			Color c = assignDisplayColour(image);
-			imageColours.put(image, c); 
+			cache.setColour(k, c);
 			
 			updateTree();
 			
@@ -504,19 +507,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			colour = Color.WHITE;
 		}
 		
-		return colour;
-				
-//		if(!isAddToImage){
-//			mergableImages.clear();
-//		} 
-		
-		
-//		if(displayImages.size()==2){
-//			cowarpaliseBtn.setEnabled(true);
-//		} else {
-//			cowarpaliseBtn.setEnabled(false);
-//		}
-		
+		return colour;		
 	}
 	
 	
@@ -531,9 +522,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		// Recolour each of the grey images according to the stored colours
 		List<ImageProcessor> recoloured = new ArrayList<>();
 		
-		for(ImageProcessor ip : cache.getDisplayImages()){
+		
+		
+		for(Key k : cache.getDisplayKeys()){
 			// The image from the warper is greyscale. Change to use the signal colour			
-			recoloured.add(ImageFilterer.recolorImage(ip, imageColours.get(ip)));
+			recoloured.add(ImageFilterer.recolorImage(cache.get(k), cache.getColour(k) ));
 		}
 				
 
@@ -660,16 +653,16 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 */
 	public class ImageCache {
 		
-		final private Map<Key, ImageProcessor> map = new HashMap<>();
-		final private Map<Key, ImageProcessor> displayImages = new HashMap<>();
+		final private Map<Key, ImageProcessor> map = new HashMap<>(); // all generated images
+		final private List<Key> displayImages = new ArrayList<>(); // images currently displayed
+		final private Map<Key, Color> imageColours = new HashMap<>(); // hold colours for warped images
 		
-		
-		public void addDisplayImage(Key k, ImageProcessor ip){
-			displayImages.put(k, ip);
+		public void addDisplayImage(Key k){
+			displayImages.add(k);
 		}
-		
-		public void addDisplayImage(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId, ImageProcessor ip){
-			displayImages.put(new Key(target, template, signalGroupId), ip);
+				
+		public void addDisplayImage(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId){
+			displayImages.add(new Key(target, template, signalGroupId));
 		}
 		
 		public void removeDisplayImage(Key k){
@@ -677,7 +670,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		}
 		
 		public boolean hasDisplayImage(Key k){
-			return displayImages.containsKey(k);
+			return displayImages.contains(k);
 		}
 		
 		public int displayCount(){
@@ -689,11 +682,25 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		}
 		
 		public List<ImageProcessor> getDisplayImages(){
-			return new ArrayList<>(displayImages.values());
+			return map.entrySet().stream().filter( e -> displayImages.contains(e.getKey())  ).map( e-> e.getValue()).collect(Collectors.toList());
 		}
 		
-		public ImageProcessor getDisplayImage(Key k){
-			return displayImages.get(k);
+		public List<Key> getDisplayKeys(){
+			return displayImages;
+		}
+		
+		
+		public Color getColour(Key k){
+			return imageColours.get(k);
+		}
+		
+		public void setColour(Key k, Color c){
+			imageColours.put(k, c);
+		}
+		
+		
+		public void add(Key k, ImageProcessor ip){
+			map.put(k, ip);
 		}
 		
 		public void add(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId, ImageProcessor ip){
