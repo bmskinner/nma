@@ -67,351 +67,338 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
-	private ConsensusNucleusChartPanel 	chartPanel; 		// consensus nucleus plus signals
-	private ExportableTable 		statsTable;					// table for signal stats
-	private JPanel 		consensusAndCheckboxPanel;	// holds the consensus chart and the checkbox
-	private JPanel		checkboxPanel;
-	
-	private JButton warpButton;
-	
-	private JLabel headerText;
-	
-	private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
-	private static final String WARP_LBL = "Warp signals";
-	
-//	private GenericCheckboxPanel warpPanel = new GenericCheckboxPanel("Warp");
-	
-	
-	public SignalsOverviewPanel(){
-		super();
-		
-		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+    private ConsensusNucleusChartPanel chartPanel;                // consensus
+                                                                  // nucleus
+                                                                  // plus
+                                                                  // signals
+    private ExportableTable            statsTable;                // table for
+                                                                  // signal
+                                                                  // stats
+    private JPanel                     consensusAndCheckboxPanel; // holds the
+                                                                  // consensus
+                                                                  // chart and
+                                                                  // the
+                                                                  // checkbox
+    private JPanel                     checkboxPanel;
 
-		JScrollPane scrollPane = createStatsPane();
-		this.add(scrollPane);
-		
-	
-		consensusAndCheckboxPanel = createConsensusPanel();
-		this.add(consensusAndCheckboxPanel);
-		
-	}
-	
-	private JPanel createConsensusPanel(){
-		
-		final JPanel panel = new JPanel(new BorderLayout());
-		
-		ChartOptions options = new ChartOptionsBuilder()
-				.build();
-		
-		JFreeChart chart = null;
-		try {
-			chart = getChart(options);
-		} catch (Exception e1) {
-			warn("Error creating blank signals chart");
-			stack("Error creating blank signals chart", e1);
-		}
-						
-		// the chart is inside a chartPanel; the chartPanel is inside a JPanel
-		// this allows a checkbox panel to be added to the JPanel later
-		chartPanel = new ConsensusNucleusChartPanel(chart);// {
-		panel.add(chartPanel, BorderLayout.CENTER);
-		chartPanel.setFillConsensus(false);
-		
-		checkboxPanel = createSignalCheckboxPanel();
-		
-		panel.add(checkboxPanel, BorderLayout.NORTH);
+    private JButton warpButton;
 
-		return panel;
-	}
-	
-	private JScrollPane createStatsPane(){
-		
-		
-		TableModel tableModel = AbstractTableCreator.createBlankTable();
-		statsTable = new ExportableTable(tableModel); // table  for basic stats
-		statsTable.setEnabled(false);
-		
-		statsTable.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				JTable table = (JTable) e.getSource();
-				
-				int row = table.rowAtPoint(e.getPoint());
-				int column = table.columnAtPoint(e.getPoint());
-								
-				// double click
-				if (e.getClickCount() == 2) {
-					
-					IAnalysisDataset d = getDatasets().get(column-1);
+    private JLabel headerText;
 
-					String nextRowName = table.getModel().getValueAt(row+1, 0).toString();
-					if(nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)){
-						SignalTableCell signalGroup = getSignalGroupFromTable(table, row+1, column);
-						
-						SignalColourChanger sc = new SignalColourChanger(SignalsOverviewPanel.this);
-						sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
-						update(getDatasets());
-						fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-					}
-											
-				}
+    private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
+    private static final String WARP_LBL                        = "Warp signals";
 
-			}
-		});
-		
-		JScrollPane scrollPane = new JScrollPane(statsTable);
-		return scrollPane;
-	}
-	
-	
-	private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column){
-		return (SignalTableCell) table.getModel().getValueAt(row, column);
-	}
-	
-				
-	/**
-	 * Create the checkboxes that set each signal channel visible or not
-	 */
-	private JPanel createSignalCheckboxPanel(){
-		JPanel panel = new JPanel();
-		
-		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		
-		warpButton = new JButton(WARP_LBL);
-		warpButton.setToolTipText("Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
-		warpButton.addActionListener( e -> { 
-			
-				new SignalWarpingDialog(  getDatasets() );
-			}  
-		);
+    // private GenericCheckboxPanel warpPanel = new
+    // GenericCheckboxPanel("Warp");
 
-		warpButton.setEnabled(false);
-		
+    public SignalsOverviewPanel() {
+        super();
 
-		panel.add(warpButton);
-		
+        this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-		if(isSingleDataset()){
-			
-		
-            for(UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()){
-            	
-            	if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-            		continue;
-            	}
-            	
-            	try {
+        JScrollPane scrollPane = createStatsPane();
+        this.add(scrollPane);
 
-            	// get the status within each dataset
-                boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
+        consensusAndCheckboxPanel = createConsensusPanel();
+        this.add(consensusAndCheckboxPanel);
 
-				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
-				
-				// make a checkbox for each signal group in the dataset
-				JCheckBox box = new JCheckBox(name, visible);
+    }
 
-				// Don't enable when the consensus is missing
-                box.setEnabled(activeDataset().getCollection().hasConsensus());
+    private JPanel createConsensusPanel() {
 
-				box.addActionListener( e ->{
-					try {
-						activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
-					} catch (UnavailableSignalGroupException e1) {
-						stack(e1);
-					}
-					fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
-					this.refreshChartCache(getDatasets());
-				});
-				panel.add(box);
-				
-            	} catch(UnavailableSignalGroupException e){
-            		stack("Error getting signal group", e);
-        		}
+        final JPanel panel = new JPanel(new BorderLayout());
 
-			}
+        ChartOptions options = new ChartOptionsBuilder().build();
 
+        JFreeChart chart = null;
+        try {
+            chart = getChart(options);
+        } catch (Exception e1) {
+            warn("Error creating blank signals chart");
+            stack("Error creating blank signals chart", e1);
+        }
 
-		}
-				
-		headerText = new JLabel("");
-		headerText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-		panel.add(headerText);
-		panel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-		
-		return panel;
-	}
-		
-	/**
-	 * Update the signal stats with the given datasets
-	 * @param list the datasets
-	 * @throws Exception 
-	 */
-	private void updateSignalStatsPanel() {
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setType(TableType.SIGNAL_STATS_TABLE)
-			.setTarget(statsTable)
-			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
-			.build();
-		
-		
-		
-		setTable(options);
+        // the chart is inside a chartPanel; the chartPanel is inside a JPanel
+        // this allows a checkbox panel to be added to the JPanel later
+        chartPanel = new ConsensusNucleusChartPanel(chart);// {
+        panel.add(chartPanel, BorderLayout.CENTER);
+        chartPanel.setFillConsensus(false);
 
-		
-	}
-	
-	private void updateCheckboxPanel(){
-		if(isSingleDataset()){
-							
-			// make a new panel for the active dataset
-			consensusAndCheckboxPanel.remove(checkboxPanel);
-			checkboxPanel = createSignalCheckboxPanel();
+        checkboxPanel = createSignalCheckboxPanel();
 
-			// add this new panel
-			consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
-			consensusAndCheckboxPanel.revalidate();
-			consensusAndCheckboxPanel.repaint();
-			consensusAndCheckboxPanel.setVisible(true);
-			
-			if(activeDataset().getCollection().hasConsensus()
-					&& activeDataset().getCollection().getSignalManager().hasSignals()){
-				warpButton.setEnabled(true);
-			}
+        panel.add(checkboxPanel, BorderLayout.NORTH);
 
-		}
-		
-		if(isMultipleDatasets()){
-			if(IAnalysisDataset.haveConsensusNuclei(getDatasets())){
-				
-				// Check at least one of the selected datasets has signals
-				String text = "";
-				
-				boolean hasSignals = false;
-				for(IAnalysisDataset d : getDatasets()){
-				
-					SignalManager m =  d.getCollection().getSignalManager();
-					if(m.hasSignals()){
-						hasSignals = true;
-						break;
-					}
-				}
-				
-				// Segments need to match for mesh creation
-				boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());		
-				
-				if(!segmentsMatch){
-					text = "Segments do not match between datasets";
-				}
-				
-				if(hasSignals && segmentsMatch){
-					warpButton.setEnabled(true);
-				} else {
-					warpButton.setEnabled(false);
-					headerText.setText(text);
-				}
-				
-				
-				
-				
-			} else {
-				warpButton.setEnabled(false);
-				headerText.setText("Datasets do not all have consensus");
-			}
-		}
-	}
-	
-	
-	private void updateSignalConsensusChart(){
-		try {
+        return panel;
+    }
 
-			// The options do not hold which signal groups are visible
-			// so we must invalidate the cache whenever they change
-			this.clearChartCache(getDatasets());
-			
-			ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.setShowWarp(false)
-					.setTarget(chartPanel)
-					.build();
-			
-			setChart(options);		
-			
-		} catch(Exception e){
-			warn("Error updating signal overview panel");
-			log(Level.FINE, "Error updating signal overview panel", e);
-		}
-	}
-	
-	
+    private JScrollPane createStatsPane() {
 
-	private UUID getSignalGroupFromLabel(String label){
-		String[] names = label.split("_");
-		return UUID.fromString(names[1]);
-	}
+        TableModel tableModel = AbstractTableCreator.createBlankTable();
+        statsTable = new ExportableTable(tableModel); // table for basic stats
+        statsTable.setEnabled(false);
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().startsWith("GroupVisble_")){
+        statsTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
 
-			try {
+                JTable table = (JTable) e.getSource();
 
-				UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
-				JCheckBox box = (JCheckBox) e.getSource();
-				activeDataset().getCollection().getSignalGroup(signalGroup).setVisible( box.isSelected());
-				fireSignalChangeEvent("GroupVisble_");
-				this.refreshChartCache(getDatasets());
-			} catch(UnavailableSignalGroupException e1){
-				fine("Error getting signal group", e1);
-			}
-		}
-		updateSignalConsensusChart();
-		
-	}
+                int row = table.rowAtPoint(e.getPoint());
+                int column = table.columnAtPoint(e.getPoint());
 
-	@Override
-	protected void updateSingle() {
-		updateMultiple();
-		
-	}
+                // double click
+                if (e.getClickCount() == 2) {
 
-	@Override
-	protected void updateMultiple() {
-		
-		updateCheckboxPanel();
-		updateSignalConsensusChart();
-		updateSignalStatsPanel();		
-	}
+                    IAnalysisDataset d = getDatasets().get(column - 1);
 
-	@Override
-	protected void updateNull() {
-		updateMultiple();
-		
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
-		chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
-		statsTable.setModel(AbstractTableCreator.createLoadingTable());	
-		
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return new OutlineChartFactory(options).makeSignalOutlineChart();
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new NuclearSignalTableCreator(options).createSignalStatsTable();
-	}
+                    String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
+                    if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                        SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
 
-	@Override
-	public void chartSetEventReceived(ChartSetEvent e) {
-		((ExportableChartPanel) e.getSource()).restoreAutoBounds();
-		
-	}
+                        SignalColourChanger sc = new SignalColourChanger(SignalsOverviewPanel.this);
+                        sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+                        update(getDatasets());
+                        fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                    }
+
+                }
+
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(statsTable);
+        return scrollPane;
+    }
+
+    private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
+        return (SignalTableCell) table.getModel().getValueAt(row, column);
+    }
+
+    /**
+     * Create the checkboxes that set each signal channel visible or not
+     */
+    private JPanel createSignalCheckboxPanel() {
+        JPanel panel = new JPanel();
+
+        panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
+
+        warpButton = new JButton(WARP_LBL);
+        warpButton.setToolTipText(
+                "Requires consensus nucleus refolded, at least one dataset with signals, and all datasets to have matching segments");
+        warpButton.addActionListener(e -> {
+
+            new SignalWarpingDialog(getDatasets());
+        });
+
+        warpButton.setEnabled(false);
+
+        panel.add(warpButton);
+
+        if (isSingleDataset()) {
+
+            for (UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()) {
+
+                if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+                    continue;
+                }
+
+                try {
+
+                    // get the status within each dataset
+                    boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
+
+                    String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+
+                    // make a checkbox for each signal group in the dataset
+                    JCheckBox box = new JCheckBox(name, visible);
+
+                    // Don't enable when the consensus is missing
+                    box.setEnabled(activeDataset().getCollection().hasConsensus());
+
+                    box.addActionListener(e -> {
+                        try {
+                            activeDataset().getCollection().getSignalGroup(signalGroup).setVisible(box.isSelected());
+                        } catch (UnavailableSignalGroupException e1) {
+                            stack(e1);
+                        }
+                        fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
+                        this.refreshChartCache(getDatasets());
+                    });
+                    panel.add(box);
+
+                } catch (UnavailableSignalGroupException e) {
+                    stack("Error getting signal group", e);
+                }
+
+            }
+
+        }
+
+        headerText = new JLabel("");
+        headerText.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        panel.add(headerText);
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+
+        return panel;
+    }
+
+    /**
+     * Update the signal stats with the given datasets
+     * 
+     * @param list
+     *            the datasets
+     * @throws Exception
+     */
+    private void updateSignalStatsPanel() {
+
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setType(TableType.SIGNAL_STATS_TABLE).setTarget(statsTable)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer()).build();
+
+        setTable(options);
+
+    }
+
+    private void updateCheckboxPanel() {
+        if (isSingleDataset()) {
+
+            // make a new panel for the active dataset
+            consensusAndCheckboxPanel.remove(checkboxPanel);
+            checkboxPanel = createSignalCheckboxPanel();
+
+            // add this new panel
+            consensusAndCheckboxPanel.add(checkboxPanel, BorderLayout.NORTH);
+            consensusAndCheckboxPanel.revalidate();
+            consensusAndCheckboxPanel.repaint();
+            consensusAndCheckboxPanel.setVisible(true);
+
+            if (activeDataset().getCollection().hasConsensus()
+                    && activeDataset().getCollection().getSignalManager().hasSignals()) {
+                warpButton.setEnabled(true);
+            }
+
+        }
+
+        if (isMultipleDatasets()) {
+            if (IAnalysisDataset.haveConsensusNuclei(getDatasets())) {
+
+                // Check at least one of the selected datasets has signals
+                String text = "";
+
+                boolean hasSignals = false;
+                for (IAnalysisDataset d : getDatasets()) {
+
+                    SignalManager m = d.getCollection().getSignalManager();
+                    if (m.hasSignals()) {
+                        hasSignals = true;
+                        break;
+                    }
+                }
+
+                // Segments need to match for mesh creation
+                boolean segmentsMatch = IBorderSegment.segmentCountsMatch(getDatasets());
+
+                if (!segmentsMatch) {
+                    text = "Segments do not match between datasets";
+                }
+
+                if (hasSignals && segmentsMatch) {
+                    warpButton.setEnabled(true);
+                } else {
+                    warpButton.setEnabled(false);
+                    headerText.setText(text);
+                }
+
+            } else {
+                warpButton.setEnabled(false);
+                headerText.setText("Datasets do not all have consensus");
+            }
+        }
+    }
+
+    private void updateSignalConsensusChart() {
+        try {
+
+            // The options do not hold which signal groups are visible
+            // so we must invalidate the cache whenever they change
+            this.clearChartCache(getDatasets());
+
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setShowWarp(false)
+                    .setTarget(chartPanel).build();
+
+            setChart(options);
+
+        } catch (Exception e) {
+            warn("Error updating signal overview panel");
+            log(Level.FINE, "Error updating signal overview panel", e);
+        }
+    }
+
+    private UUID getSignalGroupFromLabel(String label) {
+        String[] names = label.split("_");
+        return UUID.fromString(names[1]);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().startsWith("GroupVisble_")) {
+
+            try {
+
+                UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
+                JCheckBox box = (JCheckBox) e.getSource();
+                activeDataset().getCollection().getSignalGroup(signalGroup).setVisible(box.isSelected());
+                fireSignalChangeEvent("GroupVisble_");
+                this.refreshChartCache(getDatasets());
+            } catch (UnavailableSignalGroupException e1) {
+                fine("Error getting signal group", e1);
+            }
+        }
+        updateSignalConsensusChart();
+
+    }
+
+    @Override
+    protected void updateSingle() {
+        updateMultiple();
+
+    }
+
+    @Override
+    protected void updateMultiple() {
+
+        updateCheckboxPanel();
+        updateSignalConsensusChart();
+        updateSignalStatsPanel();
+    }
+
+    @Override
+    protected void updateNull() {
+        updateMultiple();
+
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+        statsTable.setModel(AbstractTableCreator.createLoadingTable());
+
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new OutlineChartFactory(options).makeSignalOutlineChart();
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new NuclearSignalTableCreator(options).createSignalStatsTable();
+    }
+
+    @Override
+    public void chartSetEventReceived(ChartSetEvent e) {
+        ((ExportableChartPanel) e.getSource()).restoreAutoBounds();
+
+    }
 }

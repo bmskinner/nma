@@ -23,25 +23,27 @@ import java.awt.Color;
 import javax.swing.JLabel;
 
 /**
- * Colour a table cell grey if it is null or empty. Use for diagonals in pairwise tables
+ * Colour a table cell grey if it is null or empty. Use for diagonals in
+ * pairwise tables
  */
 public class PairwiseTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        
-      //Cells are by default rendered as a JLabel.
+    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+
+        // Cells are by default rendered as a JLabel.
         JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         String cellContents = l.getText();
-        if(cellContents==null || cellContents.equals("")){ 
-        	l.setBackground(Color.LIGHT_GRAY);
-        } else{
-        	l.setBackground(Color.WHITE);
+        if (cellContents == null || cellContents.equals("")) {
+            l.setBackground(Color.LIGHT_GRAY);
+        } else {
+            l.setBackground(Color.WHITE);
         }
 
-      //Return the JLabel which renders the cell.
-      return l;
+        // Return the JLabel which renders the cell.
+        return l;
     }
 }

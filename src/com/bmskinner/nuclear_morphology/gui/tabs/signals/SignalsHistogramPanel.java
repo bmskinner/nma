@@ -33,69 +33,64 @@ import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 
 @SuppressWarnings("serial")
 public class SignalsHistogramPanel extends HistogramsTabPanel {
-    	  	    	
-	public SignalsHistogramPanel() throws Exception{
-		super(CellularComponent.NUCLEAR_SIGNAL);
-		
-		try {
 
-			Dimension preferredSize = new Dimension(400, 150);
-			for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
-				
-				JFreeChart chart = HistogramChartFactory.createEmptyChart();
-				SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
-//				SelectableChartPanel panel = new SelectableChartPanel(new HistogramChartFactory(options).createStatisticHistogram(), stat.toString());
-				panel.setPreferredSize(preferredSize);
-				panel.addSignalChangeListener(this);
-				chartPanels.put(stat.toString(), panel);
-				mainPanel.add(panel);
+    public SignalsHistogramPanel() throws Exception {
+        super(CellularComponent.NUCLEAR_SIGNAL);
 
-			}
+        try {
 
-		} catch(Exception e){
-			warn("Error creating signal histogram panel");
-			stack("Error creating histogram panel", e);
-		}
-		
-	}
-	
-	@Override
-	protected void updateSingle() {
-		this.setEnabled(true);
-		
-		boolean useDensity = useDensityPanel.isSelected();
-		
-		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
-			SelectableChartPanel panel = chartPanels.get(stat.toString());
+            Dimension preferredSize = new Dimension(400, 150);
+            for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
 
-//			JFreeChart chart = null;
+                JFreeChart chart = HistogramChartFactory.createEmptyChart();
+                SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
+                // SelectableChartPanel panel = new SelectableChartPanel(new
+                // HistogramChartFactory(options).createStatisticHistogram(),
+                // stat.toString());
+                panel.setPreferredSize(preferredSize);
+                panel.addSignalChangeListener(this);
+                chartPanels.put(stat.toString(), panel);
+                mainPanel.add(panel);
 
-			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.addStatistic(stat)
-				.setScale(GlobalOptions.getInstance().getScale())
-				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setUseDensity(useDensity)
-				.setTarget(panel)
-				.build();
-			
-			
-			setChart(options);
-		}
-		
-		
-	}
+            }
 
-	@Override
-	protected void updateMultiple() {
-		updateSingle();
-		
-	}
+        } catch (Exception e) {
+            warn("Error creating signal histogram panel");
+            stack("Error creating histogram panel", e);
+        }
 
-	@Override
-	protected void updateNull() {
-		this.setEnabled(false);
-		
-	}
-	
+    }
+
+    @Override
+    protected void updateSingle() {
+        this.setEnabled(true);
+
+        boolean useDensity = useDensityPanel.isSelected();
+
+        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+            SelectableChartPanel panel = chartPanels.get(stat.toString());
+
+            // JFreeChart chart = null;
+
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .setUseDensity(useDensity).setTarget(panel).build();
+
+            setChart(options);
+        }
+
+    }
+
+    @Override
+    protected void updateMultiple() {
+        updateSingle();
+
+    }
+
+    @Override
+    protected void updateNull() {
+        this.setEnabled(false);
+
+    }
+
 }

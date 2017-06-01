@@ -15,84 +15,84 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
-	
-	private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";
-	private static final String PROCEED_LBL          = "Finished selection";
 
-	final IAnalysisDataset dataset;
-	final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
+    private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";
+    private static final String PROCEED_LBL          = "Finished selection";
 
-	/**
-	 * Create with a dataset (from which nuclei will be drawn) and a folder of images to
-	 * be analysed
-	 * @param dataset the analysis dataset
-	 * @param folder the folder of images
-	 */
-	public FishRemappingProber(final IAnalysisDataset dataset, final File fishImageDir){
-		this.dataset = dataset;
-		
-		try {
-			
-			// make the panel
-			Finder finder = new FishRemappingFinder(dataset.getAnalysisOptions(), fishImageDir);
-			
-			
-			imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
+    final IAnalysisDataset       dataset;
+    final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
 
+    /**
+     * Create with a dataset (from which nuclei will be drawn) and a folder of
+     * images to be analysed
+     * 
+     * @param dataset
+     *            the analysis dataset
+     * @param folder
+     *            the folder of images
+     */
+    public FishRemappingProber(final IAnalysisDataset dataset, final File fishImageDir) {
+        this.dataset = dataset;
 
-//			imageProberPanel     = new FishRemappingProberPanel(this, 
-//					dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS), 
-//					ImageSet.FISH_REMAPPING_IMAGE_SET, 
-//					dataset,
-//					fishImageDir);
-			
-			JPanel footerPanel   = createFooter();
-			this.setOkButtonText(PROCEED_LBL);
-			
-			this.add(imageProberPanel,     BorderLayout.CENTER);
-			this.add(footerPanel,          BorderLayout.SOUTH);
+        try {
 
-			this.setTitle(DIALOG_TITLE_BAR_LBL);
-			
-//			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
-			
-			
-		} catch (Exception e){
-			warn("Error launching FISH remapping window");
-			stack(e.getMessage(), e);
-			this.dispose();
-		}	
+            // make the panel
+            Finder finder = new FishRemappingFinder(dataset.getAnalysisOptions(), fishImageDir);
 
-		this.pack();
-		this.setModal(true);
-		this.setLocationRelativeTo(null); // centre on screen
-		this.setVisible(true);
-	}
+            imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
 
-	@Override
-	protected void okButtonClicked() {
+            // imageProberPanel = new FishRemappingProberPanel(this,
+            // dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS),
+            // ImageSet.FISH_REMAPPING_IMAGE_SET,
+            // dataset,
+            // fishImageDir);
 
-		List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel).getSubCollections();
+            JPanel footerPanel = createFooter();
+            this.setOkButtonText(PROCEED_LBL);
 
-		if(subs.isEmpty()){
-			
-			return;
-		}
+            this.add(imageProberPanel, BorderLayout.CENTER);
+            this.add(footerPanel, BorderLayout.SOUTH);
 
-		for(ICellCollection sub : subs){
+            this.setTitle(DIALOG_TITLE_BAR_LBL);
 
-			if(sub.hasCells()){
+            // optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
 
-				dataset.addChildCollection(sub);
+        } catch (Exception e) {
+            warn("Error launching FISH remapping window");
+            stack(e.getMessage(), e);
+            this.dispose();
+        }
 
-				final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
-				newList.add(subDataset);
-			}
-		}
-	}
-	
-	public List<IAnalysisDataset> getNewDatasets(){
-		return newList;
-	}
+        this.pack();
+        this.setModal(true);
+        this.setLocationRelativeTo(null); // centre on screen
+        this.setVisible(true);
+    }
+
+    @Override
+    protected void okButtonClicked() {
+
+        List<ICellCollection> subs = ((FishRemappingProberPanel) imageProberPanel).getSubCollections();
+
+        if (subs.isEmpty()) {
+
+            return;
+        }
+
+        for (ICellCollection sub : subs) {
+
+            if (sub.hasCells()) {
+
+                dataset.addChildCollection(sub);
+
+                final IAnalysisDataset subDataset = dataset.getChildDataset(sub.getID());
+                newList.add(subDataset);
+            }
+        }
+    }
+
+    public List<IAnalysisDataset> getNewDatasets() {
+        return newList;
+    }
 
 }

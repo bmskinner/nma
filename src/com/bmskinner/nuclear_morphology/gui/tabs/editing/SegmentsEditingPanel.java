@@ -67,549 +67,496 @@ import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
-					
-	private SegmentationDualChartPanel dualPanel;
-	
-		private JPanel buttonsPanel;
-		private JButton mergeButton;
-		private JButton unmergeButton;
-		private JButton splitButton;
-		private JButton windowSizeButton;
-		private JButton updatewindowButton;	
-		
-		private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
-		private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
-		private static final String STR_SPLIT_SEGMENT     = "Split segment";
-		private static final String STR_SET_WINDOW_SIZE   = "Set window size";
-		private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
-		
-				
-		public SegmentsEditingPanel(){
-			super();
-			this.setLayout(new BorderLayout());
-			
-			dualPanel = new SegmentationDualChartPanel();
-			dualPanel.addSegmentEventListener(this);
-			
-			JPanel chartPanel = new JPanel();
-			chartPanel.setLayout(new GridBagLayout());
-			
-			GridBagConstraints c = new GridBagConstraints();
-			c.anchor = GridBagConstraints.EAST;
-			c.gridx = 0;
-			c.gridy = 0;
-			c.gridwidth  = 1; 
-			c.gridheight = 1;
-			c.fill = GridBagConstraints.BOTH;      //reset to default
-			c.weightx = 1.0; 
-			c.weighty = 0.7;
-			
-			chartPanel.add(dualPanel.getMainPanel(), c);
-			c.weighty = 0.3;
-			c.gridx = 0;
-			c.gridy = 1;
-			chartPanel.add(dualPanel.getRangePanel(), c);
-			
-			this.add(chartPanel, BorderLayout.CENTER);
 
-			
-			buttonsPanel = makeButtonPanel();
-			this.add(buttonsPanel, BorderLayout.NORTH);
+    private SegmentationDualChartPanel dualPanel;
 
-			setButtonsEnabled(false);
-			
-			dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setVisible(false);
-			dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setVisible(false);
-			
-		}
-		
-		@Override
-		public void setAnalysing(boolean b){
-			super.setAnalysing(b);
-			dualPanel.setAnalysing(b);
-		}
-		
-		private JPanel makeButtonPanel(){
-			
-			JPanel panel = new JPanel(new FlowLayout()){
-				@Override
-				public void setEnabled(boolean b){
-					super.setEnabled(b);
-					for(Component c : this.getComponents()){
-						c.setEnabled(b);
-					}
-				}
-			};
-			
-			mergeButton = new JButton(STR_MERGE_SEGMENT);
-			mergeButton.addActionListener(this);
-			panel.add(mergeButton);
-			
-			unmergeButton = new JButton(STR_UNMERGE_SEGMENT);
-			unmergeButton.addActionListener(this);
-			panel.add(unmergeButton);
-			
-			splitButton = new JButton(STR_SPLIT_SEGMENT);
-			splitButton.addActionListener(this);
-			panel.add(splitButton);
+    private JPanel  buttonsPanel;
+    private JButton mergeButton;
+    private JButton unmergeButton;
+    private JButton splitButton;
+    private JButton windowSizeButton;
+    private JButton updatewindowButton;
 
-			windowSizeButton = new JButton(STR_SHOW_WINDOW_SIZES);
-			windowSizeButton.addActionListener(this);
-			panel.add(windowSizeButton);
-			
-			updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
-			updatewindowButton.addActionListener(this);
-			panel.add(updatewindowButton);
+    private static final String STR_MERGE_SEGMENT     = "Hide segment boundary";
+    private static final String STR_UNMERGE_SEGMENT   = "Unhide segment boundary";
+    private static final String STR_SPLIT_SEGMENT     = "Split segment";
+    private static final String STR_SET_WINDOW_SIZE   = "Set window size";
+    private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 
-			return panel;
-			
-			
-		}
-						
-		@Override
-		protected void updateSingle() {
-			
-			ISegmentedProfile profile = null;
-			
-			boolean normaliseProfile = true;
-			
-			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setNormalised(normaliseProfile)
-				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
-				.setShowMarkers(false)
-				.setProfileType( ProfileType.ANGLE)
-				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowPoints(true)
-				.setShowXAxis(false)
-				.setShowYAxis(false)
-				.setTarget(dualPanel.getMainPanel())
-				.build();
-			
-			// Set the button configuration
-			configureButtons(options);
-						
-			JFreeChart chart = getChart(options);
+    public SegmentsEditingPanel() {
+        super();
+        this.setLayout(new BorderLayout());
 
-			/*
-			 * Create the chart for the range panel
-			 */
-			
-			ChartOptions rangeOptions = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setNormalised(normaliseProfile)
-				.setAlignment(ProfileAlignment.LEFT)
-				.setTag(Tag.REFERENCE_POINT)
-				.setShowMarkers(false)
-				.setProfileType( ProfileType.ANGLE)
-				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setShowPoints(false)
-				.setShowXAxis(false)
-				.setShowYAxis(false)
-				.setTarget(dualPanel.getRangePanel())
-				.build();
-			
-			JFreeChart rangeChart = getChart(rangeOptions);
-			
-			
-			try {
-				profile = activeDataset().getCollection()
-						.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-				stack("Error getting profile", e);
+        dualPanel = new SegmentationDualChartPanel();
+        dualPanel.addSegmentEventListener(this);
 
-			}
+        JPanel chartPanel = new JPanel();
+        chartPanel.setLayout(new GridBagLayout());
 
-			dualPanel.setCharts(chart, profile, normaliseProfile, rangeChart);
-		}
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.EAST;
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 1;
+        c.gridheight = 1;
+        c.fill = GridBagConstraints.BOTH; // reset to default
+        c.weightx = 1.0;
+        c.weighty = 0.7;
 
-		@Override
-		protected void updateMultiple() {
-			updateNull();
-			
-		}
-		
-		@Override
-		protected void updateNull() {	
-			
-			
-			ChartOptions options = new ChartOptionsBuilder()
-				.setShowXAxis(false)
-				.setShowYAxis(false)
-				.build();
-			
-			
-			JFreeChart mainChart = new MorphologyChartFactory(options).makeEmptyChart();
-		
-			JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
-			
-			dualPanel.setCharts(mainChart, rangeChart);
-			setButtonsEnabled(false);
-		}
-		
-		@Override
-		public void setChartsAndTablesLoading(){
-			super.setChartsAndTablesLoading();
-			dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), 
-					MorphologyChartFactory.createLoadingChart());
-		}
-		
-		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options){
-			return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
-		}
-				
-		/**
-		 * Enable or disable buttons depending on datasets selected
-		 * @param options
-		 * @throws Exception
-		 */
-		private void configureButtons(ChartOptions options) {
-			if(options.isSingleDataset()){
-				
-				setButtonsEnabled(true);
-				ICellCollection collection = options.firstDataset().getCollection();
-				ISegmentedProfile medianProfile;
-				try {
-					medianProfile = collection.getProfileCollection()
-							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-				} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-					warn("Error getting profile");
-					stack("Error getting profile", e);
-					setButtonsEnabled(false);
-					return;
-				}
-				
-				// Don't allow merging below 2 segments (causes errors)
-				if(medianProfile.getSegmentCount()<=2){
-					mergeButton.setEnabled(false);
-				} else {
-					mergeButton.setEnabled(true);
-				}
-				
-				
-				// Check if there are any merged segments
-				boolean hasMerges = false;
-				for(IBorderSegment seg : medianProfile.getSegments()){
-					if(seg.hasMergeSources()){
-						hasMerges = true;
-					}
-				}
-				
-				// If there are no merged segments, don't allow unmerging 
-				if(hasMerges){
-					unmergeButton.setEnabled(true);
-				} else {
-					unmergeButton.setEnabled(false);
-				}
-				
-				// set child dataset options
-				if(options.firstDataset() instanceof ChildAnalysisDataset){
-					mergeButton.setEnabled(false);
-					unmergeButton.setEnabled(false);
-					splitButton.setEnabled(false);
-					updatewindowButton.setEnabled(false);
-				}
-				
-				
-			} else { // multiple collections
-				setButtonsEnabled(false);
-			}
-		}
-		
-		public void setButtonsEnabled(boolean b){
-			unmergeButton.setEnabled(b);
-			mergeButton.setEnabled(b);
-			splitButton.setEnabled(b);
-			windowSizeButton.setEnabled(b);
-			updatewindowButton.setEnabled(b);
-//			reprofileButton.setEnabled(b);
-			
-		}
-		
-				
-		private void updateCollectionWindowSize() throws Exception{
-			double windowSizeMin = 0.01;
-			double windowSizeMax = 0.1;
-			double windowSizeActual = activeDataset().getAnalysisOptions().getProfileWindowProportion();
-			
-			SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual,
-					windowSizeMin,
-					windowSizeMax,
-					0.01);
-			JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
-			
-			
-			int option = JOptionPane.showOptionDialog(null, 
-					windowSizeSpinner, 
-					"Select new window size", 
-					JOptionPane.OK_CANCEL_OPTION, 
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-			if (option == JOptionPane.CANCEL_OPTION) {
-				return;
+        chartPanel.add(dualPanel.getMainPanel(), c);
+        c.weighty = 0.3;
+        c.gridx = 0;
+        c.gridy = 1;
+        chartPanel.add(dualPanel.getRangePanel(), c);
 
-			} else if (option == JOptionPane.OK_OPTION)	{
-				this.setAnalysing(true);
-				double windowSize = (double) windowSizeSpinner.getModel().getValue();
-				setCollectionWindowSize(windowSize);
-				this.refreshChartCache();
-				fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-				this.setAnalysing(false);
-			}
-			
-		}
-		
-		private void setCollectionWindowSize(double windowSize) throws Exception{
-			
-			// Update cells
-			
-			for(Nucleus n : activeDataset().getCollection().getNuclei()){
-				n.setWindowProportion(ProfileType.ANGLE, windowSize);
-			}
+        this.add(chartPanel, BorderLayout.CENTER);
 
-			// recalc the aggregate
-			
-			IProfileCollection pc = activeDataset().getCollection().getProfileCollection();	
-			
-			pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
-					
-			
-			ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);	
-			
-			// Does nothing, but needed to access segment fitter
-//			DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(), MorphologyAnalysisMode.NEW, programLogger);
-			
-			// Make a fitter
-			SegmentFitter fitter = new SegmentFitter(medianProfile);
+        buttonsPanel = makeButtonPanel();
+        this.add(buttonsPanel, BorderLayout.NORTH);
 
-			for(Nucleus n : activeDataset().getCollection().getNuclei()){
+        setButtonsEnabled(false);
 
-				// recombine the segments at the lengths of the median profile segments
-				ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+        dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setVisible(false);
+        dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setVisible(false);
 
-				n.setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
+    }
 
-			}
-			
-			pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
+    @Override
+    public void setAnalysing(boolean b) {
+        super.setAnalysing(b);
+        dualPanel.setAnalysing(b);
+    }
 
-			fitter = null; // clean up
-			
-			IMutableAnalysisOptions options = activeDataset().getAnalysisOptions();
-			options.setAngleWindowProportion(windowSize);
+    private JPanel makeButtonPanel() {
 
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			
-			if(e.getSource()==windowSizeButton){
-				new AngleWindowSizeExplorer(activeDataset());
-			}
-			
+        JPanel panel = new JPanel(new FlowLayout()) {
+            @Override
+            public void setEnabled(boolean b) {
+                super.setEnabled(b);
+                for (Component c : this.getComponents()) {
+                    c.setEnabled(b);
+                }
+            }
+        };
 
-			
-			try {
-				ICellCollection collection = activeDataset().getCollection();
-				ISegmentedProfile medianProfile = collection
-						.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-				
+        mergeButton = new JButton(STR_MERGE_SEGMENT);
+        mergeButton.addActionListener(this);
+        panel.add(mergeButton);
 
-				SegmentsEditingPanel.this.setAnalysing(true);
-				
-				
-				if(e.getSource().equals(mergeButton)){
-					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
-					mergeAction(medianProfile);
-					
-				}
+        unmergeButton = new JButton(STR_UNMERGE_SEGMENT);
+        unmergeButton.addActionListener(this);
+        panel.add(unmergeButton);
 
-				if(e.getSource().equals(unmergeButton)){
-					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
-					unmergeAction(medianProfile);
-				}
-				
-				if(e.getSource().equals(splitButton)){
-					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
-					splitAction(medianProfile);
-					
-				}
-				
-				if(e.getSource()==updatewindowButton){
-					fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
-					updateCollectionWindowSize();
-				}
-								
-			} catch (Exception e1) {
-				warn("Error in action");
-				stack("Error in action", e1);
-			} finally {
-				SegmentsEditingPanel.this.setAnalysing(false);
-			}
-		}
-		
-		
-		/**
-		 * Choose segments to be merged in the given segmented profile
-		 * @param medianProfile
-		 * @throws Exception
-		 */
-		private void mergeAction(ISegmentedProfile medianProfile) throws Exception{
-						
-			List<SegMergeItem> names = new ArrayList<SegMergeItem>();
+        splitButton = new JButton(STR_SPLIT_SEGMENT);
+        splitButton.addActionListener(this);
+        panel.add(splitButton);
 
-			// Put the names of the mergable segments into a list
-			for(IBorderSegment seg : medianProfile.getOrderedSegments()){
-				SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
-				names.add(item);
-			}
-			SegMergeItem[] nameArray = names.toArray(new SegMergeItem[0]);
+        windowSizeButton = new JButton(STR_SHOW_WINDOW_SIZES);
+        windowSizeButton.addActionListener(this);
+        panel.add(windowSizeButton);
 
-			SegMergeItem mergeOption = (SegMergeItem) JOptionPane.showInputDialog(null, 
-					"Choose segments to merge",
-					"Merge",
-					JOptionPane.QUESTION_MESSAGE, 
-					null, 
-					nameArray, 
-					nameArray[0]);
+        updatewindowButton = new JButton(STR_SET_WINDOW_SIZE);
+        updatewindowButton.addActionListener(this);
+        panel.add(updatewindowButton);
 
-			if(mergeOption!=null){
+        return panel;
 
-				this.setAnalysing(true);
+    }
 
-				SegmentationHandler sh = new SegmentationHandler(activeDataset());
-				sh.mergeSegments(mergeOption.getOne().getID(), mergeOption.getTwo().getID());
+    @Override
+    protected void updateSingle() {
 
+        ISegmentedProfile profile = null;
 
-				refreshEditingPanelCharts();
+        boolean normaliseProfile = true;
 
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
+                .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getMainPanel())
+                .build();
 
-			} else {
-				JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
-			}
-			this.setAnalysing(false);
+        // Set the button configuration
+        configureButtons(options);
 
-		}
-		
-		private class SegMergeItem {
-			private IBorderSegment one, two;
-			public SegMergeItem(IBorderSegment one, IBorderSegment two){
-				this.one = one;
-				this.two = two;
-			}
-			public String toString(){
-				return one.getName()+" - "+two.getName();
-			}
-			public IBorderSegment getOne(){
-				return one;
-			}
-			public IBorderSegment getTwo(){
-				return two;
-			}
-		}
-				
-		
-		
-		private void splitAction(ISegmentedProfile medianProfile) throws Exception{
+        JFreeChart chart = getChart(options);
 
-			IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
+        /*
+         * Create the chart for the range panel
+         */
 
-			// show a list of segments that can be unmerged, and merge the selected option
+        ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
+                .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setShowPoints(false).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel())
+                .build();
 
-			IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, 
-					"Choose segments to unmerge",
-					"Unmerge",
-					JOptionPane.QUESTION_MESSAGE, 
-					null, 
-					nameArray, 
-					nameArray[0]);
+        JFreeChart rangeChart = getChart(rangeOptions);
 
-			if(option!=null){
+        try {
+            profile = activeDataset().getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
+        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
+                | UnsegmentedProfileException e) {
+            stack("Error getting profile", e);
 
-				this.setAnalysing(true);
+        }
 
-				SegmentationHandler sh = new SegmentationHandler(activeDataset());
-				sh.splitSegment(option.getID());
+        dualPanel.setCharts(chart, profile, normaliseProfile, rangeChart);
+    }
 
-				refreshEditingPanelCharts();
+    @Override
+    protected void updateMultiple() {
+        updateNull();
 
-				this.setAnalysing(false);
-			}
+    }
 
+    @Override
+    protected void updateNull() {
 
-		}
-		
-		/**
-		 * Unmerge segments in a median profile
-		 * @param medianProfile
-		 * @throws Exception
-		 */
-		private void unmergeAction(ISegmentedProfile medianProfile) throws Exception{
-						
-			List<IBorderSegment> names = new ArrayList<IBorderSegment>();
+        ChartOptions options = new ChartOptionsBuilder().setShowXAxis(false).setShowYAxis(false).build();
 
-			// Put the names of the mergable segments into a list
-			for(IBorderSegment seg : medianProfile.getSegments()){
-				if(seg.hasMergeSources()){
-					names.add(seg);		
-				}	
-			}
-			
-			IBorderSegment[] nameArray = names.toArray(new IBorderSegment[0]);
-			
-			// show a list of segments that can be unmerged, and merge the selected option
+        JFreeChart mainChart = new MorphologyChartFactory(options).makeEmptyChart();
 
-			IBorderSegment mergeOption = (IBorderSegment) JOptionPane.showInputDialog(null, 
-					"Choose segments to unmerge",
-					"Unmerge",
-					JOptionPane.QUESTION_MESSAGE, 
-					null, 
-					nameArray, 
-					nameArray[0]);
+        JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
 
-			if(mergeOption!=null){
-				
-				// a choice was made
-				this.setAnalysing(true);
-				
-				SegmentationHandler sh = new SegmentationHandler(activeDataset());
-				sh.unmergeSegments(mergeOption.getID());
-//				
-				this.setAnalysing(false);
-				
-				refreshEditingPanelCharts();
-				
-			}
-		}
+        dualPanel.setCharts(mainChart, rangeChart);
+        setButtonsEnabled(false);
+    }
 
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        dualPanel.setCharts(MorphologyChartFactory.createLoadingChart(), MorphologyChartFactory.createLoadingChart());
+    }
 
-		@Override
-		public void segmentEventReceived(SegmentEvent event) {
-			if(event.getType()==SegmentEvent.MOVE_START_INDEX){
-				finest("Heard update segment request");
-				try{
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
+    }
 
-					
-					setAnalysing(true);
+    /**
+     * Enable or disable buttons depending on datasets selected
+     * 
+     * @param options
+     * @throws Exception
+     */
+    private void configureButtons(ChartOptions options) {
+        if (options.isSingleDataset()) {
 
-					UUID segID = event.getId();
-					
-					int index = event.getIndex();
+            setButtonsEnabled(true);
+            ICellCollection collection = options.firstDataset().getCollection();
+            ISegmentedProfile medianProfile;
+            try {
+                medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+                        Tag.REFERENCE_POINT, Quartile.MEDIAN);
+            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
+                    | UnsegmentedProfileException e) {
+                warn("Error getting profile");
+                stack("Error getting profile", e);
+                setButtonsEnabled(false);
+                return;
+            }
 
-					updateSegmentStartIndexAction(segID, index);
+            // Don't allow merging below 2 segments (causes errors)
+            if (medianProfile.getSegmentCount() <= 2) {
+                mergeButton.setEnabled(false);
+            } else {
+                mergeButton.setEnabled(true);
+            }
 
-				} catch(Exception e){
-					error("Error updating segment", e);
-				} finally {
-					setAnalysing(false);
-				}
+            // Check if there are any merged segments
+            boolean hasMerges = false;
+            for (IBorderSegment seg : medianProfile.getSegments()) {
+                if (seg.hasMergeSources()) {
+                    hasMerges = true;
+                }
+            }
 
-			}
-			
-		}
+            // If there are no merged segments, don't allow unmerging
+            if (hasMerges) {
+                unmergeButton.setEnabled(true);
+            } else {
+                unmergeButton.setEnabled(false);
+            }
 
+            // set child dataset options
+            if (options.firstDataset() instanceof ChildAnalysisDataset) {
+                mergeButton.setEnabled(false);
+                unmergeButton.setEnabled(false);
+                splitButton.setEnabled(false);
+                updatewindowButton.setEnabled(false);
+            }
+
+        } else { // multiple collections
+            setButtonsEnabled(false);
+        }
+    }
+
+    public void setButtonsEnabled(boolean b) {
+        unmergeButton.setEnabled(b);
+        mergeButton.setEnabled(b);
+        splitButton.setEnabled(b);
+        windowSizeButton.setEnabled(b);
+        updatewindowButton.setEnabled(b);
+        // reprofileButton.setEnabled(b);
+
+    }
+
+    private void updateCollectionWindowSize() throws Exception {
+        double windowSizeMin = 0.01;
+        double windowSizeMax = 0.1;
+        double windowSizeActual = activeDataset().getAnalysisOptions().getProfileWindowProportion();
+
+        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual, windowSizeMin, windowSizeMax, 0.01);
+        JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
+
+        int option = JOptionPane.showOptionDialog(null, windowSizeSpinner, "Select new window size",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option == JOptionPane.CANCEL_OPTION) {
+            return;
+
+        } else if (option == JOptionPane.OK_OPTION) {
+            this.setAnalysing(true);
+            double windowSize = (double) windowSizeSpinner.getModel().getValue();
+            setCollectionWindowSize(windowSize);
+            this.refreshChartCache();
+            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+            this.setAnalysing(false);
+        }
+
+    }
+
+    private void setCollectionWindowSize(double windowSize) throws Exception {
+
+        // Update cells
+
+        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
+            n.setWindowProportion(ProfileType.ANGLE, windowSize);
+        }
+
+        // recalc the aggregate
+
+        IProfileCollection pc = activeDataset().getCollection().getProfileCollection();
+
+        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
+
+        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+                Quartile.MEDIAN);
+
+        // Does nothing, but needed to access segment fitter
+        // DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(),
+        // MorphologyAnalysisMode.NEW, programLogger);
+
+        // Make a fitter
+        SegmentFitter fitter = new SegmentFitter(medianProfile);
+
+        for (Nucleus n : activeDataset().getCollection().getNuclei()) {
+
+            // recombine the segments at the lengths of the median profile
+            // segments
+            ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+
+            n.setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
+
+        }
+
+        pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
+
+        fitter = null; // clean up
+
+        IMutableAnalysisOptions options = activeDataset().getAnalysisOptions();
+        options.setAngleWindowProportion(windowSize);
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == windowSizeButton) {
+            new AngleWindowSizeExplorer(activeDataset());
+        }
+
+        try {
+            ICellCollection collection = activeDataset().getCollection();
+            ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
+
+            SegmentsEditingPanel.this.setAnalysing(true);
+
+            if (e.getSource().equals(mergeButton)) {
+                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                mergeAction(medianProfile);
+
+            }
+
+            if (e.getSource().equals(unmergeButton)) {
+                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                unmergeAction(medianProfile);
+            }
+
+            if (e.getSource().equals(splitButton)) {
+                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                splitAction(medianProfile);
+
+            }
+
+            if (e.getSource() == updatewindowButton) {
+                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                updateCollectionWindowSize();
+            }
+
+        } catch (Exception e1) {
+            warn("Error in action");
+            stack("Error in action", e1);
+        } finally {
+            SegmentsEditingPanel.this.setAnalysing(false);
+        }
+    }
+
+    /**
+     * Choose segments to be merged in the given segmented profile
+     * 
+     * @param medianProfile
+     * @throws Exception
+     */
+    private void mergeAction(ISegmentedProfile medianProfile) throws Exception {
+
+        List<SegMergeItem> names = new ArrayList<SegMergeItem>();
+
+        // Put the names of the mergable segments into a list
+        for (IBorderSegment seg : medianProfile.getOrderedSegments()) {
+            SegMergeItem item = new SegMergeItem(seg, seg.nextSegment());
+            names.add(item);
+        }
+        SegMergeItem[] nameArray = names.toArray(new SegMergeItem[0]);
+
+        SegMergeItem mergeOption = (SegMergeItem) JOptionPane.showInputDialog(null, "Choose segments to merge", "Merge",
+                JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+
+        if (mergeOption != null) {
+
+            this.setAnalysing(true);
+
+            SegmentationHandler sh = new SegmentationHandler(activeDataset());
+            sh.mergeSegments(mergeOption.getOne().getID(), mergeOption.getTwo().getID());
+
+            refreshEditingPanelCharts();
+
+        } else {
+            JOptionPane.showMessageDialog(this, "Cannot merge segments: they would cross a core border tag");
+        }
+        this.setAnalysing(false);
+
+    }
+
+    private class SegMergeItem {
+        private IBorderSegment one, two;
+
+        public SegMergeItem(IBorderSegment one, IBorderSegment two) {
+            this.one = one;
+            this.two = two;
+        }
+
+        public String toString() {
+            return one.getName() + " - " + two.getName();
+        }
+
+        public IBorderSegment getOne() {
+            return one;
+        }
+
+        public IBorderSegment getTwo() {
+            return two;
+        }
+    }
+
+    private void splitAction(ISegmentedProfile medianProfile) throws Exception {
+
+        IBorderSegment[] nameArray = medianProfile.getSegments().toArray(new IBorderSegment[0]);
+
+        // show a list of segments that can be unmerged, and merge the selected
+        // option
+
+        IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segments to unmerge",
+                "Unmerge", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+
+        if (option != null) {
+
+            this.setAnalysing(true);
+
+            SegmentationHandler sh = new SegmentationHandler(activeDataset());
+            sh.splitSegment(option.getID());
+
+            refreshEditingPanelCharts();
+
+            this.setAnalysing(false);
+        }
+
+    }
+
+    /**
+     * Unmerge segments in a median profile
+     * 
+     * @param medianProfile
+     * @throws Exception
+     */
+    private void unmergeAction(ISegmentedProfile medianProfile) throws Exception {
+
+        List<IBorderSegment> names = new ArrayList<IBorderSegment>();
+
+        // Put the names of the mergable segments into a list
+        for (IBorderSegment seg : medianProfile.getSegments()) {
+            if (seg.hasMergeSources()) {
+                names.add(seg);
+            }
+        }
+
+        IBorderSegment[] nameArray = names.toArray(new IBorderSegment[0]);
+
+        // show a list of segments that can be unmerged, and merge the selected
+        // option
+
+        IBorderSegment mergeOption = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segments to unmerge",
+                "Unmerge", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+
+        if (mergeOption != null) {
+
+            // a choice was made
+            this.setAnalysing(true);
+
+            SegmentationHandler sh = new SegmentationHandler(activeDataset());
+            sh.unmergeSegments(mergeOption.getID());
+            //
+            this.setAnalysing(false);
+
+            refreshEditingPanelCharts();
+
+        }
+    }
+
+    @Override
+    public void segmentEventReceived(SegmentEvent event) {
+        if (event.getType() == SegmentEvent.MOVE_START_INDEX) {
+            finest("Heard update segment request");
+            try {
+
+                setAnalysing(true);
+
+                UUID segID = event.getId();
+
+                int index = event.getIndex();
+
+                updateSegmentStartIndexAction(segID, index);
+
+            } catch (Exception e) {
+                error("Error updating segment", e);
+            } finally {
+                setAnalysing(false);
+            }
+
+        }
+
+    }
 
 }

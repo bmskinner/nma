@@ -49,522 +49,516 @@ import inra.ijpb.watershed.ExtendedMinimaWatershed;
 
 /**
  * Detect neutrophils in H&E stained images
+ * 
  * @author ben
  * @since 1.13.5
  *
  */
 public class NeutrophilFinder extends CellFinder {
-	
-	final private ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
-	final private ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
-	final private ComponentFactory<Lobe>       lobeFactory = new LobeFactory();
-	
-	final private static int CONNECTIIVITY  = 4;
-	final private static boolean IS_VERBOSE = false;
-	final private static boolean NORMALISE_DISTANCE_MAP      = true;
-	
-	/**
-	 * Construct with an analysis options
-	 * @param op
-	 * @param prober should prober events be fired
-	 */
-	public NeutrophilFinder(IAnalysisOptions op){
-		super(op);
-	}
-		
-	/*
-	 * METHODS IMPLEMENTING THE FINDER INTERFACE
-	 * 
-	 */
-		
-	
-	@Override
-	public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException{
-		List<ICell> list = new ArrayList<>();
-		
-		
-		
-		List<ICytoplasm> cyto = detectCytoplasm(imageFile);
-		List<Nucleus> nucl    = detectNucleus(imageFile, cyto);
-		
-		for(ICytoplasm c : cyto){
-			
-			ICell cell = new DefaultCell(c);
-			
-			Iterator<Nucleus> it = nucl.iterator();
-			
-			while(it.hasNext()){
-				Nucleus n = it.next();
-				if(c.containsOriginalPoint(n.getOriginalCentreOfMass())){
-					cell.addNucleus(n);
-					it.remove();
-				}
-			}
-			
-			if(cell.hasNucleus()){
-				
-				double cytoRatio = cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_RATIO);
-				if(cytoRatio < 1 ){ // if the nuclear area is greater than the cytoplasmic area, something went wrong in detection of cytoplasm
-					list.add(cell);
-				}
-				
-				
-			}
-			
-		}
-				
-		
-		if(  hasDetectionListeners()  ){
-			// Display the final image
-			ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-			ImageAnnotator an = new ImageAnnotator(ip);
-			
-			for(ICell cell : list){
-				an.annotateCellBorders(cell);
-			}
-			fireDetectionEvent(an.toProcessor(), "Detected cells");
-			
-		}
-		fireProgressEvent();
-		return list;
-	}
-	
-	/*
-	 * PRIVATE METHODS
-	 */
-	
-	/**
-	 * Find cytoplasms in the given image file
-	 * @param imageFile
-	 * @return
-	 * @throws ComponentCreationException
-	 * @throws ImageImportException
-	 */
-	private List<ICytoplasm> detectCytoplasm(File imageFile) throws ComponentCreationException, ImageImportException{
-		List<ICytoplasm> result = new ArrayList<>();
-		
-		try {
-		
-			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 
-			ImageProcessor ip;
-			// Do the filtering. Returns binary images.
-			if(cytoOptions.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
-				ip = detectCytoplasmByWatershed(imageFile);
-//				fireDetectionEvent(ip.duplicate(), "Watershed");
-			} else {
-				ip = detectCytoplasmByThreshold(imageFile);
-			}
-//			fireDetectionEvent(ip.duplicate(), "Cytoplasm mask");
-			
-			// Find rois
-			GenericDetector gd = new GenericDetector();
-			gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
-			gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
-//			gd.setThreshold(cytoOptions.getThreshold());
-			List<Roi> rois = gd.getRois(ip.duplicate());
+    private final ComponentFactory<ICytoplasm> cytoFactory = new CytoplasmFactory();
+    private final ComponentFactory<Nucleus>    nuclFactory = new NucleusFactory(NucleusType.NEUTROPHIL);
+    private final ComponentFactory<Lobe>       lobeFactory = new LobeFactory();
 
-			List<ICytoplasm> list = new ArrayList<>();
-			for(int i=0; i<rois.size(); i++){
+    private static final int     CONNECTIIVITY          = 4;
+    private static final boolean IS_VERBOSE             = false;
+    private static final boolean NORMALISE_DISTANCE_MAP = true;
 
-				Roi roi = rois.get(i);
-				ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip.duplicate(), i, gd);
-				list.add(cyto);
+    /**
+     * Construct with an analysis options
+     * 
+     * @param op
+     */
+    public NeutrophilFinder(IAnalysisOptions op) {
+        super(op);
+    }
 
-			}
-			
-			// Filter out the cytoplasms that will not pass detection
-			
-			for(ICytoplasm c : list){
-				if(cytoOptions.isValid(c)){
-					result.add(c);
-				}
-			}
-			
-			// Draw the detected ROIs		
-			
-			if( hasDetectionListeners() ){
-				// Input image for annotation
-				ImageProcessor ann =  new ImageImporter(imageFile).importToColorProcessor();
-				ImageAnnotator an = new ImageAnnotator(ann);
-				for(ICytoplasm c : list){
-					Color colour = cytoOptions.isValid(c) ? Color.ORANGE : Color.RED;
-					an.annotateBorder(c, colour);
-				}
-				fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
+    /*
+     * METHODS IMPLEMENTING THE FINDER INTERFACE
+     * 
+     */
 
-			}
-			
-			
-			
-			
-		} catch (MissingOptionException e) {
-			error("Missing option", e);
-		}
-	
-		return result;
-		
-	}
-		
-	
-	private ImageProcessor detectCytoplasmByWatershed(File imageFile) throws ComponentCreationException, ImageImportException{
+    @Override
+    public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+        List<ICell> list = new ArrayList<>();
 
-		ImageProcessor ip =  new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
-//		fireDetectionEvent(ip.duplicate(), "Input");
+        List<ICytoplasm> cyto = detectCytoplasm(imageFile);
+        List<Nucleus> nucl = detectNucleus(imageFile, cyto);
 
-		try {
-			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-			
-			int dilationRadius     = 3;
-			int erosionDiameter    = cytoOptions.getInt(IDetectionOptions.EROSION);
-			int dynamic            = cytoOptions.getInt(IDetectionOptions.DYNAMIC); // the minimal difference between a minima and its boundary
+        for (ICytoplasm c : cyto) {
 
-			
+            ICell cell = new DefaultCell(c);
 
-			ip= GeodesicReconstruction.fillHoles(ip);
-//			fireDetectionEvent(ip.duplicate(), "Filled holes");
-			
-			
-			ContrastEnhancer ch = new  ContrastEnhancer();
-			ch.setNormalize(true);
-			ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
-//			fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
-			
-			/*
-			 * Use a top hat filter to approximate cytoplasm
-			 */
-			{
-				
-				Strel strel = Strel.Shape.DISK.fromRadius(40);
-				ip = Morphology.blackTopHat(ip, strel);
-//				fireDetectionEvent(ip.duplicate(), "Top hat");
-				
-				ip = LabelImages.labelBoundaries(ip);
-//				fireDetectionEvent(ip.duplicate(), "Boundaries");
-				ip.invert();
-				
-				strel = Strel.Shape.DISK.fromRadius(dilationRadius);
-				ip = Morphology.erosion(ip, strel);
-				strel = Strel.Shape.DISK.fromRadius(dilationRadius*2);
-				ip = Morphology.dilation(ip, strel);
-			}
-			
-			
-			// Calculate a distance map on the binarised input
-			float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
-			ImageProcessor dist =	BinaryImages.distanceMap( ip, floatWeights, NORMALISE_DISTANCE_MAP );
-			dist.invert();
-//			fireDetectionEvent(dist.duplicate(), "Distance map");
-						
-			// Watershed the inverted map
-			ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
-					dist, ip, dynamic, CONNECTIIVITY, IS_VERBOSE );
-//			fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
-			
-			Strel strel = Strel.Shape.DISK.fromRadius(erosionDiameter);
-			watersheded = Morphology.erosion(watersheded, strel);
-			
-			// Binarise for object detection
-			ImageProcessor lines = BinaryImages.binarize( watersheded );
-//			fireDetectionEvent(lines.duplicate(), "Binarized");
-//			lines.invert();
-			return lines;
+            Iterator<Nucleus> it = nucl.iterator();
 
-		} catch (MissingOptionException e) {
-			error("Missing option", e);
-			return null;
-		}
+            while (it.hasNext()) {
+                Nucleus n = it.next();
+                if (c.containsOriginalPoint(n.getOriginalCentreOfMass())) {
+                    cell.addNucleus(n);
+                    it.remove();
+                }
+            }
 
-	}
-	
-	
-	private ImageProcessor detectCytoplasmByThreshold(File imageFile) throws ComponentCreationException, ImageImportException{
+            if (cell.hasNucleus()) {
 
-		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-//		fireDetectionEvent(ip.duplicate(), "Imported image");
-		try {
-			
-			IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
-			IPreprocessingOptions op = (IPreprocessingOptions) cytoOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-			
+                double cytoRatio = cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_RATIO);
+                if (cytoRatio < 1) { // if the nuclear area is greater than the
+                                     // cytoplasmic area, something went wrong
+                                     // in detection of cytoplasm
+                    list.add(cell);
+                }
 
-			int minHue = op.getMinHue();
-			int maxHue = op.getMaxHue();
-			int minSat = op.getMinSaturation();
-			int maxSat = op.getMaxSaturation();
-			int minBri = op.getMinBrightness();
-			int maxBri = op.getMaxBrightness();
-			
-			ImageFilterer filt = new ImageFilterer(ip);
-						
-			filt.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri);
-			
-			// the resulting processor has white cells on black. Invert.
-			filt.invert();
+            }
 
-			
-			ip = filt.convertToByteProcessor().toProcessor();
-//			fireDetectionEvent(ip.duplicate(), "To byte");
+        }
 
-			return ip;
-			
-				
+        if (hasDetectionListeners()) {
+            // Display the final image
+            ImageProcessor ip = new ImageImporter(imageFile).importToColorProcessor();
+            ImageAnnotator an = new ImageAnnotator(ip);
 
-		} catch (MissingOptionException e) {
-			error("Missing option", e);
-			return null;
-		}
+            for (ICell cell : list) {
+                an.annotateCellBorders(cell);
+            }
+            fireDetectionEvent(an.toProcessor(), "Detected cells");
 
-	}
-	
-		
-	
-	private ICytoplasm makeCytoplasm(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber, Detector gd) throws ComponentCreationException {
-		
-		  // measure the area, density etc within the nucleus
-		StatsMap values   = gd.measure(roi, ip);
+        }
+        fireProgressEvent();
+        return list;
+    }
 
-		  // save the position of the roi, for later use
-		int xbase = (int) roi.getXBase();
-		int ybase = (int) roi.getYBase();
+    /*
+     * PRIVATE METHODS
+     */
 
-		Rectangle bounds = roi.getBounds();
+    /**
+     * Find cytoplasms in the given image file
+     * 
+     * @param imageFile
+     * @return
+     * @throws ComponentCreationException
+     * @throws ImageImportException
+     */
+    private List<ICytoplasm> detectCytoplasm(File imageFile) throws ComponentCreationException, ImageImportException {
+        List<ICytoplasm> result = new ArrayList<>();
 
-		int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+        try {
 
-		// create a Nucleus from the roi
-		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+            IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 
-		ICytoplasm result = cytoFactory.buildInstance(roi, f, options.getChannel(), originalPosition, centreOfMass); 
+            ImageProcessor ip;
+            // Do the filtering. Returns binary images.
+            if (cytoOptions.getBoolean(IDetectionOptions.IS_USE_WATERSHED)) {
+                ip = detectCytoplasmByWatershed(imageFile);
+                // fireDetectionEvent(ip.duplicate(), "Watershed");
+            } else {
+                ip = detectCytoplasmByThreshold(imageFile);
+            }
+            // fireDetectionEvent(ip.duplicate(), "Cytoplasm mask");
 
-		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
-		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );
+            // Find rois
+            GenericDetector gd = new GenericDetector();
+            gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
+            gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
+            // gd.setThreshold(cytoOptions.getThreshold());
+            List<Roi> rois = gd.getRois(ip.duplicate());
 
+            List<ICytoplasm> list = new ArrayList<>();
+            for (int i = 0; i < rois.size(); i++) {
 
-		result.moveCentreOfMass(offsetCoM);
+                Roi roi = rois.get(i);
+                ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip.duplicate(), i, gd);
+                list.add(cyto);
 
-		result.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
-		result.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
-		result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
+            }
 
-		result.setScale(options.getScale());
+            // Filter out the cytoplasms that will not pass detection
 
-		return result;
-	}
-	
-	private List<Nucleus> detectNucleus(File imageFile, List<ICytoplasm> mask) throws ComponentCreationException, ImageImportException{
-		List<Nucleus> result = new ArrayList<>();
-		ImageProcessor ip =  new ImageImporter(imageFile).importToColorProcessor();
-		ImageProcessor ann = ip.duplicate();
-		try {
-			
-			IDetectionOptions nuclOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-			int topHatRadius = nuclOptions.getInt(IDetectionOptions.TOP_HAT_RADIUS);
-			
-			int thresholdMin = nuclOptions.getThreshold();
-			
+            for (ICytoplasm c : list) {
+                if (cytoOptions.isValid(c)) {
+                    result.add(c);
+                }
+            }
 
-			ImageProcessor test = new ImageConverter(ip)
-					.convertToByteProcessor()
-					.toProcessor();
-			Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
-			ip = Morphology.blackTopHat(test, strel);
-//			fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
-//			
-			
-			// Most remaining cytoplasm is weak, can can be thresholded away 
-			ImageProcessor bin = ip.duplicate();
-//			ip.setMinAndMax(thresholdMin, thresholdMax);
-			bin.threshold(thresholdMin);
-//			bin.invert();
-			
-//			fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
-			
-			List<Nucleus> list = new ArrayList<>();
-			GenericDetector gd = new GenericDetector();
-			gd.setCirc(nuclOptions.getMinCirc(), nuclOptions.getMaxCirc());
-			gd.setSize(nuclOptions.getMinSize(), nuclOptions.getMaxSize());
-			gd.setThreshold(thresholdMin);
-			List<Roi> rois = gd.getRois(bin);
-			
-			for(int i=0; i<rois.size(); i++){
-				
-				Roi roi = rois.get(i);
-				Nucleus n = makeNucleus(roi, imageFile, nuclOptions, bin, i, gd);
-				list.add(n);
-				
-			}
-			
-			for(Nucleus c : list){
-				if(nuclOptions.isValid(c)){
-					result.add(c);
-				}
-			}
-				
+            // Draw the detected ROIs
 
+            if (hasDetectionListeners()) {
+                // Input image for annotation
+                ImageProcessor ann = new ImageImporter(imageFile).importToColorProcessor();
+                ImageAnnotator an = new ImageAnnotator(ann);
+                for (ICytoplasm c : list) {
+                    Color colour = cytoOptions.isValid(c) ? Color.ORANGE : Color.RED;
+                    an.annotateBorder(c, colour);
+                }
+                fireDetectionEvent(an.toProcessor(), "Detected cytoplasm");
 
-		
-		if( hasDetectionListeners() ){
-//			fireDetectionEvent(ip.duplicate(), "Nucleus");
-			
-			ImageAnnotator an = new ImageAnnotator(ann.duplicate());
-			for(Nucleus c : list){
-				Color colour = nuclOptions.isValid(c) ? Color.ORANGE : Color.RED;
-				an.annotateBorder(c, colour);
-			}
-			fireDetectionEvent(an.toProcessor(), "Detected nucleus");
-		}
-		
-		if(options.getNucleusType().equals(NucleusType.NEUTROPHIL)){
-			detectLobesViaWatershed(ip, result);
-			
-			ImageAnnotator an = new ImageAnnotator(ann.duplicate());
-			for(Nucleus c : list){
-				if(c instanceof LobedNucleus){
-					for(Lobe l : ((LobedNucleus)c).getLobes()){
-						an.annotateBorder(l, Color.YELLOW);
-					}
-					
-				}
-			}
-			fireDetectionEvent(an.toProcessor(), "Detected lobes");
-			
-		}
-		
+            }
 
-		} catch (MissingOptionException e) {
-			stack("Missing options in nucleus detection", e);
-		}
-		return result;
-	}
-	
-	
-	
-	
+        } catch (MissingOptionException e) {
+            error("Missing option", e);
+        }
 
-	private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber, Detector gd) throws ComponentCreationException {
-		
-		  // measure the area, density etc within the nucleus
-		StatsMap values   = gd.measure(roi, ip);
+        return result;
 
-		  // save the position of the roi, for later use
-		int xbase = (int) roi.getXBase();
-		int ybase = (int) roi.getYBase();
+    }
 
-		Rectangle bounds = roi.getBounds();
+    private ImageProcessor detectCytoplasmByWatershed(File imageFile)
+            throws ComponentCreationException, ImageImportException {
 
-		int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+        ImageProcessor ip = new ImageImporter(imageFile).toConverter().convertToGreyscale(1).toProcessor();
+        // fireDetectionEvent(ip.duplicate(), "Input");
 
-		// create a Nucleus from the roi
-		IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+        try {
+            IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
 
-		Nucleus result = nuclFactory.buildInstance(roi, f, options.getChannel(), originalPosition, centreOfMass); 
+            int dilationRadius = 3;
+            int erosionDiameter = cytoOptions.getInt(IDetectionOptions.EROSION);
+            int dynamic = cytoOptions.getInt(IDetectionOptions.DYNAMIC); // the
+                                                                         // minimal
+                                                                         // difference
+                                                                         // between
+                                                                         // a
+                                                                         // minima
+                                                                         // and
+                                                                         // its
+                                                                         // boundary
 
-		// Move the nucleus xbase and ybase to 0,0 coordinates for charting
-		IPoint offsetCoM = IPoint.makeNew( centreOfMass.getX() - xbase, centreOfMass.getY() - ybase  );
+            ip = GeodesicReconstruction.fillHoles(ip);
+            // fireDetectionEvent(ip.duplicate(), "Filled holes");
 
+            ContrastEnhancer ch = new ContrastEnhancer();
+            ch.setNormalize(true);
+            ch.stretchHistogram(ip, 3); // default saturation value in ImageJ
+            // fireDetectionEvent(ip.duplicate(), "Contrast enhanced");
 
-		result.moveCentreOfMass(offsetCoM);
+            /*
+             * Use a top hat filter to approximate cytoplasm
+             */
+            {
 
-		result.setStatistic(PlottableStatistic.AREA,      values.get("Area"));
-		result.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
-		result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
+                Strel strel = Strel.Shape.DISK.fromRadius(40);
+                ip = Morphology.blackTopHat(ip, strel);
+                // fireDetectionEvent(ip.duplicate(), "Top hat");
 
-		result.setScale(options.getScale());
-		result.initialise(this.options.getProfileWindowProportion());
-		result.findPointsAroundBorder();
-		return result;
-	}
-	
-	/* 
-	 * 	Uses the Distance Transform watershed	
-     * Take the distance map from the input.
-	 * Invert it, and perform watershed using the binary mask (dynamic of 1 and 4-connectivity).	 
-	 * @param ip
-	 * @param list
-	 * @throws ComponentCreationException
-	 */
-	private void detectLobesViaWatershed(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
+                ip = LabelImages.labelBoundaries(ip);
+                // fireDetectionEvent(ip.duplicate(), "Boundaries");
+                ip.invert();
 
-		int erosionDiameter    = 1;
-		int dynamic            = 1; // the minimal difference between a minima and its boundary
-		
-//		fireDetectionEvent(ip.duplicate(), "Lobe detection input");
-		ImageProcessor mask = ip.duplicate();		
+                strel = Strel.Shape.DISK.fromRadius(dilationRadius);
+                ip = Morphology.erosion(ip, strel);
+                strel = Strel.Shape.DISK.fromRadius(dilationRadius * 2);
+                ip = Morphology.dilation(ip, strel);
+            }
 
-		
-		mask.threshold(20);
-//		fireDetectionEvent(mask.duplicate(), "Binarised input");
-					
-		// Calculate a distance map on the binarised input
-		float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
-		ImageProcessor dist =	BinaryImages.distanceMap( mask, floatWeights, NORMALISE_DISTANCE_MAP );
-		dist.invert();
-//		fireDetectionEvent(dist.duplicate(), "Distance map");
+            // Calculate a distance map on the binarised input
+            float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+            ImageProcessor dist = BinaryImages.distanceMap(ip, floatWeights, NORMALISE_DISTANCE_MAP);
+            dist.invert();
+            // fireDetectionEvent(dist.duplicate(), "Distance map");
 
-		// Watershed the inverted map
-		ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(
-				dist, mask, dynamic, CONNECTIIVITY, IS_VERBOSE );
-//		fireDetectionEvent(watersheded.duplicate(), "Distance transform watershed");
+            // Watershed the inverted map
+            ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(dist, ip, dynamic,
+                    CONNECTIIVITY, IS_VERBOSE);
+            // fireDetectionEvent(watersheded.duplicate(), "Distance transform
+            // watershed");
 
-		// Binarise for object detection
-		ImageProcessor lines = BinaryImages.binarize( watersheded );
-//		fireDetectionEvent(lines.duplicate(), "Binarized");
-		
-		// Erode by 1 pixel to better separate lobes
-		Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
-		lines = Morphology.erosion(lines, erosionStrel);
-//		fireDetectionEvent(lines.duplicate(), "Eroded");
-		
-//		lines.invert();
-		
-		// Now take the watershed image, and detect the distinct lobes
-		makeLobes(lines, list);
+            Strel strel = Strel.Shape.DISK.fromRadius(erosionDiameter);
+            watersheded = Morphology.erosion(watersheded, strel);
 
-	}
-	
-	/**
-	 * Detect lobes in the given processed image, and assign them to nuclei
-	 * @param ip the binary image with lobe objects
-	 * @param list the nuclei to which lobes in this image belong
-	 * @throws ComponentCreationException 
-	 */
-	private void makeLobes(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException{
-		
-		int minArea            = 5;
-		int maxArea            = 3000;
-		
-		GenericDetector gd = new GenericDetector();
-		gd.setIncludeHoles(false);
-		gd.setSize(minArea, maxArea);
-		List<Roi> rois  = gd.getRois(ip);
-		
-		for(Roi roi : rois){
-			for(Nucleus n : list){
-				LobedNucleus l = (LobedNucleus) n;
-				StatsMap m = gd.measure(roi, ip);
-				int x = m.get(GenericDetector.COM_X).intValue();
-				int y = m.get(GenericDetector.COM_Y).intValue();
-				IPoint com = IPoint.makeNew(x, y);
-				if(n.containsOriginalPoint(com)){
-					// Now adjust the roi base to match the source image
-					IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
-					
-					Rectangle bounds = roi.getBounds();
-					
-					roi.setLocation(base.getXAsInt(), base.getYAsInt());
+            // Binarise for object detection
+            ImageProcessor lines = BinaryImages.binarize(watersheded);
+            // fireDetectionEvent(lines.duplicate(), "Binarized");
+            // lines.invert();
+            return lines;
 
-					int[] originalPosition = {base.getXAsInt(), 
-							base.getYAsInt(), 
-							(int) bounds.getWidth(), 
-							(int) bounds.getHeight() };
-					
-					Lobe lobe = lobeFactory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com);
-					
-					l.addLobe( lobe); //TODO makethe channel useful
-				}
-			}
-		}
-	}
-	
+        } catch (MissingOptionException e) {
+            error("Missing option", e);
+            return null;
+        }
+
+    }
+
+    private ImageProcessor detectCytoplasmByThreshold(File imageFile)
+            throws ComponentCreationException, ImageImportException {
+
+        ImageProcessor ip = new ImageImporter(imageFile).importToColorProcessor();
+        // fireDetectionEvent(ip.duplicate(), "Imported image");
+        try {
+
+            IDetectionOptions cytoOptions = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+            IPreprocessingOptions op = (IPreprocessingOptions) cytoOptions
+                    .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+
+            int minHue = op.getMinHue();
+            int maxHue = op.getMaxHue();
+            int minSat = op.getMinSaturation();
+            int maxSat = op.getMaxSaturation();
+            int minBri = op.getMinBrightness();
+            int maxBri = op.getMaxBrightness();
+
+            ImageFilterer filt = new ImageFilterer(ip);
+
+            filt.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri);
+
+            // the resulting processor has white cells on black. Invert.
+            filt.invert();
+
+            ip = filt.convertToByteProcessor().toProcessor();
+            // fireDetectionEvent(ip.duplicate(), "To byte");
+
+            return ip;
+
+        } catch (MissingOptionException e) {
+            error("Missing option", e);
+            return null;
+        }
+
+    }
+
+    private ICytoplasm makeCytoplasm(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber,
+            Detector gd) throws ComponentCreationException {
+
+        // measure the area, density etc within the nucleus
+        StatsMap values = gd.measure(roi, ip);
+
+        // save the position of the roi, for later use
+        int xbase = (int) roi.getXBase();
+        int ybase = (int) roi.getYBase();
+
+        Rectangle bounds = roi.getBounds();
+
+        int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+
+        // create a Nucleus from the roi
+        IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+
+        ICytoplasm result = cytoFactory.buildInstance(roi, f, options.getChannel(), originalPosition, centreOfMass);
+
+        // Move the nucleus xbase and ybase to 0,0 coordinates for charting
+        IPoint offsetCoM = IPoint.makeNew(centreOfMass.getX() - xbase, centreOfMass.getY() - ybase);
+
+        result.moveCentreOfMass(offsetCoM);
+
+        result.setStatistic(PlottableStatistic.AREA, values.get("Area"));
+        result.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
+        result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
+
+        result.setScale(options.getScale());
+
+        return result;
+    }
+
+    private List<Nucleus> detectNucleus(File imageFile, List<ICytoplasm> mask)
+            throws ComponentCreationException, ImageImportException {
+        List<Nucleus> result = new ArrayList<>();
+        ImageProcessor ip = new ImageImporter(imageFile).importToColorProcessor();
+        ImageProcessor ann = ip.duplicate();
+        try {
+
+            IDetectionOptions nuclOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            int topHatRadius = nuclOptions.getInt(IDetectionOptions.TOP_HAT_RADIUS);
+
+            int thresholdMin = nuclOptions.getThreshold();
+
+            ImageProcessor test = new ImageConverter(ip).convertToByteProcessor().toProcessor();
+            Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring
+                                                              // element used
+                                                              // for black
+                                                              // top-hat
+            ip = Morphology.blackTopHat(test, strel);
+            // fireDetectionEvent(ip.duplicate(), "Nucleus top hat");
+            //
+
+            // Most remaining cytoplasm is weak, can can be thresholded away
+            ImageProcessor bin = ip.duplicate();
+            // ip.setMinAndMax(thresholdMin, thresholdMax);
+            bin.threshold(thresholdMin);
+            // bin.invert();
+
+            // fireDetectionEvent(bin.duplicate(), "Thresholded top hat");
+
+            List<Nucleus> list = new ArrayList<>();
+            GenericDetector gd = new GenericDetector();
+            gd.setCirc(nuclOptions.getMinCirc(), nuclOptions.getMaxCirc());
+            gd.setSize(nuclOptions.getMinSize(), nuclOptions.getMaxSize());
+            gd.setThreshold(thresholdMin);
+            List<Roi> rois = gd.getRois(bin);
+
+            for (int i = 0; i < rois.size(); i++) {
+
+                Roi roi = rois.get(i);
+                Nucleus n = makeNucleus(roi, imageFile, nuclOptions, bin, i, gd);
+                list.add(n);
+
+            }
+
+            for (Nucleus c : list) {
+                if (nuclOptions.isValid(c)) {
+                    result.add(c);
+                }
+            }
+
+            if (hasDetectionListeners()) {
+                // fireDetectionEvent(ip.duplicate(), "Nucleus");
+
+                ImageAnnotator an = new ImageAnnotator(ann.duplicate());
+                for (Nucleus c : list) {
+                    Color colour = nuclOptions.isValid(c) ? Color.ORANGE : Color.RED;
+                    an.annotateBorder(c, colour);
+                }
+                fireDetectionEvent(an.toProcessor(), "Detected nucleus");
+            }
+
+            if (options.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
+                detectLobesViaWatershed(ip, result);
+
+                ImageAnnotator an = new ImageAnnotator(ann.duplicate());
+                for (Nucleus c : list) {
+                    if (c instanceof LobedNucleus) {
+                        for (Lobe l : ((LobedNucleus) c).getLobes()) {
+                            an.annotateBorder(l, Color.YELLOW);
+                        }
+
+                    }
+                }
+                fireDetectionEvent(an.toProcessor(), "Detected lobes");
+
+            }
+
+        } catch (MissingOptionException e) {
+            stack("Missing options in nucleus detection", e);
+        }
+        return result;
+    }
+
+    private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber,
+            Detector gd) throws ComponentCreationException {
+
+        // measure the area, density etc within the nucleus
+        StatsMap values = gd.measure(roi, ip);
+
+        // save the position of the roi, for later use
+        int xbase = (int) roi.getXBase();
+        int ybase = (int) roi.getYBase();
+
+        Rectangle bounds = roi.getBounds();
+
+        int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
+
+        // create a Nucleus from the roi
+        IPoint centreOfMass = IPoint.makeNew(values.get("XM"), values.get("YM"));
+
+        Nucleus result = nuclFactory.buildInstance(roi, f, options.getChannel(), originalPosition, centreOfMass);
+
+        // Move the nucleus xbase and ybase to 0,0 coordinates for charting
+        IPoint offsetCoM = IPoint.makeNew(centreOfMass.getX() - xbase, centreOfMass.getY() - ybase);
+
+        result.moveCentreOfMass(offsetCoM);
+
+        result.setStatistic(PlottableStatistic.AREA, values.get("Area"));
+        result.setStatistic(PlottableStatistic.MAX_FERET, values.get("Feret"));
+        result.setStatistic(PlottableStatistic.PERIMETER, values.get("Perim"));
+
+        result.setScale(options.getScale());
+        result.initialise(this.options.getProfileWindowProportion());
+        result.findPointsAroundBorder();
+        return result;
+    }
+
+    /*
+     * Uses the Distance Transform watershed Take the distance map from the
+     * input. Invert it, and perform watershed using the binary mask (dynamic of
+     * 1 and 4-connectivity).
+     * 
+     * @param ip
+     * 
+     * @param list
+     * 
+     * @throws ComponentCreationException
+     */
+    private void detectLobesViaWatershed(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException {
+
+        int erosionDiameter = 1;
+        int dynamic = 1; // the minimal difference between a minima and its
+                         // boundary
+
+        // fireDetectionEvent(ip.duplicate(), "Lobe detection input");
+        ImageProcessor mask = ip.duplicate();
+
+        mask.threshold(20);
+        // fireDetectionEvent(mask.duplicate(), "Binarised input");
+
+        // Calculate a distance map on the binarised input
+        float[] floatWeights = ChamferWeights.CHESSKNIGHT.getFloatWeights();
+        ImageProcessor dist = BinaryImages.distanceMap(mask, floatWeights, NORMALISE_DISTANCE_MAP);
+        dist.invert();
+        // fireDetectionEvent(dist.duplicate(), "Distance map");
+
+        // Watershed the inverted map
+        ImageProcessor watersheded = ExtendedMinimaWatershed.extendedMinimaWatershed(dist, mask, dynamic, CONNECTIIVITY,
+                IS_VERBOSE);
+        // fireDetectionEvent(watersheded.duplicate(), "Distance transform
+        // watershed");
+
+        // Binarise for object detection
+        ImageProcessor lines = BinaryImages.binarize(watersheded);
+        // fireDetectionEvent(lines.duplicate(), "Binarized");
+
+        // Erode by 1 pixel to better separate lobes
+        Strel erosionStrel = Strel.Shape.DISK.fromDiameter(erosionDiameter);
+        lines = Morphology.erosion(lines, erosionStrel);
+        // fireDetectionEvent(lines.duplicate(), "Eroded");
+
+        // lines.invert();
+
+        // Now take the watershed image, and detect the distinct lobes
+        makeLobes(lines, list);
+
+    }
+
+    /**
+     * Detect lobes in the given processed image, and assign them to nuclei
+     * 
+     * @param ip
+     *            the binary image with lobe objects
+     * @param list
+     *            the nuclei to which lobes in this image belong
+     * @throws ComponentCreationException
+     */
+    private void makeLobes(ImageProcessor ip, List<Nucleus> list) throws ComponentCreationException {
+
+        int minArea = 5;
+        int maxArea = 3000;
+
+        GenericDetector gd = new GenericDetector();
+        gd.setIncludeHoles(false);
+        gd.setSize(minArea, maxArea);
+        List<Roi> rois = gd.getRois(ip);
+
+        for (Roi roi : rois) {
+            for (Nucleus n : list) {
+                LobedNucleus l = (LobedNucleus) n;
+                StatsMap m = gd.measure(roi, ip);
+                int x = m.get(GenericDetector.COM_X).intValue();
+                int y = m.get(GenericDetector.COM_Y).intValue();
+                IPoint com = IPoint.makeNew(x, y);
+                if (n.containsOriginalPoint(com)) {
+                    // Now adjust the roi base to match the source image
+                    IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
+
+                    Rectangle bounds = roi.getBounds();
+
+                    roi.setLocation(base.getXAsInt(), base.getYAsInt());
+
+                    int[] originalPosition = { base.getXAsInt(), base.getYAsInt(), (int) bounds.getWidth(),
+                            (int) bounds.getHeight() };
+
+                    Lobe lobe = lobeFactory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com);
+
+                    l.addLobe(lobe); // TODO makethe channel useful
+                }
+            }
+        }
+    }
+
 }

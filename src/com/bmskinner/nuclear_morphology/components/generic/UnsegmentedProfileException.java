@@ -24,15 +24,28 @@ package com.bmskinner.nuclear_morphology.components.generic;
 /**
  * Thrown when a profile collection or segmented profile has no assigned
  * segments
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class UnsegmentedProfileException extends Exception {
-		private static final long serialVersionUID = 1L;
-		public UnsegmentedProfileException() { super(); }
-		public UnsegmentedProfileException(String message) { super(message); }
-		public UnsegmentedProfileException(String message, Throwable cause) { super(message, cause); }
-		public UnsegmentedProfileException(Throwable cause) { super(cause); }
-	
+    private static final long serialVersionUID = 1L;
+
+    public UnsegmentedProfileException() {
+        super();
+    }
+
+    public UnsegmentedProfileException(String message) {
+        super(message);
+    }
+
+    public UnsegmentedProfileException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnsegmentedProfileException(Throwable cause) {
+        super(cause);
+    }
+
 }

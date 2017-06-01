@@ -36,118 +36,125 @@ import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
 /**
- * Call an open dialog to choose a saved .nbd dataset. The opened dataset
- * will be added to the bottom of the dataset list.
+ * Call an open dialog to choose a saved .nbd dataset. The opened dataset will
+ * be added to the bottom of the dataset list.
  */
 public class PopulationImportAction extends VoidResultAction {
 
-	private final File file;
-	private static final String PROGRESS_BAR_LABEL = "Opening file...";
-	private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology datasets";
-	
-	
-	/**
-	 * Create an import action for the given main window.
-	 * This will create a dialog asking for the file to open.
-	 * @param mw the main window to which a progress bar will be attached
-	 */
-	public PopulationImportAction(MainWindow mw) {
-		super(PROGRESS_BAR_LABEL, mw);		
-		file = selectFile();	
-	}
-	
-	/**
-	 * Create an import action for the given main window.
-	 * Specify the file to be opened.
-	 * @param mw the main window to which a progress bar will be attached
-	 * @param file the dataset file to open 
-	 */
-	public PopulationImportAction(MainWindow mw, File file) {
-		super(PROGRESS_BAR_LABEL, mw);
-		this.file = file;
-	}
-	
-	@Override
-	public void run(){
-		setProgressBarIndeterminate();		
-		fine("Running dataset open action");
-		if(file!=null){
-			
-			IAnalysisMethod m = new DatasetImportMethod(file);
-			worker = new DefaultAnalysisWorker(m);
+    private final File          file;
+    private static final String PROGRESS_BAR_LABEL = "Opening file...";
+    private static final String DEFAULT_FILE_TYPE  = "Nuclear morphology datasets";
 
-			worker.addPropertyChangeListener(this);
-			
-			setProgressMessage(PROGRESS_BAR_LABEL);
+    /**
+     * Create an import action for the given main window. This will create a
+     * dialog asking for the file to open.
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     */
+    public PopulationImportAction(MainWindow mw) {
+        super(PROGRESS_BAR_LABEL, mw);
+        file = selectFile();
+    }
 
-			ThreadManager.getInstance().submit(worker);
-		} else {
-			fine("Open cancelled");
-			cancel();
-		}
-	}
+    /**
+     * Create an import action for the given main window. Specify the file to be
+     * opened.
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     * @param file
+     *            the dataset file to open
+     */
+    public PopulationImportAction(MainWindow mw, File file) {
+        super(PROGRESS_BAR_LABEL, mw);
+        this.file = file;
+    }
 
-	
-	/**
-	 * Get the file to be loaded
-	 * @return
-	 */
-	private File selectFile(){
+    @Override
+    public void run() {
+        setProgressBarIndeterminate();
+        fine("Running dataset open action");
+        if (file != null) {
 
-		FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE, Importer.SAVE_FILE_EXTENSION_NODOT);
-		
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();//new File("J:\\Protocols\\Scripts and macros\\");
-		JFileChooser fc = new JFileChooser("Select a saved dataset...");
-		if(defaultDir.exists()){
-			fc = new JFileChooser(defaultDir);
-		}
-		fc.setFileFilter(filter);
+            IAnalysisMethod m = new DatasetImportMethod(file);
+            worker = new DefaultAnalysisWorker(m);
 
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)	{
-			return null;
-		}
-		File file = fc.getSelectedFile();
+            worker.addPropertyChangeListener(this);
 
-		if(file.isDirectory()){
-			return null;
-		}
-		fine("Selected file: "+file.getAbsolutePath());
-		return file;
-	}
-		
+            setProgressMessage(PROGRESS_BAR_LABEL);
 
-	@Override
-	public void finished(){
-		setProgressBarVisible(false);
-		IAnalysisDataset dataset;
-		try {
-			
-			IAnalysisResult r = worker.get();
-			
-			dataset = r.getFirstDataset();
-			
-			// Save newly converted datasets
-			if(r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)){
-				fireDatasetEvent(DatasetEvent.SAVE, dataset);
-			}
+            ThreadManager.getInstance().submit(worker);
+        } else {
+            fine("Open cancelled");
+            cancel();
+        }
+    }
 
-		} catch (InterruptedException e) {
-			warn("Unable to open file '"+file.getAbsolutePath()+"': "+e.getMessage());
-			stack("Unable to open '"+file.getAbsolutePath()+"': ", e);
-			return;
-		} catch (ExecutionException e) {
-			warn("Unable to open '"+file.getAbsolutePath()+"': "+e.getMessage());
-			stack("Unable to open '"+file.getAbsolutePath()+"': ", e);
-			return;
-		}
-		fine("Opened dataset");
+    /**
+     * Get the file to be loaded
+     * 
+     * @return
+     */
+    private File selectFile() {
 
-		fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-		
-		fine("Finishing action");
+        FileNameExtensionFilter filter = new FileNameExtensionFilter(DEFAULT_FILE_TYPE,
+                Importer.SAVE_FILE_EXTENSION_NODOT);
 
-		super.finished();		
-	}
+        File defaultDir = GlobalOptions.getInstance().getDefaultDir();// new
+                                                                      // File("J:\\Protocols\\Scripts
+                                                                      // and
+                                                                      // macros\\");
+        JFileChooser fc = new JFileChooser("Select a saved dataset...");
+        if (defaultDir.exists()) {
+            fc = new JFileChooser(defaultDir);
+        }
+        fc.setFileFilter(filter);
+
+        int returnVal = fc.showOpenDialog(fc);
+        if (returnVal != 0) {
+            return null;
+        }
+        File file = fc.getSelectedFile();
+
+        if (file.isDirectory()) {
+            return null;
+        }
+        fine("Selected file: " + file.getAbsolutePath());
+        return file;
+    }
+
+    @Override
+    public void finished() {
+        setProgressBarVisible(false);
+        IAnalysisDataset dataset;
+        try {
+
+            IAnalysisResult r = worker.get();
+
+            dataset = r.getFirstDataset();
+
+            // Save newly converted datasets
+            if (r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)) {
+                fireDatasetEvent(DatasetEvent.SAVE, dataset);
+            }
+
+        } catch (InterruptedException e) {
+            warn("Unable to open file '" + file.getAbsolutePath() + "': " + e.getMessage());
+            stack("Unable to open '" + file.getAbsolutePath() + "': ", e);
+            return;
+        } catch (ExecutionException e) {
+            warn("Unable to open '" + file.getAbsolutePath() + "': " + e.getMessage());
+            stack("Unable to open '" + file.getAbsolutePath() + "': ", e);
+            return;
+        }
+        fine("Opened dataset");
+
+        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+
+        fine("Finishing action");
+
+        super.finished();
+    }
 
 }

@@ -22,20 +22,21 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
- * Converts positions within the face to pixels and
- * vice versa
+ * Converts positions within the face to pixels and vice versa
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface MeshFaceCoordinate {
-	
-	/**
-	 * Get the pixel within the given face specified by
-	 * this coordinate
-	 * @param face the face enclosing pixel values
-	 * @return the pixel at this face coordinate
-	 */
-	IPoint getCartesianCoordinate(MeshFace face);
+
+    /**
+     * Get the pixel within the given face specified by this coordinate
+     * 
+     * @param face
+     *            the face enclosing pixel values
+     * @return the pixel at this face coordinate
+     */
+    IPoint getCartesianCoordinate(MeshFace face);
 
 }

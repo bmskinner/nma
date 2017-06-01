@@ -23,77 +23,85 @@ import java.io.Serializable;
 import java.util.List;
 
 public interface HashOptions extends Serializable {
-	
-	
-	static final String TOP_HAT_RADIUS = "Top hat radius";
 
-	/**
-	 * Get the double value with the given key
-	 * @param s
-	 * @return
-	 */
-	double getDouble(String s);
+    static final String TOP_HAT_RADIUS = "Top hat radius";
 
-	/**
-	 * Get the int value with the given key
-	 * @param s
-	 * @return
-	 */
-	int getInt(String s);
+    /**
+     * Get the double value with the given key
+     * 
+     * @param s
+     * @return
+     */
+    double getDouble(String s);
 
-	/**
-	 * Get the boolean value with the given key
-	 * @param s
-	 * @return
-	 */
-	boolean getBoolean(String s);
+    /**
+     * Get the int value with the given key
+     * 
+     * @param s
+     * @return
+     */
+    int getInt(String s);
 
-	/**
-	 * Set the double value with the given key
-	 * @param s
-	 * @param d
-	 */
-	void setDouble(String s, double d);
+    /**
+     * Get the boolean value with the given key
+     * 
+     * @param s
+     * @return
+     */
+    boolean getBoolean(String s);
 
-	/**]
-	 * Set the int value with the given key
-	 * @param s
-	 * @param i
-	 */
-	void setInt(String s, int i);
+    /**
+     * Set the double value with the given key
+     * 
+     * @param s
+     * @param d
+     */
+    void setDouble(String s, double d);
 
-	/**
-	 * Set the boolean value with the given key
-	 * @param s
-	 * @param b
-	 */
-	void setBoolean(String s, boolean b);
+    /**
+     * ] Set the int value with the given key
+     * 
+     * @param s
+     * @param i
+     */
+    void setInt(String s, int i);
 
-	/**
-	 * Get the float value with the given key
-	 * @param s
-	 * @return
-	 */
-	float getFloat(String s);
+    /**
+     * Set the boolean value with the given key
+     * 
+     * @param s
+     * @param b
+     */
+    void setBoolean(String s, boolean b);
 
-	/**
-	 * Set the float value with the given key
-	 * @param s
-	 * @param f
-	 */
-	void setFloat(String s, float f);
+    /**
+     * Get the float value with the given key
+     * 
+     * @param s
+     * @return
+     */
+    float getFloat(String s);
 
-	/**
-	 * Get the keys to all the values in this options
-	 * @return
-	 */
-	List<String> getKeys();
+    /**
+     * Set the float value with the given key
+     * 
+     * @param s
+     * @param f
+     */
+    void setFloat(String s, float f);
 
-//	/**
-//	 * Get the object stored with the given key as a string.
-//	 * @param key
-//	 * @return
-//	 */
-//	String getValue(String key);
+    /**
+     * Get the keys to all the values in this options
+     * 
+     * @return
+     */
+    List<String> getKeys();
+
+    // /**
+    // * Get the object stored with the given key as a string.
+    // * @param key
+    // * @return
+    // */
+    // String getValue(String key);
 
 }

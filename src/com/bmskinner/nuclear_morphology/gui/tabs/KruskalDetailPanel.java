@@ -39,136 +39,130 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.dialogs.KruskalTestDialog;
 
 @SuppressWarnings("serial")
-public class KruskalDetailPanel  extends DetailPanel {
-	
-	private static final String COMPARE_FRANKENPROFILE_LBL = "Compare frankenprofiles";
-	private static final String COMPARE_INFO_LBL = "Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)";
-	
-	private ExportableChartPanel chartPanel;
-	JButton frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
+public class KruskalDetailPanel extends DetailPanel {
 
-	public KruskalDetailPanel() {
-		super();
-		
-		createUI();
-		
-		setEnabled(false);
-	}
-	
-	@Override
-	public void setEnabled(boolean b){
-		super.setEnabled(b);
-		frankenButton.setEnabled(b);
-		
-	}
-	
-	private void createUI(){
-		this.setLayout(new BorderLayout());
-		
-		JPanel headerPanel = createHeaderPanel();
-		this.add(headerPanel, BorderLayout.NORTH);
-				
-		createChartPanel();
-		
-		this.add(chartPanel, BorderLayout.CENTER);
-	}
-	
-	private void createChartPanel(){
-		JFreeChart profileChart = MorphologyChartFactory.makeBlankProbabililtyChart();
-		chartPanel =  new ExportableChartPanel(profileChart);
-	}
-	
-	private JPanel createHeaderPanel(){
-		JPanel panel = new JPanel(new FlowLayout());
+    private static final String COMPARE_FRANKENPROFILE_LBL = "Compare frankenprofiles";
+    private static final String COMPARE_INFO_LBL           = "Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)";
 
-		panel.add(new JLabel(COMPARE_INFO_LBL));
-		
-		frankenButton.addActionListener( e -> {
-				
-				Thread thr = new Thread(){
-					public void run(){
-						
-						try {
-							new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1) );
-						} catch (Exception e) {
-							warn("Error testing frankenprofiles");
-							stack("Error testing frankenprofiles", e);
-						}
-					}
-				};
-				thr.start();
-			});
-		
-		panel.add(frankenButton);
+    private ExportableChartPanel chartPanel;
+    JButton                      frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
 
-		return panel;
-		
-	}
-	
-	/**
-	 * Create a chart showing the Kruskal-Wallis p-values of comparisons
-	 * between curves
-	 * @return
-	 */
-	private void updateChartPanel() {
+    public KruskalDetailPanel() {
+        super();
 
+        createUI();
 
-		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setNormalised(true)
-			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(Tag.REFERENCE_POINT)
-			.setShowMarkers(true)
-			.setProfileType(ProfileType.ANGLE)
-			.setTarget(chartPanel)
-			.build();
-		
-		setChart(options);
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return new MorphologyChartFactory(options).makeKruskalWallisChart( false);
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
-		chartPanel.setChart(AbstractChartFactory.createLoadingChart());
-	}
-	
-	@Override
-	protected void updateSingle() {
-		updateNull();
-	}
+        setEnabled(false);
+    }
 
-	
-	@Override
-	protected void updateMultiple() {
-		if(getDatasets().size()==2){ // Only create a chart if exactly two datasets are selected
-			
-			// Only allow a franken normlisation if datasets have the same number of segments
-			if(IBorderSegment.segmentCountsMatch(getDatasets())){
-				setEnabled(true);
-			} else {
-				setEnabled(false);
-			}
-			
-		
-			updateChartPanel();
-			
-		} else {
-			updateNull();
+    @Override
+    public void setEnabled(boolean b) {
+        super.setEnabled(b);
+        frankenButton.setEnabled(b);
 
-		}
-		finest("Updated Kruskal panel");
-	}
-	
-	@Override
-	protected void updateNull()  {
-		setEnabled(false);
-		JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
-		chartPanel.setChart(chart);
-	}	
+    }
+
+    private void createUI() {
+        this.setLayout(new BorderLayout());
+
+        JPanel headerPanel = createHeaderPanel();
+        this.add(headerPanel, BorderLayout.NORTH);
+
+        createChartPanel();
+
+        this.add(chartPanel, BorderLayout.CENTER);
+    }
+
+    private void createChartPanel() {
+        JFreeChart profileChart = MorphologyChartFactory.makeBlankProbabililtyChart();
+        chartPanel = new ExportableChartPanel(profileChart);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+
+        panel.add(new JLabel(COMPARE_INFO_LBL));
+
+        frankenButton.addActionListener(e -> {
+
+            Thread thr = new Thread() {
+                public void run() {
+
+                    try {
+                        new KruskalTestDialog(getDatasets().get(0), getDatasets().get(1));
+                    } catch (Exception e) {
+                        warn("Error testing frankenprofiles");
+                        stack("Error testing frankenprofiles", e);
+                    }
+                }
+            };
+            thr.start();
+        });
+
+        panel.add(frankenButton);
+
+        return panel;
+
+    }
+
+    /**
+     * Create a chart showing the Kruskal-Wallis p-values of comparisons between
+     * curves
+     * 
+     * @return
+     */
+    private void updateChartPanel() {
+
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(true)
+                .setProfileType(ProfileType.ANGLE).setTarget(chartPanel).build();
+
+        setChart(options);
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new MorphologyChartFactory(options).makeKruskalWallisChart(false);
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+    }
+
+    @Override
+    protected void updateSingle() {
+        updateNull();
+    }
+
+    @Override
+    protected void updateMultiple() {
+        if (getDatasets().size() == 2) { // Only create a chart if exactly two
+                                         // datasets are selected
+
+            // Only allow a franken normlisation if datasets have the same
+            // number of segments
+            if (IBorderSegment.segmentCountsMatch(getDatasets())) {
+                setEnabled(true);
+            } else {
+                setEnabled(false);
+            }
+
+            updateChartPanel();
+
+        } else {
+            updateNull();
+
+        }
+        finest("Updated Kruskal panel");
+    }
+
+    @Override
+    protected void updateNull() {
+        setEnabled(false);
+        JFreeChart chart = MorphologyChartFactory.makeBlankProbabililtyChart();
+        chartPanel.setChart(chart);
+    }
 
 }

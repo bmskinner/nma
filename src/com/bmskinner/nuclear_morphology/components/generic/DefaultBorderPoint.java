@@ -25,97 +25,105 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 
 /**
  * The standard implementation of the {@link IBorderPoint} interface.
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class DefaultBorderPoint extends FloatPoint implements IBorderPoint {
-	private static final long serialVersionUID = 1L;
-	
-	private IBorderPoint prevPoint = null;
-	private IBorderPoint nextPoint = null;
-	
-	/**
-	 * Construct from x and y positions 
-	 * @param x
-	 * @param y
-	 */
-	public DefaultBorderPoint( float x, float y){
-		super(x, y);
-	}
-	
-	/**
-	 * Construct from x and y positions 
-	 * @param x
-	 * @param y
-	 */
-	public DefaultBorderPoint( double x, double y){
-		super( (float) x, (float) y);
-	}
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Construct from an existing XY point
-	 * @param p
-	 */
-	public DefaultBorderPoint( IPoint p){
-		super(p);
-	}
-		
-	/**
-	 * Set the next point in the border
-	 * @param next
-	 */
-	public void setNextPoint(IBorderPoint next){
-		this.nextPoint = next;
-	}
-	
-	/**
-	 * Set the previous point in the border
-	 * @param prev
-	 */
-	public void setPrevPoint(IBorderPoint prev){
-		this.prevPoint = prev;
-	}
-	
-	public IBorderPoint nextPoint(){
-		return this.nextPoint;
-	}
-	
-	/**
-	 * Get the point n points ahead
-	 * @param points
-	 * @return
-	 */
-	public IBorderPoint nextPoint(int points){
-		if(points==1)
-			return this.nextPoint;
-		else {
-			return nextPoint.nextPoint(--points);
-		}
-	}
-	
-	public IBorderPoint prevPoint(){
-		return this.prevPoint;
-	}
-	
-	/**
-	 * Get the point n points behind
-	 * @param points
-	 * @return
-	 */
-	public IBorderPoint prevPoint(int points){
-		if(points==1)
-			return this.prevPoint;
-		else {
-			return prevPoint.prevPoint(--points);
-		}
-	}
-	
-	public boolean hasNextPoint(){
-		return nextPoint!=null;
-	}
-	
-	public boolean hasPrevPoint(){
-		return prevPoint!=null;
-	}
+    private IBorderPoint prevPoint = null;
+    private IBorderPoint nextPoint = null;
+
+    /**
+     * Construct from x and y positions
+     * 
+     * @param x
+     * @param y
+     */
+    public DefaultBorderPoint(float x, float y) {
+        super(x, y);
+    }
+
+    /**
+     * Construct from x and y positions
+     * 
+     * @param x
+     * @param y
+     */
+    public DefaultBorderPoint(double x, double y) {
+        super((float) x, (float) y);
+    }
+
+    /**
+     * Construct from an existing XY point
+     * 
+     * @param p
+     */
+    public DefaultBorderPoint(IPoint p) {
+        super(p);
+    }
+
+    /**
+     * Set the next point in the border
+     * 
+     * @param next
+     */
+    public void setNextPoint(IBorderPoint next) {
+        this.nextPoint = next;
+    }
+
+    /**
+     * Set the previous point in the border
+     * 
+     * @param prev
+     */
+    public void setPrevPoint(IBorderPoint prev) {
+        this.prevPoint = prev;
+    }
+
+    public IBorderPoint nextPoint() {
+        return this.nextPoint;
+    }
+
+    /**
+     * Get the point n points ahead
+     * 
+     * @param points
+     * @return
+     */
+    public IBorderPoint nextPoint(int points) {
+        if (points == 1)
+            return this.nextPoint;
+        else {
+            return nextPoint.nextPoint(--points);
+        }
+    }
+
+    public IBorderPoint prevPoint() {
+        return this.prevPoint;
+    }
+
+    /**
+     * Get the point n points behind
+     * 
+     * @param points
+     * @return
+     */
+    public IBorderPoint prevPoint(int points) {
+        if (points == 1)
+            return this.prevPoint;
+        else {
+            return prevPoint.prevPoint(--points);
+        }
+    }
+
+    public boolean hasNextPoint() {
+        return nextPoint != null;
+    }
+
+    public boolean hasPrevPoint() {
+        return prevPoint != null;
+    }
 }

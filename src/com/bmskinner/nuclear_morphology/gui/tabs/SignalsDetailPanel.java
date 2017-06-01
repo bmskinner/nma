@@ -34,77 +34,78 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsOverviewPanel;
 
 /**
  * The top level tab panel showing information on signals at the dataset level
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel implements SignalChangeListener {
-		
-	private static final String OVERVIEW_TAB_LBL = "Overview";
-	private static final String BOXPLOTS_TAB_LBL = "Boxplots";
-	private static final String HISTOGRAM_TAB_LBL= "Histograms";
-	private static final String SHELLS_TAB_LBL   = "Shells";
-	private static final String SETTINGS_TAB_LBL = "Detection settings";
-	private static final String SCATTER_TAB_LBL  = "Scatter";
-	private static final String COLOCAL_TAB_LBL  = "Colocalisation";
 
-	private JTabbedPane signalsTabPane;
+    private static final String OVERVIEW_TAB_LBL  = "Overview";
+    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
+    private static final String HISTOGRAM_TAB_LBL = "Histograms";
+    private static final String SHELLS_TAB_LBL    = "Shells";
+    private static final String SETTINGS_TAB_LBL  = "Detection settings";
+    private static final String SCATTER_TAB_LBL   = "Scatter";
+    private static final String COLOCAL_TAB_LBL   = "Colocalisation";
 
-	/**
-	 * Create the panel.
-	 */
-	public SignalsDetailPanel() {
-		super();
-		try{
+    private JTabbedPane signalsTabPane;
 
-			this.setLayout(new BorderLayout());
+    /**
+     * Create the panel.
+     */
+    public SignalsDetailPanel() {
+        super();
+        try {
 
-			signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
+            this.setLayout(new BorderLayout());
 
-			DetailPanel overviewPanel  = new SignalsOverviewPanel();			
-			DetailPanel boxplotPanel   = new SignalsBoxplotPanel();
-			DetailPanel histogramPanel = new SignalsHistogramPanel();
-			DetailPanel shellsPanel    = new SignalShellsPanel();
-			DetailPanel analysisPanel  = new SignalsAnalysisPanel();
-			DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
-			DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
-			
-			signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
-			signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
-			signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
-			signalsTabPane.addTab(HISTOGRAM_TAB_LBL, histogramPanel);
-			signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
-			signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
-			signalsTabPane.addTab(COLOCAL_TAB_LBL, colocalistionPanel);
+            signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-			this.addSubPanel(overviewPanel);
-			this.addSubPanel(boxplotPanel);
-			this.addSubPanel(histogramPanel);
-			this.addSubPanel(shellsPanel);
-			this.addSubPanel(analysisPanel);
-			this.addSubPanel(signalScatterChartPanel);
-			this.addSubPanel(colocalistionPanel);
-			
-			this.add(signalsTabPane, BorderLayout.CENTER);
-			
-		} catch (Exception e){
-			error("Error making signal panel", e);
-		}
-	}
-	
-	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-		super.signalChangeReceived(event);
-		if(event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)){
-			update(getDatasets());
-		}
-		
-		if(event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)){
-			
-			for(TabPanel p : this.getSubPanels()){
-				p.update(getDatasets());
-			}
-		}
-	}
+            DetailPanel overviewPanel = new SignalsOverviewPanel();
+            DetailPanel boxplotPanel = new SignalsBoxplotPanel();
+            DetailPanel histogramPanel = new SignalsHistogramPanel();
+            DetailPanel shellsPanel = new SignalShellsPanel();
+            DetailPanel analysisPanel = new SignalsAnalysisPanel();
+            DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
+            DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
+
+            signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
+            signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
+            signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
+            signalsTabPane.addTab(HISTOGRAM_TAB_LBL, histogramPanel);
+            signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
+            signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
+            signalsTabPane.addTab(COLOCAL_TAB_LBL, colocalistionPanel);
+
+            this.addSubPanel(overviewPanel);
+            this.addSubPanel(boxplotPanel);
+            this.addSubPanel(histogramPanel);
+            this.addSubPanel(shellsPanel);
+            this.addSubPanel(analysisPanel);
+            this.addSubPanel(signalScatterChartPanel);
+            this.addSubPanel(colocalistionPanel);
+
+            this.add(signalsTabPane, BorderLayout.CENTER);
+
+        } catch (Exception e) {
+            error("Error making signal panel", e);
+        }
+    }
+
+    @Override
+    public void signalChangeReceived(SignalChangeEvent event) {
+        super.signalChangeReceived(event);
+        if (event.type().equals(SignalChangeEvent.SIGNAL_COLOUR_CHANGE)) {
+            update(getDatasets());
+        }
+
+        if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)) {
+
+            for (TabPanel p : this.getSubPanels()) {
+                p.update(getDatasets());
+            }
+        }
+    }
 
 }

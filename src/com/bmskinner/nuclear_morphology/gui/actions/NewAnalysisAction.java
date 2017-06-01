@@ -44,172 +44,171 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
-
 /**
  * Run a new analysis
  */
 public class NewAnalysisAction extends VoidResultAction {
-			
-	private IMutableAnalysisOptions options;
-	private Date startTime;
-	private String outputFolderName;
-	
-	private File folder = null;
-	
-	public static final int NEW_ANALYSIS = 0;
-	
-	private static final String PROGRESS_LABEL = "Nucleus detection";
-	
-	/**
-	 * Create a new analysis. The folder of images to analyse will be
-	 * requested by a dialog.
-	 * @param mw the main window to which a progress bar will be attached
-	 */
-	public NewAnalysisAction(MainWindow mw) {
-		this(mw, null);
-	}
-	
-	/**
-	 * Create a new analysis, specifying the initial directory of images
-	 * @param mw the main window to which a progress bar will be attached
-	 * @param folder the folder of images to analyse
-	 */
-	public NewAnalysisAction(MainWindow mw, final File folder) {
-		super(PROGRESS_LABEL, mw);
-		this.folder = folder;
-		options = OptionsFactory.makeAnalysisOptions();
-		IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
-		options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
-	}
-	
-	@Override
-	public void run(){
 
-		this.setProgressBarIndeterminate();
-		
-		
-		if(folder==null){
-			if(! getImageDirectory()){
-				fine("Could not get image directory");
-				this.cancel();
-				return;
-			}
-		}
-				
-		fine("Creating for "+folder.getAbsolutePath());
-		
-		NucleusImageProber analysisSetup = new NucleusImageProber( folder, options );
+    private IMutableAnalysisOptions options;
+    private Date                    startTime;
+    private String                  outputFolderName;
 
-		if(analysisSetup.isOk()){
+    private File folder = null;
 
-//			options = analysisSetup.getOptions();
-			File directory = null;
-			try {
-				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-						.getFolder();
-			} catch (MissingOptionException e) {
-				warn("Missing nucleus options");
-				this.cancel();
-			}
-			
-			if(directory==null){
-				this.cancel();
-				return;
-			}
+    public static final int NEW_ANALYSIS = 0;
 
-			log("Directory: "+directory.getName());
+    private static final String PROGRESS_LABEL = "Nucleus detection";
 
-			this.startTime = Calendar.getInstance().getTime();
-			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+    /**
+     * Create a new analysis. The folder of images to analyse will be requested
+     * by a dialog.
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     */
+    public NewAnalysisAction(MainWindow mw) {
+        this(mw, null);
+    }
 
-			// craete the analysis folder early. Did not before in case folder had no images
-			File analysisFolder = new File(directory, outputFolderName);
-			if(!analysisFolder.exists()){
-				analysisFolder.mkdir();
-			}
-//			
-			File logFile = new File(analysisFolder, 
-					directory.getName() + Importer.LOG_FILE_EXTENSION);
+    /**
+     * Create a new analysis, specifying the initial directory of images
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     * @param folder
+     *            the folder of images to analyse
+     */
+    public NewAnalysisAction(MainWindow mw, final File folder) {
+        super(PROGRESS_LABEL, mw);
+        this.folder = folder;
+        options = OptionsFactory.makeAnalysisOptions();
+        IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+        options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
+    }
 
-			
-			IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);
-			// Calculate the number of files to process
-			
-			worker = new DefaultAnalysisWorker(m);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-			finest("Worker is executing");
-			analysisSetup.dispose();
-			
-		} else {				
-			analysisSetup.dispose();
-			fine("Analysis cancelled");
-			this.cancel();
-		}
-	}
-	
-	@Override
-	public void finished(){
-//		log("Method finished");
-		List<IAnalysisDataset> datasets;
-		
+    @Override
+    public void run() {
 
-		try {
-			IAnalysisResult r = worker.get();
-			datasets = r.getDatasets();
-			
-			if(datasets==null || datasets.isEmpty()){
-				log("No datasets returned");
-			} else {
-//				log("Fire profiling");
-				fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
-				
-			}
-			
-		} catch (InterruptedException e) {
-			warn("Interruption to swing worker");
-    		stack("Interruption to swing worker", e);
-		} catch (ExecutionException e) {
-			warn("Execution error in swing worker");
-    		stack("Execution error in swing worker", e);
-		}
+        this.setProgressBarIndeterminate();
 
-		
-		super.finished();
-	}
-	
-	private boolean getImageDirectory(){
-		
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
-		
-		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
+        if (folder == null) {
+            if (!getImageDirectory()) {
+                fine("Could not get image directory");
+                this.cancel();
+                return;
+            }
+        }
 
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        fine("Creating for " + folder.getAbsolutePath());
 
+        NucleusImageProber analysisSetup = new NucleusImageProber(folder, options);
 
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)	{
-			return false; // user cancelled
-		}
-		
-		File file = fc.getSelectedFile();
+        if (analysisSetup.isOk()) {
 
-		if( ! file.isDirectory()){
-			return false;
-		}
-		fine("Selected directory: "+file.getAbsolutePath());
-		folder = file;
-		fine("Set directory");
-		try {
-			options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
-			fine("Set analysis options");
-		} catch (Exception e) {
-			warn("Missing nucleus options");
-			stack(e.getMessage(), e);
-			return false;
-		}
-		fine("Returning");
-		return true;
-	}
-	
+            // options = analysisSetup.getOptions();
+            File directory = null;
+            try {
+                directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+            } catch (MissingOptionException e) {
+                warn("Missing nucleus options");
+                this.cancel();
+            }
+
+            if (directory == null) {
+                this.cancel();
+                return;
+            }
+
+            log("Directory: " + directory.getName());
+
+            this.startTime = Calendar.getInstance().getTime();
+            this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+
+            // craete the analysis folder early. Did not before in case folder
+            // had no images
+            File analysisFolder = new File(directory, outputFolderName);
+            if (!analysisFolder.exists()) {
+                analysisFolder.mkdir();
+            }
+            //
+            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
+
+            IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);
+            // Calculate the number of files to process
+
+            worker = new DefaultAnalysisWorker(m);
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
+            finest("Worker is executing");
+            analysisSetup.dispose();
+
+        } else {
+            analysisSetup.dispose();
+            fine("Analysis cancelled");
+            this.cancel();
+        }
+    }
+
+    @Override
+    public void finished() {
+        // log("Method finished");
+        List<IAnalysisDataset> datasets;
+
+        try {
+            IAnalysisResult r = worker.get();
+            datasets = r.getDatasets();
+
+            if (datasets == null || datasets.isEmpty()) {
+                log("No datasets returned");
+            } else {
+                // log("Fire profiling");
+                fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+
+            }
+
+        } catch (InterruptedException e) {
+            warn("Interruption to swing worker");
+            stack("Interruption to swing worker", e);
+        } catch (ExecutionException e) {
+            warn("Execution error in swing worker");
+            stack("Execution error in swing worker", e);
+        }
+
+        super.finished();
+    }
+
+    private boolean getImageDirectory() {
+
+        File defaultDir = GlobalOptions.getInstance().getDefaultDir();
+
+        JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
+                                                        // dir
+
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        int returnVal = fc.showOpenDialog(fc);
+        if (returnVal != 0) {
+            return false; // user cancelled
+        }
+
+        File file = fc.getSelectedFile();
+
+        if (!file.isDirectory()) {
+            return false;
+        }
+        fine("Selected directory: " + file.getAbsolutePath());
+        folder = file;
+        fine("Set directory");
+        try {
+            options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder(file);
+            fine("Set analysis options");
+        } catch (Exception e) {
+            warn("Missing nucleus options");
+            stack(e.getMessage(), e);
+            return false;
+        }
+        fine("Returning");
+        return true;
+    }
+
 }

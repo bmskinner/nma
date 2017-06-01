@@ -24,21 +24,20 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 
 /**
  * Overall dataset creator for datasets concerning a single cell
+ * 
  * @author bms41
  *
  */
 public class AbstractCellDatasetCreator extends AbstractDatasetCreator<DisplayOptions> {
-	
-	protected final ICell cell;
-	
-	public AbstractCellDatasetCreator(final DisplayOptions options, final ICell c){
-		super(options);
-		if(c==null){
-			throw new IllegalArgumentException("Cell cannot be null");
-		}
-		cell = c;
-	}
-	
-	
+
+    protected final ICell cell;
+
+    public AbstractCellDatasetCreator(final DisplayOptions options, final ICell c) {
+        super(options);
+        if (c == null) {
+            throw new IllegalArgumentException("Cell cannot be null");
+        }
+        cell = c;
+    }
 
 }

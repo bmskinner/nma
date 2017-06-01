@@ -27,56 +27,67 @@ import javax.swing.JLabel;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
- * Colour a table cell background based on its value to show statistical 
- * significance. Shows yellow for values below a Bonferroni-corrected cutoff
- * of 0.05, and green for values below a Bonferroni-corrected cutoff
- * of 0.01
+ * Colour a table cell background based on its value to show statistical
+ * significance. Shows yellow for values below a Bonferroni-corrected cutoff of
+ * 0.05, and green for values below a Bonferroni-corrected cutoff of 0.01
  */
 public class WilcoxonTableCellRenderer extends PairwiseTableCellRenderer {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        
-      //Cells are by default rendered as a JLabel.
+    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+
+        // Cells are by default rendered as a JLabel.
         JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
         String cellContents = l.getText();
-        if(cellContents!=null && !cellContents.equals("")){ // ensure value
-//        	
-        	
-        	NumberFormat nf = NumberFormat.getInstance();
-        	double pvalue = 1; 
-        	
-        	try {
-        		pvalue = nf.parse(cellContents).doubleValue();
-        	} catch (ParseException e) {
+        if (cellContents != null && !cellContents.equals("")) { // ensure value
+            //
 
-        		// Do nothing for now, just use the default color
-//        		programLogger.log(Level.FINEST, "Parsing error in Wilcoxon renederer", e);
-        	}
-	        
-	        Color colour = Color.WHITE; // default
-	        
-	        int numberOfTests = 5; // correct for the different variables measured;
-	        double divisor = (double) (   (table.getColumnCount()-2)  * numberOfTests); // for > 2 datasets with numberOFtests tests per dataset
-	        
-	        double fivePct = SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni correction
-	        double onePct = SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL /   divisor;
-//	        IJ.log("Columns: "+table.getColumnCount());
-	        
-	        if(pvalue<=fivePct){
-	        	colour = Color.YELLOW;
-	        }
-	        
-	        if(pvalue<=onePct){
-	        	colour = Color.GREEN;
-	        }
-	        l.setBackground(colour);
+            NumberFormat nf = NumberFormat.getInstance();
+            double pvalue = 1;
+
+            try {
+                pvalue = nf.parse(cellContents).doubleValue();
+            } catch (ParseException e) {
+
+                // Do nothing for now, just use the default color
+                // programLogger.log(Level.FINEST, "Parsing error in Wilcoxon
+                // renederer", e);
+            }
+
+            Color colour = Color.WHITE; // default
+
+            int numberOfTests = 5; // correct for the different variables
+                                   // measured;
+            double divisor = (double) ((table.getColumnCount() - 2) * numberOfTests); // for
+                                                                                      // >
+                                                                                      // 2
+                                                                                      // datasets
+                                                                                      // with
+                                                                                      // numberOFtests
+                                                                                      // tests
+                                                                                      // per
+                                                                                      // dataset
+
+            double fivePct = SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL / divisor; // Bonferroni
+                                                                                         // correction
+            double onePct = SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL / divisor;
+            // IJ.log("Columns: "+table.getColumnCount());
+
+            if (pvalue <= fivePct) {
+                colour = Color.YELLOW;
+            }
+
+            if (pvalue <= onePct) {
+                colour = Color.GREEN;
+            }
+            l.setBackground(colour);
 
         }
 
-      //Return the JLabel which renders the cell.
-      return l;
+        // Return the JLabel which renders the cell.
+        return l;
     }
 }

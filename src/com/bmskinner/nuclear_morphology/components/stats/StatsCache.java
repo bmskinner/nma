@@ -27,187 +27,198 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
 /**
  * Store plottable statistics for the collection
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class StatsCache {
-	
-	
-	// Need to be able to store the same stat for different components of the cell.
-	// This requires keys on component and stat
-	public class Key {
 
-	    private final PlottableStatistic stat;
-	    private final String component;
-	    private final MeasurementScale scale;
+    // Need to be able to store the same stat for different components of the
+    // cell.
+    // This requires keys on component and stat
+    public class Key {
 
-	    public Key(PlottableStatistic stat, String component, MeasurementScale scale) {
-			this.stat = stat;
-			this.component = component;
-			this.scale = scale;
-		}
+        private final PlottableStatistic stat;
+        private final String             component;
+        private final MeasurementScale   scale;
 
-	    @Override
-	    public boolean equals(Object o) {
-	        if (this == o) return true;
-	        if (!(o instanceof Key)) return false;
-	        Key key = (Key) o;
-	        
-	        if(! stat.equals(key.stat)) return false;
-	        
-	        if(! component.equals(key.component)) return false;
-	        
-	        if(! scale.equals(key.scale)) return false;
-	        
-	        return true;
-	    }
+        public Key(PlottableStatistic stat, String component, MeasurementScale scale) {
+            this.stat = stat;
+            this.component = component;
+            this.scale = scale;
+        }
 
-	    @Override
-	    public int hashCode() {
-	    	
-	    	final int prime = 31;
-			int result = 1;
-			result = prime * result
-					+ stat.hashCode();
-			
-			result = prime * result
-					+ component.hashCode();
-			
-			result = prime * result
-					+ scale.hashCode();
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof Key))
+                return false;
+            Key key = (Key) o;
 
-	        return result;
-	    }
+            if (!stat.equals(key.stat))
+                return false;
 
-	}
-	
-	
-	private Map<Key, Double> cache = new HashMap<Key, Double>(); // median values
-	private Map<Key, double[]> values = new HashMap<Key, double[]>(); // individual component values
+            if (!component.equals(key.component))
+                return false;
 
-	public StatsCache(){}
+            if (!scale.equals(key.scale))
+                return false;
 
-	/**
-	 * Store the given statistic
-	 * @param stat
-	 * @param scale
-	 * @param d
-	 */
-	public void setMedian(PlottableStatistic stat, String component, MeasurementScale scale, double d){
+            return true;
+        }
 
-		
-		Key key = new Key(stat, component, scale);
-		
-		cache.put(key, d);
+        @Override
+        public int hashCode() {
 
-	}
-		
-	/**
-	 * Store the given statistic
-	 * @param stat
-	 * @param scale
-	 * @param d
-	 */
-	public void setValues(PlottableStatistic stat, String component, MeasurementScale scale, double[] list){
-		
-		Key key = new Key(stat, component, scale);
-		values.put(key, list);
-	}
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + stat.hashCode();
 
-	public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale){
+            result = prime * result + component.hashCode();
 
-		if(this.hasMedian(stat, component, scale)){
-			Key key = new Key(stat, component, scale);
-			return cache.get(key);
-		} else {
-			return 0;
-		}
-		
-	}
-	
-	/**
-	 * Clear the values for the given stat
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 */
-	public void clear(PlottableStatistic stat, String component, MeasurementScale scale){
-		Key key = new Key(stat, component, scale);
-		values.remove(key);
-		cache.remove(key);
-	}
-	
-	/**
-	 * Clear the values for the given stat
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 */
-	public void clear(PlottableStatistic stat, String component){
-		
-		for(MeasurementScale s : MeasurementScale.values()){
-			Key key = new Key(stat, component, s);
-			values.remove(key);
-			cache.remove(key);
-		}
-	}
-	
-	/**
-	 * Clear the values for the given scale
-	 * @param scale
-	 * @param scale
-	 */
-	public void clear(MeasurementScale scale){
-		
-		Iterator<Key> it = values.keySet().iterator();
-		while(it.hasNext()){
-			Key key = it.next();
+            result = prime * result + scale.hashCode();
 
-			if(key.scale.equals(scale)){
-				it.remove();
-				cache.remove(key);
-			}
-		}
-	}
-	
-	/**
-	 * Get the raw values from the cache
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @return
-	 */
-	public double[] getValues(PlottableStatistic stat, String component, MeasurementScale scale){
+            return result;
+        }
 
-		if(this.hasValues(stat, component, scale)){
-			Key key = new Key(stat, component, scale);
-			return values.get(key);
-		} else {
-			return new double[0];
-		}
-		
-	}
-	
+    }
 
-	public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale){
-		
-		Key key = new Key(stat, component, scale);
-		return cache.containsKey(key);
+    private Map<Key, Double>   cache  = new HashMap<Key, Double>();   // median
+                                                                      // values
+    private Map<Key, double[]> values = new HashMap<Key, double[]>(); // individual
+                                                                      // component
+                                                                      // values
 
-	}
-	
-	/**
-	 * Check if the cache has raw values for the give stat
-	 * @param stat
-	 * @param component
-	 * @param scale
-	 * @return
-	 */
-	public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale){
-		
-		Key key = new Key(stat, component, scale);
-		return values.containsKey(key);
+    public StatsCache() {
+    }
 
-	}
+    /**
+     * Store the given statistic
+     * 
+     * @param stat
+     * @param scale
+     * @param d
+     */
+    public void setMedian(PlottableStatistic stat, String component, MeasurementScale scale, double d) {
+
+        Key key = new Key(stat, component, scale);
+
+        cache.put(key, d);
+
+    }
+
+    /**
+     * Store the given statistic
+     * 
+     * @param stat
+     * @param scale
+     * @param d
+     */
+    public void setValues(PlottableStatistic stat, String component, MeasurementScale scale, double[] list) {
+
+        Key key = new Key(stat, component, scale);
+        values.put(key, list);
+    }
+
+    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale) {
+
+        if (this.hasMedian(stat, component, scale)) {
+            Key key = new Key(stat, component, scale);
+            return cache.get(key);
+        } else {
+            return 0;
+        }
+
+    }
+
+    /**
+     * Clear the values for the given stat
+     * 
+     * @param stat
+     * @param component
+     * @param scale
+     */
+    public void clear(PlottableStatistic stat, String component, MeasurementScale scale) {
+        Key key = new Key(stat, component, scale);
+        values.remove(key);
+        cache.remove(key);
+    }
+
+    /**
+     * Clear the values for the given stat
+     * 
+     * @param stat
+     * @param component
+     * @param scale
+     */
+    public void clear(PlottableStatistic stat, String component) {
+
+        for (MeasurementScale s : MeasurementScale.values()) {
+            Key key = new Key(stat, component, s);
+            values.remove(key);
+            cache.remove(key);
+        }
+    }
+
+    /**
+     * Clear the values for the given scale
+     * 
+     * @param scale
+     * @param scale
+     */
+    public void clear(MeasurementScale scale) {
+
+        Iterator<Key> it = values.keySet().iterator();
+        while (it.hasNext()) {
+            Key key = it.next();
+
+            if (key.scale.equals(scale)) {
+                it.remove();
+                cache.remove(key);
+            }
+        }
+    }
+
+    /**
+     * Get the raw values from the cache
+     * 
+     * @param stat
+     * @param component
+     * @param scale
+     * @return
+     */
+    public double[] getValues(PlottableStatistic stat, String component, MeasurementScale scale) {
+
+        if (this.hasValues(stat, component, scale)) {
+            Key key = new Key(stat, component, scale);
+            return values.get(key);
+        } else {
+            return new double[0];
+        }
+
+    }
+
+    public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale) {
+
+        Key key = new Key(stat, component, scale);
+        return cache.containsKey(key);
+
+    }
+
+    /**
+     * Check if the cache has raw values for the give stat
+     * 
+     * @param stat
+     * @param component
+     * @param scale
+     * @return
+     */
+    public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale) {
+
+        Key key = new Key(stat, component, scale);
+        return values.containsKey(key);
+
+    }
 }

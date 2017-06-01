@@ -35,113 +35,107 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 /**
  * Constructs nuclei for an image. Tracks the number of nuclei created.
+ * 
  * @author ben
  *
  */
 public class NucleusFactory implements ComponentFactory<Nucleus> {
 
-	private int nucleusCount = 0; // store the number of nuclei created by this factory
-	private final NucleusType type;
-	
-	/**
-	 * Create a factory for nuclei of the given type
-	 * @param imageFile
-	 * @param nucleusType
-	 */
-	public NucleusFactory(NucleusType nucleusType){
-		
-		if(nucleusType==null){
-			throw new IllegalArgumentException("Type cannot be null in nucleus factory");
-		}
-		type = nucleusType;
-	}
-	
-	/**
-	 * Create a nucleus from the given list of points
-	 * @param points the border points of the nucleus
-	 * @param imageFile the image file the nucleus came from
-	 * @param channel the image channel of the nucleus
-	 * @param centreOfMass the centre of mass of the nucleus
-	 * @return a new nucleus of the factory NucleusType
-	 * @throws ComponentCreationException
-	 */
-	public Nucleus buildInstance(List<IPoint> points, File imageFile, int channel, IPoint centreOfMass) throws ComponentCreationException{
-		Roi roi = makRoi(points);
-		Rectangle bounds = roi.getBounds();
-		
-		int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(), (int) bounds.getHeight() };
-		return buildInstance(roi, imageFile, channel, original, centreOfMass);
-	}
-	
-	private Roi makRoi(List<IPoint> list){
-		float[] xpoints = new float[list.size()];
-		float[] ypoints = new float[list.size()];
-		
-		for(int i=0; i<list.size(); i++){
-			IPoint p = list.get(i);
-			
-			xpoints[i] = (float) p.getX();
-			ypoints[i] = (float) p.getY();
-		}
-		
-		Roi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
-		return roi;
-	}
-	
-	@Override
-	public Nucleus buildInstance(Roi roi,
-			File imageFile,
-			int channel, 
-			int[] originalPosition, 
-			IPoint centreOfMass) throws ComponentCreationException {
-		
-		if(roi==null || centreOfMass==null){
-			throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
-		}
-		
-		Nucleus n = null;
-		
-		try {
+    private int               nucleusCount = 0; // store the number of nuclei
+                                                // created by this factory
+    private final NucleusType type;
 
-			  // The classes for the constructor
-			  Class<?>[] classes = { 
-					  Roi.class, 
-					  IPoint.class, 
-					  File.class, 
-					  int.class, 
-					  int[].class, 
-					  int.class 
-			  };
-			  
-			  Constructor<?> nucleusConstructor = type.getNucleusClass()
-						  .getConstructor(classes);
+    /**
+     * Create a factory for nuclei of the given type
+     * 
+     * @param imageFile
+     * @param nucleusType
+     */
+    public NucleusFactory(NucleusType nucleusType) {
 
-				n = (Nucleus) nucleusConstructor.newInstance(roi,
-						  centreOfMass, 
-						  imageFile, 
-						  channel, 
-						  originalPosition,
-						  nucleusCount);
-				
-				nucleusCount++;
+        if (nucleusType == null) {
+            throw new IllegalArgumentException("Type cannot be null in nucleus factory");
+        }
+        type = nucleusType;
+    }
 
-		} catch (InvocationTargetException e) {
-			stack("Invokation error creating nucleus", e.getCause());
-			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
-		} catch(Error e){
-			stack("Error creating nucleus", e);
-			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
-		} catch (InstantiationException | IllegalAccessException |
-				IllegalArgumentException | NoSuchMethodException | SecurityException e) {
-			stack("Error creating nucleus", e);
-			throw new ComponentCreationException("Error making nucleus:" +e.getMessage(), e);
-		}
-			  
+    /**
+     * Create a nucleus from the given list of points
+     * 
+     * @param points
+     *            the border points of the nucleus
+     * @param imageFile
+     *            the image file the nucleus came from
+     * @param channel
+     *            the image channel of the nucleus
+     * @param centreOfMass
+     *            the centre of mass of the nucleus
+     * @return a new nucleus of the factory NucleusType
+     * @throws ComponentCreationException
+     */
+    public Nucleus buildInstance(List<IPoint> points, File imageFile, int channel, IPoint centreOfMass)
+            throws ComponentCreationException {
+        Roi roi = makRoi(points);
+        Rectangle bounds = roi.getBounds();
 
-		if(n==null){
-			throw new ComponentCreationException("Error making nucleus");
-		}
-		  return n;
-	}
+        int[] original = { (int) roi.getXBase(), (int) roi.getYBase(), (int) bounds.getWidth(),
+                (int) bounds.getHeight() };
+        return buildInstance(roi, imageFile, channel, original, centreOfMass);
+    }
+
+    private Roi makRoi(List<IPoint> list) {
+        float[] xpoints = new float[list.size()];
+        float[] ypoints = new float[list.size()];
+
+        for (int i = 0; i < list.size(); i++) {
+            IPoint p = list.get(i);
+
+            xpoints[i] = (float) p.getX();
+            ypoints[i] = (float) p.getY();
+        }
+
+        Roi roi = new PolygonRoi(xpoints, ypoints, Roi.POLYGON);
+        return roi;
+    }
+
+    @Override
+    public Nucleus buildInstance(Roi roi, File imageFile, int channel, int[] originalPosition, IPoint centreOfMass)
+            throws ComponentCreationException {
+
+        if (roi == null || centreOfMass == null) {
+            throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
+        }
+
+        Nucleus n = null;
+
+        try {
+
+            // The classes for the constructor
+            Class<?>[] classes = { Roi.class, IPoint.class, File.class, int.class, int[].class, int.class };
+
+            Constructor<?> nucleusConstructor = type.getNucleusClass().getConstructor(classes);
+
+            n = (Nucleus) nucleusConstructor.newInstance(roi, centreOfMass, imageFile, channel, originalPosition,
+                    nucleusCount);
+
+            nucleusCount++;
+
+        } catch (InvocationTargetException e) {
+            stack("Invokation error creating nucleus", e.getCause());
+            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+        } catch (Error e) {
+            stack("Error creating nucleus", e);
+            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | NoSuchMethodException
+                | SecurityException e) {
+            stack("Error creating nucleus", e);
+            throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
+        }
+
+        if (n == null) {
+            throw new ComponentCreationException("Error making nucleus");
+        }
+        return n;
+    }
 
 }

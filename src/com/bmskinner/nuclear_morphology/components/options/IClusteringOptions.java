@@ -29,117 +29,124 @@ import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.Hie
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * This interface describes the options available for clustering
- * cells within datasets.
+ * This interface describes the options available for clustering cells within
+ * datasets.
+ * 
  * @author bms41
  *
  */
 public interface IClusteringOptions extends Serializable {
-	
-	static final int DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
-	static final ClusteringMethod DEFAULT_CLUSTER_METHOD = ClusteringMethod.HIERARCHICAL;
-	static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD = HierarchicalClusterMethod.WARD;
-	static final int DEFAULT_EM_ITERATIONS = 100;
-	static final int DEFAULT_MODALITY_REGIONS = 2;
-	static final boolean DEFAULT_USE_MODALITY = true;
-	static final boolean DEFAULT_USE_SIMILARITY_MATRIX = false;
-	static final boolean DEFAULT_INCLUDE_AREA = false;
-	static final boolean DEFAULT_INCLUDE_ASPECT = false;
-	static final boolean DEFAULT_INCLUDE_PROFILE = true;
-	static final boolean DEFAULT_INCLUDE_MESH    = false;
-	
-	
-	/**
-	 * The mutable options with setters
-	 * @author bms41
-	 *
-	 */
-	public interface IMutableClusteringOptions extends IClusteringOptions {
 
-		void setClusterNumber(int defaultManualClusterNumber);
+    static final int                       DEFAULT_MANUAL_CLUSTER_NUMBER = 2;
+    static final ClusteringMethod          DEFAULT_CLUSTER_METHOD        = ClusteringMethod.HIERARCHICAL;
+    static final HierarchicalClusterMethod DEFAULT_HIERARCHICAL_METHOD   = HierarchicalClusterMethod.WARD;
+    static final int                       DEFAULT_EM_ITERATIONS         = 100;
+    static final int                       DEFAULT_MODALITY_REGIONS      = 2;
+    static final boolean                   DEFAULT_USE_MODALITY          = true;
+    static final boolean                   DEFAULT_USE_SIMILARITY_MATRIX = false;
+    static final boolean                   DEFAULT_INCLUDE_AREA          = false;
+    static final boolean                   DEFAULT_INCLUDE_ASPECT        = false;
+    static final boolean                   DEFAULT_INCLUDE_PROFILE       = true;
+    static final boolean                   DEFAULT_INCLUDE_MESH          = false;
 
-		void setHierarchicalMethod(
-				HierarchicalClusterMethod defaultHierarchicalMethod);
+    /**
+     * The mutable options with setters
+     * 
+     * @author bms41
+     *
+     */
+    public interface IMutableClusteringOptions extends IClusteringOptions {
 
-		void setIterations(int defaultEmIterations);
+        void setClusterNumber(int defaultManualClusterNumber);
 
-		void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
+        void setHierarchicalMethod(HierarchicalClusterMethod defaultHierarchicalMethod);
 
-		void setIncludeProfile(boolean defaultIncludeProfile);
+        void setIterations(int defaultEmIterations);
 
-		void setProfileType(ProfileType defaultProfileType);
+        void setUseSimilarityMatrix(boolean defaultUseSimilarityMatrix);
 
-		void setIncludeMesh(boolean defaultIncludeMesh);
+        void setIncludeProfile(boolean defaultIncludeProfile);
 
-		void setIncludeStatistic(PlottableStatistic stat, boolean selected);
+        void setProfileType(ProfileType defaultProfileType);
 
-		void setIncludeSegment(UUID id, boolean selected);
-		
-		IClusteringOptions lock();
+        void setIncludeMesh(boolean defaultIncludeMesh);
 
-		void setType(ClusteringMethod hierarchical);
-		
-	}
-	
-	IMutableClusteringOptions unlock();
+        void setIncludeStatistic(PlottableStatistic stat, boolean selected);
 
-	/**
-	 * Check if the given segment is to be included in the clustering
-	 * @param stat
-	 * @return
-	 */
-	boolean isIncludeSegment(UUID i);
+        void setIncludeSegment(UUID id, boolean selected);
 
-	boolean useSegments();
+        IClusteringOptions lock();
 
-	/**
-	 * Get all the segments that are saved in this options object
-	 * @return
-	 */
-	Set<UUID> getSegments();
+        void setType(ClusteringMethod hierarchical);
 
-	/**
-	 * Check if the given statistic is to be included in the clustering
-	 * @param stat
-	 * @return
-	 */
-	boolean isIncludeStatistic(PlottableStatistic stat);
+    }
 
-	/**
-	 * Get all the statistics that are saved in this options object
-	 * @return
-	 */
-	Set<PlottableStatistic> getSavedStatistics();
+    IMutableClusteringOptions unlock();
 
-	boolean isIncludeProfile();
+    /**
+     * Check if the given segment is to be included in the clustering
+     * 
+     * @param stat
+     * @return
+     */
+    boolean isIncludeSegment(UUID i);
 
-	boolean isUseSimilarityMatrix();
+    boolean useSegments();
 
-	ClusteringMethod getType();
+    /**
+     * Get all the segments that are saved in this options object
+     * 
+     * @return
+     */
+    Set<UUID> getSegments();
 
-	/**
-	 * Get the desired number of hierarchical clusters
-	 * @return
-	 */
-	int getClusterNumber();
+    /**
+     * Check if the given statistic is to be included in the clustering
+     * 
+     * @param stat
+     * @return
+     */
+    boolean isIncludeStatistic(PlottableStatistic stat);
 
-	/**
-	 * Get the chosen hierarchical method of clustering
-	 * @return
-	 */
-	HierarchicalClusterMethod getHierarchicalMethod();
+    /**
+     * Get all the statistics that are saved in this options object
+     * 
+     * @return
+     */
+    Set<PlottableStatistic> getSavedStatistics();
 
-	int getIterations();
+    boolean isIncludeProfile();
 
-	ProfileType getProfileType();
+    boolean isUseSimilarityMatrix();
 
-	boolean isIncludeMesh();
+    ClusteringMethod getType();
 
-	/**
-	 * Get a string array of the options set here suitable
-	 * for the Weka HierarchicalClusterer
-	 * @return
-	 */
-	String[] getOptions();
+    /**
+     * Get the desired number of hierarchical clusters
+     * 
+     * @return
+     */
+    int getClusterNumber();
+
+    /**
+     * Get the chosen hierarchical method of clustering
+     * 
+     * @return
+     */
+    HierarchicalClusterMethod getHierarchicalMethod();
+
+    int getIterations();
+
+    ProfileType getProfileType();
+
+    boolean isIncludeMesh();
+
+    /**
+     * Get a string array of the options set here suitable for the Weka
+     * HierarchicalClusterer
+     * 
+     * @return
+     */
+    String[] getOptions();
 
 }

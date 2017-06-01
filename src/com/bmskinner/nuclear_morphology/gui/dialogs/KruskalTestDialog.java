@@ -44,121 +44,116 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 
 @SuppressWarnings("serial")
-public class KruskalTestDialog  extends LoadingIconDialog {
+public class KruskalTestDialog extends LoadingIconDialog {
 
-	private IAnalysisDataset dataset1;
-	private IAnalysisDataset dataset2;
-	
-	private ExportableChartPanel chartPanel;
+    private IAnalysisDataset dataset1;
+    private IAnalysisDataset dataset2;
 
-	private JButton  runButton;
+    private ExportableChartPanel chartPanel;
 
-	public KruskalTestDialog(final IAnalysisDataset dataset1, final IAnalysisDataset dataset2){
-		super();
-		this.dataset1 = dataset1;
-		this.dataset2 = dataset2;
-		createUI();
-		this.setModal(false);
-		this.pack();
-		this.setVisible(true);
-	}
+    private JButton runButton;
 
-	private void createUI(){
-		this.setTitle("Kruskal test: "+dataset1.getName()+" vs "+dataset2.getName());
-		this.setLayout(new BorderLayout());
-		this.setLocationRelativeTo(null);
+    public KruskalTestDialog(final IAnalysisDataset dataset1, final IAnalysisDataset dataset2) {
+        super();
+        this.dataset1 = dataset1;
+        this.dataset2 = dataset2;
+        createUI();
+        this.setModal(false);
+        this.pack();
+        this.setVisible(true);
+    }
 
-		this.add(createSettingsPanel(), BorderLayout.NORTH);
+    private void createUI() {
+        this.setTitle("Kruskal test: " + dataset1.getName() + " vs " + dataset2.getName());
+        this.setLayout(new BorderLayout());
+        this.setLocationRelativeTo(null);
 
-		chartPanel = new ExportableChartPanel(MorphologyChartFactory.createEmptyChart());
-		this.add(chartPanel, BorderLayout.CENTER);
+        this.add(createSettingsPanel(), BorderLayout.NORTH);
 
+        chartPanel = new ExportableChartPanel(MorphologyChartFactory.createEmptyChart());
+        this.add(chartPanel, BorderLayout.CENTER);
 
-	}
+    }
 
-	private JPanel createSettingsPanel(){
-		JPanel panel = new JPanel(new FlowLayout());
-		
-		JLabel label = new JLabel("Normalise segment lengths between datasets, and rerun the Kruskal-Wallis comparison");
-		panel.add(label);
+    private JPanel createSettingsPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
 
-		runButton = new JButton("Run");
-		runButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
+        JLabel label = new JLabel(
+                "Normalise segment lengths between datasets, and rerun the Kruskal-Wallis comparison");
+        panel.add(label);
 
-				Thread thr = new Thread(){
-					public void run(){
+        runButton = new JButton("Run");
+        runButton.addActionListener(new ActionListener() {
 
-						try {
-							runAnalysis();
-						} catch (Exception e) {
-							log(Level.SEVERE, "Error testing", e);
-						}
-					}
-				};
-				thr.start();
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
+                Thread thr = new Thread() {
+                    public void run() {
 
-			}
-		});	
-		panel.add(runButton);
+                        try {
+                            runAnalysis();
+                        } catch (Exception e) {
+                            log(Level.SEVERE, "Error testing", e);
+                        }
+                    }
+                };
+                thr.start();
 
-		return panel;
-	}
+            }
+        });
+        panel.add(runButton);
 
-	/**
-	 * Toggle wait cursor on element
-	 * @param b
-	 */
-	private void setAnalysing(boolean b){
-		if(b){
-			this.setEnabled(false);
-			for(Component c : this.getComponents()){
-				c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); //new Cursor(Cursor.WAIT_CURSOR));
-			}
+        return panel;
+    }
 
-			this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    /**
+     * Toggle wait cursor on element
+     * 
+     * @param b
+     */
+    private void setAnalysing(boolean b) {
+        if (b) {
+            this.setEnabled(false);
+            for (Component c : this.getComponents()) {
+                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // new
+                                                                             // Cursor(Cursor.WAIT_CURSOR));
+            }
 
-		} else {
-			this.setEnabled(true);
-			for(Component c : this.getComponents()){
-				c.setCursor(Cursor.getDefaultCursor());
-			}
-			this.setCursor(Cursor.getDefaultCursor());
-		}
-	}
+            this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-	public void setEnabled(boolean b){
-		runButton.setEnabled(b);
-	}
+        } else {
+            this.setEnabled(true);
+            for (Component c : this.getComponents()) {
+                c.setCursor(Cursor.getDefaultCursor());
+            }
+            this.setCursor(Cursor.getDefaultCursor());
+        }
+    }
 
-	private void runAnalysis() throws Exception {
+    public void setEnabled(boolean b) {
+        runButton.setEnabled(b);
+    }
 
-		setAnalysing(true);
-		log(Level.INFO, "Franken-normalising collections");
-		// Clear the old chart
-		chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
-		
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-		list.add(dataset1);
-		list.add(dataset2);
-		
-		ChartOptions options = new ChartOptionsBuilder()
-			.setDatasets(list)
-			.setNormalised(true)
-			.setAlignment(ProfileAlignment.LEFT)
-			.setTag(Tag.REFERENCE_POINT)
-			.setShowMarkers(false)
-			.setProfileType(ProfileType.FRANKEN)
-			.build();
-				
-		JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart(true);
-		chartPanel.setChart(chart);
+    private void runAnalysis() throws Exception {
 
-		setAnalysing(false);
-		log(Level.INFO, "Comparison complete");
-	}
+        setAnalysing(true);
+        log(Level.INFO, "Franken-normalising collections");
+        // Clear the old chart
+        chartPanel.setChart(MorphologyChartFactory.createEmptyChart());
+
+        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        list.add(dataset1);
+        list.add(dataset2);
+
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(list).setNormalised(true)
+                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
+                .setProfileType(ProfileType.FRANKEN).build();
+
+        JFreeChart chart = new MorphologyChartFactory(options).makeKruskalWallisChart(true);
+        chartPanel.setChart(chart);
+
+        setAnalysing(false);
+        log(Level.INFO, "Comparison complete");
+    }
 }
-

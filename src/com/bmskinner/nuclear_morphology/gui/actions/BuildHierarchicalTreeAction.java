@@ -36,79 +36,82 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
 /**
  * Action for constructing hierarchical trees based on dataset parameters
+ * 
  * @author ben
  *
  */
-public class BuildHierarchicalTreeAction extends SingleDatasetResultAction implements DatasetEventListener, InterfaceEventListener {
+public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
+        implements DatasetEventListener, InterfaceEventListener {
 
-	private static final String PROGRESS_BAR_LABEL = "Building tree";
-	
-	public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, PROGRESS_BAR_LABEL, mw);
-	}
-	
-	@Override
-	public void run(){
-		
-		SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
+    private static final String PROGRESS_BAR_LABEL = "Building tree";
 
-		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
-			IAnalysisMethod m = clusterSetup.getMethod();//new TreeBuildingMethod(dataset, options);
+    public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, PROGRESS_BAR_LABEL, mw);
+    }
 
-			int maxProgress = dataset.getCollection().size() * 2;
-			worker = new DefaultAnalysisWorker(m);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
+    @Override
+    public void run() {
 
-		} else {
-			this.cancel();
-		}
-		clusterSetup.dispose();
-	}
+        SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
 
+        if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
+            IAnalysisMethod m = clusterSetup.getMethod();// new
+                                                         // TreeBuildingMethod(dataset,
+                                                         // options);
 
-	/* (non-Javadoc)
-	 * Overrides because we need to carry out the morphology reprofiling
-	 * on each cluster
-	 * @see no.gui.MainWindow.ProgressableAction#finished()
-	 */
-	@Override
-	public void finished() {
-		
-		try {
-			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
+            int maxProgress = dataset.getCollection().size() * 2;
+            worker = new DefaultAnalysisWorker(m);
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
 
-			ClusterTreeDialog clusterPanel = new ClusterTreeDialog( dataset, r.getGroup());
-			clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
-			clusterPanel.addInterfaceEventListener(this);
+        } else {
+            this.cancel();
+        }
+        clusterSetup.dispose();
+    }
 
-			cleanup(); // do not cancel, we need the MainWindow listener to remain attached 
+    /*
+     * (non-Javadoc) Overrides because we need to carry out the morphology
+     * reprofiling on each cluster
+     * 
+     * @see no.gui.MainWindow.ProgressableAction#finished()
+     */
+    @Override
+    public void finished() {
 
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        try {
+            ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
 
-	}
+            ClusterTreeDialog clusterPanel = new ClusterTreeDialog(dataset, r.getGroup());
+            clusterPanel.addDatasetEventListener(BuildHierarchicalTreeAction.this);
+            clusterPanel.addInterfaceEventListener(this);
 
+            cleanup(); // do not cancel, we need the MainWindow listener to
+                       // remain attached
 
-	@Override
-	public void datasetEventReceived(DatasetEvent event) {
-		finest("BuildHierarchicalTreeAction heard dataset event");
-		if(event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)){
-			fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
-		}
-		
-	}
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
+    }
 
-	@Override
-	public void interfaceEventReceived(InterfaceEvent event) {
-		fireInterfaceEvent(event.method());
-		
-	}
+    @Override
+    public void datasetEventReceived(DatasetEvent event) {
+        finest("BuildHierarchicalTreeAction heard dataset event");
+        if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
+            fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
+        }
+
+    }
+
+    @Override
+    public void interfaceEventReceived(InterfaceEvent event) {
+        fireInterfaceEvent(event.method());
+
+    }
 
 }

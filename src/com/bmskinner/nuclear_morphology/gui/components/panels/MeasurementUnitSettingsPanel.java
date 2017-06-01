@@ -18,7 +18,6 @@
  *******************************************************************************/
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
-
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,57 +31,56 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 
 @SuppressWarnings("serial")
 public class MeasurementUnitSettingsPanel extends EnumeratedOptionsPanel {
-	
-	private Map<MeasurementScale, JRadioButton> map  = new  HashMap<MeasurementScale, JRadioButton>();
-			
-	/**
-	 * Create a panel with all available MeasurementScales as
-	 * radio buttons
-	 * 
-	 */
-	public MeasurementUnitSettingsPanel(){
-		super();
-		
-		final ButtonGroup group = new ButtonGroup();
 
-		for(MeasurementScale type : MeasurementScale.values()){
-			JRadioButton button = new JRadioButton(type.toString());
-			button.setActionCommand(type.toString());
-			button.addActionListener(this);
-			this.add(button);
-			group.add(button);
-			map.put(type, button);
-		}
-		// Set the default
-		map.get(GlobalOptions.getInstance().getScale()).setSelected(true);		
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		GlobalOptions.getInstance().setScale(getSelected());
-		fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-	}
+    private Map<MeasurementScale, JRadioButton> map = new HashMap<MeasurementScale, JRadioButton>();
 
-		
-	/**
-	 * Get the currently selected scale
-	 * @return
-	 */
-	private MeasurementScale getSelected(){
-		for(MeasurementScale type : MeasurementScale.values()){
-			JRadioButton button = map.get(type);
-			if(button.isSelected()){
-				return type;
-			}
-		}
-		return null;
-	}
-	
-	public void setEnabled(boolean b){
+    /**
+     * Create a panel with all available MeasurementScales as radio buttons
+     * 
+     */
+    public MeasurementUnitSettingsPanel() {
+        super();
 
-		for(MeasurementScale type : MeasurementScale.values()){
-			map.get(type).setEnabled(b);
-		}
-	}
+        final ButtonGroup group = new ButtonGroup();
+
+        for (MeasurementScale type : MeasurementScale.values()) {
+            JRadioButton button = new JRadioButton(type.toString());
+            button.setActionCommand(type.toString());
+            button.addActionListener(this);
+            this.add(button);
+            group.add(button);
+            map.put(type, button);
+        }
+        // Set the default
+        map.get(GlobalOptions.getInstance().getScale()).setSelected(true);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        GlobalOptions.getInstance().setScale(getSelected());
+        fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    }
+
+    /**
+     * Get the currently selected scale
+     * 
+     * @return
+     */
+    private MeasurementScale getSelected() {
+        for (MeasurementScale type : MeasurementScale.values()) {
+            JRadioButton button = map.get(type);
+            if (button.isSelected()) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public void setEnabled(boolean b) {
+
+        for (MeasurementScale type : MeasurementScale.values()) {
+            map.get(type).setEnabled(b);
+        }
+    }
 }

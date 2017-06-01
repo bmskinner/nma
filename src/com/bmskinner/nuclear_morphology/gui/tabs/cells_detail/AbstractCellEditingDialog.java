@@ -31,116 +31,113 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MessagingDialog;
 
 /**
- * This dialog contins a CellViewModel and is used as a base for any 
- * dialogs that must edit a cell - this includes the segmentation and
- * border point editing dialogs.
+ * This dialog contins a CellViewModel and is used as a base for any dialogs
+ * that must edit a cell - this includes the segmentation and border point
+ * editing dialogs.
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public abstract class AbstractCellEditingDialog extends MessagingDialog {
-	
-	protected ICell cell = null;
-	protected ICell workingCell;
-	protected IAnalysisDataset dataset = null;
-			
-	private boolean hasChanged = false;
-	
-	protected CellViewModel cellModel; // allow changes to be propagated back to the other panels
-	
-	public AbstractCellEditingDialog(final CellViewModel model){
-		super( null );
-		this.cellModel = model;
-		
-		createUI();
-		
-		
-		this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		this.pack();
-		
-		
-		this.addWindowListener(new WindowAdapter() {
-			
-			public void windowClosing(WindowEvent e) {
-				
-				if(cellHasChanged()){
-					requestSaveOption();
-				} 
-				setVisible(false);
-			}
-		});
-		
-		this.setLocationRelativeTo(null);
-		this.setModal(false);
-		
-	}
-		
-	/**
-	 * Load the given cell and datast (the cell must belong to the dataset)
-	 * and display the dialog
-	 * @param cell
-	 * @param dataset
-	 */
-	public void load(final ICell cell, final IAnalysisDataset dataset){
+    protected ICell            cell    = null;
+    protected ICell            workingCell;
+    protected IAnalysisDataset dataset = null;
 
-		if(cell==null || dataset==null){
-			throw new IllegalArgumentException("Cell or dataset is null");
-		}
-		setCellChanged(false);
-		this.cell = cell;
-		this.dataset = dataset;
-		this.workingCell = new DefaultCell(cell);
-		workingCell.getNucleus().setLocked(false);
+    private boolean hasChanged = false;
 
-		this.setTitle("Editing "+cell.getNucleus().getNameAndNumber());
-	}
+    protected CellViewModel cellModel; // allow changes to be propagated back to
+                                       // the other panels
 
-	
-	/**
-	 * Check if the active cell has been edited
-	 * @return
-	 */
-	protected boolean cellHasChanged(){
-		return hasChanged;
-	}
-	
-	
-	/**
-	 * Set whether the active cell has been edited
-	 * @param b
-	 */
-	protected void setCellChanged(boolean b){
-		hasChanged = b;
-	}
-	
-	protected abstract void createUI();
-	
-	protected abstract void updateCharts(ICell cell);
-	
-	protected void requestSaveOption(){
-		
-		Object[] options = { "Save changes" , "Discard changes" };
-		int save = JOptionPane.showOptionDialog(AbstractCellEditingDialog.this,
-				"Save changes to cell?", 
-				"Save cell?",
-				JOptionPane.DEFAULT_OPTION, 
-				JOptionPane.QUESTION_MESSAGE,
-				null, options, options[0]);
+    public AbstractCellEditingDialog(final CellViewModel model) {
+        super(null);
+        this.cellModel = model;
 
-		// Replace the input cell with the working cell
-		if(save==0){
-			
-			workingCell.getNucleus().setLocked(true); // Prevent further changes without unlocking
-			dataset.getCollection().replaceCell(workingCell);
+        createUI();
 
-			// Trigger a dataset update and reprofiling
-			dataset.getCollection().createProfileCollection();
-			cellModel.swapCell(workingCell);
+        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-			
-			fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-		} 
-	}
+        this.pack();
+
+        this.addWindowListener(new WindowAdapter() {
+
+            public void windowClosing(WindowEvent e) {
+
+                if (cellHasChanged()) {
+                    requestSaveOption();
+                }
+                setVisible(false);
+            }
+        });
+
+        this.setLocationRelativeTo(null);
+        this.setModal(false);
+
+    }
+
+    /**
+     * Load the given cell and datast (the cell must belong to the dataset) and
+     * display the dialog
+     * 
+     * @param cell
+     * @param dataset
+     */
+    public void load(final ICell cell, final IAnalysisDataset dataset) {
+
+        if (cell == null || dataset == null) {
+            throw new IllegalArgumentException("Cell or dataset is null");
+        }
+        setCellChanged(false);
+        this.cell = cell;
+        this.dataset = dataset;
+        this.workingCell = new DefaultCell(cell);
+        workingCell.getNucleus().setLocked(false);
+
+        this.setTitle("Editing " + cell.getNucleus().getNameAndNumber());
+    }
+
+    /**
+     * Check if the active cell has been edited
+     * 
+     * @return
+     */
+    protected boolean cellHasChanged() {
+        return hasChanged;
+    }
+
+    /**
+     * Set whether the active cell has been edited
+     * 
+     * @param b
+     */
+    protected void setCellChanged(boolean b) {
+        hasChanged = b;
+    }
+
+    protected abstract void createUI();
+
+    protected abstract void updateCharts(ICell cell);
+
+    protected void requestSaveOption() {
+
+        Object[] options = { "Save changes", "Discard changes" };
+        int save = JOptionPane.showOptionDialog(AbstractCellEditingDialog.this, "Save changes to cell?", "Save cell?",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        // Replace the input cell with the working cell
+        if (save == 0) {
+
+            workingCell.getNucleus().setLocked(true); // Prevent further changes
+                                                      // without unlocking
+            dataset.getCollection().replaceCell(workingCell);
+
+            // Trigger a dataset update and reprofiling
+            dataset.getCollection().createProfileCollection();
+            cellModel.swapCell(workingCell);
+
+            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+        }
+    }
 
 }

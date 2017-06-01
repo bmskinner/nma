@@ -41,83 +41,80 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
-	 * arranged vertically
-	 * @author bms41
-	 *
-	 */
-	@SuppressWarnings("serial")
-	public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
-		
-		protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
+ * arranged vertically
+ * 
+ * @author bms41
+ *
+ */
+@SuppressWarnings("serial")
+public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 
-		protected JPanel 		mainPanel; // hold the charts
-		protected JPanel		headerPanel; // hold buttons
+    protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
 
-		protected JScrollPane scrollPane; // hold the main panel
-		
-		protected String component;
-		
-		public BoxplotsTabPanel(String component){
-			super();
-			this.component = component;
-			this.setLayout(new BorderLayout());
+    protected JPanel mainPanel;   // hold the charts
+    protected JPanel headerPanel; // hold buttons
 
-			try {
-				mainPanel = new JPanel();
-				mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+    protected JScrollPane scrollPane; // hold the main panel
 
-				headerPanel = new JPanel(new FlowLayout());
-				
-				this.add(headerPanel, BorderLayout.NORTH);
+    protected String component;
 
-				// add the scroll pane to the tab
-				scrollPane  = new JScrollPane(mainPanel);
-				this.add(scrollPane, BorderLayout.CENTER);
-				
-				this.setEnabled(false);
-			} catch(Exception e){
-				error("Error creating panel", e);
-			}
+    public BoxplotsTabPanel(String component) {
+        super();
+        this.component = component;
+        this.setLayout(new BorderLayout());
 
-		}
-		
-		@Override
-		public synchronized void setChartsAndTablesLoading(){
-			super.setChartsAndTablesLoading();
-			for(ExportableChartPanel p : chartPanels.values()){
-				p.setChart(AbstractChartFactory.createLoadingChart());			
-			}
-			
-		}
-		
-		@Override
-		protected synchronized JFreeChart createPanelChartType(ChartOptions options){
-			if(GlobalOptions.getInstance().isViolinPlots()){
-				return new ViolinChartFactory(options).createStatisticPlot(component);
-			} else {
-				return new BoxplotChartFactory(options).createStatisticBoxplot(component);
-			}
-		}
-		
-		@Override
-		protected synchronized TableModel createPanelTableType(TableOptions options){
-			return null;
-		}
+        try {
+            mainPanel = new JPanel();
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-				
-		 @Override
-	     public void actionPerformed(ActionEvent e) {
+            headerPanel = new JPanel(new FlowLayout());
 
-	         try {
-	        	 finest("Updating abstract boxplot tab panel");
-	             this.update(getDatasets());
-	         } catch (Exception e1) {
-	         	error("Error updating boxplot panel from action listener", e1);
-	         }
-	         
-	         
-	     }
+            this.add(headerPanel, BorderLayout.NORTH);
 
-		 
-	}
+            // add the scroll pane to the tab
+            scrollPane = new JScrollPane(mainPanel);
+            this.add(scrollPane, BorderLayout.CENTER);
 
+            this.setEnabled(false);
+        } catch (Exception e) {
+            error("Error creating panel", e);
+        }
+
+    }
+
+    @Override
+    public synchronized void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        for (ExportableChartPanel p : chartPanels.values()) {
+            p.setChart(AbstractChartFactory.createLoadingChart());
+        }
+
+    }
+
+    @Override
+    protected synchronized JFreeChart createPanelChartType(ChartOptions options) {
+        if (GlobalOptions.getInstance().isViolinPlots()) {
+            return new ViolinChartFactory(options).createStatisticPlot(component);
+        } else {
+            return new BoxplotChartFactory(options).createStatisticBoxplot(component);
+        }
+    }
+
+    @Override
+    protected synchronized TableModel createPanelTableType(TableOptions options) {
+        return null;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        try {
+            finest("Updating abstract boxplot tab panel");
+            this.update(getDatasets());
+        } catch (Exception e1) {
+            error("Error updating boxplot panel from action listener", e1);
+        }
+
+    }
+
+}

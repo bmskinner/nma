@@ -21,22 +21,25 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 /**
  * Stores a value at a MeshFaceCoordinate
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface MeshPixel {
-	
-	/**
-	 * Get the pixel value
-	 * @return
-	 */
-	int getValue();
-	
-	/**
-	 * Get the coordinate of the pixel
-	 * @return
-	 */
-	MeshFaceCoordinate getCoordinate();
+
+    /**
+     * Get the pixel value
+     * 
+     * @return
+     */
+    int getValue();
+
+    /**
+     * Get the coordinate of the pixel
+     * 
+     * @return
+     */
+    MeshFaceCoordinate getCoordinate();
 
 }

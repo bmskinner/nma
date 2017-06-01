@@ -36,154 +36,163 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
- * Offset the profiles of individual nuclei within a CellCollection
- * based on the similarities of the profile to the collection median
+ * Offset the profiles of individual nuclei within a CellCollection based on the
+ * similarities of the profile to the collection median
+ * 
  * @author bms41
  *
  */
 public class ProfileOffsetter implements Loggable {
-	
-	final private ICellCollection collection;
-	
-	public ProfileOffsetter(final ICellCollection collection){
-		
-		if(collection==null){
-			throw new IllegalArgumentException("Collection cannot be null");
-		}
-				
-		this.collection = collection;
-	}
-		
-	
-	/**
-	 * This method requires the frankenprofiling to be completed
-	 * @throws ProfileOffsetException
-	 */
-	public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
 
-		int index;
-		try {
-			index = collection.getProfileCollection().getIndex(tag);
-		} catch (UnavailableBorderTagException e2) {
-			throw new ProfileOffsetException("Cannot find "+tag+" index in median", e2);
-		} 
+    final private ICellCollection collection;
 
-		
-		UUID segID;
-		ISegmentedProfile profile;
-		IBorderSegment segFromRef;
-		try {
-			segID = collection.getProfileCollection()
-					.getSegmentContaining(tag).getID();
+    public ProfileOffsetter(final ICellCollection collection) {
 
-			profile = collection.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-			
-			segFromRef    = profile.getSegment(segID);
-		} catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {
-			stack("Error getting median profile and segment", e1);
-			throw new ProfileOffsetException("Cannot get median profile or segment", e1);
-		}
+        if (collection == null) {
+            throw new IllegalArgumentException("Collection cannot be null");
+        }
 
-		
-		
+        this.collection = collection;
+    }
 
+    /**
+     * This method requires the frankenprofiling to be completed
+     * 
+     * @throws ProfileOffsetException
+     */
+    public void assignBorderTagToNucleiViaFrankenProfile(Tag tag) throws ProfileOffsetException {
 
-		/*
-		 * Get the proportion of the index through the segment
-		 */
-		double proportion    = segFromRef.getIndexProportion(index);
-		finest("Found "+tag+" at "+proportion+" through median segment "+segFromRef.getID());
+        int index;
+        try {
+            index = collection.getProfileCollection().getIndex(tag);
+        } catch (UnavailableBorderTagException e2) {
+            throw new ProfileOffsetException("Cannot find " + tag + " index in median", e2);
+        }
 
+        UUID segID;
+        ISegmentedProfile profile;
+        IBorderSegment segFromRef;
+        try {
+            segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
-		/*
-		 * Go through each nucleus and apply the position
-		 */
-		finer("Updating tag location in nuclei");
-		for(Nucleus nucleus : collection.getNuclei()){
+            profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
+                    Quartile.MEDIAN);
 
-			int oldNIndex = nucleus.getBorderIndex(tag);
-			if(oldNIndex==-1){
-				finer("Border tag does not exist and will be created");
-			} else {
-				finer("Previous "+tag+" index at "+oldNIndex);
-			}
-			
-			try {
-				IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE)
-						.getSegment(segID);
+            segFromRef = profile.getSegment(segID);
+        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {
+            stack("Error getting median profile and segment", e1);
+            throw new ProfileOffsetException("Cannot get median profile or segment", e1);
+        }
 
-				if(nucleusSegment==null){
-					warn("Error updating nucleus, segment "+segID+" not found");
-					throw new UnavailableComponentException("Segment "+segID+" not found");
-				} else {
-					finest("Using nucleus segment "+nucleusSegment.getID());
-				}
+        /*
+         * Get the proportion of the index through the segment
+         */
+        double proportion = segFromRef.getIndexProportion(index);
+        finest("Found " + tag + " at " + proportion + " through median segment " + segFromRef.getID());
 
-				int newIndex = nucleusSegment.getProportionalIndex(proportion); // find the index in the segment closest to the proportion 
+        /*
+         * Go through each nucleus and apply the position
+         */
+        finer("Updating tag location in nuclei");
+        for (Nucleus nucleus : collection.getNuclei()) {
 
-				if(newIndex==-1){
-					warn("Cannot find "+tag+" index in nucleus profile at proportion "+proportion);
-					continue;
-				}
+            int oldNIndex = nucleus.getBorderIndex(tag);
+            if (oldNIndex == -1) {
+                finer("Border tag does not exist and will be created");
+            } else {
+                finer("Previous " + tag + " index at " + oldNIndex);
+            }
 
-				
+            try {
+                IBorderSegment nucleusSegment = nucleus.getProfile(ProfileType.ANGLE).getSegment(segID);
 
-				nucleus.setBorderTag(tag, newIndex);
-				finest("Set border tag in nucleus to "+newIndex+ " from "+oldNIndex);
-			} catch (IndexOutOfBoundsException | UnavailableComponentException e) {
-				stack("Cannot set "+tag+" index in nucleus profile", e);
-			}		
-			
-		}
-		
-	}
-	
-	/**
-	 * Use the proportional segment method to update top and bottom vertical positions
-	 * within the dataset
-	 * @throws Exception
-	 */
-	public void reCalculateVerticals() throws ProfileOffsetException {
-		assignTopAndBottomVerticalsViaFrankenProfile();
-	}
-	
-	
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 */
-	
-	/**
-	 * This method requires the frankenprofiling to be completed
-	 * @throws Exception
-	 */
-	private void assignTopAndBottomVerticalsViaFrankenProfile() throws ProfileOffsetException {
-				
-		
-		/*
-		 * Franken profile method: segment proportionality
-		 */
-		
-		assignBorderTagToNucleiViaFrankenProfile(Tag.TOP_VERTICAL);
-		assignBorderTagToNucleiViaFrankenProfile(Tag.BOTTOM_VERTICAL);
-		
-		
-		for(Nucleus nucleus : collection.getNuclei()){			
-			nucleus.updateVerticallyRotatedNucleus();
-		}	
-		
-	}
-	
+                if (nucleusSegment == null) {
+                    warn("Error updating nucleus, segment " + segID + " not found");
+                    throw new UnavailableComponentException("Segment " + segID + " not found");
+                } else {
+                    finest("Using nucleus segment " + nucleusSegment.getID());
+                }
 
-	
-	public class ProfileOffsetException extends Exception {
-		private static final long serialVersionUID = 1L;
-		public ProfileOffsetException() { super(); }
-		public ProfileOffsetException(String message) { super(message); }
-		public ProfileOffsetException(String message, Throwable cause) { super(message, cause); }
-		public ProfileOffsetException(Throwable cause) { super(cause); }
-	}
+                int newIndex = nucleusSegment.getProportionalIndex(proportion); // find
+                                                                                // the
+                                                                                // index
+                                                                                // in
+                                                                                // the
+                                                                                // segment
+                                                                                // closest
+                                                                                // to
+                                                                                // the
+                                                                                // proportion
+
+                if (newIndex == -1) {
+                    warn("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
+                    continue;
+                }
+
+                nucleus.setBorderTag(tag, newIndex);
+                finest("Set border tag in nucleus to " + newIndex + " from " + oldNIndex);
+            } catch (IndexOutOfBoundsException | UnavailableComponentException e) {
+                stack("Cannot set " + tag + " index in nucleus profile", e);
+            }
+
+        }
+
+    }
+
+    /**
+     * Use the proportional segment method to update top and bottom vertical
+     * positions within the dataset
+     * 
+     * @throws Exception
+     */
+    public void reCalculateVerticals() throws ProfileOffsetException {
+        assignTopAndBottomVerticalsViaFrankenProfile();
+    }
+
+    /*
+     * 
+     * PRIVATE METHODS
+     * 
+     */
+
+    /**
+     * This method requires the frankenprofiling to be completed
+     * 
+     * @throws Exception
+     */
+    private void assignTopAndBottomVerticalsViaFrankenProfile() throws ProfileOffsetException {
+
+        /*
+         * Franken profile method: segment proportionality
+         */
+
+        assignBorderTagToNucleiViaFrankenProfile(Tag.TOP_VERTICAL);
+        assignBorderTagToNucleiViaFrankenProfile(Tag.BOTTOM_VERTICAL);
+
+        for (Nucleus nucleus : collection.getNuclei()) {
+            nucleus.updateVerticallyRotatedNucleus();
+        }
+
+    }
+
+    public class ProfileOffsetException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public ProfileOffsetException() {
+            super();
+        }
+
+        public ProfileOffsetException(String message) {
+            super(message);
+        }
+
+        public ProfileOffsetException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ProfileOffsetException(Throwable cause) {
+            super(cause);
+        }
+    }
 
 }

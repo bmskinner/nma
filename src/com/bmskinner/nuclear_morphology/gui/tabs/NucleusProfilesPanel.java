@@ -29,37 +29,36 @@ import com.bmskinner.nuclear_morphology.gui.tabs.profiles.VariabilityDisplayPane
 
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
-	
-	private static final String MODALITY_TAB_LBL    = "Modality";
-	private static final String VARIABILITY_TAB_LBL = "Variability";
-	
-	public NucleusProfilesPanel() {
-		super();
-		this.setLayout(new BorderLayout());
-		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
-		
-		for(ProfileType type : ProfileType.displayValues()){
 
-			DetailPanel panel = new ProfileDisplayPanel(type);
-			this.addSubPanel(panel);
-			tabPanel.addTab(type.toString(), panel);
-		}
-		
-		/*
-		 * Create the other profile panels
-		 */
-		
-		DetailPanel modalityDisplayPanel  = new ModalityDisplayPanel();		
-		DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
-		
-		this.addSubPanel(variabilityChartPanel);
-		this.addSubPanel(modalityDisplayPanel);
-		
-		tabPanel.addTab(VARIABILITY_TAB_LBL, variabilityChartPanel);
-		tabPanel.addTab(MODALITY_TAB_LBL   , modalityDisplayPanel);
-		
-		
-		this.add(tabPanel, BorderLayout.CENTER);
+    private static final String MODALITY_TAB_LBL    = "Modality";
+    private static final String VARIABILITY_TAB_LBL = "Variability";
 
-	}
+    public NucleusProfilesPanel() {
+        super();
+        this.setLayout(new BorderLayout());
+        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+
+        for (ProfileType type : ProfileType.displayValues()) {
+
+            DetailPanel panel = new ProfileDisplayPanel(type);
+            this.addSubPanel(panel);
+            tabPanel.addTab(type.toString(), panel);
+        }
+
+        /*
+         * Create the other profile panels
+         */
+
+        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
+        DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
+
+        this.addSubPanel(variabilityChartPanel);
+        this.addSubPanel(modalityDisplayPanel);
+
+        tabPanel.addTab(VARIABILITY_TAB_LBL, variabilityChartPanel);
+        tabPanel.addTab(MODALITY_TAB_LBL, modalityDisplayPanel);
+
+        this.add(tabPanel, BorderLayout.CENTER);
+
+    }
 }

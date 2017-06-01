@@ -27,58 +27,60 @@ import javax.swing.JRadioButton;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
 /**
- * This is an options panel holding a group of radio buttons
- * for the available profile types.
+ * This is an options panel holding a group of radio buttons for the available
+ * profile types.
+ * 
  * @author ben
  * @since 1.11.5
  *
  */
 @SuppressWarnings("serial")
 public class ProfileCollectionTypeSettingsPanel extends EnumeratedOptionsPanel {
-	
-	private Map<ProfileType, JRadioButton> map  = new  HashMap<ProfileType, JRadioButton>();
-	
-	/**
-	 * Create a new panel
-	 */
-	public ProfileCollectionTypeSettingsPanel(){
-		
-		super();
-		final ButtonGroup group = new ButtonGroup();
-		
-		for(ProfileType type : ProfileType.values()){
-			JRadioButton button = new JRadioButton(type.toString());
-			button.setActionCommand(type.toString());
-			button.addActionListener(this);
-			this.add(button);
-			group.add(button);
-			map.put(type, button);
-		}
-		// Set the default
-		map.get(ProfileType.FRANKEN).setSelected(true);
-		
-	}
-	
-	@Override
-	public void setEnabled(boolean b){
 
-		for(ProfileType type : ProfileType.values()){
-			map.get(type).setEnabled(b);
-		}
-	}
-	
-	/**
-	 * Get the selected profile type, or null
-	 * @return
-	 */
-	public ProfileType getSelected(){
-		for(ProfileType type : ProfileType.values()){
-			JRadioButton button = map.get(type);
-			if(button.isSelected()){
-				return type;
-			}
-		}
-		return null;
-	}
+    private Map<ProfileType, JRadioButton> map = new HashMap<ProfileType, JRadioButton>();
+
+    /**
+     * Create a new panel
+     */
+    public ProfileCollectionTypeSettingsPanel() {
+
+        super();
+        final ButtonGroup group = new ButtonGroup();
+
+        for (ProfileType type : ProfileType.values()) {
+            JRadioButton button = new JRadioButton(type.toString());
+            button.setActionCommand(type.toString());
+            button.addActionListener(this);
+            this.add(button);
+            group.add(button);
+            map.put(type, button);
+        }
+        // Set the default
+        map.get(ProfileType.FRANKEN).setSelected(true);
+
+    }
+
+    @Override
+    public void setEnabled(boolean b) {
+
+        for (ProfileType type : ProfileType.values()) {
+            map.get(type).setEnabled(b);
+        }
+    }
+
+    /**
+     * Get the selected profile type, or null
+     * 
+     * @return
+     */
+    public ProfileType getSelected() {
+        for (ProfileType type : ProfileType.values()) {
+            JRadioButton button = map.get(type);
+            if (button.isSelected()) {
+                return type;
+            }
+        }
+        return null;
+    }
 
 }

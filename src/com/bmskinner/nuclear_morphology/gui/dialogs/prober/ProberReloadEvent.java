@@ -4,9 +4,9 @@ import java.util.EventObject;
 
 @SuppressWarnings("serial")
 public class ProberReloadEvent extends EventObject {
-	
-	public ProberReloadEvent(Object source){
-		super(source);
-	}
+
+    public ProberReloadEvent(Object source) {
+        super(source);
+    }
 
 }

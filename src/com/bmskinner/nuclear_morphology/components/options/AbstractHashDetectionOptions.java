@@ -8,393 +8,393 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
- * A replacement for the AbstractDetectionOptions providing more
- * extensibility for the future by using a map rather than
- * fixed fields for the stored options
+ * A replacement for the AbstractDetectionOptions providing more extensibility
+ * for the future by using a map rather than fixed fields for the stored options
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
-public abstract class AbstractHashDetectionOptions 
-	extends AbstractHashOptions
-	implements IMutableDetectionOptions {
-	
-	private static final long serialVersionUID = 1L;
+public abstract class AbstractHashDetectionOptions extends AbstractHashOptions implements IMutableDetectionOptions {
 
-	private File folder;
-	
-	private Map<String, IDetectionSubOptions> subMap = new HashMap<String, IDetectionSubOptions>();
-	
-	/**
-	 * Construct specifying a folder of images to be analysed
-	 * @param folder
-	 */
-	public AbstractHashDetectionOptions(File folder){
-		
-		this.folder = folder;		
-	}
-	
-	/**
-	 * Construct from a template options
-	 * @param template
-	 */
-	protected AbstractHashDetectionOptions(IDetectionOptions template){
-		if(template==null){
-			throw new IllegalArgumentException("Template options is null");
-		}
-		
-		folder    = template.getFolder();
-		intMap.put(THRESHOLD, template.getThreshold());
-		intMap.put(CHANNEL, template.getChannel());
+    private static final long serialVersionUID = 1L;
 
-		dblMap.put(MIN_CIRC, template.getMinCirc());
-		dblMap.put(MAX_CIRC, template.getMaxCirc());
-		dblMap.put(MIN_SIZE, template.getMinSize());
-		dblMap.put(MAX_SIZE, template.getMaxSize());
-		dblMap.put(SCALE,    template.getScale());
-		
-		boolMap.put(IS_NORMALISE_CONTRAST, template.isNormaliseContrast());
-		boolMap.put(IS_RGB, template.isRGB());
-		
-		
-		if(template.hasCannyOptions()){
-			try {
-				subMap.put(IDetectionSubOptions.CANNY_OPTIONS, template.getCannyOptions().duplicate());
-			} catch (MissingOptionException e) {
-				error("Missing Canny options", e);
-			}
-		} else {
-			
-			IMutableCannyOptions cannyOptions = OptionsFactory.makeCannyOptions();
-			cannyOptions.setUseCanny(false);
-			subMap.put(IDetectionSubOptions.CANNY_OPTIONS, cannyOptions);
-		}
-		
+    private File folder;
 
-	}
-	
-	public AbstractHashDetectionOptions setSize(double min, double max){
-		dblMap.put(MIN_SIZE, min);
-		dblMap.put(MAX_SIZE, max);
-		return this;
-	}
-	
-	public AbstractHashDetectionOptions setCircularity(double min, double max){
-		dblMap.put(MIN_CIRC, min);
-		dblMap.put(MAX_CIRC, max);
-		return this;
-	}
-	
-	@Override
-	public boolean hasSubOptions(String s){
-		return subMap.containsKey(s);
-	}
-	
-	@Override
-	public IDetectionSubOptions getSubOptions(String s) throws MissingOptionException {
-		if(subMap.containsKey(s)){
-			return subMap.get(s);
-		} else {
-			throw new MissingOptionException("Options not present: "+s);
-		}
-	}
-	
-	@Override
-	public void setSubOptions(String s, IDetectionSubOptions op){
-		subMap.put(s, op);
-	}
-		
-	
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getThreshold()
-	 */
-	@Override
-	public int getThreshold() {
-		return intMap.get(THRESHOLD);
-	}
+    private Map<String, IDetectionSubOptions> subMap = new HashMap<String, IDetectionSubOptions>();
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setThreshold(int)
-	 */
-	@Override
-	public void setThreshold(int threshold) {
-		intMap.put(THRESHOLD, threshold);
-	}
+    /**
+     * Construct specifying a folder of images to be analysed
+     * 
+     * @param folder
+     */
+    public AbstractHashDetectionOptions(File folder) {
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMinCirc()
-	 */
-	@Override
-	public double getMinCirc() {
-		return dblMap.get(MIN_CIRC);
-	}
+        this.folder = folder;
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMinCirc(double)
-	 */
-	@Override
-	public void setMinCirc(double minCirc) {
-		dblMap.put(MIN_CIRC, minCirc);
-	}
+    /**
+     * Construct from a template options
+     * 
+     * @param template
+     */
+    protected AbstractHashDetectionOptions(IDetectionOptions template) {
+        if (template == null) {
+            throw new IllegalArgumentException("Template options is null");
+        }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMaxCirc()
-	 */
-	@Override
-	public double getMaxCirc() {
-		return dblMap.get(MAX_CIRC);
-	}
+        folder = template.getFolder();
+        intMap.put(THRESHOLD, template.getThreshold());
+        intMap.put(CHANNEL, template.getChannel());
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMaxCirc(double)
-	 */
-	@Override
-	public void setMaxCirc(double maxCirc) {
-		dblMap.put(MAX_CIRC, maxCirc);
-	}
+        dblMap.put(MIN_CIRC, template.getMinCirc());
+        dblMap.put(MAX_CIRC, template.getMaxCirc());
+        dblMap.put(MIN_SIZE, template.getMinSize());
+        dblMap.put(MAX_SIZE, template.getMaxSize());
+        dblMap.put(SCALE, template.getScale());
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMinSize()
-	 */
-	@Override
-	public double getMinSize() {
-		return dblMap.get(MIN_SIZE);
-	}
+        boolMap.put(IS_NORMALISE_CONTRAST, template.isNormaliseContrast());
+        boolMap.put(IS_RGB, template.isRGB());
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMinSize(double)
-	 */
-	@Override
-	public void setMinSize(double minSize) {
-		dblMap.put(MIN_SIZE, minSize);
-	}
-	
-	@Override
-	public void setRGB(boolean b){
-		boolMap.put(IS_RGB, b);
-	}
+        if (template.hasCannyOptions()) {
+            try {
+                subMap.put(IDetectionSubOptions.CANNY_OPTIONS, template.getCannyOptions().duplicate());
+            } catch (MissingOptionException e) {
+                error("Missing Canny options", e);
+            }
+        } else {
 
-	@Override
-	public File getFolder() {
-		return folder;
-	}
+            IMutableCannyOptions cannyOptions = OptionsFactory.makeCannyOptions();
+            cannyOptions.setUseCanny(false);
+            subMap.put(IDetectionSubOptions.CANNY_OPTIONS, cannyOptions);
+        }
 
-	@Override
-	public double getMaxSize() {
-		return dblMap.get(MAX_SIZE);
-	}
+    }
 
-	@Override
-	public double getScale() {
-		return dblMap.get(SCALE);
-	}
+    public AbstractHashDetectionOptions setSize(double min, double max) {
+        dblMap.put(MIN_SIZE, min);
+        dblMap.put(MAX_SIZE, max);
+        return this;
+    }
 
-	@Override
-	public int getChannel() {
-		return intMap.get(CHANNEL);
-	}
-	
-	@Override
-	public boolean isRGB(){
-		return boolMap.get(IS_RGB);
-	}
+    public AbstractHashDetectionOptions setCircularity(double min, double max) {
+        dblMap.put(MIN_CIRC, min);
+        dblMap.put(MAX_CIRC, max);
+        return this;
+    }
 
-	@Override
-	public boolean isNormaliseContrast() {
-		return boolMap.get(IS_NORMALISE_CONTRAST);
-	}
+    @Override
+    public boolean hasSubOptions(String s) {
+        return subMap.containsKey(s);
+    }
 
-	@Override
-	public boolean hasCannyOptions() {
-		return subMap.containsKey(IDetectionSubOptions.CANNY_OPTIONS);
-	}
+    @Override
+    public IDetectionSubOptions getSubOptions(String s) throws MissingOptionException {
+        if (subMap.containsKey(s)) {
+            return subMap.get(s);
+        } else {
+            throw new MissingOptionException("Options not present: " + s);
+        }
+    }
 
-	@Override
-	public IMutableCannyOptions getCannyOptions() throws MissingOptionException {
-		
-		if(this.hasCannyOptions()){
-			IDetectionSubOptions c = subMap.get(IDetectionSubOptions.CANNY_OPTIONS);
-			if(c instanceof IMutableCannyOptions){
-				return (IMutableCannyOptions) c;
-			} else {
-				throw new MissingOptionException("Sub options cannot be cast to canny");
-			}
-		} else {
-			throw new MissingOptionException("Canny options not present");
-		}
-		
-	}
+    @Override
+    public void setSubOptions(String s, IDetectionSubOptions op) {
+        subMap.put(s, op);
+    }
 
-	@Override
-	public boolean isValid(CellularComponent c){
-		
-		if(c==null){
-			return false;
-		}
-		if(c.getStatistic(PlottableStatistic.AREA) < this.getMinSize()){
-			return false;
-		}
-		if(c.getStatistic(PlottableStatistic.AREA) > this.getMaxSize()){
-			return false;
-		}
-		if(c.getStatistic(PlottableStatistic.CIRCULARITY) < this.getMinCirc()){
-			return false;
-		}
-		
-		if(c.getStatistic(PlottableStatistic.CIRCULARITY) > this.getMaxCirc()){
-			return false;
-		}
-		return true;
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getThreshold()
+     */
+    @Override
+    public int getThreshold() {
+        return intMap.get(THRESHOLD);
+    }
 
-	@Override
-	public void setChannel(int channel) {
-		intMap.put(CHANNEL, channel);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setThreshold(int)
+     */
+    @Override
+    public void setThreshold(int threshold) {
+        intMap.put(THRESHOLD, threshold);
+    }
 
-	@Override
-	public void setScale(double scale) {
-		dblMap.put(SCALE, scale);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMinCirc()
+     */
+    @Override
+    public double getMinCirc() {
+        return dblMap.get(MIN_CIRC);
+    }
 
-	@Override
-	public void setMaxSize(double maxSize) {
-		dblMap.put(MAX_SIZE, maxSize);
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMinCirc(double)
+     */
+    @Override
+    public void setMinCirc(double minCirc) {
+        dblMap.put(MIN_CIRC, minCirc);
+    }
 
-	@Override
-	public void setFolder(File folder) {
-		this.folder = folder;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMaxCirc()
+     */
+    @Override
+    public double getMaxCirc() {
+        return dblMap.get(MAX_CIRC);
+    }
 
-	@Override
-	public void setCannyOptions(IMutableCannyOptions canny) {
-		subMap.put(IDetectionSubOptions.CANNY_OPTIONS, canny);	
-	}
-	
-	@Override
-	public void setHoughOptions(IHoughDetectionOptions hough) {
-		subMap.put(IDetectionSubOptions.HOUGH_OPTIONS, hough);	
-	}
-		
-	@Override
-	public void setNormaliseContrast(boolean b) {
-		boolMap.put(IS_NORMALISE_CONTRAST, b);
-	}
-	
-	@Override
-	public void set(IDetectionOptions options){
-		
-		try {
-			this.setCannyOptions(options.getCannyOptions());
-		} catch (MissingOptionException e) {
-			fine("No canny options to copy");
-		}
-		this.setChannel(options.getChannel());
-		this.setMaxCirc(options.getMaxCirc());
-		this.setMinCirc(options.getMinCirc());
-		this.setMaxSize(options.getMaxSize());
-		this.setMinSize(options.getMinSize());
-		this.setThreshold(options.getThreshold());
-		this.setScale(options.getScale());
-		this.setNormaliseContrast(options.isNormaliseContrast());
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMaxCirc(double)
+     */
+    @Override
+    public void setMaxCirc(double maxCirc) {
+        dblMap.put(MAX_CIRC, maxCirc);
+    }
 
-		folder = new File(options.getFolder().getAbsolutePath());
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMinSize()
+     */
+    @Override
+    public double getMinSize() {
+        return dblMap.get(MIN_SIZE);
+    }
 
-		
-	}
-	
-	
-	@Override
-	public int hashCode(){
-		
-		final int prime = 31;
-		int result = super.hashCode();
-		
-		result = prime * result + folder.hashCode();
-		result = prime * result + intMap.hashCode();
-		result = prime * result + dblMap.hashCode();
-		result = prime * result + boolMap.hashCode();
-		result = prime * result + subMap.hashCode();
-		return result;
-		
-	}
-	
-	@Override
-	public boolean equals(Object o){
-		if (this == o)
-			return true;
-		
-		if(o==null)
-			return false;
-	
-		if( ! ( o instanceof IDetectionOptions))
-			return false;
-		
-		
-		IDetectionOptions other = (IDetectionOptions) o;
-		
-		
-		if(getThreshold()!=other.getThreshold())
-			return false;
-		
-		if(getChannel()!=other.getChannel())
-			return false;
-		
-		if( Double.doubleToLongBits(getMinCirc())!= 
-				Double.doubleToLongBits(other.getMinCirc()))
-			return false;
-		
-		if( Double.doubleToLongBits(getMaxCirc())
-				!=Double.doubleToLongBits(other.getMaxCirc()))
-			return false;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMinSize(double)
+     */
+    @Override
+    public void setMinSize(double minSize) {
+        dblMap.put(MIN_SIZE, minSize);
+    }
 
-		if(Double.doubleToLongBits(getMinSize())!=
-				Double.doubleToLongBits(other.getMinSize()))
-			return false;
-		
-		if(Double.doubleToLongBits(getMaxSize())	!=
-				Double.doubleToLongBits(other.getMaxSize()))
-			return false;
-		
-		if(Double.doubleToLongBits(getScale())!=
-				Double.doubleToLongBits(other.getScale()))
-			return false;
-		
-		if(isNormaliseContrast()!=other.isNormaliseContrast())
-			return false;
-		
-		try {
-			if(! getCannyOptions().equals(other.getCannyOptions())){
-				return false;
-			}
-		} catch (MissingOptionException e) {
-			error("Canny options missing in comparison", e);
-		}
-				
-		return true;
-		
-	}
+    @Override
+    public void setRGB(boolean b) {
+        boolMap.put(IS_RGB, b);
+    }
 
-	@Override
-	public IMutableDetectionOptions unlock() {
-		return this;
-	}
-	
+    @Override
+    public File getFolder() {
+        return folder;
+    }
 
-	@Override
-	public boolean isUseHoughTransform() {
-		return boolMap.get(IS_USE_HOUGH);
-	}
+    @Override
+    public double getMaxSize() {
+        return dblMap.get(MAX_SIZE);
+    }
 
-	
+    @Override
+    public double getScale() {
+        return dblMap.get(SCALE);
+    }
 
-	@Override
-	public IDetectionOptions lock() {
-		return this;
-	}
+    @Override
+    public int getChannel() {
+        return intMap.get(CHANNEL);
+    }
 
+    @Override
+    public boolean isRGB() {
+        return boolMap.get(IS_RGB);
+    }
+
+    @Override
+    public boolean isNormaliseContrast() {
+        return boolMap.get(IS_NORMALISE_CONTRAST);
+    }
+
+    @Override
+    public boolean hasCannyOptions() {
+        return subMap.containsKey(IDetectionSubOptions.CANNY_OPTIONS);
+    }
+
+    @Override
+    public IMutableCannyOptions getCannyOptions() throws MissingOptionException {
+
+        if (this.hasCannyOptions()) {
+            IDetectionSubOptions c = subMap.get(IDetectionSubOptions.CANNY_OPTIONS);
+            if (c instanceof IMutableCannyOptions) {
+                return (IMutableCannyOptions) c;
+            } else {
+                throw new MissingOptionException("Sub options cannot be cast to canny");
+            }
+        } else {
+            throw new MissingOptionException("Canny options not present");
+        }
+
+    }
+
+    @Override
+    public boolean isValid(CellularComponent c) {
+
+        if (c == null) {
+            return false;
+        }
+        if (c.getStatistic(PlottableStatistic.AREA) < this.getMinSize()) {
+            return false;
+        }
+        if (c.getStatistic(PlottableStatistic.AREA) > this.getMaxSize()) {
+            return false;
+        }
+        if (c.getStatistic(PlottableStatistic.CIRCULARITY) < this.getMinCirc()) {
+            return false;
+        }
+
+        if (c.getStatistic(PlottableStatistic.CIRCULARITY) > this.getMaxCirc()) {
+            return false;
+        }
+        return true;
+
+    }
+
+    @Override
+    public void setChannel(int channel) {
+        intMap.put(CHANNEL, channel);
+    }
+
+    @Override
+    public void setScale(double scale) {
+        dblMap.put(SCALE, scale);
+    }
+
+    @Override
+    public void setMaxSize(double maxSize) {
+        dblMap.put(MAX_SIZE, maxSize);
+
+    }
+
+    @Override
+    public void setFolder(File folder) {
+        this.folder = folder;
+    }
+
+    @Override
+    public void setCannyOptions(IMutableCannyOptions canny) {
+        subMap.put(IDetectionSubOptions.CANNY_OPTIONS, canny);
+    }
+
+    @Override
+    public void setHoughOptions(IHoughDetectionOptions hough) {
+        subMap.put(IDetectionSubOptions.HOUGH_OPTIONS, hough);
+    }
+
+    @Override
+    public void setNormaliseContrast(boolean b) {
+        boolMap.put(IS_NORMALISE_CONTRAST, b);
+    }
+
+    @Override
+    public void set(IDetectionOptions options) {
+
+        try {
+            this.setCannyOptions(options.getCannyOptions());
+        } catch (MissingOptionException e) {
+            fine("No canny options to copy");
+        }
+        this.setChannel(options.getChannel());
+        this.setMaxCirc(options.getMaxCirc());
+        this.setMinCirc(options.getMinCirc());
+        this.setMaxSize(options.getMaxSize());
+        this.setMinSize(options.getMinSize());
+        this.setThreshold(options.getThreshold());
+        this.setScale(options.getScale());
+        this.setNormaliseContrast(options.isNormaliseContrast());
+
+        folder = new File(options.getFolder().getAbsolutePath());
+
+    }
+
+    @Override
+    public int hashCode() {
+
+        final int prime = 31;
+        int result = super.hashCode();
+
+        result = prime * result + folder.hashCode();
+        result = prime * result + intMap.hashCode();
+        result = prime * result + dblMap.hashCode();
+        result = prime * result + boolMap.hashCode();
+        result = prime * result + subMap.hashCode();
+        return result;
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (o == null)
+            return false;
+
+        if (!(o instanceof IDetectionOptions))
+            return false;
+
+        IDetectionOptions other = (IDetectionOptions) o;
+
+        if (getThreshold() != other.getThreshold())
+            return false;
+
+        if (getChannel() != other.getChannel())
+            return false;
+
+        if (Double.doubleToLongBits(getMinCirc()) != Double.doubleToLongBits(other.getMinCirc()))
+            return false;
+
+        if (Double.doubleToLongBits(getMaxCirc()) != Double.doubleToLongBits(other.getMaxCirc()))
+            return false;
+
+        if (Double.doubleToLongBits(getMinSize()) != Double.doubleToLongBits(other.getMinSize()))
+            return false;
+
+        if (Double.doubleToLongBits(getMaxSize()) != Double.doubleToLongBits(other.getMaxSize()))
+            return false;
+
+        if (Double.doubleToLongBits(getScale()) != Double.doubleToLongBits(other.getScale()))
+            return false;
+
+        if (isNormaliseContrast() != other.isNormaliseContrast())
+            return false;
+
+        try {
+            if (!getCannyOptions().equals(other.getCannyOptions())) {
+                return false;
+            }
+        } catch (MissingOptionException e) {
+            error("Canny options missing in comparison", e);
+        }
+
+        return true;
+
+    }
+
+    @Override
+    public IMutableDetectionOptions unlock() {
+        return this;
+    }
+
+    @Override
+    public boolean isUseHoughTransform() {
+        return boolMap.get(IS_USE_HOUGH);
+    }
+
+    @Override
+    public IDetectionOptions lock() {
+        return this;
+    }
 
 }

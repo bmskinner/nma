@@ -25,14 +25,27 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 
 /**
  * Thrown when a requested signal group is not present within a dataset or cell
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class UnavailableSignalGroupException extends UnavailableComponentException {
-	private static final long serialVersionUID = 1L;
-	public UnavailableSignalGroupException() { super(); }
-	public UnavailableSignalGroupException(String message) { super(message); }
-	public UnavailableSignalGroupException(String message, Throwable cause) { super(message, cause); }
-	public UnavailableSignalGroupException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public UnavailableSignalGroupException() {
+        super();
+    }
+
+    public UnavailableSignalGroupException(String message) {
+        super(message);
+    }
+
+    public UnavailableSignalGroupException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnavailableSignalGroupException(Throwable cause) {
+        super(cause);
+    }
 }

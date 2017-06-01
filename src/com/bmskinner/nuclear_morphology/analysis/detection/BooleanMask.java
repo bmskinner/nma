@@ -21,152 +21,155 @@ package com.bmskinner.nuclear_morphology.analysis.detection;
 
 /**
  * A default implementation of Mask.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class BooleanMask implements Mask {
-	
-	protected boolean[][] array;
-	
-	protected int w, h;
 
-	/**
-	 * Create a mask of the given size set to false
-	 * @param width
-	 * @param height
-	 */
-	public BooleanMask(int width, int height){
-		w = width;
-		h = height;
-		array = new boolean[h][w];
-		for(int y=0; y<h; y++){
-			for(int x=0; x<w; x++){
-				array[y][x] = false;
-			}
-		}
-	}
-	
-	/**
-	 * Create a mask from the given array
-	 * @param template
-	 */
-	public BooleanMask(boolean[][] template){
-		this(template.length, template[0].length);
-		for(int y=0; y<h; y++){
-			for(int x=0; x<w; x++){
-				array[y][x] = template[y][x];
-			}
-		}
-	}
-	
-	@Override
-	public int getWidth() {
-		return w;
-	}
+    protected boolean[][] array;
 
-	@Override
-	public int getHeight() {
-		return h;
-	}
-	
-	@Override
-	public boolean get(int x, int y) {
-		return array[y][x];
-	}
-	
-	/**
-	 * Calculate the logical AND of the two input arrays.
-	 * @param array1
-	 * @param array2
-	 * @return
-	 */
-	@Override
-	public Mask and(Mask template){
-		
-		int height = template.getHeight();
-		int width  = template.getWidth();
+    protected int w, h;
 
-		boolean[][] result = new boolean[height][width];
+    /**
+     * Create a mask of the given size set to false
+     * 
+     * @param width
+     * @param height
+     */
+    public BooleanMask(int width, int height) {
+        w = width;
+        h = height;
+        array = new boolean[h][w];
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                array[y][x] = false;
+            }
+        }
+    }
 
-		for(int y=0; y<height; y++){
-			for(int x=0; x<width; x++){
-				result[y][x] = array[y][x]  &&  template.get(x, y);
-			}
-		}
-		return new BooleanMask( result);
-	}
+    /**
+     * Create a mask from the given array
+     * 
+     * @param template
+     */
+    public BooleanMask(boolean[][] template) {
+        this(template.length, template[0].length);
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                array[y][x] = template[y][x];
+            }
+        }
+    }
 
-	@Override
-	public Mask offset(int xOffset, int yOffset) {
-		int height = array.length;
-		int width  = array[0].length;
-		boolean[][] result = new boolean[height][width];
-		zeroArray(result); 
+    @Override
+    public int getWidth() {
+        return w;
+    }
 
-		for(int y=0; y<height; y++){
-			
-			if(y-yOffset<0 || y-yOffset >= height){
-				continue;
-			}
-			
-			for(int x=0; x<width; x++){
+    @Override
+    public int getHeight() {
+        return h;
+    }
 
-				if(x-xOffset<0 || x-xOffset >= width){
-					continue;
-				}
-				result[y][x] = array[y-yOffset][x-xOffset];
-			}
-		}
-		return new BooleanMask( result);
-	}
-	
-	private void zeroArray(boolean[][] array){
-		int height = array.length;
-		int width  = array[0].length;
-		for(int y=0; y<height; y++){
-			for(int x=0; x<width; x++){
+    @Override
+    public boolean get(int x, int y) {
+        return array[y][x];
+    }
 
-				array[y][x] = false;
-			}
-		}
+    /**
+     * Calculate the logical AND of the two input arrays.
+     * 
+     * @param array1
+     * @param array2
+     * @return
+     */
+    @Override
+    public Mask and(Mask template) {
 
-	}
-	
-	private void trueArray(boolean[][] array){
-		int height = array.length;
-		int width  = array[0].length;
-		for(int y=0; y<height; y++){
-			for(int x=0; x<width; x++){
+        int height = template.getHeight();
+        int width = template.getWidth();
 
-				array[y][x] = true;
-			}
-		}
+        boolean[][] result = new boolean[height][width];
 
-	}
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                result[y][x] = array[y][x] && template.get(x, y);
+            }
+        }
+        return new BooleanMask(result);
+    }
 
-	@Override
-	public boolean[][] toArray() {
-		return array;
-	}
+    @Override
+    public Mask offset(int xOffset, int yOffset) {
+        int height = array.length;
+        int width = array[0].length;
+        boolean[][] result = new boolean[height][width];
+        zeroArray(result);
 
-	@Override
-	public Mask setFalse() {
-		zeroArray(array);
-		return this;
-	}
+        for (int y = 0; y < height; y++) {
 
-	@Override
-	public Mask setTrue() {
-		trueArray(array);
-		return this;
-	}
+            if (y - yOffset < 0 || y - yOffset >= height) {
+                continue;
+            }
 
-	@Override
-	public void set(int x, int y, boolean b) {
-		// TODO - add bounds check
-		array[y][x] = b;
-	}
+            for (int x = 0; x < width; x++) {
 
+                if (x - xOffset < 0 || x - xOffset >= width) {
+                    continue;
+                }
+                result[y][x] = array[y - yOffset][x - xOffset];
+            }
+        }
+        return new BooleanMask(result);
+    }
+
+    private void zeroArray(boolean[][] array) {
+        int height = array.length;
+        int width = array[0].length;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+
+                array[y][x] = false;
+            }
+        }
+
+    }
+
+    private void trueArray(boolean[][] array) {
+        int height = array.length;
+        int width = array[0].length;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+
+                array[y][x] = true;
+            }
+        }
+
+    }
+
+    @Override
+    public boolean[][] toArray() {
+        return array;
+    }
+
+    @Override
+    public Mask setFalse() {
+        zeroArray(array);
+        return this;
+    }
+
+    @Override
+    public Mask setTrue() {
+        trueArray(array);
+        return this;
+    }
+
+    @Override
+    public void set(int x, int y, boolean b) {
+        // TODO - add bounds check
+        array[y][x] = b;
+    }
 
 }

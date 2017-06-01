@@ -34,104 +34,106 @@ import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermN
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 
 /**
- * The types of nuclei we are able to analyse,
- * with the reference and orientation points to be used.
- * The reference point is the best identifiable point on the
- * nucleus when aligning profiles. The orientation point is the point
- * placed at the bottom when rotating a consensus nucleus.
+ * The types of nuclei we are able to analyse, with the reference and
+ * orientation points to be used. The reference point is the best identifiable
+ * point on the nucleus when aligning profiles. The orientation point is the
+ * point placed at the bottom when rotating a consensus nucleus.
  *
  */
 public enum NucleusType {
-	ROUND 		 ("Round nucleus"		 , "Head", "Tail", DefaultNucleus.class), 
-	RODENT_SPERM ("Rodent sperm nucleus" , "Tip" , "Tail", DefaultRodentSpermNucleus.class), 
-	PIG_SPERM 	 ("Pig sperm nucleus"	 , "Tail", "Tail", DefaultPigSpermNucleus.class),
-	NEUTROPHIL   ("Lobed nucleus"        , "Head", "Tail", DefaultLobedNucleus.class);
-	
-    private final String name;   
+    ROUND("Round nucleus", "Head", "Tail", DefaultNucleus.class), RODENT_SPERM("Rodent sperm nucleus", "Tip", "Tail",
+            DefaultRodentSpermNucleus.class), PIG_SPERM("Pig sperm nucleus", "Tail", "Tail",
+                    DefaultPigSpermNucleus.class), NEUTROPHIL("Lobed nucleus", "Head", "Tail",
+                            DefaultLobedNucleus.class);
+
+    private final String   name;
     private final Class<?> nucleusClass;
-     
+
     private final Map<Tag, String> map = new HashMap<Tag, String>();
-    
+
     NucleusType(String name, String referencePoint, String orientationPoint, Class<?> nucleusClass) {
         this.name = name;
         this.nucleusClass = nucleusClass;
         this.map.put(Tag.REFERENCE_POINT, referencePoint);
         this.map.put(Tag.ORIENTATION_POINT, orientationPoint);
-	}
-    
-    public String toString(){
-    	return this.name;
     }
-        
-    
+
+    public String toString() {
+        return this.name;
+    }
+
     /**
-     * Get the name of the given border tag, if present.
-     * For example, the name of the RP in mouse sperm is
-     * the tip. The name of the RP in pig sperm is the head.
+     * Get the name of the given border tag, if present. For example, the name
+     * of the RP in mouse sperm is the tip. The name of the RP in pig sperm is
+     * the head.
+     * 
      * @param point
      * @return
      */
-    public String getPoint(Tag point){
-    	return this.map.get(point);
+    public String getPoint(Tag point) {
+        return this.map.get(point);
     }
-    
-    public Class<?> getNucleusClass(){
-    	return this.nucleusClass;
+
+    public Class<?> getNucleusClass() {
+        return this.nucleusClass;
     }
-    
+
     /**
      * Get the simple names of the border tags in the nucleus
+     * 
      * @return
      */
-    public String[] pointNames(){
-    	List<String> list = new ArrayList<String>();
-    	for(Tag tag : map.keySet()){
-    		list.add(map.get(tag));
-    	}
-    	return list.toArray(new String[0]);
+    public String[] pointNames() {
+        List<String> list = new ArrayList<String>();
+        for (Tag tag : map.keySet()) {
+            list.add(map.get(tag));
+        }
+        return list.toArray(new String[0]);
     }
-    
+
     /**
-     * Get the border tag with the given name, 
-     * or null if the name is not found
+     * Get the border tag with the given name, or null if the name is not found
+     * 
      * @param name
      * @return
      */
-    public Tag getTagFromName(String name){
-    	for(Tag tag : map.keySet()){
-    		if(map.get(tag).equals(name)){
-    			return tag;
-    		}
-    	}
-    	return null;
+    public Tag getTagFromName(String name) {
+        for (Tag tag : map.keySet()) {
+            if (map.get(tag).equals(name)) {
+                return tag;
+            }
+        }
+        return null;
     }
-    
+
     /**
      * Given a nucleus, find the appropriate NucleusType
+     * 
      * @param n
      * @return
      */
-    public static NucleusType getNucleusType(Nucleus n){
-    	Class<?> nucleusClass = n.getClass();
-    	for(NucleusType type : NucleusType.values()){
-    		if(type.getNucleusClass().equals(nucleusClass)){
-    			return type;
-    		}
-    	}
-    	return null;
+    public static NucleusType getNucleusType(Nucleus n) {
+        Class<?> nucleusClass = n.getClass();
+        for (NucleusType type : NucleusType.values()) {
+            if (type.getNucleusClass().equals(nucleusClass)) {
+                return type;
+            }
+        }
+        return null;
     }
-    
+
     /**
-	 * Test if a given name is a tag name
-	 * @param s
-	 * @return
-	 */
-	public static boolean isBorderTag(String s){
-		for(BorderTag tag : BorderTag.values()){
-			if(tag.toString().equals(s)){
-				return true;
-			}
-		}
-		return false;
-	}
+     * Test if a given name is a tag name
+     * 
+     * @param s
+     * @return
+     */
+    public static boolean isBorderTag(String s) {
+        for (BorderTag tag : BorderTag.values()) {
+            if (tag.toString().equals(s)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

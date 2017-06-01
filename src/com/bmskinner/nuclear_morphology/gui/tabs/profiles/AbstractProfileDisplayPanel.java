@@ -43,119 +43,115 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends DetailPanel implements ActionListener {
-		
-		Dimension minimumChartSize = new Dimension(50, 100);
-		Dimension preferredChartSize = new Dimension(400, 300);
 
-		protected JPanel buttonPanel = new JPanel(new FlowLayout());
-		protected ExportableChartPanel chartPanel;
-		
-//		protected BorderTagOptionsPanel borderTagOptionsPanel = new BorderTagOptionsPanel();
-		protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
-		protected ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
-		
-		protected ProfileType type;
-		
-		public AbstractProfileDisplayPanel(ProfileType type){
-			super();
-			this.type = type;
-			
-			this.setLayout(new BorderLayout());
-			JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
-			chartPanel = makeProfileChartPanel(rawChart);
-			
-			
-			
-			chartPanel.setMinimumDrawWidth( 0 );
-			chartPanel.setMinimumDrawHeight( 0 );
-			this.setMinimumSize(minimumChartSize);
-			this.setPreferredSize(preferredChartSize);
-			this.add(chartPanel, BorderLayout.CENTER);
-					
-			// add the alignments panel to the tab
-			
-			buttonPanel.add(profileAlignmentOptionsPanel);
-			profileAlignmentOptionsPanel.addActionListener(this);
-			profileAlignmentOptionsPanel.setEnabled(false);
-			
-//			buttonPanel.add(borderTagOptionsPanel);
-//			borderTagOptionsPanel.addActionListener(this);
-//			borderTagOptionsPanel.setEnabled(false);
-			
-			buttonPanel.add(profileMarkersOptionsPanel);
-			profileMarkersOptionsPanel.addActionListener(this);
-			profileMarkersOptionsPanel.setEnabled(false);
-						
-			this.add(buttonPanel, BorderLayout.NORTH);
-		}
-		
-		private ExportableChartPanel makeProfileChartPanel(JFreeChart chart){
-			ExportableChartPanel panel = new ExportableChartPanel(chart){
-				@Override
-				public void restoreAutoBounds() {
-					XYPlot plot = (XYPlot) this.getChart().getPlot();
-					
-					int length = 100;
-					for(int i = 0; i<plot.getDatasetCount();i++){
-						XYDataset dataset = plot.getDataset(i);
-						Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
-						length = maximum.intValue() > length ? maximum.intValue() : length;
-					}
-					
-					if(type.getDimension().equals(StatisticDimension.ANGLE)){
-						plot.getRangeAxis().setRange(0, 360);
-					} else {
-						plot.getRangeAxis().setAutoRange(true);
-					}
-					
-					plot.getDomainAxis().setRange(0, length);				
-					return;
-				} 
-			};
-			//Disable entity collection for profiles - too much data
-			panel.getChartRenderingInfo().setEntityCollection(null);
-			return panel;
-		}
-		
-		public void setEnabled(boolean b){
-			profileAlignmentOptionsPanel.setEnabled(b);
-//			borderTagOptionsPanel.setEnabled(b);
-			profileMarkersOptionsPanel.setEnabled(b);
-		}
-		
-		@Override
-		protected void updateSingle() {
-			
-			this.setEnabled(true);
+    Dimension minimumChartSize   = new Dimension(50, 100);
+    Dimension preferredChartSize = new Dimension(400, 300);
 
-		}
-		
-		@Override
-		protected void updateMultiple() {
-			// Don't allow marker selection for multiple datasets
-			this.setEnabled(true);
-			profileMarkersOptionsPanel.setEnabled(false);
-		}
-		
-		@Override
-		protected void updateNull() {
-			this.setEnabled(false);		
-		}
-		
-		@Override
-		public void setChartsAndTablesLoading(){
-			super.setChartsAndTablesLoading();
-			chartPanel.setChart(AbstractChartFactory.createLoadingChart());	
-			
-		}
-		
-		@Override
-		public void actionPerformed(ActionEvent e) {
-//			log("Event heard from "+e.getSource().getClass().getSimpleName());
-			
-			
-			update(getDatasets());
-		}
-	}
+    protected JPanel               buttonPanel = new JPanel(new FlowLayout());
+    protected ExportableChartPanel chartPanel;
 
+    // protected BorderTagOptionsPanel borderTagOptionsPanel = new
+    // BorderTagOptionsPanel();
+    protected ProfileAlignmentOptionsPanel profileAlignmentOptionsPanel = new ProfileAlignmentOptionsPanel();
+    protected ProfileMarkersOptionsPanel   profileMarkersOptionsPanel   = new ProfileMarkersOptionsPanel();
 
+    protected ProfileType type;
+
+    public AbstractProfileDisplayPanel(ProfileType type) {
+        super();
+        this.type = type;
+
+        this.setLayout(new BorderLayout());
+        JFreeChart rawChart = MorphologyChartFactory.createEmptyChart();
+        chartPanel = makeProfileChartPanel(rawChart);
+
+        chartPanel.setMinimumDrawWidth(0);
+        chartPanel.setMinimumDrawHeight(0);
+        this.setMinimumSize(minimumChartSize);
+        this.setPreferredSize(preferredChartSize);
+        this.add(chartPanel, BorderLayout.CENTER);
+
+        // add the alignments panel to the tab
+
+        buttonPanel.add(profileAlignmentOptionsPanel);
+        profileAlignmentOptionsPanel.addActionListener(this);
+        profileAlignmentOptionsPanel.setEnabled(false);
+
+        // buttonPanel.add(borderTagOptionsPanel);
+        // borderTagOptionsPanel.addActionListener(this);
+        // borderTagOptionsPanel.setEnabled(false);
+
+        buttonPanel.add(profileMarkersOptionsPanel);
+        profileMarkersOptionsPanel.addActionListener(this);
+        profileMarkersOptionsPanel.setEnabled(false);
+
+        this.add(buttonPanel, BorderLayout.NORTH);
+    }
+
+    private ExportableChartPanel makeProfileChartPanel(JFreeChart chart) {
+        ExportableChartPanel panel = new ExportableChartPanel(chart) {
+            @Override
+            public void restoreAutoBounds() {
+                XYPlot plot = (XYPlot) this.getChart().getPlot();
+
+                int length = 100;
+                for (int i = 0; i < plot.getDatasetCount(); i++) {
+                    XYDataset dataset = plot.getDataset(i);
+                    Number maximum = DatasetUtilities.findMaximumDomainValue(dataset);
+                    length = maximum.intValue() > length ? maximum.intValue() : length;
+                }
+
+                if (type.getDimension().equals(StatisticDimension.ANGLE)) {
+                    plot.getRangeAxis().setRange(0, 360);
+                } else {
+                    plot.getRangeAxis().setAutoRange(true);
+                }
+
+                plot.getDomainAxis().setRange(0, length);
+                return;
+            }
+        };
+        // Disable entity collection for profiles - too much data
+        panel.getChartRenderingInfo().setEntityCollection(null);
+        return panel;
+    }
+
+    public void setEnabled(boolean b) {
+        profileAlignmentOptionsPanel.setEnabled(b);
+        // borderTagOptionsPanel.setEnabled(b);
+        profileMarkersOptionsPanel.setEnabled(b);
+    }
+
+    @Override
+    protected void updateSingle() {
+
+        this.setEnabled(true);
+
+    }
+
+    @Override
+    protected void updateMultiple() {
+        // Don't allow marker selection for multiple datasets
+        this.setEnabled(true);
+        profileMarkersOptionsPanel.setEnabled(false);
+    }
+
+    @Override
+    protected void updateNull() {
+        this.setEnabled(false);
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        chartPanel.setChart(AbstractChartFactory.createLoadingChart());
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // log("Event heard from "+e.getSource().getClass().getSimpleName());
+
+        update(getDatasets());
+    }
+}

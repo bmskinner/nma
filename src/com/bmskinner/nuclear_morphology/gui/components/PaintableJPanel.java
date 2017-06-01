@@ -8,39 +8,39 @@ import javax.swing.JPanel;
 
 /**
  * This panel contains an Image as its background
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class PaintableJPanel extends JPanel {
 
-	final private Image bgImage;
-	
-	public PaintableJPanel(final Image image){
-		super();
-		this.bgImage = image;
-	}
-	
-	public PaintableJPanel(){
-		super();
-		bgImage = null;
-	}
-	
-	
-	public void setClip(Rectangle r){
-		if(bgImage!=null){
-			bgImage.getGraphics().setClip(r);
-			this.repaint();
-		}
-	}
-	
-	@Override
-	  protected void paintComponent(Graphics g) {
+    final private Image bgImage;
 
-	    super.paintComponent(g);
-	    
-	    if(bgImage!=null){
-	    	g.drawImage(bgImage, 0, 0, null);
-	    }
-	}
+    public PaintableJPanel(final Image image) {
+        super();
+        this.bgImage = image;
+    }
+
+    public PaintableJPanel() {
+        super();
+        bgImage = null;
+    }
+
+    public void setClip(Rectangle r) {
+        if (bgImage != null) {
+            bgImage.getGraphics().setClip(r);
+            this.repaint();
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+
+        super.paintComponent(g);
+
+        if (bgImage != null) {
+            g.drawImage(bgImage, 0, 0, null);
+        }
+    }
 }

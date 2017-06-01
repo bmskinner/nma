@@ -29,23 +29,23 @@ import java.awt.Color;
 @SuppressWarnings("serial")
 public class AnalysisTableCellRenderer extends ConsistentRowTableCellRenderer {
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-        
-      //Cells are by default rendered as a JLabel.
+    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
+
+        // Cells are by default rendered as a JLabel.
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        
-        if(isRowConsistentAcrossColumns(table, row)){
-            
+
+        if (isRowConsistentAcrossColumns(table, row)) {
+
             Color colour = new Color(178, 255, 102);
             setBackground(colour);
-            
+
         } else {
             setBackground(Color.WHITE);
         }
 
-      //Return the JLabel which renders the cell.
-      return this;
+        // Return the JLabel which renders the cell.
+        return this;
     }
-    
-}
 
+}

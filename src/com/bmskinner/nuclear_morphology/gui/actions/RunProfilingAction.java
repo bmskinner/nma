@@ -30,104 +30,102 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
 public class RunProfilingAction extends SingleDatasetResultAction {
-	
-	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw){
-		super(dataset, "Profiling", mw, downFlag);
-		fine("Creating new profiling analysis");
-	}
-	
-	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw){
-		super(list, "Profiling", mw, downFlag);
-		fine("Creating new profiling analysis");
-	}
-	
-	public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch){
-		super(dataset, "Profiling", mw, downFlag);
-		fine("Creating new profiling analysis");
-		this.setLatch(latch);
-		
-	}
-	
-	public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch){
-		super(list, "Profiling", mw, downFlag);
-		fine("Creating new profiling analysis");
-		this.setLatch(latch);
-		
-	}
-	
-	public void run(){
-		fine("Running new profiling analysis");
-		runNewAnalysis();
-	}
-	
-	private void runNewAnalysis(){
-		try{
-			String message = "Profiling: "+dataset.getName();
-			fine("Beginning profliling action");
 
-			this.setProgressMessage(message);
-			IAnalysisMethod method = new DatasetProfilingMethod(dataset);
-			worker = new DefaultAnalysisWorker(method);
-			
+    public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw) {
+        super(dataset, "Profiling", mw, downFlag);
+        fine("Creating new profiling analysis");
+    }
 
-			worker.addPropertyChangeListener(this);
-			fine("Running morphology analysis");
-			ThreadManager.getInstance().submit(worker);
-		} catch(Exception e){
-			this.cancel();
-			error("Error in morphology analysis", e);
-		}
-	}
-	
-	@Override
-	public void finished() {
+    public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw) {
+        super(list, "Profiling", mw, downFlag);
+        fine("Creating new profiling analysis");
+    }
 
-		// ensure the progress bar gets hidden even if it is not removed
-		this.setProgressBarVisible(false);
-//		cleanup();
-		// The analysis takes place in a new thread to accomodate refolding.
-		// See specific comment in RunSegmentationAction
-		Runnable task = () -> {
+    public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch) {
+        super(dataset, "Profiling", mw, downFlag);
+        fine("Creating new profiling analysis");
+        this.setLatch(latch);
 
-//			public void run(){
+    }
 
-				if(  (downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS){
-					
-					final CountDownLatch latch = new CountDownLatch(1);
-					Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
-					r.run();
-					try {
-						latch.await();
-					} catch (InterruptedException e) {
-						error("Interruption in segmentation thread", e);
-					}
-				}
+    public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch) {
+        super(list, "Profiling", mw, downFlag);
+        fine("Creating new profiling analysis");
+        this.setLatch(latch);
 
+    }
 
-				// if no list was provided, or no more entries remain,
-				// call the finish
-				if( ! hasRemainingDatasetsToProcess()){
+    public void run() {
+        fine("Running new profiling analysis");
+        runNewAnalysis();
+    }
 
-					cancel();		
-					RunProfilingAction.this.removeInterfaceEventListener(mw.getEventHandler());
-					RunProfilingAction.this.removeDatasetEventListener(mw.getEventHandler());					
-//					
-					RunProfilingAction.this.countdownLatch();
-					
-				} else {
-					// otherwise analyse the next item in the list
-					cancel(); // remove progress bar
+    private void runNewAnalysis() {
+        try {
+            String message = "Profiling: " + dataset.getName();
+            fine("Beginning profliling action");
 
-					Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
-					p.run();
+            this.setProgressMessage(message);
+            IAnalysisMethod method = new DatasetProfilingMethod(dataset);
+            worker = new DefaultAnalysisWorker(method);
 
-				}			
-//			}
-		};
-//		thr.start();
-//		task.run();
-		ThreadManager.getInstance().execute(task);
+            worker.addPropertyChangeListener(this);
+            fine("Running morphology analysis");
+            ThreadManager.getInstance().submit(worker);
+        } catch (Exception e) {
+            this.cancel();
+            error("Error in morphology analysis", e);
+        }
+    }
 
-	}
+    @Override
+    public void finished() {
+
+        // ensure the progress bar gets hidden even if it is not removed
+        this.setProgressBarVisible(false);
+        // cleanup();
+        // The analysis takes place in a new thread to accomodate refolding.
+        // See specific comment in RunSegmentationAction
+        Runnable task = () -> {
+
+            // public void run(){
+
+            if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
+
+                final CountDownLatch latch = new CountDownLatch(1);
+                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
+                r.run();
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    error("Interruption in segmentation thread", e);
+                }
+            }
+
+            // if no list was provided, or no more entries remain,
+            // call the finish
+            if (!hasRemainingDatasetsToProcess()) {
+
+                cancel();
+                RunProfilingAction.this.removeInterfaceEventListener(mw.getEventHandler());
+                RunProfilingAction.this.removeDatasetEventListener(mw.getEventHandler());
+                //
+                RunProfilingAction.this.countdownLatch();
+
+            } else {
+                // otherwise analyse the next item in the list
+                cancel(); // remove progress bar
+
+                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
+                p.run();
+
+            }
+            // }
+        };
+        // thr.start();
+        // task.run();
+        ThreadManager.getInstance().execute(task);
+
+    }
 
 }

@@ -20,20 +20,20 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 /**
- * Describes the methods required for a 3D component.
- * To be used when simulating shells in a 3D reconstruction
- * of a flattened cell
+ * Describes the methods required for a 3D component. To be used when simulating
+ * shells in a 3D reconstruction of a flattened cell
+ * 
  * @author bms41
  *
  */
 public interface Component3D {
-	
-	/**
-	 * Test if this component contains the given point
-	 * in 3D space
-	 * @param p
-	 * @return
-	 */
-	boolean contains(Point3D p);
+
+    /**
+     * Test if this component contains the given point in 3D space
+     * 
+     * @param p
+     * @return
+     */
+    boolean contains(Point3D p);
 
 }

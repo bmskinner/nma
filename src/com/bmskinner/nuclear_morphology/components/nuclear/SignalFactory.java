@@ -28,19 +28,17 @@ import ij.gui.Roi;
 
 /**
  * Factory for creating nuclear signals
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 public class SignalFactory implements ComponentFactory<INuclearSignal> {
 
-	@Override
-	public INuclearSignal buildInstance(Roi roi, File file, int channel, int[] originalPosition, IPoint centreOfMass)
-			throws com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException {
-		return new DefaultNuclearSignal( roi,centreOfMass, 
-				file, 
-				channel, 
-				originalPosition);
-	}
+    @Override
+    public INuclearSignal buildInstance(Roi roi, File file, int channel, int[] originalPosition, IPoint centreOfMass)
+            throws com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException {
+        return new DefaultNuclearSignal(roi, centreOfMass, file, channel, originalPosition);
+    }
 
 }

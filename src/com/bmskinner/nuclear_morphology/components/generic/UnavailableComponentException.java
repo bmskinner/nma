@@ -22,17 +22,29 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 /**
- * The exception class to be thrown when a component of a profile or 
- * nuclear object is not present. This is subclassed for the various
- * components.
+ * The exception class to be thrown when a component of a profile or nuclear
+ * object is not present. This is subclassed for the various components.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class UnavailableComponentException extends Exception {
-		private static final long serialVersionUID = 1L;
-		public UnavailableComponentException() { super(); }
-		public UnavailableComponentException(String message) { super(message); }
-		public UnavailableComponentException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableComponentException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public UnavailableComponentException() {
+        super();
+    }
+
+    public UnavailableComponentException(String message) {
+        super(message);
+    }
+
+    public UnavailableComponentException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnavailableComponentException(Throwable cause) {
+        super(cause);
+    }
 }

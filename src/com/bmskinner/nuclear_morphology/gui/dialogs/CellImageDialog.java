@@ -25,57 +25,54 @@ import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 
 /**
  * View a cell annotated onto its original source image
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class CellImageDialog extends LoadingIconDialog {
-	
-	private AnnotatedNucleusPanel panel;
 
-	public CellImageDialog(ICell cell) {
-		super();
-		
-		// Assume cytoplasm==RGB for now
-		if(cell.hasCytoplasm()){
+    private AnnotatedNucleusPanel panel;
 
-			if(!cell.getCytoplasm().getSourceFile().exists()){
-				warn("Cannot load image: source file not present");
-				this.dispose();
-			}
+    public CellImageDialog(ICell cell) {
+        super();
 
-		}
+        // Assume cytoplasm==RGB for now
+        if (cell.hasCytoplasm()) {
 
-		if(cell.hasNucleus()){
-			if(!cell.getNucleus().getSourceFile().exists()){
-				warn("Cannot load image: source file not present");
-				this.dispose();
-			} 
-		}
-		
+            if (!cell.getCytoplasm().getSourceFile().exists()) {
+                warn("Cannot load image: source file not present");
+                this.dispose();
+            }
 
-		this.panel = new AnnotatedNucleusPanel();
+        }
 
-		this.setLayout(new BorderLayout());
-		this.add(panel, BorderLayout.CENTER);
-		this.setTitle(cell.getNucleus().getNameAndNumber());
+        if (cell.hasNucleus()) {
+            if (!cell.getNucleus().getSourceFile().exists()) {
+                warn("Cannot load image: source file not present");
+                this.dispose();
+            }
+        }
 
-		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        this.panel = new AnnotatedNucleusPanel();
 
+        this.setLayout(new BorderLayout());
+        this.add(panel, BorderLayout.CENTER);
+        this.setTitle(cell.getNucleus().getNameAndNumber());
 
-		try{
-			panel.updateCell(cell);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		} catch(Exception e){
-			warn("Cannot make cell image dialog");
-			stack("Error making dialog", e);
-		}
-		this.setModal(false);
-		this.pack();
-		this.centerOnScreen();
-		this.setVisible(true);
-	}
+        try {
+            panel.updateCell(cell);
 
-	
+        } catch (Exception e) {
+            warn("Cannot make cell image dialog");
+            stack("Error making dialog", e);
+        }
+        this.setModal(false);
+        this.pack();
+        this.centerOnScreen();
+        this.setVisible(true);
+    }
 
 }

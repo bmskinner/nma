@@ -31,41 +31,42 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Handles updating of signal group colours via the UI, and triggers a chart recache
+ * Handles updating of signal group colours via the UI, and triggers a chart
+ * recache
+ * 
  * @author bms41
  * @since 1.13.7
  *
  */
 public class SignalColourChanger implements Loggable {
-	
-	private final DetailPanel p;
-	
-	public SignalColourChanger(final DetailPanel parent){
-		p = parent;
-	}
-	
-	/**
-	 * Update the colour of the clicked signal group
-	 * @param row the row selected (the colour bar, one above the group name)
-	 */
-    public void updateSignalColour(IAnalysisDataset d, Color oldColour, UUID signalGroupId){
-		
-		try {
 
-			Color newColor = JColorChooser.showDialog(
-					p,
-					Labels.CHOOSE_SIGNAL_COLOUR,
-					oldColour);
+    private final DetailPanel p;
 
-			if(newColor != null){
-				d.getCollection().getSignalGroup(signalGroupId).setGroupColour(newColor);
-				
-				p.update();
-			}
-		} catch(UnavailableSignalGroupException e){
-			warn("Cannot change signal colour");
-			stack("Error getting signal group", e);
-		}
-	}
+    public SignalColourChanger(final DetailPanel parent) {
+        p = parent;
+    }
+
+    /**
+     * Update the colour of the clicked signal group
+     * 
+     * @param row
+     *            the row selected (the colour bar, one above the group name)
+     */
+    public void updateSignalColour(IAnalysisDataset d, Color oldColour, UUID signalGroupId) {
+
+        try {
+
+            Color newColor = JColorChooser.showDialog(p, Labels.CHOOSE_SIGNAL_COLOUR, oldColour);
+
+            if (newColor != null) {
+                d.getCollection().getSignalGroup(signalGroupId).setGroupColour(newColor);
+
+                p.update();
+            }
+        } catch (UnavailableSignalGroupException e) {
+            warn("Cannot change signal colour");
+            stack("Error getting signal group", e);
+        }
+    }
 
 }

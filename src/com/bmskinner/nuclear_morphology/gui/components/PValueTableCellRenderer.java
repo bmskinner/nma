@@ -30,36 +30,34 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class PValueTableCellRenderer extends DefaultTableCellRenderer {
 
-	public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+            boolean isSelected, boolean hasFocus, int row, int column) {
 
-		//Cells are by default rendered as a JLabel.
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        // Cells are by default rendered as a JLabel.
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-		Color colour = Color.WHITE;
+        Color colour = Color.WHITE;
 
-		NumberFormat nf = NumberFormat.getInstance();
-		double pvalue = 1; 
+        NumberFormat nf = NumberFormat.getInstance();
+        double pvalue = 1;
 
-		try {
-			pvalue = nf.parse(value.toString()).doubleValue();
+        try {
+            pvalue = nf.parse(value.toString()).doubleValue();
 
-			if(pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
-				colour = Color.YELLOW;
-			}
+            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
+                colour = Color.YELLOW;
+            }
 
-			if(pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL){
-				colour = Color.GREEN;
-			}
-		} catch (ParseException e) {
+            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL) {
+                colour = Color.GREEN;
+            }
+        } catch (ParseException e) {
 
-		}
+        }
 
-		setBackground(colour);
+        setBackground(colour);
 
-		return this;
-	}
-
-
+        return this;
+    }
 
 }
-

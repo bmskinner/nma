@@ -22,19 +22,19 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DualChartPanel;
 
 public class CellBorderDualPanel extends DualChartPanel {
-	
-	public static final int DEFAULT_OVERLAY_PERCENT = 25;
-	
-	public CellBorderDualPanel(){
-		super();
 
-		chartPanel.setFixedAspectRatio(true);
-				
-		rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
-		rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
+    public static final int DEFAULT_OVERLAY_PERCENT = 25;
 
-		updateChartPanelRange();
+    public CellBorderDualPanel() {
+        super();
 
-	}
+        chartPanel.setFixedAspectRatio(true);
+
+        rangePanel.setRangePct(DEFAULT_OVERLAY_PERCENT);
+        rangePanel.setDomainPct(DEFAULT_OVERLAY_PERCENT);
+
+        updateChartPanelRange();
+
+    }
 
 }

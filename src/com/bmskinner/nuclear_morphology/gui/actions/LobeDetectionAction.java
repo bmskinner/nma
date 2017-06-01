@@ -11,55 +11,51 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
 public class LobeDetectionAction extends SingleDatasetResultAction {
 
-	private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
-	
-	public LobeDetectionAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, PROGRESS_BAR_LABEL, mw);
-	}
-	
-	@Override
-	public void run(){
-		fine("Getting lobe detection options");
-		SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(mw, dataset);
+    private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
 
-		if(setup.isReadyToRun()){ // if dialog was cancelled, skip
-			
-			log("Running lobe detection");
-			IAnalysisMethod m = setup.getMethod();
-			
-			int maxProgress = dataset.getCollection().size();
-			worker = new DefaultAnalysisWorker(m, maxProgress);
-			
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
+    public LobeDetectionAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, PROGRESS_BAR_LABEL, mw);
+    }
 
-		} else {
-			fine("Cancelling lobe detection");
-			this.cancel();
-		}
-		setup.dispose();
-	}
+    @Override
+    public void run() {
+        fine("Getting lobe detection options");
+        SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(mw, dataset);
 
+        if (setup.isReadyToRun()) { // if dialog was cancelled, skip
 
+            log("Running lobe detection");
+            IAnalysisMethod m = setup.getMethod();
 
-	@Override
-	public void finished() {
+            int maxProgress = dataset.getCollection().size();
+            worker = new DefaultAnalysisWorker(m, maxProgress);
 
-		this.setProgressBarVisible(false);
-		
-		
-//		try {
-//			IAnalysisResult r = worker.get();
-//	
-//		} catch (InterruptedException | ExecutionException e) {
-//			warn("Error in lobe detection");
-//			stack(e.getMessage(), e);
-//		}
-		
-//		fireDatasetEvent(DatasetEvent.SAVE, dataset);
-		fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-		super.finished();
-		
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
 
-	}
+        } else {
+            fine("Cancelling lobe detection");
+            this.cancel();
+        }
+        setup.dispose();
+    }
+
+    @Override
+    public void finished() {
+
+        this.setProgressBarVisible(false);
+
+        // try {
+        // IAnalysisResult r = worker.get();
+        //
+        // } catch (InterruptedException | ExecutionException e) {
+        // warn("Error in lobe detection");
+        // stack(e.getMessage(), e);
+        // }
+
+        // fireDatasetEvent(DatasetEvent.SAVE, dataset);
+        fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        super.finished();
+
+    }
 }

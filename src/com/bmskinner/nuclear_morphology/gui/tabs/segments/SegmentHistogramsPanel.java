@@ -27,109 +27,102 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 
 @SuppressWarnings("serial")
-public class SegmentHistogramsPanel extends HistogramsTabPanel  {
-	
-	private Dimension preferredSize = new Dimension(200, 100);
-	
-	public SegmentHistogramsPanel(){
-		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
-		
-		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
-		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
-		panel.setPreferredSize(preferredSize);
-		SegmentHistogramsPanel.this.chartPanels.put("null", panel);
-		SegmentHistogramsPanel.this.mainPanel.add(panel);
-		
-	}
-	
-	@Override
-	protected void updateSingle() {
-		updateMultiple() ;
-	}
-	
+public class SegmentHistogramsPanel extends HistogramsTabPanel {
 
-	@Override
-	protected void updateMultiple() {
-		this.setEnabled(true);
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    private Dimension preferredSize = new Dimension(200, 100);
 
-		boolean useDensity = this.useDensityPanel.isSelected();
-		
-		finest("Dataset list is not empty");
+    public SegmentHistogramsPanel() {
+        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
-		// Check that all the datasets have the same number of segments
-		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a histogram for each segment
+        JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");
+        SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
+        panel.setPreferredSize(preferredSize);
+        SegmentHistogramsPanel.this.chartPanels.put("null", panel);
+        SegmentHistogramsPanel.this.mainPanel.add(panel);
 
-			ICellCollection collection = activeDataset().getCollection();
-			
-			List<IBorderSegment> segments;
-			try {
-				segments = collection.getProfileCollection()
-						.getSegments(Tag.REFERENCE_POINT);
-			} catch (UnavailableBorderTagException | ProfileException e) {
-				warn("Cannot get segments");
-				fine("Cannot get segments", e);
-				return;
-			}
-			
+    }
 
-			// Get each segment as a boxplot
-			for(IBorderSegment seg : segments){
-				
-				// Create a new chart panel with a loading state, and add it to this panel
-				JFreeChart chart = AbstractChartFactory.createLoadingChart();
-				SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
-				chartPanel.setPreferredSize(preferredSize);
-				mainPanel.add(chartPanel);	
-				
-				// Make the options for the chart, and render it in the background
-				ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.addStatistic(PlottableStatistic.LENGTH)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.setUseDensity(useDensity)
-					.setSegPosition(seg.getPosition())
-					.setTarget(chartPanel)
-					.build();
-				
-				finest("Made options for segment histogram "+seg.getName());
-				
-				setChart(options);
-						
-			}
+    @Override
+    protected void updateSingle() {
+        updateMultiple();
+    }
 
+    @Override
+    protected void updateMultiple() {
+        this.setEnabled(true);
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
+        boolean useDensity = this.useDensityPanel.isSelected();
 
-		} else { // different number of segments, blank chart
-			this.setEnabled(false);
-			mainPanel.setLayout(new FlowLayout());
-			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-			scrollPane.setViewportView(mainPanel);
-		}
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		scrollPane.setViewportView(mainPanel);
-		
-		
-	}
-	
-	@Override
-	protected void updateNull() {
-		this.setEnabled(true);
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        finest("Dataset list is not empty");
 
-		JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");		
-		SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
-		panel.setPreferredSize(preferredSize);
-		SegmentHistogramsPanel.this.chartPanels.put("null", panel);
-		SegmentHistogramsPanel.this.mainPanel.add(panel);
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		scrollPane.setViewportView(mainPanel);
-		this.setEnabled(false);
-	}
-	
+        // Check that all the datasets have the same number of segments
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a
+                                                                // histogram for
+                                                                // each segment
+
+            ICellCollection collection = activeDataset().getCollection();
+
+            List<IBorderSegment> segments;
+            try {
+                segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+            } catch (UnavailableBorderTagException | ProfileException e) {
+                warn("Cannot get segments");
+                fine("Cannot get segments", e);
+                return;
+            }
+
+            // Get each segment as a boxplot
+            for (IBorderSegment seg : segments) {
+
+                // Create a new chart panel with a loading state, and add it to
+                // this panel
+                JFreeChart chart = AbstractChartFactory.createLoadingChart();
+                SelectableChartPanel chartPanel = new SelectableChartPanel(chart, seg.getName());
+                chartPanel.setPreferredSize(preferredSize);
+                mainPanel.add(chartPanel);
+
+                // Make the options for the chart, and render it in the
+                // background
+                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+                        .addStatistic(PlottableStatistic.LENGTH).setScale(GlobalOptions.getInstance().getScale())
+                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setUseDensity(useDensity)
+                        .setSegPosition(seg.getPosition()).setTarget(chartPanel).build();
+
+                finest("Made options for segment histogram " + seg.getName());
+
+                setChart(options);
+
+            }
+
+        } else { // different number of segments, blank chart
+            this.setEnabled(false);
+            mainPanel.setLayout(new FlowLayout());
+            mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+            scrollPane.setViewportView(mainPanel);
+        }
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        scrollPane.setViewportView(mainPanel);
+
+    }
+
+    @Override
+    protected void updateNull() {
+        this.setEnabled(true);
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+        JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");
+        SelectableChartPanel panel = new SelectableChartPanel(chart, "null");
+        panel.setPreferredSize(preferredSize);
+        SegmentHistogramsPanel.this.chartPanels.put("null", panel);
+        SegmentHistogramsPanel.this.mainPanel.add(panel);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        scrollPane.setViewportView(mainPanel);
+        this.setEnabled(false);
+    }
+
 }

@@ -57,574 +57,600 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
  *
  */
 public class SignalManager implements Loggable {
-	
-	private ICellCollection collection;
-	
-	public SignalManager(ICellCollection collection){
-		this.collection = collection;
-	}
-	
-	  /** 
-	   * Return the nuclei with or without signals in the given group.
-	   * @param signalGroup the group number 
-	   * @param hasSignal
-	   * @return a list of cells
-	   */
-	  public Set<ICell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal){
-		  Set<ICell> result = new HashSet<ICell>(collection.size());
 
-		  for(ICell c : collection.getCells()){
-			  Nucleus n = c.getNucleus();
+    private ICellCollection collection;
 
-			  if(hasSignal){
-				  if(n.getSignalCollection().hasSignal(signalGroup)){
-					  result.add(c);
-				  }
-			  } else {
-				  if(!n.getSignalCollection().hasSignal(signalGroup)){
-					  result.add(c);
-				  }
-			  }
-		  }
-		  return result;
-	  }
-	  
-	  public int getNumberOfCellsWithNuclearSignals(UUID signalGroup){
-		  return getCellsWithNuclearSignals(signalGroup, true).size();
-	  }
-	  
-  /**
-   * Get the number of signal groups in the cell collection
-   * @return the number of signal groups
-   */
-	public int getSignalGroupCount(){
-		int count = getSignalGroupIDs().size();
-		if(this.hasSignals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-			count--;
-		}
-		 return count;
-	  }
-	  	  
-	  /**
-	   * Fetch the signal group ids in this collection. This does not include
-	   * any random signals created in shell analysis
-	   * @return
-	   */
-	public Set<UUID> getSignalGroupIDs(){
+    public SignalManager(ICellCollection collection) {
+        this.collection = collection;
+    }
 
-		Set<UUID> ids = new HashSet<UUID>(collection.getSignalGroupIDs());
-		ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
-		return ids;
-	}
-	  
-	  /**
-	   * Remove the given signal group
-	   * @param id
-	   */
-	  public void removeSignalGroup(UUID id){
-		  collection.removeSignalGroup(id);
-	  }
-	  
-	  public void removeSignalGroups(){
-		  for(UUID id : this.getSignalGroupIDs()){
-			  removeSignalGroup(id);
-		  }
-	  }
-	  
-	  /**
-	   * Fetch the signal groups in this collection
-	   * @param id
-	   * @return
-	   */
-	  public Collection<ISignalGroup> getSignalGroups(){
-	      return collection.getSignalGroups();
-	  }
-	  
-	  public String getSignalGroupName(UUID signalGroup) throws UnavailableSignalGroupException{
+    /**
+     * Return the nuclei with or without signals in the given group.
+     * 
+     * @param signalGroup
+     *            the group number
+     * @param hasSignal
+     * @return a list of cells
+     */
+    public Set<ICell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal) {
+        Set<ICell> result = new HashSet<ICell>(collection.size());
 
-		  return collection.getSignalGroup(signalGroup).getGroupName();
+        for (ICell c : collection.getCells()) {
+            Nucleus n = c.getNucleus();
 
+            if (hasSignal) {
+                if (n.getSignalCollection().hasSignal(signalGroup)) {
+                    result.add(c);
+                }
+            } else {
+                if (!n.getSignalCollection().hasSignal(signalGroup)) {
+                    result.add(c);
+                }
+            }
+        }
+        return result;
+    }
 
-		 
-	  }
-	  
-	  public int getSignalGroupNumber(UUID signalGroup){
-		  int result = 0;
-		  for(Nucleus n : collection.getNuclei()){
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  result = n.getSignalCollection().getSignalGroupNumber(signalGroup);
-			  }
-		  }
-		  return result;
-	  }
-	  
-	  public int getSignalChannel(UUID signalGroup) throws UnavailableSignalGroupException{
-          return collection.getSignalGroup(signalGroup).getChannel();
-	  }
-	  
-	  /**
-	   * Get the name of the folder containing the images for the given signal group
-	   * @param signalGroup
-	   * @return
-	 * @throws UnavailableSignalGroupException 
-	   */
-	  public String getSignalSourceFolder(UUID signalGroup) throws UnavailableSignalGroupException{
-          return collection.getSignalGroup(signalGroup).getFolder().getAbsolutePath();
-	  }
-	  
-	  /**
-	   * Update the source image folder for the given signal group
-	   * @param signalGroup
-	   * @param f
-	   */
-	  public void updateSignalSourceFolder(UUID signalGroup, File f){
-		  
-		  if( ! collection.hasSignalGroup(signalGroup)){
-			  return;
-		  }
-		  
-		  collection.getNuclei().parallelStream().forEach( n-> {
-			  if(n.getSignalCollection().hasSignal(signalGroup)){
-				  String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
-				  File newFile = new File(f.getAbsolutePath()+File.separator+fileName);
-				  n.getSignalCollection().updateSourceFile(signalGroup, newFile);
-			  }
-		  });
-		  
-          try {
-			collection.getSignalGroup(signalGroup).setFolder(f);
-		} catch (UnavailableSignalGroupException e) {
-			fine("Error getting signal group", e);
-		}
-          
-	  }
-	  
-	  /**
-	   * Update the signal group id
-	   * @param oldID the id to replace
-	   * @param newID the new id
-	   */
-	  public void updateSignalGroupID(UUID oldID, UUID newID){
-		  
-		  if( ! collection.hasSignalGroup(oldID)){
-			  fine("Signal group is not present");
-			  return;
-		  }
-		  
-		  finer("Updating signals to new group id in nuclei");
-		  for(Nucleus n : collection.getNuclei()){
-			  n.getSignalCollection().updateSignalGroupID(oldID, newID);
-		  }
-		  
-		  finer("Updating signal group in cell collection");
+    public int getNumberOfCellsWithNuclearSignals(UUID signalGroup) {
+        return getCellsWithNuclearSignals(signalGroup, true).size();
+    }
 
-		  try {
+    /**
+     * Get the number of signal groups in the cell collection
+     * 
+     * @return the number of signal groups
+     */
+    public int getSignalGroupCount() {
+        int count = getSignalGroupIDs().size();
+        if (this.hasSignals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+            count--;
+        }
+        return count;
+    }
 
-			  // the group the signals are currently in
-			  ISignalGroup oldGroup = collection.getSignalGroup(oldID);
+    /**
+     * Fetch the signal group ids in this collection. This does not include any
+     * random signals created in shell analysis
+     * 
+     * @return
+     */
+    public Set<UUID> getSignalGroupIDs() {
 
-			  finer("Old group: "+oldID+" | "+oldGroup.toString());
+        Set<UUID> ids = new HashSet<UUID>(collection.getSignalGroupIDs());
+        ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
+        return ids;
+    }
 
+    /**
+     * Remove the given signal group
+     * 
+     * @param id
+     */
+    public void removeSignalGroup(UUID id) {
+        collection.removeSignalGroup(id);
+    }
 
+    public void removeSignalGroups() {
+        for (UUID id : this.getSignalGroupIDs()) {
+            removeSignalGroup(id);
+        }
+    }
 
-			  // Merge and rename signal groups
+    /**
+     * Fetch the signal groups in this collection
+     * 
+     * @param id
+     * @return
+     */
+    public Collection<ISignalGroup> getSignalGroups() {
+        return collection.getSignalGroups();
+    }
 
-			  if(collection.hasSignalGroup(newID)){ // check if the group already exists
+    public String getSignalGroupName(UUID signalGroup) throws UnavailableSignalGroupException {
 
-				  finer("A signal group of id "+newID+" already exists");
-				  ISignalGroup existingGroup = collection.getSignalGroup(newID);
+        return collection.getSignalGroup(signalGroup).getGroupName();
 
-				  if( ! oldGroup.getGroupName().equals(existingGroup.getGroupName())){
-					  finer("Setting signal group name to merge");
-					  existingGroup.setGroupName("Merged_"+oldGroup.getGroupName()+"_"+existingGroup.getGroupName());
-				  }
+    }
 
-				  if( oldGroup.getChannel()!=existingGroup.getChannel()){
-					  finer("Setting signal group name to -1");
-					  existingGroup.setChannel(-1);
-				  }
+    public int getSignalGroupNumber(UUID signalGroup) {
+        int result = 0;
+        for (Nucleus n : collection.getNuclei()) {
+            if (n.getSignalCollection().hasSignal(signalGroup)) {
+                result = n.getSignalCollection().getSignalGroupNumber(signalGroup);
+            }
+        }
+        return result;
+    }
 
-				  // Shells and colours?
+    public int getSignalChannel(UUID signalGroup) throws UnavailableSignalGroupException {
+        return collection.getSignalGroup(signalGroup).getChannel();
+    }
 
-			  } else { // the signal group does not exist, just copy the old group
+    /**
+     * Get the name of the folder containing the images for the given signal
+     * group
+     * 
+     * @param signalGroup
+     * @return
+     * @throws UnavailableSignalGroupException
+     */
+    public String getSignalSourceFolder(UUID signalGroup) throws UnavailableSignalGroupException {
+        return collection.getSignalGroup(signalGroup).getFolder().getAbsolutePath();
+    }
 
-				  finer("A signal group of id "+newID+" does not exist");
+    /**
+     * Update the source image folder for the given signal group
+     * 
+     * @param signalGroup
+     * @param f
+     */
+    public void updateSignalSourceFolder(UUID signalGroup, File f) {
 
-				  // the new group for the signals
-				  ISignalGroup newGroup = new SignalGroup(oldGroup);
+        if (!collection.hasSignalGroup(signalGroup)) {
+            return;
+        }
 
-				  finer("New group: "+newID+" | "+newGroup.toString());
-				  collection.addSignalGroup(newID, newGroup);
-				  finer("Added new signal group: "+newID);
+        collection.getNuclei().parallelStream().forEach(n -> {
+            if (n.getSignalCollection().hasSignal(signalGroup)) {
+                String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
+                File newFile = new File(f.getAbsolutePath() + File.separator + fileName);
+                n.getSignalCollection().updateSourceFile(signalGroup, newFile);
+            }
+        });
 
-			  }
+        try {
+            collection.getSignalGroup(signalGroup).setFolder(f);
+        } catch (UnavailableSignalGroupException e) {
+            fine("Error getting signal group", e);
+        }
 
-			  collection.removeSignalGroup(oldID);
-			  finer("Removed old signal group");
-		  } catch(UnavailableSignalGroupException e){
-			  warn("Missing expected signal group");
-			  fine("Error getting signal group "+oldID, e);
-		  }
-	  }
-	  
-	  /**
-	   * Find the total number of signals within all nuclei of the collection.
-	   * @return the total
-	   */
-	  public int getSignalCount(){
-		  int count = 0;
-		  for(UUID signalGroup : getSignalGroupIDs()){
-			  count+= this.getSignalCount(signalGroup);
-		  }
-		  return count;
-	  }
-	  
-	  /**
-	   * Get the number of signals in the given group
-	   * @param signalGroup the group to search
-	   * @return the count or -1 if the signal group is not present
-	   */
-	  public int getSignalCount(UUID signalGroup){
-		  int count = 0;
-		  
-		  if(collection.getSignalGroupIDs().contains(signalGroup)){
-			  count=0;
-			  for(Nucleus n : collection.getNuclei()){
-				  count += n.getSignalCollection().numberOfSignals(signalGroup);
+    }
 
-			  } // end nucleus iterations
-		  }
-		  return count;
-	  }
+    /**
+     * Update the signal group id
+     * 
+     * @param oldID
+     *            the id to replace
+     * @param newID
+     *            the new id
+     */
+    public void updateSignalGroupID(UUID oldID, UUID newID) {
 
-	  /**
-	   * Get the mean number of signals in each nucleus
-	   * @param signalGroup
-	   * @return
-	   */
-	  public double getSignalCountPerNucleus(UUID signalGroup){
-		  if(getSignalCount(signalGroup)==0){
-			  return 0;
-		  }
+        if (!collection.hasSignalGroup(oldID)) {
+            fine("Signal group is not present");
+            return;
+        }
 
-		  return (double) getSignalCount(signalGroup) / (double) getNumberOfCellsWithNuclearSignals(signalGroup);
-	  }
-		
+        finer("Updating signals to new group id in nuclei");
+        for (Nucleus n : collection.getNuclei()) {
+            n.getSignalCollection().updateSignalGroupID(oldID, newID);
+        }
 
-	  /**
-	   * Test whether the current population has signals in any channel
-	   * @return
-	   */
-	  public boolean hasSignals(){
-		  for(UUID i : getSignalGroupIDs()){
-			  if(this.hasSignals(i)){
-				  return true;
-			  }
-		  }
-		  return false;
-	  }
+        finer("Updating signal group in cell collection");
 
-	  /**
-	   * Test whether the current population has signals in the given group
-	   * @return
-	   */
-	  public boolean hasSignals(UUID signalGroup){
-		  if(this.getSignalCount(signalGroup)>0){
-			  return true;
-		  } else{
-			  return false;
-		  }
+        try {
 
-	  }
-	  
-	  /**
-	   * Test if any of the signal groups in the collection have a shell result
-	   * @return
-	   */
-	  public boolean hasShellResult(){
-		  for(UUID id : collection.getSignalGroupIDs()){
+            // the group the signals are currently in
+            ISignalGroup oldGroup = collection.getSignalGroup(oldID);
 
-			  try {
-				  if(collection.getSignalGroup(id).hasShellResult()){
-					  return true;
-				  }
-			  } catch (UnavailableSignalGroupException e) {
-				  fine("Error getting signal group", e);
-			  }
-		  }
-		  return false;
-	  }
+            finer("Old group: " + oldID + " | " + oldGroup.toString());
 
+            // Merge and rename signal groups
 
-	  
-	  /**
-	   * Get all the signals from all nuclei in the given channel
-	   * @param channel the channel to search
-	   * @return a list of signals
-	   */
-	  public List<INuclearSignal> getSignals(UUID signalGroup){
+            if (collection.hasSignalGroup(newID)) { // check if the group
+                                                    // already exists
 
-		  List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
-		  for(Nucleus n : collection.getNuclei()){
-			  result.addAll(n.getSignalCollection().getSignals(signalGroup));
-		  }
-		  return result;
-	  }
-	  
-      
-      /**
-       * Get the median of the signal statistic in the given signal group
-       * @param  signalGroup
-       * @return the median
-     * @throws Exception 
-       */
-      public double getMedianSignalStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup){
-          
-          double[] values = null;
-          double median;
-          /*
-           * Angles must be wrapped
-           */
-          if(stat.getDimension().equals(StatisticDimension.ANGLE)){
-              values = getOffsetSignalAngles(signalGroup);
-              
-              if(values.length==0){
-            	  fine("No signals detected in group for "+stat);
-            	  return 0;
-              }
-              
-              median = new Quartile(values, Quartile.MEDIAN).doubleValue();
-              median += getMeanSignalAngle(signalGroup);
-          } else {
-              values = this.getSignalStatistics(stat, scale, signalGroup);
-              
-              if(values.length==0){
-            	  fine("No signals detected in group for "+stat);
-            	  return 0;
-              }
-              
-              median =  new Quartile(values, Quartile.MEDIAN).doubleValue();
-          }
-          
-          return median;
-             
-      }
-      
-      /**
-       * Get the signal statistics for the given group
-       * @param stat
-       * @param scale
-       * @param signalGroup
-       * @return
-       */
-      public double[] getSignalStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+                finer("A signal group of id " + newID + " already exists");
+                ISignalGroup existingGroup = collection.getSignalGroup(newID);
 
-    	  if( ! this.hasSignals(signalGroup)){
-    		  return new double[0];
-    	  }
+                if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
+                    finer("Setting signal group name to merge");
+                    existingGroup
+                            .setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
+                }
 
-    	  Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
-    	  List<Double> a = new ArrayList<Double>(0);
-    	  for(ICell c : cells){
-    		  for(Nucleus n : c.getNuclei()){
-    			  a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
-    		  }
+                if (oldGroup.getChannel() != existingGroup.getChannel()) {
+                    finer("Setting signal group name to -1");
+                    existingGroup.setChannel(-1);
+                }
 
-    	  }
+                // Shells and colours?
 
-    	  double[] values;
+            } else { // the signal group does not exist, just copy the old group
 
-    	  try{
-    		  values = new ArrayConverter(a).toDoubleArray();
+                finer("A signal group of id " + newID + " does not exist");
 
-    	  } catch (ArrayConversionException e) {
-    		  values = new double[0]; 
-    	  }
-    	  return values;
-      }
+                // the new group for the signals
+                ISignalGroup newGroup = new SignalGroup(oldGroup);
 
-      /**
-       * Signal angles wrap, so a mean must be calculated as a zero point for boxplots.
-       * Uses http://catless.ncl.ac.uk/Risks/7.44.html#subj4:
-       *                   sum_i_from_1_to_N sin(a[i])
-       *   a = arctangent ---------------------------
-       *                   sum_i_from_1_to_N cos(a[i])
-       * @param signalGroup
-       * @return
-       */
-      public double getMeanSignalAngle(UUID signalGroup) {
+                finer("New group: " + newID + " | " + newGroup.toString());
+                collection.addSignalGroup(newID, newGroup);
+                finer("Added new signal group: " + newID);
 
-          double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
-          
-          double sumSin = 0;
-          double sumCos = 0;
-          for(double value : values){
-              sumSin += Math.sin(value);
-              sumCos += Math.cos(value);
-          }
-          
-          double mean = Math.atan2(sumSin, sumCos);
-          
-          if(mean<0){
-              mean += 360;
-          }
-          return mean;
-      }
-      
-      /**
-       * For the signals in a group, find the corrected mean angle using the arctangent
-       * method, then rescale the angles to use the mean as a zero point.
-       * The returned values should be in the range -180 - +180 from the new zero
+            }
 
+            collection.removeSignalGroup(oldID);
+            finer("Removed old signal group");
+        } catch (UnavailableSignalGroupException e) {
+            warn("Missing expected signal group");
+            fine("Error getting signal group " + oldID, e);
+        }
+    }
+
+    /**
+     * Find the total number of signals within all nuclei of the collection.
+     * 
+     * @return the total
+     */
+    public int getSignalCount() {
+        int count = 0;
+        for (UUID signalGroup : getSignalGroupIDs()) {
+            count += this.getSignalCount(signalGroup);
+        }
+        return count;
+    }
+
+    /**
+     * Get the number of signals in the given group
+     * 
+     * @param signalGroup
+     *            the group to search
+     * @return the count or -1 if the signal group is not present
+     */
+    public int getSignalCount(UUID signalGroup) {
+        int count = 0;
+
+        if (collection.getSignalGroupIDs().contains(signalGroup)) {
+            count = 0;
+            for (Nucleus n : collection.getNuclei()) {
+                count += n.getSignalCollection().numberOfSignals(signalGroup);
+
+            } // end nucleus iterations
+        }
+        return count;
+    }
+
+    /**
+     * Get the mean number of signals in each nucleus
+     * 
+     * @param signalGroup
+     * @return
+     */
+    public double getSignalCountPerNucleus(UUID signalGroup) {
+        if (getSignalCount(signalGroup) == 0) {
+            return 0;
+        }
+
+        return (double) getSignalCount(signalGroup) / (double) getNumberOfCellsWithNuclearSignals(signalGroup);
+    }
+
+    /**
+     * Test whether the current population has signals in any channel
+     * 
+     * @return
+     */
+    public boolean hasSignals() {
+        for (UUID i : getSignalGroupIDs()) {
+            if (this.hasSignals(i)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Test whether the current population has signals in the given group
+     * 
+     * @return
+     */
+    public boolean hasSignals(UUID signalGroup) {
+        if (this.getSignalCount(signalGroup) > 0) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Test if any of the signal groups in the collection have a shell result
+     * 
+     * @return
+     */
+    public boolean hasShellResult() {
+        for (UUID id : collection.getSignalGroupIDs()) {
+
+            try {
+                if (collection.getSignalGroup(id).hasShellResult()) {
+                    return true;
+                }
+            } catch (UnavailableSignalGroupException e) {
+                fine("Error getting signal group", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get all the signals from all nuclei in the given channel
+     * 
+     * @param channel
+     *            the channel to search
+     * @return a list of signals
+     */
+    public List<INuclearSignal> getSignals(UUID signalGroup) {
+
+        List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+        for (Nucleus n : collection.getNuclei()) {
+            result.addAll(n.getSignalCollection().getSignals(signalGroup));
+        }
+        return result;
+    }
+
+    /**
+     * Get the median of the signal statistic in the given signal group
+     * 
+     * @param signalGroup
+     * @return the median
+     * @throws Exception
+     */
+    public double getMedianSignalStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+
+        double[] values = null;
+        double median;
+        /*
+         * Angles must be wrapped
+         */
+        if (stat.getDimension().equals(StatisticDimension.ANGLE)) {
+            values = getOffsetSignalAngles(signalGroup);
+
+            if (values.length == 0) {
+                fine("No signals detected in group for " + stat);
+                return 0;
+            }
+
+            median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+            median += getMeanSignalAngle(signalGroup);
+        } else {
+            values = this.getSignalStatistics(stat, scale, signalGroup);
+
+            if (values.length == 0) {
+                fine("No signals detected in group for " + stat);
+                return 0;
+            }
+
+            median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+        }
+
+        return median;
+
+    }
+
+    /**
+     * Get the signal statistics for the given group
+     * 
+     * @param stat
+     * @param scale
+     * @param signalGroup
+     * @return
+     */
+    public double[] getSignalStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+
+        if (!this.hasSignals(signalGroup)) {
+            return new double[0];
+        }
+
+        Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
+        List<Double> a = new ArrayList<Double>(0);
+        for (ICell c : cells) {
+            for (Nucleus n : c.getNuclei()) {
+                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
+            }
+
+        }
+
+        double[] values;
+
+        try {
+            values = new ArrayConverter(a).toDoubleArray();
+
+        } catch (ArrayConversionException e) {
+            values = new double[0];
+        }
+        return values;
+    }
+
+    /**
+     * Signal angles wrap, so a mean must be calculated as a zero point for
+     * boxplots. Uses http://catless.ncl.ac.uk/Risks/7.44.html#subj4:
+     * sum_i_from_1_to_N sin(a[i]) a = arctangent ---------------------------
+     * sum_i_from_1_to_N cos(a[i])
+     * 
+     * @param signalGroup
+     * @return
+     */
+    public double getMeanSignalAngle(UUID signalGroup) {
+
+        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup);
+
+        double sumSin = 0;
+        double sumCos = 0;
+        for (double value : values) {
+            sumSin += Math.sin(value);
+            sumCos += Math.cos(value);
+        }
+
+        double mean = Math.atan2(sumSin, sumCos);
+
+        if (mean < 0) {
+            mean += 360;
+        }
+        return mean;
+    }
+
+    /**
+     * For the signals in a group, find the corrected mean angle using the
+     * arctangent method, then rescale the angles to use the mean as a zero
+     * point. The returned values should be in the range -180 - +180 from the
+     * new zero
+     * 
      * @param signalGroup
      * @return
      * @throws Exception
      */
     public double[] getOffsetSignalAngles(UUID signalGroup) {
 
-          double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup); 
-                    
-          if(values.length==0){
-        	  return new double[0];
-          }
-          
-          /*
-           * The mean is the actual mean of the series of signal angles, with correction for wrapping.
-           */
+        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup);
 
-          double meanAngle = getMeanSignalAngle(signalGroup);
-         
-          /*
-           * This is the distance from the mean angle to the zero angle, so values can be
-           * corrected back to 'real' angles
-           */
-          double offset = angleDistance (meanAngle, 0) ;
+        if (values.length == 0) {
+            return new double[0];
+        }
 
-          double[] result = new double[values.length];
-          
-          for(int i=0;i<values.length; i++){
-             
-        	  /*
-               * Calculate the distance of the signal from the mean value, including a wrap.
-               */
-              
-              double distance = angleDistance (values[i], meanAngle) ;
-              
-              /*
-               * Correct the distance into the distance from the zero point of the nucleus
-               */
-              result[i] = distance + offset;
+        /*
+         * The mean is the actual mean of the series of signal angles, with
+         * correction for wrapping.
+         */
 
-          }
-          return result;
-      }
-    
-    
+        double meanAngle = getMeanSignalAngle(signalGroup);
+
+        /*
+         * This is the distance from the mean angle to the zero angle, so values
+         * can be corrected back to 'real' angles
+         */
+        double offset = angleDistance(meanAngle, 0);
+
+        double[] result = new double[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+
+            /*
+             * Calculate the distance of the signal from the mean value,
+             * including a wrap.
+             */
+
+            double distance = angleDistance(values[i], meanAngle);
+
+            /*
+             * Correct the distance into the distance from the zero point of the
+             * nucleus
+             */
+            result[i] = distance + offset;
+
+        }
+        return result;
+    }
+
     /**
      * Copy the signal groups in this cell collection to the target collection,
      * preserving the signal group IDs
+     * 
      * @param target
      */
-    public void copySignalGroups(ICellCollection target){
+    public void copySignalGroups(ICellCollection target) {
 
-    	for(UUID id : collection.getSignalGroupIDs()){
-    		ISignalGroup newGroup;
-    		try {
-    			newGroup = new SignalGroup(  collection.getSignalGroup(id)  );
-    			target.addSignalGroup(id, newGroup);
-    		} catch (UnavailableSignalGroupException e) {
-    			warn("Unable to copy signal group");
-    			fine("Signal group not present", e);
-    		}
-    	}
+        for (UUID id : collection.getSignalGroupIDs()) {
+            ISignalGroup newGroup;
+            try {
+                newGroup = new SignalGroup(collection.getSignalGroup(id));
+                target.addSignalGroup(id, newGroup);
+            } catch (UnavailableSignalGroupException e) {
+                warn("Unable to copy signal group");
+                fine("Signal group not present", e);
+            }
+        }
     }
 
-    
     /**
-     * Length (angular) of a shortest way between two angles.
-     * It will be in range [-180, 180].
+     * Length (angular) of a shortest way between two angles. It will be in
+     * range [-180, 180].
      */
     private double angleDistance(double a, double b) {
-    	double phi = Math.abs(b - a) % 360;       // This is either the distance or 360 - distance
-    	double distance = phi > 180 ? 360 - phi : phi;
+        double phi = Math.abs(b - a) % 360; // This is either the distance or
+                                            // 360 - distance
+        double distance = phi > 180 ? 360 - phi : phi;
 
-    	double sign = (a - b >= 0 && a - b <= 180) || (a - b <= -180 && a- b>= -360) ? 1 : -1;
-    	distance *= sign; 
-    	return distance;
-
+        double sign = (a - b >= 0 && a - b <= 180) || (a - b <= -180 && a - b >= -360) ? 1 : -1;
+        distance *= sign;
+        return distance;
 
     }
 
-    
     /**
      * If the OP has moved, signal angles need to be recalculated
      * 
      */
-    public void recalculateSignalAngles(){
-    	finer("Recalcalculating signal angles");
-    	for(Nucleus n : collection.getNuclei()){
-    		try {
-				n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
-			} catch (UnavailableBorderTagException e) {
-				fine("Cannot get OP index");
-			}
-    	}
+    public void recalculateSignalAngles() {
+        finer("Recalcalculating signal angles");
+        for (Nucleus n : collection.getNuclei()) {
+            try {
+                n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+            } catch (UnavailableBorderTagException e) {
+                fine("Cannot get OP index");
+            }
+        }
     }
-    
+
     /**
-     * Shell counts are the same for all signal groups in the collection. If a signal
-     * group in the collection has a shell result, the shell count is returned.
-     * @return the shell count of the collection, or zero if no shell results are present
+     * Shell counts are the same for all signal groups in the collection. If a
+     * signal group in the collection has a shell result, the shell count is
+     * returned.
+     * 
+     * @return the shell count of the collection, or zero if no shell results
+     *         are present
      */
-    public int getShellCount(){
-    	
-    	for(ISignalGroup group : this.getSignalGroups()){
-    		if(group.hasShellResult()){
-    			return group.getShellResult().getNumberOfShells();
-    		}
-    	}
-    	return 0;
+    public int getShellCount() {
+
+        for (ISignalGroup group : this.getSignalGroups()) {
+            if (group.hasShellResult()) {
+                return group.getShellResult().getNumberOfShells();
+            }
+        }
+        return 0;
     }
-    
+
     /**
-     * For each signal group pair, find the smallest pairwise distance
-     * between signals for each nucleus in the collection. Return the data as
-     * a list of pairwise signal distance collections 
+     * For each signal group pair, find the smallest pairwise distance between
+     * signals for each nucleus in the collection. Return the data as a list of
+     * pairwise signal distance collections
      */
-    public PairwiseSignalDistanceCollection calculateSignalColocalisation(MeasurementScale scale){
-    	
-    	PairwiseSignalDistanceCollection ps = new PairwiseSignalDistanceCollection();
-	
-    	for(Nucleus n : collection.getNuclei()){
-			List<PairwiseSignalDistanceValue> list = n.getSignalCollection().calculateSignalColocalisation(scale);
-			
-			for(PairwiseSignalDistanceValue v : list){
-				ps.addValue(v);
-			}
-    	}
-    	
-    	return ps;
+    public PairwiseSignalDistanceCollection calculateSignalColocalisation(MeasurementScale scale) {
+
+        PairwiseSignalDistanceCollection ps = new PairwiseSignalDistanceCollection();
+
+        for (Nucleus n : collection.getNuclei()) {
+            List<PairwiseSignalDistanceValue> list = n.getSignalCollection().calculateSignalColocalisation(scale);
+
+            for (PairwiseSignalDistanceValue v : list) {
+                ps.addValue(v);
+            }
+        }
+
+        return ps;
     }
-    
+
     /**
      * Calculate the best colocalising signal pairs in the collection
-     * @param signalGroup1 the first signal group id
-     * @param signalGroup2 the second signal group id
+     * 
+     * @param signalGroup1
+     *            the first signal group id
+     * @param signalGroup2
+     *            the second signal group id
      * @return a list of colocalising signals
-     * @throws IllegalArgumentException if the UUIDs are the same
+     * @throws IllegalArgumentException
+     *             if the UUIDs are the same
      */
-    public List<Colocalisation<INuclearSignal>> getColocalisingSignals(UUID signalGroup1, UUID signalGroup2){
-    	
-    	if(signalGroup1.equals(signalGroup2)){
-			throw new IllegalArgumentException("Signal IDs are the same");
-		}
-    	
-    	List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
-    	
-    	for(Nucleus n : collection.getNuclei()){
-    		result.addAll(n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
-    	}
-    	return result;
+    public List<Colocalisation<INuclearSignal>> getColocalisingSignals(UUID signalGroup1, UUID signalGroup2) {
+
+        if (signalGroup1.equals(signalGroup2)) {
+            throw new IllegalArgumentException("Signal IDs are the same");
+        }
+
+        List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+
+        for (Nucleus n : collection.getNuclei()) {
+            result.addAll(n.getSignalCollection().calculateColocalisation(signalGroup1, signalGroup2));
+        }
+        return result;
     }
-	  
+
 }

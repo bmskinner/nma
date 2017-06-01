@@ -35,106 +35,108 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * This class divdes segment fitting amongst the nuclei in a dataset
+ * 
  * @author ben
  *
  */
 @SuppressWarnings("serial")
-public class SegmentRecombiningTask extends AbstractProgressAction  {
-	
-	private final SegmentFitter fitter;
-	private final ISegmentedProfile medianProfile;
-	private final int low, high;
-	private final Nucleus[] nuclei;
-	private static final int THRESHOLD = 30; // The number of nuclei to split the task on
-	private final IProfileCollection pc;
-	
-	private SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low, int high) throws Exception{
-		
-		this.fitter        = new SegmentFitter(medianProfile);
-		this.low           = low;
-		this.high          = high;
-		this.nuclei        = nuclei;
-		this.pc            = pc;
-		this.medianProfile = medianProfile;
-	}
-	
-	public SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei) throws Exception{
-		this(medianProfile, pc, nuclei, 0, nuclei.length);
-	}
+public class SegmentRecombiningTask extends AbstractProgressAction {
 
-	protected void compute() {
-		if (high - low < THRESHOLD){
-			
-			try {
-				processNuclei();
-			} catch (Exception e) {
-				error("Error processing nuclei" , e);
-			}
-			
-		} else {
-			int mid = (low + high) >>> 1;
+    private final SegmentFitter      fitter;
+    private final ISegmentedProfile  medianProfile;
+    private final int                low, high;
+    private final Nucleus[]          nuclei;
+    private static final int         THRESHOLD = 30; // The number of nuclei to
+                                                     // split the task on
+    private final IProfileCollection pc;
 
-			List<SegmentRecombiningTask> tasks = new ArrayList<SegmentRecombiningTask>();
+    private SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low,
+            int high) throws Exception {
 
-			try {
-				SegmentRecombiningTask task1 = new SegmentRecombiningTask(medianProfile, pc, nuclei, low, mid);
-				SegmentRecombiningTask task2 = new SegmentRecombiningTask(medianProfile, pc, nuclei, mid, high);
-				
-				task1.addProgressListener(this);
-				task2.addProgressListener(this);
+        this.fitter = new SegmentFitter(medianProfile);
+        this.low = low;
+        this.high = high;
+        this.nuclei = nuclei;
+        this.pc = pc;
+        this.medianProfile = medianProfile;
+    }
 
-				tasks.add(task1);
-				tasks.add(task2);
+    public SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei)
+            throws Exception {
+        this(medianProfile, pc, nuclei, 0, nuclei.length);
+    }
 
-				SegmentRecombiningTask.invokeAll(tasks);
-				
-			} catch (Exception e) {
-				error("Error dividing task" , e);
-			}
+    protected void compute() {
+        if (high - low < THRESHOLD) {
 
-		}
-	}
-		
-	private void processNuclei() throws Exception {
-		
-		for(int i=low; i<high; i++){
-			try {
-				processNucleus(nuclei[i]);
-			} catch(Exception e){
-				// On error, dump the nucleus logs
-//				log(Level.SEVERE, nuclei[i].printLog());
-				throw e;
-			}
-			fireProgressEvent();
-		}
-		
-	}
-	
-	private void processNucleus(Nucleus n) throws Exception {
-		
+            try {
+                processNuclei();
+            } catch (Exception e) {
+                error("Error processing nuclei", e);
+            }
 
-		if(n.isLocked()){
-			finest(n.getNameAndNumber()+" is locked, skipping");
-			return;
-		} else {
-			finest("Recombining segments for nucleus "+n.getNameAndNumber());
-		}
-		
-		fitter.fit(n, pc);
+        } else {
+            int mid = (low + high) >>> 1;
 
-		// recombine the segments to the lengths of the median profile segments
+            List<SegmentRecombiningTask> tasks = new ArrayList<SegmentRecombiningTask>();
 
-		IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+            try {
+                SegmentRecombiningTask task1 = new SegmentRecombiningTask(medianProfile, pc, nuclei, low, mid);
+                SegmentRecombiningTask task2 = new SegmentRecombiningTask(medianProfile, pc, nuclei, mid, high);
 
-		ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
-		n.setProfile(ProfileType.FRANKEN, segmented);
-		
-//		n.log("Recombined segments:");
-//		n.log(segmented.toString());
-		
-		log(Level.FINEST, "Recombined segments for nucleus "+n.getNameAndNumber());
-		log(Level.FINEST, segmented.toString());
-	}
-	
+                task1.addProgressListener(this);
+                task2.addProgressListener(this);
+
+                tasks.add(task1);
+                tasks.add(task2);
+
+                SegmentRecombiningTask.invokeAll(tasks);
+
+            } catch (Exception e) {
+                error("Error dividing task", e);
+            }
+
+        }
+    }
+
+    private void processNuclei() throws Exception {
+
+        for (int i = low; i < high; i++) {
+            try {
+                processNucleus(nuclei[i]);
+            } catch (Exception e) {
+                // On error, dump the nucleus logs
+                // log(Level.SEVERE, nuclei[i].printLog());
+                throw e;
+            }
+            fireProgressEvent();
+        }
+
+    }
+
+    private void processNucleus(Nucleus n) throws Exception {
+
+        if (n.isLocked()) {
+            finest(n.getNameAndNumber() + " is locked, skipping");
+            return;
+        } else {
+            finest("Recombining segments for nucleus " + n.getNameAndNumber());
+        }
+
+        fitter.fit(n, pc);
+
+        // recombine the segments to the lengths of the median profile segments
+
+        IProfile recombinedProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
+
+        ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
+        n.setProfile(ProfileType.FRANKEN, segmented);
+
+        // n.log("Recombined segments:");
+        // n.log(segmented.toString());
+
+        log(Level.FINEST, "Recombined segments for nucleus " + n.getNameAndNumber());
+        log(Level.FINEST, segmented.toString());
+    }
 
 }

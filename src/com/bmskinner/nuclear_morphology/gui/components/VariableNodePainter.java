@@ -28,62 +28,58 @@ import jebl.evolution.trees.RootedTree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;
 
 public class VariableNodePainter extends BasicLabelPainter {
-	
-	public VariableNodePainter(String title, RootedTree tree, PainterIntent intent) {
-		super(title, tree, intent);
-		
-	}
-	
-	@Override
-	public void paint(Graphics2D g2, Node item, Justification justification, Rectangle2D bounds) {
-		final Font oldFont = g2.getFont();
-		final Font newFont = new Font(oldFont.getFontName(), Font.BOLD, oldFont.getSize());
-	
 
-        if(item.getAttributeNames().contains("Color")){
-        	g2.setFont(newFont);
-        	Paint p = (Paint) item.getAttribute("Color");
-        	g2.setPaint(p);
+    public VariableNodePainter(String title, RootedTree tree, PainterIntent intent) {
+        super(title, tree, intent);
+
+    }
+
+    @Override
+    public void paint(Graphics2D g2, Node item, Justification justification, Rectangle2D bounds) {
+        final Font oldFont = g2.getFont();
+        final Font newFont = new Font(oldFont.getFontName(), Font.BOLD, oldFont.getSize());
+
+        if (item.getAttributeNames().contains("Color")) {
+            g2.setFont(newFont);
+            Paint p = (Paint) item.getAttribute("Color");
+            g2.setPaint(p);
         } else {
-        	g2.setFont(newFont);
-        	g2.setPaint(Color.BLACK);
+            g2.setFont(newFont);
+            g2.setPaint(Color.BLACK);
         }
 
+        // final String label = getLabel(item);
 
-//        final String label = getLabel(item);
-        
         final String label = item.getAttribute("ShortName").toString();
-        
-        
+
         if (label != null) {
 
-        	Rectangle2D rect = g2.getFontMetrics().getStringBounds(label, g2);
+            Rectangle2D rect = g2.getFontMetrics().getStringBounds(label, g2);
 
-        	float xOffset = 0;
+            float xOffset = 0;
 
-        	float yOffset = (float) g2.getFontMetrics().getAscent();
+            float yOffset = (float) g2.getFontMetrics().getAscent();
 
+            float y = yOffset + (float) bounds.getY();
+            switch (justification) {
+            case CENTER:
+                break;
+            case FLUSH:
+            case LEFT:
+                xOffset = (float) bounds.getX();
+                break;
+            case RIGHT:
+                xOffset = (float) (bounds.getX() + bounds.getWidth() - rect.getWidth());
+                break;
+            default:
+                throw new IllegalArgumentException("Unrecognized alignment enum option");
+            }
 
-        	float y = yOffset + (float) bounds.getY();
-        	switch (justification) {
-        	case CENTER:
-        		break;
-        	case FLUSH:
-        	case LEFT:
-        		xOffset = (float) bounds.getX();
-        		break;
-        	case RIGHT:
-        		xOffset = (float) (bounds.getX() + bounds.getWidth() - rect.getWidth());
-        		break;
-        	default:
-        		throw new IllegalArgumentException("Unrecognized alignment enum option");
-        	}
-
-        	g2.drawString(label, xOffset, y);
+            g2.drawString(label, xOffset, y);
         }
 
         g2.setFont(oldFont);
-		
-	}
+
+    }
 
 }

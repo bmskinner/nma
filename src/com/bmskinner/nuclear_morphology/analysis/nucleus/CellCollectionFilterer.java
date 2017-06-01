@@ -35,127 +35,130 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * A filterer that filters cell collections to remove obvious outliers
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
-public class CellCollectionFilterer extends Filterer<ICellCollection>{
+public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
-	@Override
-	public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta) throws CollectionFilteringException {
+    @Override
+    public void removeOutliers(ICellCollection collection, ICellCollection failCollection, double delta)
+            throws CollectionFilteringException {
 
-		List<PlottableStatistic> stats = new ArrayList<>();
-		stats.add(PlottableStatistic.AREA);
-		stats.add(PlottableStatistic.PERIMETER);
-		stats.add(PlottableStatistic.PATH_LENGTH);
-		stats.add(PlottableStatistic.MAX_FERET);
+        List<PlottableStatistic> stats = new ArrayList<>();
+        stats.add(PlottableStatistic.AREA);
+        stats.add(PlottableStatistic.PERIMETER);
+        stats.add(PlottableStatistic.PATH_LENGTH);
+        stats.add(PlottableStatistic.MAX_FERET);
 
+        // Make the predicate for the stats
+        // Fails if outside the given range
+        Predicate<ICell> pred = new Predicate<ICell>() {
+            @Override
+            public boolean test(ICell t) {
 
-		// Make the predicate for the stats
-		// Fails if outside the given range
-		Predicate<ICell> pred = new Predicate<ICell>() {
-			@Override
-			public boolean test(ICell t) {
+                for (Nucleus n : t.getNuclei()) {
 
-				for(Nucleus n : t.getNuclei()){
+                    for (PlottableStatistic stat : stats) {
+                        double med;
+                        try {
+                            med = collection.getMedianStatistic(stat, CellularComponent.NUCLEUS,
+                                    MeasurementScale.PIXELS);
+                        } catch (Exception e) {
+                            stack("Cannot get median stat", e);
+                            return false;
+                        }
 
-					for(PlottableStatistic stat : stats){
-						double med;
-						try {
-							med = collection.getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-						} catch (Exception e) {
-							stack("Cannot get median stat", e);
-							return false;
-						}
+                        double max = med * delta;
+                        double min = med / delta;
 
-						double max = med * delta;
-						double min = med / delta;
+                        double value = n.getStatistic(stat);
 
-						double value = n.getStatistic(stat);
+                        if (value > max || value < min) {
+                            return false;
+                        }
+                    }
 
-						if(value > max || value < min ){
-							return false;
-						}
-					}
+                }
+                return true;
+            }
 
-				}
-				return true;
-			}
+        };
 
-		};
+        // Test each cell for the predicate
+        Iterator<ICell> it = collection.getCells().iterator();
 
+        while (it.hasNext()) {
+            ICell c = it.next();
 
-		// Test each cell for the predicate
-		Iterator<ICell> it  = collection.getCells().iterator();
+            if (!pred.test(c)) {
 
-		while(it.hasNext()){
-			ICell c = it.next();
+                if (failCollection != null) {
+                    failCollection.addCell(new DefaultCell(c));
+                }
+                // collection.removeCell(c);
+                it.remove();
 
-			if( ! pred.test(c)){
+            }
 
-				if(failCollection!=null){
-					failCollection.addCell(new DefaultCell(c));
-				}
-//				collection.removeCell(c);
-				it.remove();
-				
-			}
+        }
 
-		}
+        fine("Remaining: " + collection.size() + " nuclei");
 
+    }
 
-		fine("Remaining: "+collection.size()+" nuclei");
+    //// @Override
+    // public ICellCollection filter(ICellCollection collection, Predicate
+    //// pred){
+    //
+    // return collection.filter(pred);
+    // }
 
-	}
-	
-////	@Override 
-//	public ICellCollection filter(ICellCollection collection, Predicate pred){
-//		
-//		return collection.filter(pred);
-//	}
-	
-	/**
-	 * Filter the given collection to retain cells in which the given statistic is within the lower and
-	 * upper bounds inclusive.
-	 * @param collection the collection to filter
-	 * @param stat the statistic to filter on
-	 * @param lower the lower bound
-	 * @param upper the upper bound
-	 * @return a new cell collection with copies of the original cells
-	 * @throws CollectionFilteringException
-	 */
-	@Override
-	public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper)
-			throws CollectionFilteringException {
+    /**
+     * Filter the given collection to retain cells in which the given statistic
+     * is within the lower and upper bounds inclusive.
+     * 
+     * @param collection
+     *            the collection to filter
+     * @param stat
+     *            the statistic to filter on
+     * @param lower
+     *            the lower bound
+     * @param upper
+     *            the upper bound
+     * @return a new cell collection with copies of the original cells
+     * @throws CollectionFilteringException
+     */
+    @Override
+    public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper)
+            throws CollectionFilteringException {
 
-		
-		finer("Filtering on "+stat);
-		ICellCollection filtered = collection.filterCollection(stat,
-						MeasurementScale.PIXELS, 
-						lower, upper);
-		
-		if(filtered == null){
-			throw new CollectionFilteringException("No collection returned");
-		}
-		
-		if( ! filtered.hasCells()){
-			throw new CollectionFilteringException("No cells returned for "+stat);
-		}
-		
-		try {
-			
-			//TODO - this fails on converted collections from (at least) 1.13.0 with no profiles in aggregate
-			collection.getProfileManager().copyCollectionOffsets(filtered);
-			collection.getSignalManager().copySignalGroups(filtered);
-			
-		} catch (ProfileException e) {
-			warn("Error copying collection offsets");
-			stack("Error in offsetting", e);
-		}
-		
-		finer("Filter on "+stat+" gave "+filtered.size()+" cells");
-		return filtered;
-	}
+        finer("Filtering on " + stat);
+        ICellCollection filtered = collection.filterCollection(stat, MeasurementScale.PIXELS, lower, upper);
 
-	
+        if (filtered == null) {
+            throw new CollectionFilteringException("No collection returned");
+        }
+
+        if (!filtered.hasCells()) {
+            throw new CollectionFilteringException("No cells returned for " + stat);
+        }
+
+        try {
+
+            // TODO - this fails on converted collections from (at least) 1.13.0
+            // with no profiles in aggregate
+            collection.getProfileManager().copyCollectionOffsets(filtered);
+            collection.getSignalManager().copySignalGroups(filtered);
+
+        } catch (ProfileException e) {
+            warn("Error copying collection offsets");
+            stack("Error in offsetting", e);
+        }
+
+        finer("Filter on " + stat + " gave " + filtered.size() + " cells");
+        return filtered;
+    }
+
 }

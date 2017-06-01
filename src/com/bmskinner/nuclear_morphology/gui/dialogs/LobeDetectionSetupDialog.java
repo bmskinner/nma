@@ -37,74 +37,71 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPane
 
 /**
  * The setup for lobe detection in neutrophils
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
 public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
-	
-	private static final String DIALOG_TITLE = "Lobe detection options";
-	
-	private IHoughDetectionOptions options;
-	
-	/**
-	 * Construct with a main program window to listen for actions, and a dataset to operate on
-	 * @param mw
-	 * @param dataset
-	 */
-	public LobeDetectionSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
 
-		// modal dialog
-		super( mw, dataset, DIALOG_TITLE);		
-		createUI();
-		packAndDisplay();
+    private static final String DIALOG_TITLE = "Lobe detection options";
 
-	}
+    private IHoughDetectionOptions options;
 
-	@Override
-	public IAnalysisMethod getMethod() {
-		
-		// Assign the options to the dataset
-		try {
-			dataset.getAnalysisOptions()
-					.getDetectionOptions(CellularComponent.NUCLEUS)
-					.setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
-		} catch (MissingOptionException e) {
-			warn("Unable to create method");
-			stack(e.getMessage(), e);
-		}
-		
-		return new LobeDetectionMethod(dataset, options);
-	}
+    /**
+     * Construct with a main program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param mw
+     * @param dataset
+     */
+    public LobeDetectionSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
 
-	@Override
-	protected void createUI() {
+        // modal dialog
+        super(mw, dataset, DIALOG_TITLE);
+        createUI();
+        packAndDisplay();
 
-		try {
-			options = OptionsFactory.makeHoughOptions();
-			JPanel contentPanel = new JPanel(new BorderLayout());
-			SettingsPanel panel =  new HoughSettingsPanel(options); 
+    }
 
-			contentPanel.add(panel, BorderLayout.CENTER);
-			contentPanel.add(createFooter(), BorderLayout.SOUTH);
+    @Override
+    public IAnalysisMethod getMethod() {
 
-			this.add(contentPanel, BorderLayout.CENTER);
-		} catch(Exception e){
-			error(e.getMessage(), e);
-			stack(e);
-		}
-	}
+        // Assign the options to the dataset
+        try {
+            dataset.getAnalysisOptions().getDetectionOptions(CellularComponent.NUCLEUS)
+                    .setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
+        } catch (MissingOptionException e) {
+            warn("Unable to create method");
+            stack(e.getMessage(), e);
+        }
 
+        return new LobeDetectionMethod(dataset, options);
+    }
 
+    @Override
+    protected void createUI() {
 
-	@Override
-	protected void setDefaults() {
-		// TODO Auto-generated method stub
-		
+        try {
+            options = OptionsFactory.makeHoughOptions();
+            JPanel contentPanel = new JPanel(new BorderLayout());
+            SettingsPanel panel = new HoughSettingsPanel(options);
 
-	}
+            contentPanel.add(panel, BorderLayout.CENTER);
+            contentPanel.add(createFooter(), BorderLayout.SOUTH);
 
-	
+            this.add(contentPanel, BorderLayout.CENTER);
+        } catch (Exception e) {
+            error(e.getMessage(), e);
+            stack(e);
+        }
+    }
+
+    @Override
+    protected void setDefaults() {
+        // TODO Auto-generated method stub
+
+    }
 
 }

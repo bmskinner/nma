@@ -34,292 +34,255 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
- * This coordinates updates to segmentation between datasets
- * and their children. When a UI request is made to update segmentation,
- * this handler is reponsible for keeping all child datasets in sync
+ * This coordinates updates to segmentation between datasets and their children.
+ * When a UI request is made to update segmentation, this handler is reponsible
+ * for keeping all child datasets in sync
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class SegmentationHandler implements Loggable {
-	
-	private final IAnalysisDataset dataset;
-	
-	public SegmentationHandler(final IAnalysisDataset d){
-		dataset = d;
-	}
-	
-	/**
-	 * Unmerge segments with the given ID in this collection
-	 * and its children, as long as the collection is real.
-	 * @param segID the segment ID to be unmerged
-	 */
-	public void mergeSegments(UUID segID1, UUID segID2){
-		
-		if(segID1==null || segID2==null){
-			throw new IllegalArgumentException("Segment IDs cannot be null");
-		}
-		
-		if(dataset.getCollection().isVirtual()){
-			return;
-		}
 
-		// Give the new merged segment a new ID
-		UUID newID = java.util.UUID.randomUUID();
-		ISegmentedProfile medianProfile = null;
-		try {
+    private final IAnalysisDataset dataset;
 
-			medianProfile = dataset.getCollection()
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+    public SegmentationHandler(final IAnalysisDataset d) {
+        dataset = d;
+    }
 
-			IBorderSegment seg1 = medianProfile.getSegment(segID1);
-			IBorderSegment seg2 = medianProfile.getSegment(segID2);
-			
-			boolean ok = dataset.getCollection()
-					.getProfileManager().testSegmentsMergeable(seg1, seg2);
-			
-			if(ok){
-				
-				dataset.getCollection()
-					.getProfileManager()
-					.mergeSegments(seg1, seg2, newID);
-				
-				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-					
-					ISegmentedProfile childProfile = child.getCollection()
-							.getProfileCollection()
-							.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+    /**
+     * Unmerge segments with the given ID in this collection and its children,
+     * as long as the collection is real.
+     * 
+     * @param segID
+     *            the segment ID to be unmerged
+     */
+    public void mergeSegments(UUID segID1, UUID segID2) {
 
-					IBorderSegment childSeg1 = childProfile.getSegment(segID1);
-					IBorderSegment childSeg2 = childProfile.getSegment(segID2);
-					
-					
-					child.getCollection()
-						.getProfileManager()
-						.mergeSegments(childSeg1, childSeg2, newID);
-				}
-			} else {
-				warn("Segments are not mergable");
-			}
-			
-		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
-			warn("Error merging segments");
-			for(UUID id : medianProfile.getSegmentIDs()){
-				warn(id.toString());
-			}
-			stack(e);
+        if (segID1 == null || segID2 == null) {
+            throw new IllegalArgumentException("Segment IDs cannot be null");
+        }
 
-		}
-	}
-	
-	/**
-	 * Unmerge segments with the given ID in this collection
-	 * and its children, as long as the collection is real.
-	 * @param segID the segment ID to be unmerged
-	 */
-	public void unmergeSegments(UUID segID){
-		
-		if(dataset.getCollection().isVirtual()){
-			return;
-		}
+        if (dataset.getCollection().isVirtual()) {
+            return;
+        }
 
-		try {
+        // Give the new merged segment a new ID
+        UUID newID = java.util.UUID.randomUUID();
+        ISegmentedProfile medianProfile = null;
+        try {
 
-			ISegmentedProfile medianProfile = dataset.getCollection()
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+            medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
+                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-			IBorderSegment seg = medianProfile.getSegment(segID);
-			
-			if( ! seg.hasMergeSources()){
-				return;
-			}
+            IBorderSegment seg1 = medianProfile.getSegment(segID1);
+            IBorderSegment seg2 = medianProfile.getSegment(segID2);
 
-			dataset.getCollection()
-				.getProfileManager()
-				.unmergeSegments(seg);
+            boolean ok = dataset.getCollection().getProfileManager().testSegmentsMergeable(seg1, seg2);
 
+            if (ok) {
 
-			for(IAnalysisDataset child : dataset.getAllChildDatasets()){
+                dataset.getCollection().getProfileManager().mergeSegments(seg1, seg2, newID);
 
-				ISegmentedProfile childProfile = child.getCollection()
-						.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-				IBorderSegment childSeg = childProfile.getSegment(segID);
+                    ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
+                            .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
+                    IBorderSegment childSeg1 = childProfile.getSegment(segID1);
+                    IBorderSegment childSeg2 = childProfile.getSegment(segID2);
 
-				child.getCollection()
-				.getProfileManager()
-				.unmergeSegments(childSeg);
-			}
-		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
-			warn("Error unmerging segments");
-			stack(e.getMessage(), e);
+                    child.getCollection().getProfileManager().mergeSegments(childSeg1, childSeg2, newID);
+                }
+            } else {
+                warn("Segments are not mergable");
+            }
 
-		}
-	}
+        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+            warn("Error merging segments");
+            for (UUID id : medianProfile.getSegmentIDs()) {
+                warn(id.toString());
+            }
+            stack(e);
 
+        }
+    }
 
-	/**
-	 * Split the segment with the given ID in this collection
-	 * and its children, as long as the collection is real.
-	 * @param segID the segment ID to be split
-	 */
-	public void splitSegment(UUID segID){
+    /**
+     * Unmerge segments with the given ID in this collection and its children,
+     * as long as the collection is real.
+     * 
+     * @param segID
+     *            the segment ID to be unmerged
+     */
+    public void unmergeSegments(UUID segID) {
 
-		if(dataset.getCollection().isVirtual()){
-			return;
-		}
+        if (dataset.getCollection().isVirtual()) {
+            return;
+        }
 
-		try {
+        try {
 
-			ISegmentedProfile medianProfile = dataset.getCollection()
-					.getProfileCollection()
-					.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+            ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
+                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-			IBorderSegment seg = medianProfile.getSegment(segID);
+            IBorderSegment seg = medianProfile.getSegment(segID);
 
-			UUID newID1 = java.util.UUID.randomUUID();
-			UUID newID2 = java.util.UUID.randomUUID();
+            if (!seg.hasMergeSources()) {
+                return;
+            }
 
+            dataset.getCollection().getProfileManager().unmergeSegments(seg);
 
-			boolean ok = dataset
-					.getCollection()
-					.getProfileManager()
-					.splitSegment(seg, newID1, newID2);
+            for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-			if(ok){
+                ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-				for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-					
-					child.getCollection()
-					.getProfileManager()
-					.splitSegment(seg, newID1, newID2);
-				}
-				log("Segment split sucessful");
-			} else {
-				warn("Splitting segment cancelled");
-			}
+                IBorderSegment childSeg = childProfile.getSegment(segID);
 
-		} catch(ProfileException | UnsegmentedProfileException | UnavailableComponentException e){
-			warn("Error splitting segments");
-			stack(e.getMessage(), e);
+                child.getCollection().getProfileManager().unmergeSegments(childSeg);
+            }
+        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+            warn("Error unmerging segments");
+            stack(e.getMessage(), e);
 
-		}
-	}
+        }
+    }
 
-	/**
-	 * Update the start index of the given segment to the given index in the 
-	 * median profile, and update individual nuclei to match.
-	 * @param id
-	 * @param index
-	 * @throws Exception
-	 */
-	public void updateSegmentStartIndexAction(UUID id, int index) {
-				
-		try {
+    /**
+     * Split the segment with the given ID in this collection and its children,
+     * as long as the collection is real.
+     * 
+     * @param segID
+     *            the segment ID to be split
+     */
+    public void splitSegment(UUID segID) {
 
-			double prop = dataset.getCollection()
-				.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-				.getFractionOfIndex(index);
-		
+        if (dataset.getCollection().isVirtual()) {
+            return;
+        }
 
-		// Update the median profile
-			dataset
-			.getCollection()
-			.getProfileManager()
-			.updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel always uses seg start index
-		
-		
-		for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-			
-			// Update each child median profile to the same proportional index 
-			
-			int childIndex = child.getCollection()
-					.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getIndexOfFraction(prop);
-			
-			child.getCollection()
-				.getProfileManager()
-				.updateMedianProfileSegmentIndex(true, id, childIndex);
-		}
+        try {
 
-		// Lock all the segments except the one to change
-		dataset
-			.getCollection()
-			.getProfileManager()
-			.setLockOnAllNucleusSegmentsExcept(id, true);
+            ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
+                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-		} catch(ProfileException |  UnsegmentedProfileException | UnavailableComponentException e){
-			warn("Error updating index of segments");
-			stack(e.getMessage(), e);
+            IBorderSegment seg = medianProfile.getSegment(segID);
 
-		}
+            UUID newID1 = java.util.UUID.randomUUID();
+            UUID newID2 = java.util.UUID.randomUUID();
 
-		
-		
-						
+            boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
 
+            if (ok) {
 
-		
-	}
-	
-	
-	/**
-	 * Update the border tag in the median profile to the given index, 
-	 * and update individual nuclei to match.
-	 * @param tag
-	 * @param newTagIndex
-	 */
-	public void setBorderTag(Tag tag, int index){
+                for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
-		if(tag==null){
-			throw new IllegalArgumentException("Tag is null");
-		}
-		
-		if(dataset.getCollection().isVirtual()){
-			return;
-		}
+                    child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
+                }
+                log("Segment split sucessful");
+            } else {
+                warn("Splitting segment cancelled");
+            }
 
+        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+            warn("Error splitting segments");
+            stack(e.getMessage(), e);
 
-		try {
-			
-			double prop = dataset.getCollection()
-					.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-					.getFractionOfIndex(index);
-			
-			
-			dataset.getCollection()
-				.getProfileManager()
-				.updateBorderTag(tag, index);
-			
-			
-			for(IAnalysisDataset child : dataset.getAllChildDatasets()){
-				
-				// Update each child median profile to the same proportional index 
-				
-				int childIndex = child.getCollection()
-						.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-						.getIndexOfFraction(prop);
-				
-				child.getCollection()
-					.getProfileManager()
-					.updateBorderTag(tag, childIndex);
-			}
-			
-			
-		} catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-			warn("Unable to update border tag index");
-			stack("Profiling error", e);
-			return;
-		} catch(Exception e){
-			warn("Unexpected error");
-			stack(e);
-			return;
-		}
-	}
-	
+        }
+    }
+
+    /**
+     * Update the start index of the given segment to the given index in the
+     * median profile, and update individual nuclei to match.
+     * 
+     * @param id
+     * @param index
+     * @throws Exception
+     */
+    public void updateSegmentStartIndexAction(UUID id, int index) {
+
+        try {
+
+            double prop = dataset.getCollection().getProfileCollection()
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getFractionOfIndex(index);
+
+            // Update the median profile
+            dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel
+                                                                                                          // always
+                                                                                                          // uses
+                                                                                                          // seg
+                                                                                                          // start
+                                                                                                          // index
+
+            for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+
+                // Update each child median profile to the same proportional
+                // index
+
+                int childIndex = child.getCollection().getProfileCollection()
+                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getIndexOfFraction(prop);
+
+                child.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, childIndex);
+            }
+
+            // Lock all the segments except the one to change
+            dataset.getCollection().getProfileManager().setLockOnAllNucleusSegmentsExcept(id, true);
+
+        } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
+            warn("Error updating index of segments");
+            stack(e.getMessage(), e);
+
+        }
+
+    }
+
+    /**
+     * Update the border tag in the median profile to the given index, and
+     * update individual nuclei to match.
+     * 
+     * @param tag
+     * @param newTagIndex
+     */
+    public void setBorderTag(Tag tag, int index) {
+
+        if (tag == null) {
+            throw new IllegalArgumentException("Tag is null");
+        }
+
+        if (dataset.getCollection().isVirtual()) {
+            return;
+        }
+
+        try {
+
+            double prop = dataset.getCollection().getProfileCollection()
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getFractionOfIndex(index);
+
+            dataset.getCollection().getProfileManager().updateBorderTag(tag, index);
+
+            for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+
+                // Update each child median profile to the same proportional
+                // index
+
+                int childIndex = child.getCollection().getProfileCollection()
+                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getIndexOfFraction(prop);
+
+                child.getCollection().getProfileManager().updateBorderTag(tag, childIndex);
+            }
+
+        } catch (IndexOutOfBoundsException | ProfileException | UnavailableBorderTagException
+                | UnavailableProfileTypeException e) {
+            warn("Unable to update border tag index");
+            stack("Profiling error", e);
+            return;
+        } catch (Exception e) {
+            warn("Unexpected error");
+            stack(e);
+            return;
+        }
+    }
+
 }
-

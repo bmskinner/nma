@@ -24,62 +24,61 @@ import javax.swing.ImageIcon;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ImageType;
 
 public class IconCell {
-	
-	private ImageIcon smallIcon = null;
-	private ImageIcon largeIcon = null;
-	private ImageType type = null;
-	private boolean enabled = true;
-	
-	public IconCell(ImageIcon largeIcon, ImageType type){
-		this.largeIcon = largeIcon;
-		this.type = type;
-	}
 
-	public ImageIcon getSmallIcon() {
-		return smallIcon;
-	}
+    private ImageIcon smallIcon = null;
+    private ImageIcon largeIcon = null;
+    private ImageType type      = null;
+    private boolean   enabled   = true;
 
-	public ImageIcon getLargeIcon() {
-		return largeIcon;
-	}
+    public IconCell(ImageIcon largeIcon, ImageType type) {
+        this.largeIcon = largeIcon;
+        this.type = type;
+    }
 
-	public ImageType getType() {
-		return type;
-	}
-	
-	public boolean hasType(){
-		return type!=null;
-	}
+    public ImageIcon getSmallIcon() {
+        return smallIcon;
+    }
 
-	public void setSmallIcon(ImageIcon smallIcon) {
-		this.smallIcon = smallIcon;
-	}
-	
-	
-	public boolean hasSmallIcon(){
-		return smallIcon!=null;
-	}
-	
-	public boolean hasLargeIcon(){
-		return largeIcon!=null;
-	}
-	
-	public boolean isEnabled() {
-		return enabled;
-	}
+    public ImageIcon getLargeIcon() {
+        return largeIcon;
+    }
 
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
-	}
-	
-	public double getFactor(){
-		// Translate coordinates back to large image
-		double factor = (double) largeIcon.getIconWidth() / (double)smallIcon.getIconWidth();
-		return factor;
-	}
+    public ImageType getType() {
+        return type;
+    }
 
-	public String toString(){
-		return type==null ? "" : enabled ? type.toString() : type.toString()+" (disabled)";
-	}
-	
+    public boolean hasType() {
+        return type != null;
+    }
+
+    public void setSmallIcon(ImageIcon smallIcon) {
+        this.smallIcon = smallIcon;
+    }
+
+    public boolean hasSmallIcon() {
+        return smallIcon != null;
+    }
+
+    public boolean hasLargeIcon() {
+        return largeIcon != null;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public double getFactor() {
+        // Translate coordinates back to large image
+        double factor = (double) largeIcon.getIconWidth() / (double) smallIcon.getIconWidth();
+        return factor;
+    }
+
+    public String toString() {
+        return type == null ? "" : enabled ? type.toString() : type.toString() + " (disabled)";
+    }
+
 }

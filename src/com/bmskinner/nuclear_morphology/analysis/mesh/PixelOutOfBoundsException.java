@@ -21,13 +21,26 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 /**
  * Throw when a pixel cannot be mapped to a mesh face coordinate
+ * 
  * @author bms41
  *
  */
 public class PixelOutOfBoundsException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public PixelOutOfBoundsException() { super(); }
-	public PixelOutOfBoundsException(String message) { super(message); }
-	public PixelOutOfBoundsException(String message, Throwable cause) { super(message, cause); }
-	public PixelOutOfBoundsException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public PixelOutOfBoundsException() {
+        super();
+    }
+
+    public PixelOutOfBoundsException(String message) {
+        super(message);
+    }
+
+    public PixelOutOfBoundsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PixelOutOfBoundsException(Throwable cause) {
+        super(cause);
+    }
 }

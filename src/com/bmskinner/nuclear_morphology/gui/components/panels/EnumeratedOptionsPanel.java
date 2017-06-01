@@ -35,41 +35,41 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
 
-	private List<ActionListener> listeners = new ArrayList<ActionListener>();
-	private final List<Object> interfaceListeners 	= new ArrayList<Object>();
-	
-	public EnumeratedOptionsPanel(){
-		this.setLayout(new FlowLayout());
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		for(ActionListener a: listeners) {
-			a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()) {
-			});
-		}
-	}
-	
-	public void addActionListener(ActionListener a){
-		this.listeners.add(a);
-	}
-	
-	public synchronized void addInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.add( l );
+    private List<ActionListener> listeners          = new ArrayList<ActionListener>();
+    private final List<Object>   interfaceListeners = new ArrayList<Object>();
+
+    public EnumeratedOptionsPanel() {
+        this.setLayout(new FlowLayout());
     }
-    
-    public synchronized void removeInterfaceEventListener( InterfaceEventListener l ) {
-    	interfaceListeners.remove( l );
-    }
-	
-	protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-    	
-    	InterfaceEvent event = new InterfaceEvent( this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while( iterator.hasNext() ) {
-            ( (InterfaceEventListener) iterator.next() ).interfaceEventReceived( event );
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        for (ActionListener a : listeners) {
+            a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, e.getActionCommand()) {
+            });
         }
     }
-	
+
+    public void addActionListener(ActionListener a) {
+        this.listeners.add(a);
+    }
+
+    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
+        interfaceListeners.add(l);
+    }
+
+    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
+        interfaceListeners.remove(l);
+    }
+
+    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
+
+        InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
+        Iterator<Object> iterator = interfaceListeners.iterator();
+        while (iterator.hasNext()) {
+            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
+        }
+    }
+
 }

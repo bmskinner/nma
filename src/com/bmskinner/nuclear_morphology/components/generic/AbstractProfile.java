@@ -87,7 +87,8 @@ public abstract class AbstractProfile implements IProfile {
      * @param profile2
      *            the profile to compare
      * @return a new profile with the length of the longest input profile
-     * @throws ProfileException if the interpolation fails
+     * @throws ProfileException
+     *             if the interpolation fails
      */
     protected IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
         if (profile1 == null || profile2 == null) {

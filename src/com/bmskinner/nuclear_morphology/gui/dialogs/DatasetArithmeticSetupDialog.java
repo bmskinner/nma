@@ -36,116 +36,112 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 
 @SuppressWarnings("serial")
-public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener{
-	
-	
-	DatasetSelectionPanel boxOne;
-	DatasetSelectionPanel boxTwo;
-	JComboBox<DatasetArithmeticOperation> operatorBox;
-	JLabel operatorDescription = new JLabel(DatasetArithmeticOperation.AND.getDescription());
-	
-	public enum DatasetArithmeticOperation {
-		AND ("Cells are present in both datasets"),
-		OR ("Cells are in either dataset (this merges the datasets)"), 
-		NOT ("Cells are in dataset one, but not dataset two"), 
-		XOR ("Cells are in one or other dataset, but not both datasets");
-		
-		private String description;
-		
-		private DatasetArithmeticOperation(String description){
-			this.description = description;
-		}
-		
-		public String getDescription(){
-			return this.description;
-		}
-	}
+public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener {
 
-	public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list, MainWindow mw) {
-		super( mw, true);
+    DatasetSelectionPanel                 boxOne;
+    DatasetSelectionPanel                 boxTwo;
+    JComboBox<DatasetArithmeticOperation> operatorBox;
+    JLabel                                operatorDescription = new JLabel(
+            DatasetArithmeticOperation.AND.getDescription());
 
-		this.setTitle("Dataset arithmetic options");
-		setSize(450, 300);
-		this.setLocationRelativeTo(null);
-		createGUI(list);
-//		this.pack();
-		this.setVisible(true);
-	}
-	
-	public IAnalysisDataset getDatasetOne(){
-		return boxOne.getSelectedDataset();
-	}
-	
-	public IAnalysisDataset getDatasetTwo(){
-		return boxTwo.getSelectedDataset();
-	}
-	
-	public DatasetArithmeticOperation getOperation(){
-		return (DatasetArithmeticOperation) operatorBox.getSelectedItem();
-	}
+    public enum DatasetArithmeticOperation {
+        AND("Cells are present in both datasets"), OR("Cells are in either dataset (this merges the datasets)"), NOT(
+                "Cells are in dataset one, but not dataset two"), XOR(
+                        "Cells are in one or other dataset, but not both datasets");
 
-	private void createGUI(List<IAnalysisDataset> list) {
-		
-		setLayout(new BorderLayout());
+        private String description;
 
-		JPanel panel = new JPanel();
-		GridBagLayout layout = new GridBagLayout();
-		panel.setLayout(layout);
-		
-		List<JLabel> labels = new ArrayList<JLabel>();
-		List<Component> fields = new ArrayList<Component>();
-		
-		boxOne = new DatasetSelectionPanel(list);
-		boxTwo = new DatasetSelectionPanel(list);
+        private DatasetArithmeticOperation(String description) {
+            this.description = description;
+        }
 
-		boxOne.setSelectedDataset(list.get(0));
-		boxTwo.setSelectedDataset(list.get(0));
-		
-		if(list.size()==2){
-			boxTwo.setSelectedDataset(list.get(1));
-		}
-		
-		operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
-		operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
-		operatorBox.setPreferredSize(boxOne.getPreferredSize());
-		operatorBox.addActionListener(this);
-		
-		labels.add(new JLabel("Dataset one"));
-		fields.add(boxOne);
-		
-		JPanel operatorPanel = new JPanel(new FlowLayout());
-		operatorPanel.add(operatorBox);
-		labels.add(new JLabel("Operation"));
-		fields.add(operatorPanel);
-		
-		JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		descPanel.add(operatorDescription);
-		labels.add(new JLabel("Description"));
-		fields.add(descPanel);
-		
-		labels.add(new JLabel("Dataset two"));
-		fields.add(boxTwo);
-		
-		this.addLabelTextRows(labels, fields, layout, panel);
-		
-		JPanel header = new JPanel(new FlowLayout());
-		header.add(new JLabel("Create a new dataset using the following rule:"));
-		
-		this.add(header, BorderLayout.NORTH);
-		this.add(panel, BorderLayout.CENTER);
-		
-		this.add(createFooter(), BorderLayout.SOUTH);
-		
-		
-	}
+        public String getDescription() {
+            return this.description;
+        }
+    }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+    public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list, MainWindow mw) {
+        super(mw, true);
 
-		operatorDescription.setText(getOperation().getDescription());
-		
-	}
-	
-	
+        this.setTitle("Dataset arithmetic options");
+        setSize(450, 300);
+        this.setLocationRelativeTo(null);
+        createGUI(list);
+        // this.pack();
+        this.setVisible(true);
+    }
+
+    public IAnalysisDataset getDatasetOne() {
+        return boxOne.getSelectedDataset();
+    }
+
+    public IAnalysisDataset getDatasetTwo() {
+        return boxTwo.getSelectedDataset();
+    }
+
+    public DatasetArithmeticOperation getOperation() {
+        return (DatasetArithmeticOperation) operatorBox.getSelectedItem();
+    }
+
+    private void createGUI(List<IAnalysisDataset> list) {
+
+        setLayout(new BorderLayout());
+
+        JPanel panel = new JPanel();
+        GridBagLayout layout = new GridBagLayout();
+        panel.setLayout(layout);
+
+        List<JLabel> labels = new ArrayList<JLabel>();
+        List<Component> fields = new ArrayList<Component>();
+
+        boxOne = new DatasetSelectionPanel(list);
+        boxTwo = new DatasetSelectionPanel(list);
+
+        boxOne.setSelectedDataset(list.get(0));
+        boxTwo.setSelectedDataset(list.get(0));
+
+        if (list.size() == 2) {
+            boxTwo.setSelectedDataset(list.get(1));
+        }
+
+        operatorBox = new JComboBox<DatasetArithmeticOperation>(DatasetArithmeticOperation.values());
+        operatorBox.setSelectedItem(DatasetArithmeticOperation.AND);
+        operatorBox.setPreferredSize(boxOne.getPreferredSize());
+        operatorBox.addActionListener(this);
+
+        labels.add(new JLabel("Dataset one"));
+        fields.add(boxOne);
+
+        JPanel operatorPanel = new JPanel(new FlowLayout());
+        operatorPanel.add(operatorBox);
+        labels.add(new JLabel("Operation"));
+        fields.add(operatorPanel);
+
+        JPanel descPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        descPanel.add(operatorDescription);
+        labels.add(new JLabel("Description"));
+        fields.add(descPanel);
+
+        labels.add(new JLabel("Dataset two"));
+        fields.add(boxTwo);
+
+        this.addLabelTextRows(labels, fields, layout, panel);
+
+        JPanel header = new JPanel(new FlowLayout());
+        header.add(new JLabel("Create a new dataset using the following rule:"));
+
+        this.add(header, BorderLayout.NORTH);
+        this.add(panel, BorderLayout.CENTER);
+
+        this.add(createFooter(), BorderLayout.SOUTH);
+
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        operatorDescription.setText(getOperation().getDescription());
+
+    }
 
 }

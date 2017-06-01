@@ -29,75 +29,94 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * The interface for shell analysis results
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface IShellResult extends Serializable, Loggable {
 
-	/**
-	 * Get the mean pixel proportions for the given type 
-	 * @param type the counting type
-	 * @return a list of proportions of signal per shell
-	 */
-	List<Double> getRawMeans(CountType type);
+    /**
+     * Get the mean pixel proportions for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return a list of proportions of signal per shell
+     */
+    List<Double> getRawMeans(CountType type);
 
-	/**
-	 * Get the normalised pixel proportions for the given type 
-	 * @param type the counting type
-	 * @return a list of proportions of signal per shell
-	 */
-	List<Double> getNormalisedMeans(CountType type);
+    /**
+     * Get the normalised pixel proportions for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return a list of proportions of signal per shell
+     */
+    List<Double> getNormalisedMeans(CountType type);
 
-	/**
-	 * Get the standard error of pixel proportions for the given type 
-	 * @param type the counting type
-	 * @return a list of proportions of signal per shell
-	 */
-	List<Double> getRawStandardErrors(CountType type);
-	
-	/**
-	 * Get the standard error of pixel proportions for the given type 
-	 * @param type the counting type
-	 * @return a list of proportions of signal per shell
-	 */
-	List<Double> getNormalisedStandardErrors(CountType type);
+    /**
+     * Get the standard error of pixel proportions for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return a list of proportions of signal per shell
+     */
+    List<Double> getRawStandardErrors(CountType type);
 
-	/**
-	 * Get the raw chi square test value for the given type 
-	 * @param type the counting type
-	 * @return the result of a chi square test against equal proportions per shell
-	 */
-	double getRawChiSquare(CountType type);
-	
-	/**
-	 * Get the normalised chi square test value for the given type 
-	 * @param type the counting type
-	 * @return the result of a chi square test against equal proportions per shell
-	 */
-	double getNormalisedChiSquare(CountType type);
+    /**
+     * Get the standard error of pixel proportions for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return a list of proportions of signal per shell
+     */
+    List<Double> getNormalisedStandardErrors(CountType type);
 
-	/**
-	 * Get the raw chi square p-value for the given type 
-	 * @param type the counting type
-	 * @return the result of a chi square test against equal proportions per shell
-	 */
-	double getRawPValue(CountType type);
-	
-	/**
-	 * Get the normalised chi square p-value for the given type 
-	 * @param type the counting type
-	 * @return the result of a chi square test against equal proportions per shell
-	 */
-	double getNormalisedPValue(CountType type);
+    /**
+     * Get the raw chi square test value for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return the result of a chi square test against equal proportions per
+     *         shell
+     */
+    double getRawChiSquare(CountType type);
 
-	
-	/**
-	 * Get the number of shells in the shell result
-	 * @return the shell count
-	 */
-	int getNumberOfShells();
+    /**
+     * Get the normalised chi square test value for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return the result of a chi square test against equal proportions per
+     *         shell
+     */
+    double getNormalisedChiSquare(CountType type);
 
-	
+    /**
+     * Get the raw chi square p-value for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return the result of a chi square test against equal proportions per
+     *         shell
+     */
+    double getRawPValue(CountType type);
+
+    /**
+     * Get the normalised chi square p-value for the given type
+     * 
+     * @param type
+     *            the counting type
+     * @return the result of a chi square test against equal proportions per
+     *         shell
+     */
+    double getNormalisedPValue(CountType type);
+
+    /**
+     * Get the number of shells in the shell result
+     * 
+     * @return the shell count
+     */
+    int getNumberOfShells();
 
 }

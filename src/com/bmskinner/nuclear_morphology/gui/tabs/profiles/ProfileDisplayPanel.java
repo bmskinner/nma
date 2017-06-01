@@ -31,73 +31,63 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
-			
-	public ProfileDisplayPanel(ProfileType type){
-		super(type);
 
+    public ProfileDisplayPanel(ProfileType type) {
+        super(type);
 
-		JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
-		chartPanel.setChart(chart);
+        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
+        chartPanel.setChart(chart);
 
-		if(this.type==ProfileType.FRANKEN){
-			this.profileAlignmentOptionsPanel.setEnabled(false);
-		}
-	}
-		
-		@Override
-		protected void updateSingle() {
-			super.updateSingle();
-			updateChart();
-			
-		}
-		
-		@Override
-		protected void updateMultiple() {
-			super.updateMultiple();
-			updateChart();
-		}
-		
-		@Override
-		protected void updateNull() {
-			super.updateNull();
-			JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
-			chartPanel.setChart(chart);
+        if (this.type == ProfileType.FRANKEN) {
+            this.profileAlignmentOptionsPanel.setEnabled(false);
+        }
+    }
 
-		}
-		
-		@Override
-		protected JFreeChart createPanelChartType(ChartOptions options){
-			return new MorphologyChartFactory(options).createProfileChart(  );
-		}
-		
-		private void updateChart() {
-			ChartOptions options = makeOptions();
-			setChart(options);		
-		}
-		
-		
-		private ChartOptions makeOptions(){
+    @Override
+    protected void updateSingle() {
+        super.updateSingle();
+        updateChart();
 
-			boolean normalised         = profileAlignmentOptionsPanel.isNormalised();
-			ProfileAlignment alignment = normalised ?  ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
-//			BorderTagObject tag        = borderTagOptionsPanel.getSelected();
-			boolean showMarkers        = profileMarkersOptionsPanel.showMarkers();
-			boolean hideProfiles       = profileMarkersOptionsPanel.isHideProfiles();
-			
-//			log("Creating options: normalised: "+normalised);
-			
-			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.setNormalised(normalised)
-				.setAlignment(alignment)
-				.setTag(Tag.REFERENCE_POINT)
-				.setShowMarkers(showMarkers)
-				.setHideProfiles(hideProfiles)
-				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setProfileType(type)
-				.setTarget(chartPanel)
-				.build();
-			return options;
-		}
+    }
+
+    @Override
+    protected void updateMultiple() {
+        super.updateMultiple();
+        updateChart();
+    }
+
+    @Override
+    protected void updateNull() {
+        super.updateNull();
+        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
+        chartPanel.setChart(chart);
+
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new MorphologyChartFactory(options).createProfileChart();
+    }
+
+    private void updateChart() {
+        ChartOptions options = makeOptions();
+        setChart(options);
+    }
+
+    private ChartOptions makeOptions() {
+
+        boolean normalised = profileAlignmentOptionsPanel.isNormalised();
+        ProfileAlignment alignment = normalised ? ProfileAlignment.LEFT : profileAlignmentOptionsPanel.getSelected();
+        // BorderTagObject tag = borderTagOptionsPanel.getSelected();
+        boolean showMarkers = profileMarkersOptionsPanel.showMarkers();
+        boolean hideProfiles = profileMarkersOptionsPanel.isHideProfiles();
+
+        // log("Creating options: normalised: "+normalised);
+
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
+                .setAlignment(alignment).setTag(Tag.REFERENCE_POINT).setShowMarkers(showMarkers)
+                .setHideProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
+                .setTarget(chartPanel).build();
+        return options;
+    }
 }
-		

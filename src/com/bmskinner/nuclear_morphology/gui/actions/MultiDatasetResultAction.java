@@ -25,21 +25,24 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 /**
- * An action class that allows multiple datasets to be operated on simultaneously
+ * An action class that allows multiple datasets to be operated on
+ * simultaneously
+ * 
  * @author bms41
  * @since 1.13.6
  *
  */
 public abstract class MultiDatasetResultAction extends VoidResultAction {
-	
-	protected final List<IAnalysisDataset> datasets;
-	
-	public MultiDatasetResultAction(final List<IAnalysisDataset> datasets, final String barMessage, final MainWindow mw) {
-		super(barMessage, mw);
-		if(datasets==null){
-			throw new IllegalArgumentException("Cannot have null dataset list");
-		}
-		this.datasets = datasets;
-	}
+
+    protected final List<IAnalysisDataset> datasets;
+
+    public MultiDatasetResultAction(final List<IAnalysisDataset> datasets, final String barMessage,
+            final MainWindow mw) {
+        super(barMessage, mw);
+        if (datasets == null) {
+            throw new IllegalArgumentException("Cannot have null dataset list");
+        }
+        this.datasets = datasets;
+    }
 
 }

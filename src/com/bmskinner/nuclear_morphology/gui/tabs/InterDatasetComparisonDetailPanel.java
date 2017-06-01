@@ -24,30 +24,30 @@ import javax.swing.JTabbedPane;
 
 @SuppressWarnings("serial")
 public class InterDatasetComparisonDetailPanel extends DetailPanel {
-	
-	private static final String BASIC_VENN_TAB_LBL  = "Venn";
-	private static final String DETAIL_VENN_TAB_LBL = "Detailed Venn";
-	private static final String KRUSKAL_TAB_LBL     = "Kruskal";
 
-	public InterDatasetComparisonDetailPanel() {
-		super();
-		
-		this.setLayout(new BorderLayout());
-		
-		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+    private static final String BASIC_VENN_TAB_LBL  = "Venn";
+    private static final String DETAIL_VENN_TAB_LBL = "Detailed Venn";
+    private static final String KRUSKAL_TAB_LBL     = "Kruskal";
 
-		DetailPanel vennPanel 		  = new VennDetailPanel(); 
-		DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
-		DetailPanel kruskalPanel	  = new KruskalDetailPanel();
-		
-		this.addSubPanel(vennPanel);
-		this.addSubPanel(pairwiseVennPanel);
-		this.addSubPanel(kruskalPanel);
+    public InterDatasetComparisonDetailPanel() {
+        super();
 
-		tabPanel.addTab(BASIC_VENN_TAB_LBL , vennPanel        );
-		tabPanel.addTab(DETAIL_VENN_TAB_LBL, pairwiseVennPanel);
-		tabPanel.addTab(KRUSKAL_TAB_LBL    , kruskalPanel     );
+        this.setLayout(new BorderLayout());
 
-		this.add(tabPanel, BorderLayout.CENTER);
-	}
+        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+
+        DetailPanel vennPanel = new VennDetailPanel();
+        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
+        DetailPanel kruskalPanel = new KruskalDetailPanel();
+
+        this.addSubPanel(vennPanel);
+        this.addSubPanel(pairwiseVennPanel);
+        this.addSubPanel(kruskalPanel);
+
+        tabPanel.addTab(BASIC_VENN_TAB_LBL, vennPanel);
+        tabPanel.addTab(DETAIL_VENN_TAB_LBL, pairwiseVennPanel);
+        tabPanel.addTab(KRUSKAL_TAB_LBL, kruskalPanel);
+
+        this.add(tabPanel, BorderLayout.CENTER);
+    }
 }

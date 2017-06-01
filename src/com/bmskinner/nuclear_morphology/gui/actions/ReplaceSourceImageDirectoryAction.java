@@ -27,55 +27,51 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
 
-	public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Replacing images", mw);
-		this.setProgressBarIndeterminate();
+    public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, "Replacing images", mw);
+        this.setProgressBarIndeterminate();
 
-		
+    }
 
+    @Override
+    public void run() {
+        try {
 
-	}
-	
-	@Override
-	public void run(){
-		try{
+            if (!dataset.hasMergeSources()) {
 
-			if(!dataset.hasMergeSources()){
+                DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
+                String folderName = localOpenDialog.getDirectory();
 
-				DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
-				String folderName = localOpenDialog.getDirectory();
+                if (folderName != null) {
 
-				if(folderName!=null) { 
+                    File newFolder = new File(folderName);
 
+                    log("Updating folder to " + folderName);
 
-					File newFolder = new File(folderName);
+                    dataset.updateSourceImageDirectory(newFolder);
 
-					log("Updating folder to "+folderName );
-					
-					dataset.updateSourceImageDirectory(newFolder);
+                    finished();
 
-					finished();
+                } else {
+                    log("Update cancelled");
+                    cancel();
+                }
+            } else {
+                warn("Dataset is a merge; cancelling");
+                cancel();
+            }
 
-				} else {
-					log("Update cancelled");
-					cancel();
-				}
-			}else {
-				warn("Dataset is a merge; cancelling");
-				cancel();
-			}
+        } catch (Exception e) {
+            error("Error in folder update: " + e.getMessage(), e);
+        }
+    }
 
-		} catch(Exception e){
-			error("Error in folder update: "+e.getMessage(), e);
-		}
-	}
-	
-	@Override
-	public void finished(){
-		// Do not use super.finished(), or it will trigger another save action
-		fine("Folder update complete");
-		cancel();		
-		this.removeInterfaceEventListener(mw.getEventHandler());
-		this.removeDatasetEventListener(mw.getEventHandler());		
-	}
+    @Override
+    public void finished() {
+        // Do not use super.finished(), or it will trigger another save action
+        fine("Folder update complete");
+        cancel();
+        this.removeInterfaceEventListener(mw.getEventHandler());
+        this.removeDatasetEventListener(mw.getEventHandler());
+    }
 }

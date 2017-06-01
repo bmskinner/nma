@@ -25,127 +25,119 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class NuclearStatsPanel extends DetailPanel implements ActionListener {
-	
-	private ExportableTable tablePopulationStats;
-		
-	public NuclearStatsPanel(){
-		super();
-		
-		this.setLayout(new BorderLayout());
-		
-		JScrollPane statsPanel = createStatsPanel();
-		
-		JPanel headerPanel = new JPanel(new FlowLayout());
 
-		this.add(headerPanel, BorderLayout.NORTH);
+    private ExportableTable tablePopulationStats;
 
-		this.add(statsPanel, BorderLayout.CENTER);
+    public NuclearStatsPanel() {
+        super();
 
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return null;
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		
-		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
-	}
-	
-	@Override
-	protected void updateSingle() {
-		finest("Passing to update multiple");
-		updateMultiple();
-	}
-	
+        this.setLayout(new BorderLayout());
 
-	@Override
-	protected void updateMultiple() {
-		super.updateMultiple();
-		finest("Updating analysis stats panel");
-		updateStatsPanel();
-		finest("Updated analysis stats panel");
-	}
-	
-	@Override
-	protected void updateNull() {
-		super.updateNull();
-		finest("Passing to update multiple");
-		updateMultiple();
-	}
-		
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
-		tablePopulationStats.setModel(AbstractTableCreator.createLoadingTable());
-	}
-	
-	/**
-	 * Update the stats panel with data from the given datasets
-	 * @param list the datasets
-	 */
-	private void updateStatsPanel(){
+        JScrollPane statsPanel = createStatsPanel();
 
-		finest("Updating stats panel");
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setType(TableType.ANALYSIS_STATS)
-			.setScale(GlobalOptions.getInstance().getScale())
-			.setTarget(tablePopulationStats)
-			.build();
-		
-		setTable(options);
-		finest("Set table model");
-		
-	}
-	
-	private JScrollPane createStatsPanel(){
-		JScrollPane scrollPane = new JScrollPane();
-		try {
+        JPanel headerPanel = new JPanel(new FlowLayout());
 
-			
-			JPanel panel = new JPanel();
+        this.add(headerPanel, BorderLayout.NORTH);
 
-			panel.setLayout(new BorderLayout(0, 0));
+        this.add(statsPanel, BorderLayout.CENTER);
 
-			tablePopulationStats = new ExportableTable();
-			panel.add(tablePopulationStats, BorderLayout.CENTER);
-			tablePopulationStats.setEnabled(false);
+    }
 
-			scrollPane.setViewportView(panel);
-			scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
-			
-			TableOptions options = new TableOptionsBuilder()
-				.setDatasets(null)
-				.setType(TableType.ANALYSIS_STATS)
-				.build();
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return null;
+    }
 
-			TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
-			
-			tablePopulationStats.setModel(model);
-			
-		} catch(Exception e){
-			warn("Error making nuclear stats panel");
-			stack("Error creating stats panel", e);
-		}
-		return scrollPane;
-	}
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
 
-	 @Override
-     public void actionPerformed(ActionEvent e) {
+        return new AnalysisDatasetTableCreator(options).createAnalysisTable();
+    }
 
-         try {
-        	 finest("Updating nucleus stats panel");
-             this.update(getDatasets());
-         } catch (Exception e1) {
-         	stack("Error updating boxplot panel from action listener", e1);
-         }
-         
-         
-     }
+    @Override
+    protected void updateSingle() {
+        finest("Passing to update multiple");
+        updateMultiple();
+    }
+
+    @Override
+    protected void updateMultiple() {
+        super.updateMultiple();
+        finest("Updating analysis stats panel");
+        updateStatsPanel();
+        finest("Updated analysis stats panel");
+    }
+
+    @Override
+    protected void updateNull() {
+        super.updateNull();
+        finest("Passing to update multiple");
+        updateMultiple();
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        tablePopulationStats.setModel(AbstractTableCreator.createLoadingTable());
+    }
+
+    /**
+     * Update the stats panel with data from the given datasets
+     * 
+     * @param list
+     *            the datasets
+     */
+    private void updateStatsPanel() {
+
+        finest("Updating stats panel");
+
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.ANALYSIS_STATS)
+                .setScale(GlobalOptions.getInstance().getScale()).setTarget(tablePopulationStats).build();
+
+        setTable(options);
+        finest("Set table model");
+
+    }
+
+    private JScrollPane createStatsPanel() {
+        JScrollPane scrollPane = new JScrollPane();
+        try {
+
+            JPanel panel = new JPanel();
+
+            panel.setLayout(new BorderLayout(0, 0));
+
+            tablePopulationStats = new ExportableTable();
+            panel.add(tablePopulationStats, BorderLayout.CENTER);
+            tablePopulationStats.setEnabled(false);
+
+            scrollPane.setViewportView(panel);
+            scrollPane.setColumnHeaderView(tablePopulationStats.getTableHeader());
+
+            TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_STATS)
+                    .build();
+
+            TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
+
+            tablePopulationStats.setModel(model);
+
+        } catch (Exception e) {
+            warn("Error making nuclear stats panel");
+            stack("Error creating stats panel", e);
+        }
+        return scrollPane;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        try {
+            finest("Updating nucleus stats panel");
+            this.update(getDatasets());
+        } catch (Exception e1) {
+            stack("Error updating boxplot panel from action listener", e1);
+        }
+
+    }
 
 }

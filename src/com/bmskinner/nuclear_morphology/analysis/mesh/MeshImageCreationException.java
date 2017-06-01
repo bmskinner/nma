@@ -20,9 +20,21 @@
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 public class MeshImageCreationException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public MeshImageCreationException() { super(); }
-	public MeshImageCreationException(String message) { super(message); }
-	public MeshImageCreationException(String message, Throwable cause) { super(message, cause); }
-	public MeshImageCreationException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public MeshImageCreationException() {
+        super();
+    }
+
+    public MeshImageCreationException(String message) {
+        super(message);
+    }
+
+    public MeshImageCreationException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MeshImageCreationException(Throwable cause) {
+        super(cause);
+    }
 }

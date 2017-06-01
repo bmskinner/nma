@@ -24,27 +24,28 @@ import java.text.DecimalFormat;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {	
-	
-	protected final E options;
-	
-	protected static final String EMPTY_STRING = "" ;
-	
-	public AbstractDatasetCreator(final E options){
-		if(options==null){
-			throw new IllegalArgumentException("Options cannot be null");
-		}
-		this.options = options;
-	}
-		
-	/**
-	 * The standard formatter for datasets. At least one integer, and 2 decimals: 0.00
-	 */
-	public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00"); 
-	
-	static {
-		
-		DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
-		DEFAULT_DECIMAL_FORMAT.setMinimumIntegerDigits(1);
-	}
+public abstract class AbstractDatasetCreator<E extends DisplayOptions> implements Loggable {
+
+    protected final E options;
+
+    protected static final String EMPTY_STRING = "";
+
+    public AbstractDatasetCreator(final E options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Options cannot be null");
+        }
+        this.options = options;
+    }
+
+    /**
+     * The standard formatter for datasets. At least one integer, and 2
+     * decimals: 0.00
+     */
+    public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00");
+
+    static {
+
+        DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
+        DEFAULT_DECIMAL_FORMAT.setMinimumIntegerDigits(1);
+    }
 }

@@ -25,30 +25,36 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
  * Adds storage of cellular components to an XYDataset
+ * 
  * @author bms41
  *
- * @param <E> A cellular component to be drawn
+ * @param <E>
+ *            A cellular component to be drawn
  */
-public interface OutlineDataset<E extends CellularComponent>  extends XYDataset {
-	
-	/**
-	 * Set the component for the given series
-	 * @param seriesKey
-	 * @param n
-	 */
-	void setComponent(Comparable seriesKey, E n);
-	
-	/**
-	 * Get the component for the given series
-	 * @param seriesKey the series
-	 * @return
-	 */
-	E getComponent(Comparable seriesKey);
-	
-	/**
-	 * Check if the given series has a component
-	 * @param seriesKey
-	 * @return
-	 */
-	boolean hasComponent(Comparable seriesKey);
+public interface OutlineDataset<E extends CellularComponent> extends XYDataset {
+
+    /**
+     * Set the component for the given series
+     * 
+     * @param seriesKey
+     * @param n
+     */
+    void setComponent(Comparable seriesKey, E n);
+
+    /**
+     * Get the component for the given series
+     * 
+     * @param seriesKey
+     *            the series
+     * @return
+     */
+    E getComponent(Comparable seriesKey);
+
+    /**
+     * Check if the given series has a component
+     * 
+     * @param seriesKey
+     * @return
+     */
+    boolean hasComponent(Comparable seriesKey);
 }

@@ -35,88 +35,82 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * Display the original image for a cell, with
- * the nucleus outlines drawn on it. 
+ * Display the original image for a cell, with the nucleus outlines drawn on it.
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class AnnotatedNucleusPanel extends JPanel implements Loggable {
-	
-	private ICell cell;
-	private JLabel imageLabel = new JLabel();
-	
-	public AnnotatedNucleusPanel(){
 
-		this.setLayout(new BorderLayout());
-		this.setBorder(new EmptyBorder(5, 5, 5, 5));
-		this.add(imageLabel, BorderLayout.CENTER);
-		imageLabel.setHorizontalTextPosition(JLabel.CENTER);
-		imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
-		imageLabel.setVerticalAlignment(JLabel.CENTER);
-		imageLabel.setHorizontalAlignment(JLabel.CENTER);
+    private ICell  cell;
+    private JLabel imageLabel = new JLabel();
 
-	}
-	
-	public void updateCell(ICell c) throws Exception {
-		this.cell = c;
-		importCellImage();
-		
-	}
-	
-	private void importCellImage() throws Exception {
-		
-		boolean useRGB = false;
+    public AnnotatedNucleusPanel() {
 
-		if(cell.hasCytoplasm()){
-			useRGB = true;
-		}
-		
-		
-		
-		ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNucleus().getImage();
-		
-		ImageAnnotator an = new ImageAnnotator(openProcessor);
-		
-		if(cell.hasCytoplasm()){
-			an.annotateBorder(cell.getCytoplasm(), Color.CYAN);
-		}
-		
-		for(Nucleus n : cell.getNuclei()){
-			an.annotateBorder(n, Color.ORANGE);
-		}
-		
-		openProcessor = an.toProcessor();
+        this.setLayout(new BorderLayout());
+        this.setBorder(new EmptyBorder(5, 5, 5, 5));
+        this.add(imageLabel, BorderLayout.CENTER);
+        imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+        imageLabel.setVerticalTextPosition(JLabel.BOTTOM);
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
 
-		
-		ImageIcon icon = null;
-		if(imageLabel.getIcon()!=null){
-			icon = (ImageIcon) imageLabel.getIcon();
-			icon.getImage().flush();
-		}
-		icon = makeIcon(openProcessor);
-		this.setSize(icon.getIconWidth(), icon.getIconHeight());
-		imageLabel.setIcon(icon);
-		imageLabel.revalidate();
-		imageLabel.repaint();
-		
-		this.repaint();
-	}
-			
-	
-	/*
-	 * Resize the image to half of the screen height 
-	 */
-	private ImageIcon makeIcon(ImageProcessor processor){
+    }
 
-		ImageProcessor resized = new ImageFilterer(processor)
-			.fitToScreen(0.6)
-			.toProcessor();
+    public void updateCell(ICell c) throws Exception {
+        this.cell = c;
+        importCellImage();
 
-		ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
+    }
 
-		return smallImageIcon;
+    private void importCellImage() throws Exception {
 
-	}
+        boolean useRGB = false;
+
+        if (cell.hasCytoplasm()) {
+            useRGB = true;
+        }
+
+        ImageProcessor openProcessor = useRGB ? cell.getCytoplasm().getRGBImage() : cell.getNucleus().getImage();
+
+        ImageAnnotator an = new ImageAnnotator(openProcessor);
+
+        if (cell.hasCytoplasm()) {
+            an.annotateBorder(cell.getCytoplasm(), Color.CYAN);
+        }
+
+        for (Nucleus n : cell.getNuclei()) {
+            an.annotateBorder(n, Color.ORANGE);
+        }
+
+        openProcessor = an.toProcessor();
+
+        ImageIcon icon = null;
+        if (imageLabel.getIcon() != null) {
+            icon = (ImageIcon) imageLabel.getIcon();
+            icon.getImage().flush();
+        }
+        icon = makeIcon(openProcessor);
+        this.setSize(icon.getIconWidth(), icon.getIconHeight());
+        imageLabel.setIcon(icon);
+        imageLabel.revalidate();
+        imageLabel.repaint();
+
+        this.repaint();
+    }
+
+    /*
+     * Resize the image to half of the screen height
+     */
+    private ImageIcon makeIcon(ImageProcessor processor) {
+
+        ImageProcessor resized = new ImageFilterer(processor).fitToScreen(0.6).toProcessor();
+
+        ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
+
+        return smallImageIcon;
+
+    }
 
 }

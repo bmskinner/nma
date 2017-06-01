@@ -22,70 +22,75 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
 public enum SegmentStatistic implements PlottableStatistic {
 
-	LENGTH      ("Length"      , StatisticDimension.LENGTH),
-	DISPLACEMENT("Displacement", StatisticDimension.ANGLE);
+    LENGTH("Length", StatisticDimension.LENGTH), DISPLACEMENT("Displacement", StatisticDimension.ANGLE);
 
-	private String name;
-	private StatisticDimension dimension;
+    private String             name;
+    private StatisticDimension dimension;
 
-	SegmentStatistic(String name, StatisticDimension dimension){
-		this.name = name;
-		this.dimension = dimension;
-	}
+    SegmentStatistic(String name, StatisticDimension dimension) {
+        this.name = name;
+        this.dimension = dimension;
+    }
 
-	public String toString(){
-		return this.name;
-	}
+    public String toString() {
+        return this.name;
+    }
 
-	public boolean isDimensionless(){
-		return dimension.equals(StatisticDimension.DIMENSIONLESS);
-	}
-	
-	@Override
-	public boolean isAngle() {
-		return StatisticDimension.ANGLE.equals(dimension);
-	}
+    public boolean isDimensionless() {
+        return dimension.equals(StatisticDimension.DIMENSIONLESS);
+    }
 
-	/**
-	 * Get the dimension of the statistic (area, length, none)
-	 * @return
-	 */
-	public StatisticDimension getDimension(){
-		return this.dimension;
-	}
+    @Override
+    public boolean isAngle() {
+        return StatisticDimension.ANGLE.equals(dimension);
+    }
 
-	/**
-	 * Get the label (name and units) for the stat
-	 * @return
-	 */
-	public String label(MeasurementScale scale){
-		String result = "";
-		if(this.isDimensionless()){
-			result = this.toString();
-		} else {
-			result = this.toString() +" ("+ this.units(scale) + ")";
-		}
-		return result;
-	}
+    /**
+     * Get the dimension of the statistic (area, length, none)
+     * 
+     * @return
+     */
+    public StatisticDimension getDimension() {
+        return this.dimension;
+    }
 
-	/**
-	 * Convert the input value (assumed to be pixels) using the given
-	 * factor ( Nucleus.getScale() ) into the appropriate scale
-	 * @param value the pixel measure
-	 * @param factor the conversion factor to microns
-	 * @param scale the desired scale
-	 * @return
-	 */
-	public double convert(double value, double factor, MeasurementScale scale){
-		return PlottableStatistic.convert(value, factor, scale, dimension);
-	}
+    /**
+     * Get the label (name and units) for the stat
+     * 
+     * @return
+     */
+    public String label(MeasurementScale scale) {
+        String result = "";
+        if (this.isDimensionless()) {
+            result = this.toString();
+        } else {
+            result = this.toString() + " (" + this.units(scale) + ")";
+        }
+        return result;
+    }
 
-	public String units(MeasurementScale scale){
-		return PlottableStatistic.units(scale, dimension);
-	}
+    /**
+     * Convert the input value (assumed to be pixels) using the given factor (
+     * Nucleus.getScale() ) into the appropriate scale
+     * 
+     * @param value
+     *            the pixel measure
+     * @param factor
+     *            the conversion factor to microns
+     * @param scale
+     *            the desired scale
+     * @return
+     */
+    public double convert(double value, double factor, MeasurementScale scale) {
+        return PlottableStatistic.convert(value, factor, scale, dimension);
+    }
 
-	public PlottableStatistic[] getValues(){
-		return SegmentStatistic.values();
-	}
+    public String units(MeasurementScale scale) {
+        return PlottableStatistic.units(scale, dimension);
+    }
+
+    public PlottableStatistic[] getValues() {
+        return SegmentStatistic.values();
+    }
 
 }

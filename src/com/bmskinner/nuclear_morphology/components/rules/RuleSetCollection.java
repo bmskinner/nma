@@ -36,182 +36,186 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * This holds the rulesets for identifying each of the BorderTags
- * in a profile. Multiple RuleSets can be combined for each BorderTag,
- * allowing multiple ProfileTypes to be used. Designed to be stored within
- * a cell collection
+ * This holds the rulesets for identifying each of the BorderTags in a profile.
+ * Multiple RuleSets can be combined for each BorderTag, allowing multiple
+ * ProfileTypes to be used. Designed to be stored within a cell collection
+ * 
  * @author bms41
  *
  */
 public class RuleSetCollection implements Serializable, Loggable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	private Map<Tag, List<RuleSet>> map    = new HashMap<Tag, List<RuleSet>>();
-	
-	/**
-	 * Create a new empty collection
-	 */
-	public RuleSetCollection(){
-		for(Tag tag : BorderTagObject.values()){
-			clearRuleSets(tag);
-		}
-		clearRuleSets(Tag.CUSTOM_POINT);
-	}
-	
-	/**
-	 * Remove all the RuleSets for the given tag
-	 * @param tag
-	 */
-	public void clearRuleSets(Tag tag){
-		map.put(tag, new ArrayList<RuleSet>());
-	}
-	
-	/**
-	 * Add a ruleset for the given tag
-	 * @param tag
-	 * @param r
-	 */
-	public void addRuleSet(Tag tag, RuleSet r){
-		map.get(tag).add(r);
-	}
-	
-	/**
-	 * Replace existing RuleSets for the given tag with the list
-	 * @param tag
-	 * @param list
-	 */
-	public void setRuleSets(Tag tag, List<RuleSet> list){
-		map.put(tag, list);
-	}
-	
-	/**
-	 * Get the rulesets for the given tag
-	 * @param tag
-	 * @param r
-	 */
-	public List<RuleSet> getRuleSets(Tag tag){
-		return map.get(tag);
-	}
-		
-	public Set<Tag> getTags(){
-		return map.keySet();
-	}
-	
-	public boolean hasRulesets(Tag tag){
-		return map.get(tag).size()>0;
-	}
-	
-	public boolean isEmpty(){
-		return map.isEmpty();
-	}
-	
-	public String toString(){
-		StringBuilder b = new StringBuilder();
-		b.append("RuleSets:\n");
-		for(Tag tag : map.keySet()){
-			b.append("\t"+tag+":\n");
-			List<RuleSet> l = map.get(tag);
-			for(RuleSet r : l){
-				b.append("\t"+r.toString()+"\n");
-			}
-		}
-		
-		return b.toString();
-	}
-	
-	/*
-	 * Static methods to create the default rulesets for a given NucleusType
-	 */
-	
-	public static RuleSetCollection createDefaultRuleSet(NucleusType type){
-		
-		switch(type){
-			case PIG_SPERM:
-				return createPigSpermRuleSets();
-			case RODENT_SPERM:
-				return createMouseSpermRuleSets();
-			default:
-				return createRoundRuleSets();
 
-		}
-		
-	}
-	
-	/**
-	 * Create a RuleSetCollection for mouse sperm nuclei
-	 * @return
-	 */
-	private static RuleSetCollection createMouseSpermRuleSets(){
-		RuleSetCollection r = new RuleSetCollection();
-		
-		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.mouseSpermRPRuleSet());
-		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
-		r.addRuleSet(Tag.TOP_VERTICAL,      RuleSet.mouseSpermTVRuleSet());
-		r.addRuleSet(Tag.BOTTOM_VERTICAL,   RuleSet.mouseSpermBVRuleSet());
-		return r;
-	}
-	
-	/**
-	 * Create a RuleSetCollection for pig sperm nuclei
-	 * @return
-	 */
-	private static RuleSetCollection createPigSpermRuleSets(){
-		RuleSetCollection r = new RuleSetCollection();
-		
-		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.pigSpermRPRuleSet());
-		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
-		return r;
-	}
-	
-	/**
-	 * Create a RuleSetCollection for round nuclei
-	 * @return
-	 */
-	private static RuleSetCollection createRoundRuleSets(){
-		RuleSetCollection r = new RuleSetCollection();
-		
-		r.addRuleSet(Tag.REFERENCE_POINT,   RuleSet.roundRPRuleSet());
-		r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
-		return r;
-	}
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//		finest("\tReading RulesetCollection");
-		in.defaultReadObject();
-		
-		
-		
-		if(  map!=null ){
-						
-			Map<Tag, List<RuleSet>> newMap = new HashMap<Tag, List<RuleSet>>();
-			
-			Iterator<?> it = map.keySet().iterator();
-			
-			while(it.hasNext()){
-				Object tag = it.next();
-				if(tag instanceof BorderTag){
-					fine("No BorderTagObject for "+tag.toString()+": creating");
-					
-					newMap.put(new BorderTagObject( (BorderTag) tag), map.get(tag));					
-				}
-				
-			}
-			
-			if( ! newMap.isEmpty()){
-				map = newMap;
-			}
+    private static final long serialVersionUID = 1L;
 
-			
-		}
-				
-//		finest("\tRead RulesetCollection");
-	}
+    private Map<Tag, List<RuleSet>> map = new HashMap<Tag, List<RuleSet>>();
 
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//		finest("\tWriting RulesetCollection");
-		out.defaultWriteObject();
-//		finest("\tWrote RulesetCollection");
-	}
+    /**
+     * Create a new empty collection
+     */
+    public RuleSetCollection() {
+        for (Tag tag : BorderTagObject.values()) {
+            clearRuleSets(tag);
+        }
+        clearRuleSets(Tag.CUSTOM_POINT);
+    }
+
+    /**
+     * Remove all the RuleSets for the given tag
+     * 
+     * @param tag
+     */
+    public void clearRuleSets(Tag tag) {
+        map.put(tag, new ArrayList<RuleSet>());
+    }
+
+    /**
+     * Add a ruleset for the given tag
+     * 
+     * @param tag
+     * @param r
+     */
+    public void addRuleSet(Tag tag, RuleSet r) {
+        map.get(tag).add(r);
+    }
+
+    /**
+     * Replace existing RuleSets for the given tag with the list
+     * 
+     * @param tag
+     * @param list
+     */
+    public void setRuleSets(Tag tag, List<RuleSet> list) {
+        map.put(tag, list);
+    }
+
+    /**
+     * Get the rulesets for the given tag
+     * 
+     * @param tag
+     * @param r
+     */
+    public List<RuleSet> getRuleSets(Tag tag) {
+        return map.get(tag);
+    }
+
+    public Set<Tag> getTags() {
+        return map.keySet();
+    }
+
+    public boolean hasRulesets(Tag tag) {
+        return map.get(tag).size() > 0;
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("RuleSets:\n");
+        for (Tag tag : map.keySet()) {
+            b.append("\t" + tag + ":\n");
+            List<RuleSet> l = map.get(tag);
+            for (RuleSet r : l) {
+                b.append("\t" + r.toString() + "\n");
+            }
+        }
+
+        return b.toString();
+    }
+
+    /*
+     * Static methods to create the default rulesets for a given NucleusType
+     */
+
+    public static RuleSetCollection createDefaultRuleSet(NucleusType type) {
+
+        switch (type) {
+        case PIG_SPERM:
+            return createPigSpermRuleSets();
+        case RODENT_SPERM:
+            return createMouseSpermRuleSets();
+        default:
+            return createRoundRuleSets();
+
+        }
+
+    }
+
+    /**
+     * Create a RuleSetCollection for mouse sperm nuclei
+     * 
+     * @return
+     */
+    private static RuleSetCollection createMouseSpermRuleSets() {
+        RuleSetCollection r = new RuleSetCollection();
+
+        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.mouseSpermRPRuleSet());
+        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.mouseSpermOPRuleSet());
+        r.addRuleSet(Tag.TOP_VERTICAL, RuleSet.mouseSpermTVRuleSet());
+        r.addRuleSet(Tag.BOTTOM_VERTICAL, RuleSet.mouseSpermBVRuleSet());
+        return r;
+    }
+
+    /**
+     * Create a RuleSetCollection for pig sperm nuclei
+     * 
+     * @return
+     */
+    private static RuleSetCollection createPigSpermRuleSets() {
+        RuleSetCollection r = new RuleSetCollection();
+
+        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
+        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
+        return r;
+    }
+
+    /**
+     * Create a RuleSetCollection for round nuclei
+     * 
+     * @return
+     */
+    private static RuleSetCollection createRoundRuleSets() {
+        RuleSetCollection r = new RuleSetCollection();
+
+        r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.roundRPRuleSet());
+        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.roundOPRuleSet());
+        return r;
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // finest("\tReading RulesetCollection");
+        in.defaultReadObject();
+
+        if (map != null) {
+
+            Map<Tag, List<RuleSet>> newMap = new HashMap<Tag, List<RuleSet>>();
+
+            Iterator<?> it = map.keySet().iterator();
+
+            while (it.hasNext()) {
+                Object tag = it.next();
+                if (tag instanceof BorderTag) {
+                    fine("No BorderTagObject for " + tag.toString() + ": creating");
+
+                    newMap.put(new BorderTagObject((BorderTag) tag), map.get(tag));
+                }
+
+            }
+
+            if (!newMap.isEmpty()) {
+                map = newMap;
+            }
+
+        }
+
+        // finest("\tRead RulesetCollection");
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        // finest("\tWriting RulesetCollection");
+        out.defaultWriteObject();
+        // finest("\tWrote RulesetCollection");
+    }
 
 }

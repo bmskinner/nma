@@ -27,206 +27,229 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.IJ;
 
 /**
- * Use to hold boolean results from a Profile
- * - for example, local minima or maxima. 
+ * Use to hold boolean results from a Profile - for example, local minima or
+ * maxima.
  *
  */
 public class BooleanProfile implements Serializable, Loggable {
-	
-	private static final long serialVersionUID = 1L;
-	final protected boolean[] array;
-	
-	/**
-	 * Constructor based on an array of values.
-	 * @param values the array to use
-	 */
-	public BooleanProfile(final boolean[] values){
 
-		this.array = new boolean[values.length];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = values[i];
-		}
-	}
-	
-	public BooleanProfile(final int length, final boolean b){
-		this.array = new boolean[length];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = b;
-		}
-	}
-	
-	/**
-	 * Constructor based on an existing Profile. Makes a copy 
-	 * of the existing Profile
-	 * @param p the profile to copy
-	 */
-	public BooleanProfile(final BooleanProfile p){
-		
-		this.array = new boolean[p.size()];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = p.get(i);
-		}
-	}
-	
-	/**
-	 * Construct an empty (false) profile with
-	 * the same length as the input
-	 * @param p
-	 */
-	public BooleanProfile(final IProfile p){
-		this(p, false);
-	}
-	
-	/**
-	 * Construct a profile with
-	 * the same length as the input and the given values
-	 * @param p the template profile (for length)
-	 * @param b the default value
-	 */
-	public BooleanProfile(final IProfile p, boolean b){
-		this.array = new boolean[p.size()];
-		for(int i=0; i<this.array.length; i++){
-			array[i] = b;
-		}
-	}
-	
-	/**
-	 * Get the length of the array in the profile
-	 * @return the size of the profile
-	 */
-	public int size(){
-		return array.length;
-	}
-	
-	/**
-	 * Set the value at the given index. Wraps out of bounds indexes
-	 * @param index
-	 * @param b
-	 */
-	public void set(int index, boolean b){
-		
-		if(index<0 || index >=array.length){
-			index = CellularComponent.wrapIndex(index, array.length);
-		}
-		array[index] = b;
-	}
-	
-	/**
-	 * Get the value at the given index
-	 * @param index the index
-	 * @return the value at the index
-	 */
-	public boolean get(int index){
-		boolean result = false;
+    private static final long serialVersionUID = 1L;
+    final protected boolean[] array;
 
-		try {
-			if(index>=array.length){
-				throw new Exception("Requested value "+index+" is beyond profile end");
-			}
-			result = this.array[index];
-		} catch(Exception e){
-			IJ.log("Cannot get value from profile: "+e.getMessage());
-			for(StackTraceElement el : e.getStackTrace()){
-				IJ.log(el.toString());
-			}
-		}
-		return result;
-	}
-	
-	/**
-	 * Get the array from the profile
-	 * @return an array of values
-	 */
-	public boolean[] toArray(){
-		return this.array;
-	}
-	
-	/**
-	 * Get an X-axis; get a position
-	 * for each point on the scale 0-<length>
-	 * @param length the length to scale to
-	 * @return a profile with the positions as values
-	 */
-	public IProfile getPositions(int length){
-		float [] result = new float[array.length];
-		for(int i=0;i<array.length;i++){
-			result[i] = (float) i / (float) array.length * (float) length;
-		}
-		return new FloatProfile(result);
-	}
-	
-	/**
-	 * Copy the profile and offset it to start from the given index
-	 * @param j the index to start from
-	 * @return a new offset BooleanProfile
-	 * @throws Exception 
-	 */
-	public BooleanProfile offset(int j) throws Exception{
-		boolean[] newArray = new boolean[this.size()];
-		for(int i=0;i<this.size();i++){
-			newArray[i] = this.array[ CellularComponent.wrapIndex( i+j , this.size() ) ];
-		}
-		return new BooleanProfile(newArray);
-	}
-	
-	  /**
-	   * Returns true at each position if either profile is true at that position
-	   * @param adder the profile to compare. Must be the same length as this profile
-	   * @return the new profile
-	   */
-	  public BooleanProfile or(BooleanProfile profile){
-		  if(this.size()!=profile.size()){
-			  throw new IllegalArgumentException("Profile sizes do not match");
-		  }
-		  boolean[] result = new boolean[this.size()];
+    /**
+     * Constructor based on an array of values.
+     * 
+     * @param values
+     *            the array to use
+     */
+    public BooleanProfile(final boolean[] values) {
 
-		  for (int i=0; i<array.length; i++) { 
-			  result[i] = array[i] || profile.get(i);
-		  }
-		  return new BooleanProfile(result);
-	  }
-	  
-	  /**
-	   * Returns true at each position if both profiles are true at that position
-	   * @param adder the profile to compare. Must be the same length as this profile
-	   * @return the new profile
-	   */
-	  public BooleanProfile and(BooleanProfile profile){
-		  if(this.size()!=profile.size()){
-			  throw new IllegalArgumentException("Profile sizes do not match");
-		  }
-		  boolean[] result = new boolean[this.size()];
+        this.array = new boolean[values.length];
+        for (int i = 0; i < this.array.length; i++) {
+            array[i] = values[i];
+        }
+    }
 
-		  for (int i=0; i<array.length; i++) { 
-			  result[i] = array[i] && profile.get(i);
-		  }
-		  return new BooleanProfile(result);
-	  }
-	
-	  /**
-	   * Inverts the profile
-	   * @param profile the template
-	   * @return
-	   */
-	  public BooleanProfile invert(){
-		  boolean[] result = new boolean[this.size()];
+    public BooleanProfile(final int length, final boolean b) {
+        this.array = new boolean[length];
+        for (int i = 0; i < this.array.length; i++) {
+            array[i] = b;
+        }
+    }
 
-		  for (int i=0; i<array.length; i++) { 
-			  result[i] = ! array[i];
-		  }
-		  return new BooleanProfile(result);
-	  }
-	  
-	  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//		  finest("\tReading boolean profile");
-		  in.defaultReadObject();
-//		  finest("\tRead boolean profile");
-	  }
+    /**
+     * Constructor based on an existing Profile. Makes a copy of the existing
+     * Profile
+     * 
+     * @param p
+     *            the profile to copy
+     */
+    public BooleanProfile(final BooleanProfile p) {
 
-	  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//		  finest("\tWriting boolean profile");
-		  out.defaultWriteObject();
-//		  finest("\tWrote boolean profile");
-	  }
-	
+        this.array = new boolean[p.size()];
+        for (int i = 0; i < this.array.length; i++) {
+            array[i] = p.get(i);
+        }
+    }
+
+    /**
+     * Construct an empty (false) profile with the same length as the input
+     * 
+     * @param p
+     */
+    public BooleanProfile(final IProfile p) {
+        this(p, false);
+    }
+
+    /**
+     * Construct a profile with the same length as the input and the given
+     * values
+     * 
+     * @param p
+     *            the template profile (for length)
+     * @param b
+     *            the default value
+     */
+    public BooleanProfile(final IProfile p, boolean b) {
+        this.array = new boolean[p.size()];
+        for (int i = 0; i < this.array.length; i++) {
+            array[i] = b;
+        }
+    }
+
+    /**
+     * Get the length of the array in the profile
+     * 
+     * @return the size of the profile
+     */
+    public int size() {
+        return array.length;
+    }
+
+    /**
+     * Set the value at the given index. Wraps out of bounds indexes
+     * 
+     * @param index
+     * @param b
+     */
+    public void set(int index, boolean b) {
+
+        if (index < 0 || index >= array.length) {
+            index = CellularComponent.wrapIndex(index, array.length);
+        }
+        array[index] = b;
+    }
+
+    /**
+     * Get the value at the given index
+     * 
+     * @param index
+     *            the index
+     * @return the value at the index
+     */
+    public boolean get(int index) {
+        boolean result = false;
+
+        try {
+            if (index >= array.length) {
+                throw new Exception("Requested value " + index + " is beyond profile end");
+            }
+            result = this.array[index];
+        } catch (Exception e) {
+            IJ.log("Cannot get value from profile: " + e.getMessage());
+            for (StackTraceElement el : e.getStackTrace()) {
+                IJ.log(el.toString());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Get the array from the profile
+     * 
+     * @return an array of values
+     */
+    public boolean[] toArray() {
+        return this.array;
+    }
+
+    /**
+     * Get an X-axis; get a position for each point on the scale 0-<length>
+     * 
+     * @param length
+     *            the length to scale to
+     * @return a profile with the positions as values
+     */
+    public IProfile getPositions(int length) {
+        float[] result = new float[array.length];
+        for (int i = 0; i < array.length; i++) {
+            result[i] = (float) i / (float) array.length * (float) length;
+        }
+        return new FloatProfile(result);
+    }
+
+    /**
+     * Copy the profile and offset it to start from the given index
+     * 
+     * @param j
+     *            the index to start from
+     * @return a new offset BooleanProfile
+     * @throws Exception
+     */
+    public BooleanProfile offset(int j) throws Exception {
+        boolean[] newArray = new boolean[this.size()];
+        for (int i = 0; i < this.size(); i++) {
+            newArray[i] = this.array[CellularComponent.wrapIndex(i + j, this.size())];
+        }
+        return new BooleanProfile(newArray);
+    }
+
+    /**
+     * Returns true at each position if either profile is true at that position
+     * 
+     * @param adder
+     *            the profile to compare. Must be the same length as this
+     *            profile
+     * @return the new profile
+     */
+    public BooleanProfile or(BooleanProfile profile) {
+        if (this.size() != profile.size()) {
+            throw new IllegalArgumentException("Profile sizes do not match");
+        }
+        boolean[] result = new boolean[this.size()];
+
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i] || profile.get(i);
+        }
+        return new BooleanProfile(result);
+    }
+
+    /**
+     * Returns true at each position if both profiles are true at that position
+     * 
+     * @param adder
+     *            the profile to compare. Must be the same length as this
+     *            profile
+     * @return the new profile
+     */
+    public BooleanProfile and(BooleanProfile profile) {
+        if (this.size() != profile.size()) {
+            throw new IllegalArgumentException("Profile sizes do not match");
+        }
+        boolean[] result = new boolean[this.size()];
+
+        for (int i = 0; i < array.length; i++) {
+            result[i] = array[i] && profile.get(i);
+        }
+        return new BooleanProfile(result);
+    }
+
+    /**
+     * Inverts the profile
+     * 
+     * @param profile
+     *            the template
+     * @return
+     */
+    public BooleanProfile invert() {
+        boolean[] result = new boolean[this.size()];
+
+        for (int i = 0; i < array.length; i++) {
+            result[i] = !array[i];
+        }
+        return new BooleanProfile(result);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // finest("\tReading boolean profile");
+        in.defaultReadObject();
+        // finest("\tRead boolean profile");
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        // finest("\tWriting boolean profile");
+        out.defaultWriteObject();
+        // finest("\tWrote boolean profile");
+    }
+
 }

@@ -20,11 +20,23 @@
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 public class UncomparableMeshImageException extends Exception {
-	
-	private static final long serialVersionUID = 1L;
-	public UncomparableMeshImageException() { super(); }
-	public UncomparableMeshImageException(String message) { super(message); }
-	public UncomparableMeshImageException(String message, Throwable cause) { super(message, cause); }
-	public UncomparableMeshImageException(Throwable cause) { super(cause); }
+
+    private static final long serialVersionUID = 1L;
+
+    public UncomparableMeshImageException() {
+        super();
+    }
+
+    public UncomparableMeshImageException(String message) {
+        super(message);
+    }
+
+    public UncomparableMeshImageException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UncomparableMeshImageException(Throwable cause) {
+        super(cause);
+    }
 
 }

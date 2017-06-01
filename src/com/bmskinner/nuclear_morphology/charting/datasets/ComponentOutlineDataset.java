@@ -28,39 +28,40 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
  * Holds the outline of a cellular component
+ * 
  * @author ben
  *
- * @param <E> the component class to be drawn
+ * @param <E>
+ *            the component class to be drawn
  */
 @SuppressWarnings("serial")
-public class ComponentOutlineDataset<E extends CellularComponent> 
-	extends DefaultXYDataset
-	implements OutlineDataset<E> {
-	
-	Map<Comparable, E> components = new HashMap<Comparable, E>();
-		
-	/**
-	 * Set the component for the given series
-	 * @param i
-	 * @param n
-	 */
-	public void setComponent(Comparable seriesKey, E n){
-		components.put(seriesKey, n);
-	}
-	
-	/**
-	 * Get the component for the given series
-	 * @param i
-	 * @return
-	 */
-	public E getComponent(Comparable seriesKey){
-		return components.get(seriesKey);
-	}
-	
+public class ComponentOutlineDataset<E extends CellularComponent> extends DefaultXYDataset
+        implements OutlineDataset<E> {
 
-	public boolean hasComponent(Comparable seriesKey){
-		return components.containsKey(seriesKey);
-	}
-	
+    Map<Comparable, E> components = new HashMap<Comparable, E>();
+
+    /**
+     * Set the component for the given series
+     * 
+     * @param i
+     * @param n
+     */
+    public void setComponent(Comparable seriesKey, E n) {
+        components.put(seriesKey, n);
+    }
+
+    /**
+     * Get the component for the given series
+     * 
+     * @param i
+     * @return
+     */
+    public E getComponent(Comparable seriesKey) {
+        return components.get(seriesKey);
+    }
+
+    public boolean hasComponent(Comparable seriesKey) {
+        return components.containsKey(seriesKey);
+    }
 
 }

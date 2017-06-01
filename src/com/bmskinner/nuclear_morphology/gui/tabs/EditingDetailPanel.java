@@ -30,106 +30,94 @@ import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 
 @SuppressWarnings("serial")
-public class EditingDetailPanel 
-	extends DetailPanel 
-	implements SignalChangeListener, 
-	DatasetEventListener, 
-	InterfaceEventListener {
-	
-//	protected CellDetailPanel		cellDetailPanel;
-//	protected SegmentsEditingPanel segmentsEditingPanel;
-//	protected BorderTagEditingPanel borderTagEditingPanel;
-	
-	
-	
-	public EditingDetailPanel(){
-		
-		super();
-		
-		this.setLayout(new BorderLayout());
-		JTabbedPane tabPane = new JTabbedPane();
-		this.add(tabPane, BorderLayout.CENTER);
-		
-		DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
-		DetailPanel segmentsEditingPanel = new SegmentsEditingPanel();
-		DetailPanel borderTagEditingPanel = new BorderTagEditingPanel();
-		
-		
-		this.addSubPanel(cellDetailPanel);
-		this.addSubPanel(segmentsEditingPanel);
-		this.addSubPanel(borderTagEditingPanel);
-		
-		this.addSignalChangeListener(cellDetailPanel);
-		this.addSignalChangeListener(segmentsEditingPanel);
-		this.addSignalChangeListener(borderTagEditingPanel);
-		
-		
-		tabPane.addTab("Cells", cellDetailPanel);
-		
-		/*
-		 * Signals come from the segment panel to this container
-		 * Signals can be sent to the segment panel
-		 * Events come from the panel only
-		 */
-		segmentsEditingPanel.addSignalChangeListener(this);
-		borderTagEditingPanel.addSignalChangeListener(this);
-		
-		
-		tabPane.addTab("Segmentation", segmentsEditingPanel);
-		tabPane.addTab("Border tags", borderTagEditingPanel);
+public class EditingDetailPanel extends DetailPanel
+        implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 
-		
-	}
-	
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a single dataset is selected
-	 */
-//	protected void updateSingle() {
-//		updateMultiple();
-//	}
-//	
-//	/**
-//	 * This method must be overridden by the extending class
-//	 * to perform the actual update when a multiple datasets are selected
-//	 */
-//	protected void updateMultiple() {
-////		cellDetailPanel.setEnabled(true);
-////		segmentsEditingPanel.setEnabled(true);
-//	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
-//	protected void updateNull() {
-//		updateMultiple();
-//	}
-	
-	@Override
-	public void signalChangeReceived(SignalChangeEvent event) {
-		
-		super.signalChangeReceived(event);
-		finer("Editing panel heard signal: "+event.type());
-		
-		// Pass downwards if the signal was not generated internally
-		if( ! this.getSubPanels().contains(event.getSource())){
-			fireSignalChangeEvent(event.type());
-		}
-		
-//		if(event.sourceName().equals("CellDetailPanel") 
-//				|| event.sourceName().equals("SegmentsEditingPanel")
-//				|| event.sourceName().equals("BorderTagEditingPanel")){
-//			fireSignalChangeEvent(event.type());			
-//		} 
-		
-//		fireSignalChangeEvent(event.type());	
-//			
-//		cellDetailPanel.signalChangeReceived(event);
-//		segmentsEditingPanel.signalChangeReceived(event);
-//		borderTagEditingPanel.signalChangeReceived(event);
+    // protected CellDetailPanel cellDetailPanel;
+    // protected SegmentsEditingPanel segmentsEditingPanel;
+    // protected BorderTagEditingPanel borderTagEditingPanel;
 
-		
-	}
+    public EditingDetailPanel() {
+
+        super();
+
+        this.setLayout(new BorderLayout());
+        JTabbedPane tabPane = new JTabbedPane();
+        this.add(tabPane, BorderLayout.CENTER);
+
+        DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
+        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel();
+        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel();
+
+        this.addSubPanel(cellDetailPanel);
+        this.addSubPanel(segmentsEditingPanel);
+        this.addSubPanel(borderTagEditingPanel);
+
+        this.addSignalChangeListener(cellDetailPanel);
+        this.addSignalChangeListener(segmentsEditingPanel);
+        this.addSignalChangeListener(borderTagEditingPanel);
+
+        tabPane.addTab("Cells", cellDetailPanel);
+
+        /*
+         * Signals come from the segment panel to this container Signals can be
+         * sent to the segment panel Events come from the panel only
+         */
+        segmentsEditingPanel.addSignalChangeListener(this);
+        borderTagEditingPanel.addSignalChangeListener(this);
+
+        tabPane.addTab("Segmentation", segmentsEditingPanel);
+        tabPane.addTab("Border tags", borderTagEditingPanel);
+
+    }
+
+    /**
+     * This method must be overridden by the extending class to perform the
+     * actual update when a single dataset is selected
+     */
+    // protected void updateSingle() {
+    // updateMultiple();
+    // }
+    //
+    // /**
+    // * This method must be overridden by the extending class
+    // * to perform the actual update when a multiple datasets are selected
+    // */
+    // protected void updateMultiple() {
+    //// cellDetailPanel.setEnabled(true);
+    //// segmentsEditingPanel.setEnabled(true);
+    // }
+
+    /**
+     * This method must be overridden by the extending class to perform the
+     * actual update when a no datasets are selected
+     */
+    // protected void updateNull() {
+    // updateMultiple();
+    // }
+
+    @Override
+    public void signalChangeReceived(SignalChangeEvent event) {
+
+        super.signalChangeReceived(event);
+        finer("Editing panel heard signal: " + event.type());
+
+        // Pass downwards if the signal was not generated internally
+        if (!this.getSubPanels().contains(event.getSource())) {
+            fireSignalChangeEvent(event.type());
+        }
+
+        // if(event.sourceName().equals("CellDetailPanel")
+        // || event.sourceName().equals("SegmentsEditingPanel")
+        // || event.sourceName().equals("BorderTagEditingPanel")){
+        // fireSignalChangeEvent(event.type());
+        // }
+
+        // fireSignalChangeEvent(event.type());
+        //
+        // cellDetailPanel.signalChangeReceived(event);
+        // segmentsEditingPanel.signalChangeReceived(event);
+        // borderTagEditingPanel.signalChangeReceived(event);
+
+    }
 }

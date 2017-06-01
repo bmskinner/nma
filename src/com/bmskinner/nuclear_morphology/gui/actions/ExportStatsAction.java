@@ -35,80 +35,79 @@ import com.bmskinner.nuclear_morphology.io.Exporter;
 
 /**
  * The action for exporting stats from datasets
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class ExportStatsAction extends MultiDatasetResultAction {
-	
-	private static final String PROGRESS_LBL = "Exporting stats";
-		
-	public ExportStatsAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-		super(datasets, PROGRESS_LBL, mw);
-	}
 
-	@Override
-	public void run() {
-		
-		File file = chooseExportFile();
-		
-		if(file==null){
-			cancel();
-			return;
-		}
-		
-		IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
-		worker = new DefaultAnalysisWorker(m, datasets.size());
-		worker.addPropertyChangeListener(this);
-		this.setProgressMessage("Exporting stats");
-		ThreadManager.getInstance().submit(worker);
-		
-	}
-	
-	@Override
-	public void finished(){
-		
-		this.cancel();
-		fine("Refolding finished, cleaning up");
-		super.finished();
-		this.countdownLatch();
-	}
-	
-	private File chooseExportFile(){
-		
-		String defaultFile = null;
-		File dir = null;
-		if(datasets.size()==1){
-			dir = datasets.get(0).getSavePath().getParentFile();
-			defaultFile = datasets.get(0).getName()+Exporter.TAB_FILE_EXTENSION;
-			
-		} else {
-			defaultFile = "Multiple_stats_export"+Exporter.TAB_FILE_EXTENSION;
-			dir =  IAnalysisDataset.commonPathOfFiles(datasets);
-			if( ! dir.exists() || ! dir.isDirectory()){
-				dir = GlobalOptions.getInstance().getDefaultDir();
-			}
-		}
+    private static final String PROGRESS_LBL = "Exporting stats";
 
+    public ExportStatsAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
+        super(datasets, PROGRESS_LBL, mw);
+    }
 
-		JFileChooser fc = new JFileChooser( dir ); 
-		fc.setSelectedFile(new File(defaultFile));
-		fc.setDialogTitle("Specify a file to save as");
+    @Override
+    public void run() {
 
-		int returnVal = fc.showSaveDialog(fc);
-		if (returnVal != 0)	{
-			return null; // user cancelled
-		}
+        File file = chooseExportFile();
 
-		File file = fc.getSelectedFile();
-		
-		// Add extension if needed
-		if( ! file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)){
-			file = new File(file.getAbsolutePath()+Exporter.TAB_FILE_EXTENSION);
-		}
+        if (file == null) {
+            cancel();
+            return;
+        }
 
-		return file;
-	}
+        IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
+        worker = new DefaultAnalysisWorker(m, datasets.size());
+        worker.addPropertyChangeListener(this);
+        this.setProgressMessage("Exporting stats");
+        ThreadManager.getInstance().submit(worker);
 
+    }
+
+    @Override
+    public void finished() {
+
+        this.cancel();
+        fine("Refolding finished, cleaning up");
+        super.finished();
+        this.countdownLatch();
+    }
+
+    private File chooseExportFile() {
+
+        String defaultFile = null;
+        File dir = null;
+        if (datasets.size() == 1) {
+            dir = datasets.get(0).getSavePath().getParentFile();
+            defaultFile = datasets.get(0).getName() + Exporter.TAB_FILE_EXTENSION;
+
+        } else {
+            defaultFile = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
+            dir = IAnalysisDataset.commonPathOfFiles(datasets);
+            if (!dir.exists() || !dir.isDirectory()) {
+                dir = GlobalOptions.getInstance().getDefaultDir();
+            }
+        }
+
+        JFileChooser fc = new JFileChooser(dir);
+        fc.setSelectedFile(new File(defaultFile));
+        fc.setDialogTitle("Specify a file to save as");
+
+        int returnVal = fc.showSaveDialog(fc);
+        if (returnVal != 0) {
+            return null; // user cancelled
+        }
+
+        File file = fc.getSelectedFile();
+
+        // Add extension if needed
+        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        }
+
+        return file;
+    }
 
 }

@@ -24,104 +24,101 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * An instruction for finding an index in a profile
+ * 
  * @author bms41
  *
  */
 public class Rule implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	final private RuleType type;
-	final private List<Double> values = new ArrayList<Double>(); // spare field
+    private static final long  serialVersionUID = 1L;
+    final private RuleType     type;
+    final private List<Double> values           = new ArrayList<Double>(); // spare
+                                                                           // field
 
-	public Rule(RuleType type, double value){
+    public Rule(RuleType type, double value) {
 
-		this.type = type;
-		this.values.add(value);
-	}
+        this.type = type;
+        this.values.add(value);
+    }
 
-	public Rule(RuleType type, boolean value){
+    public Rule(RuleType type, boolean value) {
 
-		this.type = type;
-		double v = value ? 1d : 0d;
-		this.values.add(v);
-	} 
-	
-	public void addValue(double d){
-		values.add(d);
-	}
+        this.type = type;
+        double v = value ? 1d : 0d;
+        this.values.add(v);
+    }
 
-	/**
-	 * Get the first value in the rule
-	 * @return
-	 */
-	public double getValue(){
-		return values.get(0);
-	}
-	
-	public double getValue(int index){
-		return values.get(index);
-	}
-	
-	public int valueCount(){
-		return values.size();
-	}
+    public void addValue(double d) {
+        values.add(d);
+    }
 
-	public boolean getBooleanValue(){
-		return getBooleanValue(0);
-	}
-	
-	public boolean getBooleanValue(int index){
-		if(values.get(index)==1d){
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	public RuleType getType(){
-		return type;
-	}
-	
-	public String toString(){
-		StringBuilder b = new StringBuilder();
-		b.append(type + " : ");
-		for(Double d : values){
-			b.append(d+" : ");
-		}
-		return b.toString();
-	}
-	
-	/**
-	 * A type of instruction to follow
-	 * @author bms41
-	 *
-	 */
-	public enum RuleType{
+    /**
+     * Get the first value in the rule
+     * 
+     * @return
+     */
+    public double getValue() {
+        return values.get(0);
+    }
 
-		IS_MINIMUM,
-		IS_MAXIMUM,
-		
-		IS_LOCAL_MINIMUM,
-		IS_LOCAL_MAXIMUM,
+    public double getValue(int index) {
+        return values.get(index);
+    }
 
-		VALUE_IS_LESS_THAN,
-		VALUE_IS_MORE_THAN,
-		
-		INDEX_IS_LESS_THAN,
-		INDEX_IS_MORE_THAN,
-		
-		IS_CONSTANT_REGION,
-		
-		FIRST_TRUE,
-		LAST_TRUE,
-		
-		INDEX_IS_WITHIN_FRACTION_OF,
-		INDEX_IS_OUTSIDE_FRACTION_OF,
-		
-		INVERT;
+    public int valueCount() {
+        return values.size();
+    }
 
-	}
+    public boolean getBooleanValue() {
+        return getBooleanValue(0);
+    }
+
+    public boolean getBooleanValue(int index) {
+        if (values.get(index) == 1d) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public RuleType getType() {
+        return type;
+    }
+
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append(type + " : ");
+        for (Double d : values) {
+            b.append(d + " : ");
+        }
+        return b.toString();
+    }
+
+    /**
+     * A type of instruction to follow
+     * 
+     * @author bms41
+     *
+     */
+    public enum RuleType {
+
+        IS_MINIMUM, IS_MAXIMUM,
+
+        IS_LOCAL_MINIMUM, IS_LOCAL_MAXIMUM,
+
+        VALUE_IS_LESS_THAN, VALUE_IS_MORE_THAN,
+
+        INDEX_IS_LESS_THAN, INDEX_IS_MORE_THAN,
+
+        IS_CONSTANT_REGION,
+
+        FIRST_TRUE, LAST_TRUE,
+
+        INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
+
+        INVERT;
+
+    }
 }

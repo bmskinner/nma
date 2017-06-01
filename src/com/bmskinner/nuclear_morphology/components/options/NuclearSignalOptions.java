@@ -7,394 +7,426 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
 /**
  * An early implementation of nuclear signal options. Use a hash version instead
+ * 
  * @author bms41
  *
  */
 @Deprecated
 public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
-	
-	private static final long serialVersionUID = 1L;
-	
-	public int threshold;
-	public double minCirc, maxCirc, minSize, maxFraction;
-	public int detectionMode;
 
-	public NuclearSignalOptions(){
-		this(   DEFAULT_SIGNAL_THRESHOLD, 
-				INuclearSignalOptions.DEFAULT_MIN_CIRC,
-				INuclearSignalOptions.DEFAULT_MAX_CIRC,
-				DEFAULT_MIN_SIGNAL_SIZE,
-				DEFAULT_MAX_SIGNAL_FRACTION,
-				SignalDetectionMode.FORWARD);
-		
-	}
-	
-	public NuclearSignalOptions(int threshold, double minCirc, double maxCirc,
-			double minSize, double maxFraction, SignalDetectionMode detectionMode) {
-		this.threshold = threshold;
-		this.minCirc = minCirc;
-		this.maxCirc = maxCirc;
-		this.minSize = minSize;
-		this.maxFraction = maxFraction;
-		
-		switch(detectionMode){
-			case FORWARD: this.detectionMode = 0;
-				break;
-			case REVERSE: this.detectionMode = 1;
-				break;
-			case ADAPTIVE: this.detectionMode = 2;
-				break;
-		}
-	}
-	
-	/**
-	 * Construct from a template object
-	 * @param template
-	 */
-	protected NuclearSignalOptions(INuclearSignalOptions template){
-		threshold = template.getThreshold();
-		
-		minCirc = template.getMinCirc();
-		maxCirc = template.getMaxCirc();
-		minSize = template.getMinSize();
-		maxFraction = template.getMaxFraction();
-		
-		SignalDetectionMode	mode = template.getDetectionMode();
-		switch(mode){
-			case FORWARD: this.detectionMode = 0;
-				break;
-			case REVERSE: this.detectionMode = 1;
-				break;
-			case ADAPTIVE: this.detectionMode = 2;
-				break;
-		}
+    private static final long serialVersionUID = 1L;
 
-				
-	}
+    public int    threshold;
+    public double minCirc, maxCirc, minSize, maxFraction;
+    public int    detectionMode;
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getThreshold()
-	 */
-	@Override
-	public int getThreshold() {
-		return threshold;
-	}
+    public NuclearSignalOptions() {
+        this(DEFAULT_SIGNAL_THRESHOLD, INuclearSignalOptions.DEFAULT_MIN_CIRC, INuclearSignalOptions.DEFAULT_MAX_CIRC,
+                DEFAULT_MIN_SIGNAL_SIZE, DEFAULT_MAX_SIGNAL_FRACTION, SignalDetectionMode.FORWARD);
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setThreshold(int)
-	 */
-	@Override
-	public void setThreshold(int threshold) {
-		this.threshold = threshold;
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMinCirc()
-	 */
-	@Override
-	public double getMinCirc() {
-		return minCirc;
-	}
+    public NuclearSignalOptions(int threshold, double minCirc, double maxCirc, double minSize, double maxFraction,
+            SignalDetectionMode detectionMode) {
+        this.threshold = threshold;
+        this.minCirc = minCirc;
+        this.maxCirc = maxCirc;
+        this.minSize = minSize;
+        this.maxFraction = maxFraction;
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMinCirc(double)
-	 */
-	@Override
-	public void setMinCirc(double minCirc) {
-		this.minCirc = minCirc;
-	}
+        switch (detectionMode) {
+        case FORWARD:
+            this.detectionMode = 0;
+            break;
+        case REVERSE:
+            this.detectionMode = 1;
+            break;
+        case ADAPTIVE:
+            this.detectionMode = 2;
+            break;
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMaxCirc()
-	 */
-	@Override
-	public double getMaxCirc() {
-		return maxCirc;
-	}
+    /**
+     * Construct from a template object
+     * 
+     * @param template
+     */
+    protected NuclearSignalOptions(INuclearSignalOptions template) {
+        threshold = template.getThreshold();
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMaxCirc(double)
-	 */
-	@Override
-	public void setMaxCirc(double maxCirc) {
-		this.maxCirc = maxCirc;
-	}
+        minCirc = template.getMinCirc();
+        maxCirc = template.getMaxCirc();
+        minSize = template.getMinSize();
+        maxFraction = template.getMaxFraction();
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMinSize()
-	 */
-	@Override
-	public double getMinSize() {
-		return minSize;
-	}
+        SignalDetectionMode mode = template.getDetectionMode();
+        switch (mode) {
+        case FORWARD:
+            this.detectionMode = 0;
+            break;
+        case REVERSE:
+            this.detectionMode = 1;
+            break;
+        case ADAPTIVE:
+            this.detectionMode = 2;
+            break;
+        }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMinSize(double)
-	 */
-	@Override
-	public void setMinSize(double minSize) {
-		this.minSize = minSize;
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getMaxFraction()
-	 */
-	@Override
-	public double getMaxFraction() {
-		return maxFraction;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getThreshold()
+     */
+    @Override
+    public int getThreshold() {
+        return threshold;
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setMaxFraction(double)
-	 */
-	@Override
-	public void setMaxFraction(double maxFraction) {
-		this.maxFraction = maxFraction;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setThreshold(int)
+     */
+    @Override
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#getDetectionMode()
-	 */
-	@Override
-	public SignalDetectionMode getDetectionMode() {
-		
-		switch(detectionMode){
-			case 0: return SignalDetectionMode.FORWARD;
-	
-			case 1: return SignalDetectionMode.REVERSE;
-	
-			case 2: return SignalDetectionMode.ADAPTIVE;
-			
-			default: return SignalDetectionMode.FORWARD;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMinCirc()
+     */
+    @Override
+    public double getMinCirc() {
+        return minCirc;
+    }
 
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMinCirc(double)
+     */
+    @Override
+    public void setMinCirc(double minCirc) {
+        this.minCirc = minCirc;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMaxCirc()
+     */
+    @Override
+    public double getMaxCirc() {
+        return maxCirc;
+    }
 
-	/* (non-Javadoc)
-	 * @see analysis.signals.INuclearSignalOptions#setDetectionMode(int)
-	 */
-	@Override
-	public void setDetectionMode(SignalDetectionMode detectionMode) {
-		switch(detectionMode){
-		case FORWARD: this.detectionMode = 0;
-			break;
-		case REVERSE: this.detectionMode = 1;
-			break;
-		case ADAPTIVE: this.detectionMode = 2;
-			break;
-	}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMaxCirc(double)
+     */
+    @Override
+    public void setMaxCirc(double maxCirc) {
+        this.maxCirc = maxCirc;
+    }
 
-	@Override
-	public File getFolder() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMinSize()
+     */
+    @Override
+    public double getMinSize() {
+        return minSize;
+    }
 
-	@Override
-	public double getMaxSize() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMinSize(double)
+     */
+    @Override
+    public void setMinSize(double minSize) {
+        this.minSize = minSize;
+    }
 
-	@Override
-	public double getScale() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getMaxFraction()
+     */
+    @Override
+    public double getMaxFraction() {
+        return maxFraction;
+    }
 
-	@Override
-	public int getChannel() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setMaxFraction(double)
+     */
+    @Override
+    public void setMaxFraction(double maxFraction) {
+        this.maxFraction = maxFraction;
+    }
 
-	@Override
-	public boolean isNormaliseContrast() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#getDetectionMode()
+     */
+    @Override
+    public SignalDetectionMode getDetectionMode() {
 
-	@Override
-	public boolean hasCannyOptions() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+        switch (detectionMode) {
+        case 0:
+            return SignalDetectionMode.FORWARD;
 
-	@Override
-	public IMutableCannyOptions getCannyOptions() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        case 1:
+            return SignalDetectionMode.REVERSE;
 
-	@Override
-	public boolean isValid(CellularComponent c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+        case 2:
+            return SignalDetectionMode.ADAPTIVE;
 
-	@Override
-	public void setChannel(int channel) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+        default:
+            return SignalDetectionMode.FORWARD;
+        }
 
-	@Override
-	public void setScale(double scale) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    }
 
-	@Override
-	public void setMaxSize(double maxNucleusSize) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.signals.INuclearSignalOptions#setDetectionMode(int)
+     */
+    @Override
+    public void setDetectionMode(SignalDetectionMode detectionMode) {
+        switch (detectionMode) {
+        case FORWARD:
+            this.detectionMode = 0;
+            break;
+        case REVERSE:
+            this.detectionMode = 1;
+            break;
+        case ADAPTIVE:
+            this.detectionMode = 2;
+            break;
+        }
+    }
 
-	@Override
-	public void setFolder(File folder) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public File getFolder() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public void setCannyOptions(IMutableCannyOptions canny) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public double getMaxSize() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public IMutableDetectionOptions duplicate() {
-		return new NuclearSignalOptions(this);
-	}
+    @Override
+    public double getScale() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public void setNormaliseContrast(boolean b) {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public int getChannel() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
-	@Override
-	public void set(IDetectionOptions options) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public boolean isNormaliseContrast() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public IMutableDetectionOptions unlock() {
-		return this;
-	}
+    @Override
+    public boolean hasCannyOptions() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public boolean isUseHoughTransform() {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return false;
-	}
+    @Override
+    public IMutableCannyOptions getCannyOptions() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-	public IDetectionOptions lock() {
-		return this;
-	}
+    @Override
+    public boolean isValid(CellularComponent c) {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
-	@Override
-	public void setHoughOptions(IHoughDetectionOptions hough) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public void setChannel(int channel) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public IDetectionSubOptions getSubOptions(String s) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return null;
-	}
+    @Override
+    public void setScale(double scale) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public boolean isRGB() {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return false;
-	}
+    @Override
+    public void setMaxSize(double maxNucleusSize) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public void setSubOptions(String s, IDetectionSubOptions sub) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public void setFolder(File folder) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public void setRGB(boolean b) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public void setCannyOptions(IMutableCannyOptions canny) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public List<String> getKeys() {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return null;
-	}
+    @Override
+    public IMutableDetectionOptions duplicate() {
+        return new NuclearSignalOptions(this);
+    }
 
-	@Override
-	public boolean hasSubOptions(String key) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return false;
-	}
+    @Override
+    public void setNormaliseContrast(boolean b) {
+        // TODO Auto-generated method stub
 
-	@Override
-	public double getDouble(String s) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return 0;
-	}
+    }
 
-	@Override
-	public int getInt(String s) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return 0;
-	}
+    @Override
+    public void set(IDetectionOptions options) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public boolean getBoolean(String s) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return false;
-	}
+    @Override
+    public IMutableDetectionOptions unlock() {
+        return this;
+    }
 
-	@Override
-	public void setDouble(String s, double d) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public boolean isUseHoughTransform() {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return false;
+    }
 
-	@Override
-	public void setInt(String s, int i) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public IDetectionOptions lock() {
+        return this;
+    }
 
-	@Override
-	public void setBoolean(String s, boolean b) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
+    @Override
+    public void setHoughOptions(IHoughDetectionOptions hough) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
 
-	@Override
-	public float getFloat(String s) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-		return 0;
-	}
+    @Override
+    public IDetectionSubOptions getSubOptions(String s) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return null;
+    }
 
-	@Override
-	public void setFloat(String s, float f) {
-		// TODO Auto-generated method stub
-		warn("Unimplemented method in "+this.getClass().getName());
-	}
-	
-	
+    @Override
+    public boolean isRGB() {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return false;
+    }
+
+    @Override
+    public void setSubOptions(String s, IDetectionSubOptions sub) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
+    @Override
+    public void setRGB(boolean b) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
+    @Override
+    public List<String> getKeys() {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return null;
+    }
+
+    @Override
+    public boolean hasSubOptions(String key) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return false;
+    }
+
+    @Override
+    public double getDouble(String s) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return 0;
+    }
+
+    @Override
+    public int getInt(String s) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return 0;
+    }
+
+    @Override
+    public boolean getBoolean(String s) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return false;
+    }
+
+    @Override
+    public void setDouble(String s, double d) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
+    @Override
+    public void setInt(String s, int i) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
+    @Override
+    public void setBoolean(String s, boolean b) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
+    @Override
+    public float getFloat(String s) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+        return 0;
+    }
+
+    @Override
+    public void setFloat(String s, float f) {
+        // TODO Auto-generated method stub
+        warn("Unimplemented method in " + this.getClass().getName());
+    }
+
 }

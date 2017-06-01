@@ -28,93 +28,97 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
  * Recursive task to find cells in a folder of images
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
-public abstract class AbstractDetectionTask extends AbstractProgressAction  {
-	
-	protected final ICellCollection collection;
-	protected File[] files;
-	protected static final int THRESHOLD = 5; // number of images to handle per fork
-	protected final int low, high;
-	protected final String outputFolder;
-	protected final IAnalysisOptions analysisOptions;
-	protected final File folder;
-		
-	protected AbstractDetectionTask(File folder, File[] files, ICellCollection collection, int low, int high, String outputFolder, IAnalysisOptions analysisOptions) {
-		this.collection      = collection;
-		this.files           = files;
-		this.folder          = folder;
-		this.low             = low;
-		this.high            = high;
-		this.outputFolder    = outputFolder;
-		this.analysisOptions = analysisOptions;
-	}
-	
-	protected void analyseFiles() {
-		
-		for(int i=low; i<high; i++){
-			analyseFile(files[i]);
-		}
-		
-	}
-	
-	/**
-	 *  Checks that the given file is suitable for analysis.
-	 *  Is the file an image. Also check if it is in the 'banned list'.
-	 *  These are prefixes that are attached to exported images
-	 *  at later stages of analysis. This prevents exported images
-	 *  from previous runs being analysed.
-	 *
-	 *  @param file the File to check
-	 *  @return a true or false of whether the file passed checks
-	 */
-	public static boolean checkFile(File file){
+public abstract class AbstractDetectionTask extends AbstractProgressAction {
 
-		if(file==null){
-			return false;
-		}
-		
-		if( ! file.isFile()){
-			return false;
-		}
+    protected final ICellCollection  collection;
+    protected File[]                 files;
+    protected static final int       THRESHOLD = 5;  // number of images to
+                                                     // handle per fork
+    protected final int              low, high;
+    protected final String           outputFolder;
+    protected final IAnalysisOptions analysisOptions;
+    protected final File             folder;
 
-		String fileName = file.getName();
+    protected AbstractDetectionTask(File folder, File[] files, ICellCollection collection, int low, int high,
+            String outputFolder, IAnalysisOptions analysisOptions) {
+        this.collection = collection;
+        this.files = files;
+        this.folder = folder;
+        this.low = low;
+        this.high = high;
+        this.outputFolder = outputFolder;
+        this.analysisOptions = analysisOptions;
+    }
 
-		for( String prefix : ImageImporter.PREFIXES_TO_IGNORE){
-			if(fileName.startsWith(prefix)){
-				return false;
-			}
-		}
+    protected void analyseFiles() {
 
-		for( String fileType : ImageImporter.IMPORTABLE_FILE_TYPES){
-			if( fileName.endsWith(fileType) ){
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	  /**
-	  * Create the output folder for the analysis if required
-	  *
-	  * @param folder the folder in which to create the analysis folder
-	  * @return a File containing the created folder
-	  */
-	protected File makeFolder(File folder){
-	    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
-	    if(!output.exists()){
-	      try{
-	        output.mkdir();
-	      } catch(Exception e) {
-	    	  error("Failed to create directory", e);
-	      }
-	    }
-	    return output;
-	  }
-	
-	protected abstract void analyseFile(File f);
+        for (int i = low; i < high; i++) {
+            analyseFile(files[i]);
+        }
+
+    }
+
+    /**
+     * Checks that the given file is suitable for analysis. Is the file an
+     * image. Also check if it is in the 'banned list'. These are prefixes that
+     * are attached to exported images at later stages of analysis. This
+     * prevents exported images from previous runs being analysed.
+     *
+     * @param file
+     *            the File to check
+     * @return a true or false of whether the file passed checks
+     */
+    public static boolean checkFile(File file) {
+
+        if (file == null) {
+            return false;
+        }
+
+        if (!file.isFile()) {
+            return false;
+        }
+
+        String fileName = file.getName();
+
+        for (String prefix : ImageImporter.PREFIXES_TO_IGNORE) {
+            if (fileName.startsWith(prefix)) {
+                return false;
+            }
+        }
+
+        for (String fileType : ImageImporter.IMPORTABLE_FILE_TYPES) {
+            if (fileName.endsWith(fileType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Create the output folder for the analysis if required
+     *
+     * @param folder
+     *            the folder in which to create the analysis folder
+     * @return a File containing the created folder
+     */
+    protected File makeFolder(File folder) {
+        File output = new File(folder.getAbsolutePath() + File.separator + this.outputFolder);
+        if (!output.exists()) {
+            try {
+                output.mkdir();
+            } catch (Exception e) {
+                error("Failed to create directory", e);
+            }
+        }
+        return output;
+    }
+
+    protected abstract void analyseFile(File f);
 
 }

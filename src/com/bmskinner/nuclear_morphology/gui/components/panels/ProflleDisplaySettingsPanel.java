@@ -28,80 +28,107 @@ import javax.swing.JRadioButton;
 
 @SuppressWarnings("serial")
 public class ProflleDisplaySettingsPanel extends JPanel {
-	
-	public JRadioButton rawProfileLeftButton  = new JRadioButton("Left"); // left align raw profiles in rawChartPanel
-	public JRadioButton rawProfileRightButton = new JRadioButton("Right"); // right align raw profiles in rawChartPan
-	public JCheckBox    normCheckBox 	= new JCheckBox("Normalised");	// to toggle raw or normalised segment profiles in segmentsProfileChartPanel
-	
-	public JRadioButton referenceButton  = new JRadioButton("Reference point"); // start drawing from reference
-	public JRadioButton orientationButton = new JRadioButton("Orientation point"); // start drawing from orientation
-	
-	public JCheckBox showMarkersCheckBox = new JCheckBox("Show markers");	// to toggle OP and RP lines
-	
-	public ProflleDisplaySettingsPanel(){
-		this.setLayout(new FlowLayout());
-		
-		rawProfileLeftButton.setSelected(true);
-		rawProfileLeftButton.setActionCommand("LeftAlignRawProfile");
-		rawProfileRightButton.setActionCommand("RightAlignRawProfile");
-				
-		
-		// checkbox to select raw or normalised profiles
-		normCheckBox.setSelected(true);
-		normCheckBox.setActionCommand("NormalisedProfile");
-		
-		
-		JPanel alignPanel = makealignPanel();
-		this.add(alignPanel);
-		
-		// checkbox to show markers on profiles
-		showMarkersCheckBox.setSelected(true);
-		showMarkersCheckBox.setActionCommand("ToggleMarkers");
-		this.add(showMarkersCheckBox);
-		
-		this.setEnabled(false);
-	}
-	
-	private JPanel makealignPanel(){
-		//Group the radio buttons.
-		JPanel panel = new JPanel(new FlowLayout()){
-			@Override
-			public void setEnabled(boolean enabled){
-				for(Component c : this.getComponents()){
-					c.setEnabled(enabled);
-				}
-			}
-		};
-		final ButtonGroup alignGroup = new ButtonGroup();
-		alignGroup.add(rawProfileLeftButton);
-		alignGroup.add(rawProfileRightButton);
 
-		panel.add(normCheckBox);
-		panel.add(rawProfileLeftButton);
-		panel.add(rawProfileRightButton);
+    public JRadioButton rawProfileLeftButton  = new JRadioButton("Left");    // left
+                                                                             // align
+                                                                             // raw
+                                                                             // profiles
+                                                                             // in
+                                                                             // rawChartPanel
+    public JRadioButton rawProfileRightButton = new JRadioButton("Right");   // right
+                                                                             // align
+                                                                             // raw
+                                                                             // profiles
+                                                                             // in
+                                                                             // rawChartPan
+    public JCheckBox    normCheckBox          = new JCheckBox("Normalised"); // to
+                                                                             // toggle
+                                                                             // raw
+                                                                             // or
+                                                                             // normalised
+                                                                             // segment
+                                                                             // profiles
+                                                                             // in
+                                                                             // segmentsProfileChartPanel
 
+    public JRadioButton referenceButton   = new JRadioButton("Reference point");   // start
+                                                                                   // drawing
+                                                                                   // from
+                                                                                   // reference
+    public JRadioButton orientationButton = new JRadioButton("Orientation point"); // start
+                                                                                   // drawing
+                                                                                   // from
+                                                                                   // orientation
 
-		// Add the radio buttons to choose between reference and orientation drawing
-		referenceButton.setSelected(false);
-		referenceButton.setActionCommand("DrawReferencePoint");
+    public JCheckBox showMarkersCheckBox = new JCheckBox("Show markers"); // to
+                                                                          // toggle
+                                                                          // OP
+                                                                          // and
+                                                                          // RP
+                                                                          // lines
 
-		orientationButton.setSelected(true);
-		orientationButton.setActionCommand("DrawOrientationPoint");
+    public ProflleDisplaySettingsPanel() {
+        this.setLayout(new FlowLayout());
 
-		final ButtonGroup drawPointGroup = new ButtonGroup();
-		drawPointGroup.add(referenceButton);
-		drawPointGroup.add(orientationButton);
+        rawProfileLeftButton.setSelected(true);
+        rawProfileLeftButton.setActionCommand("LeftAlignRawProfile");
+        rawProfileRightButton.setActionCommand("RightAlignRawProfile");
 
-		panel.add(referenceButton);
-		panel.add(orientationButton);
-		return panel;
-	}
-	
-	@Override
-	public void setEnabled(boolean enabled){
-		for(Component c : this.getComponents()){
-			c.setEnabled(enabled);
-		}
-	}
-	
+        // checkbox to select raw or normalised profiles
+        normCheckBox.setSelected(true);
+        normCheckBox.setActionCommand("NormalisedProfile");
+
+        JPanel alignPanel = makealignPanel();
+        this.add(alignPanel);
+
+        // checkbox to show markers on profiles
+        showMarkersCheckBox.setSelected(true);
+        showMarkersCheckBox.setActionCommand("ToggleMarkers");
+        this.add(showMarkersCheckBox);
+
+        this.setEnabled(false);
+    }
+
+    private JPanel makealignPanel() {
+        // Group the radio buttons.
+        JPanel panel = new JPanel(new FlowLayout()) {
+            @Override
+            public void setEnabled(boolean enabled) {
+                for (Component c : this.getComponents()) {
+                    c.setEnabled(enabled);
+                }
+            }
+        };
+        final ButtonGroup alignGroup = new ButtonGroup();
+        alignGroup.add(rawProfileLeftButton);
+        alignGroup.add(rawProfileRightButton);
+
+        panel.add(normCheckBox);
+        panel.add(rawProfileLeftButton);
+        panel.add(rawProfileRightButton);
+
+        // Add the radio buttons to choose between reference and orientation
+        // drawing
+        referenceButton.setSelected(false);
+        referenceButton.setActionCommand("DrawReferencePoint");
+
+        orientationButton.setSelected(true);
+        orientationButton.setActionCommand("DrawOrientationPoint");
+
+        final ButtonGroup drawPointGroup = new ButtonGroup();
+        drawPointGroup.add(referenceButton);
+        drawPointGroup.add(orientationButton);
+
+        panel.add(referenceButton);
+        panel.add(orientationButton);
+        return panel;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        for (Component c : this.getComponents()) {
+            c.setEnabled(enabled);
+        }
+    }
+
 }

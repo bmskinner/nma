@@ -25,77 +25,84 @@ import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 
 /**
- * Border points are 2D points that also track the previous and next
- * points in the border they are a part of
+ * Border points are 2D points that also track the previous and next points in
+ * the border they are a part of
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public interface IBorderPoint extends IMutablePoint {
 
-	/**
-	 * Create a new point of the default type
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	static IBorderPoint makeNew(float x, float y){
-		return new DefaultBorderPoint(x,y);
-	}
-	
-	/**
-	 * Create a new point of the default type
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	static IBorderPoint makeNew(double x, double y){
-		return makeNew( (float) x, (float) y);
-	}
-	
-	/**
-	 * Create a new point of the default type
-	 * based on the given point
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	static IBorderPoint makeNew(IBorderPoint a){
-		return makeNew( a.getX(), a.getY());
-	}
-	
-	/**
-	 * Set the next point in the border
-	 * @param next
-	 */
-	void setNextPoint(IBorderPoint next);
+    /**
+     * Create a new point of the default type
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    static IBorderPoint makeNew(float x, float y) {
+        return new DefaultBorderPoint(x, y);
+    }
 
-	/**
-	 * Set the previous point in the border
-	 * @param prev
-	 */
-	void setPrevPoint(IBorderPoint prev);
+    /**
+     * Create a new point of the default type
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    static IBorderPoint makeNew(double x, double y) {
+        return makeNew((float) x, (float) y);
+    }
 
-	IBorderPoint nextPoint();
+    /**
+     * Create a new point of the default type based on the given point
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    static IBorderPoint makeNew(IBorderPoint a) {
+        return makeNew(a.getX(), a.getY());
+    }
 
-	/**
-	 * Get the point n points ahead
-	 * @param points
-	 * @return
-	 */
-	IBorderPoint nextPoint(int points);
+    /**
+     * Set the next point in the border
+     * 
+     * @param next
+     */
+    void setNextPoint(IBorderPoint next);
 
-	IBorderPoint prevPoint();
+    /**
+     * Set the previous point in the border
+     * 
+     * @param prev
+     */
+    void setPrevPoint(IBorderPoint prev);
 
-	/**
-	 * Get the point n points behind
-	 * @param points
-	 * @return
-	 */
-	IBorderPoint prevPoint(int points);
+    IBorderPoint nextPoint();
 
-	boolean hasNextPoint();
+    /**
+     * Get the point n points ahead
+     * 
+     * @param points
+     * @return
+     */
+    IBorderPoint nextPoint(int points);
 
-	boolean hasPrevPoint();
+    IBorderPoint prevPoint();
+
+    /**
+     * Get the point n points behind
+     * 
+     * @param points
+     * @return
+     */
+    IBorderPoint prevPoint(int points);
+
+    boolean hasNextPoint();
+
+    boolean hasPrevPoint();
 
 }

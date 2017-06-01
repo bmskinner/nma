@@ -21,140 +21,131 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
-
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
-	
-	private static final String HEADER_LBL    = "Pairwise distances between the centres of mass of all signals";
-	private static final String TABLE_TOOLTIP = "Shows the distances between the centres of mass of signals";
-	
-	private ExportableTable table; // individual cell stats
-	
-	private JScrollPane scrollPane;
-	
-	public CellSignalStatsPanel(CellViewModel model) {
-		super(model);
-		this.setLayout(new BorderLayout());
-		
-		JPanel header    = createHeader();
-		
-		scrollPane = new JScrollPane();
 
-		TableModel tableModel = AnalysisDatasetTableCreator.createBlankTable();		
-		
-		table = new ExportableTable(tableModel);
-		table.setEnabled(false);
-		table.setToolTipText(TABLE_TOOLTIP);
-		
-		scrollPane.setViewportView(table);
-		scrollPane.setColumnHeaderView(table.getTableHeader());
-		
-		
-		this.add(header,     BorderLayout.NORTH);
-		this.add(scrollPane, BorderLayout.CENTER);
-		
-		this.setEnabled(false);
-	}
-	
-	/**
-	 * Create the header panel
-	 * @return
-	 */
-	private JPanel createHeader(){
-		JPanel panel = new JPanel();
-		
-		JLabel label = new JLabel(HEADER_LBL);
-		
-		panel.add(label);
-		return panel;
-	}
-	
-	public synchronized void update(){
-		
-		if(this.isMultipleDatasets() || ! this.hasDatasets()){
-			table.setModel(AbstractTableCreator.createBlankTable());
-			return;
-		}
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setCell(this.getCellModel().getCell())
-			.setScale(GlobalOptions.getInstance().getScale())
-			.setTarget(table)
-			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer())
-			.build();
+    private static final String HEADER_LBL    = "Pairwise distances between the centres of mass of all signals";
+    private static final String TABLE_TOOLTIP = "Shows the distances between the centres of mass of signals";
 
-		try{
-			
-			setTable(options);
+    private ExportableTable table; // individual cell stats
 
-		} catch(Exception e){
-			warn("Error updating cell stats table");
-			stack("Error updating cell stats table", e);
-		}
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		
-		table.setModel(AbstractTableCreator.createLoadingTable());
-	}
-	
-	@Override
-	protected void updateSingle() {
-		update();
-	}
+    private JScrollPane scrollPane;
 
+    public CellSignalStatsPanel(CellViewModel model) {
+        super(model);
+        this.setLayout(new BorderLayout());
 
+        JPanel header = createHeader();
 
-	@Override
-	protected void updateMultiple() {
-		updateNull();
-	}
+        scrollPane = new JScrollPane();
 
+        TableModel tableModel = AnalysisDatasetTableCreator.createBlankTable();
 
+        table = new ExportableTable(tableModel);
+        table.setEnabled(false);
+        table.setToolTipText(TABLE_TOOLTIP);
 
-	@Override
-	protected void updateNull() {
-		table.setModel(AbstractTableCreator.createBlankTable());
-		
-	}
+        scrollPane.setViewportView(table);
+        scrollPane.setColumnHeaderView(table.getTableHeader());
 
+        this.add(header, BorderLayout.NORTH);
+        this.add(scrollPane, BorderLayout.CENTER);
 
+        this.setEnabled(false);
+    }
 
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		
-		if(getCellModel().hasCell()){
-			return new CellTableDatasetCreator(options, getCellModel().getCell()).createPairwiseSignalDistanceTable();
-		} else {
-			return AbstractTableCreator.createBlankTable();
-		}
-	}
-	
-	/**
-	 * Colour colocalising signal table. Self matches are greyed out.
-	 */
-	private class CellSignalColocalisationRenderer extends DefaultTableCellRenderer {
+    /**
+     * Create the header panel
+     * 
+     * @return
+     */
+    private JPanel createHeader() {
+        JPanel panel = new JPanel();
 
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-	        
-			//Cells are by default rendered as a JLabel.
-			super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        JLabel label = new JLabel(HEADER_LBL);
 
-			Color bgColour = Color.WHITE;
-			Color fgColour = Color.BLACK;
-			
-			if(row==column-1){
-				bgColour = Color.LIGHT_GRAY;
-				fgColour = Color.LIGHT_GRAY;
-			}
+        panel.add(label);
+        return panel;
+    }
 
-			setBackground(bgColour);
-			setForeground(fgColour);
+    public synchronized void update() {
 
-			return this;
-		}
-	}
+        if (this.isMultipleDatasets() || !this.hasDatasets()) {
+            table.setModel(AbstractTableCreator.createBlankTable());
+            return;
+        }
+
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setCell(this.getCellModel().getCell()).setScale(GlobalOptions.getInstance().getScale())
+                .setTarget(table)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new CellSignalColocalisationRenderer()).build();
+
+        try {
+
+            setTable(options);
+
+        } catch (Exception e) {
+            warn("Error updating cell stats table");
+            stack("Error updating cell stats table", e);
+        }
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+
+        table.setModel(AbstractTableCreator.createLoadingTable());
+    }
+
+    @Override
+    protected void updateSingle() {
+        update();
+    }
+
+    @Override
+    protected void updateMultiple() {
+        updateNull();
+    }
+
+    @Override
+    protected void updateNull() {
+        table.setModel(AbstractTableCreator.createBlankTable());
+
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+
+        if (getCellModel().hasCell()) {
+            return new CellTableDatasetCreator(options, getCellModel().getCell()).createPairwiseSignalDistanceTable();
+        } else {
+            return AbstractTableCreator.createBlankTable();
+        }
+    }
+
+    /**
+     * Colour colocalising signal table. Self matches are greyed out.
+     */
+    private class CellSignalColocalisationRenderer extends DefaultTableCellRenderer {
+
+        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+            // Cells are by default rendered as a JLabel.
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            Color bgColour = Color.WHITE;
+            Color fgColour = Color.BLACK;
+
+            if (row == column - 1) {
+                bgColour = Color.LIGHT_GRAY;
+                fgColour = Color.LIGHT_GRAY;
+            }
+
+            setBackground(bgColour);
+            setForeground(fgColour);
+
+            return this;
+        }
+    }
 
 }

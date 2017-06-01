@@ -25,28 +25,31 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 
 /**
  * Methods for editing datasets via a tab panel
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface EditingTabPanel extends TabPanel {
-	
-	void checkCellLock();
-	
-	/**
-	 * Update the border tag in the median profile to the given index, 
-	 * and update individual nuclei to match.
-	 * @param tag
-	 * @param newTagIndex
-	 */
-	void setBorderTagAction(Tag tag, int newTagIndex);
-	
-	/**
-	 * Update the start index of the given segment to the given index in the 
-	 * median profile, and update individual nuclei to match
-	 * @param id
-	 * @param index
-	 * @throws Exception
-	 */
-	void updateSegmentStartIndexAction(UUID id, int index) throws Exception;
+
+    void checkCellLock();
+
+    /**
+     * Update the border tag in the median profile to the given index, and
+     * update individual nuclei to match.
+     * 
+     * @param tag
+     * @param newTagIndex
+     */
+    void setBorderTagAction(Tag tag, int newTagIndex);
+
+    /**
+     * Update the start index of the given segment to the given index in the
+     * median profile, and update individual nuclei to match
+     * 
+     * @param id
+     * @param index
+     * @throws Exception
+     */
+    void updateSegmentStartIndexAction(UUID id, int index) throws Exception;
 }

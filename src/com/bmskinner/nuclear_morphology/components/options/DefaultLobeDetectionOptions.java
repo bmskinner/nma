@@ -4,41 +4,41 @@ import java.io.File;
 
 /**
  * A default implementation of the IMutableLobeDetectionOptions interface.
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
-public class DefaultLobeDetectionOptions
-	extends DefaultNucleusDetectionOptions 
-	implements IMutableLobeDetectionOptions {
+public class DefaultLobeDetectionOptions extends DefaultNucleusDetectionOptions
+        implements IMutableLobeDetectionOptions {
 
-	private static final long serialVersionUID = 1L;
-	
-	private double lobeFraction = 0.5;;
-	
-	public DefaultLobeDetectionOptions(File folder) {
-		super(folder);
-	}
-	
-	public DefaultLobeDetectionOptions(ILobeDetectionOptions template) {
-		super(template);
-		lobeFraction = template.getLobeDiameter();
-	}
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public IMutableDetectionOptions duplicate() {
-		return new DefaultLobeDetectionOptions(this);
-	}
+    private double lobeFraction = 0.5;;
 
-	@Override
-	public void setLobeDiameter(double d) {
-		lobeFraction = d;
-		
-	}
+    public DefaultLobeDetectionOptions(File folder) {
+        super(folder);
+    }
 
-	@Override
-	public double getLobeDiameter() {
-		return lobeFraction;
-	}
+    public DefaultLobeDetectionOptions(ILobeDetectionOptions template) {
+        super(template);
+        lobeFraction = template.getLobeDiameter();
+    }
+
+    @Override
+    public IMutableDetectionOptions duplicate() {
+        return new DefaultLobeDetectionOptions(this);
+    }
+
+    @Override
+    public void setLobeDiameter(double d) {
+        lobeFraction = d;
+
+    }
+
+    @Override
+    public double getLobeDiameter() {
+        return lobeFraction;
+    }
 
 }

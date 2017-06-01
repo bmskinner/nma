@@ -22,14 +22,27 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 /**
  * Thrown when the requested border tag is not present in a Taggable object
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class UnavailableBorderTagException extends UnavailableComponentException {
-	private static final long serialVersionUID = 1L;
-	public UnavailableBorderTagException() { super(); }
-	public UnavailableBorderTagException(String message) { super(message); }
-	public UnavailableBorderTagException(String message, Throwable cause) { super(message, cause); }
-	public UnavailableBorderTagException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
+
+    public UnavailableBorderTagException() {
+        super();
+    }
+
+    public UnavailableBorderTagException(String message) {
+        super(message);
+    }
+
+    public UnavailableBorderTagException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnavailableBorderTagException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -25,58 +25,58 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 public abstract class OverlayObject {
-	
-	protected Stroke stroke;
-	protected Paint fill;
-	protected Paint outline;
-	protected boolean isVisible;
-	protected PropertyChangeSupport pcs;
-	
-	public OverlayObject(Stroke stroke, Paint outline, Paint fill){
-		this.stroke   = stroke;
-		this.outline  = outline;
-		this.fill     = fill;
-		this.isVisible = true;
-		this.pcs      = new PropertyChangeSupport(this);
-	}
-	
-	public Stroke getStroke() {
-		return stroke;
-	}
 
-	public void setStroke(Stroke stroke) {
-		this.stroke = stroke;
-	}
+    protected Stroke                stroke;
+    protected Paint                 fill;
+    protected Paint                 outline;
+    protected boolean               isVisible;
+    protected PropertyChangeSupport pcs;
 
-	public Paint getFill() {
-		return fill;
-	}
+    public OverlayObject(Stroke stroke, Paint outline, Paint fill) {
+        this.stroke = stroke;
+        this.outline = outline;
+        this.fill = fill;
+        this.isVisible = true;
+        this.pcs = new PropertyChangeSupport(this);
+    }
 
-	public void setFill(Paint fill) {
-		this.fill = fill;
-	}
+    public Stroke getStroke() {
+        return stroke;
+    }
 
-	public Paint getOutline() {
-		return outline;
-	}
+    public void setStroke(Stroke stroke) {
+        this.stroke = stroke;
+    }
 
-	public void setOutline(Paint outline) {
-		this.outline = outline;
-	}
-	
+    public Paint getFill() {
+        return fill;
+    }
 
-	public boolean isVisible() {
-		return isVisible;
-	}
+    public void setFill(Paint fill) {
+        this.fill = fill;
+    }
 
-	public void setVisible(boolean isVisible) {
-		this.isVisible = isVisible;
-	}
-	
-	 /**
+    public Paint getOutline() {
+        return outline;
+    }
+
+    public void setOutline(Paint outline) {
+        this.outline = outline;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setVisible(boolean isVisible) {
+        this.isVisible = isVisible;
+    }
+
+    /**
      * Adds a property change listener.
      *
-     * @param l  the listener.
+     * @param l
+     *            the listener.
      */
     public void addPropertyChangeListener(PropertyChangeListener l) {
         this.pcs.addPropertyChangeListener(l);
@@ -85,25 +85,25 @@ public abstract class OverlayObject {
     /**
      * Removes a property change listener.
      *
-     * @param l  the listener.
+     * @param l
+     *            the listener.
      */
     public void removePropertyChangeListener(PropertyChangeListener l) {
         this.pcs.removePropertyChangeListener(l);
     }
-    
-    
+
     /**
-     * Test if the given point (in chart coordinates) lies within this
-     * overlay
+     * Test if the given point (in chart coordinates) lies within this overlay
+     * 
      * @param x
      * @param y
      * @return
      */
     public abstract boolean contains(int x, int y);
-    
+
     /**
-     * Test if the given point (in chart coordinates) lies within this
-     * overlay
+     * Test if the given point (in chart coordinates) lies within this overlay
+     * 
      * @param x
      * @param y
      * @return

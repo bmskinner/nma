@@ -26,205 +26,211 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 
 /**
  * Run clustering of nuclei in a dataset based on a given set of options
+ * 
  * @author ben
  *
  */
 public class NucleusClusteringMethod extends TreeBuildingMethod {
-	
-	public static final int EM = 0; // expectation maximisation
-	public static final int HIERARCHICAL = 1;
-	
-	private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
 
-		
-	/**
-	 * Construct from a dataset and options
-	 * @param dataset the analysis dataset with nuclei to cluster
-	 * @param options the clustering options
-	 */
-	public NucleusClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options){
-		super(dataset, options);		
-	}
-	
-	@Override
-	public IAnalysisResult call() throws Exception {
+    public static final int EM           = 0; // expectation maximisation
+    public static final int HIERARCHICAL = 1;
 
-		run();		
-		
-		// Save the clusters to the dataset
-		List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+    private Map<Integer, ICellCollection> clusterMap = new HashMap<Integer, ICellCollection>();
 
-		finest("Getting group number");
-		int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
-		finest("Cluster group number chosen: "+clusterNumber);
+    /**
+     * Construct from a dataset and options
+     * 
+     * @param dataset
+     *            the analysis dataset with nuclei to cluster
+     * @param options
+     *            the clustering options
+     */
+    public NucleusClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options) {
+        super(dataset, options);
+    }
 
-		IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX+"_"+clusterNumber, options, newickTree);
+    @Override
+    public IAnalysisResult call() throws Exception {
 
-		for(int cluster=0;cluster<clusterMap.size();cluster++){
+        run();
 
-			ICellCollection c = clusterMap.get(cluster);
+        // Save the clusters to the dataset
+        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
 
-			if(c.hasCells()){
-				finest("Cluster "+cluster+": "+c.getName());
-				
-				try {
-					dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
-				} catch (ProfileException e) {
-					warn("Error copying collection offsets");
-					stack("Error in offsetting", e);
-				}
+        finest("Getting group number");
+        int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
+        finest("Cluster group number chosen: " + clusterNumber);
 
-				
-				
-				group.addDataset(c);
-				c.setName(group.getName()+"_"+c.getName());
+        IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, options,
+                newickTree);
 
-				dataset.addChildCollection(c);
-								
-				
-				// attach the clusters to their parent collection
-				log("Cluster "+cluster+": "+c.size()+" nuclei");
-				IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
-				clusterDataset.setRoot(false);
-				
-				// set shared counts
-				c.setSharedCount(dataset.getCollection(), c.size());
-				dataset.getCollection().setSharedCount(c, c.size());
-				
-				list.add(clusterDataset);
-			}
+        for (int cluster = 0; cluster < clusterMap.size(); cluster++) {
 
+            ICellCollection c = clusterMap.get(cluster);
 
-		}
-		fine("Profiles copied to all clusters");
-		dataset.addClusterGroup(group);
-		IAnalysisResult r = new ClusterAnalysisResult(list, group);
-		return r;
-	}
-	
+            if (c.hasCells()) {
+                finest("Cluster " + cluster + ": " + c.getName());
 
-	private void run() {
-		boolean ok = cluster(collection);
-		fine("Returning "+ok);
-	}
-	
-	/**
-	 * Run the clustering on a collection
-	 * @param collection
-	 * @return success or fail
-	 */
-	public boolean cluster(ICellCollection collection){
+                try {
+                    dataset.getCollection().getProfileManager().copyCollectionOffsets(c);
+                } catch (ProfileException e) {
+                    warn("Error copying collection offsets");
+                    stack("Error in offsetting", e);
+                }
 
-		fine("Beginning clustering of population");
-				
-		try {
-						
-			// create Instances to hold Instance
-			Instances instances = makeInstances();
-			
+                group.addDataset(c);
+                c.setName(group.getName() + "_" + c.getName());
 
-			// create the clusterer to run on the Instances
-			String[] optionArray = this.options.getOptions();
-				
+                dataset.addChildCollection(c);
 
-			finer("Clusterer is type "+options.getType());
-			for(String s : optionArray){
-				finest("Clusterer options: "+s);
-			}
+                // attach the clusters to their parent collection
+                log("Cluster " + cluster + ": " + c.size() + " nuclei");
+                IAnalysisDataset clusterDataset = dataset.getChildDataset(c.getID());
+                clusterDataset.setRoot(false);
 
+                // set shared counts
+                c.setSharedCount(dataset.getCollection(), c.size());
+                dataset.getCollection().setSharedCount(c, c.size());
 
-			if(options.getType().equals(ClusteringMethod.HIERARCHICAL)){
-				HierarchicalClusterer clusterer = new HierarchicalClusterer();
+                list.add(clusterDataset);
+            }
 
-				clusterer.setOptions(optionArray);     // set the options
-				clusterer.setDistanceFunction(new EuclideanDistance());
-				clusterer.setDistanceIsBranchLength(true);
-				clusterer.setNumClusters(1);
+        }
+        fine("Profiles copied to all clusters");
+        dataset.addClusterGroup(group);
+        IAnalysisResult r = new ClusterAnalysisResult(list, group);
+        return r;
+    }
 
-				finest( "Building clusterer for tree");
-				//					firePropertyChange("Cooldown", getProgress(), Constants.Progress.FINISHED.code());
-				clusterer.buildClusterer(instances);    // build the clusterer with one cluster for the tree
-				clusterer.setPrintNewick(true);
+    private void run() {
+        boolean ok = cluster(collection);
+        fine("Returning " + ok);
+    }
 
-				this.newickTree = clusterer.graph();
+    /**
+     * Run the clustering on a collection
+     * 
+     * @param collection
+     * @return success or fail
+     */
+    public boolean cluster(ICellCollection collection) {
 
-				clusterer.setNumClusters(options.getClusterNumber());
+        fine("Beginning clustering of population");
 
-				finest("Building hierarchical clusterer");
-				clusterer.buildClusterer(instances);    // build the clusterer
-				assignClusters(clusterer, collection);		
+        try {
 
-			}
+            // create Instances to hold Instance
+            Instances instances = makeInstances();
 
-			if(options.getType().equals(ClusteringMethod.EM)){
-				EM clusterer = new EM();   // new instance of clusterer
-				clusterer.setOptions(optionArray);     // set the options
-				clusterer.buildClusterer(instances);    // build the clusterer
-				finest("Assigning clusters via EM");
-				assignClusters(clusterer, collection);		
-			}
+            // create the clusterer to run on the Instances
+            String[] optionArray = this.options.getOptions();
 
+            finer("Clusterer is type " + options.getType());
+            for (String s : optionArray) {
+                finest("Clusterer options: " + s);
+            }
 
-		} catch (Exception e) {
-			error("Error in assignments", e);
-			return false;
-		}
-		fine("Clustering complete");
-		return true;
-	}
-	
-	/**
-	 * Given a trained clusterer, put each nucleus within the collection into a cluster
-	 * @param clusterer the clusterer to use
-	 * @param collection the collection with nuclei to cluster
-	 */
-	private void assignClusters(Clusterer clusterer, ICellCollection collection){
-		try {
-			// construct new collections for each cluster
-			fine("Assigning nuclei to clusters");
-			fine("Clusters : "+clusterer.numberOfClusters());
+            if (options.getType().equals(ClusteringMethod.HIERARCHICAL)) {
+                HierarchicalClusterer clusterer = new HierarchicalClusterer();
 
-			for(int i=0;i<clusterer.numberOfClusters();i++ ){
-				fine("Cluster "+i+": " +	collection.getName()+"_Cluster_"+i);
+                clusterer.setOptions(optionArray); // set the options
+                clusterer.setDistanceFunction(new EuclideanDistance());
+                clusterer.setDistanceIsBranchLength(true);
+                clusterer.setNumClusters(1);
 
-				ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_"+i);
-				
-				clusterCollection.setName("Cluster_"+i);
-				clusterMap.put(i, clusterCollection);
-			}
+                finest("Building clusterer for tree");
+                // firePropertyChange("Cooldown", getProgress(),
+                // Constants.Progress.FINISHED.code());
+                clusterer.buildClusterer(instances); // build the clusterer with
+                                                     // one cluster for the tree
+                clusterer.setPrintNewick(true);
 
-			int i = collection.size();
-			for(Instance inst : cellToInstanceMap.keySet()){
-				
-				try{
-					
-					
-					UUID cellID = cellToInstanceMap.get(inst);
+                this.newickTree = clusterer.graph();
 
-					int clusterNumber = clusterer.clusterInstance(inst); // #pass each instance through the model
-					
-					finest("\tTesting instance "+i+": "+clusterNumber);
-					
-					ICellCollection cluster = clusterMap.get(clusterNumber);
+                clusterer.setNumClusters(options.getClusterNumber());
 
-					// should never be null
-					if(collection.getCell(cellID)!=null){
-						cluster.addCell( collection.getCell(cellID) );
-					} else {
-						warn("Error: cell with ID "+cellID+" is not found");
-					}
-					finest("\tInstance handled");
-					fireProgressEvent();
-				} catch(Exception e){
-					error("Error assigning instance to cluster", e);
-				}
-				 
-			}
-			finer("Assignment of clusters complete");
-		} catch (Exception e) {
-			warn("Error making clusters");
-			fine("Error clustering", e);			
-		}
-	}
+                finest("Building hierarchical clusterer");
+                clusterer.buildClusterer(instances); // build the clusterer
+                assignClusters(clusterer, collection);
+
+            }
+
+            if (options.getType().equals(ClusteringMethod.EM)) {
+                EM clusterer = new EM(); // new instance of clusterer
+                clusterer.setOptions(optionArray); // set the options
+                clusterer.buildClusterer(instances); // build the clusterer
+                finest("Assigning clusters via EM");
+                assignClusters(clusterer, collection);
+            }
+
+        } catch (Exception e) {
+            error("Error in assignments", e);
+            return false;
+        }
+        fine("Clustering complete");
+        return true;
+    }
+
+    /**
+     * Given a trained clusterer, put each nucleus within the collection into a
+     * cluster
+     * 
+     * @param clusterer
+     *            the clusterer to use
+     * @param collection
+     *            the collection with nuclei to cluster
+     */
+    private void assignClusters(Clusterer clusterer, ICellCollection collection) {
+        try {
+            // construct new collections for each cluster
+            fine("Assigning nuclei to clusters");
+            fine("Clusters : " + clusterer.numberOfClusters());
+
+            for (int i = 0; i < clusterer.numberOfClusters(); i++) {
+                fine("Cluster " + i + ": " + collection.getName() + "_Cluster_" + i);
+
+                ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
+
+                clusterCollection.setName("Cluster_" + i);
+                clusterMap.put(i, clusterCollection);
+            }
+
+            int i = collection.size();
+            for (Instance inst : cellToInstanceMap.keySet()) {
+
+                try {
+
+                    UUID cellID = cellToInstanceMap.get(inst);
+
+                    int clusterNumber = clusterer.clusterInstance(inst); // #pass
+                                                                         // each
+                                                                         // instance
+                                                                         // through
+                                                                         // the
+                                                                         // model
+
+                    finest("\tTesting instance " + i + ": " + clusterNumber);
+
+                    ICellCollection cluster = clusterMap.get(clusterNumber);
+
+                    // should never be null
+                    if (collection.getCell(cellID) != null) {
+                        cluster.addCell(collection.getCell(cellID));
+                    } else {
+                        warn("Error: cell with ID " + cellID + " is not found");
+                    }
+                    finest("\tInstance handled");
+                    fireProgressEvent();
+                } catch (Exception e) {
+                    error("Error assigning instance to cluster", e);
+                }
+
+            }
+            finer("Assignment of clusters complete");
+        } catch (Exception e) {
+            warn("Error making clusters");
+            fine("Error clustering", e);
+        }
+    }
 
 }

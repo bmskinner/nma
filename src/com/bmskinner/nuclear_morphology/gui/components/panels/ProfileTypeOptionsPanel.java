@@ -25,38 +25,41 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
 /**
  * Provides a drop down list with the displayable profile types.
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public class ProfileTypeOptionsPanel extends EnumeratedOptionsPanel {
 
-	private JComboBox<ProfileType> profileTypeBox; //= new JComboBox<ProfileType>(ProfileType.values());
+    private JComboBox<ProfileType> profileTypeBox; // = new
+                                                   // JComboBox<ProfileType>(ProfileType.values());
 
-	public ProfileTypeOptionsPanel(){
-		super();
-		
-		// FrankenProfiles cause problems for individual nuclei, so disable for now
-		DefaultComboBoxModel<ProfileType> model = new DefaultComboBoxModel<ProfileType>();
-		
-		for(ProfileType type : ProfileType.displayValues()){
-			model.addElement(type);
-		}
-		
-		profileTypeBox = new JComboBox<ProfileType>(model);
-		
-		this.add(profileTypeBox);
-		profileTypeBox.addActionListener(this);
-		profileTypeBox.setSelectedItem(ProfileType.ANGLE);
-	
-	}
+    public ProfileTypeOptionsPanel() {
+        super();
 
-	public ProfileType getSelected(){
-		return (ProfileType) profileTypeBox.getSelectedItem();
-	}
+        // FrankenProfiles cause problems for individual nuclei, so disable for
+        // now
+        DefaultComboBoxModel<ProfileType> model = new DefaultComboBoxModel<ProfileType>();
 
-	public void setEnabled(boolean b){
-		profileTypeBox.setEnabled(b);
-		
-	}
+        for (ProfileType type : ProfileType.displayValues()) {
+            model.addElement(type);
+        }
+
+        profileTypeBox = new JComboBox<ProfileType>(model);
+
+        this.add(profileTypeBox);
+        profileTypeBox.addActionListener(this);
+        profileTypeBox.setSelectedItem(ProfileType.ANGLE);
+
+    }
+
+    public ProfileType getSelected() {
+        return (ProfileType) profileTypeBox.getSelectedItem();
+    }
+
+    public void setEnabled(boolean b) {
+        profileTypeBox.setEnabled(b);
+
+    }
 }

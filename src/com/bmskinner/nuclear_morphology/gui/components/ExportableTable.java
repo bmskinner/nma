@@ -35,87 +35,87 @@ import ij.io.SaveDialog;
 
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
-	
-	final private TablePopupMenu popup;
-	
-	public ExportableTable(){
-		super();
-		popup = new TablePopupMenu(this);
-		this.setComponentPopupMenu(popup);
-	}
-	
-	public ExportableTable(TableModel model){
-		super(model);
-		popup = new TablePopupMenu(this);
-		this.setComponentPopupMenu(popup);
-	}
-	
-	private class TablePopupMenu extends JPopupMenu {
-		
-		final private ExportableTable table;
 
-		final private JMenuItem exportMenuItem = new JMenuItem( new AbstractAction("Export"){
+    final private TablePopupMenu popup;
 
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				export();	
-			}
-		});
-		
-		public TablePopupMenu(final ExportableTable table) {
-			
-			super("Popup");
-			this.table = table;
-			this.add(exportMenuItem);
+    public ExportableTable() {
+        super();
+        popup = new TablePopupMenu(this);
+        this.setComponentPopupMenu(popup);
+    }
 
-	    }
-		
-		private void export(){
-			
-			
-			// get a place to save to
-			SaveDialog saveDialog = new SaveDialog("Export table to...", "Table", Exporter.TAB_FILE_EXTENSION);
+    public ExportableTable(TableModel model) {
+        super(model);
+        popup = new TablePopupMenu(this);
+        this.setComponentPopupMenu(popup);
+    }
 
-			String fileName = saveDialog.getFileName();
-			String folderName = saveDialog.getDirectory();
-			
-			if(fileName!=null && folderName!=null){
-				File saveFile = new File(folderName+File.separator+fileName);
-				
-				// write out the model
-				String string = makeExportString();
-				PrintWriter out;
-				try {
+    private class TablePopupMenu extends JPopupMenu {
 
-					out = new PrintWriter(saveFile);
-					out.println(string);
-					out.close();
-				} catch (FileNotFoundException e) {
-					
-				}
-				
-			} 
+        final private ExportableTable table;
 
-		}
-		
-		private String makeExportString(){
-			StringBuilder builder = new StringBuilder();
-			TableModel model = table.getModel();
-			for(int col=0; col<model.getColumnCount(); col++){
-				builder.append(model.getColumnName(col)+"\t");;
-			}
-			builder.append("\r\n");
-			for(int row=0; row<model.getRowCount(); row++){
+        final private JMenuItem exportMenuItem = new JMenuItem(new AbstractAction("Export") {
 
-				for(int col=0; col<model.getColumnCount(); col++){
-					Object value = model.getValueAt(row, col);
-					builder.append(value+"\t");
-				}
-				builder.append("\r\n");
-			}
-			return builder.toString();
-		}
-		
-	}
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                export();
+            }
+        });
+
+        public TablePopupMenu(final ExportableTable table) {
+
+            super("Popup");
+            this.table = table;
+            this.add(exportMenuItem);
+
+        }
+
+        private void export() {
+
+            // get a place to save to
+            SaveDialog saveDialog = new SaveDialog("Export table to...", "Table", Exporter.TAB_FILE_EXTENSION);
+
+            String fileName = saveDialog.getFileName();
+            String folderName = saveDialog.getDirectory();
+
+            if (fileName != null && folderName != null) {
+                File saveFile = new File(folderName + File.separator + fileName);
+
+                // write out the model
+                String string = makeExportString();
+                PrintWriter out;
+                try {
+
+                    out = new PrintWriter(saveFile);
+                    out.println(string);
+                    out.close();
+                } catch (FileNotFoundException e) {
+
+                }
+
+            }
+
+        }
+
+        private String makeExportString() {
+            StringBuilder builder = new StringBuilder();
+            TableModel model = table.getModel();
+            for (int col = 0; col < model.getColumnCount(); col++) {
+                builder.append(model.getColumnName(col) + "\t");
+                ;
+            }
+            builder.append("\r\n");
+            for (int row = 0; row < model.getRowCount(); row++) {
+
+                for (int col = 0; col < model.getColumnCount(); col++) {
+                    Object value = model.getValueAt(row, col);
+                    builder.append(value + "\t");
+                }
+                builder.append("\r\n");
+            }
+            return builder.toString();
+        }
+
+    }
 
 }

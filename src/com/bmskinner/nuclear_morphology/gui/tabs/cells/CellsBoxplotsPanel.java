@@ -41,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
 /**
  * Display boxplots for whole cell data
+ * 
  * @author bms41
  * @since 1.13.4
  *
@@ -48,80 +49,74 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 @SuppressWarnings("serial")
 public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
-	public CellsBoxplotsPanel() {
-		super(CellularComponent.WHOLE_CELL);
+    public CellsBoxplotsPanel() {
+        super(CellularComponent.WHOLE_CELL);
 
-		Dimension preferredSize = new Dimension(200, 300);
-		
-		for(PlottableStatistic stat : PlottableStatistic.getCellStats()){
-			
-			JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
-			ViolinChartPanel panel = new ViolinChartPanel(chart);
-			
-			panel.setPreferredSize(preferredSize);
-			chartPanels.put(stat.toString(), panel);
-			mainPanel.add(panel);
-			
-		}
-		
-		// add the scroll pane to the tab
-		scrollPane  = new JScrollPane(mainPanel);
-		this.add(scrollPane, BorderLayout.CENTER);			
-	}
-							
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		
-		update(getDatasets());
-		
-	}
+        Dimension preferredSize = new Dimension(200, 300);
 
-	@Override
-	protected synchronized void updateSingle() {
-		super.updateSingle();
-		finest("Passing to update multiple in "+this.getClass().getName());
-		updateMultiple();
-		
-	}
+        for (PlottableStatistic stat : PlottableStatistic.getCellStats()) {
 
-	@Override
-	protected synchronized void updateMultiple() {
-		super.updateMultiple();
-		
+            JFreeChart chart = BoxplotChartFactory.makeEmptyChart();
+            ViolinChartPanel panel = new ViolinChartPanel(chart);
 
-		for(PlottableStatistic stat : PlottableStatistic.getCellStats()){
+            panel.setPreferredSize(preferredSize);
+            chartPanels.put(stat.toString(), panel);
+            mainPanel.add(panel);
 
-			ExportableChartPanel panel = chartPanels.get(stat.toString());
-			
-			ChartOptions options = new ChartOptionsBuilder()
-				.setDatasets(getDatasets())
-				.addStatistic(stat)
-				.setScale(GlobalOptions.getInstance().getScale())
-				.setSwatch(GlobalOptions.getInstance().getSwatch())
-				.setTarget(panel)
-				.build();
-			
-			setChart(options);
-		}
+        }
 
-		
-	}
+        // add the scroll pane to the tab
+        scrollPane = new JScrollPane(mainPanel);
+        this.add(scrollPane, BorderLayout.CENTER);
+    }
 
-	@Override
-	protected synchronized void updateNull() {
-		super.updateNull();
-		finest("Passing to update multiple in "+this.getClass().getName());
-		updateMultiple();
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-		for(PlottableStatistic stat : PlottableStatistic.getCellStats()){
-			ExportableChartPanel panel = chartPanels.get(stat.toString());
-			panel.setChart(MorphologyChartFactory.createLoadingChart());
-			
-		}
-	}
+        update(getDatasets());
+
+    }
+
+    @Override
+    protected synchronized void updateSingle() {
+        super.updateSingle();
+        finest("Passing to update multiple in " + this.getClass().getName());
+        updateMultiple();
+
+    }
+
+    @Override
+    protected synchronized void updateMultiple() {
+        super.updateMultiple();
+
+        for (PlottableStatistic stat : PlottableStatistic.getCellStats()) {
+
+            ExportableChartPanel panel = chartPanels.get(stat.toString());
+
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .setTarget(panel).build();
+
+            setChart(options);
+        }
+
+    }
+
+    @Override
+    protected synchronized void updateNull() {
+        super.updateNull();
+        finest("Passing to update multiple in " + this.getClass().getName());
+        updateMultiple();
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+
+        for (PlottableStatistic stat : PlottableStatistic.getCellStats()) {
+            ExportableChartPanel panel = chartPanels.get(stat.toString());
+            panel.setChart(MorphologyChartFactory.createLoadingChart());
+
+        }
+    }
 }

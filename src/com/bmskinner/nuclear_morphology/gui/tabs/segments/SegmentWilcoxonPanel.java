@@ -42,103 +42,97 @@ import com.bmskinner.nuclear_morphology.gui.components.WilcoxonTableCellRenderer
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 
 @SuppressWarnings("serial")
-public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel  {
-					
-	public SegmentWilcoxonPanel(){
-		super();
-	}
+public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 
-	@Override
-	protected void updateSingle() {
-		tablePanel = createTablePanel();
-		scrollPane.setColumnHeaderView(null);
-		
-		JPanel labelPanel = new JPanel();
-		labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
-		tablePanel.add(labelPanel);
+    public SegmentWilcoxonPanel() {
+        super();
+    }
 
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-		
-	}
+    @Override
+    protected void updateSingle() {
+        tablePanel = createTablePanel();
+        scrollPane.setColumnHeaderView(null);
 
-	@Override
-	protected void updateMultiple() {
-		tablePanel = createTablePanel();
-		scrollPane.setColumnHeaderView(null);
-		
-		if(IBorderSegment.segmentCountsMatch(getDatasets())){
+        JPanel labelPanel = new JPanel();
+        labelPanel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+        tablePanel.add(labelPanel);
 
-			List<IBorderSegment> segments;
-			try {
-				segments = activeDataset()
-						.getCollection()
-						.getProfileCollection()
-						.getSegments(Tag.REFERENCE_POINT);
-			} catch (UnavailableBorderTagException | ProfileException e) {
-				warn("Cannot get segments");
-				fine("Cannot get segments", e);
-				return;
-			}
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
 
-			for(PlottableStatistic stat : PlottableStatistic.getSegmentStats()){
+    }
 
-				// Get each segment as a boxplot
-				for(IBorderSegment seg : segments){
+    @Override
+    protected void updateMultiple() {
+        tablePanel = createTablePanel();
+        scrollPane.setColumnHeaderView(null);
 
-					String segName = seg.getName();
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) {
 
-					
-					ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
-					
-					TableOptions options = new TableOptionsBuilder()
-						.setDatasets(getDatasets())
-						.addStatistic(stat)
-						.setSegPosition(seg.getPosition())
-						.setTarget(table)
-						.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
-						.build();
+            List<IBorderSegment> segments;
+            try {
+                segments = activeDataset().getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+            } catch (UnavailableBorderTagException | ProfileException e) {
+                warn("Cannot get segments");
+                fine("Cannot get segments", e);
+                return;
+            }
 
-					addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
-					setTable(options);
+            for (PlottableStatistic stat : PlottableStatistic.getSegmentStats()) {
 
-//					scrollPane.setColumnHeaderView(table.getTableHeader());
+                // Get each segment as a boxplot
+                for (IBorderSegment seg : segments) {
 
-				}
+                    String segName = seg.getName();
 
-			}
-			tablePanel.revalidate();
+                    ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 
-		} else {
-			JPanel labelPanel = new JPanel();
-			// Separate so we can use a flow layout for the label
-			labelPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-			tablePanel.add(labelPanel);
-		} 
-		
-		
-		
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-		
-	}
+                    TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+                            .setSegPosition(seg.getPosition()).setTarget(table)
+                            .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer()).build();
 
-	@Override
-	protected void updateNull() {
-		tablePanel = createTablePanel();
-		scrollPane.setColumnHeaderView(null);
-		JPanel labelPanel = new JPanel();
-		// Separate so we can use a flow layout for the label
-		labelPanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
-		tablePanel.add(labelPanel);
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-		
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEAR_BORDER_SEGMENT);
-	}
-			
+                    addWilconxonTable(tablePanel, table, stat.toString() + " - " + segName);
+                    setTable(options);
+
+                    // scrollPane.setColumnHeaderView(table.getTableHeader());
+
+                }
+
+            }
+            tablePanel.revalidate();
+
+        } else {
+            JPanel labelPanel = new JPanel();
+            // Separate so we can use a flow layout for the label
+            labelPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+            tablePanel.add(labelPanel);
+        }
+
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+
+    }
+
+    @Override
+    protected void updateNull() {
+        tablePanel = createTablePanel();
+        scrollPane.setColumnHeaderView(null);
+        JPanel labelPanel = new JPanel();
+        // Separate so we can use a flow layout for the label
+        labelPanel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+        tablePanel.add(labelPanel);
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new AnalysisDatasetTableCreator(options)
+                .createWilcoxonStatisticTable(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    }
+
 }

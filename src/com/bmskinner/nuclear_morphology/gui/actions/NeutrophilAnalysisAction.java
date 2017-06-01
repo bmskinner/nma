@@ -45,161 +45,161 @@ import com.bmskinner.nuclear_morphology.io.Importer;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 
-	private IMutableAnalysisOptions options;
-	private Date startTime;
-	private String outputFolderName;
+    private IMutableAnalysisOptions options;
+    private Date                    startTime;
+    private String                  outputFolderName;
 
-	private File folder = null;
+    private File folder = null;
 
-	public static final int NEW_ANALYSIS = 0;
+    public static final int NEW_ANALYSIS = 0;
 
-	/**
-	 * Create a new analysis. The folder of images to analyse will be
-	 * requested by a dialog.
-	 * @param mw the main window to which a progress bar will be attached
-	 */
-	public NeutrophilAnalysisAction(MainWindow mw) {
-		this(mw, null);
-	}
+    /**
+     * Create a new analysis. The folder of images to analyse will be requested
+     * by a dialog.
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     */
+    public NeutrophilAnalysisAction(MainWindow mw) {
+        this(mw, null);
+    }
 
-	/**
-	 * Create a new analysis, specifying the initial directory of images
-	 * @param mw the main window to which a progress bar will be attached
-	 * @param folder the folder of images to analyse
-	 */
-	public NeutrophilAnalysisAction(MainWindow mw, final File folder) {
-		super("Neutrophil detection", mw);
-		this.folder = folder;
-	}
+    /**
+     * Create a new analysis, specifying the initial directory of images
+     * 
+     * @param mw
+     *            the main window to which a progress bar will be attached
+     * @param folder
+     *            the folder of images to analyse
+     */
+    public NeutrophilAnalysisAction(MainWindow mw, final File folder) {
+        super("Neutrophil detection", mw);
+        this.folder = folder;
+    }
 
-	@Override
-	public void run(){
+    @Override
+    public void run() {
 
-		this.setProgressBarIndeterminate();
+        this.setProgressBarIndeterminate();
 
-		if(folder==null){
-			fine("No folder, getting directory");
-			if(! getImageDirectory()){
-				this.cancel();
-				return;
-			}
-		}
-		
-		fine("Making analysis options");
-		
-//		try {
-//			
-//			DemoProber demo = new DemoProber(folder);
-//
-//			cancel();
-//			return;
-//		} catch (Exception e1) {
-//			error("Error in test", e1);
-//		}
+        if (folder == null) {
+            fine("No folder, getting directory");
+            if (!getImageDirectory()) {
+                this.cancel();
+                return;
+            }
+        }
 
-		NeutrophilImageProber analysisSetup = new NeutrophilImageProber( folder );
+        fine("Making analysis options");
 
-		if(analysisSetup.isOk()){
+        // try {
+        //
+        // DemoProber demo = new DemoProber(folder);
+        //
+        // cancel();
+        // return;
+        // } catch (Exception e1) {
+        // error("Error in test", e1);
+        // }
 
+        NeutrophilImageProber analysisSetup = new NeutrophilImageProber(folder);
 
-			options = analysisSetup.getOptions();
-			
-			File directory = null;
-			try {
-				directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-						.getFolder();
-			} catch (MissingOptionException e) {
-				warn("Missing nucleus options");
-				this.cancel();
-			}
-			
-			if(directory==null){
-				this.cancel();
-				return;
-			}
+        if (analysisSetup.isOk()) {
 
-			log("Directory: "+directory.getName());
+            options = analysisSetup.getOptions();
 
-			this.startTime = Calendar.getInstance().getTime();
-			this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+            File directory = null;
+            try {
+                directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+            } catch (MissingOptionException e) {
+                warn("Missing nucleus options");
+                this.cancel();
+            }
 
-			// craete the analysis folder early. Did not before in case folder had no images
-			File analysisFolder = new File(directory, outputFolderName);
-			if(!analysisFolder.exists()){
-				analysisFolder.mkdir();
-			}
-			//	
-			File logFile = new File(analysisFolder, 
-					directory.getName() + Importer.LOG_FILE_EXTENSION);
+            if (directory == null) {
+                this.cancel();
+                return;
+            }
 
+            log("Directory: " + directory.getName());
 
-			IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
+            this.startTime = Calendar.getInstance().getTime();
+            this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
 
+            // craete the analysis folder early. Did not before in case folder
+            // had no images
+            File analysisFolder = new File(directory, outputFolderName);
+            if (!analysisFolder.exists()) {
+                analysisFolder.mkdir();
+            }
+            //
+            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
 
-			worker = new DefaultAnalysisWorker(m);
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-			finest("Worker is executing");
-			analysisSetup.dispose();
+            IAnalysisMethod m = new NeutrophilDetectionMethod(this.outputFolderName, logFile, options);
 
-		} else {				
-			analysisSetup.dispose();
-			fine("Analysis cancelled");
-			this.cancel();
-		}
-	}
+            worker = new DefaultAnalysisWorker(m);
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
+            finest("Worker is executing");
+            analysisSetup.dispose();
 
-	@Override
-	public void finished(){
-		//log("Method finished");
-		List<IAnalysisDataset> datasets;
+        } else {
+            analysisSetup.dispose();
+            fine("Analysis cancelled");
+            this.cancel();
+        }
+    }
 
+    @Override
+    public void finished() {
+        // log("Method finished");
+        List<IAnalysisDataset> datasets;
 
-		try {
-			IAnalysisResult r = worker.get();
-			datasets = r.getDatasets();
+        try {
+            IAnalysisResult r = worker.get();
+            datasets = r.getDatasets();
 
-			if(datasets==null||datasets.size()==0 ){
-				log("No datasets returned");
-			} else {
-				//		log("Fire profiling");
-				fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+            if (datasets == null || datasets.size() == 0) {
+                log("No datasets returned");
+            } else {
+                // log("Fire profiling");
+                fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
 
-			}
+            }
 
-		} catch (InterruptedException e) {
-			warn("Interruption to swing worker");
-			stack("Interruption to swing worker", e);
-		} catch (ExecutionException e) {
-			warn("Execution error in swing worker");
-			stack("Execution error in swing worker", e);
-		}
+        } catch (InterruptedException e) {
+            warn("Interruption to swing worker");
+            stack("Interruption to swing worker", e);
+        } catch (ExecutionException e) {
+            warn("Execution error in swing worker");
+            stack("Execution error in swing worker", e);
+        }
 
+        super.finished();
+    }
 
-		super.finished();
-	}
+    private boolean getImageDirectory() {
+        File defaultDir = GlobalOptions.getInstance().getDefaultDir();
+        JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
+                                                        // dir
 
-	private boolean getImageDirectory(){
-		File defaultDir = GlobalOptions.getInstance().getDefaultDir();
-		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int returnVal = fc.showOpenDialog(fc);
+        if (returnVal != 0) {
+            return false; // user cancelled
+        }
 
+        File file = fc.getSelectedFile();
 
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)	{
-			return false; // user cancelled
-		}
+        if (!file.isDirectory()) {
+            return false;
+        }
+        fine("Selected directory: " + file.getAbsolutePath());
+        folder = file;
+        // options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder(
+        // file);
 
-		File file = fc.getSelectedFile();
-
-		if( ! file.isDirectory()){
-			return false;
-		}
-		fine("Selected directory: "+file.getAbsolutePath());
-		folder = file;
-//		options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder( file);
-
-		return true;
-	}
+        return true;
+    }
 }

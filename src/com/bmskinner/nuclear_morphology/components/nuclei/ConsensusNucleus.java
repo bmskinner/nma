@@ -37,83 +37,80 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 @Deprecated
 public class ConsensusNucleus extends RoundNucleus implements Serializable {
 
-	private static final long serialVersionUID = 1L;
-	
-	private NucleusType type;
-	
-	
-	public ConsensusNucleus(Nucleus n, NucleusType type) {
-		
-		super(n);
-		this.type = type;
-	}
-	
-	public NucleusType getType(){
-		return this.type;
-	}
-	
-	@Override
-	public int[] getPosition(){
-		Rectangle bounds = getVerticallyRotatedNucleus().toPolygon().getBounds();
-		int newWidth  = (int) bounds.getWidth();
-		int newHeight = (int) bounds.getHeight();
-		int newX      = (int) bounds.getX();
-		int newY      = (int) bounds.getY();
+    private static final long serialVersionUID = 1L;
 
-		int[] newPosition = { newX, newY, newWidth, newHeight };
-		return  newPosition;
-	}
-	
-	@Override
-	public void calculateProfiles() throws ProfileException {
-		
-		/*
-		 * The CurveRefolder currently only uses the angle profile
-		 * so ignore the others to speed refolding
-		 */
-		ProfileCreator creator = new ProfileCreator(this);
+    private NucleusType type;
 
-		ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
-				
-		profileMap.put(ProfileType.ANGLE, profile);
+    public ConsensusNucleus(Nucleus n, NucleusType type) {
 
-	}
-	
-	@Override
-	public FloatPolygon toOriginalPolygon(){
-		return this.toPolygon();
-	}
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-	}
-	
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		out.defaultWriteObject();
-	}
+        super(n);
+        this.type = type;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		return result;
-	}
+    public NucleusType getType() {
+        return this.type;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ConsensusNucleus other = (ConsensusNucleus) obj;
-		if (type != other.type)
-			return false;
-		return true;
-	}
-	
-	
+    @Override
+    public int[] getPosition() {
+        Rectangle bounds = getVerticallyRotatedNucleus().toPolygon().getBounds();
+        int newWidth = (int) bounds.getWidth();
+        int newHeight = (int) bounds.getHeight();
+        int newX = (int) bounds.getX();
+        int newY = (int) bounds.getY();
+
+        int[] newPosition = { newX, newY, newWidth, newHeight };
+        return newPosition;
+    }
+
+    @Override
+    public void calculateProfiles() throws ProfileException {
+
+        /*
+         * The CurveRefolder currently only uses the angle profile so ignore the
+         * others to speed refolding
+         */
+        ProfileCreator creator = new ProfileCreator(this);
+
+        ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
+
+        profileMap.put(ProfileType.ANGLE, profile);
+
+    }
+
+    @Override
+    public FloatPolygon toOriginalPolygon() {
+        return this.toPolygon();
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ConsensusNucleus other = (ConsensusNucleus) obj;
+        if (type != other.type)
+            return false;
+        return true;
+    }
 
 }

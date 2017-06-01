@@ -19,25 +19,24 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 /**
- * Describes the scales at which data may be presented.
- * The pixel scale is what is captured by the camera. 
- * If a conversion factor is provided, this can be shown
- * in real units.
+ * Describes the scales at which data may be presented. The pixel scale is what
+ * is captured by the camera. If a conversion factor is provided, this can be
+ * shown in real units.
+ * 
  * @author bms41
  *
  */
 public enum MeasurementScale {
-	
-	PIXELS ("Pixels"),
-	MICRONS ("Microns");
-	
-	final private String name;
-	
-	MeasurementScale(final String name){
-		this.name = name;
-	}
-	
-	public String toString(){
-		return this.name;
-	}
+
+    PIXELS("Pixels"), MICRONS("Microns");
+
+    final private String name;
+
+    MeasurementScale(final String name) {
+        this.name = name;
+    }
+
+    public String toString() {
+        return this.name;
+    }
 }

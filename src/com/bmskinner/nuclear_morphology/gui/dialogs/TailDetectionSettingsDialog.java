@@ -39,109 +39,108 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 public class TailDetectionSettingsDialog extends SettingsDialog implements ActionListener {
 
-	private static final long serialVersionUID = 1L;
-	
-	private JPanel contentPanel;
-	
-	private JComboBox<String> channelSelection;
-	
-	private CannySettingsPanel cannyPanel;
-	
-	private IAnalysisOptions options;
-	
-	private int channel;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Create the dialog.
-	 */
-	public TailDetectionSettingsDialog(final IAnalysisOptions a) {
-		super();
-		setModal(true);
-		this.options = a;
-		createGUI();
-		
-		pack();
-		setVisible(true);
-	}
-	private void createGUI(){
-		setTitle("Tail detection");
-		setBounds(100, 100, 450, 300);
-		
-		getContentPane().setLayout(new BorderLayout());
-		
-		contentPanel = new JPanel();
+    private JPanel contentPanel;
 
-		contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		channelSelection = new JComboBox<String>(channelOptionStrings);
-		channelSelection.addActionListener(this);
-		contentPanel.add(channelSelection);
-		
-		IMutableCannyOptions canny = null;
-		try {
-			canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL)
-					.getCannyOptions().unlock();
-		} catch (MissingOptionException e) {
-			warn("Missing canny options");
-		}
-		
-		cannyPanel = new CannySettingsPanel(canny);
-		contentPanel.add(cannyPanel);
-		
-		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		
-		getContentPane().add(makeLowerButtonPanel(), BorderLayout.SOUTH);
-	}
-	
-	/**
-	 * Create the panel with ok and cancel buttons
-	 * @return the panel
-	 */
-	private JPanel makeLowerButtonPanel(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout());
+    private JComboBox<String> channelSelection;
 
-		JButton btnOk = new JButton("OK");
-		btnOk.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				TailDetectionSettingsDialog.this.setVisible(false);
-			}
-		});
+    private CannySettingsPanel cannyPanel;
 
-		panel.add(btnOk);
+    private IAnalysisOptions options;
 
-		JButton btnCancel = new JButton("Cancel");
-		btnCancel.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				TailDetectionSettingsDialog.this.dispose();
-			}
-		});
-		panel.add(btnCancel);
-		return panel;
-	}
-	@Override
-	public void actionPerformed(ActionEvent e) {
+    private int channel;
 
-		if(e.getSource() instanceof JComboBox<?>){
-			
-			JComboBox<?> cb = (JComboBox<?>)e.getSource();
-	        
-			String channelName = cb.getSelectedItem().toString();
-	        
-	        channel = channelName.equals("Red") 
-					? ImageImporter.RGB_RED
-							: channelName.equals("Green") 
-							? ImageImporter.RGB_GREEN
-									: ImageImporter.RGB_BLUE;
-		}
-		
-	}
-		
-	public int getChannel(){
-		return this.channel;
-	}
+    /**
+     * Create the dialog.
+     */
+    public TailDetectionSettingsDialog(final IAnalysisOptions a) {
+        super();
+        setModal(true);
+        this.options = a;
+        createGUI();
+
+        pack();
+        setVisible(true);
+    }
+
+    private void createGUI() {
+        setTitle("Tail detection");
+        setBounds(100, 100, 450, 300);
+
+        getContentPane().setLayout(new BorderLayout());
+
+        contentPanel = new JPanel();
+
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        channelSelection = new JComboBox<String>(channelOptionStrings);
+        channelSelection.addActionListener(this);
+        contentPanel.add(channelSelection);
+
+        IMutableCannyOptions canny = null;
+        try {
+            canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions().unlock();
+        } catch (MissingOptionException e) {
+            warn("Missing canny options");
+        }
+
+        cannyPanel = new CannySettingsPanel(canny);
+        contentPanel.add(cannyPanel);
+
+        getContentPane().add(contentPanel, BorderLayout.CENTER);
+
+        getContentPane().add(makeLowerButtonPanel(), BorderLayout.SOUTH);
+    }
+
+    /**
+     * Create the panel with ok and cancel buttons
+     * 
+     * @return the panel
+     */
+    private JPanel makeLowerButtonPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout());
+
+        JButton btnOk = new JButton("OK");
+        btnOk.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                TailDetectionSettingsDialog.this.setVisible(false);
+            }
+        });
+
+        panel.add(btnOk);
+
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+                TailDetectionSettingsDialog.this.dispose();
+            }
+        });
+        panel.add(btnCancel);
+        return panel;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() instanceof JComboBox<?>) {
+
+            JComboBox<?> cb = (JComboBox<?>) e.getSource();
+
+            String channelName = cb.getSelectedItem().toString();
+
+            channel = channelName.equals("Red") ? ImageImporter.RGB_RED
+                    : channelName.equals("Green") ? ImageImporter.RGB_GREEN : ImageImporter.RGB_BLUE;
+        }
+
+    }
+
+    public int getChannel() {
+        return this.channel;
+    }
 
 }

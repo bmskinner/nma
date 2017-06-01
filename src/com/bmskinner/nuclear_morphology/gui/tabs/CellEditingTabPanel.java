@@ -22,26 +22,25 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
 
 public interface CellEditingTabPanel extends EditingTabPanel {
-	
-	/**
-	 * Update the charts and tables for the current cell
-	 * and component
-	 */
-	void update();
-	
-		
-	/**
-	 * Get the current cell view 
-	 * @return
-	 */
-	CellViewModel getCellModel();
-	
-	void setCellModel(CellViewModel model);
-	
-	/**
-	 * Remove any charts that contain the current active cell,
-	 * causing them to redraw on the next refresh
-	 */
-	void clearCellCharts();
+
+    /**
+     * Update the charts and tables for the current cell and component
+     */
+    void update();
+
+    /**
+     * Get the current cell view
+     * 
+     * @return
+     */
+    CellViewModel getCellModel();
+
+    void setCellModel(CellViewModel model);
+
+    /**
+     * Remove any charts that contain the current active cell, causing them to
+     * redraw on the next refresh
+     */
+    void clearCellCharts();
 
 }

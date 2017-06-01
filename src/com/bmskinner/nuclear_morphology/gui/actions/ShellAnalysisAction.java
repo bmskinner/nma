@@ -33,44 +33,40 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
 public class ShellAnalysisAction extends SingleDatasetResultAction {
 
-	public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Shell analysis", mw);
+    public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, "Shell analysis", mw);
 
-		
-	}
-	
-	@Override
-	public void run(){
-		SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
-		JSpinner spinner = new JSpinner(sModel);
+    }
 
-		int option = JOptionPane.showOptionDialog(null, 
-				spinner, 
-				"Select number of shells", 
-				JOptionPane.OK_CANCEL_OPTION, 
-				JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if (option == JOptionPane.CANCEL_OPTION) {
-			// user hit cancel
-			this.cancel();
-			return;
+    @Override
+    public void run() {
+        SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
+        JSpinner spinner = new JSpinner(sModel);
 
-		} else if (option == JOptionPane.OK_OPTION)	{
+        int option = JOptionPane.showOptionDialog(null, spinner, "Select number of shells",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+        if (option == JOptionPane.CANCEL_OPTION) {
+            // user hit cancel
+            this.cancel();
+            return;
 
-			int shellCount = (Integer) spinner.getModel().getValue();
-			
-			IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
-			worker = new DefaultAnalysisWorker(m);
-			
-//			worker = new ShellAnalysisWorker(dataset,shellCount);
+        } else if (option == JOptionPane.OK_OPTION) {
 
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		}
-	}
-	
-	@Override
-	public void finished() {
-		fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-		super.finished();
-	}
+            int shellCount = (Integer) spinner.getModel().getValue();
+
+            IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
+            worker = new DefaultAnalysisWorker(m);
+
+            // worker = new ShellAnalysisWorker(dataset,shellCount);
+
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
+        }
+    }
+
+    @Override
+    public void finished() {
+        fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+        super.finished();
+    }
 }

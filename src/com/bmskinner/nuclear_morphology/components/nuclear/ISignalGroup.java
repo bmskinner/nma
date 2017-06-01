@@ -26,100 +26,114 @@ import java.io.File;
 import java.io.Serializable;
 
 /**
- * Signal groups are used to store common metadata about nuclear
- * signals within a cell collection - for example, the folder of images
- * the signals were detected in, or the colour with which the signals
- * should be drawn in charts.
+ * Signal groups are used to store common metadata about nuclear signals within
+ * a cell collection - for example, the folder of images the signals were
+ * detected in, or the colour with which the signals should be drawn in charts.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface ISignalGroup extends Serializable {
 
-	/**
-	 * Get the shell result for the group, if present
-	 * @return
-	 */
-	IShellResult getShellResult();
+    /**
+     * Get the shell result for the group, if present
+     * 
+     * @return
+     */
+    IShellResult getShellResult();
 
-	/**
-	 * Set the group shell result
-	 * @param result
-	 */
-	void setShellResult(IShellResult result);
+    /**
+     * Set the group shell result
+     * 
+     * @param result
+     */
+    void setShellResult(IShellResult result);
 
-	/**
-	 * Test if a shell result is available
-	 * @return
-	 */
-	boolean hasShellResult();
+    /**
+     * Test if a shell result is available
+     * 
+     * @return
+     */
+    boolean hasShellResult();
 
-	/**
-	 * Get the name of the signal group
-	 * @return
-	 */
-	String getGroupName();
+    /**
+     * Get the name of the signal group
+     * 
+     * @return
+     */
+    String getGroupName();
 
-	/**
-	 * Set the name of the signal group
-	 * @param groupName
-	 */
-	void setGroupName(String groupName);
+    /**
+     * Set the name of the signal group
+     * 
+     * @param groupName
+     */
+    void setGroupName(String groupName);
 
-	/**
-	 * Test if the signals in this group are visible in charts
-	 * @return
-	 */
-	boolean isVisible();
+    /**
+     * Test if the signals in this group are visible in charts
+     * 
+     * @return
+     */
+    boolean isVisible();
 
-	/**
-	 * Set whether the signals in this group are visible in charts
-	 * @return
-	 */
-	void setVisible(boolean isVisible);
+    /**
+     * Set whether the signals in this group are visible in charts
+     * 
+     * @return
+     */
+    void setVisible(boolean isVisible);
 
-	/**
-	 * Test if a custom colour has been set for this group
-	 * @return
-	 */
-	boolean hasColour();
+    /**
+     * Test if a custom colour has been set for this group
+     * 
+     * @return
+     */
+    boolean hasColour();
 
-	/**
-	 * Get the colour for this signal group, if set
-	 * @return the colour, or null if not present
-	 */
-	Color getGroupColour();
+    /**
+     * Get the colour for this signal group, if set
+     * 
+     * @return the colour, or null if not present
+     */
+    Color getGroupColour();
 
-	/**
-	 * Set the signal colour for this group
-	 * @param groupColour
-	 */
-	void setGroupColour(Color groupColour);
+    /**
+     * Set the signal colour for this group
+     * 
+     * @param groupColour
+     */
+    void setGroupColour(Color groupColour);
 
-	/**
-	 * Get the RGB channel this signal was detected in
-	 * @return
-	 */
-	int getChannel();
+    /**
+     * Get the RGB channel this signal was detected in
+     * 
+     * @return
+     */
+    int getChannel();
 
-	/**
-	 * Set the RGB channel the signal was detected in
-	 * @param channel
-	 */
-	void setChannel(int channel);
+    /**
+     * Set the RGB channel the signal was detected in
+     * 
+     * @param channel
+     */
+    void setChannel(int channel);
 
-	/**
-	 * Get the folder the signals were found in 
-	 * @return
-	 */
-	File getFolder();
+    /**
+     * Get the folder the signals were found in
+     * 
+     * @return
+     */
+    File getFolder();
 
-	/**
-	 * Set the folder of images the signals were found in
-	 * @param folder
-	 */
-	void setFolder(File folder);
+    /**
+     * Set the folder of images the signals were found in
+     * 
+     * @param folder
+     */
+    void setFolder(File folder);
 
-	String toString();
+    String toString();
 
 }

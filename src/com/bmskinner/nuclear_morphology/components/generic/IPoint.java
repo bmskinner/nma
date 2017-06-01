@@ -23,156 +23,166 @@ import java.awt.geom.Point2D;
 
 public interface IPoint {
 
-	/**
-	 * Create a new point of the default type
-	 * @param x the x position
-	 * @param y the y position
-	 * @return a point at the specified position
-	 */
-	static IPoint makeNew(float x, float y){
-		return new FloatPoint(x,y);
-	}
-	
-	/**
-	 * Create a new point of the default type
-	 * @param x the x position
-	 * @param y the y position
-	 * @return a point at the specified position
-	 */
-	static IPoint makeNew(double x, double y){
-		return makeNew( (float) x, (float) y);
-	}
-	
-	/**
-	 * Create a new point of the default type
-	 * based on the given point
-	 * @param x the x position
-	 * @param y the y position
-	 * @return a point at the specified position
-	 */
-	static IPoint makeNew(IPoint a){
-		return makeNew( a.getX(), a.getY());
-	}
-	
-	/**
-	 * Create a new point of the default type
-	 * based on the given point
-	 * @param x the x position
-	 * @param y the y position
-	 * @return a point at the specified position
-	 */
-	static IPoint makeNew(Point2D a){
-		return makeNew( a.getX(), a.getY());
-	}
-	
-	/**
-	 * Get the x-value 
-	 *
-	 * @return the x-value of the point
-	 */
-	double getX();
+    /**
+     * Create a new point of the default type
+     * 
+     * @param x
+     *            the x position
+     * @param y
+     *            the y position
+     * @return a point at the specified position
+     */
+    static IPoint makeNew(float x, float y) {
+        return new FloatPoint(x, y);
+    }
 
-	/**
-	 * Get the y-value 
-	 *
-	 * @return the y-value of the point
-	 */
-	double getY();
+    /**
+     * Create a new point of the default type
+     * 
+     * @param x
+     *            the x position
+     * @param y
+     *            the y position
+     * @return a point at the specified position
+     */
+    static IPoint makeNew(double x, double y) {
+        return makeNew((float) x, (float) y);
+    }
 
-	/**
-	 * Get the x-value as an integer
-	 *
-	 * @return the x-value of the point
-	 */
-	int getXAsInt();
+    /**
+     * Create a new point of the default type based on the given point
+     * 
+     * @param x
+     *            the x position
+     * @param y
+     *            the y position
+     * @return a point at the specified position
+     */
+    static IPoint makeNew(IPoint a) {
+        return makeNew(a.getX(), a.getY());
+    }
 
-	/**
-	 * Get the y-value as an integer
-	 *
-	 * @return the y-value of the point
-	 */
-	int getYAsInt();
+    /**
+     * Create a new point of the default type based on the given point
+     * 
+     * @param x
+     *            the x position
+     * @param y
+     *            the y position
+     * @return a point at the specified position
+     */
+    static IPoint makeNew(Point2D a) {
+        return makeNew(a.getX(), a.getY());
+    }
 
-	
+    /**
+     * Get the x-value
+     *
+     * @return the x-value of the point
+     */
+    double getX();
 
-	/**
-	 * Find the distance between this point and
-	 * a given point
-	 *
-	 * @param a the point to measure to
-	 * @return the distance between the points
-	 */
-	double getLengthTo(IPoint a);
+    /**
+     * Get the y-value
+     *
+     * @return the y-value of the point
+     */
+    double getY();
 
-	/**
-	 * Tests if the two points overlap with
-	 * integer precision
-	 *
-	 * @param a the point to test against
-	 * @return boolean whether they overlap as integers
-	 */
-	boolean overlaps(IPoint a);
+    /**
+     * Get the x-value as an integer
+     *
+     * @return the x-value of the point
+     */
+    int getXAsInt();
 
-	boolean isAbove(IPoint p);
+    /**
+     * Get the y-value as an integer
+     *
+     * @return the y-value of the point
+     */
+    int getYAsInt();
 
-	boolean isBelow(IPoint p);
+    /**
+     * Find the distance between this point and a given point
+     *
+     * @param a
+     *            the point to measure to
+     * @return the distance between the points
+     */
+    double getLengthTo(IPoint a);
 
-	boolean isLeftOf(IPoint p);
+    /**
+     * Tests if the two points overlap with integer precision
+     *
+     * @param a
+     *            the point to test against
+     * @return boolean whether they overlap as integers
+     */
+    boolean overlaps(IPoint a);
 
-	boolean isRightOf(IPoint p);
+    boolean isAbove(IPoint p);
 
-	
+    boolean isBelow(IPoint p);
 
-	/**
-	 * Tests if the two points overlap with
-	 * double precision
-	 *
-	 * @param a the point to test against
-	 * @return boolean whether they overlap as doubles
-	 */
-	boolean overlapsPerfectly(IPoint a);
+    boolean isLeftOf(IPoint p);
 
-	/**
-	 * Writes the integer x and y values together in the format
-	 * "x,y"
-	 *
-	 * @return the string with the integer coordinates
-	 */
-	String toString();
+    boolean isRightOf(IPoint p);
 
-	/**
-	 * Fetch the point as Point2D
-	 * @return
-	 */
-	Point2D toPoint2D();
+    /**
+     * Tests if the two points overlap with double precision
+     *
+     * @param a
+     *            the point to test against
+     * @return boolean whether they overlap as doubles
+     */
+    boolean overlapsPerfectly(IPoint a);
 
-	/**
-	 * Measure the smallest angle between the two lines a-this and this-b connecting
-	 * the three points
-	 * @param a the first line endpoint
-	 * @param b the second line endpoint
-	 * @return
-	 */
-	double findAngle(IPoint a, IPoint b);
+    /**
+     * Writes the integer x and y values together in the format "x,y"
+     *
+     * @return the string with the integer coordinates
+     */
+    String toString();
 
-	int hashCode();
+    /**
+     * Fetch the point as Point2D
+     * 
+     * @return
+     */
+    Point2D toPoint2D();
 
-	boolean equals(Object obj);
-	
-	/**
-	 * Get the midpoint of the two points
-	 * @param a
-	 * @param b
-	 * @return
-	 */
-	static IPoint getMidpoint(IPoint a, IPoint b){
-		if(a==null || b==null){
-			throw new IllegalArgumentException("Points cannot be null");
-		}
-		
-		double nx = (a.getX()+b.getX()) /2;
-		double ny = (a.getY()+b.getY()) /2;
-		return IPoint.makeNew(nx, ny);
-	}
+    /**
+     * Measure the smallest angle between the two lines a-this and this-b
+     * connecting the three points
+     * 
+     * @param a
+     *            the first line endpoint
+     * @param b
+     *            the second line endpoint
+     * @return
+     */
+    double findAngle(IPoint a, IPoint b);
+
+    int hashCode();
+
+    boolean equals(Object obj);
+
+    /**
+     * Get the midpoint of the two points
+     * 
+     * @param a
+     * @param b
+     * @return
+     */
+    static IPoint getMidpoint(IPoint a, IPoint b) {
+        if (a == null || b == null) {
+            throw new IllegalArgumentException("Points cannot be null");
+        }
+
+        double nx = (a.getX() + b.getX()) / 2;
+        double ny = (a.getY() + b.getY()) / 2;
+        return IPoint.makeNew(nx, ny);
+    }
 
 }

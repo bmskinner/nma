@@ -42,51 +42,47 @@ import org.jfree.ui.RectangleEdge;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public class EllipticalOverlay
-	extends AbstractOverlay 
-	implements Overlay,
-               PropertyChangeListener, 
-               Serializable, 
-               Loggable {
+public class EllipticalOverlay extends AbstractOverlay
+        implements Overlay, PropertyChangeListener, Serializable, Loggable {
 
-	private EllipticalOverlayObject ellipse = null;
-	
-	/**
+    private EllipticalOverlayObject ellipse = null;
+
+    /**
      * Default constructor.
      */
     public EllipticalOverlay() {
         super();
     }
-    
-    
+
     /**
      * Construct with a rectangle object
+     * 
      * @param rectangle
      */
     public EllipticalOverlay(EllipticalOverlayObject ellipse) {
         super();
         setEllipse(ellipse);
     }
-    
 
     /**
-     * Adds a rectangle object to this overlay and fires a 
+     * Adds a rectangle object to this overlay and fires a
      * {@link OverlayChangeEvent} to all registered listeners.
      *
-     * @param rectangle  the rectangle object (<code>null</code> not permitted).
+     * @param rectangle
+     *            the rectangle object (<code>null</code> not permitted).
      *
      * @see #removeRectangle(charting.charts.RectangleOverlayObject)
      */
     public void setEllipse(EllipticalOverlayObject ellipse) {
 
-    	if( ellipse==null	){
-    		throw new IllegalArgumentException("Ellipse object cannot be null in chart overlay");
-    	}
+        if (ellipse == null) {
+            throw new IllegalArgumentException("Ellipse object cannot be null in chart overlay");
+        }
         this.ellipse = ellipse;
         this.ellipse.addPropertyChangeListener(this);
         fireOverlayChanged();
     }
-    
+
     /**
      * Get the current rectangle object in this overlay
      */
@@ -95,23 +91,25 @@ public class EllipticalOverlay
     }
 
     /**
-     * Removes the given rectangle and sends an {@link OverlayChangeEvent}
-     * to all registered listeners.
+     * Removes the given rectangle and sends an {@link OverlayChangeEvent} to
+     * all registered listeners.
      *
-     * @param rectangle the rectangle to remove
+     * @param rectangle
+     *            the rectangle to remove
      */
     public void removeEllipse(EllipticalOverlayObject ellipse) {
-    	if(ellipse==this.ellipse){
-    		this.ellipse=null;
-    		fireOverlayChanged();
-    	}
+        if (ellipse == this.ellipse) {
+            this.ellipse = null;
+            fireOverlayChanged();
+        }
     }
 
     /**
      * Receives a property change event (typically a change in one of the
      * crosshairs).
      *
-     * @param e  the event.
+     * @param e
+     *            the event.
      */
     @Override
     public void propertyChange(PropertyChangeEvent e) {
@@ -121,12 +119,14 @@ public class EllipticalOverlay
     /**
      * Paints the crosshairs in the layer.
      *
-     * @param g2  the graphics target.
-     * @param chartPanel  the chart panel.
+     * @param g2
+     *            the graphics target.
+     * @param chartPanel
+     *            the chart panel.
      */
     @Override
     public void paintOverlay(Graphics2D g2, ChartPanel chartPanel) {
-    	    	
+
         Shape savedClip = g2.getClip();
         Rectangle2D dataArea = chartPanel.getScreenDataArea();
         g2.clip(dataArea);
@@ -136,40 +136,38 @@ public class EllipticalOverlay
         ValueAxis yAxis = plot.getRangeAxis();
         RectangleEdge xAxisEdge = plot.getDomainAxisEdge();
         RectangleEdge yAxisEdge = plot.getRangeAxisEdge();
-        
+
         // x rectangle for domain axis
-        if(ellipse!=null){
+        if (ellipse != null) {
             if (ellipse.isVisible()) {
-            	
-            	// get the values for the x-axis
-                double minx = ellipse.getXValue()-ellipse.getXRadius();//.getXMinValue();
+
+                // get the values for the x-axis
+                double minx = ellipse.getXValue() - ellipse.getXRadius();// .getXMinValue();
                 double minxx = xAxis.valueToJava2D(minx, dataArea, xAxisEdge);
-                
-                double maxx = ellipse.getXValue()+ellipse.getXRadius();
+
+                double maxx = ellipse.getXValue() + ellipse.getXRadius();
                 double maxxx = xAxis.valueToJava2D(maxx, dataArea, xAxisEdge);
-                
+
                 // Get the values for the y-axis
-                double miny  = ellipse.getYValue()-ellipse.getYRadius();
+                double miny = ellipse.getYValue() - ellipse.getYRadius();
                 double minyy = yAxis.valueToJava2D(miny, dataArea, yAxisEdge);
-                
-                double maxy  = ellipse.getYValue()+ellipse.getYRadius();
+
+                double maxy = ellipse.getYValue() + ellipse.getYRadius();
                 double maxyy = yAxis.valueToJava2D(maxy, dataArea, yAxisEdge);
-                
+
                 // Swap y if inverted
                 double temp = minyy;
-                
+
                 minyy = minyy > maxyy ? maxyy : minyy;
-                maxyy = temp  > maxyy ? temp  : maxyy;
-                
-                
-                finest("Chart rectangle x: "+minx+" - "+maxx+"  y: "+miny+" - "+maxy);
-                finest("Java2D rectangle x: "+minxx+" - "+maxxx+"  y: "+minyy+" - "+maxyy);
-                
+                maxyy = temp > maxyy ? temp : maxyy;
+
+                finest("Chart rectangle x: " + minx + " - " + maxx + "  y: " + miny + " - " + maxy);
+                finest("Java2D rectangle x: " + minxx + " - " + maxxx + "  y: " + minyy + " - " + maxyy);
+
                 if (plot.getOrientation() == PlotOrientation.VERTICAL) {
                     drawVerticalEllipse(g2, dataArea, minxx, maxxx, minyy, maxyy, ellipse);
-                }
-                else {
-                	drawHorizontalEllipse(g2, dataArea, minxx, maxxx, minyy, maxyy, ellipse);
+                } else {
+                    drawHorizontalEllipse(g2, dataArea, minxx, maxxx, minyy, maxyy, ellipse);
                 }
             }
         }
@@ -179,25 +177,28 @@ public class EllipticalOverlay
     /**
      * Draws the rectangle horizontally across the plot.
      *
-     * @param g2  the graphics target.
-     * @param dataArea  the data area.
-     * @param y  the y-value in Java2D space.
-     * @param crosshair  the crosshair.
+     * @param g2
+     *            the graphics target.
+     * @param dataArea
+     *            the data area.
+     * @param y
+     *            the y-value in Java2D space.
+     * @param crosshair
+     *            the crosshair.
      */
-    protected void drawHorizontalEllipse(Graphics2D g2, Rectangle2D dataArea,
-    		double minx, double maxx, double miny, double maxy, EllipticalOverlayObject ellipse) {
+    protected void drawHorizontalEllipse(Graphics2D g2, Rectangle2D dataArea, double minx, double maxx, double miny,
+            double maxy, EllipticalOverlayObject ellipse) {
 
-    	
         if (miny >= dataArea.getMinY() && miny <= dataArea.getMaxY()) {
-        	
-        	double w = maxx - minx;
-        	double h = maxy - miny;
-        	
-        	Ellipse2D e = new Ellipse2D.Double(minx, miny, w, h);
+
+            double w = maxx - minx;
+            double h = maxy - miny;
+
+            Ellipse2D e = new Ellipse2D.Double(minx, miny, w, h);
 
             Paint savedPaint = g2.getPaint();
             Stroke savedStroke = g2.getStroke();
-            g2.setPaint( ellipse.getFill());
+            g2.setPaint(ellipse.getFill());
             g2.setStroke(ellipse.getStroke());
 
             g2.fill(e);
@@ -210,58 +211,60 @@ public class EllipticalOverlay
     /**
      * Draw the rectangle vertically on the plot.
      *
-     * @param g2  the graphics target.
-     * @param dataArea  the data area.
-     * @param x  the x-value in Java2D space.
-     * @param crosshair  the crosshair.
+     * @param g2
+     *            the graphics target.
+     * @param dataArea
+     *            the data area.
+     * @param x
+     *            the x-value in Java2D space.
+     * @param crosshair
+     *            the crosshair.
      */
-    protected void drawVerticalEllipse(Graphics2D g2, Rectangle2D dataArea,
-    		double minx, double maxx, double miny, double maxy, EllipticalOverlayObject ellipse) {
-    	        
-//        if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
-        	
-        	double w = maxx - minx;
-        	double h = maxy - miny;
-        	
-        	Ellipse2D e = new Ellipse2D.Double(minx, miny, w, h);
+    protected void drawVerticalEllipse(Graphics2D g2, Rectangle2D dataArea, double minx, double maxx, double miny,
+            double maxy, EllipticalOverlayObject ellipse) {
 
-            Paint savedPaint = g2.getPaint();
-            Stroke savedStroke = g2.getStroke();
-            g2.setPaint( ellipse.getFill());
-            g2.setStroke(ellipse.getStroke());
+        // if (minx >= dataArea.getMinX() && minx <= dataArea.getMaxX()) {
 
-            g2.fill(e);
+        double w = maxx - minx;
+        double h = maxy - miny;
 
-            g2.setPaint(savedPaint);
-            g2.setStroke(savedStroke);
-//        }
+        Ellipse2D e = new Ellipse2D.Double(minx, miny, w, h);
+
+        Paint savedPaint = g2.getPaint();
+        Stroke savedStroke = g2.getStroke();
+        g2.setPaint(ellipse.getFill());
+        g2.setStroke(ellipse.getStroke());
+
+        g2.fill(e);
+
+        g2.setPaint(savedPaint);
+        g2.setStroke(savedStroke);
+        // }
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ellipse == null) ? 0 : ellipse.hashCode());
+        return result;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((ellipse == null) ? 0 : ellipse.hashCode());
-		return result;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EllipticalOverlay other = (EllipticalOverlay) obj;
+        if (ellipse == null) {
+            if (other.ellipse != null)
+                return false;
+        } else if (!ellipse.equals(other.ellipse))
+            return false;
+        return true;
+    }
 
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EllipticalOverlay other = (EllipticalOverlay) obj;
-		if (ellipse == null) {
-			if (other.ellipse != null)
-				return false;
-		} else if (!ellipse.equals(other.ellipse))
-			return false;
-		return true;
-	}  
-	
 }

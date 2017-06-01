@@ -26,41 +26,39 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
 /**
  * This interface accesses the tagged points around the periphery of an object.
  * Default tags are provided.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface Tag extends Comparable<Tag>, Serializable {
 
-	public static final BorderTagObject REFERENCE_POINT = new BorderTagObject(
-			BorderTag.REFERENCE_POINT);
-	public static final BorderTagObject ORIENTATION_POINT = new BorderTagObject(
-			BorderTag.ORIENTATION_POINT);
-	public static final BorderTagObject TOP_VERTICAL = new BorderTagObject(
-			BorderTag.TOP_VERTICAL);
-	public static final BorderTagObject BOTTOM_VERTICAL = new BorderTagObject(
-			BorderTag.BOTTOM_VERTICAL);
-	public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(
-			BorderTag.INTERSECTION_POINT);
-	public static final BorderTagObject CUSTOM_POINT = new BorderTagObject(
-			BorderTag.CUSTOM);
+    public static final BorderTagObject REFERENCE_POINT    = new BorderTagObject(BorderTag.REFERENCE_POINT);
+    public static final BorderTagObject ORIENTATION_POINT  = new BorderTagObject(BorderTag.ORIENTATION_POINT);
+    public static final BorderTagObject TOP_VERTICAL       = new BorderTagObject(BorderTag.TOP_VERTICAL);
+    public static final BorderTagObject BOTTOM_VERTICAL    = new BorderTagObject(BorderTag.BOTTOM_VERTICAL);
+    public static final BorderTagObject INTERSECTION_POINT = new BorderTagObject(BorderTag.INTERSECTION_POINT);
+    public static final BorderTagObject CUSTOM_POINT       = new BorderTagObject(BorderTag.CUSTOM);
 
-	/**
-	 * Get the name of the tag
-	 * @return
-	 */
-	String getName();
+    /**
+     * Get the name of the tag
+     * 
+     * @return
+     */
+    String getName();
 
-	/**
-	 * Get the underlying tag
-	 * @return
-	 */
-	BorderTag getTag();
+    /**
+     * Get the underlying tag
+     * 
+     * @return
+     */
+    BorderTag getTag();
 
-	/**
-	 * Get the tag type
-	 * @return
-	 */
-	BorderTagType type();
+    /**
+     * Get the tag type
+     * 
+     * @return
+     */
+    BorderTagType type();
 
 }

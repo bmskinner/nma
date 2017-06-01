@@ -46,161 +46,162 @@ import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 
 @SuppressWarnings("serial")
 public class NuclearHistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
-		
-		public NuclearHistogramsPanel(){
-			super(CellularComponent.NUCLEUS);
 
-			try {
+    public NuclearHistogramsPanel() {
+        super(CellularComponent.NUCLEUS);
 
-				Dimension preferredSize = new Dimension(400, 150);
-				for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
-					
-					JFreeChart chart = HistogramChartFactory.makeEmptyChart();
-					
-					SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
-					panel.getChartRenderingInfo().setEntityCollection(null);
-					panel.setPreferredSize(preferredSize);
-					panel.addSignalChangeListener(this);
-					chartPanels.put(stat.toString(), panel);
-					mainPanel.add(panel);
+        try {
 
-				}
+            Dimension preferredSize = new Dimension(400, 150);
+            for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
-			} catch(Exception e){
-				error("Error creating histogram panel", e);
-			}
+                JFreeChart chart = HistogramChartFactory.makeEmptyChart();
 
-		}
-		
-		protected void updateSingle() {
-			updateMultiple();
-		}
-		
-		protected void updateMultiple() {
-			this.setEnabled(true);
-//			MeasurementScale scale  = measurementUnitSettingsPanel.getSelected();
-			boolean useDensity = useDensityPanel.isSelected();
+                SelectableChartPanel panel = new SelectableChartPanel(chart, stat.toString());
+                panel.getChartRenderingInfo().setEntityCollection(null);
+                panel.setPreferredSize(preferredSize);
+                panel.addSignalChangeListener(this);
+                chartPanels.put(stat.toString(), panel);
+                mainPanel.add(panel);
 
-//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
-			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
-				SelectableChartPanel panel = chartPanels.get(stat.toString());
+            }
 
-				ChartOptionsBuilder builder = new ChartOptionsBuilder();
-				ChartOptions options = builder.setDatasets(getDatasets())
-					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.setUseDensity(useDensity)
-					.setTarget(panel)
-					.build();
-				
-				setChart(options);
-			}
-		}
-		
-		protected void updateNull() {
-			this.setEnabled(false);
-		}
+        } catch (Exception e) {
+            error("Error creating histogram panel", e);
+        }
 
-		
-		@Override
-		public void setChartsAndTablesLoading(){
-			super.setChartsAndTablesLoading();
-//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
-			for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
-				ExportableChartPanel panel = chartPanels.get(stat.toString());
-				panel.setChart(MorphologyChartFactory.createLoadingChart());
-				
-			}
-		}
+    }
 
-		@Override
-		public void signalChangeReceived(SignalChangeEvent event) {
+    protected void updateSingle() {
+        updateMultiple();
+    }
 
-			if(event.type().equals("MarkerPositionUpdated")){
-				
-				SelectableChartPanel panel = (SelectableChartPanel) event.getSource();
-				filterByChartSelection(panel);
-				
-			}
+    protected void updateMultiple() {
+        this.setEnabled(true);
+        // MeasurementScale scale = measurementUnitSettingsPanel.getSelected();
+        boolean useDensity = useDensityPanel.isSelected();
 
-		}
+        // NucleusType type =
+        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+            SelectableChartPanel panel = chartPanels.get(stat.toString());
 
-		/**
-		 * Get a statistic from its name.
-		 * @param name
-		 * @return
-		 */
-		private PlottableStatistic getPanelStatisticFromName(String name){
-			PlottableStatistic stat = null;
-//			NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
-			for(PlottableStatistic n : PlottableStatistic.getNucleusStats()){
-				if(n.toString().equals(name)){
-					stat = n;
-				}
-			}
-			return stat;
-		}
-				
-		/**
-		 * Filter the selected populations based on the region outlined on a histogram panel
-		 * @param panel
-		 */
-		public void filterByChartSelection(SelectableChartPanel panel){
-			// check the scale to use for selection
-			MeasurementScale scale  = GlobalOptions.getInstance().getScale();
+            ChartOptionsBuilder builder = new ChartOptionsBuilder();
+            ChartOptions options = builder.setDatasets(getDatasets()).addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .setUseDensity(useDensity).setTarget(panel).build();
 
-			// get the parameters to filter on
-			Double lower = panel.getGateLower();
-			Double upper = panel.getGateUpper();
-			DecimalFormat df = new DecimalFormat("#.##");
+            setChart(options);
+        }
+    }
 
-			// check the boxplot that fired
-			PlottableStatistic stat = getPanelStatisticFromName(panel.getName());
+    protected void updateNull() {
+        this.setEnabled(false);
+    }
 
-			if(    !lower.isNaN() && !upper.isNaN()     ){
-				
-				// Make a dialog to ask if a filter should be performed
-				int result = getFilterDialogResult(lower, upper);
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        // NucleusType type =
+        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+            ExportableChartPanel panel = chartPanels.get(stat.toString());
+            panel.setChart(MorphologyChartFactory.createLoadingChart());
 
-				if(result==0){ // button at index 0 - continue
-					
-//					List<AnalysisDataset> newList = new ArrayList<AnalysisDataset>();
+        }
+    }
 
-					// create a new sub-collection with the given parameters for each dataset
-					for(IAnalysisDataset dataset : getDatasets()){
-						ICellCollection collection = dataset.getCollection();
-						try {
-							
-							log(Level.INFO, "Filtering on "
-									+stat.toString()
-									+": "
-									+df.format(lower)
-									+" - "+df.format(upper));
-							
-							ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
+    @Override
+    public void signalChangeReceived(SignalChangeEvent event) {
 
-							if(subCollection.hasCells()){
+        if (event.type().equals("MarkerPositionUpdated")) {
 
-								log(Level.INFO, "Filtered "+subCollection.size()+" nuclei");
-								dataset.addChildCollection(subCollection);
-								try {
-									dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
-								} catch (Exception e1) {
-									log(Level.SEVERE, "Error applying segments", e1);
-								}
-//								newList.add(  dataset.getChildDataset(subCollection.getID() ));
-							}
+            SelectableChartPanel panel = (SelectableChartPanel) event.getSource();
+            filterByChartSelection(panel);
 
-						} catch (Exception e) {
-							log(Level.SEVERE, "Error filtering", e);
-							
-						}
-					}
-					log(Level.FINEST, "Firing population update request");
-					fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-//					fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-				}
-			} 
-		}
-	}
+        }
+
+    }
+
+    /**
+     * Get a statistic from its name.
+     * 
+     * @param name
+     * @return
+     */
+    private PlottableStatistic getPanelStatisticFromName(String name) {
+        PlottableStatistic stat = null;
+        // NucleusType type =
+        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+        for (PlottableStatistic n : PlottableStatistic.getNucleusStats()) {
+            if (n.toString().equals(name)) {
+                stat = n;
+            }
+        }
+        return stat;
+    }
+
+    /**
+     * Filter the selected populations based on the region outlined on a
+     * histogram panel
+     * 
+     * @param panel
+     */
+    public void filterByChartSelection(SelectableChartPanel panel) {
+        // check the scale to use for selection
+        MeasurementScale scale = GlobalOptions.getInstance().getScale();
+
+        // get the parameters to filter on
+        Double lower = panel.getGateLower();
+        Double upper = panel.getGateUpper();
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        // check the boxplot that fired
+        PlottableStatistic stat = getPanelStatisticFromName(panel.getName());
+
+        if (!lower.isNaN() && !upper.isNaN()) {
+
+            // Make a dialog to ask if a filter should be performed
+            int result = getFilterDialogResult(lower, upper);
+
+            if (result == 0) { // button at index 0 - continue
+
+                // List<AnalysisDataset> newList = new
+                // ArrayList<AnalysisDataset>();
+
+                // create a new sub-collection with the given parameters for
+                // each dataset
+                for (IAnalysisDataset dataset : getDatasets()) {
+                    ICellCollection collection = dataset.getCollection();
+                    try {
+
+                        log(Level.INFO,
+                                "Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
+
+                        ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
+
+                        if (subCollection.hasCells()) {
+
+                            log(Level.INFO, "Filtered " + subCollection.size() + " nuclei");
+                            dataset.addChildCollection(subCollection);
+                            try {
+                                dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
+                            } catch (Exception e1) {
+                                log(Level.SEVERE, "Error applying segments", e1);
+                            }
+                            // newList.add(
+                            // dataset.getChildDataset(subCollection.getID() ));
+                        }
+
+                    } catch (Exception e) {
+                        log(Level.SEVERE, "Error filtering", e);
+
+                    }
+                }
+                log(Level.FINEST, "Firing population update request");
+                fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+                // fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+            }
+        }
+    }
+}

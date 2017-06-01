@@ -48,141 +48,127 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 
 /**
- * Holds a series of outline panels showing the locations of the segment
- * starts for all nuclei within a dataset
+ * Holds a series of outline panels showing the locations of the segment starts
+ * for all nuclei within a dataset
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetEventListener  {
+public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetEventListener {
 
-	private Dimension preferredSize = new Dimension(300, 300);
-			
-	public SegmentPositionsPanel(){
-		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
-		
-		try {
-			this.updateNull();
-		} catch (Exception e) {
-			error("Error creating segments posistion panel", e);
-		}		
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		update(getDatasets());
-		
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return new MorphologyChartFactory(options).makeSegmentStartPositionChart();
-	}
+    private Dimension preferredSize = new Dimension(300, 300);
 
+    public SegmentPositionsPanel() {
+        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
-	@Override
-	protected void updateSingle() {
-		super.updateSingle();
-		finest("Passing to update multiple datasets");
-		updateMultiple();
-	}
-	
+        try {
+            this.updateNull();
+        } catch (Exception e) {
+            error("Error creating segments posistion panel", e);
+        }
+    }
 
-	
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        update(getDatasets());
 
+    }
 
-	@Override
-	protected void updateMultiple() {
-		super.updateMultiple();
-		
-		// Replace all the charts on the main panel
-		
-		finest("Creating new main panel");
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new MorphologyChartFactory(options).makeSegmentStartPositionChart();
+    }
 
-		finest("Checking segment counts");
-				
-		// Check that all the datasets have the same number of segments
-		if(IBorderSegment.segmentCountsMatch(getDatasets())){
-			
-			finest("Segment counts match");
+    @Override
+    protected void updateSingle() {
+        super.updateSingle();
+        finest("Passing to update multiple datasets");
+        updateMultiple();
+    }
 
-			ICellCollection collection = activeDataset().getCollection();
-			List<IBorderSegment> segments;
-			try {
-				segments = collection.getProfileCollection()
-						.getSegments(Tag.REFERENCE_POINT);
-			} catch (UnavailableBorderTagException | ProfileException e) {
-				warn("Cannot get segments");
-				fine("Cannot get segments", e);
-				return;
-			}
+    @Override
+    protected void updateMultiple() {
+        super.updateMultiple();
 
+        // Replace all the charts on the main panel
 
-			finest("Creating segment charts");
-			
-			// Get each segment as a boxplot
-			for(IBorderSegment seg : segments){
+        finest("Creating new main panel");
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-				finest("Creating chart for segment "+seg.getName());
-				
-				JFreeChart chart = AbstractChartFactory.createLoadingChart();
-				ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
-				chartPanel.setFixedAspectRatio(true);
-				chartPanel.addChartSetEventListener(this);
-				chartPanel.setPreferredSize(preferredSize);
-				chartPanel.setSize(preferredSize);
-				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);			
-				
-				ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.setSegPosition(seg.getPosition())
-					.setSegID(seg.getID())
-					.setTarget(chartPanel)
-					.build();
-				
-				setChart(options);
+        finest("Checking segment counts");
 
-				
-				finest("Adding new chart panel for segment "+seg.getName());
+        // Check that all the datasets have the same number of segments
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) {
 
-			}
-			
-			finest("Finshed creating segment charts");
+            finest("Segment counts match");
 
-		} else { // different number of segments, blank chart
-			finest("Segment counts do not match");
-			this.setEnabled(false);
-			mainPanel.setLayout(new FlowLayout());
-			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-		}
+            ICellCollection collection = activeDataset().getCollection();
+            List<IBorderSegment> segments;
+            try {
+                segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+            } catch (UnavailableBorderTagException | ProfileException e) {
+                warn("Cannot get segments");
+                fine("Cannot get segments", e);
+                return;
+            }
 
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		
-		scrollPane.setViewportView(mainPanel);
+            finest("Creating segment charts");
 
-	}
-	
+            // Get each segment as a boxplot
+            for (IBorderSegment seg : segments) {
 
+                finest("Creating chart for segment " + seg.getName());
 
+                JFreeChart chart = AbstractChartFactory.createLoadingChart();
+                ExportableChartPanel chartPanel = new ExportableChartPanel(chart);
+                chartPanel.setFixedAspectRatio(true);
+                chartPanel.addChartSetEventListener(this);
+                chartPanel.setPreferredSize(preferredSize);
+                chartPanel.setSize(preferredSize);
+                chartPanels.put(seg.getName(), chartPanel);
+                mainPanel.add(chartPanel);
 
-	@Override
-	protected void updateNull() {
-		super.updateNull();
-		this.setEnabled(false);
-		mainPanel.setLayout(new FlowLayout());
-		mainPanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-		scrollPane.setViewportView(mainPanel);
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		scrollPane.setViewportView(mainPanel);
-	}
+                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+                        .setSegPosition(seg.getPosition()).setSegID(seg.getID()).setTarget(chartPanel).build();
 
-	@Override
-	public void chartSetEventReceived(ChartSetEvent e) {
-		((ExportableChartPanel) e.getSource()).restoreAutoBounds();
-	}
+                setChart(options);
+
+                finest("Adding new chart panel for segment " + seg.getName());
+
+            }
+
+            finest("Finshed creating segment charts");
+
+        } else { // different number of segments, blank chart
+            finest("Segment counts do not match");
+            this.setEnabled(false);
+            mainPanel.setLayout(new FlowLayout());
+            mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+        }
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
+
+        scrollPane.setViewportView(mainPanel);
+
+    }
+
+    @Override
+    protected void updateNull() {
+        super.updateNull();
+        this.setEnabled(false);
+        mainPanel.setLayout(new FlowLayout());
+        mainPanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+        scrollPane.setViewportView(mainPanel);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        scrollPane.setViewportView(mainPanel);
+    }
+
+    @Override
+    public void chartSetEventReceived(ChartSetEvent e) {
+        ((ExportableChartPanel) e.getSource()).restoreAutoBounds();
+    }
 }

@@ -28,126 +28,139 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 
 /**
  * Store the number of cells overlapping between datasets
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class VennCache {
 
-	/**
-	 * The key to the venn cache
-	 * @author bms41
-	 * @since 1.13.4
-	 *
-	 */
-	private class Key {
-		 private UUID id;
-		 
-		 public Key(UUID id){
-			 this.id = id;
-		 }
+    /**
+     * The key to the venn cache
+     * 
+     * @author bms41
+     * @since 1.13.4
+     *
+     */
+    private class Key {
+        private UUID id;
 
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + getOuterType().hashCode();
-			result = prime * result + ((id == null) ? 0 : id.hashCode());
-			return result;
-		}
+        public Key(UUID id) {
+            this.id = id;
+        }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			Key other = (Key) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
-			if (id == null) {
-				if (other.id != null)
-					return false;
-			} else if (!id.equals(other.id))
-				return false;
-			return true;
-		}
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + getOuterType().hashCode();
+            result = prime * result + ((id == null) ? 0 : id.hashCode());
+            return result;
+        }
 
-		private VennCache getOuterType() {
-			return VennCache.this;
-		}
-		 
-		 
-		 
-		
-	}
-	
-	private Map<Key, Integer> map = new HashMap<Key, Integer>();
-	
-	/**
-	 * Default constructor 
-	 */
-	public VennCache(){	}
-	
-	
-	/**
-	 * Add the number of shared nuclei with the given dataset
-	 * @param d the dataset
-	 * @param i the number of shared nuclei
-	 */
-	public void addCount(IAnalysisDataset d, int i){
-		Key k = new Key(d.getUUID());
-		map.put(k, i);
-	}
-	
-	/**
-	 * Add the number of shared nuclei with the given collection
-	 * @param d the collection
-	 * @param i the number of shared nuclei
-	 */
-	public void addCount(ICellCollection d, int i){
-		Key k = new Key(d.getID());
-		map.put(k, i);
-	}
-	
-	/**
-	 * Get the number of shared nuclei with the given dataset
-	 * @param d the dataset
-	 * @return the shared count
-	 */
-	public int getCount(IAnalysisDataset d){
-		Key k = new Key(d.getUUID());
-		return map.get(k);
-	}
-	
-	/**
-	 * Get the number of shared nuclei with the given collection
-	 * @param d the collection
-	 * @return the shared count
-	 */
-	public int getCount(ICellCollection d){
-		Key k = new Key(d.getID());
-		return map.get(k);
-	}
-	
-	/**
-	 * Check if the given dataset is present in the cache
-	 * @param d the dataset
-	 */
-	public boolean hasCount(IAnalysisDataset d){
-		Key k = new Key(d.getUUID());
-		return map.containsKey(k);
-	}
-	
-	/**
-	 * Check if the given collection is present in the cache
-	 * @param d the collection
-	 */
-	public boolean hasCount(ICellCollection d){
-		Key k = new Key(d.getID());
-		return map.containsKey(k);
-	}
- 	
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Key other = (Key) obj;
+            if (!getOuterType().equals(other.getOuterType()))
+                return false;
+            if (id == null) {
+                if (other.id != null)
+                    return false;
+            } else if (!id.equals(other.id))
+                return false;
+            return true;
+        }
+
+        private VennCache getOuterType() {
+            return VennCache.this;
+        }
+
+    }
+
+    private Map<Key, Integer> map = new HashMap<Key, Integer>();
+
+    /**
+     * Default constructor
+     */
+    public VennCache() {
+    }
+
+    /**
+     * Add the number of shared nuclei with the given dataset
+     * 
+     * @param d
+     *            the dataset
+     * @param i
+     *            the number of shared nuclei
+     */
+    public void addCount(IAnalysisDataset d, int i) {
+        Key k = new Key(d.getUUID());
+        map.put(k, i);
+    }
+
+    /**
+     * Add the number of shared nuclei with the given collection
+     * 
+     * @param d
+     *            the collection
+     * @param i
+     *            the number of shared nuclei
+     */
+    public void addCount(ICellCollection d, int i) {
+        Key k = new Key(d.getID());
+        map.put(k, i);
+    }
+
+    /**
+     * Get the number of shared nuclei with the given dataset
+     * 
+     * @param d
+     *            the dataset
+     * @return the shared count
+     */
+    public int getCount(IAnalysisDataset d) {
+        Key k = new Key(d.getUUID());
+        return map.get(k);
+    }
+
+    /**
+     * Get the number of shared nuclei with the given collection
+     * 
+     * @param d
+     *            the collection
+     * @return the shared count
+     */
+    public int getCount(ICellCollection d) {
+        Key k = new Key(d.getID());
+        return map.get(k);
+    }
+
+    /**
+     * Check if the given dataset is present in the cache
+     * 
+     * @param d
+     *            the dataset
+     */
+    public boolean hasCount(IAnalysisDataset d) {
+        Key k = new Key(d.getUUID());
+        return map.containsKey(k);
+    }
+
+    /**
+     * Check if the given collection is present in the cache
+     * 
+     * @param d
+     *            the collection
+     */
+    public boolean hasCount(ICellCollection d) {
+        Key k = new Key(d.getID());
+        return map.containsKey(k);
+    }
+
 }

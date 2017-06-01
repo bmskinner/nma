@@ -23,14 +23,27 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 /**
  * Thrown when a profile type is not available within a profile collection.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class UnavailableProfileTypeException extends UnavailableComponentException {
-		private static final long serialVersionUID = 1L;
-		public UnavailableProfileTypeException() { super(); }
-		public UnavailableProfileTypeException(String message) { super(message); }
-		public UnavailableProfileTypeException(String message, Throwable cause) { super(message, cause); }
-		public UnavailableProfileTypeException(Throwable cause) { super(cause); }
-	}
+    private static final long serialVersionUID = 1L;
+
+    public UnavailableProfileTypeException() {
+        super();
+    }
+
+    public UnavailableProfileTypeException(String message) {
+        super(message);
+    }
+
+    public UnavailableProfileTypeException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnavailableProfileTypeException(Throwable cause) {
+        super(cause);
+    }
+}

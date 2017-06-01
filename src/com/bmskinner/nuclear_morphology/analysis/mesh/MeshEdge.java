@@ -23,67 +23,72 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public interface MeshEdge {
 
-	MeshVertex getV1();
+    MeshVertex getV1();
 
-	MeshVertex getV2();
+    MeshVertex getV2();
 
-	MeshEdge reverse();
+    MeshEdge reverse();
 
-	void setValue(double d);
+    void setValue(double d);
 
-	/**
-	 * Get the value stored within this edge.
-	 * @return the value
-	 */
-	double getValue();
+    /**
+     * Get the value stored within this edge.
+     * 
+     * @return the value
+     */
+    double getValue();
 
-	double getLog2Ratio();
+    double getLog2Ratio();
 
-	double getLength();
+    double getLength();
 
-	IPoint getMidpoint();
+    IPoint getMidpoint();
 
-	boolean isLongerThan(MeshEdge e);
+    boolean isLongerThan(MeshEdge e);
 
-	/**
-	 * Test if the edges share both endpoints
-	 * @param e
-	 * @return
-	 */
-	boolean overlaps(MeshEdge e);
+    /**
+     * Test if the edges share both endpoints
+     * 
+     * @param e
+     * @return
+     */
+    boolean overlaps(MeshEdge e);
 
-	boolean crosses(MeshEdge e);
+    boolean crosses(MeshEdge e);
 
-	/**
-	 * Check if any of the endpoints of the edges are shared
-	 * @param e
-	 * @return
-	 */
-	boolean sharesEndpoint(MeshEdge e);
+    /**
+     * Check if any of the endpoints of the edges are shared
+     * 
+     * @param e
+     * @return
+     */
+    boolean sharesEndpoint(MeshEdge e);
 
-	boolean containsVertex(MeshVertex v);
+    boolean containsVertex(MeshVertex v);
 
-	boolean equals(MeshEdge e);
+    boolean equals(MeshEdge e);
 
-	/**
-	 * Get the point a given fraction of the way along the edge (starting at v1)
-	 * @param d
-	 * @return
-	 */
-	IPoint getProportionalPosition(double d);
+    /**
+     * Get the point a given fraction of the way along the edge (starting at v1)
+     * 
+     * @param d
+     * @return
+     */
+    IPoint getProportionalPosition(double d);
 
-	/**
-	 * If the point lies on the edge, get the proportional distance along the 
-	 * edge from v1. Otherwise return 0
-	 * @param p
-	 * @return
-	 */
-	double getPositionProportion(IPoint p);
+    /**
+     * If the point lies on the edge, get the proportional distance along the
+     * edge from v1. Otherwise return 0
+     * 
+     * @param p
+     * @return
+     */
+    double getPositionProportion(IPoint p);
 
-	int hashCode();
+    int hashCode();
 
-	boolean equals(Object obj);
+    boolean equals(Object obj);
 
-	String getName();
+    String getName();
 
 }

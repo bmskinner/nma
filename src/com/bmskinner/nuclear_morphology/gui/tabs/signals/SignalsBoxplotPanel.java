@@ -40,80 +40,73 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
-	public SignalsBoxplotPanel(){
-		super(CellularComponent.NUCLEAR_SIGNAL);
-		createUI();
-	}
+    public SignalsBoxplotPanel() {
+        super(CellularComponent.NUCLEAR_SIGNAL);
+        createUI();
+    }
 
-	private void createUI(){
+    private void createUI() {
 
-		this.setLayout(new BorderLayout());
-		Dimension preferredSize = new Dimension(200, 300);
+        this.setLayout(new BorderLayout());
+        Dimension preferredSize = new Dimension(200, 300);
 
-		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
+        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
 
-			ChartOptions options = new ChartOptionsBuilder()
-					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.build();
+            ChartOptions options = new ChartOptionsBuilder().addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .build();
 
-			JFreeChart chart = null;
-			try {
-				chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
-			} catch (Exception e) {
-				log(Level.SEVERE, "Error creating boxplots panel", e);
-			}
+            JFreeChart chart = null;
+            try {
+                chart = new ViolinChartFactory(options).createStatisticPlot(CellularComponent.NUCLEAR_SIGNAL);
+            } catch (Exception e) {
+                log(Level.SEVERE, "Error creating boxplots panel", e);
+            }
 
-			ViolinChartPanel panel = new ViolinChartPanel(chart);
-			panel.setPreferredSize(preferredSize);
-			chartPanels.put(stat.toString(), panel);
-			mainPanel.add(panel);
-		}
+            ViolinChartPanel panel = new ViolinChartPanel(chart);
+            panel.setPreferredSize(preferredSize);
+            chartPanels.put(stat.toString(), panel);
+            mainPanel.add(panel);
+        }
 
-		// add the scroll pane to the tab
-		scrollPane  = new JScrollPane(mainPanel);
-		this.add(scrollPane, BorderLayout.CENTER);
+        // add the scroll pane to the tab
+        scrollPane = new JScrollPane(mainPanel);
+        this.add(scrollPane, BorderLayout.CENTER);
 
-	}
+    }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
 
-		update(getDatasets());
+        update(getDatasets());
 
-	}
+    }
 
-	@Override
-	protected void updateSingle() {
-		updateMultiple();
+    @Override
+    protected void updateSingle() {
+        updateMultiple();
 
-	}
+    }
 
-	@Override
-	protected void updateMultiple() {
+    @Override
+    protected void updateMultiple() {
 
-		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
+        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
 
-			ExportableChartPanel panel = chartPanels.get(stat.toString());
+            ExportableChartPanel panel = chartPanels.get(stat.toString());
 
-			ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.addStatistic(stat)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.setTarget(panel)
-					.build();
-			
-			setChart(options);
-		}
+            ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+                    .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                    .setTarget(panel).build();
 
-	}
+            setChart(options);
+        }
 
-	@Override
-	protected void updateNull() {
-		updateMultiple();
-	}
+    }
+
+    @Override
+    protected void updateNull() {
+        updateMultiple();
+    }
 
 }
-

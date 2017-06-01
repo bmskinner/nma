@@ -38,380 +38,395 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
- * The image panel for FISH remapping. Stores the cells selected for
- * remapping and colours them appropriately.
+ * The image panel for FISH remapping. Stores the cells selected for remapping
+ * and colours them appropriately.
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
 public class FishRemappingProberPanel extends GenericImageProberPanel {
-	
-	private static final int ORIGINAL_IMG_COL = 0;
-	private static final int ORIGINAL_IMG_ROW = 0;
-	private static final double PANEL_SCREEN_WIDTH_PROP = 0.7;
 
-	
-	private final IAnalysisDataset dataset;
+    private static final int    ORIGINAL_IMG_COL        = 0;
+    private static final int    ORIGINAL_IMG_ROW        = 0;
+    private static final double PANEL_SCREEN_WIDTH_PROP = 0.7;
 
-//	private final File fishDir;
-	
-	private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei selected with the left button
-	private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei selected with the right button
-	
-	private Set<ICell> openCells = new HashSet<ICell>();
-	
-	public FishRemappingProberPanel(IAnalysisDataset dataset, Finder finder, Window parent) throws MissingOptionException{
-		
-		super(dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder(), finder, parent);
-		
+    private final IAnalysisDataset dataset;
 
-		this.dataset   = dataset;
-//		this.fishDir = fishDir;
-		
-				
-//		// Make sure the images fit in the table
-		Dimension minPanelSize = getPreferredSize();
-		minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth() * PANEL_SCREEN_WIDTH_PROP);
-		setPreferredSize(minPanelSize);
-		
-//		createFileList(options.getFolder());
-	}
-	
-	@Override
-	protected JTable createTable(TableModel model){
-		JTable table = super.createTable(model);
-		
-//		// change the table widths
-//		Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-//		// set the new width
-//		double ratio = (double) screenSize.getWidth() / (double) screenSize.getHeight();
-//		int newWidth = (int) ( screenSize.getWidth() * PANEL_SCREEN_WIDTH_PROP);
-//		int newHeight = (int) (   (double) newWidth / ratio);
-//		
-//		table.setRowHeight(newHeight);
-//		table.setC
+    // private final File fishDir;
 
-		for(MouseListener l : table.getMouseListeners()){
-			table.removeMouseListener(l);
-		}
+    private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei
+                                                                      // selected
+                                                                      // with
+                                                                      // the
+                                                                      // left
+                                                                      // button
+    private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei
+                                                                      // selected
+                                                                      // with
+                                                                      // the
+                                                                      // right
+                                                                      // button
 
-		// Add listener for nucleus click
-		table.addMouseListener( new MouseAdapter(){
+    private Set<ICell> openCells = new HashSet<ICell>();
 
-			@Override
-			public void mouseClicked(MouseEvent e){
-				if(e.getClickCount()==1){
+    public FishRemappingProberPanel(IAnalysisDataset dataset, Finder finder, Window parent)
+            throws MissingOptionException {
 
-					Point pnt = e.getPoint();
-					int row = table.rowAtPoint(pnt);
-					int col = table.columnAtPoint(pnt);
+        super(dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder(), finder, parent);
 
-					if(row==ORIGINAL_IMG_ROW && col==ORIGINAL_IMG_COL){
+        this.dataset = dataset;
+        // this.fishDir = fishDir;
 
-						Runnable r = () -> {
-							smallImageClicked(e, pnt);
-						};
+        // // Make sure the images fit in the table
+        Dimension minPanelSize = getPreferredSize();
+        minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth()
+                * PANEL_SCREEN_WIDTH_PROP);
+        setPreferredSize(minPanelSize);
 
-						ThreadManager.getInstance().execute(r);
+        // createFileList(options.getFolder());
+    }
 
+    @Override
+    protected JTable createTable(TableModel model) {
+        JTable table = super.createTable(model);
 
+        // // change the table widths
+        // Dimension screenSize =
+        // java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        // // set the new width
+        // double ratio = (double) screenSize.getWidth() / (double)
+        // screenSize.getHeight();
+        // int newWidth = (int) ( screenSize.getWidth() *
+        // PANEL_SCREEN_WIDTH_PROP);
+        // int newHeight = (int) ( (double) newWidth / ratio);
+        //
+        // table.setRowHeight(newHeight);
+        // table.setC
 
-					} else { // Show a large image for the FISH image when clicked
+        for (MouseListener l : table.getMouseListeners()) {
+            table.removeMouseListener(l);
+        }
 
-						TableModel model = (TableModel)table.getModel();
+        // Add listener for nucleus click
+        table.addMouseListener(new MouseAdapter() {
 
-						ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
 
-						if(selectedData.getLargeIcon()!=null){
-							new LargeImageDialog(selectedData, getWindow());
-						}
-					}
+                    Point pnt = e.getPoint();
+                    int row = table.rowAtPoint(pnt);
+                    int col = table.columnAtPoint(pnt);
 
+                    if (row == ORIGINAL_IMG_ROW && col == ORIGINAL_IMG_COL) {
 
-				}
-			}
+                        Runnable r = () -> {
+                            smallImageClicked(e, pnt);
+                        };
 
-		});
-		return table;
-	}
-	
-	/**
-	 * Import the given file as an image, detect nuclei and
-	 * display the image with annotated nuclear outlines
-	 * @param imageFile
-	 */
-	@Override
-	protected void importAndDisplayImage(File imageFile){
-		
-		// Get the cells open in this image
-		super.importAndDisplayImage(imageFile);
-		
-		if(dataset.getCollection().hasCells(imageFile)){
-			openCells = dataset.getCollection().getCells(imageFile);
+                        ThreadManager.getInstance().execute(r);
 
-			ProberTableCell infoCell = (ProberTableCell) table.getModel()
-					.getValueAt(ORIGINAL_IMG_COL, ORIGINAL_IMG_ROW);
+                    } else { // Show a large image for the FISH image when
+                             // clicked
 
-			Image largeImage = infoCell.getLargeIcon().getImage();
+                        TableModel model = (TableModel) table.getModel();
 
-			// Get the cells matching the imageFile
-			for(ICell c : openCells){
-				drawNucleus(c, largeImage);
-			}
+                        ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
+                        if (selectedData.getLargeIcon() != null) {
+                            new LargeImageDialog(selectedData, getWindow());
+                        }
+                    }
 
-			// Update the small icon
-			infoCell.setSmallIcon( new ImageIcon(scaleImage( infoCell.getLargeIcon() )) );
-			table.repaint();
-		}
+                }
+            }
 
-	}
-		
-	private void smallImageClicked(MouseEvent e, Point pnt){
-		
-		IPoint p = getPointInOriginalImage(pnt);
-		
-		finer("Clicked in large image "+p.toString());
-		
-		// See if the clicked position is in a nucleus
+        });
+        return table;
+    }
 
-		int row = table.rowAtPoint(   pnt);
-		int col = table.columnAtPoint(pnt);
-		// Get the rectangle covering the cell of the table
-		
-		Rectangle cellRectangle = table.getCellRect(row, col, false);
-		
-		// Get the icon cell at the clicked row and column
-		ProberTableCell selectedData = (ProberTableCell) table.getModel().getValueAt( row, col );
-		
-		for(ICell c : openCells){
-			
-			for(Nucleus n : c.getNuclei()){
-				if(n.containsOriginalPoint( p )){
+    /**
+     * Import the given file as an image, detect nuclei and display the image
+     * with annotated nuclear outlines
+     * 
+     * @param imageFile
+     */
+    @Override
+    protected void importAndDisplayImage(File imageFile) {
 
-					updateSelectedNuclei(e, c);
-					fine("Click is in nucleus");
+        // Get the cells open in this image
+        super.importAndDisplayImage(imageFile);
 
-					drawNucleus(c, selectedData.getLargeIcon().getImage());
-					// Update the small icon
-					selectedData.setSmallIcon( new ImageIcon(scaleImage( selectedData.getLargeIcon() )) );
-					table.repaint(cellRectangle); // repaint the affected cell only
-					return; // don't keep searching
+        if (dataset.getCollection().hasCells(imageFile)) {
+            openCells = dataset.getCollection().getCells(imageFile);
 
-				}
-			}
-			
-		}
-	}
-	
-	/**
-	 * Convert the coordinates clicked in the small icon to coordinates
-	 * in the original image.
-	 * @param e
-	 * @param pnt
-	 * @return
-	 */
-	private IPoint getPointInOriginalImage(Point pnt){
-		// Get the data model for this table
-		TableModel model = (TableModel)table.getModel();
+            ProberTableCell infoCell = (ProberTableCell) table.getModel().getValueAt(ORIGINAL_IMG_COL,
+                    ORIGINAL_IMG_ROW);
 
-		int row = table.rowAtPoint(   pnt);
-		int col = table.columnAtPoint(pnt);
+            Image largeImage = infoCell.getLargeIcon().getImage();
 
-		// The coordinates are relative to the cell of the table.
-		// The height of the image is less than the table height, so 
-		// subtract the y difference
-		double x = pnt.getX();
-		double y = pnt.getY();
+            // Get the cells matching the imageFile
+            for (ICell c : openCells) {
+                drawNucleus(c, largeImage);
+            }
 
-		finer("Clicked "+x+" : "+y);
+            // Update the small icon
+            infoCell.setSmallIcon(new ImageIcon(scaleImage(infoCell.getLargeIcon())));
+            table.repaint();
+        }
 
+    }
 
-		/*
-		 * The coordinates within the cell must be converted
-		 * to coordinates within the small image in the IconCell.
-		 * 
-		 * The x coordinates are not always correct. The IconCell is aligned
-		 * horizontally, so the difference in width between the IconCell and the
-		 * table cell can be used as an offset
-		 * 
-		 * The imageprober has vertical alignment to the top of the cell,
-		 * so y coordinates should also be correct
-		 * 
-		 * 
-		 */
+    private void smallImageClicked(MouseEvent e, Point pnt) {
 
-		// Get the rectangle covering the cell of the table
-		Rectangle cellRectangle = table.getCellRect(row, col, false);
+        IPoint p = getPointInOriginalImage(pnt);
 
-		// Get the icon cell at the clicked row and column
-		ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
+        finer("Clicked in large image " + p.toString());
 
-		// Get the width of the icon in the icon cell
-		int iconWidth = selectedData.getSmallIcon().getIconWidth();
+        // See if the clicked position is in a nucleus
 
-		//				// Get the width of the column of interest
-		int columnWidth = cellRectangle.width;
+        int row = table.rowAtPoint(pnt);
+        int col = table.columnAtPoint(pnt);
+        // Get the rectangle covering the cell of the table
 
-		finer("Column width is "+columnWidth);
-		finer("IconCell width is "+iconWidth);
+        Rectangle cellRectangle = table.getCellRect(row, col, false);
 
-		//				Split the difference
-		int offset = (columnWidth - iconWidth) >>1;
+        // Get the icon cell at the clicked row and column
+        ProberTableCell selectedData = (ProberTableCell) table.getModel().getValueAt(row, col);
 
-			x = x-offset;
+        for (ICell c : openCells) {
 
-			finer("Clicked in small image "+x+" : "+y);
+            for (Nucleus n : c.getNuclei()) {
+                if (n.containsOriginalPoint(p)) {
 
-			if(x < 0 || x > iconWidth){
-				return null; // out of bounds of icon
-			}
+                    updateSelectedNuclei(e, c);
+                    fine("Click is in nucleus");
 
-			if(y > selectedData.getSmallIcon().getIconHeight()){
-				return null; // out of image bounds in cell
-			}
+                    drawNucleus(c, selectedData.getLargeIcon().getImage());
+                    // Update the small icon
+                    selectedData.setSmallIcon(new ImageIcon(scaleImage(selectedData.getLargeIcon())));
+                    table.repaint(cellRectangle); // repaint the affected cell
+                                                  // only
+                    return; // don't keep searching
 
-			// Translate coordinates back to large image
-			double factor = selectedData.getFactor();
+                }
+            }
 
-			double largeX = x * factor;
-			double largeY = y * factor;
+        }
+    }
 
-			IPoint p = IPoint.makeNew(largeX, largeY);
-			return p;
-	}
-	
-	/**
-	 * Draw the cell on the given image
-	 * @param c
-	 * @param image
-	 */
-	private void drawNucleus(ICell c, Image image){
-		
-		Graphics2D g2 = (Graphics2D) image.getGraphics();
-		
-		Color oldColor = g2.getColor();
-		g2.setColor(getCellColour(c));
-		
-		Shape p = c.getNucleus().toOriginalShape();
-		
-		g2.fill(p);
-		g2.setColor(oldColor);
-		
-	}
-	
-	
-	/**
-	 * Choose the color to fill nuclei based on the
-	 * colour swatch and whether they are selected.
-	 * @param c the cell
-	 * @return
-	 */
-	private Color getCellColour(ICell c){
-		Color color = Color.BLUE;
-		ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
-		if(selectedNucleiLeft.contains(c.getId())){
+    /**
+     * Convert the coordinates clicked in the small icon to coordinates in the
+     * original image.
+     * 
+     * @param e
+     * @param pnt
+     * @return
+     */
+    private IPoint getPointInOriginalImage(Point pnt) {
+        // Get the data model for this table
+        TableModel model = (TableModel) table.getModel();
 
-			if(swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)){
-				color = Color.CYAN;
-			} else {
-				color = Color.GREEN;
-			}
-		}
-		if(selectedNucleiRight.contains(c.getId())){
-			if(swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)){
-				color = Color.ORANGE;
-			} else {
-				color = Color.RED;
-			}
-		}
-		
-		return color;
-	}
-	
-	
-	/**
-	 * Create a copy of the given processor, and scale it fit the maximum
-	 * dimensions specified by setSmallIconSize(). The aspect ratio is preserved.
-	 * @param ip
-	 * @return
-	 */
-	protected Image scaleImage(ImageIcon ic){
-				
-		double aspect =  (double) ic.getIconWidth() / (double) ic.getIconHeight();
-		
-		
-		Dimension smallDimension = new Dimension(500, table.getRowHeight()-30);
-		
-		double finalWidth = smallDimension.getHeight() * aspect; // fix height
-		finalWidth = finalWidth > smallDimension.getWidth() 
-				   ? smallDimension.getWidth() 
-				   : finalWidth; // but constrain width too
-				   
-		return ic.getImage().getScaledInstance( (int) finalWidth, -1, Image.SCALE_SMOOTH);
-	}
-	
-	
-	
-	/**
-	 * Get a list of CellCollections, containing the selected nuclei.
-	 * If no nuclei were selected, the list is empty
-	 * @return 
-	 * @throws Exception 
-	 */
-	public List<ICellCollection> getSubCollections() {
-		List<ICellCollection> result = new ArrayList<ICellCollection>(0);
-		
-		if(!selectedNucleiLeft.isEmpty()){
-			ICellCollection subCollectionLeft  = new VirtualCellCollection(dataset, "SubCollectionLeft");
-			for(UUID id : selectedNucleiLeft){
-				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionLeft.addCell(cell);
-			}
-			result.add(subCollectionLeft);
-		}
-		
-		if(!selectedNucleiRight.isEmpty()){
-			ICellCollection subCollectionRight  = new VirtualCellCollection(dataset, "SubCollectionRight");
-			for(UUID id : selectedNucleiRight){
-				ICell cell = dataset.getCollection().getCell(id);
-				subCollectionRight.addCell(cell);
-			}
-			result.add(subCollectionRight);
-		}
+        int row = table.rowAtPoint(pnt);
+        int col = table.columnAtPoint(pnt);
 
-		return result;
-	}
-	
-	/**
-	 * Update the lists of selected nuclei based on a click.
-	 * @param e
-	 * @param c
-	 */
-	private synchronized void updateSelectedNuclei(MouseEvent e, ICell c){
-		
-		
-		// if present in list, remove it, otherwise add it
-		if(selectedNucleiLeft.contains(c.getId()) ||  selectedNucleiRight.contains(c.getId()) ){
+        // The coordinates are relative to the cell of the table.
+        // The height of the image is less than the table height, so
+        // subtract the y difference
+        double x = pnt.getX();
+        double y = pnt.getY();
 
-			selectedNucleiLeft.remove(c.getId());
-			selectedNucleiRight.remove(c.getId());
+        finer("Clicked " + x + " : " + y);
 
-		} else {
+        /*
+         * The coordinates within the cell must be converted to coordinates
+         * within the small image in the IconCell.
+         * 
+         * The x coordinates are not always correct. The IconCell is aligned
+         * horizontally, so the difference in width between the IconCell and the
+         * table cell can be used as an offset
+         * 
+         * The imageprober has vertical alignment to the top of the cell, so y
+         * coordinates should also be correct
+         * 
+         * 
+         */
 
-			if((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK){ // right button
-				selectedNucleiRight.add(c.getId());
-				selectedNucleiLeft.remove(c.getId());
-			}
+        // Get the rectangle covering the cell of the table
+        Rectangle cellRectangle = table.getCellRect(row, col, false);
 
-			if((e.getModifiers() & InputEvent.BUTTON1_MASK)	== InputEvent.BUTTON1_MASK){ // left button
-				selectedNucleiLeft.add(c.getId());
-				selectedNucleiRight.remove(c.getId());
-			}
+        // Get the icon cell at the clicked row and column
+        ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
-		}
-		
-		
-	}
+        // Get the width of the icon in the icon cell
+        int iconWidth = selectedData.getSmallIcon().getIconWidth();
+
+        // // Get the width of the column of interest
+        int columnWidth = cellRectangle.width;
+
+        finer("Column width is " + columnWidth);
+        finer("IconCell width is " + iconWidth);
+
+        // Split the difference
+        int offset = (columnWidth - iconWidth) >> 1;
+
+        x = x - offset;
+
+        finer("Clicked in small image " + x + " : " + y);
+
+        if (x < 0 || x > iconWidth) {
+            return null; // out of bounds of icon
+        }
+
+        if (y > selectedData.getSmallIcon().getIconHeight()) {
+            return null; // out of image bounds in cell
+        }
+
+        // Translate coordinates back to large image
+        double factor = selectedData.getFactor();
+
+        double largeX = x * factor;
+        double largeY = y * factor;
+
+        IPoint p = IPoint.makeNew(largeX, largeY);
+        return p;
+    }
+
+    /**
+     * Draw the cell on the given image
+     * 
+     * @param c
+     * @param image
+     */
+    private void drawNucleus(ICell c, Image image) {
+
+        Graphics2D g2 = (Graphics2D) image.getGraphics();
+
+        Color oldColor = g2.getColor();
+        g2.setColor(getCellColour(c));
+
+        Shape p = c.getNucleus().toOriginalShape();
+
+        g2.fill(p);
+        g2.setColor(oldColor);
+
+    }
+
+    /**
+     * Choose the color to fill nuclei based on the colour swatch and whether
+     * they are selected.
+     * 
+     * @param c
+     *            the cell
+     * @return
+     */
+    private Color getCellColour(ICell c) {
+        Color color = Color.BLUE;
+        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
+        if (selectedNucleiLeft.contains(c.getId())) {
+
+            if (swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)) {
+                color = Color.CYAN;
+            } else {
+                color = Color.GREEN;
+            }
+        }
+        if (selectedNucleiRight.contains(c.getId())) {
+            if (swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)) {
+                color = Color.ORANGE;
+            } else {
+                color = Color.RED;
+            }
+        }
+
+        return color;
+    }
+
+    /**
+     * Create a copy of the given processor, and scale it fit the maximum
+     * dimensions specified by setSmallIconSize(). The aspect ratio is
+     * preserved.
+     * 
+     * @param ip
+     * @return
+     */
+    protected Image scaleImage(ImageIcon ic) {
+
+        double aspect = (double) ic.getIconWidth() / (double) ic.getIconHeight();
+
+        Dimension smallDimension = new Dimension(500, table.getRowHeight() - 30);
+
+        double finalWidth = smallDimension.getHeight() * aspect; // fix height
+        finalWidth = finalWidth > smallDimension.getWidth() ? smallDimension.getWidth() : finalWidth; // but
+                                                                                                      // constrain
+                                                                                                      // width
+                                                                                                      // too
+
+        return ic.getImage().getScaledInstance((int) finalWidth, -1, Image.SCALE_SMOOTH);
+    }
+
+    /**
+     * Get a list of CellCollections, containing the selected nuclei. If no
+     * nuclei were selected, the list is empty
+     * 
+     * @return
+     * @throws Exception
+     */
+    public List<ICellCollection> getSubCollections() {
+        List<ICellCollection> result = new ArrayList<ICellCollection>(0);
+
+        if (!selectedNucleiLeft.isEmpty()) {
+            ICellCollection subCollectionLeft = new VirtualCellCollection(dataset, "SubCollectionLeft");
+            for (UUID id : selectedNucleiLeft) {
+                ICell cell = dataset.getCollection().getCell(id);
+                subCollectionLeft.addCell(cell);
+            }
+            result.add(subCollectionLeft);
+        }
+
+        if (!selectedNucleiRight.isEmpty()) {
+            ICellCollection subCollectionRight = new VirtualCellCollection(dataset, "SubCollectionRight");
+            for (UUID id : selectedNucleiRight) {
+                ICell cell = dataset.getCollection().getCell(id);
+                subCollectionRight.addCell(cell);
+            }
+            result.add(subCollectionRight);
+        }
+
+        return result;
+    }
+
+    /**
+     * Update the lists of selected nuclei based on a click.
+     * 
+     * @param e
+     * @param c
+     */
+    private synchronized void updateSelectedNuclei(MouseEvent e, ICell c) {
+
+        // if present in list, remove it, otherwise add it
+        if (selectedNucleiLeft.contains(c.getId()) || selectedNucleiRight.contains(c.getId())) {
+
+            selectedNucleiLeft.remove(c.getId());
+            selectedNucleiRight.remove(c.getId());
+
+        } else {
+
+            if ((e.getModifiers() & InputEvent.BUTTON3_MASK) == InputEvent.BUTTON3_MASK) { // right
+                                                                                           // button
+                selectedNucleiRight.add(c.getId());
+                selectedNucleiLeft.remove(c.getId());
+            }
+
+            if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) { // left
+                                                                                           // button
+                selectedNucleiLeft.add(c.getId());
+                selectedNucleiRight.remove(c.getId());
+            }
+
+        }
+
+    }
 }

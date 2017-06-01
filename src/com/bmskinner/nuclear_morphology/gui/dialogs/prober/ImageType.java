@@ -19,27 +19,27 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 /**
- * This is to allow different enums to be used in the 
- * setup of an ImageProber. 
+ * This is to allow different enums to be used in the setup of an ImageProber.
+ * 
  * @author bms41
  *
  */
 public interface ImageType {
-	
-	public String toString();
-	
-	
-	/**
-	 * Provides access to the static enum values() method
-	 * @return
-	 */
-	public ImageType[] getValues();
-	
-	/**
-	 * Get the position this image type occupies 
-	 * in an image prober window
-	 * @return
-	 */
-	public int getPosition();
+
+    public String toString();
+
+    /**
+     * Provides access to the static enum values() method
+     * 
+     * @return
+     */
+    public ImageType[] getValues();
+
+    /**
+     * Get the position this image type occupies in an image prober window
+     * 
+     * @return
+     */
+    public int getPosition();
 
 }

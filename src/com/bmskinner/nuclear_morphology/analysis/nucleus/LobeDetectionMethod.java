@@ -45,364 +45,359 @@ import inra.ijpb.morphology.Strel;
 import inra.ijpb.morphology.strel.DiskStrel;
 import inra.ijpb.watershed.Watershed;
 
-
 /**
- * This method finds lobes within nuclei. It is designed to work on 
- * neutrophils.
+ * This method finds lobes within nuclei. It is designed to work on neutrophils.
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
 public class LobeDetectionMethod extends AbstractAnalysisMethod {
 
-	private IHoughDetectionOptions options;
-	
-	private static final double DEFAULT_MIN_LOBE_AREA = 10;
-	
-	private final LobeFactory factory = new LobeFactory();
-	
-	public LobeDetectionMethod(IAnalysisDataset dataset, IHoughDetectionOptions op) {
-		super(dataset);
-		options = op;
-	}
+    private IHoughDetectionOptions options;
 
-	@Override
-	public IAnalysisResult call() throws Exception {
+    private static final double DEFAULT_MIN_LOBE_AREA = 10;
 
-		fine("Running lobe detection method");
+    private final LobeFactory factory = new LobeFactory();
 
-		if(NucleusType.NEUTROPHIL.equals(dataset.getAnalysisOptions().getNucleusType())){
-			run();	
-		} else {
-			throw new IncorrectNucleusTypeException("Not a lobed nucleus type");
-		}
-			
-		IAnalysisResult r = new DefaultAnalysisResult(dataset);
-		return r;
-	}
-	
-	private void run() {
-		
-		// Clear existing lobes
-		dataset.getCollection().getNuclei().stream().forEach( n -> {
-			if(n instanceof LobedNucleus){
-				((LobedNucleus)n).removeAllLobes();
-				n.setStatistic(PlottableStatistic.LOBE_COUNT, Statistical.STAT_NOT_CALCULATED);
-			}
-		});
-		
-		// Remove existing cached stats
-		dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.NUCLEUS);
-		dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.WHOLE_CELL);
-		for(ICell cell : dataset.getCollection().getCells()){
-			detectLobes(cell);
-			fireProgressEvent();
-		}
-		
-	}
-	
-	/**
-	 * Identify lobes within the nuclei of the cell
-	 * @param cell
-	 */
-	private void detectLobes(ICell cell){
+    public LobeDetectionMethod(IAnalysisDataset dataset, IHoughDetectionOptions op) {
+        super(dataset);
+        options = op;
+    }
 
-		try {
+    @Override
+    public IAnalysisResult call() throws Exception {
 
-			detectLobesViaWatershed(cell);
-//			detectLobesViaHough(cell);
+        fine("Running lobe detection method");
 
-		} catch (UnloadableImageException e) {
-			warn("Unable to load cell image");
-			stack(e);
-//		} catch (MissingOptionException e) {
-//			warn("Missing nucleus detection options for thresholding");
-//			stack(e);
-		} catch (Exception e) {
-			warn("Error in lobe detection");
-			stack(e.getMessage(), e);
-		}
-	}
-	
-	/**
-	 * Detect lobes using the hough transform
-	 * @param cell
-	 * @throws UnloadableImageException
-	 * @throws MissingOptionException
-	 */
-	private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException{
-		
-		IDetectionOptions nucleusOptions = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-		IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
-		
-		ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
-		if(op.isUseColourThreshold()){
-			
-			int minHue = op.getMinHue();
-			int maxHue = op.getMaxHue();
-			int minSat = op.getMinSaturation();
-			int maxSat = op.getMaxSaturation();
-			int minBri = 73;// op.getMinBrightness();
-			int maxBri = 255;//op.getMaxBrightness();
-			
-			ImageProcessor test = new ImageFilterer(ip)
-					.colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
-					.convertToByteProcessor()
-					.toProcessor();
-			
-//			
-//			ICannyOptions canny = OptionsFactory.makeCannyOptions();
-			
-			ImageFilterer imf =  new ImageFilterer(test);
-			//.runEdgeDetector(canny);
-			
-//			new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny", imf.toProcessor()).show();
-			List<IPoint> lobes = imf.runHoughCircleDetection(options);
-			addPointsToNuclei(cell, lobes);
-		}
-		
-	}
-	
-	/**
-	 * Identify lobes based on watershed segmentation of nuclei within cytoplasm
-	 * @param cell
-	 * @throws UnloadableImageException
-	 * @throws ComponentCreationException
-	 */
-	private void detectLobesViaWatershed(ICell cell) throws UnloadableImageException, ComponentCreationException{
-		
-		int topHatRadius = 20;
-		boolean calculateDams  = true;
-		int gradientRadius = 2;
-		int connectivity = 6;
-		int bitDepth = 32;
-		int dynamic = 10; // the minimal difference between a minima and its boundary
-		
-		int thresholdMin = 20;
-		int thresholdMax = 255;
-		
-		Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring element used for black top-hat
-		
-		// Since we're using the component image, we need to offset coordinates back to the 
-		// source image when testing if a lobe is within the nucleus
-		ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
-		
-		ImageProcessor test = new ImageConverter(ip)
-				.convertToByteProcessor()
-				.toProcessor();
-		
-		
+        if (NucleusType.NEUTROPHIL.equals(dataset.getAnalysisOptions().getNucleusType())) {
+            run();
+        } else {
+            throw new IncorrectNucleusTypeException("Not a lobed nucleus type");
+        }
+
+        IAnalysisResult r = new DefaultAnalysisResult(dataset);
+        return r;
+    }
+
+    private void run() {
+
+        // Clear existing lobes
+        dataset.getCollection().getNuclei().stream().forEach(n -> {
+            if (n instanceof LobedNucleus) {
+                ((LobedNucleus) n).removeAllLobes();
+                n.setStatistic(PlottableStatistic.LOBE_COUNT, Statistical.STAT_NOT_CALCULATED);
+            }
+        });
+
+        // Remove existing cached stats
+        dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.NUCLEUS);
+        dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.WHOLE_CELL);
+        for (ICell cell : dataset.getCollection().getCells()) {
+            detectLobes(cell);
+            fireProgressEvent();
+        }
+
+    }
+
+    /**
+     * Identify lobes within the nuclei of the cell
+     * 
+     * @param cell
+     */
+    private void detectLobes(ICell cell) {
+
+        try {
+
+            detectLobesViaWatershed(cell);
+            // detectLobesViaHough(cell);
+
+        } catch (UnloadableImageException e) {
+            warn("Unable to load cell image");
+            stack(e);
+            // } catch (MissingOptionException e) {
+            // warn("Missing nucleus detection options for thresholding");
+            // stack(e);
+        } catch (Exception e) {
+            warn("Error in lobe detection");
+            stack(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Detect lobes using the hough transform
+     * 
+     * @param cell
+     * @throws UnloadableImageException
+     * @throws MissingOptionException
+     */
+    private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
+
+        IDetectionOptions nucleusOptions = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions
+                .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
+
+        ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
+        if (op.isUseColourThreshold()) {
+
+            int minHue = op.getMinHue();
+            int maxHue = op.getMaxHue();
+            int minSat = op.getMinSaturation();
+            int maxSat = op.getMaxSaturation();
+            int minBri = 73;// op.getMinBrightness();
+            int maxBri = 255;// op.getMaxBrightness();
+
+            ImageProcessor test = new ImageFilterer(ip).colorThreshold(minHue, maxHue, minSat, maxSat, minBri, maxBri)
+                    .convertToByteProcessor().toProcessor();
+
+            //
+            // ICannyOptions canny = OptionsFactory.makeCannyOptions();
+
+            ImageFilterer imf = new ImageFilterer(test);
+            // .runEdgeDetector(canny);
+
+            // new ImagePlus(cell.getNucleus().getNameAndNumber()+": Canny",
+            // imf.toProcessor()).show();
+            List<IPoint> lobes = imf.runHoughCircleDetection(options);
+            addPointsToNuclei(cell, lobes);
+        }
+
+    }
+
+    /**
+     * Identify lobes based on watershed segmentation of nuclei within cytoplasm
+     * 
+     * @param cell
+     * @throws UnloadableImageException
+     * @throws ComponentCreationException
+     */
+    private void detectLobesViaWatershed(ICell cell) throws UnloadableImageException, ComponentCreationException {
+
+        int topHatRadius = 20;
+        boolean calculateDams = true;
+        int gradientRadius = 2;
+        int connectivity = 6;
+        int bitDepth = 32;
+        int dynamic = 10; // the minimal difference between a minima and its
+                          // boundary
+
+        int thresholdMin = 20;
+        int thresholdMax = 255;
+
+        Strel strel = DiskStrel.fromRadius(topHatRadius); // the structuring
+                                                          // element used for
+                                                          // black top-hat
+
+        // Since we're using the component image, we need to offset coordinates
+        // back to the
+        // source image when testing if a lobe is within the nucleus
+        ImageProcessor ip = cell.getCytoplasm().getComponentRGBImage();
+
+        ImageProcessor test = new ImageConverter(ip).convertToByteProcessor().toProcessor();
+
         /*
-         * Top hat filtering removes most cytoplasm background
-         * Computes black top hat (or "bottom hat") of the original image.
-         *  The black top hat is obtained by subtracting the original image from the result of a closing.
-         *  The black top hat enhances dark structures smaller than the structuring element.
+         * Top hat filtering removes most cytoplasm background Computes black
+         * top hat (or "bottom hat") of the original image. The black top hat is
+         * obtained by subtracting the original image from the result of a
+         * closing. The black top hat enhances dark structures smaller than the
+         * structuring element.
          */
-		
-		ImageProcessor th = Morphology.blackTopHat(test, strel);
 
-		// Most remaining cytoplasm is weak, can can be thresholded away 
-		th.setMinAndMax(thresholdMin, thresholdMax);
-		
-		ImagePlus imp = new ImagePlus("Min max", th);
-//		imp.show();
+        ImageProcessor th = Morphology.blackTopHat(test, strel);
 
-		// Copy the process used in the MorphoLbJ MorphologicalSegmentation plugin
-					
-		ImageStack image = new ImageStack(th.getWidth(), th.getHeight());
-		image.addSlice(th);
-		
-		strel = Strel.Shape.SQUARE.fromRadius( gradientRadius );
-		
-		/*
-		 * Computes the morphological gradient of the input image. 
-		 * The morphological gradient is obtained from the difference
-		 * of image dilation and image erosion computed with the 
-		 * same structuring element.
-		 */
-		ImageProcessor gradient = Morphology.gradient( image.getProcessor( 1 ), strel );
-		image = new ImageStack(image.getWidth(), image.getHeight());
-		image.addSlice(gradient); 
-		
-		
-		ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima( image, dynamic, connectivity );
+        // Most remaining cytoplasm is weak, can can be thresholded away
+        th.setMinAndMax(thresholdMin, thresholdMax);
 
-		/*
-		 * Computes the labels in the binary 2D or 3D image contained 
-		 * in the given ImagePlus, and computes the maximum label 
-		 * to set up the display range of the resulting ImagePlus.
-		 */
-		ImageStack labeledMinima = BinaryImages.componentsLabeling( regionalMinima, connectivity, bitDepth );
-		ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
-		
+        ImagePlus imp = new ImagePlus("Min max", th);
+        // imp.show();
 
-		/*
-		 * Compute watershed with markers with a
-		 *  binary mask to restrict the regions of application
-		 */
-		ImagePlus resultStack = Watershed.computeWatershed( imp, min, 
-				connectivity, calculateDams );
-//		resultStack.show();
-		final ImagePlus lines = BinaryImages.binarize( resultStack );
-//		lines.show();
-		
-		ImageProcessor lp = lines.getProcessor();
-		lp.invert();
-		
-		// Now take the watershed image, and detect the distinct lobes
-		
-		ImageFilterer ft = new ImageFilterer(lp);
-		ImageProcessor ws = ft.dilate(1).toProcessor();
-		
-		GenericDetector gd = new GenericDetector();
-		gd.setIncludeHoles(false);
-		gd.setSize(DEFAULT_MIN_LOBE_AREA, cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA));
-		List<Roi> rois  = gd.getRois(ws);
-		addLobesToNuclei(cell, rois);
-		
-	}
-	
-	private void addLobesToNuclei(ICell cell, List<Roi> rois) throws UnloadableImageException, ComponentCreationException{
-		
-		GenericDetector gd = new GenericDetector();
-		
-		List<Nucleus> nuclei = cell.getNuclei();
-		
-		for(Nucleus n : nuclei){
+        // Copy the process used in the MorphoLbJ MorphologicalSegmentation
+        // plugin
 
-			if(n instanceof LobedNucleus){
-				LobedNucleus l = (LobedNucleus) n;
-				ImageProcessor ip = l.getImage();
-				
-				
-				// Add this to the roi centre of mass
+        ImageStack image = new ImageStack(th.getWidth(), th.getHeight());
+        image.addSlice(th);
 
-//				log("Testing "+l.getNameAndNumber()+": "+l.getOriginalCentreOfMass().toString());
-				for(Roi roi : rois){
-					StatsMap m = gd.measure(roi, ip);
-					int x = m.get(GenericDetector.COM_X).intValue();
-					int y = m.get(GenericDetector.COM_Y).intValue();
-					IPoint com = IPoint.makeNew(x, y);
-					IPoint adj = Imageable.translateCoordinateToSourceImage(com, cell.getCytoplasm());
-					
-					
-					
-//					log("\tTesting "+adj.toString());
-					if(l.containsOriginalPoint(adj)){
-//						log("\t\tMatch ");
-						
-						
-						// Now adjust the roi base to match the source image
-						IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
-						IPoint adjBase = Imageable.translateCoordinateToSourceImage(base, cell.getCytoplasm());
-						
-						Rectangle bounds = roi.getBounds();
-						
-						roi.setLocation(adjBase.getXAsInt(), adjBase.getYAsInt());
+        strel = Strel.Shape.SQUARE.fromRadius(gradientRadius);
 
-						int[] originalPosition = {adjBase.getXAsInt(), 
-								adjBase.getYAsInt(), 
-								(int) bounds.getWidth(), 
-								(int) bounds.getHeight() };
-						
-						Lobe lobe = factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, adj);
-//						lobe.moveCentreOfMass(adj);
-						
-						l.addLobe( lobe); //TODO makethe channel useful
-					}
+        /*
+         * Computes the morphological gradient of the input image. The
+         * morphological gradient is obtained from the difference of image
+         * dilation and image erosion computed with the same structuring
+         * element.
+         */
+        ImageProcessor gradient = Morphology.gradient(image.getProcessor(1), strel);
+        image = new ImageStack(image.getWidth(), image.getHeight());
+        image.addSlice(gradient);
 
-				}
+        ImageStack regionalMinima = MinimaAndMaxima3D.extendedMinima(image, dynamic, connectivity);
 
-				l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
-			}
-			
-			
-		}
-		// Update stats
-		double lobes = cell.getNuclei().stream().mapToDouble( n -> n.getStatistic(PlottableStatistic.LOBE_COUNT )).sum();
-		cell.setStatistic(PlottableStatistic.LOBE_COUNT, lobes);
-	}
-	
-	
-	private void addPointsToNuclei(ICell cell, List<IPoint> points){
-//		log("Adding "+points.size()+" points to nuclei");
-		
-		
-		
-		IPoint base = cell.getCytoplasm().getOriginalBase();
-		
-		List<Nucleus> nuclei = cell.getNuclei();
-		
-		for(Nucleus n : nuclei){
-			
-			if(n instanceof LobedNucleus){
-				LobedNucleus l = (LobedNucleus) n;
-				
-				// Trim the points so that the centre of a point cluster is chosen, 
-				// rather than the whole cloud
-				
-				// make a binary mask over the points
-				// get the ROIs encompassing them
-				// Add the CoM of each ROI
-				
-				try {
-//					// This is just to get the dimensions of the original image
-//					// TODO - use the component size and apply an offset
-					ImageProcessor ip = l.getImage();
-					
-				
-					int w = ip.getWidth();
-					int h = ip.getHeight();
-					ByteProcessor bp = new ByteProcessor(w, h ); 
-					
+        /*
+         * Computes the labels in the binary 2D or 3D image contained in the
+         * given ImagePlus, and computes the maximum label to set up the display
+         * range of the resulting ImagePlus.
+         */
+        ImageStack labeledMinima = BinaryImages.componentsLabeling(regionalMinima, connectivity, bitDepth);
+        ImagePlus min = new ImagePlus("", labeledMinima.getProcessor(1));
 
-					for(int i=0; i<w*h; i++){
-						bp.set(i, 0);
-					}
+        /*
+         * Compute watershed with markers with a binary mask to restrict the
+         * regions of application
+         */
+        ImagePlus resultStack = Watershed.computeWatershed(imp, min, connectivity, calculateDams);
+        // resultStack.show();
+        final ImagePlus lines = BinaryImages.binarize(resultStack);
+        // lines.show();
 
+        ImageProcessor lp = lines.getProcessor();
+        lp.invert();
 
-					for(IPoint p : points){
+        // Now take the watershed image, and detect the distinct lobes
 
-						int oX = p.getXAsInt() + base.getXAsInt() - CellularComponent.COMPONENT_BUFFER;
-						int oY = p.getYAsInt() + base.getYAsInt() - CellularComponent.COMPONENT_BUFFER;
+        ImageFilterer ft = new ImageFilterer(lp);
+        ImageProcessor ws = ft.dilate(1).toProcessor();
 
-						IPoint oP = IPoint.makeNew(oX, oY);
+        GenericDetector gd = new GenericDetector();
+        gd.setIncludeHoles(false);
+        gd.setSize(DEFAULT_MIN_LOBE_AREA, cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA));
+        List<Roi> rois = gd.getRois(ws);
+        addLobesToNuclei(cell, rois);
 
-						bp.set(oX, oY, 255);
-					}
+    }
 
-					// Now look for ROIs in the byte processor
-					GenericDetector dt = new GenericDetector();
-					List<Roi> rois = dt.getRois(bp);
-					for(Roi roi : rois){
-						StatsMap m = dt.measure(roi, bp);
-						int x = m.get(GenericDetector.COM_X).intValue();
-						int y = m.get(GenericDetector.COM_Y).intValue();
+    private void addLobesToNuclei(ICell cell, List<Roi> rois)
+            throws UnloadableImageException, ComponentCreationException {
 
-						IPoint com = IPoint.makeNew(x, y);
-						if(l.containsOriginalPoint(com)){
-							Rectangle bounds = roi.getBounds();
-							int xbase = (int) roi.getXBase();
-							int ybase = (int) roi.getYBase();
-							int[] originalPosition = {xbase, ybase, (int) bounds.getWidth(), (int) bounds.getHeight() };
-							l.addLobe( factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com)); //TODO makethe channel useful
-//							l.addLobeCentre(com);
-						}
+        GenericDetector gd = new GenericDetector();
 
-					}
+        List<Nucleus> nuclei = cell.getNuclei();
 
-					
-					//				log(l.getLobeCount()+" lobes");
-					// Copy stat for charting
-					l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
-				} catch (UnloadableImageException | ComponentCreationException e) {
-					stack(e);
-				}
-			}
-			
-			
-		}
-		
-	}
+        for (Nucleus n : nuclei) {
+
+            if (n instanceof LobedNucleus) {
+                LobedNucleus l = (LobedNucleus) n;
+                ImageProcessor ip = l.getImage();
+
+                // Add this to the roi centre of mass
+
+                // log("Testing "+l.getNameAndNumber()+":
+                // "+l.getOriginalCentreOfMass().toString());
+                for (Roi roi : rois) {
+                    StatsMap m = gd.measure(roi, ip);
+                    int x = m.get(GenericDetector.COM_X).intValue();
+                    int y = m.get(GenericDetector.COM_Y).intValue();
+                    IPoint com = IPoint.makeNew(x, y);
+                    IPoint adj = Imageable.translateCoordinateToSourceImage(com, cell.getCytoplasm());
+
+                    // log("\tTesting "+adj.toString());
+                    if (l.containsOriginalPoint(adj)) {
+                        // log("\t\tMatch ");
+
+                        // Now adjust the roi base to match the source image
+                        IPoint base = IPoint.makeNew(roi.getXBase(), roi.getYBase());
+                        IPoint adjBase = Imageable.translateCoordinateToSourceImage(base, cell.getCytoplasm());
+
+                        Rectangle bounds = roi.getBounds();
+
+                        roi.setLocation(adjBase.getXAsInt(), adjBase.getYAsInt());
+
+                        int[] originalPosition = { adjBase.getXAsInt(), adjBase.getYAsInt(), (int) bounds.getWidth(),
+                                (int) bounds.getHeight() };
+
+                        Lobe lobe = factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, adj);
+                        // lobe.moveCentreOfMass(adj);
+
+                        l.addLobe(lobe); // TODO makethe channel useful
+                    }
+
+                }
+
+                l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
+            }
+
+        }
+        // Update stats
+        double lobes = cell.getNuclei().stream().mapToDouble(n -> n.getStatistic(PlottableStatistic.LOBE_COUNT)).sum();
+        cell.setStatistic(PlottableStatistic.LOBE_COUNT, lobes);
+    }
+
+    private void addPointsToNuclei(ICell cell, List<IPoint> points) {
+        // log("Adding "+points.size()+" points to nuclei");
+
+        IPoint base = cell.getCytoplasm().getOriginalBase();
+
+        List<Nucleus> nuclei = cell.getNuclei();
+
+        for (Nucleus n : nuclei) {
+
+            if (n instanceof LobedNucleus) {
+                LobedNucleus l = (LobedNucleus) n;
+
+                // Trim the points so that the centre of a point cluster is
+                // chosen,
+                // rather than the whole cloud
+
+                // make a binary mask over the points
+                // get the ROIs encompassing them
+                // Add the CoM of each ROI
+
+                try {
+                    // // This is just to get the dimensions of the original
+                    // image
+                    // // TODO - use the component size and apply an offset
+                    ImageProcessor ip = l.getImage();
+
+                    int w = ip.getWidth();
+                    int h = ip.getHeight();
+                    ByteProcessor bp = new ByteProcessor(w, h);
+
+                    for (int i = 0; i < w * h; i++) {
+                        bp.set(i, 0);
+                    }
+
+                    for (IPoint p : points) {
+
+                        int oX = p.getXAsInt() + base.getXAsInt() - CellularComponent.COMPONENT_BUFFER;
+                        int oY = p.getYAsInt() + base.getYAsInt() - CellularComponent.COMPONENT_BUFFER;
+
+                        IPoint oP = IPoint.makeNew(oX, oY);
+
+                        bp.set(oX, oY, 255);
+                    }
+
+                    // Now look for ROIs in the byte processor
+                    GenericDetector dt = new GenericDetector();
+                    List<Roi> rois = dt.getRois(bp);
+                    for (Roi roi : rois) {
+                        StatsMap m = dt.measure(roi, bp);
+                        int x = m.get(GenericDetector.COM_X).intValue();
+                        int y = m.get(GenericDetector.COM_Y).intValue();
+
+                        IPoint com = IPoint.makeNew(x, y);
+                        if (l.containsOriginalPoint(com)) {
+                            Rectangle bounds = roi.getBounds();
+                            int xbase = (int) roi.getXBase();
+                            int ybase = (int) roi.getYBase();
+                            int[] originalPosition = { xbase, ybase, (int) bounds.getWidth(),
+                                    (int) bounds.getHeight() };
+                            l.addLobe(factory.buildInstance(roi, l.getSourceFile(), 0, originalPosition, com)); // TODO
+                                                                                                                // makethe
+                                                                                                                // channel
+                                                                                                                // useful
+                            // l.addLobeCentre(com);
+                        }
+
+                    }
+
+                    // log(l.getLobeCount()+" lobes");
+                    // Copy stat for charting
+                    l.setStatistic(PlottableStatistic.LOBE_COUNT, l.getLobeCount());
+                } catch (UnloadableImageException | ComponentCreationException e) {
+                    stack(e);
+                }
+            }
+
+        }
+
+    }
 
 }

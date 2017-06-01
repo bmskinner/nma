@@ -16,6 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import ij.gui.PolygonRoi;
@@ -54,452 +55,513 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
  * Draw components and features on image processors.
+ * 
  * @author ben
  *
  */
-public class ImageAnnotator  extends AbstractImageFilterer {
+public class ImageAnnotator extends AbstractImageFilterer {
 
-	public ImageAnnotator(ImageProcessor ip) {
-		super(ip);
-	}
-	
-	/**
-	 * Draw the borders of all cell components. Assumes that the image
-	 * contains the original coordinates of the cell
-	 * @param cell
-	 * @return
-	 */
-	public ImageAnnotator annotateCellBorders(ICell cell){
-		
-		if(cell.hasCytoplasm()){
-			annotateBorder(cell.getCytoplasm(), Color.CYAN);
-		}
-		
-		for(Nucleus n : cell.getNuclei()){
-			annotateBorder(n, Color.ORANGE);
-			if(n instanceof LobedNucleus){
-				for(Lobe l : ((LobedNucleus)n).getLobes()){
-					annotateBorder(l, Color.GREEN);
-					annotatePoint(l.getCentreOfMass(), Color.GREEN);
-				}
-			}
-		}
-		
-		return this;
-	}
-		
-	
-	/**
-	 * Draw the outline of the given nucleus, with the OP, RP,
-	 * CoM, feret, segments and any signals markerd
-	 * @param n the nucleus to draw
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateNucleus(Nucleus n){
-		
-		try{
+    public ImageAnnotator(ImageProcessor ip) {
+        super(ip);
+    }
 
-			annotateOP( n);
-			annotateRP( n);
-			annotateCoM( n);
-			annotateMinFeret( n);
-			annotateSegments( n);
-			annotateSignals( n);
+    /**
+     * Draw the borders of all cell components. Assumes that the image contains
+     * the original coordinates of the cell
+     * 
+     * @param cell
+     * @return
+     */
+    public ImageAnnotator annotateCellBorders(ICell cell) {
 
-		}  catch(Exception e){
-			error("Error annotating nucleus", e);
+        if (cell.hasCytoplasm()) {
+            annotateBorder(cell.getCytoplasm(), Color.CYAN);
+        }
 
-		} 
-		return this;
-	}
-	
-	/**
-	 * Draw a point on the image processor
-	 * @param p the point to draw
-	 * @param c the colour to draw
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotatePoint(IPoint p, Color c){
-		
-		if(p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth()){
-			throw new IllegalArgumentException("Point x is out of image bounds");
-		}
-		
-		if(p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight()){
-			throw new IllegalArgumentException("Point y is out of image bounds");
-		}
-				
-		ip.setColor(c);
-		ip.setLineWidth(3);
-		ip.drawDot( p.getXAsInt(), p.getYAsInt());
-		return this;
-	}
-	
-	/**
-	 * Draw the border of the given component on the component image of the template.
-	 * These can be the same object.
-	 * @param n the component to draw
-	 * @param template the component to get the component image from
-	 * @param c the colour to draw the border
-	 * @return this annotator
-	 */
-	public ImageAnnotator annotatePoint(IPoint p, Imageable template, Color c){		
-		IPoint offset = Imageable.translateCoordinateToComponentImage(p, template);	
-		return annotatePoint(offset, c);
-	}
-	
-	/**
-	 * Draw a line on the image processor
-	 * @param p1 the first endpoint
-	 * @param p1 the second endpoint
-	 * @param c the colour to draw
-	 * @return the annotator
-	 */
-	private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c){
-		ip.setColor(c);
-		ip.setLineWidth(1);
-		ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
-		return this;
-	}
-	
-	private ImageAnnotator annotatePolygon(PolygonRoi p, Paint c){
-		ip.setColor((Color) c);
-		ip.setLineWidth(2);
-		ip.draw(p);
-		return this;
-	}
-	
+        for (Nucleus n : cell.getNuclei()) {
+            annotateBorder(n, Color.ORANGE);
+            if (n instanceof LobedNucleus) {
+                for (Lobe l : ((LobedNucleus) n).getLobes()) {
+                    annotateBorder(l, Color.GREEN);
+                    annotatePoint(l.getCentreOfMass(), Color.GREEN);
+                }
+            }
+        }
 
-	/**
-	 * Draw the orientation point of a nucleus in cyan. For other colours
-	 * use {@link ImageAnnotator#annotatePoint} directly
-	 * @param n the nucleus
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateOP(Nucleus n){		
-		try {
-			return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
-		} catch (UnavailableBorderTagException e) {
-			stack(e);	
-		}
-		return this;
-	}
+        return this;
+    }
 
-	/**
-	 * Draw the reference point of a nucleus in yellow. For other colours
-	 * use {@link ImageAnnotator#annotatePoint} directly
-	 * @param n the nucleus
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateRP(Nucleus n){
-		try {
-			return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
-		} catch (UnavailableBorderTagException e) {
-			stack(e);	
-			return this;
-		}
-	}
-	
-	/**
-	 * Draw the centre of mass of a component in magenta. For other colours
-	 * use {@link ImageAnnotator#annotatePoint} directly
-	 * @param n the component
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateCoM(CellularComponent n){
-		return annotatePoint(n.getCentreOfMass(), Color.MAGENTA);
-	}
-	
-	/**
-	 * Draw the outline of the component in the given colour at the original position
-	 * @param n the component
-	 * @param c the colour
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateBorder(CellularComponent n, Color c){
-		FloatPolygon p = n.toOriginalPolygon();
-		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-		
-		return annotatePolygon(roi, c);
-	}
-	
-	/**
-	 * Draw the border of the given component on the component image of the template.
-	 * These can be the same object.
-	 * @param n the component to draw
-	 * @param template the component to get the component image from
-	 * @param c the colour to draw the border
-	 * @return this annotator
-	 */
-	public ImageAnnotator annotateBorder(CellularComponent n, Imageable template, Color c){
-		FloatPolygon p = n.toOriginalPolygon();
-		PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-		
-		IPoint base = n.getOriginalBase();
-		IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
-		roi.setLocation(offset.getX(), offset.getY());
-		
-		return annotatePolygon(roi, c);
-	}
-		
-	
-	/**
-	 * Annotate the image with the given text. The text background is white and the
-	 * text colour is black
-	 * @param x the string x
-	 * @param y the string y
-	 * @param s the text
-	 * @return
-	 */
-	public ImageAnnotator annotateString(int x, int y, String s){
-		return this.annotateString(x, y, s, Color.BLACK);
-	}
-	
-	/**
-	 * Annotate the image with the given text. The text background is white.
-	 * @param x the string x
-	 * @param y the string y
-	 * @param s the text
-	 * @param text the text colour
-	 * @return
-	 */
-	public ImageAnnotator annotateString(int x, int y, String s, Color text){
-		return this.annotateString(x, y, s, text, Color.WHITE);
-	}
-	
-	/**
-	 * Annotate the image with the given text.
-	 * @param x the string x
-	 * @param y the string y
-	 * @param s the text
-	 * @param text the text colour
-	 * @param back the backgound colour
-	 * @return
-	 */
-	public ImageAnnotator annotateString(int x, int y, String s, Color text, Color back){
-		
-		ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); //TODO - choose text size based on image size
-		ip.setColor(text);
-		ip.drawString(s, 
-				x,
-				y, 
-				back);
-		return this;
-	}
-	
-	/**
-	 * Draw the size and shape values over the CoM of the component
-	 * @param n the component to draw
-	 * @param c the color of the text
-	 * @return
-	 */
-	public ImageAnnotator annotateStats(CellularComponent n, Color text, Color back){
-		
-		DecimalFormat df = new DecimalFormat("#.##");
-		
-		String areaLbl;
-		String perimLbl;
-		
-		double circ;
-		double area;
-		
-		if(n instanceof INuclearSignal){
+    /**
+     * Draw the outline of the given nucleus, with the OP, RP, CoM, feret,
+     * segments and any signals markerd
+     * 
+     * @param n
+     *            the nucleus to draw
+     * @return the annotator
+     */
+    public ImageAnnotator annotateNucleus(Nucleus n) {
 
-			area = n.getStatistic(PlottableStatistic.AREA);
-			double perim2 = Math.pow(n.getStatistic(PlottableStatistic.PERIMETER), 2);
-			circ = (4 * Math.PI) * (area / perim2);
+        try {
 
-		} else {
-			area =  n.getStatistic(PlottableStatistic.AREA);
-			circ =  n.getStatistic(PlottableStatistic.CIRCULARITY);
-		}
-		
-		areaLbl  = "Area: " + df.format( area);
-		perimLbl = "Circ: " + df.format( circ);
-		String label = areaLbl + "\n" + perimLbl;
-		
-		return this.annotateString(n.getOriginalCentreOfMass().getXAsInt(),
-				n.getOriginalCentreOfMass().getYAsInt(), 
-				label, text, back);
-	}
-	
-	/**
-	 * Draw the size and shape values over the CoM of the component
-	 * @param n the component to draw
-	 * @param c the color of the text
-	 * @return
-	 */
-	public ImageAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text, Color back){
-		
-		DecimalFormat df = new DecimalFormat("#.##");
-		
-		String areaLbl;
-		String perimLbl;
-		
-		double circ = 0;
-		double area = 0;
-		double fraction;
-		
-		if(signal instanceof INuclearSignal){
+            annotateOP(n);
+            annotateRP(n);
+            annotateCoM(n);
+            annotateMinFeret(n);
+            annotateSegments(n);
+            annotateSignals(n);
 
-			area = signal.getStatistic(PlottableStatistic.AREA);
-			double perim2 = Math.pow(signal.getStatistic(PlottableStatistic.PERIMETER), 2);
-			circ = (4 * Math.PI) * (area / perim2);
+        } catch (Exception e) {
+            error("Error annotating nucleus", e);
 
-		} 
-		
-		fraction  = area / parent.getStatistic(PlottableStatistic.AREA);
-		
-		areaLbl  = "Area: " + df.format( area);
-		perimLbl = "Circ: " + df.format( circ);
-		String fractLabel = "Fract: " + df.format( fraction);
+        }
+        return this;
+    }
 
-		String label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
-		
-		return this.annotateString(signal.getOriginalCentreOfMass().getXAsInt(),
-				signal.getOriginalCentreOfMass().getYAsInt(), 
-				label, text, back);
+    /**
+     * Draw a point on the image processor
+     * 
+     * @param p
+     *            the point to draw
+     * @param c
+     *            the colour to draw
+     * @return the annotator
+     */
+    public ImageAnnotator annotatePoint(IPoint p, Color c) {
 
-	}
-	
+        if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth()) {
+            throw new IllegalArgumentException("Point x is out of image bounds");
+        }
 
+        if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight()) {
+            throw new IllegalArgumentException("Point y is out of image bounds");
+        }
 
-	/**
-	 * Draw the feret diameter of a profilable component in magenta. For other colours
-	 * use {@link ImageAnnotator#annotateLine} directly
-	 * @param n the component
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateMinFeret(Profileable n){
-		int minIndex;
-		try {
-			minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
-			IBorderPoint narrow1 = n.getBorderPoint(minIndex);
-			IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
-			return annotateLine(narrow1, narrow2, Color.MAGENTA);
-		} catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
-			stack("Unable to get diameter profile", e);
-			return this;
-		}
-		
-		
-	}
-	
-	/**
-	 * Draw the segments of a profilable component in the global
-	 * colour swatch colours.
-	 * @param n the component
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateSegments(Profileable n){
+        ip.setColor(c);
+        ip.setLineWidth(3);
+        ip.drawDot(p.getXAsInt(), p.getYAsInt());
+        return this;
+    }
 
-		try{
+    /**
+     * Draw the border of the given component on the component image of the
+     * template. These can be the same object.
+     * 
+     * @param p
+     *            the points to draw
+     * @param template
+     *            the component to get the component image from
+     * @param c
+     *            the colour to draw the border
+     * @return this annotator
+     */
+    public ImageAnnotator annotatePoint(IPoint p, Imageable template, Color c) {
+        IPoint offset = Imageable.translateCoordinateToComponentImage(p, template);
+        return annotatePoint(offset, c);
+    }
 
-			if(n.getProfile(ProfileType.ANGLE).getSegments().size()>0){ // only draw if there are segments
-				for(int i=0;i<n.getProfile(ProfileType.ANGLE).getSegments().size();i++){
+    /**
+     * Draw a line on the image processor
+     * 
+     * @param p1
+     *            the first endpoint
+     * @param p1
+     *            the second endpoint
+     * @param c
+     *            the colour to draw
+     * @return the annotator
+     */
+    private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c) {
+        ip.setColor(c);
+        ip.setLineWidth(1);
+        ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
+        return this;
+    }
 
-					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
+    private ImageAnnotator annotatePolygon(PolygonRoi p, Paint c) {
+        ip.setColor((Color) c);
+        ip.setLineWidth(2);
+        ip.draw(p);
+        return this;
+    }
 
-					float[] xpoints = new float[seg.length()+1];
-					float[] ypoints = new float[seg.length()+1];
-					for(int j=0; j<=seg.length();j++){
-						int k = n.wrapIndex(seg.getStartIndex()+j);
-						IBorderPoint p = n.getOriginalBorderPoint(k); // get the border points in the segment
-						xpoints[j] = (float) p.getX();
-						ypoints[j] = (float) p.getY();
-					}
+    /**
+     * Draw the orientation point of a nucleus in cyan. For other colours use
+     * {@link ImageAnnotator#annotatePoint} directly
+     * 
+     * @param n
+     *            the nucleus
+     * @return the annotator
+     */
+    public ImageAnnotator annotateOP(Nucleus n) {
+        try {
+            return annotatePoint(n.getBorderPoint(Tag.ORIENTATION_POINT), Color.CYAN);
+        } catch (UnavailableBorderTagException e) {
+            stack(e);
+        }
+        return this;
+    }
 
-					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+    /**
+     * Draw the reference point of a nucleus in yellow. For other colours use
+     * {@link ImageAnnotator#annotatePoint} directly
+     * 
+     * @param n
+     *            the nucleus
+     * @return the annotator
+     */
+    public ImageAnnotator annotateRP(Nucleus n) {
+        try {
+            return annotatePoint(n.getBorderPoint(Tag.REFERENCE_POINT), Color.YELLOW);
+        } catch (UnavailableBorderTagException e) {
+            stack(e);
+            return this;
+        }
+    }
 
+    /**
+     * Draw the centre of mass of a component in magenta. For other colours use
+     * {@link ImageAnnotator#annotatePoint} directly
+     * 
+     * @param n
+     *            the component
+     * @return the annotator
+     */
+    public ImageAnnotator annotateCoM(CellularComponent n) {
+        return annotatePoint(n.getCentreOfMass(), Color.MAGENTA);
+    }
 
-					Paint color = ColourSelecter.getColor(i);
+    /**
+     * Draw the outline of the component in the given colour at the original
+     * position
+     * 
+     * @param n
+     *            the component
+     * @param c
+     *            the colour
+     * @return the annotator
+     */
+    public ImageAnnotator annotateBorder(CellularComponent n, Color c) {
+        FloatPolygon p = n.toOriginalPolygon();
+        PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
-					annotatePolygon(segRoi, color);
-				}
-			}
-		} catch(Exception e){
-			error("Error annotating segments", e);
-		}
-		return this;
-	}
-	
-	/**
-	 * Draw the segments of a profilable component in the global
-	 * colour swatch colours. Draw the segments at their positions in the 
-	 * template compent image
-	 * @param n the component
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateSegments(Profileable n, Imageable template){
+        return annotatePolygon(roi, c);
+    }
 
-		try{
-			
-			
+    /**
+     * Draw the border of the given component on the component image of the
+     * template. These can be the same object.
+     * 
+     * @param n
+     *            the component to draw
+     * @param template
+     *            the component to get the component image from
+     * @param c
+     *            the colour to draw the border
+     * @return this annotator
+     */
+    public ImageAnnotator annotateBorder(CellularComponent n, Imageable template, Color c) {
+        FloatPolygon p = n.toOriginalPolygon();
+        PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
 
-			if(n.getProfile(ProfileType.ANGLE).getSegments().size()>0){ // only draw if there are segments
-				for(int i=0;i<n.getProfile(ProfileType.ANGLE).getSegments().size();i++){
+        IPoint base = n.getOriginalBase();
+        IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+        roi.setLocation(offset.getX(), offset.getY());
 
-					IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_"+i);
+        return annotatePolygon(roi, c);
+    }
 
-					float[] xpoints = new float[seg.length()+1];
-					float[] ypoints = new float[seg.length()+1];
-					for(int j=0; j<=seg.length();j++){
-						int k = n.wrapIndex(seg.getStartIndex()+j);
-						IBorderPoint p = n.getOriginalBorderPoint(k); // get the border points in the segment
-						xpoints[j] = (float) p.getX();
-						ypoints[j] = (float) p.getY();
-					}
+    /**
+     * Annotate the image with the given text. The text background is white and
+     * the text colour is black
+     * 
+     * @param x
+     *            the string x
+     * @param y
+     *            the string y
+     * @param s
+     *            the text
+     * @return
+     */
+    public ImageAnnotator annotateString(int x, int y, String s) {
+        return this.annotateString(x, y, s, Color.BLACK);
+    }
 
-					PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-					
-					// Offset the segment relative to the nucleus component image
-					IPoint base = IPoint.makeNew(segRoi.getXBase(), segRoi.getYBase());
-					IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
-					
-					segRoi.setLocation(offset.getX(), offset.getY());
+    /**
+     * Annotate the image with the given text. The text background is white.
+     * 
+     * @param x
+     *            the string x
+     * @param y
+     *            the string y
+     * @param s
+     *            the text
+     * @param text
+     *            the text colour
+     * @return
+     */
+    public ImageAnnotator annotateString(int x, int y, String s, Color text) {
+        return this.annotateString(x, y, s, text, Color.WHITE);
+    }
 
-					Paint color = ColourSelecter.getColor(i);
+    /**
+     * Annotate the image with the given text.
+     * 
+     * @param x
+     *            the string x
+     * @param y
+     *            the string y
+     * @param s
+     *            the text
+     * @param text
+     *            the text colour
+     * @param back
+     *            the backgound colour
+     * @return
+     */
+    public ImageAnnotator annotateString(int x, int y, String s, Color text, Color back) {
 
-					annotatePolygon(segRoi, color);
-				}
-			}
-		} catch(Exception e){
-			error("Error annotating segments", e);
-		}
-		return this;
-	}
-	
-	/**
-	 * Draw the signals within a nucleus
-	 * @param n the nucleus
-	 * @return the annotator
-	 */
-	public ImageAnnotator annotateSignals(Nucleus n){
+        ip.setFont(new Font("SansSerif", Font.PLAIN, 20)); // TODO - choose text
+                                                           // size based on
+                                                           // image size
+        ip.setColor(text);
+        ip.drawString(s, x, y, back);
+        return this;
+    }
 
-		ISignalCollection signalCollection = n.getSignalCollection();
-		for( UUID id : signalCollection.getSignalGroupIDs()){
-			int i = signalCollection.getSignalGroupNumber(id);
-			List<INuclearSignal> signals = signalCollection.getSignals(id);
-			Color colour = i==ImageImporter.FIRST_SIGNAL_CHANNEL 
-						 ? Color.RED 
-						 : i==ImageImporter.FIRST_SIGNAL_CHANNEL+1 
-						 	? Color.GREEN 
-						 	: Color.WHITE;
-			
+    /**
+     * Draw the size and shape values over the CoM of the component
+     * 
+     * @param n
+     *            the component to draw
+     * @param c
+     *            the color of the text
+     * @return
+     */
+    public ImageAnnotator annotateStats(CellularComponent n, Color text, Color back) {
 
+        DecimalFormat df = new DecimalFormat("#.##");
 
-			if(!signals.isEmpty()){
+        String areaLbl;
+        String perimLbl;
 
-				for(INuclearSignal s : signals){
-					
-					annotatePoint(s.getCentreOfMass(), colour);
-					
-					FloatPolygon p = s.toPolygon();
-					PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-					annotatePolygon(roi, colour);
-				}
-			}
-		}
-		return this;
-	}
+        double circ;
+        double area;
+
+        if (n instanceof INuclearSignal) {
+
+            area = n.getStatistic(PlottableStatistic.AREA);
+            double perim2 = Math.pow(n.getStatistic(PlottableStatistic.PERIMETER), 2);
+            circ = (4 * Math.PI) * (area / perim2);
+
+        } else {
+            area = n.getStatistic(PlottableStatistic.AREA);
+            circ = n.getStatistic(PlottableStatistic.CIRCULARITY);
+        }
+
+        areaLbl = "Area: " + df.format(area);
+        perimLbl = "Circ: " + df.format(circ);
+        String label = areaLbl + "\n" + perimLbl;
+
+        return this.annotateString(n.getOriginalCentreOfMass().getXAsInt(), n.getOriginalCentreOfMass().getYAsInt(),
+                label, text, back);
+    }
+
+    /**
+     * Draw the size and shape values over the CoM of the component
+     * 
+     * @param n
+     *            the component to draw
+     * @param c
+     *            the color of the text
+     * @return
+     */
+    public ImageAnnotator annotateSignalStats(CellularComponent parent, CellularComponent signal, Color text,
+            Color back) {
+
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        String areaLbl;
+        String perimLbl;
+
+        double circ = 0;
+        double area = 0;
+        double fraction;
+
+        if (signal instanceof INuclearSignal) {
+
+            area = signal.getStatistic(PlottableStatistic.AREA);
+            double perim2 = Math.pow(signal.getStatistic(PlottableStatistic.PERIMETER), 2);
+            circ = (4 * Math.PI) * (area / perim2);
+
+        }
+
+        fraction = area / parent.getStatistic(PlottableStatistic.AREA);
+
+        areaLbl = "Area: " + df.format(area);
+        perimLbl = "Circ: " + df.format(circ);
+        String fractLabel = "Fract: " + df.format(fraction);
+
+        String label = areaLbl + "\n" + perimLbl + "\n" + fractLabel;
+
+        return this.annotateString(signal.getOriginalCentreOfMass().getXAsInt(),
+                signal.getOriginalCentreOfMass().getYAsInt(), label, text, back);
+
+    }
+
+    /**
+     * Draw the feret diameter of a profilable component in magenta. For other
+     * colours use {@link ImageAnnotator#annotateLine} directly
+     * 
+     * @param n
+     *            the component
+     * @return the annotator
+     */
+    public ImageAnnotator annotateMinFeret(Profileable n) {
+        int minIndex;
+        try {
+            minIndex = n.getProfile(ProfileType.DIAMETER).getIndexOfMin();
+            IBorderPoint narrow1 = n.getBorderPoint(minIndex);
+            IBorderPoint narrow2 = n.findOppositeBorder(narrow1);
+            return annotateLine(narrow1, narrow2, Color.MAGENTA);
+        } catch (UnavailableProfileTypeException | ProfileException | UnavailableBorderPointException e) {
+            stack("Unable to get diameter profile", e);
+            return this;
+        }
+
+    }
+
+    /**
+     * Draw the segments of a profilable component in the global colour swatch
+     * colours.
+     * 
+     * @param n
+     *            the component
+     * @return the annotator
+     */
+    public ImageAnnotator annotateSegments(Profileable n) {
+
+        try {
+
+            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { // only
+                                                                            // draw
+                                                                            // if
+                                                                            // there
+                                                                            // are
+                                                                            // segments
+                for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
+
+                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
+
+                    float[] xpoints = new float[seg.length() + 1];
+                    float[] ypoints = new float[seg.length() + 1];
+                    for (int j = 0; j <= seg.length(); j++) {
+                        int k = n.wrapIndex(seg.getStartIndex() + j);
+                        IBorderPoint p = n.getOriginalBorderPoint(k); // get the
+                                                                      // border
+                                                                      // points
+                                                                      // in the
+                                                                      // segment
+                        xpoints[j] = (float) p.getX();
+                        ypoints[j] = (float) p.getY();
+                    }
+
+                    PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+
+                    Paint color = ColourSelecter.getColor(i);
+
+                    annotatePolygon(segRoi, color);
+                }
+            }
+        } catch (Exception e) {
+            error("Error annotating segments", e);
+        }
+        return this;
+    }
+
+    /**
+     * Draw the segments of a profilable component in the global colour swatch
+     * colours. Draw the segments at their positions in the template compent
+     * image
+     * 
+     * @param n
+     *            the component
+     * @return the annotator
+     */
+    public ImageAnnotator annotateSegments(Profileable n, Imageable template) {
+
+        try {
+
+            if (n.getProfile(ProfileType.ANGLE).getSegments().size() > 0) { // only
+                                                                            // draw
+                                                                            // if
+                                                                            // there
+                                                                            // are
+                                                                            // segments
+                for (int i = 0; i < n.getProfile(ProfileType.ANGLE).getSegments().size(); i++) {
+
+                    IBorderSegment seg = n.getProfile(ProfileType.ANGLE).getSegment("Seg_" + i);
+
+                    float[] xpoints = new float[seg.length() + 1];
+                    float[] ypoints = new float[seg.length() + 1];
+                    for (int j = 0; j <= seg.length(); j++) {
+                        int k = n.wrapIndex(seg.getStartIndex() + j);
+                        IBorderPoint p = n.getOriginalBorderPoint(k); // get the
+                                                                      // border
+                                                                      // points
+                                                                      // in the
+                                                                      // segment
+                        xpoints[j] = (float) p.getX();
+                        ypoints[j] = (float) p.getY();
+                    }
+
+                    PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
+
+                    // Offset the segment relative to the nucleus component
+                    // image
+                    IPoint base = IPoint.makeNew(segRoi.getXBase(), segRoi.getYBase());
+                    IPoint offset = Imageable.translateCoordinateToComponentImage(base, template);
+
+                    segRoi.setLocation(offset.getX(), offset.getY());
+
+                    Paint color = ColourSelecter.getColor(i);
+
+                    annotatePolygon(segRoi, color);
+                }
+            }
+        } catch (Exception e) {
+            error("Error annotating segments", e);
+        }
+        return this;
+    }
+
+    /**
+     * Draw the signals within a nucleus
+     * 
+     * @param n
+     *            the nucleus
+     * @return the annotator
+     */
+    public ImageAnnotator annotateSignals(Nucleus n) {
+
+        ISignalCollection signalCollection = n.getSignalCollection();
+        for (UUID id : signalCollection.getSignalGroupIDs()) {
+            int i = signalCollection.getSignalGroupNumber(id);
+            List<INuclearSignal> signals = signalCollection.getSignals(id);
+            Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
+                    : i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
+
+            if (!signals.isEmpty()) {
+
+                for (INuclearSignal s : signals) {
+
+                    annotatePoint(s.getCentreOfMass(), colour);
+
+                    FloatPolygon p = s.toPolygon();
+                    PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+                    annotatePolygon(roi, colour);
+                }
+            }
+        }
+        return this;
+    }
 }

@@ -32,50 +32,48 @@ import jebl.gui.trees.treeviewer.TreeViewer;
 
 @SuppressWarnings("serial")
 public class DraggableTreeViewer extends TreeViewer {
-	
-	List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
-	
-	public DraggableTreeViewer(){
-		super();
 
-	}
-	
-	public DraggableTreeViewer(ControlPalette controlPalette, int CONTROL_PALETTE_ALIGNMENT) {
-		super(controlPalette, CONTROL_PALETTE_ALIGNMENT);
-	}
-	
+    List<Line2D.Double> lines = new ArrayList<Line2D.Double>();
 
-	public void addLine(Line2D.Double line){
-		clearLines();
-		this.lines.add(line);
-	}
-	
-//	@Override
-//	public void setTree(Tree tree){
-//		super.setTree(tree);
-//		sampleTreePane.setTree((RootedTree) tree, null);
-//	}
-	
-//	public Set<Node> getNodesAtPoint(Graphics2D g2, Rectangle r){
-//		return sampleTreePane.getNodesAtPoint(g2, r);
-//	}
-	
-		
-	public void clearLines(){
-		this.lines = new ArrayList<Line2D.Double>();
-	}
-	
-	@Override
-	public void paint(Graphics g){
-				
-		super.paint(g);
-		
-		Graphics2D g2 = (Graphics2D) g;
-		g2.setPaint(Color.BLACK);
-		g2.setStroke(new BasicStroke(2f));
-		for(Line2D.Double line : lines){
-			g2.draw(line);
-		}
-	}
+    public DraggableTreeViewer() {
+        super();
+
+    }
+
+    public DraggableTreeViewer(ControlPalette controlPalette, int CONTROL_PALETTE_ALIGNMENT) {
+        super(controlPalette, CONTROL_PALETTE_ALIGNMENT);
+    }
+
+    public void addLine(Line2D.Double line) {
+        clearLines();
+        this.lines.add(line);
+    }
+
+    // @Override
+    // public void setTree(Tree tree){
+    // super.setTree(tree);
+    // sampleTreePane.setTree((RootedTree) tree, null);
+    // }
+
+    // public Set<Node> getNodesAtPoint(Graphics2D g2, Rectangle r){
+    // return sampleTreePane.getNodesAtPoint(g2, r);
+    // }
+
+    public void clearLines() {
+        this.lines = new ArrayList<Line2D.Double>();
+    }
+
+    @Override
+    public void paint(Graphics g) {
+
+        super.paint(g);
+
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setPaint(Color.BLACK);
+        g2.setStroke(new BasicStroke(2f));
+        for (Line2D.Double line : lines) {
+            g2.draw(line);
+        }
+    }
 
 }

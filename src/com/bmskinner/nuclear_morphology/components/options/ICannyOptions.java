@@ -6,109 +6,92 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * The parameters for edge detection using the Canny algorithm, and
- * the image pre-processing options to apply.
+ * The parameters for edge detection using the Canny algorithm, and the image
+ * pre-processing options to apply.
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
-public interface ICannyOptions extends IDetectionSubOptions, Serializable, Loggable{
+public interface ICannyOptions extends IDetectionSubOptions, Serializable, Loggable {
 
-	// The default values below work for our mouse sperm images
-	// pretty well.
-	static final String CANNY_LOW_THRESHOLD = "Canny low threshold";
-	static final String CANNY_HIGH_THRESHOLD = "Canny high threshold";
-	static final String CANNY_KERNEL_RADIUS = "Canny kernel radius";
-	static final String CANNY_KERNEL_WIDTH  = "Canny kernel width";
-	static final String CLOSING_RADIUS = "Closing radius";
-	static final String KUWAHARA_RADIUS = "Kuwahara radius";
-	static final String IS_USE_KUWAHARA = "Use Kuwahara";
-	static final String IS_FLATTEN_CHROMOCENTRE = "Use chromocentre flattening";
-	static final String FLATTEN_THRESHOLD = "Flattening threshold";
-	static final String IS_AUTO_THRESHOLD = "Use auto threshold";
-	static final String IS_ADD_BORDER = "Add border";
-	static final String IS_USE_CANNY = "Use Canny";
-	
-	static final float   DEFAULT_CANNY_LOW_THRESHOLD       = 0.5f;
-	static final float   DEFAULT_CANNY_HIGH_THRESHOLD      = 1.5f;
-	static final float   DEFAULT_CANNY_TAIL_LOW_THRESHOLD  = 0.1f;
-	static final float   DEFAULT_CANNY_TAIL_HIGH_THRESHOLD = 0.5f;
-	static final float   DEFAULT_CANNY_KERNEL_RADIUS       = 3;
-	static final int     DEFAULT_CANNY_KERNEL_WIDTH        = 16;
-	static final int     DEFAULT_CLOSING_OBJECT_RADIUS     = 5;
-	static final int     DEFAULT_TAIL_CLOSING_OBJECT_RADIUS= 3;
-	static final int     DEFAULT_KUWAHARA_KERNEL_RADIUS    = 3;
-	static final boolean DEFAULT_USE_KUWAHARA              = true;
-	static final boolean DEFAULT_FLATTEN_CHROMOCENTRES     = true;
-	static final boolean DEFAULT_USE_CANNY                 = true;
-	static final boolean DEFAULT_AUTO_THRESHOLD            = false;
-	static final int     DEFAULT_FLATTEN_THRESHOLD         = 100;
-	static final boolean DEFAULT_ADD_BORDER                = false;
+    // The default values below work for our mouse sperm images
+    // pretty well.
+    static final String CANNY_LOW_THRESHOLD     = "Canny low threshold";
+    static final String CANNY_HIGH_THRESHOLD    = "Canny high threshold";
+    static final String CANNY_KERNEL_RADIUS     = "Canny kernel radius";
+    static final String CANNY_KERNEL_WIDTH      = "Canny kernel width";
+    static final String CLOSING_RADIUS          = "Closing radius";
+    static final String KUWAHARA_RADIUS         = "Kuwahara radius";
+    static final String IS_USE_KUWAHARA         = "Use Kuwahara";
+    static final String IS_FLATTEN_CHROMOCENTRE = "Use chromocentre flattening";
+    static final String FLATTEN_THRESHOLD       = "Flattening threshold";
+    static final String IS_AUTO_THRESHOLD       = "Use auto threshold";
+    static final String IS_ADD_BORDER           = "Add border";
+    static final String IS_USE_CANNY            = "Use Canny";
 
-	
-	/**
-	 * Make the options mutable
-	 * @return
-	 */
-	IMutableCannyOptions unlock();
-	
-	/**
-	 * Create a copy of this options
-	 * @return
-	 */
-	ICannyOptions duplicate();
-	
-	/**
-	 * Should edge detection be run?
-	 * @return
-	 */
-	boolean isUseCanny();
+    static final float   DEFAULT_CANNY_LOW_THRESHOLD        = 0.5f;
+    static final float   DEFAULT_CANNY_HIGH_THRESHOLD       = 1.5f;
+    static final float   DEFAULT_CANNY_TAIL_LOW_THRESHOLD   = 0.1f;
+    static final float   DEFAULT_CANNY_TAIL_HIGH_THRESHOLD  = 0.5f;
+    static final float   DEFAULT_CANNY_KERNEL_RADIUS        = 3;
+    static final int     DEFAULT_CANNY_KERNEL_WIDTH         = 16;
+    static final int     DEFAULT_CLOSING_OBJECT_RADIUS      = 5;
+    static final int     DEFAULT_TAIL_CLOSING_OBJECT_RADIUS = 3;
+    static final int     DEFAULT_KUWAHARA_KERNEL_RADIUS     = 3;
+    static final boolean DEFAULT_USE_KUWAHARA               = true;
+    static final boolean DEFAULT_FLATTEN_CHROMOCENTRES      = true;
+    static final boolean DEFAULT_USE_CANNY                  = true;
+    static final boolean DEFAULT_AUTO_THRESHOLD             = false;
+    static final int     DEFAULT_FLATTEN_THRESHOLD          = 100;
+    static final boolean DEFAULT_ADD_BORDER                 = false;
 
+    /**
+     * Make the options mutable
+     * 
+     * @return
+     */
+    IMutableCannyOptions unlock();
 
-	/**
-	 * Should chromocentres be flattened?
-	 * @return
-	 */
-	boolean isUseFlattenImage();
+    /**
+     * Create a copy of this options
+     * 
+     * @return
+     */
+    ICannyOptions duplicate();
 
-	
+    /**
+     * Should edge detection be run?
+     * 
+     * @return
+     */
+    boolean isUseCanny();
 
-	int getFlattenThreshold();
+    /**
+     * Should chromocentres be flattened?
+     * 
+     * @return
+     */
+    boolean isUseFlattenImage();
 
-	
+    int getFlattenThreshold();
 
-	boolean isUseKuwahara();
+    boolean isUseKuwahara();
 
-	
+    int getKuwaharaKernel();
 
-	int getKuwaharaKernel();
+    int getClosingObjectRadius();
 
-	
+    boolean isCannyAutoThreshold();
 
-	int getClosingObjectRadius();
+    float getLowThreshold();
 
-	
+    float getHighThreshold();
 
-	boolean isCannyAutoThreshold();
+    float getKernelRadius();
 
-	
+    int getKernelWidth();
 
-	float getLowThreshold();
-
-	
-
-	float getHighThreshold();
-
-	
-	float getKernelRadius();
-
-	
-
-	int getKernelWidth();
-
-	
-	
-	boolean isAddBorder();
-	
+    boolean isAddBorder();
 
 }

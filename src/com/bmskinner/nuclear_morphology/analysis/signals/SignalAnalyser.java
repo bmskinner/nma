@@ -34,113 +34,116 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * This carries out the calculations of signal positions and angles
- * within a nucleus
+ * This carries out the calculations of signal positions and angles within a
+ * nucleus
+ * 
  * @author bms41
  *
  */
 public class SignalAnalyser implements Loggable {
-	
-	public SignalAnalyser(){};
-	
-	 /*
-		For each signal within the nucleus, calculate the distance to the nCoM
-		and update the signal
-	*/
-	public void calculateSignalDistancesFromCoM(Nucleus n){
 
-		for(List<INuclearSignal> signals : n.getSignalCollection().getSignals()){
+    public SignalAnalyser() {
+    };
 
-			if(!signals.isEmpty()){
-				for(INuclearSignal s : signals){
-					double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
-					s.setStatistic(PlottableStatistic.DISTANCE_FROM_COM, distance);
-				}
-			}
-		}
-	}
+    /*
+     * For each signal within the nucleus, calculate the distance to the nCoM
+     * and update the signal
+     */
+    public void calculateSignalDistancesFromCoM(Nucleus n) {
 
-	/*
-	Calculate the distance from the nuclear centre of
-	mass as a fraction of the distance from the nuclear CoM, through the 
-	signal CoM, to the nuclear border
-	 */
-	public void calculateFractionalSignalDistancesFromCoM(Nucleus n) throws UnavailableBorderPointException{
+        for (List<INuclearSignal> signals : n.getSignalCollection().getSignals()) {
 
-		ISignalCollection signalCollection = n.getSignalCollection();
-		this.calculateClosestBorderToSignals(n);
+            if (!signals.isEmpty()) {
+                for (INuclearSignal s : signals) {
+                    double distance = n.getCentreOfMass().getLengthTo(s.getCentreOfMass());
+                    s.setStatistic(PlottableStatistic.DISTANCE_FROM_COM, distance);
+                }
+            }
+        }
+    }
 
-		for(List<INuclearSignal> signals : signalCollection.getSignals()){
+    /*
+     * Calculate the distance from the nuclear centre of mass as a fraction of
+     * the distance from the nuclear CoM, through the signal CoM, to the nuclear
+     * border
+     */
+    public void calculateFractionalSignalDistancesFromCoM(Nucleus n) throws UnavailableBorderPointException {
 
-			if(!signals.isEmpty()){
+        ISignalCollection signalCollection = n.getSignalCollection();
+        this.calculateClosestBorderToSignals(n);
 
-				for(INuclearSignal signal : signals){
+        for (List<INuclearSignal> signals : signalCollection.getSignals()) {
 
-					// get the line equation
-					LineEquation eq = new DoubleEquation(signal.getCentreOfMass(), n.getCentreOfMass());
+            if (!signals.isEmpty()) {
 
-					// using the equation, get the y postion on the line for each X point around the roi
-					double minDeltaY = 100;
-					int minDeltaYIndex = 0;
-					double minDistanceToSignal = 1000;
+                for (INuclearSignal signal : signals) {
 
-					for(int j = 0; j<n.getBorderLength();j++){
-						double x = n.getBorderPoint(j).getX();
-						double y = n.getBorderPoint(j).getY();
-						double yOnLine = eq.getY(x);
-						double distanceToSignal = n.getBorderPoint(j).getLengthTo(signal.getCentreOfMass()); // fetch
+                    // get the line equation
+                    LineEquation eq = new DoubleEquation(signal.getCentreOfMass(), n.getCentreOfMass());
 
-						double deltaY = Math.abs(y - yOnLine);
-						// find the point closest to the line; this could find either intersection
-						// hence check it is as close as possible to the signal CoM also
-						if(deltaY < minDeltaY && distanceToSignal < minDistanceToSignal){
-							minDeltaY = deltaY;
-							minDeltaYIndex = j;
-							minDistanceToSignal = distanceToSignal;
-						}
-					}
-					IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
-					double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
-					double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
-					double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
-					signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
-				}
-			}
-		}
-	}
+                    // using the equation, get the y postion on the line for
+                    // each X point around the roi
+                    double minDeltaY = 100;
+                    int minDeltaYIndex = 0;
+                    double minDistanceToSignal = 1000;
 
-	/*
-	Go through the signals in the nucleus, and find the point on
-	the nuclear ROI that is closest to the signal centre of mass.
-	 */
-	private void calculateClosestBorderToSignals(Nucleus n) throws UnavailableBorderPointException {
-		ISignalCollection signalCollection = n.getSignalCollection();
-		for(List<INuclearSignal> signals : signalCollection.getSignals()){
+                    for (int j = 0; j < n.getBorderLength(); j++) {
+                        double x = n.getBorderPoint(j).getX();
+                        double y = n.getBorderPoint(j).getY();
+                        double yOnLine = eq.getY(x);
+                        double distanceToSignal = n.getBorderPoint(j).getLengthTo(signal.getCentreOfMass()); // fetch
 
-			if(!signals.isEmpty()){
+                        double deltaY = Math.abs(y - yOnLine);
+                        // find the point closest to the line; this could find
+                        // either intersection
+                        // hence check it is as close as possible to the signal
+                        // CoM also
+                        if (deltaY < minDeltaY && distanceToSignal < minDistanceToSignal) {
+                            minDeltaY = deltaY;
+                            minDeltaYIndex = j;
+                            minDistanceToSignal = distanceToSignal;
+                        }
+                    }
+                    IBorderPoint borderPoint = n.getBorderPoint(minDeltaYIndex);
+                    double nucleusCoMToBorder = borderPoint.getLengthTo(n.getCentreOfMass());
+                    double signalCoMToNucleusCoM = n.getCentreOfMass().getLengthTo(signal.getCentreOfMass());
+                    double fractionalDistance = signalCoMToNucleusCoM / nucleusCoMToBorder;
+                    signal.setStatistic(PlottableStatistic.FRACT_DISTANCE_FROM_COM, fractionalDistance);
+                }
+            }
+        }
+    }
 
-				for(INuclearSignal s : signals){
+    /*
+     * Go through the signals in the nucleus, and find the point on the nuclear
+     * ROI that is closest to the signal centre of mass.
+     */
+    private void calculateClosestBorderToSignals(Nucleus n) throws UnavailableBorderPointException {
+        ISignalCollection signalCollection = n.getSignalCollection();
+        for (List<INuclearSignal> signals : signalCollection.getSignals()) {
 
-					int minIndex = 0;
-					double minDistance = n.getStatistic(PlottableStatistic.MAX_FERET, MeasurementScale.PIXELS);
+            if (!signals.isEmpty()) {
 
-					for(int j = 0; j<n.getBorderLength();j++){
-						IPoint p = n.getBorderPoint(j);
-						double distance = p.getLengthTo(s.getCentreOfMass());
+                for (INuclearSignal s : signals) {
 
-						// find the point closest to the CoM
-						if(distance < minDistance){
-							minIndex = j;
-							minDistance = distance;
-						}
-					}
-					s.setClosestBorderPoint(minIndex);
+                    int minIndex = 0;
+                    double minDistance = n.getStatistic(PlottableStatistic.MAX_FERET, MeasurementScale.PIXELS);
 
-				}
-			}
-		}
-	}
+                    for (int j = 0; j < n.getBorderLength(); j++) {
+                        IPoint p = n.getBorderPoint(j);
+                        double distance = p.getLengthTo(s.getCentreOfMass());
 
+                        // find the point closest to the CoM
+                        if (distance < minDistance) {
+                            minIndex = j;
+                            minDistance = distance;
+                        }
+                    }
+                    s.setClosestBorderPoint(minIndex);
 
+                }
+            }
+        }
+    }
 
 }

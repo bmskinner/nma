@@ -21,36 +21,37 @@ package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 /**
  * A default implemnetation of the MeshPixel
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public class DefaultMeshPixel implements MeshPixel {
-	
-	final int value;
-	final MeshFaceCoordinate coordinate;
-	
-	public DefaultMeshPixel(final MeshFaceCoordinate c, final int v){
-		
-		if(v<0){
-			throw new IllegalArgumentException("Pixel value is below zero");
-		}
-		value = v;
-		coordinate = c;
-	}
 
-	@Override
-	public int getValue() {
-		return value;
-	}
+    final int                value;
+    final MeshFaceCoordinate coordinate;
 
-	@Override
-	public MeshFaceCoordinate getCoordinate() {
-		return coordinate;
-	}
-	
-	public String toString(){
-		return coordinate.toString()+" - "+value;
-	}
+    public DefaultMeshPixel(final MeshFaceCoordinate c, final int v) {
+
+        if (v < 0) {
+            throw new IllegalArgumentException("Pixel value is below zero");
+        }
+        value = v;
+        coordinate = c;
+    }
+
+    @Override
+    public int getValue() {
+        return value;
+    }
+
+    @Override
+    public MeshFaceCoordinate getCoordinate() {
+        return coordinate;
+    }
+
+    public String toString() {
+        return coordinate.toString() + " - " + value;
+    }
 
 }

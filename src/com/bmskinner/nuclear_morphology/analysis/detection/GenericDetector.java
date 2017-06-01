@@ -25,34 +25,34 @@ import ij.process.ImageProcessor;
 import java.util.List;
 
 /**
- * A generic use of the detector with no filtering on size or
- * shape by default
+ * A generic use of the detector with no filtering on size or shape by default
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class GenericDetector extends Detector {
-	
-	/**
-	 * Create with no constraints on size or circularity.
-	 */
-	public GenericDetector(){
-		
-		this.setMinCirc(0);
-		this.setMaxCirc(1);
-		this.setMinSize(1);
-	}
-	
-	/**
-	 * Detect rois in the image with no size or circularity parameters
-	 * set
-	 * @param ip
-	 * @return
-	 */
-	public List<Roi> getRois(ImageProcessor ip){
-		this.setMaxSize(  ip.getWidth()*ip.getHeight()  );
-//		this.setThreshold(128); // should be already set
-		return this.detectRois(ip);
-	}
+
+    /**
+     * Create with no constraints on size or circularity.
+     */
+    public GenericDetector() {
+
+        this.setMinCirc(0);
+        this.setMaxCirc(1);
+        this.setMinSize(1);
+    }
+
+    /**
+     * Detect rois in the image with no size or circularity parameters set
+     * 
+     * @param ip
+     * @return
+     */
+    public List<Roi> getRois(ImageProcessor ip) {
+        this.setMaxSize(ip.getWidth() * ip.getHeight());
+        // this.setThreshold(128); // should be already set
+        return this.detectRois(ip);
+    }
 
 }

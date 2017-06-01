@@ -39,109 +39,107 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 
-public class BorderTagDualChartPanel extends DualChartPanel{
-	
-	private int activeProfileIndex = 0;
-	
-	private JPopupMenu popupMenu = new JPopupMenu("Popup");
-	
-	public BorderTagDualChartPanel(){
-		super();
-		
-		
-		chartPanel.addChartMouseListener(new ChartMouseListener() {
+public class BorderTagDualChartPanel extends DualChartPanel {
 
-		    public void chartMouseClicked(ChartMouseEvent e) {
-		    	
-		    	if(e.getEntity() instanceof XYItemEntity){
-		    		XYItemEntity ent = (XYItemEntity) e.getEntity();
-		    		int series = ent.getSeriesIndex();
-		    		int item   = ent.getItem();
-		    		double x   = ent.getDataset().getXValue(series, item);
+    private int activeProfileIndex = 0;
 
-		    		
-		    		activeProfileIndex = (int) x;
-		    		MouseEvent ev = e.getTrigger();
-		    		popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
-		    	}
+    private JPopupMenu popupMenu = new JPopupMenu("Popup");
 
-		    }
+    public BorderTagDualChartPanel() {
+        super();
 
-		    public void chartMouseMoved(ChartMouseEvent e) {
-		    }
-		    	
-		});
-		
-		chartPanel.setRangeZoomable(false);
-		chartPanel.setDomainZoomable(false);
-	}
-	
-	public void createBorderTagPopup(ICell cell){
-		Set<Tag> set = cell.getNucleus().getBorderTags().keySet();
-		List<Tag> list = new ArrayList<Tag>(set);
-		makePopup(list);
-		
-	}
-		
-	public void createBorderTagPopup(IAnalysisDataset dataset){
+        chartPanel.addChartMouseListener(new ChartMouseListener() {
 
-		List<Tag> list = dataset.getCollection().getProfileCollection().getBorderTags();
-		makePopup(list);
+            public void chartMouseClicked(ChartMouseEvent e) {
 
-	}
-	
-	private void makePopup(List<Tag> list){
-		popupMenu = new JPopupMenu("Popup");
-		
-		Collections.sort(list);
-		
-		for(Tag tag : list){
-			
-			/*
-			 * The IP is determined solely by the OP
-			 */
-			if( tag.equals(Tag.INTERSECTION_POINT)){
-				continue;
-			}
-			
-			JMenuItem item = new JMenuItem(tag.toString());
-			
-			item.addActionListener( e ->{
-					fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));				
-			});
-			popupMenu.add(item);			
-		}
-		
-		// Find border tags with rulesets that have not been assigned in the median
-		List<Tag> unassignedTags = new ArrayList<Tag>();
-		for(Tag tag : BorderTagObject.values()){
-			if( tag.equals(Tag.INTERSECTION_POINT)){
-				continue;
-			}
-			
-			if( ! list.contains(tag)){
-				unassignedTags.add(tag);
-				
-			}
-		}
-		
-		if( ! unassignedTags.isEmpty()){
-			Collections.sort(unassignedTags);
-			
-			popupMenu.addSeparator();
+                if (e.getEntity() instanceof XYItemEntity) {
+                    XYItemEntity ent = (XYItemEntity) e.getEntity();
+                    int series = ent.getSeriesIndex();
+                    int item = ent.getItem();
+                    double x = ent.getDataset().getXValue(series, item);
 
-			for(Tag tag : unassignedTags){
-				JMenuItem item = new JMenuItem(tag.toString());
-				item.setForeground(Color.DARK_GRAY);
-				
-				item.addActionListener( e ->{
-						fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));				
-				});
-				popupMenu.add(item);	
-			}
-			
-			
-		}
-	}
-	
+                    activeProfileIndex = (int) x;
+                    MouseEvent ev = e.getTrigger();
+                    popupMenu.show(ev.getComponent(), ev.getX(), ev.getY());
+                }
+
+            }
+
+            public void chartMouseMoved(ChartMouseEvent e) {
+            }
+
+        });
+
+        chartPanel.setRangeZoomable(false);
+        chartPanel.setDomainZoomable(false);
+    }
+
+    public void createBorderTagPopup(ICell cell) {
+        Set<Tag> set = cell.getNucleus().getBorderTags().keySet();
+        List<Tag> list = new ArrayList<Tag>(set);
+        makePopup(list);
+
+    }
+
+    public void createBorderTagPopup(IAnalysisDataset dataset) {
+
+        List<Tag> list = dataset.getCollection().getProfileCollection().getBorderTags();
+        makePopup(list);
+
+    }
+
+    private void makePopup(List<Tag> list) {
+        popupMenu = new JPopupMenu("Popup");
+
+        Collections.sort(list);
+
+        for (Tag tag : list) {
+
+            /*
+             * The IP is determined solely by the OP
+             */
+            if (tag.equals(Tag.INTERSECTION_POINT)) {
+                continue;
+            }
+
+            JMenuItem item = new JMenuItem(tag.toString());
+
+            item.addActionListener(e -> {
+                fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+            });
+            popupMenu.add(item);
+        }
+
+        // Find border tags with rulesets that have not been assigned in the
+        // median
+        List<Tag> unassignedTags = new ArrayList<Tag>();
+        for (Tag tag : BorderTagObject.values()) {
+            if (tag.equals(Tag.INTERSECTION_POINT)) {
+                continue;
+            }
+
+            if (!list.contains(tag)) {
+                unassignedTags.add(tag);
+
+            }
+        }
+
+        if (!unassignedTags.isEmpty()) {
+            Collections.sort(unassignedTags);
+
+            popupMenu.addSeparator();
+
+            for (Tag tag : unassignedTags) {
+                JMenuItem item = new JMenuItem(tag.toString());
+                item.setForeground(Color.DARK_GRAY);
+
+                item.addActionListener(e -> {
+                    fireBorderTagEvent(new BorderTagEvent(item, tag, activeProfileIndex));
+                });
+                popupMenu.add(item);
+            }
+
+        }
+    }
+
 }

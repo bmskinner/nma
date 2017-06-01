@@ -55,106 +55,97 @@ import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 @SuppressWarnings("serial")
 public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {
 
-	private Dimension preferredSize = new Dimension(200, 300);
-			
-	public SegmentBoxplotsPanel(){
-		super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    private Dimension preferredSize = new Dimension(200, 300);
 
-		JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
-		
+    public SegmentBoxplotsPanel() {
+        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
-		ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
-		chartPanel.setPreferredSize(preferredSize);
-		chartPanels.put("null", chartPanel);
+        JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
 
-		mainPanel.add(chartPanel);
+        ExportableChartPanel chartPanel = new ExportableChartPanel(boxplot);
+        chartPanel.setPreferredSize(preferredSize);
+        chartPanels.put("null", chartPanel);
 
-		
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		update(getDatasets());
-		
-	}
+        mainPanel.add(chartPanel);
 
+    }
 
-	@Override
-	protected void updateSingle() {
-		updateMultiple();
-		
-	}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        update(getDatasets());
 
+    }
 
-	@Override
-	protected void updateMultiple() {
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+    @Override
+    protected void updateSingle() {
+        updateMultiple();
 
-		finest("Dataset list is not empty");
+    }
 
-		// Check that all the datasets have the same number of segments
-		if(IBorderSegment.segmentCountsMatch(getDatasets())){ // make a boxplot for each segment
-			
-			ICellCollection collection = activeDataset().getCollection();
-			List<IBorderSegment> segments;
-			try {
-				segments = collection.getProfileCollection()
-						.getSegments(Tag.REFERENCE_POINT);
-			} catch (UnavailableBorderTagException | ProfileException e) {
-				warn("Cannot get segments");
-				fine("Cannot get segments", e);
-				return;
-			}			
+    @Override
+    protected void updateMultiple() {
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
 
-			// Get each segment as a boxplot
-			for(IBorderSegment seg : segments){
-				
-				JFreeChart chart = AbstractChartFactory.createLoadingChart();
-				ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
-				chartPanel.addChartSetEventListener(this);
-				chartPanel.setPreferredSize(preferredSize);
-				chartPanels.put(seg.getName(), chartPanel);
-				mainPanel.add(chartPanel);	
-				
-				ChartOptions options = new ChartOptionsBuilder()
-					.setDatasets(getDatasets())
-					.addStatistic(PlottableStatistic.LENGTH)
-					.setScale(GlobalOptions.getInstance().getScale())
-					.setSwatch(GlobalOptions.getInstance().getSwatch())
-					.setSegPosition(seg.getPosition())
-					.setTarget(chartPanel)
-					.build();
+        finest("Dataset list is not empty");
 
-				setChart(options);
-			}
+        // Check that all the datasets have the same number of segments
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) { // make a
+                                                                // boxplot for
+                                                                // each segment
 
-			
-		} else { // different number of segments, blank chart
-			mainPanel.setLayout(new FlowLayout());
-			mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
-		}
-		mainPanel.revalidate();
-		mainPanel.repaint();
-				
-		scrollPane.setViewportView(mainPanel);
-	}
+            ICellCollection collection = activeDataset().getCollection();
+            List<IBorderSegment> segments;
+            try {
+                segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+            } catch (UnavailableBorderTagException | ProfileException e) {
+                warn("Cannot get segments");
+                fine("Cannot get segments", e);
+                return;
+            }
 
+            // Get each segment as a boxplot
+            for (IBorderSegment seg : segments) {
 
-	@Override
-	protected void updateNull() {
-		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
-		
-		ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.makeEmptyChart());
-		mainPanel.add(chartPanel);
-		mainPanel.revalidate();
-		mainPanel.repaint();
-		scrollPane.setViewportView(mainPanel);
-	}
-	
-	@Override
-	public void chartSetEventReceived(ChartSetEvent e) {
-		((ViolinChartPanel) e.getSource()).restoreAutoBounds();
-	}
+                JFreeChart chart = AbstractChartFactory.createLoadingChart();
+                ViolinChartPanel chartPanel = new ViolinChartPanel(chart);
+                chartPanel.addChartSetEventListener(this);
+                chartPanel.setPreferredSize(preferredSize);
+                chartPanels.put(seg.getName(), chartPanel);
+                mainPanel.add(chartPanel);
+
+                ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+                        .addStatistic(PlottableStatistic.LENGTH).setScale(GlobalOptions.getInstance().getScale())
+                        .setSwatch(GlobalOptions.getInstance().getSwatch()).setSegPosition(seg.getPosition())
+                        .setTarget(chartPanel).build();
+
+                setChart(options);
+            }
+
+        } else { // different number of segments, blank chart
+            mainPanel.setLayout(new FlowLayout());
+            mainPanel.add(new JLabel(Labels.INCONSISTENT_SEGMENT_NUMBER, JLabel.CENTER));
+        }
+        mainPanel.revalidate();
+        mainPanel.repaint();
+
+        scrollPane.setViewportView(mainPanel);
+    }
+
+    @Override
+    protected void updateNull() {
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
+
+        ChartPanel chartPanel = new ChartPanel(BoxplotChartFactory.makeEmptyChart());
+        mainPanel.add(chartPanel);
+        mainPanel.revalidate();
+        mainPanel.repaint();
+        scrollPane.setViewportView(mainPanel);
+    }
+
+    @Override
+    public void chartSetEventReceived(ChartSetEvent e) {
+        ((ViolinChartPanel) e.getSource()).restoreAutoBounds();
+    }
 }

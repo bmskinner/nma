@@ -24,8 +24,9 @@ import java.util.EventObject;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 
 /**
- * Border tag events indicate a change to the position of a border
- * tag in a profile. They are sent from detail panels.
+ * Border tag events indicate a change to the position of a border tag in a
+ * profile. They are sent from detail panels.
+ * 
  * @author ben
  * @since 1.13.2
  *
@@ -33,29 +34,33 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 @SuppressWarnings("serial")
 public class BorderTagEvent extends EventObject {
 
-	private Tag tag;
-	private int index;
+    private Tag tag;
+    private int index;
 
-	/**
-	 * Create an event from a source, with the given message
-	 * @param source the source of the datasets
-	 * @param message the instruction on what to do with the datasets
-	 * @param sourceName the name of the object or component generating the datasets
-	 * @param list the datasets to carry
-	 */
-	public BorderTagEvent( Object source, Tag tag, int index ) {
-		super( source );
-		this.tag = tag;
-		this.index = index;
-	}
+    /**
+     * Create an event from a source, with the given message
+     * 
+     * @param source
+     *            the source of the datasets
+     * @param message
+     *            the instruction on what to do with the datasets
+     * @param sourceName
+     *            the name of the object or component generating the datasets
+     * @param list
+     *            the datasets to carry
+     */
+    public BorderTagEvent(Object source, Tag tag, int index) {
+        super(source);
+        this.tag = tag;
+        this.index = index;
+    }
 
-	public Tag getTag() {
-		return tag;
-	}
+    public Tag getTag() {
+        return tag;
+    }
 
-	public int getIndex() {
-		return index;
-	}
-
+    public int getIndex() {
+        return index;
+    }
 
 }

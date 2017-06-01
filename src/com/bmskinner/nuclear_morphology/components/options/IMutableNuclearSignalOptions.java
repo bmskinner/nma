@@ -19,25 +19,28 @@
 
 package com.bmskinner.nuclear_morphology.components.options;
 
-
 /**
  * The interface for signal detection parameters
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface IMutableNuclearSignalOptions extends INuclearSignalOptions, IMutableDetectionOptions {
-	
-	/**
-	 * Set the maximum fraction of the parent component (e.g. nucleus) that the signal can occupy
-	 * @param maxFraction
-	 */
-	void setMaxFraction(double maxFraction);
-	
-	/**
-	 * Set the detection mode for signals
-	 * @param detectionMode
-	 */
-	void setDetectionMode(SignalDetectionMode detectionMode);
+
+    /**
+     * Set the maximum fraction of the parent component (e.g. nucleus) that the
+     * signal can occupy
+     * 
+     * @param maxFraction
+     */
+    void setMaxFraction(double maxFraction);
+
+    /**
+     * Set the detection mode for signals
+     * 
+     * @param detectionMode
+     */
+    void setDetectionMode(SignalDetectionMode detectionMode);
 
 }

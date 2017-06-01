@@ -22,39 +22,42 @@ package com.bmskinner.nuclear_morphology.components.options;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 
 public interface IMutableAnalysisOptions extends IAnalysisOptions {
-	
-	
-	/**
-	 * Set the detection options for the given component
-	 * @param key
-	 * @param options
-	 */
-	void setDetectionOptions(String key, IMutableDetectionOptions options);
 
-	/**
-	 * Set the proportion of the perimeter to use when profiling nuclei
-	 * @param proportion
-	 */
-	void setAngleWindowProportion(double proportion);
+    /**
+     * Set the detection options for the given component
+     * 
+     * @param key
+     * @param options
+     */
+    void setDetectionOptions(String key, IMutableDetectionOptions options);
 
-	/**
-	 * Set the type of nucleus / cell being analysed
-	 * @param nucleusType
-	 */
-	void setNucleusType(NucleusType nucleusType);
+    /**
+     * Set the proportion of the perimeter to use when profiling nuclei
+     * 
+     * @param proportion
+     */
+    void setAngleWindowProportion(double proportion);
 
+    /**
+     * Set the type of nucleus / cell being analysed
+     * 
+     * @param nucleusType
+     */
+    void setNucleusType(NucleusType nucleusType);
 
-	/**
-	 * Set whether the consensus nucleus should be refolded during the analysis
-	 * @param refoldNucleus
-	 */
-	void setRefoldNucleus(boolean refoldNucleus);
-	
-	
-	/**
-	 * Set whether nuclei that cannot be detected should be retained as a separate collection
-	 * @param keepFailedCollections
-	 */
-	void setKeepFailedCollections(boolean keepFailedCollections);
+    /**
+     * Set whether the consensus nucleus should be refolded during the analysis
+     * 
+     * @param refoldNucleus
+     */
+    void setRefoldNucleus(boolean refoldNucleus);
+
+    /**
+     * Set whether nuclei that cannot be detected should be retained as a
+     * separate collection
+     * 
+     * @param keepFailedCollections
+     */
+    void setKeepFailedCollections(boolean keepFailedCollections);
 
 }

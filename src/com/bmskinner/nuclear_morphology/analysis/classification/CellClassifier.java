@@ -25,28 +25,31 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 
 /**
  * Interface for the classifiers that predict cell types
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 public interface CellClassifier {
-		
-	/**
-	 * Run the classification
-	 */
-	void classify();
-	
-	/**
-	 * Get the groups that the classifier has returned
-	 * @return
-	 */
-	Set<String> getGroups();
-	
-	/**
-	 * Get the cells that have been assigned to the given group
-	 * @param group
-	 * @return
-	 */
-	Set<ICell> getCells(String group);
+
+    /**
+     * Run the classification
+     */
+    void classify();
+
+    /**
+     * Get the groups that the classifier has returned
+     * 
+     * @return
+     */
+    Set<String> getGroups();
+
+    /**
+     * Get the cells that have been assigned to the given group
+     * 
+     * @param group
+     * @return
+     */
+    Set<ICell> getCells(String group);
 
 }

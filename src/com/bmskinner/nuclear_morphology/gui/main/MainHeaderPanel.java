@@ -23,127 +23,117 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
 public class MainHeaderPanel extends JPanel implements Loggable {
-	
-	private static final String NEW_ANALYSIS_LBL   = "New analysis";
-	private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";
-	private static final String NEW_NEUTROPHIL_LBL = "Neutrophils";
 
-	private static final String LOAD_DATASET_LBL   = "Load dataset";
-	private static final String SAVE_ALL_LBL       = "Save all";
-	private static final String SAVE_WORKSPACE_LBL = "Save workspace";
-	private static final String OPTIONS_LBL        = "Options";
-	
-	private MainWindow mw;
-	
-	public MainHeaderPanel(MainWindow mw){
-		this.mw = mw;
-		
-		setLayout(new FlowLayout());
-		
-		createHeaderButtons();
-	}
-	
-	/**
-	 * Create the panel of primary buttons
-	 */
-	private void createHeaderButtons(){
-		
-		JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
+    private static final String NEW_ANALYSIS_LBL   = "New analysis";
+    private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";
+    private static final String NEW_NEUTROPHIL_LBL = "Neutrophils";
 
-		if(Version.currentVersion().isNewerThan(Version.v_1_13_4)){
-			
-	        final JPopupMenu popup = new JPopupMenu();
-	        
-	        
-	        popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
-	            public void actionPerformed(ActionEvent e) {
-	            	Runnable r = new NewAnalysisAction(mw);
-					r.run();
-	            }
-	        }));
-	        popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
-	            public void actionPerformed(ActionEvent e) {
-	            	Runnable r = new NeutrophilAnalysisAction(mw);
-					r.run();
-	            }
-	        }));
-	
-	
-	        btnNewAnalysis.addMouseListener(new MouseAdapter() {
-	            public void mousePressed(MouseEvent e) {
-	            	popup.show(btnNewAnalysis, 0, btnNewAnalysis.getBounds().height);
-	
-	            }
-	        });
-		} else {
-			btnNewAnalysis.addActionListener(	
-					e -> {
-						Runnable r = new NewAnalysisAction(mw);
-						r.run();
-					}
-				);
-		}
+    private static final String LOAD_DATASET_LBL   = "Load dataset";
+    private static final String SAVE_ALL_LBL       = "Save all";
+    private static final String SAVE_WORKSPACE_LBL = "Save workspace";
+    private static final String OPTIONS_LBL        = "Options";
+
+    private MainWindow mw;
+
+    public MainHeaderPanel(MainWindow mw) {
+        this.mw = mw;
+
+        setLayout(new FlowLayout());
+
+        createHeaderButtons();
+    }
+
+    /**
+     * Create the panel of primary buttons
+     */
+    private void createHeaderButtons() {
+
+        JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
+
+        if (Version.currentVersion().isNewerThan(Version.v_1_13_4)) {
+
+            final JPopupMenu popup = new JPopupMenu();
+
+            popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
+                public void actionPerformed(ActionEvent e) {
+                    Runnable r = new NewAnalysisAction(mw);
+                    r.run();
+                }
+            }));
+            popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
+                public void actionPerformed(ActionEvent e) {
+                    Runnable r = new NeutrophilAnalysisAction(mw);
+                    r.run();
+                }
+            }));
+
+            btnNewAnalysis.addMouseListener(new MouseAdapter() {
+                public void mousePressed(MouseEvent e) {
+                    popup.show(btnNewAnalysis, 0, btnNewAnalysis.getBounds().height);
+
+                }
+            });
+        } else {
+            btnNewAnalysis.addActionListener(e -> {
+                Runnable r = new NewAnalysisAction(mw);
+                r.run();
+            });
+        }
 
         add(btnNewAnalysis);
-		
 
+        // ---------------
+        // load saved dataset button
+        // ---------------
 
-		//---------------
-		// load saved dataset button
-		//---------------
+        JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 
-		JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
-		
-		btnLoadSavedDataset.addActionListener(	
-			e -> {
-				finest("Creating import action");
-				Runnable r = new PopulationImportAction(mw);
-				r.run();
-			}
-		);
-			
-		add(btnLoadSavedDataset);
+        btnLoadSavedDataset.addActionListener(e -> {
+            finest("Creating import action");
+            Runnable r = new PopulationImportAction(mw);
+            r.run();
+        });
 
-		//---------------
-		// save button
-		//---------------
+        add(btnLoadSavedDataset);
 
-		JButton btnSavePopulation = new JButton(SAVE_ALL_LBL);
-		btnSavePopulation.addActionListener( e -> {
-					log("Saving root populations...");
-					mw.getEventHandler().saveRootDatasets();
-				}
-		);
+        // ---------------
+        // save button
+        // ---------------
 
-		add(btnSavePopulation);
-		
-		//---------------
-		// save workspace button
-		//---------------
+        JButton btnSavePopulation = new JButton(SAVE_ALL_LBL);
+        btnSavePopulation.addActionListener(e -> {
+            log("Saving root populations...");
+            mw.getEventHandler().saveRootDatasets();
+        });
 
-		JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
-		btnSaveWorkspace.addActionListener( e -> {
-				mw.getEventHandler().signalChangeReceived(new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
-			}
-		);
+        add(btnSavePopulation);
 
-		add(btnSaveWorkspace);
-				
-		JButton optionsButton = new JButton(OPTIONS_LBL);
-		optionsButton.addActionListener(
-				
-				e -> { 
+        // ---------------
+        // save workspace button
+        // ---------------
 
-					MainOptionsDialog dialog = new MainOptionsDialog(mw);
-					dialog.addInterfaceEventListener(mw.getEventHandler());
-			}
-		);		
-		add(optionsButton);
-		
-		MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
-		unitsPanel.addInterfaceEventListener(mw.getEventHandler());
-		add(unitsPanel);
+        JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
+        btnSaveWorkspace.addActionListener(e -> {
+            mw.getEventHandler().signalChangeReceived(
+                    new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
+        });
 
-	}
+        add(btnSaveWorkspace);
+
+        JButton optionsButton = new JButton(OPTIONS_LBL);
+        optionsButton.addActionListener(
+
+                e -> {
+
+                    MainOptionsDialog dialog = new MainOptionsDialog(mw);
+                    dialog.addInterfaceEventListener(mw.getEventHandler());
+                });
+        add(optionsButton);
+
+        MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
+        unitsPanel.addInterfaceEventListener(mw.getEventHandler());
+        add(unitsPanel);
+
+    }
 
 }

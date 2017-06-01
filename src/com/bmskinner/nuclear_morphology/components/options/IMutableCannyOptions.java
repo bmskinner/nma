@@ -21,45 +21,47 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 /**
  * The setters for ICannyOptions
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface IMutableCannyOptions extends ICannyOptions {
-	
-	IMutableCannyOptions duplicate();
-	
-	/**
-	 * @param useCanny
-	 */
-	void setUseCanny(boolean useCanny);
-	
-	void setFlattenImage(boolean flattenImage);
-	
-	void setFlattenThreshold(int flattenThreshold);
-	
-	void setUseKuwahara(boolean b);
-	
-	void setKuwaharaKernel(int radius);
-	
-	void setClosingObjectRadius(int closingObjectRadius);
-	
-	void setCannyAutoThreshold(boolean cannyAutoThreshold);
-	
-	void setLowThreshold(float lowThreshold);
-	
-	void setHighThreshold(float highThreshold);
 
-	void setKernelRadius(float kernelRadius);
-	
-	void setKernelWidth(int kernelWidth);
-	
-	void setAddBorder(boolean b);
-	
-	/**
-	 * Set the options to match the given values
-	 * @param options
-	 */
-	void set(ICannyOptions options);
+    IMutableCannyOptions duplicate();
+
+    /**
+     * @param useCanny
+     */
+    void setUseCanny(boolean useCanny);
+
+    void setFlattenImage(boolean flattenImage);
+
+    void setFlattenThreshold(int flattenThreshold);
+
+    void setUseKuwahara(boolean b);
+
+    void setKuwaharaKernel(int radius);
+
+    void setClosingObjectRadius(int closingObjectRadius);
+
+    void setCannyAutoThreshold(boolean cannyAutoThreshold);
+
+    void setLowThreshold(float lowThreshold);
+
+    void setHighThreshold(float highThreshold);
+
+    void setKernelRadius(float kernelRadius);
+
+    void setKernelWidth(int kernelWidth);
+
+    void setAddBorder(boolean b);
+
+    /**
+     * Set the options to match the given values
+     * 
+     * @param options
+     */
+    void set(ICannyOptions options);
 
 }

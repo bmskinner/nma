@@ -31,88 +31,98 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
 public class SaveDatasetAction extends SingleDatasetResultAction {
-	
-	private File saveFile = null;
-	
-	/**
-	 * Constructor to save the current dataset. This gives programmatic
-	 * access to saving to non-default locations, without needing to use
-	 * the save dialog
-	 * @param dataset the dataset to save
-	 * @param saveFile the location to save to
-	 * @param mw the main window, to access program logger
-	 * @param doneSignal a latch to hold threads until the save is complete
-	 */
-	public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
-		super(dataset, "Saving dataset", mw);
-		setLatch(doneSignal);
-		finest("Save dataset action created by explicit file location");
-		
-		this.setProgressBarIndeterminate();
-//		worker = new PopulationExporter(dataset, saveFile);
-//		worker.addPropertyChangeListener(this);
-//		
-//		ThreadManager.getInstance().submit(worker);
-//		worker.execute();	
-	}	
-	
-	/**
-	 * Default constructor to save the current dataset
-	 * @param dataset the dataset to save
-	 * @param mw the main window, to access program logger
-	 * @param doneSignal a latch to hold threads until the save is complete
-	 * @param chooseSaveLocation save to the default dataset save file, or choose another location
-	 */
-	public SaveDatasetAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal, boolean chooseSaveLocation) {
-		super(dataset, "Saving dataset", mw);
-		setLatch(doneSignal);
-		finest("Save dataset action created by default or manual file location");
-		this.setProgressBarIndeterminate();
-//		File saveFile = null;
-		if(chooseSaveLocation){
-			
-			SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
 
-			String fileName = saveDialog.getFileName();
-			String folderName = saveDialog.getDirectory();
-			if(fileName!=null && folderName!=null){
-				saveFile = new File(folderName+File.separator+fileName);
-			} else {
-				this.finished();
-			}
+    private File saveFile = null;
 
-		} else {
-			saveFile = dataset.getSavePath();
-		}
-				
-	}
-	
-	@Override
-	public void run(){
-		
-		if(saveFile!=null){
-			log("Saving as "+saveFile.getAbsolutePath()+"...");
-			
-			IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
-			worker = new DefaultAnalysisWorker(m);
-			
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
-		} else {
-			this.finished();
-		}
-	}
-	
-	
-	
-	@Override
-	public void finished(){
+    /**
+     * Constructor to save the current dataset. This gives programmatic access
+     * to saving to non-default locations, without needing to use the save
+     * dialog
+     * 
+     * @param dataset
+     *            the dataset to save
+     * @param saveFile
+     *            the location to save to
+     * @param mw
+     *            the main window, to access program logger
+     * @param doneSignal
+     *            a latch to hold threads until the save is complete
+     */
+    public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
+        super(dataset, "Saving dataset", mw);
+        setLatch(doneSignal);
+        finest("Save dataset action created by explicit file location");
 
-		finer("Save action complete");
-		finest("Removing save latch");
-		this.countdownLatch();
-		super.finished();
-		
-	}
+        this.setProgressBarIndeterminate();
+        // worker = new PopulationExporter(dataset, saveFile);
+        // worker.addPropertyChangeListener(this);
+        //
+        // ThreadManager.getInstance().submit(worker);
+        // worker.execute();
+    }
+
+    /**
+     * Default constructor to save the current dataset
+     * 
+     * @param dataset
+     *            the dataset to save
+     * @param mw
+     *            the main window, to access program logger
+     * @param doneSignal
+     *            a latch to hold threads until the save is complete
+     * @param chooseSaveLocation
+     *            save to the default dataset save file, or choose another
+     *            location
+     */
+    public SaveDatasetAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal,
+            boolean chooseSaveLocation) {
+        super(dataset, "Saving dataset", mw);
+        setLatch(doneSignal);
+        finest("Save dataset action created by default or manual file location");
+        this.setProgressBarIndeterminate();
+        // File saveFile = null;
+        if (chooseSaveLocation) {
+
+            SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
+
+            String fileName = saveDialog.getFileName();
+            String folderName = saveDialog.getDirectory();
+            if (fileName != null && folderName != null) {
+                saveFile = new File(folderName + File.separator + fileName);
+            } else {
+                this.finished();
+            }
+
+        } else {
+            saveFile = dataset.getSavePath();
+        }
+
+    }
+
+    @Override
+    public void run() {
+
+        if (saveFile != null) {
+            log("Saving as " + saveFile.getAbsolutePath() + "...");
+
+            IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
+            worker = new DefaultAnalysisWorker(m);
+
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
+        } else {
+            this.finished();
+        }
+    }
+
+    @Override
+    public void finished() {
+
+        finer("Save action complete");
+        finest("Removing save latch");
+        this.countdownLatch();
+        super.finished();
+
+    }
 
 }

@@ -32,358 +32,382 @@ import com.bmskinner.nuclear_morphology.stats.Sum;
 
 /**
  * Creator for violin datasets
+ * 
  * @author ben
  *
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
-		
-	
-	/**
-	 * Create with options
-	 * @param options
-	 */
-	public ViolinDatasetCreator(final ChartOptions options){
-		super(options);
-	}
-	
-	/**
-	 * Get a violin dataset for the given statistic for each dataset in the options
-	 * @param stat the statistic to chart
-	 * @return a violin dataset
-	 * @throws ChartDatasetCreationException if any error occurs or the statistic was not recognised
-	 */
-	public ViolinCategoryDataset createPlottableStatisticViolinDataset(String component) throws ChartDatasetCreationException {
 
-		finest("Creating violin dataset for "+component );
-		
-		if(CellularComponent.WHOLE_CELL.equals(component)){
-			return createCellStatisticViolinDataset();
-		}
-		
-		if(CellularComponent.NUCLEUS.equals(component)){
-			return createNucleusStatisticViolinDataset();
-		}
-
-		if(CellularComponent.NUCLEAR_SIGNAL.equals(component)){
-			return createSignalStatisticViolinDataset();
-		}
-		
-		if(CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)){
-			return createSegmentStatisticDataset();
-		}
-				
-		throw new ChartDatasetCreationException("Component not recognised: "+component);
-
-	}
-		
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 * 
-	 */
-	
-	/**
-	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param options the charting options
-	 * @return
-	 * @throws Exception
-	 */
-	private ViolinCategoryDataset createCellStatisticViolinDataset() {
-		List<IAnalysisDataset> datasets = options.getDatasets();
-		PlottableStatistic stat = options.getStat();
-		MeasurementScale scale  = options.getScale();
-		ViolinCategoryDataset ds = new ViolinCategoryDataset();
-
-		
-		for (int i=0; i < datasets.size(); i++) {
-			ICellCollection c = datasets.get(i).getCollection();
-			
-			String rowKey = c.getName()+"_"+i;
-			String colKey = stat.toString();
-
-			// Add the boxplot values
-
-			double[] stats = c.getMedianStatistics(stat, CellularComponent.WHOLE_CELL, scale);
-			List<Number> list = new ArrayList<Number>();
-			for (double d : stats) {
-				list.add(new Double(d));
-			}
-			
-			ds.add(list, rowKey, colKey);
-			
-			addProbabilities(ds, list, rowKey, colKey);  
-		}
-
-		return ds;
-	}
-	
-	/**
-	 * Get a boxplot dataset for the given statistic for each collection
-	 * @param options the charting options
-	 * @return
-	 * @throws Exception
-	 */
-	private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
-		List<IAnalysisDataset> datasets = options.getDatasets();
-		PlottableStatistic stat = options.getStat();
-		MeasurementScale scale  = options.getScale();
-		ViolinCategoryDataset ds = new ViolinCategoryDataset();
-
-		
-		for (int i=0; i < datasets.size(); i++) {
-			ICellCollection c = datasets.get(i).getCollection();
-			
-			String rowKey = c.getName()+"_"+i;
-			String colKey = stat.toString();
-
-			// Add the boxplot values
-
-			double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
-			List<Number> list = new ArrayList<Number>();
-			for (double d : stats) {
-				list.add(new Double(d));
-			}
-			
-			ds.add(list, rowKey, colKey);
-			
-			addProbabilities(ds, list, rowKey, colKey);  
-		}
-
-		return ds;
-	}
-	
     /**
-     * Create a boxplot dataset for signal statistics for a single analysis dataset
-	 * @param dataset the AnalysisDataset to get signal info from
-	 * @return a boxplot dataset
-	 * @throws Exception 
-	 */
+     * Create with options
+     * 
+     * @param options
+     */
+    public ViolinDatasetCreator(final ChartOptions options) {
+        super(options);
+    }
+
+    /**
+     * Get a violin dataset for the given statistic for each dataset in the
+     * options
+     * 
+     * @param stat
+     *            the statistic to chart
+     * @return a violin dataset
+     * @throws ChartDatasetCreationException
+     *             if any error occurs or the statistic was not recognised
+     */
+    public ViolinCategoryDataset createPlottableStatisticViolinDataset(String component)
+            throws ChartDatasetCreationException {
+
+        finest("Creating violin dataset for " + component);
+
+        if (CellularComponent.WHOLE_CELL.equals(component)) {
+            return createCellStatisticViolinDataset();
+        }
+
+        if (CellularComponent.NUCLEUS.equals(component)) {
+            return createNucleusStatisticViolinDataset();
+        }
+
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
+            return createSignalStatisticViolinDataset();
+        }
+
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
+            return createSegmentStatisticDataset();
+        }
+
+        throw new ChartDatasetCreationException("Component not recognised: " + component);
+
+    }
+
+    /*
+     * 
+     * PRIVATE METHODS
+     * 
+     * 
+     */
+
+    /**
+     * Get a boxplot dataset for the given statistic for each collection
+     * 
+     * @param options
+     *            the charting options
+     * @return
+     * @throws Exception
+     */
+    private ViolinCategoryDataset createCellStatisticViolinDataset() {
+        List<IAnalysisDataset> datasets = options.getDatasets();
+        PlottableStatistic stat = options.getStat();
+        MeasurementScale scale = options.getScale();
+        ViolinCategoryDataset ds = new ViolinCategoryDataset();
+
+        for (int i = 0; i < datasets.size(); i++) {
+            ICellCollection c = datasets.get(i).getCollection();
+
+            String rowKey = c.getName() + "_" + i;
+            String colKey = stat.toString();
+
+            // Add the boxplot values
+
+            double[] stats = c.getMedianStatistics(stat, CellularComponent.WHOLE_CELL, scale);
+            List<Number> list = new ArrayList<Number>();
+            for (double d : stats) {
+                list.add(new Double(d));
+            }
+
+            ds.add(list, rowKey, colKey);
+
+            addProbabilities(ds, list, rowKey, colKey);
+        }
+
+        return ds;
+    }
+
+    /**
+     * Get a boxplot dataset for the given statistic for each collection
+     * 
+     * @param options
+     *            the charting options
+     * @return
+     * @throws Exception
+     */
+    private ViolinCategoryDataset createNucleusStatisticViolinDataset() {
+        List<IAnalysisDataset> datasets = options.getDatasets();
+        PlottableStatistic stat = options.getStat();
+        MeasurementScale scale = options.getScale();
+        ViolinCategoryDataset ds = new ViolinCategoryDataset();
+
+        for (int i = 0; i < datasets.size(); i++) {
+            ICellCollection c = datasets.get(i).getCollection();
+
+            String rowKey = c.getName() + "_" + i;
+            String colKey = stat.toString();
+
+            // Add the boxplot values
+
+            double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
+            List<Number> list = new ArrayList<Number>();
+            for (double d : stats) {
+                list.add(new Double(d));
+            }
+
+            ds.add(list, rowKey, colKey);
+
+            addProbabilities(ds, list, rowKey, colKey);
+        }
+
+        return ds;
+    }
+
+    /**
+     * Create a boxplot dataset for signal statistics for a single analysis
+     * dataset
+     * 
+     * @param dataset
+     *            the AnalysisDataset to get signal info from
+     * @return a boxplot dataset
+     * @throws Exception
+     */
     private ViolinCategoryDataset createSignalStatisticViolinDataset() {
 
-    	List<IAnalysisDataset> datasets = options.getDatasets();
-    	PlottableStatistic stat = options.getStat();
-		MeasurementScale scale = options.getScale();
-		ViolinCategoryDataset ds = new ViolinCategoryDataset();
-				
- 
-        for(IAnalysisDataset d : datasets){
-        	
-        	ICellCollection collection = d.getCollection();
+        List<IAnalysisDataset> datasets = options.getDatasets();
+        PlottableStatistic stat = options.getStat();
+        MeasurementScale scale = options.getScale();
+        ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-        	for(UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()){
-        		
-        		if(collection.getSignalManager().hasSignals(signalGroup)){
+        for (IAnalysisDataset d : datasets) {
 
-        			double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
+            ICellCollection collection = d.getCollection();
 
-        			String rowKey = CellularComponent.NUCLEAR_SIGNAL+"_"+signalGroup;
-        			String colKey = collection.getName();
-        			/*
-        			 * For charting, use offset angles, otherwise the boxplots will fail on wrapped signals
-        			 */
-        			if(stat.equals(PlottableStatistic.ANGLE)){
-        				values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-        			}
+            for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-        			List<Number> list = new ArrayList<Number>();
-        			for (double value : values) {
-        				list.add(new Double(value));
-        			}
+                if (collection.getSignalManager().hasSignals(signalGroup)) {
 
-        			ds.add(list, rowKey, colKey);
+                    double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
 
-        			addProbabilities(ds, list, rowKey, colKey);     
-        		}
-        	}
+                    String rowKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup;
+                    String colKey = collection.getName();
+                    /*
+                     * For charting, use offset angles, otherwise the boxplots
+                     * will fail on wrapped signals
+                     */
+                    if (stat.equals(PlottableStatistic.ANGLE)) {
+                        values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
+                    }
+
+                    List<Number> list = new ArrayList<Number>();
+                    for (double value : values) {
+                        list.add(new Double(value));
+                    }
+
+                    ds.add(list, rowKey, colKey);
+
+                    addProbabilities(ds, list, rowKey, colKey);
+                }
+            }
         }
-		return ds;
-	}
-    
+        return ds;
+    }
+
     /**
-	 * Create a box and whisker dataset for the desired segment statistic
-	 * @param collections the datasets to include
-	 * @param segName the segment to calculate for
-	 * @param scale the scale
-	 * @param stat the segment statistic to use
-	 * @return
-     * @throws ChartDatasetCreationException 
-	 * @throws Exception
-	 */
+     * Create a box and whisker dataset for the desired segment statistic
+     * 
+     * @param collections
+     *            the datasets to include
+     * @param segName
+     *            the segment to calculate for
+     * @param scale
+     *            the scale
+     * @param stat
+     *            the segment statistic to use
+     * @return
+     * @throws ChartDatasetCreationException
+     * @throws Exception
+     */
     private ViolinCategoryDataset createSegmentStatisticDataset() throws ChartDatasetCreationException {
-		
-    	finest("Making segment statistic dataset" );
-    	
-		PlottableStatistic stat = options.getStat();
-		
-		if(stat.equals(PlottableStatistic.LENGTH)){
-			return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
-		}
-		
-		if(stat.equals(PlottableStatistic.DISPLACEMENT)){
-			return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
-		}
-			
-		return null;
-		
-	}
-	
 
-	
-	/**
-	 * Get the lengths of the given segment in the collections
-	 * @param collections
-	 * @param segName
-	 * @return
-	 * @throws ChartDatasetCreationException 
-	 * @throws Exception 
-	 */
-	private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition, MeasurementScale scale) throws ChartDatasetCreationException {
+        finest("Making segment statistic dataset");
 
-		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+        PlottableStatistic stat = options.getStat();
 
-		for (int i=0; i < collections.size(); i++) {
+        if (stat.equals(PlottableStatistic.LENGTH)) {
+            return createSegmentLengthDataset(options.getDatasets(), options.getSegPosition(), options.getScale());
+        }
 
-			ICellCollection collection = collections.get(i).getCollection();
-			try {
-				IBorderSegment medianSeg = collection
-						.getProfileCollection()
-						.getSegmentAt(Tag.REFERENCE_POINT, segPosition);
+        if (stat.equals(PlottableStatistic.DISPLACEMENT)) {
+            return createSegmentDisplacementDataset(options.getDatasets(), options.getSegPosition());
+        }
 
+        return null;
 
-				List<Number> list = new ArrayList<Number>(0);
+    }
 
-				for(Nucleus n : collection.getNuclei()){
+    /**
+     * Get the lengths of the given segment in the collections
+     * 
+     * @param collections
+     * @param segName
+     * @return
+     * @throws ChartDatasetCreationException
+     * @throws Exception
+     */
+    private ViolinCategoryDataset createSegmentLengthDataset(List<IAnalysisDataset> collections, int segPosition,
+            MeasurementScale scale) throws ChartDatasetCreationException {
 
-					IBorderSegment seg;
+        ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
-					seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT)
-							.getSegment(medianSeg.getID());
+        for (int i = 0; i < collections.size(); i++) {
 
+            ICellCollection collection = collections.get(i).getCollection();
+            try {
+                IBorderSegment medianSeg = collection.getProfileCollection().getSegmentAt(Tag.REFERENCE_POINT,
+                        segPosition);
 
+                List<Number> list = new ArrayList<Number>(0);
 
-					double length = 0;
-					if(seg!=null){
-						int indexLength = seg.length();
-						double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
-						length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
+                for (Nucleus n : collection.getNuclei()) {
 
-					}
-					list.add(length);
-//					finest("Added length "+length+" to segment dataset "+seg.getName() );
-				}
-				
-				String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;
-				String colKey = IBorderSegment.SEGMENT_PREFIX+segPosition;
-				dataset.add(list, rowKey, colKey);
+                    IBorderSegment seg;
 
-				addProbabilities(dataset, list, rowKey, colKey);
-				
-			} catch (ProfileException | UnavailableComponentException e) {
-				fine("Error getting segmented profile", e);
-				throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-			}		
-		}
+                    seg = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(medianSeg.getID());
 
-		return dataset;
-	}
-	
-	/**
-	 * Get the displacements of the given segment in the collections
-	 * @param collections
-	 * @param segName
-	 * @return
-	 * @throws ChartDatasetCreationException 
-	 * @throws Exception 
-	 */
-	private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition) throws ChartDatasetCreationException {
+                    double length = 0;
+                    if (seg != null) {
+                        int indexLength = seg.length();
+                        double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+                        length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
 
-		ViolinCategoryDataset dataset = new ViolinCategoryDataset();
+                    }
+                    list.add(length);
+                    // finest("Added length "+length+" to segment dataset
+                    // "+seg.getName() );
+                }
 
-		for (int i=0; i < collections.size(); i++) {
+                String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+                String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
+                dataset.add(list, rowKey, colKey);
 
-			ICellCollection collection = collections.get(i).getCollection();
-			
-			IBorderSegment medianSeg;
-			try {
-				medianSeg = collection
-						.getProfileCollection()
-						.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-						.getSegmentAt(segPosition);
-			} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException | UnsegmentedProfileException e) {
-				stack("Unable to get segmented median profile", e);
-				throw new ChartDatasetCreationException("Cannot get median profile");
-			}
+                addProbabilities(dataset, list, rowKey, colKey);
 
+            } catch (ProfileException | UnavailableComponentException e) {
+                fine("Error getting segmented profile", e);
+                throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+            }
+        }
 
-			List<Number> list = new ArrayList<Number>(0);
+        return dataset;
+    }
 
-			for(Nucleus n : collection.getNuclei()){
+    /**
+     * Get the displacements of the given segment in the collections
+     * 
+     * @param collections
+     * @param segName
+     * @return
+     * @throws ChartDatasetCreationException
+     * @throws Exception
+     */
+    private ViolinCategoryDataset createSegmentDisplacementDataset(List<IAnalysisDataset> collections, int segPosition)
+            throws ChartDatasetCreationException {
 
-				try {
-					
-					ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-					
-					IBorderSegment seg = profile.getSegment(medianSeg.getID());
-					
-					double displacement = profile.getDisplacement(seg);
-					list.add(displacement);
-				} catch (ProfileException | UnavailableComponentException e) {
-					stack("Error getting segmented profile", e);
-					throw new ChartDatasetCreationException("Cannot get segmented profile", e);
-				}
-				
-				
-			}
-			
-			String rowKey = IBorderSegment.SEGMENT_PREFIX+segPosition+"_"+i;
-			String colKey = IBorderSegment.SEGMENT_PREFIX+segPosition;
+        ViolinCategoryDataset dataset = new ViolinCategoryDataset();
 
-			dataset.add(list, rowKey, colKey);
+        for (int i = 0; i < collections.size(); i++) {
 
-			addProbabilities(dataset, list, rowKey, colKey);
-		}
-		return dataset;
-	}
-	
-	protected void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey, Comparable<?> colKey){
-		
-		List<Number> pdfValues = new ArrayList<Number>();
-		
-		if(list.isEmpty()){
-			Range r = new Range(0, 0);
-			dataset.addProbabilityRange(r, rowKey, colKey);
-			dataset.addProbabilities(pdfValues, rowKey, colKey);
-			return;
-		}
-		
-		Number total = new Sum(list); // Stats.sum(list);
-		double min = new Min(list).doubleValue();
-		double max = new Max(list).doubleValue();
+            ICellCollection collection = collections.get(i).getCollection();
 
-		// If all values are the same, min==max, and there will be a step error calculating values between them for pdf
-		if(list.size()>2 && total.doubleValue()>0 && min!=max){ // don't bother with a dataset of a single cell, or if the stat is not present
-			
-			double stepSize = ( max - min ) / 100;
-			
-			KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(  list , 0.001 );
+            IBorderSegment medianSeg;
+            try {
+                medianSeg = collection.getProfileCollection()
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentAt(segPosition);
+            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
+                    | UnsegmentedProfileException e) {
+                stack("Unable to get segmented median profile", e);
+                throw new ChartDatasetCreationException("Cannot get median profile");
+            }
 
-			for(double v=min; v<=max; v+=stepSize){
+            List<Number> list = new ArrayList<Number>(0);
 
-				pdfValues.add(est.getProbability(v));
-			}
+            for (Nucleus n : collection.getNuclei()) {
 
-			
-			Range r = new Range(min, max);
-			dataset.addProbabilityRange(r, rowKey, colKey);
-		} else {
-				Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
-				dataset.addProbabilityRange(r, rowKey, colKey);
-		}
-		dataset.addProbabilities(pdfValues, rowKey, colKey);
-		
-	}
-	
-	
-	
+                try {
+
+                    ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+
+                    IBorderSegment seg = profile.getSegment(medianSeg.getID());
+
+                    double displacement = profile.getDisplacement(seg);
+                    list.add(displacement);
+                } catch (ProfileException | UnavailableComponentException e) {
+                    stack("Error getting segmented profile", e);
+                    throw new ChartDatasetCreationException("Cannot get segmented profile", e);
+                }
+
+            }
+
+            String rowKey = IBorderSegment.SEGMENT_PREFIX + segPosition + "_" + i;
+            String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
+
+            dataset.add(list, rowKey, colKey);
+
+            addProbabilities(dataset, list, rowKey, colKey);
+        }
+        return dataset;
+    }
+
+    protected void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
+            Comparable<?> colKey) {
+
+        List<Number> pdfValues = new ArrayList<Number>();
+
+        if (list.isEmpty()) {
+            Range r = new Range(0, 0);
+            dataset.addProbabilityRange(r, rowKey, colKey);
+            dataset.addProbabilities(pdfValues, rowKey, colKey);
+            return;
+        }
+
+        Number total = new Sum(list); // Stats.sum(list);
+        double min = new Min(list).doubleValue();
+        double max = new Max(list).doubleValue();
+
+        // If all values are the same, min==max, and there will be a step error
+        // calculating values between them for pdf
+        if (list.size() > 2 && total.doubleValue() > 0 && min != max) { // don't
+                                                                        // bother
+                                                                        // with
+                                                                        // a
+                                                                        // dataset
+                                                                        // of a
+                                                                        // single
+                                                                        // cell,
+                                                                        // or if
+                                                                        // the
+                                                                        // stat
+                                                                        // is
+                                                                        // not
+                                                                        // present
+
+            double stepSize = (max - min) / 100;
+
+            KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
+
+            for (double v = min; v <= max; v += stepSize) {
+
+                pdfValues.add(est.getProbability(v));
+            }
+
+            Range r = new Range(min, max);
+            dataset.addProbabilityRange(r, rowKey, colKey);
+        } else {
+            Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
+            dataset.addProbabilityRange(r, rowKey, colKey);
+        }
+        dataset.addProbabilities(pdfValues, rowKey, colKey);
+
+    }
+
 }

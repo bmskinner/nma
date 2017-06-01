@@ -32,73 +32,70 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
 
-	public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Splitting collection", mw);
-	} 
+    public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, "Splitting collection", mw);
+    }
 
-	@Override
-	public void run(){
-		try {
+    @Override
+    public void run() {
+        try {
 
-			if(dataset.hasChildren()){
-				log("Splitting collection...");
+            if (dataset.hasChildren()) {
+                log("Splitting collection...");
 
-				IAnalysisDataset[] names =  dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
+                IAnalysisDataset[] names = dataset.getAllChildDatasets().toArray(new IAnalysisDataset[0]);
 
-				IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
-						"Give me nuclei that are NOT present within the following population", "Split population",
-						JOptionPane.PLAIN_MESSAGE, null,
-						names, names[0]);
+                IAnalysisDataset negative = (IAnalysisDataset) JOptionPane.showInputDialog(null,
+                        "Give me nuclei that are NOT present within the following population", "Split population",
+                        JOptionPane.PLAIN_MESSAGE, null, names, names[0]);
 
-				if(negative!=null){
+                if (negative != null) {
 
-					// prepare a new collection
-					ICellCollection collection = dataset.getCollection();
+                    // prepare a new collection
+                    ICellCollection collection = dataset.getCollection();
 
-					ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
+                    ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
 
-					for(ICell cell : collection.getCells()){
+                    for (ICell cell : collection.getCells()) {
 
-						boolean ok = true;
-						for(ICell negCell : negative.getCollection().getCells()){
-							if(negCell.getId().equals(cell.getId())){
-								ok = false;
-							}
-						}
+                        boolean ok = true;
+                        for (ICell negCell : negative.getCollection().getCells()) {
+                            if (negCell.getId().equals(cell.getId())) {
+                                ok = false;
+                            }
+                        }
 
-						if(ok){
-							newCollection.addCell(new DefaultCell(cell));
-						}
+                        if (ok) {
+                            newCollection.addCell(new DefaultCell(cell));
+                        }
 
-					}
-					newCollection.setName("Not_in_"+negative.getName());
+                    }
+                    newCollection.setName("Not_in_" + negative.getName());
 
-					dataset.addChildCollection(newCollection);
+                    dataset.addChildCollection(newCollection);
 
-					if(newCollection.size()>0){
+                    if (newCollection.size() > 0) {
 
-						log(Level.INFO,"Reapplying morphology...");
+                        log(Level.INFO, "Reapplying morphology...");
 
-						int flag = 0;
-						IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
-						final CountDownLatch latch = new CountDownLatch(1);
-						new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
-					}
-				} else {
-					fine("User cancelled split");
-				}
+                        int flag = 0;
+                        IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
+                        final CountDownLatch latch = new CountDownLatch(1);
+                        new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
+                    }
+                } else {
+                    fine("User cancelled split");
+                }
 
+            } else {
+                log("Cannot split; no children in dataset");
+            }
 
-			} else {
-				log("Cannot split; no children in dataset");
-			}
-
-
-		} catch (Exception e1) {
-			error("Error splitting collection", e1);
-		} finally {
-			cancel();
-		}
-	}
+        } catch (Exception e1) {
+            error("Error splitting collection", e1);
+        } finally {
+            cancel();
+        }
+    }
 
 }

@@ -37,67 +37,66 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 
 @SuppressWarnings("serial")
 public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
-		
-	public WilcoxonDetailPanel() {
-		super();
-	}
-	
-	@Override
-	protected void updateSingle() {
-		scrollPane.setColumnHeaderView(null);
-		tablePanel = createTablePanel();
-		
-		JPanel panel = new JPanel(new FlowLayout());
-		panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
-		tablePanel.add(panel);
 
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-	}
-	
+    public WilcoxonDetailPanel() {
+        super();
+    }
 
-	@Override
-	protected void updateMultiple() {
-		scrollPane.setColumnHeaderView(null);
-		tablePanel = createTablePanel();
-//		NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+    @Override
+    protected void updateSingle() {
+        scrollPane.setColumnHeaderView(null);
+        tablePanel = createTablePanel();
 
-			ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
-			
-			TableOptions options = new TableOptionsBuilder()
-				.setDatasets(getDatasets())
-				.addStatistic(stat)
-				.setTarget(table)
-				.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
-				.build();
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+        tablePanel.add(panel);
 
-			addWilconxonTable(tablePanel, table, stat.toString());
-			scrollPane.setColumnHeaderView(table.getTableHeader());
-			setTable(options);
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+    }
 
+    @Override
+    protected void updateMultiple() {
+        scrollPane.setColumnHeaderView(null);
+        tablePanel = createTablePanel();
+        // NucleusType type =
+        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
-		}
-		tablePanel.revalidate();
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-		
-	}
-	
-	@Override
-	protected void updateNull() {		
-		scrollPane.setColumnHeaderView(null);
-		tablePanel = createTablePanel();
-		
-		JPanel panel = new JPanel(new FlowLayout());
-		panel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
-		tablePanel.add(panel);
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEUS);
-	}
+            ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
+
+            TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
+                    .setTarget(table).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
+                    .build();
+
+            addWilconxonTable(tablePanel, table, stat.toString());
+            scrollPane.setColumnHeaderView(table.getTableHeader());
+            setTable(options);
+
+        }
+        tablePanel.revalidate();
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+
+    }
+
+    @Override
+    protected void updateNull() {
+        scrollPane.setColumnHeaderView(null);
+        tablePanel = createTablePanel();
+
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
+        tablePanel.add(panel);
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new AnalysisDatasetTableCreator(options).createWilcoxonStatisticTable(CellularComponent.NUCLEUS);
+    }
 }

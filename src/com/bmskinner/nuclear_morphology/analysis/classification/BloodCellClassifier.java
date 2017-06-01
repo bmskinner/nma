@@ -35,77 +35,79 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * Attempt to classify the cells from an H&E stained blood smear.
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 public class BloodCellClassifier implements CellClassifier, Loggable {
-	
-	public static final String ERYTHROCYTE = "Erythrocyte";
-	public static final String NEUTROPHIL  = "Neutrophil";
-	public static final String BASOPHIL    = "Basophil";
-	public static final String EOSINOPHIL  = "Eosinophil";
-	public static final String LYMPHOCYTE  = "Lymphocyte";
-	
-	private final IAnalysisDataset dataset;
-	
-	private Map<String, Set<ICell>> groups = new HashMap<String, Set<ICell>>();
-	
-	/**
-	 * Construct with a dataset to be classified
-	 * @param dataset
-	 */
-	public BloodCellClassifier(IAnalysisDataset dataset){
-		this.dataset = dataset;
-	}
-	
-	@Override
-	public void classify(){
-		
-		Set<ICell> eryth  = new HashSet<>();
-		Set<ICell> neutro = new HashSet<>();
-		Set<ICell> lympho = new HashSet<>();
-		
-		// Go through the difference blood cell types we can look for
-		
-		for(ICell c : dataset.getCollection().getCells()){
-			
-			if( ! c.hasNucleus()){
-				eryth.add(c);
-				continue;
-			}
-			
-			if(c.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT)==1 || c.getStatistic(PlottableStatistic.LOBE_COUNT)==1 ){
-				lympho.add(c);
-				continue;
-			}
-			
-			// Now look for the differences between granulocytes
-			// Pass RGB data to a clusterer and group on cytoplasm intensity
-			// Requires user confirmation of cells
-			
-			ColourMeasurometer cm  = new ColourMeasurometer();
-			try {
-				
-				Color colour = cm.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
-				
-				
-			} catch (UnloadableImageException e) {
-				stack(e);
-			}
-			
-		}
-		
-	}
 
-	@Override
-	public Set<String> getGroups() {
-		return groups.keySet();
-	}
+    public static final String ERYTHROCYTE = "Erythrocyte";
+    public static final String NEUTROPHIL  = "Neutrophil";
+    public static final String BASOPHIL    = "Basophil";
+    public static final String EOSINOPHIL  = "Eosinophil";
+    public static final String LYMPHOCYTE  = "Lymphocyte";
 
-	@Override
-	public Set<ICell> getCells(String group) {
-		return groups.get(group);
-	}
+    private final IAnalysisDataset dataset;
+
+    private Map<String, Set<ICell>> groups = new HashMap<String, Set<ICell>>();
+
+    /**
+     * Construct with a dataset to be classified
+     * 
+     * @param dataset
+     */
+    public BloodCellClassifier(IAnalysisDataset dataset) {
+        this.dataset = dataset;
+    }
+
+    @Override
+    public void classify() {
+
+        Set<ICell> eryth = new HashSet<>();
+        Set<ICell> neutro = new HashSet<>();
+        Set<ICell> lympho = new HashSet<>();
+
+        // Go through the difference blood cell types we can look for
+
+        for (ICell c : dataset.getCollection().getCells()) {
+
+            if (!c.hasNucleus()) {
+                eryth.add(c);
+                continue;
+            }
+
+            if (c.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT) == 1
+                    || c.getStatistic(PlottableStatistic.LOBE_COUNT) == 1) {
+                lympho.add(c);
+                continue;
+            }
+
+            // Now look for the differences between granulocytes
+            // Pass RGB data to a clusterer and group on cytoplasm intensity
+            // Requires user confirmation of cells
+
+            ColourMeasurometer cm = new ColourMeasurometer();
+            try {
+
+                Color colour = cm.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
+
+            } catch (UnloadableImageException e) {
+                stack(e);
+            }
+
+        }
+
+    }
+
+    @Override
+    public Set<String> getGroups() {
+        return groups.keySet();
+    }
+
+    @Override
+    public Set<ICell> getCells(String group) {
+        return groups.get(group);
+    }
 
 }

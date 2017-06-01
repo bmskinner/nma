@@ -46,376 +46,375 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 
 /**
- * This is a cell detection method for neutrophils, separate from the fluorescence
- * nucleus method. It mostly duplicates the NucleusDetectionMethod though.
+ * This is a cell detection method for neutrophils, separate from the
+ * fluorescence nucleus method. It mostly duplicates the NucleusDetectionMethod
+ * though.
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
 public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
 
-	private static final String spacerString = "---------";
+    private static final String spacerString = "---------";
 
-	private final String outputFolder;
+    private final String outputFolder;
 
-	private Finder<List<ICell>> finder;
-	
-	private final File folder;
-	
-	private final IMutableAnalysisOptions analysisOptions;
+    private Finder<List<ICell>> finder;
 
-	private Map<File, ICellCollection> collectionMap = new HashMap<File, ICellCollection>();
+    private final File folder;
 
-	List<IAnalysisDataset> datasets;
+    private final IMutableAnalysisOptions analysisOptions;
 
-	/**
-	 * Construct a detector on the given folder, and output the results to 
-	 * the given output folder
-	 * @param outputFolder the name of the folder for results
-	 * @param programLogger the logger to the log panel
-	 * @param debugFile the dataset log file
-	 * @param options the options to detect with
-	 */
-	public NeutrophilDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options){
-		super(null);
-		
-		if(outputFolder==null || options==null){
-			throw new IllegalArgumentException("Must have output folder name and input options");
-		}
-		
-		this.outputFolder 	= outputFolder;
-		this.analysisOptions 	= options;
-		try {
-			folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-		} catch(MissingOptionException e){
-			throw new IllegalArgumentException("Input options does not have a folder", e);
-		}
-		finder = new NeutrophilFinder(options);
-		
-	}
+    private Map<File, ICellCollection> collectionMap = new HashMap<File, ICellCollection>();
 
+    List<IAnalysisDataset> datasets;
 
+    /**
+     * Construct a detector on the given folder, and output the results to the
+     * given output folder
+     * 
+     * @param outputFolder
+     *            the name of the folder for results
+     * @param programLogger
+     *            the logger to the log panel
+     * @param debugFile
+     *            the dataset log file
+     * @param options
+     *            the options to detect with
+     */
+    public NeutrophilDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options) {
+        super(null);
 
-	@Override
-	public IAnalysisResult call() throws Exception {
+        if (outputFolder == null || options == null) {
+            throw new IllegalArgumentException("Must have output folder name and input options");
+        }
 
-		run();		
-		IAnalysisResult r = new DefaultAnalysisResult(datasets);
-		return r;
-	}
+        this.outputFolder = outputFolder;
+        this.analysisOptions = options;
+        try {
+            folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+        } catch (MissingOptionException e) {
+            throw new IllegalArgumentException("Input options does not have a folder", e);
+        }
+        finder = new NeutrophilFinder(options);
 
-	public void run(){
-		
+    }
 
-		try{
+    @Override
+    public IAnalysisResult call() throws Exception {
 
-			countTotalImagesToAnalyse();
+        run();
+        IAnalysisResult r = new DefaultAnalysisResult(datasets);
+        return r;
+    }
 
-			log("Running neutrophil detector");
-			processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
+    public void run() {
 
-			fine("Detected nuclei in "+analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
+        try {
 
-			fine( "Creating cell collections");
+            countTotalImagesToAnalyse();
 
-			List<ICellCollection> folderCollection = this.getNucleiCollections();
+            log("Running neutrophil detector");
+            processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
 
-			// Run the analysis pipeline
+            fine("Detected nuclei in "
+                    + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
 
-			fine("Analysing collections");
+            fine("Creating cell collections");
 
-			datasets = analysePopulations(folderCollection);		
+            List<ICellCollection> folderCollection = this.getNucleiCollections();
 
-			fine( "Analysis complete; return collections");
+            // Run the analysis pipeline
 
-		} catch(Exception e){
-			stack("Error in processing folder", e);
-		}
+            fine("Analysing collections");
 
-	}
+            datasets = analysePopulations(folderCollection);
 
+            fine("Analysis complete; return collections");
 
-	private void countTotalImagesToAnalyse(){
-		log("Calculating number of images to analyse");
-		try {
-			
-			File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-			int totalImages = countSuitableImages(folder);
-			fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-			log("Analysing "+totalImages+" images");
-			
-		} catch (MissingOptionException e) {
-			warn("No folder to analyse");
-			stack(e.getMessage(), e);
-		}
-		
-	}
+        } catch (Exception e) {
+            stack("Error in processing folder", e);
+        }
 
+    }
 
+    private void countTotalImagesToAnalyse() {
+        log("Calculating number of images to analyse");
+        try {
 
-	public List<IAnalysisDataset> getDatasets(){
-		return this.datasets;
-	}
+            File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+            int totalImages = countSuitableImages(folder);
+            fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
+            log("Analysing " + totalImages + " images");
 
-	public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection){
+        } catch (MissingOptionException e) {
+            warn("No folder to analyse");
+            stack(e.getMessage(), e);
+        }
 
-		log("Creating cell collections");
+    }
 
-		List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
-
-		for(ICellCollection collection : folderCollection){
-
-			IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
-			dataset.setAnalysisOptions(analysisOptions);
-			dataset.setRoot(true);
-
-			File folder = collection.getFolder();
-			log("Analysing: "+folder.getName());
-
-			try{
-
-				ICellCollection failedNuclei = new DefaultCellCollection(folder, 
-						collection.getOutputFolderName(), 
-						collection.getName()+" - failed", 
-						collection.getNucleusType());
-
-
-//				log("Filtering collection...");
-//				boolean ok = new CollectionFilterer().run(collection, failedNuclei); // put fails into failedNuclei, remove from r
-//				if(ok){
-//					log("Filtered OK");
-//				} else {
-//					log("Filtering error");
-//				}
-
-				/*
-				 * Keep the failed nuclei - they can be manually assessed later
-				 */
-
-				if(analysisOptions.isKeepFailedCollections()){
-					log("Keeping failed nuclei as new collection");
-					IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-					IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
-					failedOptions.setNucleusType(NucleusType.ROUND);
-					failed.setAnalysisOptions(failedOptions);
-					failed.setRoot(true);
-					result.add(failed);
-				}
-
-				log(spacerString);
-
-				log("Population: "+collection.getName());
-				log("Passed: "+collection.size()+" nuclei");
-				log("Failed: "+failedNuclei.size()+" nuclei");
-
-				log(spacerString);
-
-
-				result.add(dataset);
-
-
-			} catch(Exception e){
-				warn("Cannot create collection: "+e.getMessage());
-				stack("Error in nucleus detection", e);
-			}
-
-			//			
-
-		}
-		return result;
-	}
-
-	/**
-	 * Add a NucleusCollection to the group, using the source folder
-	 * name as a key.
-	 *
-	 *  @param file a folder to be analysed
-	 *  @param collection the collection of nuclei found
-	 */
-	public void addNucleusCollection(File file, ICellCollection collection){
-		this.collectionMap.put(file, collection);
-	}
-
-
-	/**
-	 * Get the Map of NucleusCollections to the folder from
-	 * which they came. Any folders with no nuclei are removed
-	 * before returning.
-	 *
-	 *  @return a Map of a folder to its nuclei
-	 */
-	public List<ICellCollection> getNucleiCollections(){
-		// remove any empty collections before returning
-
-		fine( "Getting all collections");
-
-		List<File> toRemove = new ArrayList<File>(0);
-
-		fine( "Testing nucleus counts");
-
-		Set<File> keys = collectionMap.keySet();
-		for (File key : keys) {
-			ICellCollection collection = collectionMap.get(key);
-			if(collection.size()==0){
-				fine( "Removing collection "+key.toString());
-				toRemove.add(key);
-			}    
-		}
-
-		fine( "Got collections to remove");
-
-		Iterator<File> iter = toRemove.iterator();
-		while(iter.hasNext()){
-			collectionMap.remove(iter.next());
-		}
-
-		fine( "Removed collections");
-
-		List<ICellCollection> result = new ArrayList<ICellCollection>();
-		for(ICellCollection c : collectionMap.values()){
-			result.add(c);
-		}
-		return result;
-
-	}
-
-	/**
-	 * Count the number of images in the given folder
-	 * that are suitable for analysis. Rcursive over 
-	 * subfolders.
-	 * @param folder the folder to count
-	 * @return the number of analysable image files
-	 */
-	public static int countSuitableImages(File folder){
-		if(folder==null){
-			throw new IllegalArgumentException("Folder cannot be null");
-		}
-		
-		File[] listOfFiles = folder.listFiles();
-		
-		if(listOfFiles==null){
-			return 0;
-		}
-
-		int result = 0;
-
-		for (File file : listOfFiles) {
-
-			boolean ok = ImageImporter.fileIsImportable(file);
-
-			if(ok){
-				result++;
-
-			} else { 
-				if(file.isDirectory()){ // recurse over any sub folders
-					result += countSuitableImages(file);
-				}
-			} 
-		} 
-		return result;
-	}
-
-	/**
-	 * Go through the input folder. Check if each file is
-	 * suitable for analysis, and if so, call the analyser.
-	 *
-	 * @param folder the folder of images to be analysed
-	 */
-	protected void processFolder(File folder){
-		
-		if(folder==null){
-			throw new IllegalArgumentException("Folder cannot be null");
-		}
-
-		finest("Processing folder "+folder.getAbsolutePath());
-		File[] arrOfFiles = folder.listFiles();
-		if(arrOfFiles==null){
-			return;
-		}
-
-		ICellCollection folderCollection = new DefaultCellCollection(folder, 
-				outputFolder, 
-				folder.getName(), 
-				analysisOptions.getNucleusType());
-
-		collectionMap.put(folder, folderCollection);
-
-		finest("Invoking recursive detection task");
-
-
-		for(File f : arrOfFiles){
-			if(f.isDirectory()){
-				processFolder(f); // recurse over each folder
-			} else {
-				analyseFile(f, folderCollection);
-			}
-		}
-
-
-	} // end function
-	
-	protected void analyseFile(File file, ICellCollection collection){
-		
-		finest("Analysing file "+file.getAbsolutePath());
-		boolean ok = ImageImporter.fileIsImportable(file);
-
-		if(!ok){
-			return;
-		}
-
-		try {
-
-			// put folder creation here so we don't make folders we won't use (e.g. empty directory analysed)
-			makeFolder(folder);
-
-			log("File:  "+file.getName());
-			List<ICell> cells = finder.findInImage(file);
-//			// Build a pipline for the image
-//			DetectionPipeline<ICell> pipe = new NeutrophilDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.CYTOPLASM),
-//					analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
-//					file,
-//					analysisOptions.getProfileWindowProportion());
-//
-//			// Run each step of the pipeline without sampling intermediate results
-//			List<ICell> cells = pipe.findInImage();
-
-			if(cells.isEmpty()){
-				log("  No cells detected in image");
-			} else {
-
-				for(ICell cell : cells){
-					collection.addCell(cell);
-					log("  Added nucleus "+cell.getNucleus().getNucleusNumber());
-				}
-				log("  Added "+cells.size()+" nuclei");
-			}
-
-		} catch (Exception e) { 
-			warn("Error processing file");
-			stack("Error in image processing: "+e.getMessage(), e);
-		} 
-
-		fireProgressEvent();
-
-
-	}
-	
-	  /**
-	  * Create the output folder for the analysis if required
-	  *
-	  * @param folder the folder in which to create the analysis folder
-	  * @return a File containing the created folder
-	  */
-	protected File makeFolder(File folder){
-	    File output = new File(folder.getAbsolutePath()+File.separator+this.outputFolder);
-	    if(!output.exists()){
-	      try{
-	        output.mkdir();
-	      } catch(Exception e) {
-	    	  error("Failed to create directory", e);
-	      }
-	    }
-	    return output;
-	  }
+    public List<IAnalysisDataset> getDatasets() {
+        return this.datasets;
+    }
+
+    public List<IAnalysisDataset> analysePopulations(List<ICellCollection> folderCollection) {
+
+        log("Creating cell collections");
+
+        List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
+
+        for (ICellCollection collection : folderCollection) {
+
+            IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
+            dataset.setAnalysisOptions(analysisOptions);
+            dataset.setRoot(true);
+
+            File folder = collection.getFolder();
+            log("Analysing: " + folder.getName());
+
+            try {
+
+                ICellCollection failedNuclei = new DefaultCellCollection(folder, collection.getOutputFolderName(),
+                        collection.getName() + " - failed", collection.getNucleusType());
+
+                // log("Filtering collection...");
+                // boolean ok = new CollectionFilterer().run(collection,
+                // failedNuclei); // put fails into failedNuclei, remove from r
+                // if(ok){
+                // log("Filtered OK");
+                // } else {
+                // log("Filtering error");
+                // }
+
+                /*
+                 * Keep the failed nuclei - they can be manually assessed later
+                 */
+
+                if (analysisOptions.isKeepFailedCollections()) {
+                    log("Keeping failed nuclei as new collection");
+                    IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
+                    IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
+                    failedOptions.setNucleusType(NucleusType.ROUND);
+                    failed.setAnalysisOptions(failedOptions);
+                    failed.setRoot(true);
+                    result.add(failed);
+                }
+
+                log(spacerString);
+
+                log("Population: " + collection.getName());
+                log("Passed: " + collection.size() + " nuclei");
+                log("Failed: " + failedNuclei.size() + " nuclei");
+
+                log(spacerString);
+
+                result.add(dataset);
+
+            } catch (Exception e) {
+                warn("Cannot create collection: " + e.getMessage());
+                stack("Error in nucleus detection", e);
+            }
+
+            //
+
+        }
+        return result;
+    }
+
+    /**
+     * Add a NucleusCollection to the group, using the source folder name as a
+     * key.
+     *
+     * @param file
+     *            a folder to be analysed
+     * @param collection
+     *            the collection of nuclei found
+     */
+    public void addNucleusCollection(File file, ICellCollection collection) {
+        this.collectionMap.put(file, collection);
+    }
+
+    /**
+     * Get the Map of NucleusCollections to the folder from which they came. Any
+     * folders with no nuclei are removed before returning.
+     *
+     * @return a Map of a folder to its nuclei
+     */
+    public List<ICellCollection> getNucleiCollections() {
+        // remove any empty collections before returning
+
+        fine("Getting all collections");
+
+        List<File> toRemove = new ArrayList<File>(0);
+
+        fine("Testing nucleus counts");
+
+        Set<File> keys = collectionMap.keySet();
+        for (File key : keys) {
+            ICellCollection collection = collectionMap.get(key);
+            if (collection.size() == 0) {
+                fine("Removing collection " + key.toString());
+                toRemove.add(key);
+            }
+        }
+
+        fine("Got collections to remove");
+
+        Iterator<File> iter = toRemove.iterator();
+        while (iter.hasNext()) {
+            collectionMap.remove(iter.next());
+        }
+
+        fine("Removed collections");
+
+        List<ICellCollection> result = new ArrayList<ICellCollection>();
+        for (ICellCollection c : collectionMap.values()) {
+            result.add(c);
+        }
+        return result;
+
+    }
+
+    /**
+     * Count the number of images in the given folder that are suitable for
+     * analysis. Rcursive over subfolders.
+     * 
+     * @param folder
+     *            the folder to count
+     * @return the number of analysable image files
+     */
+    public static int countSuitableImages(File folder) {
+        if (folder == null) {
+            throw new IllegalArgumentException("Folder cannot be null");
+        }
+
+        File[] listOfFiles = folder.listFiles();
+
+        if (listOfFiles == null) {
+            return 0;
+        }
+
+        int result = 0;
+
+        for (File file : listOfFiles) {
+
+            boolean ok = ImageImporter.fileIsImportable(file);
+
+            if (ok) {
+                result++;
+
+            } else {
+                if (file.isDirectory()) { // recurse over any sub folders
+                    result += countSuitableImages(file);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Go through the input folder. Check if each file is suitable for analysis,
+     * and if so, call the analyser.
+     *
+     * @param folder
+     *            the folder of images to be analysed
+     */
+    protected void processFolder(File folder) {
+
+        if (folder == null) {
+            throw new IllegalArgumentException("Folder cannot be null");
+        }
+
+        finest("Processing folder " + folder.getAbsolutePath());
+        File[] arrOfFiles = folder.listFiles();
+        if (arrOfFiles == null) {
+            return;
+        }
+
+        ICellCollection folderCollection = new DefaultCellCollection(folder, outputFolder, folder.getName(),
+                analysisOptions.getNucleusType());
+
+        collectionMap.put(folder, folderCollection);
+
+        finest("Invoking recursive detection task");
+
+        for (File f : arrOfFiles) {
+            if (f.isDirectory()) {
+                processFolder(f); // recurse over each folder
+            } else {
+                analyseFile(f, folderCollection);
+            }
+        }
+
+    } // end function
+
+    protected void analyseFile(File file, ICellCollection collection) {
+
+        finest("Analysing file " + file.getAbsolutePath());
+        boolean ok = ImageImporter.fileIsImportable(file);
+
+        if (!ok) {
+            return;
+        }
+
+        try {
+
+            // put folder creation here so we don't make folders we won't use
+            // (e.g. empty directory analysed)
+            makeFolder(folder);
+
+            log("File:  " + file.getName());
+            List<ICell> cells = finder.findInImage(file);
+            // // Build a pipline for the image
+            // DetectionPipeline<ICell> pipe = new
+            // NeutrophilDetectionPipeline(analysisOptions.getDetectionOptions(IAnalysisOptions.CYTOPLASM),
+            // analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS),
+            // file,
+            // analysisOptions.getProfileWindowProportion());
+            //
+            // // Run each step of the pipeline without sampling intermediate
+            // results
+            // List<ICell> cells = pipe.findInImage();
+
+            if (cells.isEmpty()) {
+                log("  No cells detected in image");
+            } else {
+
+                for (ICell cell : cells) {
+                    collection.addCell(cell);
+                    log("  Added nucleus " + cell.getNucleus().getNucleusNumber());
+                }
+                log("  Added " + cells.size() + " nuclei");
+            }
+
+        } catch (Exception e) {
+            warn("Error processing file");
+            stack("Error in image processing: " + e.getMessage(), e);
+        }
+
+        fireProgressEvent();
+
+    }
+
+    /**
+     * Create the output folder for the analysis if required
+     *
+     * @param folder
+     *            the folder in which to create the analysis folder
+     * @return a File containing the created folder
+     */
+    protected File makeFolder(File folder) {
+        File output = new File(folder.getAbsolutePath() + File.separator + this.outputFolder);
+        if (!output.exists()) {
+            try {
+                output.mkdir();
+            } catch (Exception e) {
+                error("Failed to create directory", e);
+            }
+        }
+        return output;
+    }
 
 }

@@ -58,602 +58,596 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * An basic implementation of the image prober panel 
+ * An basic implementation of the image prober panel
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 @SuppressWarnings("serial")
-public class GenericImageProberPanel  extends JPanel
-	implements  Loggable, 
-				ProberReloadEventListener {
-	
-	/*
-	 * STATIC DISPLAY VALUES
-	 */
-//	public static final int     DEFAULT_COLUMN_COUNT = 2;
-	
-	protected static final String NULL_FILE_ERROR = "File is null";
-	
-	private static final String HEADER_LBL = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
-	private static final String FOLDER_LBL = "Probing ";
-	private static final String PREV_IMAGE_BTN = "Prev";
-	private static final String NEXT_IMAGE_BTN = "Next";
-	private static final String WORKING_LBL    = "Working...";
-	private static final double IMAGE_SCREEN_PROPORTION = 0.80;
-	
-	/*
-	 * PRIVATE VALUES
-	 */
-	
-	private Window parent;
-	private JLabel imageLabel;
-	private int rowHeight = 200;
-	private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<PanelUpdatingEventListener>();
-	
-	/*
-	 * PROTECTED VALUES
-	 */
-	
-	protected  Finder<?> finder;
-	
-	protected static final int SMALL_ICON_MAX_WIDTH   = 500;
-	protected static final int SMALL_ICON_MAX_HEIGHT  = 500;
+public class GenericImageProberPanel extends JPanel implements Loggable, ProberReloadEventListener {
 
-	protected JProgressBar progressBar;
-	protected JTable table; 	
-	protected List<File> imageFiles; // the list of image files
-	protected File openImage;	     // the image currently open
-	protected int fileIndex = 0; 	 // the index of the open file
-	
-	protected final File folder; // the folder of files
-	
-	public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException{
-		
-		this.folder = folder;
-		this.parent = parent;
-		this.finder        = finder;
-		createUI();
-	}
-	
-	/**
-	 * Import the given file as an image, detect objects and
-	 * display the image with annotated  outlines
-	 * @param imageFile
-	 */
-	protected void importAndDisplayImage(File imageFile){
-		if(imageFile==null){
-			throw new IllegalArgumentException(NULL_FILE_ERROR);
-		}
-		try {
-			finer("Firing panel updating event");
-			setImageLabel(imageFile.getAbsolutePath());
-			firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
-			progressBar.setVisible(true);
-			
-			finder.findInImage(imageFile);
+    /*
+     * STATIC DISPLAY VALUES
+     */
+    // public static final int DEFAULT_COLUMN_COUNT = 2;
 
-		} catch (Exception e) { // end try
-			warn(e.getMessage());
-			stack(e.getMessage(), e);
-			setImageLabel("Error probing "+imageFile.getAbsolutePath());
+    protected static final String NULL_FILE_ERROR = "File is null";
 
-		} finally {
+    private static final String HEADER_LBL              = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
+    private static final String FOLDER_LBL              = "Probing ";
+    private static final String PREV_IMAGE_BTN          = "Prev";
+    private static final String NEXT_IMAGE_BTN          = "Next";
+    private static final String WORKING_LBL             = "Working...";
+    private static final double IMAGE_SCREEN_PROPORTION = 0.80;
 
-			progressBar.setVisible(false);
-			firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-		}
-	}
-	
-	protected void createUI(){
-		setLayout(new BorderLayout());
-		
+    /*
+     * PRIVATE VALUES
+     */
 
-		JPanel headerPanel = createHeader();
-		JPanel tablePanel  = createTablePanel();
+    private Window                           parent;
+    private JLabel                           imageLabel;
+    private int                              rowHeight         = 200;
+    private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<PanelUpdatingEventListener>();
 
-		JButton nextButton = new JButton(NEXT_IMAGE_BTN);
-		nextButton.addActionListener( e ->{
-			openImage = getNextImage();
-			imageLabel.setText(openImage.getAbsolutePath());
-			run();
-		});
-		
-		
-		JButton prevButton = new JButton(PREV_IMAGE_BTN);
-		prevButton.addActionListener( e ->{
-			openImage = getPrevImage();
-			imageLabel.setText(openImage.getAbsolutePath());
-			run();
-		});
-		
+    /*
+     * PROTECTED VALUES
+     */
 
-		this.add(headerPanel, BorderLayout.NORTH);
-		this.add(tablePanel,  BorderLayout.CENTER);
-		this.add(nextButton,  BorderLayout.EAST);
-		this.add(prevButton,  BorderLayout.WEST);
-		
-		createFileList(folder);
-	}
-	
-	public void run(){
+    protected Finder<?> finder;
 
-		((ProberTableModel)table.getModel()).setRowCount(0);
-		Runnable r = () -> {
-			try {
-				importAndDisplayImage(openImage);
-			} catch (Exception e) {
-				error("Error in prober", e);
-			}
-		};
-		ThreadManager.getInstance().submit(r);
-	}
-	
-	
-	protected Window getWindow(){
-		return parent;
-	}
-	
-	/**
-	 * Set the text in the header label
-	 * @param s
-	 */
-	protected void setImageLabel(String s){
-		imageLabel.setText(FOLDER_LBL + s);
-	}
-	
-	/**
-	 * Create a list of image files in the given folder
-	 * @param folder
-	 */
-	protected void createFileList(final File folder){
-		
-		finest("Generating file list from "+folder.getAbsolutePath());
+    protected static final int SMALL_ICON_MAX_WIDTH  = 500;
+    protected static final int SMALL_ICON_MAX_HEIGHT = 500;
 
-		imageFiles = new ArrayList<File>();
-		imageFiles = importImages(folder);
+    protected JProgressBar progressBar;
+    protected JTable       table;
+    protected List<File>   imageFiles;    // the list of image files
+    protected File         openImage;     // the image currently open
+    protected int          fileIndex = 0; // the index of the open file
 
-		if(imageFiles.size()>0){
-			openImage = imageFiles.get(fileIndex);
-			run();
-		} else {
-			warn("No images found in folder");
-			JOptionPane.showMessageDialog(GenericImageProberPanel.this,  
-					"No images found in folder.", 
-					"Nope.",
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
-		
-	/**
-	 * Check each file in the given folder for suitability
-	 * If the folder contains folders, check recursively
-	 * @param folder the folder to check
-	 * @return a list of image files
-	 */
-	private List<File> importImages(final File folder){
+    protected final File folder; // the folder of files
 
-		List<File> files = new ArrayList<File>();
-		if(folder.listFiles()==null){
-			return files;
-		}
+    public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException {
 
-		Stream.of(folder.listFiles()).forEach( file -> {
-			
-			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
+        this.folder = folder;
+        this.parent = parent;
+        this.finder = finder;
+        createUI();
+    }
 
-			if(ok){
-				files.add(file);
-			}
-			
-			if(file.isDirectory()){
-				files.addAll(importImages(file));
-			}
-			
-		});
+    /**
+     * Import the given file as an image, detect objects and display the image
+     * with annotated outlines
+     * 
+     * @param imageFile
+     */
+    protected void importAndDisplayImage(File imageFile) {
+        if (imageFile == null) {
+            throw new IllegalArgumentException(NULL_FILE_ERROR);
+        }
+        try {
+            finer("Firing panel updating event");
+            setImageLabel(imageFile.getAbsolutePath());
+            firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
+            progressBar.setVisible(true);
 
-//		for (File file :  folder.listFiles()) {
-//
-//			boolean ok = ImageImporter.fileIsImportable(file); // check file extension
-//
-//			if(ok){
-//				files.add(file);
-//			}
-//			
-//			if(file.isDirectory()){
-//				files.addAll(importImages(file));
-//			}
-//		}
-		return files;
-	}
-	
+            finder.findInImage(imageFile);
 
-	
-	/**
-	 * Get the next image in the file list
-	 * @return
-	 */
-	private File getNextImage(){
-		
-		if(fileIndex >= imageFiles.size()-1){
-			fileIndex = 0;
-		} else {
-			fileIndex++;
-		}
-		File f =  imageFiles.get(fileIndex);
-		return f;
+        } catch (Exception e) { // end try
+            warn(e.getMessage());
+            stack(e.getMessage(), e);
+            setImageLabel("Error probing " + imageFile.getAbsolutePath());
 
-	}
-	
-	/**
-	 * Get the previous image in the file list
-	 * @return
-	 */
-	private File getPrevImage(){
-		
-		if(fileIndex <= 0){
-			fileIndex = imageFiles.size()-1;
-		} else {
-			fileIndex--;
-		}
+        } finally {
 
-		File f =  imageFiles.get(fileIndex);
-		return f;
-	}
-	
-	public void cancel(){
-		progressBar.setVisible(false);
-		progressBar.setValue(0);
-		firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-	}
-	
-	private JPanel createTablePanel(){
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		ProberTableModel model = new ProberTableModel();
-		
-		finder.addDetectionEventListener(model);
-		
-		table = createTable(model);
-		
-		JScrollPane scrollPane = new JScrollPane(table);		
-		panel.add(scrollPane, BorderLayout.CENTER);
-		
-		progressBar = new JProgressBar();
-		progressBar.setIndeterminate(true);
-		progressBar.setString(WORKING_LBL);
-		progressBar.setStringPainted(true);
-		progressBar.setVisible(false);
-		panel.add(progressBar, BorderLayout.SOUTH);
-		return panel;
-	}
-	
-	/**
-	 * Make the header panel with status label
-	 * @return
-	 */
-	private JPanel createHeader(){
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		
-		panel.add( new JLabel(HEADER_LBL));
-		
-		imageLabel = new JLabel("Looking for images...");
-		panel.add( imageLabel );
+            progressBar.setVisible(false);
+            firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
+        }
+    }
 
-		return panel;
-	}
-	
-	
-	protected JTable createTable(TableModel model){
-		JTable table = new JTable(model);
-		table.setRowHeight(200);
-		for(int i=0; i<table.getColumnCount(); i++){
-			table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
-		}
-		
-		table.setTableHeader(null);
-		table.setCellSelectionEnabled(true);
+    protected void createUI() {
+        setLayout(new BorderLayout());
+
+        JPanel headerPanel = createHeader();
+        JPanel tablePanel = createTablePanel();
+
+        JButton nextButton = new JButton(NEXT_IMAGE_BTN);
+        nextButton.addActionListener(e -> {
+            openImage = getNextImage();
+            imageLabel.setText(openImage.getAbsolutePath());
+            run();
+        });
+
+        JButton prevButton = new JButton(PREV_IMAGE_BTN);
+        prevButton.addActionListener(e -> {
+            openImage = getPrevImage();
+            imageLabel.setText(openImage.getAbsolutePath());
+            run();
+        });
+
+        this.add(headerPanel, BorderLayout.NORTH);
+        this.add(tablePanel, BorderLayout.CENTER);
+        this.add(nextButton, BorderLayout.EAST);
+        this.add(prevButton, BorderLayout.WEST);
+
+        createFileList(folder);
+    }
+
+    public void run() {
+
+        ((ProberTableModel) table.getModel()).setRowCount(0);
+        Runnable r = () -> {
+            try {
+                importAndDisplayImage(openImage);
+            } catch (Exception e) {
+                error("Error in prober", e);
+            }
+        };
+        ThreadManager.getInstance().submit(r);
+    }
+
+    protected Window getWindow() {
+        return parent;
+    }
+
+    /**
+     * Set the text in the header label
+     * 
+     * @param s
+     */
+    protected void setImageLabel(String s) {
+        imageLabel.setText(FOLDER_LBL + s);
+    }
+
+    /**
+     * Create a list of image files in the given folder
+     * 
+     * @param folder
+     */
+    protected void createFileList(final File folder) {
+
+        finest("Generating file list from " + folder.getAbsolutePath());
+
+        imageFiles = new ArrayList<File>();
+        imageFiles = importImages(folder);
+
+        if (imageFiles.size() > 0) {
+            openImage = imageFiles.get(fileIndex);
+            run();
+        } else {
+            warn("No images found in folder");
+            JOptionPane.showMessageDialog(GenericImageProberPanel.this, "No images found in folder.", "Nope.",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Check each file in the given folder for suitability If the folder
+     * contains folders, check recursively
+     * 
+     * @param folder
+     *            the folder to check
+     * @return a list of image files
+     */
+    private List<File> importImages(final File folder) {
+
+        List<File> files = new ArrayList<File>();
+        if (folder.listFiles() == null) {
+            return files;
+        }
+
+        Stream.of(folder.listFiles()).forEach(file -> {
+
+            boolean ok = ImageImporter.fileIsImportable(file); // check file
+                                                               // extension
+
+            if (ok) {
+                files.add(file);
+            }
+
+            if (file.isDirectory()) {
+                files.addAll(importImages(file));
+            }
+
+        });
+
+        // for (File file : folder.listFiles()) {
+        //
+        // boolean ok = ImageImporter.fileIsImportable(file); // check file
+        // extension
+        //
+        // if(ok){
+        // files.add(file);
+        // }
+        //
+        // if(file.isDirectory()){
+        // files.addAll(importImages(file));
+        // }
+        // }
+        return files;
+    }
+
+    /**
+     * Get the next image in the file list
+     * 
+     * @return
+     */
+    private File getNextImage() {
+
+        if (fileIndex >= imageFiles.size() - 1) {
+            fileIndex = 0;
+        } else {
+            fileIndex++;
+        }
+        File f = imageFiles.get(fileIndex);
+        return f;
+
+    }
+
+    /**
+     * Get the previous image in the file list
+     * 
+     * @return
+     */
+    private File getPrevImage() {
+
+        if (fileIndex <= 0) {
+            fileIndex = imageFiles.size() - 1;
+        } else {
+            fileIndex--;
+        }
+
+        File f = imageFiles.get(fileIndex);
+        return f;
+    }
+
+    public void cancel() {
+        progressBar.setVisible(false);
+        progressBar.setValue(0);
+        firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
+    }
+
+    private JPanel createTablePanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        ProberTableModel model = new ProberTableModel();
+
+        finder.addDetectionEventListener(model);
+
+        table = createTable(model);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        progressBar = new JProgressBar();
+        progressBar.setIndeterminate(true);
+        progressBar.setString(WORKING_LBL);
+        progressBar.setStringPainted(true);
+        progressBar.setVisible(false);
+        panel.add(progressBar, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    /**
+     * Make the header panel with status label
+     * 
+     * @return
+     */
+    private JPanel createHeader() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        panel.add(new JLabel(HEADER_LBL));
+
+        imageLabel = new JLabel("Looking for images...");
+        panel.add(imageLabel);
+
+        return panel;
+    }
+
+    protected JTable createTable(TableModel model) {
+        JTable table = new JTable(model);
+        table.setRowHeight(200);
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
+        }
+
+        table.setTableHeader(null);
+        table.setCellSelectionEnabled(true);
         table.setRowSelectionAllowed(false);
         table.setColumnSelectionAllowed(false);
-        
-        table.addMouseListener( new MouseAdapter(){
-        	
-        	@Override
-        	public void mouseClicked(MouseEvent e){
-        		if(e.getClickCount()==1){
-        			
-        			// Get the data model for this table
-        			TableModel model = (TableModel)table.getModel();
-        			
-        			Point pnt = e.getPoint();
-        			int row = table.rowAtPoint(pnt);
-        			int col = table.columnAtPoint(pnt);
-        			
 
-        			ProberTableCell selectedData = (ProberTableCell) model.getValueAt( row, col );
-        			
-        			if(selectedData!=null){
+        table.addMouseListener(new MouseAdapter() {
 
-        				if(selectedData.getLargeIcon()!=null){
-        					new LargeImageDialog(selectedData, parent);
-        				}
-        			}
-        			
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) {
 
-        			
-        			
-        		}
-        	}
-        	
+                    // Get the data model for this table
+                    TableModel model = (TableModel) table.getModel();
+
+                    Point pnt = e.getPoint();
+                    int row = table.rowAtPoint(pnt);
+                    int col = table.columnAtPoint(pnt);
+
+                    ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+
+                    if (selectedData != null) {
+
+                        if (selectedData.getLargeIcon() != null) {
+                            new LargeImageDialog(selectedData, parent);
+                        }
+                    }
+
+                }
+            }
+
         });
         return table;
-	}
-	
-	
-	public static class ProberTableCell {
-		private ImageIcon smallIcon;
-		private ImageIcon largeIcon;
-		private boolean enabled;
-		private String label;
-		
-		public ProberTableCell(ImageIcon largeIcon, String label, boolean enabled){
-			this.largeIcon = largeIcon;
-			this.enabled   = enabled;
-			this.label     = label;
-		}
-		
-		public String toString(){
-			if(enabled){
-				return label;
-			} else {
-				return label+" (disabled)";
-			}
-		}
+    }
 
-		public ImageIcon getSmallIcon() {
-			return smallIcon;
-		}
+    public static class ProberTableCell {
+        private ImageIcon smallIcon;
+        private ImageIcon largeIcon;
+        private boolean   enabled;
+        private String    label;
 
-		public ImageIcon getLargeIcon() {
-			return largeIcon;
-		}
-		
-		/**
-		 * Create a new image icon from scaling the large image to a given
-		 * fraction of the screen size and maintaining aspect ratio. I.E.:
-		 * if resizing the width to <i>fraction</i> of the screen width results in the height begin greater
-		 * than <i>fraction</i> of the screen height, the width will be reduced so 
-		 * height equals <i>fraction<i> of the screen height
-		 * @param fraction the fraction, from 0-1
-		 * @return
-		 */
-		public ImageIcon getLargeIconFitToScreen(double fraction) {
-			
-			if(largeIcon==null){
-				throw new IllegalArgumentException("Large icon is null");
-			}
-			
-			int originalWidth  = largeIcon.getImage().getWidth(null);
-			int originalHeight = largeIcon.getImage().getHeight(null);
+        public ProberTableCell(ImageIcon largeIcon, String label, boolean enabled) {
+            this.largeIcon = largeIcon;
+            this.enabled = enabled;
+            this.label = label;
+        }
 
-			// keep the image aspect ratio
-			double ratio = (double) originalWidth / (double) originalHeight;
-			
-			Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        public String toString() {
+            if (enabled) {
+                return label;
+            } else {
+                return label + " (disabled)";
+            }
+        }
 
-			// set the new width
-			int newWidth = (int) ( screenSize.getWidth() * fraction);
-			int newHeight = (int) (   (double) newWidth / ratio);
-			
-			// Check height is OK. If not, recalculate sizes
-			if(newHeight >= screenSize.getHeight()){
-				newHeight = (int) ( screenSize.getHeight() * fraction);
-				newWidth = (int) (   (double) newHeight * ratio);
-			}
+        public ImageIcon getSmallIcon() {
+            return smallIcon;
+        }
 
-			// Create the image
+        public ImageIcon getLargeIcon() {
+            return largeIcon;
+        }
 
-			Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);
+        /**
+         * Create a new image icon from scaling the large image to a given
+         * fraction of the screen size and maintaining aspect ratio. I.E.: if
+         * resizing the width to <i>fraction</i> of the screen width results in
+         * the height begin greater than <i>fraction</i> of the screen height,
+         * the width will be reduced so height equals <i>fraction<i> of the
+         * screen height
+         * 
+         * @param fraction
+         *            the fraction, from 0-1
+         * @return
+         */
+        public ImageIcon getLargeIconFitToScreen(double fraction) {
 
-			return new ImageIcon(result);
-		}
+            if (largeIcon == null) {
+                throw new IllegalArgumentException("Large icon is null");
+            }
 
-		
-		public void setSmallIcon(ImageIcon smallIcon) {
-			this.smallIcon = smallIcon;
-		}
-		
-		
-		public boolean hasSmallIcon(){
-			return smallIcon!=null;
-		}
-		
-		public boolean hasLargeIcon(){
-			return largeIcon!=null;
-		}
-		
-		public boolean isEnabled() {
-			return enabled;
-		}
+            int originalWidth = largeIcon.getImage().getWidth(null);
+            int originalHeight = largeIcon.getImage().getHeight(null);
 
-		public void setEnabled(boolean enabled) {
-			this.enabled = enabled;
-		}
-		
-		public double getFactor(){
-			// Translate coordinates back to large image
-			double factor = (double) largeIcon.getIconWidth() / (double)smallIcon.getIconWidth();
-			return factor;
-		}
-	}
-	
+            // keep the image aspect ratio
+            double ratio = (double) originalWidth / (double) originalHeight;
 
-	/**
-	 * This renderer displays the small icons from an ImageProberTableCell, and sets text
-	 * appropriate to the label within the cell.
-	 * @author ben
-	 *
-	 */
-	@SuppressWarnings("serial")
-	class IconCellRenderer extends DefaultTableCellRenderer	{
-		@Override
-		public Component getTableCellRendererComponent(	JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			try {
-				super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 
-				ProberTableCell info = (ProberTableCell) value;
-				
-				setTextHorizontalAlignment(JLabel.CENTER);
-				setHorizontalTextPosition(JLabel.CENTER);
-				setVerticalTextPosition(JLabel.BOTTOM);
-				
-				setHorizontalAlignment(JLabel.CENTER);
-				setVerticalAlignment(JLabel.CENTER); // image has no offset
-				setBackground(Color.LIGHT_GRAY); // contrast to images with white background
-				setText("");
+            // set the new width
+            int newWidth = (int) (screenSize.getWidth() * fraction);
+            int newHeight = (int) ((double) newWidth / ratio);
 
-				if(info==null){
-					setText("");
-					return this;
-				} else {
-					setText(info.toString());
-				}
+            // Check height is OK. If not, recalculate sizes
+            if (newHeight >= screenSize.getHeight()) {
+                newHeight = (int) (screenSize.getHeight() * fraction);
+                newWidth = (int) ((double) newHeight * ratio);
+            }
 
-				if(info.hasSmallIcon()){
-					setIcon( info.getSmallIcon() );
-				} else {
-					setIcon(null);
-				}
-				
-			}
-			catch (Exception e){
-				error("Renderer error", e);
-			}
+            // Create the image
 
-			return this;
-		}
+            Image result = largeIcon.getImage().getScaledInstance(newWidth, newHeight, Image.SCALE_FAST);
 
-		private void setTextHorizontalAlignment(int center) {
-			// TODO Auto-generated method stub
-			
-		}
+            return new ImageIcon(result);
+        }
 
+        public void setSmallIcon(ImageIcon smallIcon) {
+            this.smallIcon = smallIcon;
+        }
 
-}
+        public boolean hasSmallIcon() {
+            return smallIcon != null;
+        }
 
+        public boolean hasLargeIcon() {
+            return largeIcon != null;
+        }
 
-	/**
-	 * Show images in a non-modal window at IMAGE_SCREEN_PROPORTION of the 
-	 * screen width or size
-	 *
-	 */
-	@SuppressWarnings("serial")
-	public class LargeImageDialog extends JDialog {
+        public boolean isEnabled() {
+            return enabled;
+        }
 
-//		public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
 
-		/**
-		 * Create a full-scale image for the given key in this ImageProber.
-		 * @param key the image to show
-		 * @param parent the parent ImageProber window
-		 */
-		public LargeImageDialog(final ProberTableCell cell, final Window parent){
-			super( parent );
+        public double getFactor() {
+            // Translate coordinates back to large image
+            double factor = (double) largeIcon.getIconWidth() / (double) smallIcon.getIconWidth();
+            return factor;
+        }
+    }
 
-			this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    /**
+     * This renderer displays the small icons from an ImageProberTableCell, and
+     * sets text appropriate to the label within the cell.
+     * 
+     * @author ben
+     *
+     */
+    @SuppressWarnings("serial")
+    class IconCellRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            try {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-			final ImageIcon icon = cell.getLargeIconFitToScreen(IMAGE_SCREEN_PROPORTION);
+                ProberTableCell info = (ProberTableCell) value;
 
-			this.setLayout(new BorderLayout());
+                setTextHorizontalAlignment(JLabel.CENTER);
+                setHorizontalTextPosition(JLabel.CENTER);
+                setVerticalTextPosition(JLabel.BOTTOM);
 
+                setHorizontalAlignment(JLabel.CENTER);
+                setVerticalAlignment(JLabel.CENTER); // image has no offset
+                setBackground(Color.LIGHT_GRAY); // contrast to images with
+                                                 // white background
+                setText("");
 
-			this.add(new JLabel(icon), BorderLayout.CENTER);
-			this.setTitle(cell.toString());
+                if (info == null) {
+                    setText("");
+                    return this;
+                } else {
+                    setText(info.toString());
+                }
 
-			this.setModal(false);
-			this.setResizable(false);
-			this.pack();
-			this.setLocationRelativeTo(null);
-			this.setVisible(true);
-		}
+                if (info.hasSmallIcon()) {
+                    setIcon(info.getSmallIcon());
+                } else {
+                    setIcon(null);
+                }
 
-	}	
-		
-	
-//	@Override
-//	public void propertyChange(PropertyChangeEvent evt) {
-//		int value = 0;
-//	    try{
-//	    	Object newValue = evt.getNewValue();
-//	    	
-//	    	if(newValue.getClass().isAssignableFrom(Integer.class)){
-//	    		value = (int) newValue;
-//	    		
-//	    	}
-//	    	if(value >=0 && value <=100){
-//	    		progressBar.setValue(value);
-//	    	}
-//	    	
-//	    	
-//	    	if(evt.getPropertyName().equals("Finished")){
-//
-//				progressBar.setVisible(false);
-//				firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-//				
-//			}
-//	    	
-//	    } catch (Exception e){
-//	    	error("Error getting value from property change", e);
-//	    }
-//		
-//	}
-		
-	@Override
-	public void proberReloadEventReceived(ProberReloadEvent e) {
-		run();
-	}
+            } catch (Exception e) {
+                error("Renderer error", e);
+            }
 
-		
-	public void addPanelUpdatingEventListener(PanelUpdatingEventListener l){
-		updatingListeners.add(l);
-	}
-	
-	public void removePanelUpdatingEventListener(PanelUpdatingEventListener l){
-		updatingListeners.remove(l);
-	}
+            return this;
+        }
 
-	protected void firePanelUpdatingEvent(int type){
-		Iterator<PanelUpdatingEventListener> it = updatingListeners.iterator();
-		PanelUpdatingEvent e = new PanelUpdatingEvent(this, type);
-		while(it.hasNext()){
-			it.next().panelUpdatingEventReceived(e);
-		}
-	}
-	
-	
-	public interface PanelUpdatingEventListener {
-		void panelUpdatingEventReceived(PanelUpdatingEvent e);
-	}
-	
-	@SuppressWarnings("serial")
-	public class PanelUpdatingEvent extends EventObject {
-		
-		public static final int UPDATING = 0;
-		public static final int COMPLETE = 1;
-		
-		private int type;
-		
-		public PanelUpdatingEvent(Object source, int type){
-			super(source);
-			this.type = type;
-		}
-		
-		public int getType(){
-			return type;
-		}
+        private void setTextHorizontalAlignment(int center) {
+            // TODO Auto-generated method stub
 
-	}
+        }
+
+    }
+
+    /**
+     * Show images in a non-modal window at IMAGE_SCREEN_PROPORTION of the
+     * screen width or size
+     *
+     */
+    @SuppressWarnings("serial")
+    public class LargeImageDialog extends JDialog {
+
+        // public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
+
+        /**
+         * Create a full-scale image for the given key in this ImageProber.
+         * 
+         * @param key
+         *            the image to show
+         * @param parent
+         *            the parent ImageProber window
+         */
+        public LargeImageDialog(final ProberTableCell cell, final Window parent) {
+            super(parent);
+
+            this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+            final ImageIcon icon = cell.getLargeIconFitToScreen(IMAGE_SCREEN_PROPORTION);
+
+            this.setLayout(new BorderLayout());
+
+            this.add(new JLabel(icon), BorderLayout.CENTER);
+            this.setTitle(cell.toString());
+
+            this.setModal(false);
+            this.setResizable(false);
+            this.pack();
+            this.setLocationRelativeTo(null);
+            this.setVisible(true);
+        }
+
+    }
+
+    // @Override
+    // public void propertyChange(PropertyChangeEvent evt) {
+    // int value = 0;
+    // try{
+    // Object newValue = evt.getNewValue();
+    //
+    // if(newValue.getClass().isAssignableFrom(Integer.class)){
+    // value = (int) newValue;
+    //
+    // }
+    // if(value >=0 && value <=100){
+    // progressBar.setValue(value);
+    // }
+    //
+    //
+    // if(evt.getPropertyName().equals("Finished")){
+    //
+    // progressBar.setVisible(false);
+    // firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
+    //
+    // }
+    //
+    // } catch (Exception e){
+    // error("Error getting value from property change", e);
+    // }
+    //
+    // }
+
+    @Override
+    public void proberReloadEventReceived(ProberReloadEvent e) {
+        run();
+    }
+
+    public void addPanelUpdatingEventListener(PanelUpdatingEventListener l) {
+        updatingListeners.add(l);
+    }
+
+    public void removePanelUpdatingEventListener(PanelUpdatingEventListener l) {
+        updatingListeners.remove(l);
+    }
+
+    protected void firePanelUpdatingEvent(int type) {
+        Iterator<PanelUpdatingEventListener> it = updatingListeners.iterator();
+        PanelUpdatingEvent e = new PanelUpdatingEvent(this, type);
+        while (it.hasNext()) {
+            it.next().panelUpdatingEventReceived(e);
+        }
+    }
+
+    public interface PanelUpdatingEventListener {
+        void panelUpdatingEventReceived(PanelUpdatingEvent e);
+    }
+
+    @SuppressWarnings("serial")
+    public class PanelUpdatingEvent extends EventObject {
+
+        public static final int UPDATING = 0;
+        public static final int COMPLETE = 1;
+
+        private int type;
+
+        public PanelUpdatingEvent(Object source, int type) {
+            super(source);
+            this.type = type;
+        }
+
+        public int getType() {
+            return type;
+        }
+
+    }
 
 }

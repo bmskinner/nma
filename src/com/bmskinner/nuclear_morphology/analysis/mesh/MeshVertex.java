@@ -25,34 +25,35 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public interface MeshVertex {
 
-	boolean isPeripheral();
+    boolean isPeripheral();
 
-	String getName();
+    String getName();
 
-	IPoint getPosition();
+    IPoint getPosition();
 
-	void addEdge(MeshEdge e);
+    void addEdge(MeshEdge e);
 
-	void removeEdge(MeshEdge e);
+    void removeEdge(MeshEdge e);
 
-	Set<MeshEdge> getEdges();
+    Set<MeshEdge> getEdges();
 
-	boolean hasEdgeTo(MeshVertex v);
+    boolean hasEdgeTo(MeshVertex v);
 
-	/**
-	 * Get the edge linking this vertex to the given vertex, if present.
-	 * Otherwise returns null
-	 * @param v
-	 * @return
-	 */
-	MeshEdge getEdgeTo(MeshVertex v);
+    /**
+     * Get the edge linking this vertex to the given vertex, if present.
+     * Otherwise returns null
+     * 
+     * @param v
+     * @return
+     */
+    MeshEdge getEdgeTo(MeshVertex v);
 
-	double getLengthTo(MeshVertex v);
+    double getLengthTo(MeshVertex v);
 
-	boolean overlaps(MeshVertex v);
+    boolean overlaps(MeshVertex v);
 
-	int getNumber();
+    int getNumber();
 
-	int hashCode();
+    int hashCode();
 
 }

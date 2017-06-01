@@ -32,60 +32,59 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 
 /**
- * Refold the consensus nucleus for the selected dataset using default parameters
+ * Refold the consensus nucleus for the selected dataset using default
+ * parameters
  */
 public class RefoldNucleusAction extends SingleDatasetResultAction {
-	
-	private static final String PROGRESS_LBL = "Refolding";
 
-	/**
-	 * Refold the given selected dataset
-	 */
-	public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
-		super(dataset, PROGRESS_LBL, mw);
-		this.setLatch(doneSignal);
-	}
-	
-	@Override
-	public void run(){
-		
-		try{
+    private static final String PROGRESS_LBL = "Refolding";
 
-			this.setProgressBarIndeterminate();
-			
-			boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
-						
-			IAnalysisMethod m;
-						
-			if(override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)){
-				m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
-			} else {
-				m = new ConsensusAveragingMethod(dataset);
-			}
-			
-			worker = new DefaultAnalysisWorker(m, 100);
-			worker.addPropertyChangeListener(this);
-			
-			this.setProgressMessage(PROGRESS_LBL+": "+dataset.getName());
-			ThreadManager.getInstance().submit(worker);
+    /**
+     * Refold the given selected dataset
+     */
+    public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
+        super(dataset, PROGRESS_LBL, mw);
+        this.setLatch(doneSignal);
+    }
 
-		} catch(Exception e1){
-			this.cancel();
-			warn("Error refolding nucleus");
-			stack("Error refolding nucleus", e1);
-		}
-	}
-	
-	@Override
-	public void finished(){
-		
-		this.cancel();
-		fine("Refolding finished, cleaning up");
-		super.finished();
-		this.countdownLatch();
-		
-		
-		
-	}
+    @Override
+    public void run() {
+
+        try {
+
+            this.setProgressBarIndeterminate();
+
+            boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
+
+            IAnalysisMethod m;
+
+            if (override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)) {
+                m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+            } else {
+                m = new ConsensusAveragingMethod(dataset);
+            }
+
+            worker = new DefaultAnalysisWorker(m, 100);
+            worker.addPropertyChangeListener(this);
+
+            this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());
+            ThreadManager.getInstance().submit(worker);
+
+        } catch (Exception e1) {
+            this.cancel();
+            warn("Error refolding nucleus");
+            stack("Error refolding nucleus", e1);
+        }
+    }
+
+    @Override
+    public void finished() {
+
+        this.cancel();
+        fine("Refolding finished, cleaning up");
+        super.finished();
+        this.countdownLatch();
+
+    }
 
 }

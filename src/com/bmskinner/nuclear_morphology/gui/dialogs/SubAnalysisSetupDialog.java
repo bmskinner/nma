@@ -26,54 +26,57 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
 /**
- * A base class for the sub analyses setup options. It contains a reference to 
- * the main analysis window to make the dialog modal
- * It can return an IAnalysisMethod preconfigured for running
+ * A base class for the sub analyses setup options. It contains a reference to
+ * the main analysis window to make the dialog modal It can return an
+ * IAnalysisMethod preconfigured for running
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
 public abstract class SubAnalysisSetupDialog extends SettingsDialog {
-	
-	protected final JPanel contentPanel = new JPanel();
-	
-	protected final IAnalysisDataset dataset;
-	
-	/**
-	 * Construct with a main program window to listen for actions, and a dataset to operate on
-	 * @param mw
-	 * @param dataset
-	 */
-	public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-		super( mw, true);
-		fine("Making sub-analysis setup dialog");
-		this.dataset = dataset;
-		this.setTitle(title);
-		this.setModal(true);
-	}
-	
-	
-	protected void packAndDisplay(){
-		this.pack();
-		this.setLocationRelativeTo(null);
-		this.setVisible(true);
-	}
 
-	/**
-	 * Get the method for the analysis to be run
-	 * @return
-	 */
-	public abstract IAnalysisMethod getMethod();
-	
-	/**
-	 * Make the UI for the dialog
-	 */
-	protected abstract void createUI();
-		
-	/**
-	 * Set the default options for the dialog 
-	 */
-	protected abstract void setDefaults();
+    protected final JPanel contentPanel = new JPanel();
+
+    protected final IAnalysisDataset dataset;
+
+    /**
+     * Construct with a main program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param mw
+     * @param dataset
+     */
+    public SubAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
+        super(mw, true);
+        fine("Making sub-analysis setup dialog");
+        this.dataset = dataset;
+        this.setTitle(title);
+        this.setModal(true);
+    }
+
+    protected void packAndDisplay() {
+        this.pack();
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+    }
+
+    /**
+     * Get the method for the analysis to be run
+     * 
+     * @return
+     */
+    public abstract IAnalysisMethod getMethod();
+
+    /**
+     * Make the UI for the dialog
+     */
+    protected abstract void createUI();
+
+    /**
+     * Set the default options for the dialog
+     */
+    protected abstract void setDefaults();
 
 }

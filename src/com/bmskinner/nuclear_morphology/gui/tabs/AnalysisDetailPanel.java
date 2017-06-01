@@ -43,100 +43,93 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 @SuppressWarnings("serial")
 public class AnalysisDetailPanel extends DetailPanel {
 
-	private ExportableTable tableAnalysisParameters;
+    private ExportableTable tableAnalysisParameters;
 
-	public AnalysisDetailPanel() {
-		
-		super();
-		
-		this.setLayout(new BorderLayout());
-				
-		JScrollPane parametersPanel = createAnalysisParametersPanel();
+    public AnalysisDetailPanel() {
 
-		this.add(parametersPanel, BorderLayout.CENTER);
-		
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-	
-	@Override
-	public synchronized void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
-		tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createAnalysisTable();
-	}
-	
-	@Override
-	protected void updateSingle() {
-		updateMultiple() ;
-	}
-	
+        super();
 
-	@Override
-	protected void updateMultiple() {
-		updateAnalysisParametersPanel();
-		finest("Updated analysis parameter panel");
-	}
-	
-	@Override
-	protected void updateNull() {
-		tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
-	}
-			
-	
-	/**
-	 * Update the analysis panel with data from the given datasets
-	 * @param list the datasets
-	 * @throws Exception 
-	 */
-	private void updateAnalysisParametersPanel() {
+        this.setLayout(new BorderLayout());
 
+        JScrollPane parametersPanel = createAnalysisParametersPanel();
 
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setType(TableType.ANALYSIS_PARAMETERS)
-			.setTarget(tableAnalysisParameters)
-			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
-			.build();
-		
-		setTable(options);
+        this.add(parametersPanel, BorderLayout.CENTER);
 
-	}
-	
+    }
 
-	private JScrollPane createAnalysisParametersPanel() {
-		JScrollPane scrollPane = new JScrollPane();
-		
-		try {
-					
-			JPanel panel = new JPanel();
-			panel.setLayout(new BorderLayout(0, 0));
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return null;
+    }
 
-			tableAnalysisParameters = new ExportableTable();
-			panel.add(tableAnalysisParameters, BorderLayout.CENTER);
-			tableAnalysisParameters.setEnabled(false);
+    @Override
+    public synchronized void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
+    }
 
-			scrollPane.setViewportView(panel);
-			scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new AnalysisDatasetTableCreator(options).createAnalysisTable();
+    }
 
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(null)
-			.setType(TableType.ANALYSIS_PARAMETERS)
-			.build();
-			
-			TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
-			tableAnalysisParameters.setModel(model);
+    @Override
+    protected void updateSingle() {
+        updateMultiple();
+    }
 
-		}catch(Exception e){
-			log(Level.SEVERE, "Error creating stats panel", e);
-		}
-		return scrollPane;
-	}
+    @Override
+    protected void updateMultiple() {
+        updateAnalysisParametersPanel();
+        finest("Updated analysis parameter panel");
+    }
+
+    @Override
+    protected void updateNull() {
+        tableAnalysisParameters.setModel(AbstractTableCreator.createBlankTable());
+    }
+
+    /**
+     * Update the analysis panel with data from the given datasets
+     * 
+     * @param list
+     *            the datasets
+     * @throws Exception
+     */
+    private void updateAnalysisParametersPanel() {
+
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setType(TableType.ANALYSIS_PARAMETERS).setTarget(tableAnalysisParameters)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer()).build();
+
+        setTable(options);
+
+    }
+
+    private JScrollPane createAnalysisParametersPanel() {
+        JScrollPane scrollPane = new JScrollPane();
+
+        try {
+
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout(0, 0));
+
+            tableAnalysisParameters = new ExportableTable();
+            panel.add(tableAnalysisParameters, BorderLayout.CENTER);
+            tableAnalysisParameters.setEnabled(false);
+
+            scrollPane.setViewportView(panel);
+            scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
+
+            TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_PARAMETERS)
+                    .build();
+
+            TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
+            tableAnalysisParameters.setModel(model);
+
+        } catch (Exception e) {
+            log(Level.SEVERE, "Error creating stats panel", e);
+        }
+        return scrollPane;
+    }
 }

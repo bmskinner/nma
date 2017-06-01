@@ -19,17 +19,29 @@
 package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 /**
- * Thrown when something goes wrong in a profile that is not covered
- * by another exception.
+ * Thrown when something goes wrong in a profile that is not covered by another
+ * exception.
+ * 
  * @author bms41
  *
  */
 public class ProfileException extends Exception {
-	private static final long serialVersionUID = 1L;
-	public ProfileException() { super(); }
-	public ProfileException(String message) { super(message); }
-	public ProfileException(String message, Throwable cause) { super(message, cause); }
-	public ProfileException(Throwable cause) { super(cause); }
+    private static final long serialVersionUID = 1L;
 
+    public ProfileException() {
+        super();
+    }
+
+    public ProfileException(String message) {
+        super(message);
+    }
+
+    public ProfileException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ProfileException(Throwable cause) {
+        super(cause);
+    }
 
 }

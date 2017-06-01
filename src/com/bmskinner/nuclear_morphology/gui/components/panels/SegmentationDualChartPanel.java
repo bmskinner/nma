@@ -28,34 +28,30 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 
-public class SegmentationDualChartPanel extends DualChartPanel{
-	
-	public SegmentationDualChartPanel(){
-		super();
-		
-		ChartOptions options = new ChartOptionsBuilder()
-			.setProfileType(ProfileType.ANGLE)
-			.setShowXAxis(false)
-			.setShowYAxis(false)
-			.build();
-		
-		JFreeChart profileChart  = new MorphologyChartFactory(options).makeEmptyChart();
-		chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
-		((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
-	}
-	
-	public void setProfile(ISegmentedProfile profile, boolean normalised){
-		
-		((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
-		this.updateChartPanelRange();
-	}
-	
-	public void setCharts(JFreeChart chart, ISegmentedProfile profile, boolean normalised, JFreeChart rangeChart){
-		
-		((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
-		rangePanel.setChart(rangeChart);
-		this.updateChartPanelRange();
-	}
-	
+public class SegmentationDualChartPanel extends DualChartPanel {
+
+    public SegmentationDualChartPanel() {
+        super();
+
+        ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
+                .setShowYAxis(false).build();
+
+        JFreeChart profileChart = new MorphologyChartFactory(options).makeEmptyChart();
+        chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
+        ((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
+    }
+
+    public void setProfile(ISegmentedProfile profile, boolean normalised) {
+
+        ((DraggableOverlayChartPanel) chartPanel).setProfile(profile, normalised);
+        this.updateChartPanelRange();
+    }
+
+    public void setCharts(JFreeChart chart, ISegmentedProfile profile, boolean normalised, JFreeChart rangeChart) {
+
+        ((DraggableOverlayChartPanel) chartPanel).setChart(chart, profile, normalised);
+        rangePanel.setChart(rangeChart);
+        this.updateChartPanelRange();
+    }
 
 }

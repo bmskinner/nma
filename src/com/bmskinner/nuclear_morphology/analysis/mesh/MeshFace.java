@@ -40,106 +40,119 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public interface MeshFace {
 
-	/**
-	 * Get the value stored with this face
-	 * @return
-	 */
-	double getValue();
+    /**
+     * Get the value stored with this face
+     * 
+     * @return
+     */
+    double getValue();
 
-	/**
-	 * Get the log2 ratio of the value stored in the face
-	 * @return
-	 */
-	double getLog2Ratio();
+    /**
+     * Get the log2 ratio of the value stored in the face
+     * 
+     * @return
+     */
+    double getLog2Ratio();
 
-	/**
-	 * Store a value in this face
-	 * @param value
-	 */
-	void setValue(double value);
+    /**
+     * Store a value in this face
+     * 
+     * @param value
+     */
+    void setValue(double value);
 
-	Set<MeshEdge> getEdges();
+    Set<MeshEdge> getEdges();
 
-	Set<MeshVertex> getVertices();
+    Set<MeshVertex> getVertices();
 
-	boolean contains(MeshEdge e);
+    boolean contains(MeshEdge e);
 
-	boolean contains(MeshVertex v);
-	
+    boolean contains(MeshVertex v);
 
-	/**
-	 * Get the area of the face
-	 * @return
-	 */
-	double getArea();
+    /**
+     * Get the area of the face
+     * 
+     * @return
+     */
+    double getArea();
 
-	String getName();
+    String getName();
 
-	IPoint getMidpoint();
+    IPoint getMidpoint();
 
-	/**
-	 * Test if the given point is within the face
-	 * @param p
-	 * @return
-	 */
-	boolean contains(IPoint p);
+    /**
+     * Test if the given point is within the face
+     * 
+     * @param p
+     * @return
+     */
+    boolean contains(IPoint p);
 
-	/**
-	 * Generate a closed path for the face
-	 * @return
-	 */
-	Path2D toPath();
+    /**
+     * Generate a closed path for the face
+     * 
+     * @return
+     */
+    Path2D toPath();
 
-	/**
-	 * Given a point within the face, get the face coordinate
-	 * @param p
-	 * @return
-	 */
-	MeshFaceCoordinate getFaceCoordinate(IPoint p) throws PixelOutOfBoundsException;
-	
-	/**
-	 * Count the number of vertices in the face that are peripheral
-	 * @return
-	 */
-	int getPeripheralVertexCount();
-	
-	/**
-	 * Count the number of vertices in the face that are internal
-	 * @return
-	 */
-	int getInternalVertexCount();
+    /**
+     * Given a point within the face, get the face coordinate
+     * 
+     * @param p
+     * @return
+     */
+    MeshFaceCoordinate getFaceCoordinate(IPoint p) throws PixelOutOfBoundsException;
 
-	
-	/**
-	 * Get the peripheral vertex with the lower vertex number
-	 * @return
-	 */
-	MeshVertex getLowerPeripheralVertex();
+    /**
+     * Count the number of vertices in the face that are peripheral
+     * 
+     * @return
+     */
+    int getPeripheralVertexCount();
 
-	/**
-	 * Get the peripheral vertex with the higher vertex number
-	 * @return
-	 */
-	MeshVertex getHigherPeripheralVertex();
+    /**
+     * Count the number of vertices in the face that are internal
+     * 
+     * @return
+     */
+    int getInternalVertexCount();
 
-	/**
-	 * Get the internal vertex with the lower vertex number
-	 * @return
-	 */
-	MeshVertex getLowerInternalVertex();
+    /**
+     * Get the peripheral vertex with the lower vertex number
+     * 
+     * @return
+     */
+    MeshVertex getLowerPeripheralVertex();
 
-	/**
-	 * Get the internal vertex with the higher vertex number
-	 * @return
-	 */
-	MeshVertex getHigherInternalVertex();
-	
-	/**
-	 * Check that v1 is the internal vertex, or the lower perpheral vertex.
-	 * If not, return new new edge with reversed orientation
-	 * @param e the edge to test
-	 * @return
-	 */
-	MeshEdge correctEdgeOrientation(MeshEdge e);
+    /**
+     * Get the peripheral vertex with the higher vertex number
+     * 
+     * @return
+     */
+    MeshVertex getHigherPeripheralVertex();
+
+    /**
+     * Get the internal vertex with the lower vertex number
+     * 
+     * @return
+     */
+    MeshVertex getLowerInternalVertex();
+
+    /**
+     * Get the internal vertex with the higher vertex number
+     * 
+     * @return
+     */
+    MeshVertex getHigherInternalVertex();
+
+    /**
+     * Check that v1 is the internal vertex, or the lower perpheral vertex. If
+     * not, return new new edge with reversed orientation
+     * 
+     * @param e
+     *            the edge to test
+     * @return
+     */
+    MeshEdge correctEdgeOrientation(MeshEdge e);
 
 }

@@ -9,18 +9,18 @@ import com.bmskinner.nuclear_morphology.gui.tabs.profiles.ProfileDisplayPanel;
 
 @SuppressWarnings("serial")
 public class SegmentProfilePanel extends ProfileDisplayPanel {
-	
-	public SegmentProfilePanel(){
-		super(ProfileType.ANGLE);
-		this.remove(buttonPanel); // customisation is not needed here
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-//		options.setShowMarkers(false);
-//		options.setShowAnnotations(false);
-//		options.setShowLines(true);
-		return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
-	}
+
+    public SegmentProfilePanel() {
+        super(ProfileType.ANGLE);
+        this.remove(buttonPanel); // customisation is not needed here
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        // options.setShowMarkers(false);
+        // options.setShowAnnotations(false);
+        // options.setShowLines(true);
+        return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
+    }
 
 }

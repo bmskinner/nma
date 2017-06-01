@@ -27,73 +27,73 @@ import org.jfree.data.statistics.DefaultStatisticalCategoryDataset;
 
 @SuppressWarnings("serial")
 public class ShellResultDataset extends DefaultStatisticalCategoryDataset {
-	
-	KeyedObjects2D signalGroups;
-	
-	
-	public ShellResultDataset(){
-		super();
-		signalGroups = new KeyedObjects2D();
-	}
-		
-	
-	/**
-	 * Add a series to this dataset, with a signal group id
-	 * @param signalGroup
-	 * @param mean
-	 * @param stdev
-	 * @param rowKey
-	 * @param columnKey
-	 */
-	public void add(UUID signalGroup, double mean, double stdev, Comparable<?> rowKey, Comparable<?> columnKey){
-		super.add(mean, stdev, rowKey, columnKey);
-		signalGroups.addObject(signalGroup, rowKey, columnKey);
-	}
-	
-	/**
-	 * Get the signal group for the given row and column
-	 * @param rowKey
-	 * @param columnKey
-	 * @return
-	 */
-	public UUID getSignalGroup(Comparable<?> rowKey, Comparable<?> columnKey){
-		return (UUID) signalGroups.getObject(rowKey, columnKey);
-	}
-	
-	/**
-	 * Get the range of the data within this dataset
-	 * @return
-	 */
-	public Range getVisibleRange(){
-		
-		double max = 0;
-		double min = 0;
-		
-		for( int i=0; i<getColumnCount(); i++){
-			Comparable columnKey = getColumnKey(i);
-			
-			for (int j = 0; j < getRowCount(); j++) {
 
-				Comparable rowKey = getRowKey(j);
-				
-				double mean = this.getMeanValue(rowKey, columnKey).doubleValue();
-				
-				double stdev = this.getStdDevValue(rowKey, columnKey).doubleValue();
-				
-				if(mean+stdev > max){
-					max = mean+stdev;
-				}
-				
-				if(mean-stdev<min){
-					min = mean-stdev;
-				}
-				
-				
-			}
-		}
-		
-		return new Range(min*1.1, max*1.1);
-		
-	}
+    KeyedObjects2D signalGroups;
+
+    public ShellResultDataset() {
+        super();
+        signalGroups = new KeyedObjects2D();
+    }
+
+    /**
+     * Add a series to this dataset, with a signal group id
+     * 
+     * @param signalGroup
+     * @param mean
+     * @param stdev
+     * @param rowKey
+     * @param columnKey
+     */
+    public void add(UUID signalGroup, double mean, double stdev, Comparable<?> rowKey, Comparable<?> columnKey) {
+        super.add(mean, stdev, rowKey, columnKey);
+        signalGroups.addObject(signalGroup, rowKey, columnKey);
+    }
+
+    /**
+     * Get the signal group for the given row and column
+     * 
+     * @param rowKey
+     * @param columnKey
+     * @return
+     */
+    public UUID getSignalGroup(Comparable<?> rowKey, Comparable<?> columnKey) {
+        return (UUID) signalGroups.getObject(rowKey, columnKey);
+    }
+
+    /**
+     * Get the range of the data within this dataset
+     * 
+     * @return
+     */
+    public Range getVisibleRange() {
+
+        double max = 0;
+        double min = 0;
+
+        for (int i = 0; i < getColumnCount(); i++) {
+            Comparable columnKey = getColumnKey(i);
+
+            for (int j = 0; j < getRowCount(); j++) {
+
+                Comparable rowKey = getRowKey(j);
+
+                double mean = this.getMeanValue(rowKey, columnKey).doubleValue();
+
+                double stdev = this.getStdDevValue(rowKey, columnKey).doubleValue();
+
+                if (mean + stdev > max) {
+                    max = mean + stdev;
+                }
+
+                if (mean - stdev < min) {
+                    min = mean - stdev;
+                }
+
+            }
+        }
+
+        return new Range(min * 1.1, max * 1.1);
+
+    }
 
 }

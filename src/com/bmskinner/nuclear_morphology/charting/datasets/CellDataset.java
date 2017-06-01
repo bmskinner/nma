@@ -31,70 +31,69 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 
 /**
  * Holds the information needed to draw a cell outline
+ * 
  * @author bms41
  *
  */
 public class CellDataset {
-	
-	private ICell cell; 
-	private Map<String, OutlineDataset> outlines = new HashMap<String, OutlineDataset>();
-	
-	private  Map<String, XYDataset> tags =new HashMap<String, XYDataset>();
-	
-	private  Map<String, XYDataset> lobes =new HashMap<String, XYDataset>();
-	
-	public CellDataset(ICell cell){
-		this.cell = cell;
-	}
-	
-	public ICell getCell(){
-		return cell;
-	}
-	
-	public void addOutline(String key, OutlineDataset ds){
-		outlines.put(key, ds);
-	}
-	
-	public void addTags(String key, XYDataset ds){
-		tags.put(key, ds);
-	}
-	
-	public void addLobes(String key, OutlineDataset ds){
-		outlines.put(key, ds);
-	}
-	
-	public Collection<OutlineDataset> getDatasets(){
-		return outlines.values();
-	}
-	
-	public int getDatasetCount(){
-		return outlines.size()+tags.size()+lobes.size();
-	}
-	
-	public Set<String> getKeys(){
-		Set<String> keys = new HashSet<String>();
-		
-		keys.addAll(outlines.keySet());
-		keys.addAll(tags.keySet());
-		keys.addAll(lobes.keySet());
-		return keys;
-	}
-	
-	public XYDataset getDataset(String key){
-		if(outlines.containsKey(key)){
-			return outlines.get(key);
-		}
-		
-		if(tags.containsKey(key)){
-			return tags.get(key);
-		}
-		
-		if(lobes.containsKey(key)){
-			return lobes.get(key);
-		}
-		throw new IllegalArgumentException("Key not present: "+key);
-	}
-	
 
+    private ICell                       cell;
+    private Map<String, OutlineDataset> outlines = new HashMap<String, OutlineDataset>();
+
+    private Map<String, XYDataset> tags = new HashMap<String, XYDataset>();
+
+    private Map<String, XYDataset> lobes = new HashMap<String, XYDataset>();
+
+    public CellDataset(ICell cell) {
+        this.cell = cell;
+    }
+
+    public ICell getCell() {
+        return cell;
+    }
+
+    public void addOutline(String key, OutlineDataset ds) {
+        outlines.put(key, ds);
+    }
+
+    public void addTags(String key, XYDataset ds) {
+        tags.put(key, ds);
+    }
+
+    public void addLobes(String key, OutlineDataset ds) {
+        outlines.put(key, ds);
+    }
+
+    public Collection<OutlineDataset> getDatasets() {
+        return outlines.values();
+    }
+
+    public int getDatasetCount() {
+        return outlines.size() + tags.size() + lobes.size();
+    }
+
+    public Set<String> getKeys() {
+        Set<String> keys = new HashSet<String>();
+
+        keys.addAll(outlines.keySet());
+        keys.addAll(tags.keySet());
+        keys.addAll(lobes.keySet());
+        return keys;
+    }
+
+    public XYDataset getDataset(String key) {
+        if (outlines.containsKey(key)) {
+            return outlines.get(key);
+        }
+
+        if (tags.containsKey(key)) {
+            return tags.get(key);
+        }
+
+        if (lobes.containsKey(key)) {
+            return lobes.get(key);
+        }
+        throw new IllegalArgumentException("Key not present: " + key);
+    }
 
 }

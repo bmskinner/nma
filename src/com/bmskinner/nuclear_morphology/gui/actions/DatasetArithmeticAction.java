@@ -31,116 +31,112 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog
 
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
-	private IAnalysisDataset datasetOne = null;
-	
-	private static final String PROGRESS_LBL = "Dataset arithmetic";
-	
-	public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
-		super(list, PROGRESS_LBL, mw);
-		this.setProgressBarIndeterminate();
-	} 
-	
-	@Override
-	public void run(){
-		try {
-			fine("Performing arithmetic...");
+    private IAnalysisDataset datasetOne = null;
 
-			/*
-			 * Make a dialog with a dropdown for dataset 1, operator, then  dropdown for dataset 2
-			 */
+    private static final String PROGRESS_LBL = "Dataset arithmetic";
 
-			DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets, mw);
+    public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
+        super(list, PROGRESS_LBL, mw);
+        this.setProgressBarIndeterminate();
+    }
 
-			if(dialog.isReadyToRun()){
+    @Override
+    public void run() {
+        try {
+            fine("Performing arithmetic...");
 
-				datasetOne = dialog.getDatasetOne();
-				IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
-				DatasetArithmeticOperation operation = dialog.getOperation();
+            /*
+             * Make a dialog with a dropdown for dataset 1, operator, then
+             * dropdown for dataset 2
+             */
 
+            DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets, mw);
 
-				log("Performing "+operation+" on datasets");
-				// prepare a new collection
+            if (dialog.isReadyToRun()) {
 
-				ICellCollection newCollection = null; 
+                datasetOne = dialog.getDatasetOne();
+                IAnalysisDataset datasetTwo = dialog.getDatasetTwo();
+                DatasetArithmeticOperation operation = dialog.getOperation();
 
-				switch(operation){
-				case AND: // present in both
-					newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
+                log("Performing " + operation + " on datasets");
+                // prepare a new collection
 
-					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-					newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
+                ICellCollection newCollection = null;
 
-					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-					datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
-					break;
-				case NOT: // present in one, not present in two
-					newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
+                switch (operation) {
+                case AND: // present in both
+                    newCollection = datasetOne.getCollection().and(datasetTwo.getCollection());
 
-					newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
-					newCollection.setSharedCount(datasetTwo.getCollection(), 0);
+                    newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+                    newCollection.setSharedCount(datasetTwo.getCollection(), newCollection.size());
 
-					datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
-					datasetTwo.getCollection().setSharedCount(newCollection, 0);
+                    datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+                    datasetTwo.getCollection().setSharedCount(newCollection, newCollection.size());
+                    break;
+                case NOT: // present in one, not present in two
+                    newCollection = datasetOne.getCollection().not(datasetTwo.getCollection());
 
-					break;
-				case OR: // present in either (merge)
-					newCollection = datasetOne.getCollection().or(datasetTwo.getCollection());
-					break;
-				case XOR: // present in either but not both
-					newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
-					break;
-				default:
-					break;
+                    newCollection.setSharedCount(datasetOne.getCollection(), newCollection.size());
+                    newCollection.setSharedCount(datasetTwo.getCollection(), 0);
 
-				}
+                    datasetOne.getCollection().setSharedCount(newCollection, newCollection.size());
+                    datasetTwo.getCollection().setSharedCount(newCollection, 0);
 
-				makeNewDataset(newCollection);
+                    break;
+                case OR: // present in either (merge)
+                    newCollection = datasetOne.getCollection().or(datasetTwo.getCollection());
+                    break;
+                case XOR: // present in either but not both
+                    newCollection = datasetOne.getCollection().xor(datasetTwo.getCollection());
+                    break;
+                default:
+                    break;
 
-			} else {
-				fine("User cancelled operation");
-			}
+                }
 
+                makeNewDataset(newCollection);
 
+            } else {
+                fine("User cancelled operation");
+            }
 
-		} catch (Exception e1) {
-			error("Error in dataset arithmetic", e1);
-			
-		} finally{ 
-			cancel();
-		}
-	}
-	
-	private void makeNewDataset(ICellCollection newCollection){
-		if(newCollection !=null && newCollection.size()>0){
-			
-			log("Found "+newCollection.size()+" cells");
-			log("Running morphology analysis...");
-						
-			IAnalysisDataset newDataset;
-			
-			if(newCollection instanceof VirtualCellCollection){
+        } catch (Exception e1) {
+            error("Error in dataset arithmetic", e1);
 
-				IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
-				
-				root.addChildCollection(newCollection);
-				newDataset = root.getChildDataset(newCollection.getID());				
-				
-			} else {
-				newDataset = new DefaultAnalysisDataset(newCollection);
-				newDataset.setRoot(true);
-			}
-			
+        } finally {
+            cancel();
+        }
+    }
 
+    private void makeNewDataset(ICellCollection newCollection) {
+        if (newCollection != null && newCollection.size() > 0) {
 
-			int flag = SingleDatasetResultAction.ADD_POPULATION;
-			flag |= SingleDatasetResultAction.SAVE_DATASET;
-			flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-			RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
-			
-			ThreadManager.getInstance().execute(pr);
-								
-		} else {
-			log("No populations returned");
-		}
-	}
+            log("Found " + newCollection.size() + " cells");
+            log("Running morphology analysis...");
+
+            IAnalysisDataset newDataset;
+
+            if (newCollection instanceof VirtualCellCollection) {
+
+                IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
+
+                root.addChildCollection(newCollection);
+                newDataset = root.getChildDataset(newCollection.getID());
+
+            } else {
+                newDataset = new DefaultAnalysisDataset(newCollection);
+                newDataset.setRoot(true);
+            }
+
+            int flag = SingleDatasetResultAction.ADD_POPULATION;
+            flag |= SingleDatasetResultAction.SAVE_DATASET;
+            flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
+            RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
+
+            ThreadManager.getInstance().execute(pr);
+
+        } else {
+            log("No populations returned");
+        }
+    }
 }

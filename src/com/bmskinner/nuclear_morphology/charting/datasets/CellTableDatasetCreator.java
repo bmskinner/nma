@@ -55,393 +55,386 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * Generate the stats tables for a single cell
+ * 
  * @author bms41
  *
  */
 public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
-	
-	public CellTableDatasetCreator(final DisplayOptions options, final ICell c){
-		super(options, c);
-	}
-	
-	
-	/**
-	 * Create a table of stats for the given cell.
-	 * @param cell the cell
-	 * @return a table model
-	 * @throws ChartDatasetCreationException 
-	 * @throws Exception 
-	 */
-	public TableModel createCellInfoTable(){
-		
-		if( ! options.hasDatasets()){
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		if(options.isMultipleDatasets()){
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		IAnalysisDataset d = options.firstDataset();
-		DefaultTableModel model = new DefaultTableModel();
-		
-		List<Object> fieldNames = new ArrayList<Object>(0);
-		List<Object> rowData 	= new ArrayList<Object>(0);
-						
-		// find the collection with the most channels
-		// this defines  the number of rows
-		
-		if(cell.hasCytoplasm()){
-			addCytoplasmDataToTable(fieldNames, rowData, cell, d);
-		}
-		
-		
-		fieldNames.add("Number of nuclei (lobes)");
-		rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT)+" ("+cell.getStatistic(PlottableStatistic.LOBE_COUNT)+")");
-		
-		int nucleusNumber = 0;
-		for(Nucleus n : cell.getNuclei()){
-			nucleusNumber++;
-			fieldNames.add("Nucleus " +nucleusNumber);
-			rowData.add("");
-			addNuclearDataToTable(fieldNames, rowData, n, d);
-			
-		}
 
-		model.addColumn("", fieldNames.toArray(new Object[0])); 
-		model.addColumn("Info", rowData.toArray(new Object[0]));
+    public CellTableDatasetCreator(final DisplayOptions options, final ICell c) {
+        super(options, c);
+    }
 
-			
-		return model;	
-	}
-	
-	public TableModel createCellSegmentsTable(){
-		if( ! options.hasDatasets()){
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		if(options.isMultipleDatasets()){
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		IAnalysisDataset d = options.firstDataset();
-		DefaultTableModel model = new DefaultTableModel();
-		
-		List<Object> fieldNames = new ArrayList<Object>(0);
-		List<Object> rowData 	= new ArrayList<Object>(0);
+    /**
+     * Create a table of stats for the given cell.
+     * 
+     * @param cell
+     *            the cell
+     * @return a table model
+     * @throws ChartDatasetCreationException
+     * @throws Exception
+     */
+    public TableModel createCellInfoTable() {
 
-		try {
-			ISegmentedProfile p = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			
-			for(IBorderSegment s : p.getSegments()){
-				fieldNames.add(s.getName());
-				rowData.add(s.getStartIndex()+"-"+s.getEndIndex());
-				
-			}	
-			
-			model.addColumn("Segment", fieldNames.toArray(new Object[0])); 
-			model.addColumn("Range (of "+p.size()+")",   rowData.toArray(new Object[0]));
-			
-			
-		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		
-		return model;
-		
-	}
-	
-	
-	/**
-	 * Create a table model showing the distances between all signals in a cell
-	 * @param options
-	 * @return
-	 */
-	public TableModel createPairwiseSignalDistanceTable(){
+        if (!options.hasDatasets()) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-		if(! options.isSingleDataset()){
-			return AbstractTableCreator.createBlankTable();
-		}
+        if (options.isMultipleDatasets()) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-		IAnalysisDataset d = options.firstDataset();
-		DefaultTableModel model = new DefaultTableModel();
+        IAnalysisDataset d = options.firstDataset();
+        DefaultTableModel model = new DefaultTableModel();
 
-		List<Object> columnNames = new ArrayList<Object>(0);
-		
-		ISignalCollection sc = cell.getNucleus().getSignalCollection();
-		
-		if(sc.numberOfSignals()==0){
-			return AbstractTableCreator.createBlankTable();
-		}
-		try {
+        List<Object> fieldNames = new ArrayList<Object>(0);
+        List<Object> rowData = new ArrayList<Object>(0);
 
-			// Make the first column, of names
-			for(UUID id : sc.getSignalGroupIDs()){
+        // find the collection with the most channels
+        // this defines the number of rows
 
-				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+        if (cell.hasCytoplasm()) {
+            addCytoplasmDataToTable(fieldNames, rowData, cell, d);
+        }
 
-				List<INuclearSignal> signalsRow = sc.getSignals(id);
-				int sigNumber = 0;
+        fieldNames.add("Number of nuclei (lobes)");
+        rowData.add(cell.getStatistic(PlottableStatistic.CELL_NUCLEUS_COUNT) + " ("
+                + cell.getStatistic(PlottableStatistic.LOBE_COUNT) + ")");
 
-				for(INuclearSignal row : signalsRow){
+        int nucleusNumber = 0;
+        for (Nucleus n : cell.getNuclei()) {
+            nucleusNumber++;
+            fieldNames.add("Nucleus " + nucleusNumber);
+            rowData.add("");
+            addNuclearDataToTable(fieldNames, rowData, n, d);
 
-					columnNames.add(signalName+"_Sig_"+sigNumber);
-					sigNumber++;
-				}
+        }
 
-			}
-			model.addColumn("Signal", columnNames.toArray(new Object[0])); 
+        model.addColumn("", fieldNames.toArray(new Object[0]));
+        model.addColumn("Info", rowData.toArray(new Object[0]));
 
-			// Get the matrix to draw
-			double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
+        return model;
+    }
 
-			// Make the subequent columns, one per signal
-			int col = 0;
+    public TableModel createCellSegmentsTable() {
+        if (!options.hasDatasets()) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-		
+        if (options.isMultipleDatasets()) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-			for(UUID id : sc.getSignalGroupIDs()){
+        IAnalysisDataset d = options.firstDataset();
+        DefaultTableModel model = new DefaultTableModel();
 
-				String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+        List<Object> fieldNames = new ArrayList<Object>(0);
+        List<Object> rowData = new ArrayList<Object>(0);
 
-				List<INuclearSignal> signalsRow = sc.getSignals(id);
-				int sigNumber = 0;
-				for(INuclearSignal row : signalsRow){
-					String colName = signalName+"_Sig_"+sigNumber;
-					List<Object> colData = new ArrayList<Object>(0);
+        try {
+            ISegmentedProfile p = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
-					double[] colValues = matrix[col];
-					for(double value : colValues){
-						colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
-					}
+            for (IBorderSegment s : p.getSegments()) {
+                fieldNames.add(s.getName());
+                rowData.add(s.getStartIndex() + "-" + s.getEndIndex());
 
-					model.addColumn(colName, colData.toArray(new Object[0])); 
-					col++;
-					sigNumber++;
-				}
-			}
-		
-		} catch(UnavailableSignalGroupException e){
-			stack("Error getting signal group", e);
-			return AbstractTableCreator.createBlankTable();
-		}
-		
-		return model;
-	}
-	
-	/*
-	 * 
-	 * PRIVATE METHODS
-	 * 
-	 */
-	
-	private void addCytoplasmDataToTable(List<Object> fieldNames,  List<Object> rowData, ICell c, IAnalysisDataset d){
-		fieldNames.add("Cytoplasm");
-		rowData.add("");
+            }
 
-		try {
-			
-			ICytoplasm cyto = c.getCytoplasm();
-			
-			for(PlottableStatistic stat : PlottableStatistic.getComponentStats()){
-				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
+            model.addColumn("Segment", fieldNames.toArray(new Object[0]));
+            model.addColumn("Range (of " + p.size() + ")", rowData.toArray(new Object[0]));
 
-				double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale()  );
-					rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
-			}
-			
-//			ColourMeasurometer cm = new ColourMeasurometer();
-			Color colour = ColourMeasurometer.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
-			
-			fieldNames.add("Average RGB");
-			rowData.add(colour.getRed()+", "+colour.getGreen()+", "+colour.getBlue());
-			
-		} catch (UnloadableImageException e) {
-			warn("Cannot get colour of cytoplasm");
-			stack(e);
-		}
-		
-		
-	}
-	
-	private void addNuclearDataToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, IAnalysisDataset d){
-					
-		fieldNames.add("Source image file");
-		rowData.add(n.getPathAndNumber());
+        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-		fieldNames.add("Source image name");
-		rowData.add(n.getSourceFileName());
+        return model;
 
-		fieldNames.add("Source channel");
-		rowData.add(n.getChannel());
-		
-		fieldNames.add("Angle window prop.");
-		rowData.add(n.getWindowProportion(ProfileType.ANGLE));
-		
-		fieldNames.add("Angle window size");
-		rowData.add(n.getWindowSize(ProfileType.ANGLE));
+    }
 
-		fieldNames.add("Scale (pixels/um)");
-		rowData.add(n.getScale());
-		
-		
-		addNuclearStatisticsToTable(fieldNames, rowData, n);
-		
-		fieldNames.add("Original bounding width");
-		rowData.add(n.getBounds().getWidth());
-		
-		fieldNames.add("Original bounding height");
-		rowData.add(n.getBounds().getHeight());
+    /**
+     * Create a table model showing the distances between all signals in a cell
+     * 
+     * @param options
+     * @return
+     */
+    public TableModel createPairwiseSignalDistanceTable() {
 
-		fieldNames.add("Nucleus CoM");
-		rowData.add(n.getCentreOfMass().toString());
-		
-		fieldNames.add("Original CoM");
-		rowData.add(n.getOriginalCentreOfMass().toString());
+        if (!options.isSingleDataset()) {
+            return AbstractTableCreator.createBlankTable();
+        }
 
-		fieldNames.add("Original nucleus position");
-		rowData.add("x: "+n.getPosition()[0]+" : y: "+n.getPosition()[1]);
+        IAnalysisDataset d = options.firstDataset();
+        DefaultTableModel model = new DefaultTableModel();
 
-		fieldNames.add("Current nucleus position");
-		rowData.add("x: "+n.getMinX()+" : y: "+n.getMinY());
+        List<Object> columnNames = new ArrayList<Object>(0);
 
-		NucleusType type = NucleusType.getNucleusType(n);
+        ISignalCollection sc = cell.getNucleus().getSignalCollection();
 
-		if(type!=null){
-						
-			for(Tag tag : n.getBorderTags().keySet()){
-				fieldNames.add(tag);
-				if(n.hasBorderTag(tag)){
+        if (sc.numberOfSignals() == 0) {
+            return AbstractTableCreator.createBlankTable();
+        }
+        try {
 
-					
-					try {
-						IBorderPoint p = n.getBorderPoint(tag);
-						int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
-						rowData.add(p.toString()+" at profile index "+index);
-					} catch (UnavailableBorderTagException e) {
-						fine("Tag not present: "+tag);
-						rowData.add("Missing tag");
-					}
+            // Make the first column, of names
+            for (UUID id : sc.getSignalGroupIDs()) {
 
-				} else {
-					rowData.add("N/A");
-				}
-			}
-		} 
-		
-					
-		addNuclearSignalsToTable(fieldNames, rowData, n, d);
-	}
-	
-	/**
-	 * Add the nuclear statistic information to a cell table
-	 * @param fieldNames
-	 * @param rowData
-	 * @param n
-	 */
-	private void addNuclearStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n){
-		
-		NucleusType type = options.firstDataset().getCollection().getNucleusType();
-		
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)){
+                String signalName = d.getCollection().getSignalGroup(id).getGroupName();
 
-			if( ! stat.equals(PlottableStatistic.VARIABILITY)){
+                List<INuclearSignal> signalsRow = sc.getSignals(id);
+                int sigNumber = 0;
 
-				fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()  )  );
+                for (INuclearSignal row : signalsRow) {
 
-				double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale()  );
-					rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
-			}
+                    columnNames.add(signalName + "_Sig_" + sigNumber);
+                    sigNumber++;
+                }
 
-		}
-		
-	}
-	
-	/**
-	 * Add the nuclear signal information to a cell table
-	 * @param fieldNames
-	 * @param rowData
-	 * @param n the nucleus
-	 * @param d the source dataset for the nucleus
-	 */
-	private void addNuclearSignalsToTable(List<Object> fieldNames,  List<Object> rowData, Nucleus n, IAnalysisDataset d){
-		
-		int j=0;
+            }
+            model.addColumn("Signal", columnNames.toArray(new Object[0]));
 
-		for(UUID signalGroup : d.getCollection().getSignalGroupIDs()){
-			
-			if(signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)){
-				continue;
-			}
-			
-			try {
+            // Get the matrix to draw
+            double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
 
-				ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+            // Make the subequent columns, one per signal
+            int col = 0;
 
-				fieldNames.add("");
-				rowData.add("");
-				Color colour = g.hasColour()
-						? g.getGroupColour()
-						: ColourSelecter.getColor(j);
-						
-				SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName(), colour);
+            for (UUID id : sc.getSignalGroupIDs()) {
 
+                String signalName = d.getCollection().getSignalGroup(id).getGroupName();
 
-				fieldNames.add("Signal group");
-				rowData.add(tableCell);		
+                List<INuclearSignal> signalsRow = sc.getSignals(id);
+                int sigNumber = 0;
+                for (INuclearSignal row : signalsRow) {
+                    String colName = signalName + "_Sig_" + sigNumber;
+                    List<Object> colData = new ArrayList<Object>(0);
 
-				fieldNames.add("Source image");
-				rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+                    double[] colValues = matrix[col];
+                    for (double value : colValues) {
+                        colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+                    }
 
-				fieldNames.add("Source channel");
-				rowData.add(g.getChannel());
+                    model.addColumn(colName, colData.toArray(new Object[0]));
+                    col++;
+                    sigNumber++;
+                }
+            }
 
-				fieldNames.add("Number of signals");
-				rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
+        } catch (UnavailableSignalGroupException e) {
+            stack("Error getting signal group", e);
+            return AbstractTableCreator.createBlankTable();
+        }
 
-				for(INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)){
-					addSignalStatisticsToTable(fieldNames, rowData, s );
-				}	
-			} catch (UnavailableSignalGroupException e){
-				fine("Signal group "+signalGroup+" is not present in collection", e);
-			} finally {
-				j++;
-			}
+        return model;
+    }
 
-		}
+    /*
+     * 
+     * PRIVATE METHODS
+     * 
+     */
 
-	}
-	
-	/**
-	 * Add the nuclear signal statistics to a cell table
-	 * @param fieldNames
-	 * @param rowData
-	 * @param s
-	 */
-	private void addSignalStatisticsToTable(List<Object> fieldNames,  List<Object> rowData, INuclearSignal s){
-		
-		
-		for(PlottableStatistic stat : PlottableStatistic.getSignalStats()){
+    private void addCytoplasmDataToTable(List<Object> fieldNames, List<Object> rowData, ICell c, IAnalysisDataset d) {
+        fieldNames.add("Cytoplasm");
+        rowData.add("");
 
-			fieldNames.add(    stat.label(   GlobalOptions.getInstance().getScale() )  );
+        try {
 
-			double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale() );
+            ICytoplasm cyto = c.getCytoplasm();
 
-			rowData.add(DEFAULT_DECIMAL_FORMAT.format(value) );
-		}
+            for (PlottableStatistic stat : PlottableStatistic.getComponentStats()) {
+                fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
-		fieldNames.add("Signal CoM");
-		rowData.add(s.getCentreOfMass().toString());
-		
-		fieldNames.add("Original CoM");
-		rowData.add(s.getOriginalCentreOfMass().toString());
-		
-//		fieldNames.add("First border point");
-//		rowData.add(s.getBorderPoint(0).toString());
-		
-	}
+                double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale());
+                rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+            }
 
+            // ColourMeasurometer cm = new ColourMeasurometer();
+            Color colour = ColourMeasurometer.calculateAverageRGB(c, CellularComponent.CYTOPLASM);
 
+            fieldNames.add("Average RGB");
+            rowData.add(colour.getRed() + ", " + colour.getGreen() + ", " + colour.getBlue());
+
+        } catch (UnloadableImageException e) {
+            warn("Cannot get colour of cytoplasm");
+            stack(e);
+        }
+
+    }
+
+    private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) {
+
+        fieldNames.add("Source image file");
+        rowData.add(n.getPathAndNumber());
+
+        fieldNames.add("Source image name");
+        rowData.add(n.getSourceFileName());
+
+        fieldNames.add("Source channel");
+        rowData.add(n.getChannel());
+
+        fieldNames.add("Angle window prop.");
+        rowData.add(n.getWindowProportion(ProfileType.ANGLE));
+
+        fieldNames.add("Angle window size");
+        rowData.add(n.getWindowSize(ProfileType.ANGLE));
+
+        fieldNames.add("Scale (pixels/um)");
+        rowData.add(n.getScale());
+
+        addNuclearStatisticsToTable(fieldNames, rowData, n);
+
+        fieldNames.add("Original bounding width");
+        rowData.add(n.getBounds().getWidth());
+
+        fieldNames.add("Original bounding height");
+        rowData.add(n.getBounds().getHeight());
+
+        fieldNames.add("Nucleus CoM");
+        rowData.add(n.getCentreOfMass().toString());
+
+        fieldNames.add("Original CoM");
+        rowData.add(n.getOriginalCentreOfMass().toString());
+
+        fieldNames.add("Original nucleus position");
+        rowData.add("x: " + n.getPosition()[0] + " : y: " + n.getPosition()[1]);
+
+        fieldNames.add("Current nucleus position");
+        rowData.add("x: " + n.getMinX() + " : y: " + n.getMinY());
+
+        NucleusType type = NucleusType.getNucleusType(n);
+
+        if (type != null) {
+
+            for (Tag tag : n.getBorderTags().keySet()) {
+                fieldNames.add(tag);
+                if (n.hasBorderTag(tag)) {
+
+                    try {
+                        IBorderPoint p = n.getBorderPoint(tag);
+                        int index = n.getOffsetBorderIndex(Tag.REFERENCE_POINT, n.getBorderIndex(tag));
+                        rowData.add(p.toString() + " at profile index " + index);
+                    } catch (UnavailableBorderTagException e) {
+                        fine("Tag not present: " + tag);
+                        rowData.add("Missing tag");
+                    }
+
+                } else {
+                    rowData.add("N/A");
+                }
+            }
+        }
+
+        addNuclearSignalsToTable(fieldNames, rowData, n, d);
+    }
+
+    /**
+     * Add the nuclear statistic information to a cell table
+     * 
+     * @param fieldNames
+     * @param rowData
+     * @param n
+     */
+    private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
+
+        NucleusType type = options.firstDataset().getCollection().getNucleusType();
+
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
+
+            if (!stat.equals(PlottableStatistic.VARIABILITY)) {
+
+                fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+
+                double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale());
+                rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+            }
+
+        }
+
+    }
+
+    /**
+     * Add the nuclear signal information to a cell table
+     * 
+     * @param fieldNames
+     * @param rowData
+     * @param n
+     *            the nucleus
+     * @param d
+     *            the source dataset for the nucleus
+     */
+    private void addNuclearSignalsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n,
+            IAnalysisDataset d) {
+
+        int j = 0;
+
+        for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
+
+            if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+                continue;
+            }
+
+            try {
+
+                ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+
+                fieldNames.add("");
+                rowData.add("");
+                Color colour = g.hasColour() ? g.getGroupColour() : ColourSelecter.getColor(j);
+
+                SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName(), colour);
+
+                fieldNames.add("Signal group");
+                rowData.add(tableCell);
+
+                fieldNames.add("Source image");
+                rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
+
+                fieldNames.add("Source channel");
+                rowData.add(g.getChannel());
+
+                fieldNames.add("Number of signals");
+                rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
+
+                for (INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)) {
+                    addSignalStatisticsToTable(fieldNames, rowData, s);
+                }
+            } catch (UnavailableSignalGroupException e) {
+                fine("Signal group " + signalGroup + " is not present in collection", e);
+            } finally {
+                j++;
+            }
+
+        }
+
+    }
+
+    /**
+     * Add the nuclear signal statistics to a cell table
+     * 
+     * @param fieldNames
+     * @param rowData
+     * @param s
+     */
+    private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
+
+        for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
+
+            fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
+
+            double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale());
+
+            rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+        }
+
+        fieldNames.add("Signal CoM");
+        rowData.add(s.getCentreOfMass().toString());
+
+        fieldNames.add("Original CoM");
+        rowData.add(s.getOriginalCentreOfMass().toString());
+
+        // fieldNames.add("First border point");
+        // rowData.add(s.getBorderPoint(0).toString());
+
+    }
 
 }

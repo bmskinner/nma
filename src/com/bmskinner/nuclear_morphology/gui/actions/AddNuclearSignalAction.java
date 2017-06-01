@@ -36,100 +36,94 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 
 /**
  * Show the setup screen to detect nuclear signals, and run a detection analysis
+ * 
  * @author ben
  *
  */
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
-	
-	private File folder;
 
-	
-	public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Signal detection", mw);
-	}
-	
-	@Override
-	public void run(){
-		try{
-			
-			if( ! this.getImageDirectory()){
-				cancel();
-				return;
-			}
-			// add dialog for non-default detection options
-			SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
+    private File folder;
 
-			if(analysisSetup.isOk()){
+    public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, "Signal detection", mw);
+    }
 
-				INuclearSignalOptions options = analysisSetup.getOptions();
-//
-//
-				IAnalysisMethod m = new SignalDetectionMethod(dataset, 
-						options, 
-						analysisSetup.getId());
-				
-				
-				String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).getGroupName();
-				
-				worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+    @Override
+    public void run() {
+        try {
 
-				this.setProgressMessage("Signal detection: "+name);
-				worker.addPropertyChangeListener(this);
-				ThreadManager.getInstance().submit(worker);
-			} else {
-				this.cancel();
-				return;
-			}
+            if (!this.getImageDirectory()) {
+                cancel();
+                return;
+            }
+            // add dialog for non-default detection options
+            SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
+            if (analysisSetup.isOk()) {
 
-		} catch (Exception e){
-			this.cancel();
-			warn("Error in signal detection");
-			stack("Error in signal detection", e);
-		}
-	}
-	
-	@Override
-	public void finished(){
-		finer("Finished signal detection");
-		this.cleanup(); // remove the property change listener
-		fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+                INuclearSignalOptions options = analysisSetup.getOptions();
+                //
+                //
+                IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
 
-		cancel();
-		
-	}
-	
-	private boolean getImageDirectory(){
-		
-		File defaultDir = null;
-		try {
-			defaultDir = dataset.getAnalysisOptions()
-					.getDetectionOptions(IAnalysisOptions.NUCLEUS)
-					.getFolder();
-		} catch (MissingOptionException e) {
-			warn("No nucleus options available");
-			return false;
-		}
-		
-		JFileChooser fc = new JFileChooser( defaultDir ); // if null, will be home dir
+                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).getGroupName();
 
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 
+                this.setProgressMessage("Signal detection: " + name);
+                worker.addPropertyChangeListener(this);
+                ThreadManager.getInstance().submit(worker);
+            } else {
+                this.cancel();
+                return;
+            }
 
-		int returnVal = fc.showOpenDialog(fc);
-		if (returnVal != 0)	{
-			return false; // user cancelled
-		}
-		
-		File file = fc.getSelectedFile();
+        } catch (Exception e) {
+            this.cancel();
+            warn("Error in signal detection");
+            stack("Error in signal detection", e);
+        }
+    }
 
-		if( ! file.isDirectory()){
-			return false;
-		}
-		fine("Selected directory: "+file.getAbsolutePath());
-		folder = file;
+    @Override
+    public void finished() {
+        finer("Finished signal detection");
+        this.cleanup(); // remove the property change listener
+        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
-		return true;
-	}
+        cancel();
+
+    }
+
+    private boolean getImageDirectory() {
+
+        File defaultDir = null;
+        try {
+            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+        } catch (MissingOptionException e) {
+            warn("No nucleus options available");
+            return false;
+        }
+
+        JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
+                                                        // dir
+
+        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        int returnVal = fc.showOpenDialog(fc);
+        if (returnVal != 0) {
+            return false; // user cancelled
+        }
+
+        File file = fc.getSelectedFile();
+
+        if (!file.isDirectory()) {
+            return false;
+        }
+        fine("Selected directory: " + file.getAbsolutePath());
+        folder = file;
+
+        return true;
+    }
 
 }

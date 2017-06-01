@@ -13,47 +13,49 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 /**
  * An implementation of the Finder for cells
+ * 
  * @author ben
  * @since 1.13.5
  *
  */
 public abstract class CellFinder extends AbstractFinder<List<ICell>> {
 
-	/**
-	 * Construct the finder using an options
-	 * @param op
-	 */
-	public CellFinder(IAnalysisOptions op) {
-		super(op);
+    /**
+     * Construct the finder using an options
+     * 
+     * @param op
+     */
+    public CellFinder(IAnalysisOptions op) {
+        super(op);
 
-	}
-	
-	@Override
-	public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException{
-		
-		if(folder==null){
-			throw new IllegalArgumentException("Folder cannot be null");
-		}
-		List<ICell> list = new ArrayList<>();
-		File[] arr = folder.listFiles();
-		if(arr==null){
-			return null;
-		}
+    }
 
-		Stream.of(arr).parallel().forEach( f -> {
-			if( ! f.isDirectory()){
-				
-				if(ImageImporter.fileIsImportable(f)){
-					try {
-						list.addAll(findInImage(f));
-					} catch (ImageImportException | ComponentCreationException e) {
-						stack("Error searching image", e);
-					}
-				}
-			}
-		});
+    @Override
+    public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException {
 
-		return list;
-	}
+        if (folder == null) {
+            throw new IllegalArgumentException("Folder cannot be null");
+        }
+        List<ICell> list = new ArrayList<>();
+        File[] arr = folder.listFiles();
+        if (arr == null) {
+            return null;
+        }
+
+        Stream.of(arr).parallel().forEach(f -> {
+            if (!f.isDirectory()) {
+
+                if (ImageImporter.fileIsImportable(f)) {
+                    try {
+                        list.addAll(findInImage(f));
+                    } catch (ImageImportException | ComponentCreationException e) {
+                        stack("Error searching image", e);
+                    }
+                }
+            }
+        });
+
+        return list;
+    }
 
 }

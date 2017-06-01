@@ -37,96 +37,86 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
 /**
  * This is for tables about nuclei at the dataset level
+ * 
  * @author bms41
  * @since 1.13.4
  *
  */
 public class NucleusTableCreator extends AbstractTableCreator {
-	
-	public NucleusTableCreator(final TableOptions options){
-		super(options);
-	}
-	
-	/**
-	 * Create a table model for the Hough detection options for lobes
-	 * @return
-	 */
-	public TableModel createLobeDetectionOptionsTable(){
-		
-		if( ! options.hasDatasets()){
-			return AnalysisDatasetTableCreator.createBlankTable();
-		}
-		
-		
-		DefaultTableModel model = new DefaultTableModel();
 
-		Vector<Object> rowNames	= new Vector<Object>();
-		
-		
-		
-		// Make the row names for the options
-		IDetectionSubOptions op = null;
-		try {
-			
-			if(options.firstDataset().hasAnalysisOptions()){
-				IAnalysisOptions an = options.firstDataset().getAnalysisOptions();
-				
-				IDetectionOptions ido = an.getDetectionOptions(CellularComponent.NUCLEUS);
-				
-				
-				if(ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)){
-					op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
-				}
-			}
+    public NucleusTableCreator(final TableOptions options) {
+        super(options);
+    }
 
+    /**
+     * Create a table model for the Hough detection options for lobes
+     * 
+     * @return
+     */
+    public TableModel createLobeDetectionOptionsTable() {
 
-			if(op==null){
-				return createBlankTable();
-			}
-			
-			
-			rowNames.addAll(op.getKeys());
+        if (!options.hasDatasets()) {
+            return AnalysisDatasetTableCreator.createBlankTable();
+        }
 
+        DefaultTableModel model = new DefaultTableModel();
 
-			model.addColumn("Option", rowNames);
+        Vector<Object> rowNames = new Vector<Object>();
 
-			List<IAnalysisDataset> datasets = options.getDatasets();
+        // Make the row names for the options
+        IDetectionSubOptions op = null;
+        try {
 
-			for (int i=0; i < datasets.size(); i++) {
-				
+            if (options.firstDataset().hasAnalysisOptions()) {
+                IAnalysisOptions an = options.firstDataset().getAnalysisOptions();
 
-				IAnalysisDataset d = datasets.get(i);
-				Vector<Object> values  	= new Vector<Object>();
+                IDetectionOptions ido = an.getDetectionOptions(CellularComponent.NUCLEUS);
 
-				if(! d.hasAnalysisOptions()){
-					return createBlankTable();
-				}
-				
-				IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
-						.getDetectionOptions(CellularComponent.NUCLEUS)
-						.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
-				
-				if(hough==null){
-					return createBlankTable();
-				}
+                if (ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)) {
+                    op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+                }
+            }
 
-				for(String s : op.getKeys()){
-					values.add(hough.getValue(s));
-				}
-				
+            if (op == null) {
+                return createBlankTable();
+            }
 
-				model.addColumn(d.getName(), values);
-			}
+            rowNames.addAll(op.getKeys());
 
+            model.addColumn("Option", rowNames);
 
-		} catch (MissingOptionException e) {
-			fine("Missing detection options in dataset");
-			stack(e.getMessage(), e);
-			return createBlankTable();
-		}
-		return model;
-	}
+            List<IAnalysisDataset> datasets = options.getDatasets();
 
+            for (int i = 0; i < datasets.size(); i++) {
 
+                IAnalysisDataset d = datasets.get(i);
+                Vector<Object> values = new Vector<Object>();
+
+                if (!d.hasAnalysisOptions()) {
+                    return createBlankTable();
+                }
+
+                IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
+                        .getDetectionOptions(CellularComponent.NUCLEUS)
+                        .getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
+
+                if (hough == null) {
+                    return createBlankTable();
+                }
+
+                for (String s : op.getKeys()) {
+                    values.add(hough.getValue(s));
+                }
+
+                model.addColumn(d.getName(), values);
+            }
+
+        } catch (MissingOptionException e) {
+            fine("Missing detection options in dataset");
+            stack(e.getMessage(), e);
+            return createBlankTable();
+        }
+        return model;
+    }
 
 }

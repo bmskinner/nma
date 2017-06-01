@@ -41,123 +41,115 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
-	
-	private JButton randomSamplingButton;
-	
-	public NucleusMagnitudePanel() {
-		super();
-	}
 
-	
-	/**
-	 * Create the info panel
-	 * @return
-	 */
-	@Override
-	protected JPanel createInfoPanel(){
-		
-		/*
-		 * Header labels
-		 */
-		JPanel labelPanel = new JPanel();
-		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
-		labelPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
-		labelPanel.add(new JLabel("Row median value as a proportion of column median value"));
-		
-		
-		/*
-		 * Control buttons
-		 */
-		JPanel buttonPanel = new JPanel(new FlowLayout());
-		randomSamplingButton = new JButton("Random sampling");
-		randomSamplingButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) { 
+    private JButton randomSamplingButton;
 
-				new RandomSamplingDialog(activeDataset());
-			
-			}
-		});		
-		randomSamplingButton.setEnabled(false);
-		
-		buttonPanel.add(randomSamplingButton);
-		
-		JPanel infoPanel = new JPanel();
-		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
-		infoPanel.add( labelPanel  );
-		infoPanel.add( buttonPanel );
-		return infoPanel;
-	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a single dataset is selected
-	 */
-	protected void updateSingle() {
-		scrollPane.setColumnHeaderView(null);
-		tablePanel = createTablePanel();
-		randomSamplingButton.setEnabled(true);
-		
-		JPanel panel = new JPanel(new FlowLayout());
-		panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
-		tablePanel.add(panel);
+    public NucleusMagnitudePanel() {
+        super();
+    }
 
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a multiple datasets are selected
-	 */
-	protected void updateMultiple() {
-		scrollPane.setColumnHeaderView(null);
-		tablePanel = createTablePanel();
-		randomSamplingButton.setEnabled(false);
+    /**
+     * Create the info panel
+     * 
+     * @return
+     */
+    @Override
+    protected JPanel createInfoPanel() {
 
-//		NucleusType type = IAnalysisDataset.getBroadestNucleusType(getDatasets());
-		for(PlottableStatistic stat : PlottableStatistic.getNucleusStats()){
+        /*
+         * Header labels
+         */
+        JPanel labelPanel = new JPanel();
+        labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS));
+        labelPanel.add(new JLabel("Pairwise magnitude comparisons between populations"));
+        labelPanel.add(new JLabel("Row median value as a proportion of column median value"));
 
-			
-			
-			TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.addStatistic(stat)
-			.build();
+        /*
+         * Control buttons
+         */
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        randomSamplingButton = new JButton("Random sampling");
+        randomSamplingButton.addActionListener(new ActionListener() {
 
-			TableModel model = getTable(options);
+            @Override
+            public void actionPerformed(ActionEvent e) {
 
-			ExportableTable table = new ExportableTable(model);
-			setRenderer(table, new PairwiseTableCellRenderer());
-			addWilconxonTable(tablePanel, table, stat.toString());
-			scrollPane.setColumnHeaderView(table.getTableHeader());
+                new RandomSamplingDialog(activeDataset());
 
+            }
+        });
+        randomSamplingButton.setEnabled(false);
 
-		}
-		tablePanel.revalidate();
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-	}
-	
+        buttonPanel.add(randomSamplingButton);
 
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createMagnitudeStatisticTable(CellularComponent.NUCLEUS);
-	}
-	
-	/**
-	 * This method must be overridden by the extending class
-	 * to perform the actual update when a no datasets are selected
-	 */
-	protected void updateNull() {
-		randomSamplingButton.setEnabled(false);
-		tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
-		scrollPane.setViewportView(tablePanel);;
-		tablePanel.repaint();
-	}
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.X_AXIS));
+        infoPanel.add(labelPanel);
+        infoPanel.add(buttonPanel);
+        return infoPanel;
+    }
+
+    /**
+     * This method must be overridden by the extending class to perform the
+     * actual update when a single dataset is selected
+     */
+    protected void updateSingle() {
+        scrollPane.setColumnHeaderView(null);
+        tablePanel = createTablePanel();
+        randomSamplingButton.setEnabled(true);
+
+        JPanel panel = new JPanel(new FlowLayout());
+        panel.add(new JLabel(Labels.SINGLE_DATASET, JLabel.CENTER));
+        tablePanel.add(panel);
+
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+    }
+
+    /**
+     * This method must be overridden by the extending class to perform the
+     * actual update when a multiple datasets are selected
+     */
+    protected void updateMultiple() {
+        scrollPane.setColumnHeaderView(null);
+        tablePanel = createTablePanel();
+        randomSamplingButton.setEnabled(false);
+
+        // NucleusType type =
+        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+        for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
+
+            TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat).build();
+
+            TableModel model = getTable(options);
+
+            ExportableTable table = new ExportableTable(model);
+            setRenderer(table, new PairwiseTableCellRenderer());
+            addWilconxonTable(tablePanel, table, stat.toString());
+            scrollPane.setColumnHeaderView(table.getTableHeader());
+
+        }
+        tablePanel.revalidate();
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new AnalysisDatasetTableCreator(options).createMagnitudeStatisticTable(CellularComponent.NUCLEUS);
+    }
+
+    /**
+     * This method must be overridden by the extending class to perform the
+     * actual update when a no datasets are selected
+     */
+    protected void updateNull() {
+        randomSamplingButton.setEnabled(false);
+        tablePanel.add(new JLabel("No datasets selected", JLabel.CENTER));
+        scrollPane.setViewportView(tablePanel);
+        ;
+        tablePanel.repaint();
+    }
 }
-	
-
-	

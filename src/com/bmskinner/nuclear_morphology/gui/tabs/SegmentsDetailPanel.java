@@ -36,78 +36,76 @@ import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentWilcoxonPanel;
 
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
-		
-	private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
-	private static final String HISTOGRAM_TAB_LBL = "Histograms";
-	private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
-	private static final String MAGNITUDE_TAB_LBL = "Magnitude";
-		
-	public SegmentsDetailPanel() {
-		super();
-		this.setLayout(new BorderLayout());
 
-		JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
-		tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		DetailPanel segmentProfilePanel    = new SegmentProfilePanel();
-		DetailPanel segmentBoxplotsPanel   = new SegmentBoxplotsPanel();
-		DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel();
-		DetailPanel segmentWilcoxonPanel   = new SegmentWilcoxonPanel();
-		DetailPanel segmentMagnitudePanel  = new SegmentMagnitudePanel();
-		DetailPanel segmentStatsPanel      = new SegmentStatsPanel();
-		
-		Dimension minimumChartSize = new Dimension(100, 100);
-		
-		segmentProfilePanel.setMinimumSize(minimumChartSize);
-		segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
-		segmentHistogramsPanel.setMinimumSize(minimumChartSize);
-		segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
-		segmentMagnitudePanel.setMinimumSize(minimumChartSize);
-		segmentStatsPanel.setMinimumSize(minimumChartSize);
-		segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		
-		this.addSubPanel(segmentProfilePanel);
-		this.addSubPanel(segmentBoxplotsPanel);
-		this.addSubPanel(segmentHistogramsPanel);
-		this.addSubPanel(segmentWilcoxonPanel);
-		this.addSubPanel(segmentMagnitudePanel);
-		this.addSubPanel(segmentStatsPanel);
-		
-		
-		tabPanel.addTab(BOXPLOTS_TAB_LBL, segmentBoxplotsPanel);
-		tabPanel.addTab(HISTOGRAM_TAB_LBL, segmentHistogramsPanel);
-		tabPanel.addTab(WILCOXON_TAB_LBL, segmentWilcoxonPanel);
-		tabPanel.addTab(MAGNITUDE_TAB_LBL, segmentMagnitudePanel);
-		
-		JPanel mainPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill = GridBagConstraints.BOTH;
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.weightx = 1;
-		constraints.weighty = 0.5;
-		constraints.anchor = GridBagConstraints.CENTER;
-		
-		mainPanel.add(segmentStatsPanel, constraints);
-		
-		constraints.gridx = 0;
-		constraints.gridy = 1;
-		constraints.gridheight = 1;
-		constraints.gridwidth = 1;
-		constraints.weighty = 1;
-		mainPanel.add(segmentProfilePanel, constraints);
-		
-		constraints.gridx = 1;
-		constraints.gridy = 0;
-		constraints.gridheight = 2;
-		constraints.gridwidth = 1;
-		mainPanel.add(tabPanel, constraints);
-		
-		this.add(mainPanel, BorderLayout.CENTER);
-		
-		
-	}			
+    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
+    private static final String HISTOGRAM_TAB_LBL = "Histograms";
+    private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
+    private static final String MAGNITUDE_TAB_LBL = "Magnitude";
+
+    public SegmentsDetailPanel() {
+        super();
+        this.setLayout(new BorderLayout());
+
+        JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
+        tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        DetailPanel segmentProfilePanel = new SegmentProfilePanel();
+        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel();
+        DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel();
+        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel();
+        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel();
+        DetailPanel segmentStatsPanel = new SegmentStatsPanel();
+
+        Dimension minimumChartSize = new Dimension(100, 100);
+
+        segmentProfilePanel.setMinimumSize(minimumChartSize);
+        segmentProfilePanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        segmentBoxplotsPanel.setMinimumSize(minimumChartSize);
+        segmentHistogramsPanel.setMinimumSize(minimumChartSize);
+        segmentWilcoxonPanel.setMinimumSize(minimumChartSize);
+        segmentMagnitudePanel.setMinimumSize(minimumChartSize);
+        segmentStatsPanel.setMinimumSize(minimumChartSize);
+        segmentStatsPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        this.addSubPanel(segmentProfilePanel);
+        this.addSubPanel(segmentBoxplotsPanel);
+        this.addSubPanel(segmentHistogramsPanel);
+        this.addSubPanel(segmentWilcoxonPanel);
+        this.addSubPanel(segmentMagnitudePanel);
+        this.addSubPanel(segmentStatsPanel);
+
+        tabPanel.addTab(BOXPLOTS_TAB_LBL, segmentBoxplotsPanel);
+        tabPanel.addTab(HISTOGRAM_TAB_LBL, segmentHistogramsPanel);
+        tabPanel.addTab(WILCOXON_TAB_LBL, segmentWilcoxonPanel);
+        tabPanel.addTab(MAGNITUDE_TAB_LBL, segmentMagnitudePanel);
+
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        constraints.gridheight = 1;
+        constraints.gridwidth = 1;
+        constraints.weightx = 1;
+        constraints.weighty = 0.5;
+        constraints.anchor = GridBagConstraints.CENTER;
+
+        mainPanel.add(segmentStatsPanel, constraints);
+
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        constraints.gridheight = 1;
+        constraints.gridwidth = 1;
+        constraints.weighty = 1;
+        mainPanel.add(segmentProfilePanel, constraints);
+
+        constraints.gridx = 1;
+        constraints.gridy = 0;
+        constraints.gridheight = 2;
+        constraints.gridwidth = 1;
+        mainPanel.add(tabPanel, constraints);
+
+        this.add(mainPanel, BorderLayout.CENTER);
+
+    }
 }

@@ -45,163 +45,157 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 public class SegmentStatsPanel extends DetailPanel {
-	
-	private static final long serialVersionUID = 1L;
-	private ExportableTable table; // individual segment stats
-			
-	private JScrollPane scrollPane;
-			
-	public SegmentStatsPanel(){
-		super();
-		
-		this.setLayout(new BorderLayout());
 
-		scrollPane = new JScrollPane();
-					
-		try {
-						
-			TableModel model = AnalysisDatasetTableCreator.createBlankTable();
-			table = new ExportableTable(model);
+    private static final long serialVersionUID = 1L;
+    private ExportableTable   table;                // individual segment stats
 
-		} catch (Exception e) {
-			log(Level.SEVERE, "Error in segment table", e);
-		}
-		table.setEnabled(false);
-					
-		scrollPane.setViewportView(table);
-		scrollPane.setColumnHeaderView(table.getTableHeader());
-		
-		this.add(scrollPane, BorderLayout.CENTER);
-	}
-	
-	@Override
-	protected void updateSingle() {
-		
-//		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-		
-		TableOptions options = makeOptions();
-		setTable(options);
-	}
-	
-	@Override
-	protected void updateMultiple() {
-		
-//		table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-		
-		TableOptions options = makeOptions();
-		setTable(options);
-		
-		if(IBorderSegment.segmentCountsMatch(getDatasets())){
-			table.setToolTipText("Mean and range for 95% confidence interval");
+    private JScrollPane scrollPane;
 
-		} else {
-			finest("Segment counts don't match");
-			table.setToolTipText(null);
-		}
-	}
+    public SegmentStatsPanel() {
+        super();
 
-	@Override
-	protected void updateNull() {
-		table.setModel(AbstractTableCreator.createBlankTable());
-//		TableModel model = getTable(makeOptions());
-//
-//		table.setModel(model);
+        this.setLayout(new BorderLayout());
 
-		table.setToolTipText(null);
+        scrollPane = new JScrollPane();
 
+        try {
 
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		
-		table.setModel(AbstractTableCreator.createLoadingTable());
-		
-	}
-	
-	private TableOptions makeOptions(){
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setScale(GlobalOptions.getInstance().getScale())
-			.setSwatch(GlobalOptions.getInstance().getSwatch())
-			.setTarget(table)
-			.setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
-			.build();
-		return options;
-	}
+            TableModel model = AnalysisDatasetTableCreator.createBlankTable();
+            table = new ExportableTable(model);
 
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new AnalysisDatasetTableCreator(options).createMedianProfileStatisticTable();
-	}
+        } catch (Exception e) {
+            log(Level.SEVERE, "Error in segment table", e);
+        }
+        table.setEnabled(false);
 
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options) {
-		return null;
-	}
-	
-	private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+        scrollPane.setViewportView(table);
+        scrollPane.setColumnHeaderView(table.getTableHeader());
 
-		private static final long serialVersionUID = 1L;
+        this.add(scrollPane, BorderLayout.CENTER);
+    }
 
-		public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+    @Override
+    protected void updateSingle() {
 
-			//Cells are by default rendered as a JLabel.
-			Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			// default cell colour is white
-			Color colour = Color.WHITE;
+        // table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 
-			final String colName = table.getColumnName(column); // will be Seg_x
+        TableOptions options = makeOptions();
+        setTable(options);
+    }
 
-			// only apply to first row, after the first column
-			if(column>0 && row==0){
+    @Override
+    protected void updateMultiple() {
 
-				int segment;
-				try {
-					segment = Integer.valueOf(colName.replace("Seg_", ""));
-				} catch (Exception e){
-					log(Level.FINEST, "Error getting segment name: "+colName);
-					segment = 0;
-				}
+        // table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
 
-				colour = (Color) ColourSelecter.getColor(segment);
-				log(Level.FINEST, "SegmentTableCellRenderer for segment "+segment+" uses color "+colour);
+        TableOptions options = makeOptions();
+        setTable(options);
 
-			}
+        if (IBorderSegment.segmentCountsMatch(getDatasets())) {
+            table.setToolTipText("Mean and range for 95% confidence interval");
 
-			String rowName = table.getModel().getValueAt(row, 0).toString();
-			if(rowName.equals("Length p(unimodal)") && column > 0){
+        } else {
+            finest("Segment counts don't match");
+            table.setToolTipText(null);
+        }
+    }
 
-				String cellContents = ((JLabel) l).getText();
+    @Override
+    protected void updateNull() {
+        table.setModel(AbstractTableCreator.createBlankTable());
+        // TableModel model = getTable(makeOptions());
+        //
+        // table.setModel(model);
 
-				double pval;
-				try {
+        table.setToolTipText(null);
 
-					NumberFormat nf = NumberFormat.getInstance();
-					pval = nf.parse(cellContents).doubleValue();
-				} catch (Exception e){
-					log(Level.FINEST, "Error getting value: "+cellContents+" in column "+colName, e);
-					pval = 0;
-				}
+    }
 
-				if(  pval < SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL){
-					colour = Color.YELLOW;
-				}
-				if(  pval < SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL){
-					colour = Color.GREEN;
-				}
+    @Override
+    public void setChartsAndTablesLoading() {
 
-			}
+        table.setModel(AbstractTableCreator.createLoadingTable());
 
+    }
 
-			l.setBackground(colour);
+    private TableOptions makeOptions() {
 
-			//Return the JLabel which renders the cell.
-			return l;
-		}
-	}
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setTarget(table).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SegmentTableCellRenderer())
+                .build();
+        return options;
+    }
 
-	
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new AnalysisDatasetTableCreator(options).createMedianProfileStatisticTable();
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return null;
+    }
+
+    private class SegmentTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+
+        private static final long serialVersionUID = 1L;
+
+        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+
+            // Cells are by default rendered as a JLabel.
+            Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            // default cell colour is white
+            Color colour = Color.WHITE;
+
+            final String colName = table.getColumnName(column); // will be Seg_x
+
+            // only apply to first row, after the first column
+            if (column > 0 && row == 0) {
+
+                int segment;
+                try {
+                    segment = Integer.valueOf(colName.replace("Seg_", ""));
+                } catch (Exception e) {
+                    log(Level.FINEST, "Error getting segment name: " + colName);
+                    segment = 0;
+                }
+
+                colour = (Color) ColourSelecter.getColor(segment);
+                log(Level.FINEST, "SegmentTableCellRenderer for segment " + segment + " uses color " + colour);
+
+            }
+
+            String rowName = table.getModel().getValueAt(row, 0).toString();
+            if (rowName.equals("Length p(unimodal)") && column > 0) {
+
+                String cellContents = ((JLabel) l).getText();
+
+                double pval;
+                try {
+
+                    NumberFormat nf = NumberFormat.getInstance();
+                    pval = nf.parse(cellContents).doubleValue();
+                } catch (Exception e) {
+                    log(Level.FINEST, "Error getting value: " + cellContents + " in column " + colName, e);
+                    pval = 0;
+                }
+
+                if (pval < SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
+                    colour = Color.YELLOW;
+                }
+                if (pval < SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL) {
+                    colour = Color.GREEN;
+                }
+
+            }
+
+            l.setBackground(colour);
+
+            // Return the JLabel which renders the cell.
+            return l;
+        }
+    }
 
 }

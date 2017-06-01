@@ -24,37 +24,37 @@ import javax.swing.ImageIcon;
 import com.bmskinner.nuclear_morphology.components.ICell;
 
 public class LabelInfo {
-	private ImageIcon icon;
-	private boolean isSelected = false;
-	private ICell cell;
-	
-	public LabelInfo(ImageIcon icon, ICell cell){
-		this.icon = icon;
-		this.cell = cell;
-	}
+    private ImageIcon icon;
+    private boolean   isSelected = false;
+    private ICell     cell;
 
-	public ImageIcon getIcon() {
-		return icon;
-	}
-	
-	public ICell getCell(){
-		return cell;
-	}
-	
-	public String toString(){
-		return cell==null ? "" : cell.getNucleus().getNameAndNumber();
-	}
+    public LabelInfo(ImageIcon icon, ICell cell) {
+        this.icon = icon;
+        this.cell = cell;
+    }
 
-	public boolean isSelected() {
-		return isSelected;
-	}
+    public ImageIcon getIcon() {
+        return icon;
+    }
 
-	public void setSelected(boolean isSelected) {
-		this.isSelected = isSelected;
-	}
-	
-	public String state(){
-		return this.toString()+": "+isSelected;
-	}
-	
+    public ICell getCell() {
+        return cell;
+    }
+
+    public String toString() {
+        return cell == null ? "" : cell.getNucleus().getNameAndNumber();
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
+    }
+
+    public String state() {
+        return this.toString() + ": " + isSelected;
+    }
+
 }

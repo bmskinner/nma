@@ -26,9 +26,8 @@
 
   A tail is the point determined via profile analysis. The
   head is assigned as the point opposite through the CoM.
-*/  
+*/
 package com.bmskinner.nuclear_morphology.components.nuclei;
-
 
 import ij.gui.Roi;
 
@@ -41,74 +40,92 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 
 @Deprecated
-public class AsymmetricNucleus
-  extends RoundNucleus
-{
+public class AsymmetricNucleus extends RoundNucleus {
 
-	private static final long serialVersionUID = 1L;
-	private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(0); // holds the points considered to be sperm tails before filtering
-	protected transient boolean clockwiseRP = false; // is the original orientation of the nucleus with RP clockwise to the CoM, or not
+    private static final long            serialVersionUID   = 1L;
+    private transient List<IBorderPoint> tailEstimatePoints = new ArrayList<IBorderPoint>(0); // holds
+                                                                                              // the
+                                                                                              // points
+                                                                                              // considered
+                                                                                              // to
+                                                                                              // be
+                                                                                              // sperm
+                                                                                              // tails
+                                                                                              // before
+                                                                                              // filtering
+    protected transient boolean          clockwiseRP        = false;                          // is
+                                                                                              // the
+                                                                                              // original
+                                                                                              // orientation
+                                                                                              // of
+                                                                                              // the
+                                                                                              // nucleus
+                                                                                              // with
+                                                                                              // RP
+                                                                                              // clockwise
+                                                                                              // to
+                                                                                              // the
+                                                                                              // CoM,
+                                                                                              // or
+                                                                                              // not
 
-  public AsymmetricNucleus(Nucleus n) {
-    super(n);
-  }
-  
-  protected AsymmetricNucleus(){
-	  super();
-  }
+    public AsymmetricNucleus(Nucleus n) {
+        super(n);
+    }
 
-//  public AsymmetricNucleus (Roi roi, File file, int number, int[] position) { // construct from an roi
-//	  super(roi, file, number, position);
-//  }
-  
-  public AsymmetricNucleus (Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct from an roi
-	  super(roi, file, number, position, centreOfMass);
-  }
-  
-  
-    
-  @Override
-  public Nucleus duplicate(){
-	  AsymmetricNucleus duplicate = new AsymmetricNucleus(this);
-	  return duplicate;
-  }
+    protected AsymmetricNucleus() {
+        super();
+    }
 
-  /*
-    -----------------------
-    Get nucleus features
-    -----------------------
-  */
-  
-  public List<IBorderPoint> getEstimatedTailPoints(){
-    return this.tailEstimatePoints;
-  }
+    // public AsymmetricNucleus (Roi roi, File file, int number, int[] position)
+    // { // construct from an roi
+    // super(roi, file, number, position);
+    // }
 
-  /*
-    -----------------------
-    Set nucleus features
-    -----------------------
-  */
-  @Override
-  public boolean isClockwiseRP(){
-	  return this.clockwiseRP;
-  }
+    public AsymmetricNucleus(Roi roi, File file, int number, int[] position, IPoint centreOfMass) { // construct
+                                                                                                    // from
+                                                                                                    // an
+                                                                                                    // roi
+        super(roi, file, number, position, centreOfMass);
+    }
 
-  protected void addTailEstimatePosition(IBorderPoint p){
-    this.tailEstimatePoints.add(p);
-  }
-  
-  
-  private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//	  finest("\tReading asymmetric nucleus");
-	  in.defaultReadObject();
-	  tailEstimatePoints = new ArrayList<IBorderPoint>(0);
-	  clockwiseRP = false;
-//	  finest("\tRead asymmetric nucleus");
-  }
+    @Override
+    public Nucleus duplicate() {
+        AsymmetricNucleus duplicate = new AsymmetricNucleus(this);
+        return duplicate;
+    }
 
-  private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//	  finest("\tWriting asymmetric nucleus");
-	  out.defaultWriteObject();  
-//	  finest("\tWrote asymmetric nucleus");
-  }
+    /*
+     * ----------------------- Get nucleus features -----------------------
+     */
+
+    public List<IBorderPoint> getEstimatedTailPoints() {
+        return this.tailEstimatePoints;
+    }
+
+    /*
+     * ----------------------- Set nucleus features -----------------------
+     */
+    @Override
+    public boolean isClockwiseRP() {
+        return this.clockwiseRP;
+    }
+
+    protected void addTailEstimatePosition(IBorderPoint p) {
+        this.tailEstimatePoints.add(p);
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // finest("\tReading asymmetric nucleus");
+        in.defaultReadObject();
+        tailEstimatePoints = new ArrayList<IBorderPoint>(0);
+        clockwiseRP = false;
+        // finest("\tRead asymmetric nucleus");
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        // finest("\tWriting asymmetric nucleus");
+        out.defaultWriteObject();
+        // finest("\tWrote asymmetric nucleus");
+    }
 }

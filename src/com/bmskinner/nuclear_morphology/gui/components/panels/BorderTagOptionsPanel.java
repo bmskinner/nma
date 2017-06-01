@@ -30,45 +30,46 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagTy
 
 @SuppressWarnings("serial")
 public class BorderTagOptionsPanel extends EnumeratedOptionsPanel {
-	
-	private Map<BorderTagObject, JRadioButton> map  = new  HashMap<BorderTagObject, JRadioButton>();
-	
-	public BorderTagOptionsPanel(){
-		
-		super();
-		final ButtonGroup group = new ButtonGroup();
-		
-		for(BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)){
-			JRadioButton button = new JRadioButton(type.toString());
-			button.setActionCommand(type.toString());
-			button.addActionListener(this);
-			this.add(button);
-			group.add(button);
-			map.put(type, button);
-		}
-		// Set the default
-		map.get(Tag.REFERENCE_POINT).setSelected(true);
-		
-	}
-	
-	public void setEnabled(boolean b){
-		for(Tag type : BorderTagObject.values(BorderTagType.CORE)){
-			map.get(type).setEnabled(b);
-		}
-	}
 
-	/**
-	 * Get the selected profile type, or null
-	 * @return
-	 */
-	public BorderTagObject getSelected(){
-		for(BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)){
-			JRadioButton button = map.get(type);
-			if(button.isSelected()){
-				return type;
-			}
-		}
-		return null;
-	}
+    private Map<BorderTagObject, JRadioButton> map = new HashMap<BorderTagObject, JRadioButton>();
+
+    public BorderTagOptionsPanel() {
+
+        super();
+        final ButtonGroup group = new ButtonGroup();
+
+        for (BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)) {
+            JRadioButton button = new JRadioButton(type.toString());
+            button.setActionCommand(type.toString());
+            button.addActionListener(this);
+            this.add(button);
+            group.add(button);
+            map.put(type, button);
+        }
+        // Set the default
+        map.get(Tag.REFERENCE_POINT).setSelected(true);
+
+    }
+
+    public void setEnabled(boolean b) {
+        for (Tag type : BorderTagObject.values(BorderTagType.CORE)) {
+            map.get(type).setEnabled(b);
+        }
+    }
+
+    /**
+     * Get the selected profile type, or null
+     * 
+     * @return
+     */
+    public BorderTagObject getSelected() {
+        for (BorderTagObject type : BorderTagObject.values(BorderTagType.CORE)) {
+            JRadioButton button = map.get(type);
+            if (button.isSelected()) {
+                return type;
+            }
+        }
+        return null;
+    }
 
 }

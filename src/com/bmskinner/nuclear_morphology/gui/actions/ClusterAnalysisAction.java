@@ -31,67 +31,64 @@ import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusteringSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 
-
 /**
  * Setup a clustering of the given dataset.
+ * 
  * @author ben
  *
  */
 public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
-	private static final String PROGRESS_BAR_LABEL = "Clustering cells";
-	
-	public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, PROGRESS_BAR_LABEL, mw);
-	}
-	
-	@Override
-	public void run(){
+    private static final String PROGRESS_BAR_LABEL = "Clustering cells";
 
-		SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
+    public ClusterAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, PROGRESS_BAR_LABEL, mw);
+    }
 
-		if(clusterSetup.isReadyToRun()){ // if dialog was cancelled, skip
+    @Override
+    public void run() {
 
-			IAnalysisMethod m = clusterSetup.getMethod();
-			
-			int maxProgress = dataset.getCollection().size() * 2;
-			worker = new DefaultAnalysisWorker(m);
-			
-			worker.addPropertyChangeListener(this);
-			ThreadManager.getInstance().submit(worker);
+        SubAnalysisSetupDialog clusterSetup = new ClusteringSetupDialog(mw, dataset);
 
-		} else {
-			this.cancel();
-		}
-		clusterSetup.dispose();
-	}
+        if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
 
+            IAnalysisMethod m = clusterSetup.getMethod();
 
-	/* (non-Javadoc)
-	 * Overrides because we need to carry out the morphology reprofiling
-	 * on each cluster
-	 * @see no.gui.MainWindow.ProgressableAction#finished()
-	 */
-	@Override
-	public void finished() {
+            int maxProgress = dataset.getCollection().size() * 2;
+            worker = new DefaultAnalysisWorker(m);
 
-		this.setProgressBarVisible(false);
-		
-		
-		try {
-			ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
-			int size = r.getGroup().size();
-			log("Found "+size+" clusters");
-		} catch (InterruptedException | ExecutionException e) {
-			warn("Error clustering");
-			stack("Error clustering", e);
-		}
-		
+            worker.addPropertyChangeListener(this);
+            ThreadManager.getInstance().submit(worker);
 
-		fireDatasetEvent(DatasetEvent.SAVE, dataset);
-		fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-		super.finished();
-		
+        } else {
+            this.cancel();
+        }
+        clusterSetup.dispose();
+    }
 
-	}
+    /*
+     * (non-Javadoc) Overrides because we need to carry out the morphology
+     * reprofiling on each cluster
+     * 
+     * @see no.gui.MainWindow.ProgressableAction#finished()
+     */
+    @Override
+    public void finished() {
+
+        this.setProgressBarVisible(false);
+
+        try {
+            ClusterAnalysisResult r = (ClusterAnalysisResult) worker.get();
+            int size = r.getGroup().size();
+            log("Found " + size + " clusters");
+        } catch (InterruptedException | ExecutionException e) {
+            warn("Error clustering");
+            stack("Error clustering", e);
+        }
+
+        fireDatasetEvent(DatasetEvent.SAVE, dataset);
+        fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        super.finished();
+
+    }
 }

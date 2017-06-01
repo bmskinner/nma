@@ -23,33 +23,30 @@ import javax.swing.JCheckBox;
 @SuppressWarnings("serial")
 public class GenericCheckboxPanel extends EnumeratedOptionsPanel {
 
-	
-	private JCheckBox    checkBox 	= new JCheckBox();
+    private JCheckBox checkBox = new JCheckBox();
 
-	public GenericCheckboxPanel(String label){
-		super();
+    public GenericCheckboxPanel(String label) {
+        super();
 
+        // checkbox to select raw or normalised profiles
+        checkBox.setSelected(false);
+        checkBox.addActionListener(this);
+        checkBox.setText(label);
+        this.add(checkBox);
 
-		// checkbox to select raw or normalised profiles
-		checkBox.setSelected(false);
-		checkBox.addActionListener(this);
-		checkBox.setText(label);
-		this.add(checkBox);
+    }
 
-	}
+    public boolean isSelected() {
+        return this.checkBox.isSelected();
+    }
 
+    public void setEnabled(boolean b) {
 
-	public boolean isSelected(){
-		return this.checkBox.isSelected();
-	}
+        checkBox.setEnabled(b);
+    }
 
-	public void setEnabled(boolean b){
-
-		checkBox.setEnabled(b);
-	}
-	
-	public void setText(String s){
-		checkBox.setText(s);
-	}
+    public void setText(String s) {
+        checkBox.setText(s);
+    }
 
 }

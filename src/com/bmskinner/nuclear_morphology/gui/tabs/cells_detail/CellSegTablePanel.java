@@ -31,60 +31,56 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 
-
 @SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
-	
-	JTable table;
-	
-	public CellSegTablePanel(final CellViewModel model) {
-		super(model);
-		
-		this.setLayout(new BorderLayout());
-		this.setBorder(null);
-		
-		TableModel tableModel = AbstractTableCreator.createBlankTable();
-		
-		table = new JTable(tableModel);
-		JScrollPane sp = new JScrollPane(table);
-		sp.setColumnHeaderView(table.getTableHeader());
-		add(sp, BorderLayout.CENTER);
-		
-	}
 
-	@Override
-	public synchronized void update() {
-		if(this.isMultipleDatasets() || ! this.hasDatasets()){
-			table.setModel(AbstractTableCreator.createBlankTable());
-			return;
-		}
-		
-		if( ! getCellModel().hasCell()){
-			table.setModel(AbstractTableCreator.createBlankTable());
-			return;
-		}
-		
-		TableOptions options = new TableOptionsBuilder()
-			.setDatasets(getDatasets())
-			.setCell(this.getCellModel().getCell())
-			.setScale(GlobalOptions.getInstance().getScale())
-			.setTarget(table)
-			.build();
+    JTable table;
 
-		try{
-			
-			setTable(options);
+    public CellSegTablePanel(final CellViewModel model) {
+        super(model);
 
-		} catch(Exception e){
-			warn("Error updating cell segments table");
-			stack(e);
-		}
-		
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellSegmentsTable();
-	}
+        this.setLayout(new BorderLayout());
+        this.setBorder(null);
+
+        TableModel tableModel = AbstractTableCreator.createBlankTable();
+
+        table = new JTable(tableModel);
+        JScrollPane sp = new JScrollPane(table);
+        sp.setColumnHeaderView(table.getTableHeader());
+        add(sp, BorderLayout.CENTER);
+
+    }
+
+    @Override
+    public synchronized void update() {
+        if (this.isMultipleDatasets() || !this.hasDatasets()) {
+            table.setModel(AbstractTableCreator.createBlankTable());
+            return;
+        }
+
+        if (!getCellModel().hasCell()) {
+            table.setModel(AbstractTableCreator.createBlankTable());
+            return;
+        }
+
+        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
+                .setCell(this.getCellModel().getCell()).setScale(GlobalOptions.getInstance().getScale())
+                .setTarget(table).build();
+
+        try {
+
+            setTable(options);
+
+        } catch (Exception e) {
+            warn("Error updating cell segments table");
+            stack(e);
+        }
+
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellSegmentsTable();
+    }
 
 }

@@ -20,11 +20,12 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 /**
  * Describes the dimensions available to a statistical measure
+ * 
  * @author ben
  *
  */
 public enum StatisticDimension {
-	  
-	  AREA, LENGTH, DIMENSIONLESS, ANGLE
-	  	  
-  }
+
+    AREA, LENGTH, DIMENSIONLESS, ANGLE
+
+}

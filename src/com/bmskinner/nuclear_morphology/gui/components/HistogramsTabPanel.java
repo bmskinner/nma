@@ -47,98 +47,100 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 /**
  * This class is extended for making a panel with multiple stats histograms
  * arranged vertically
+ * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
 public abstract class HistogramsTabPanel extends DetailPanel implements ActionListener {
-	
-	protected Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
 
-	protected JPanel 		mainPanel; // hold the charts
-	protected JPanel		headerPanel; // hold buttons
-	protected GenericCheckboxPanel useDensityPanel = new GenericCheckboxPanel("Probability density function");
+    protected Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
 
-	protected JScrollPane scrollPane; // hold the main panel
-	
-	protected String component;
-	
-	public HistogramsTabPanel(String component){
-		super();
-		this.component = component;
-		this.setLayout(new BorderLayout());
+    protected JPanel               mainPanel;                                                                 // hold
+                                                                                                              // the
+                                                                                                              // charts
+    protected JPanel               headerPanel;                                                               // hold
+                                                                                                              // buttons
+    protected GenericCheckboxPanel useDensityPanel = new GenericCheckboxPanel("Probability density function");
 
-		try {
-			mainPanel = new JPanel();
-			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+    protected JScrollPane scrollPane; // hold the main panel
 
-			headerPanel = new JPanel(new FlowLayout());
+    protected String component;
 
-			
-			headerPanel.add(useDensityPanel);
+    public HistogramsTabPanel(String component) {
+        super();
+        this.component = component;
+        this.setLayout(new BorderLayout());
 
-			useDensityPanel.addActionListener(this);
+        try {
+            mainPanel = new JPanel();
+            mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
-			this.add(headerPanel, BorderLayout.NORTH);
+            headerPanel = new JPanel(new FlowLayout());
 
-			// add the scroll pane to the tab
-			scrollPane  = new JScrollPane(mainPanel);
-			this.add(scrollPane, BorderLayout.CENTER);
-			
-			this.setEnabled(false);
-		} catch(Exception e){
-			log(Level.SEVERE, "Error creating panel", e);
-		}
+            headerPanel.add(useDensityPanel);
 
-	}
-	
-	@Override
-	public void setChartsAndTablesLoading(){
-		super.setChartsAndTablesLoading();
-		for(ExportableChartPanel p : chartPanels.values()){
-			p.setChart(AbstractChartFactory.createLoadingChart());			
-		}
-		
-	}
-	
-	@Override
-	protected JFreeChart createPanelChartType(ChartOptions options){
-		return new HistogramChartFactory(options).createStatisticHistogram(component);
-	}
-	
-	@Override
-	protected TableModel createPanelTableType(TableOptions options){
-		return null;
-	}
-	
-	public void setEnabled(boolean b){
-		super.setEnabled(b);
-		useDensityPanel.setEnabled(b);
-	}
-	
-	 @Override
-     public void actionPerformed(ActionEvent e) {
+            useDensityPanel.addActionListener(this);
 
-         try {
-        	 finest("Updating abstract histogram tab panel");
-             this.update(getDatasets());
-         } catch (Exception e1) {
-        	 error("Error updating histogram panel from action listener", e1);
-         }
-         
-         
-     }
-	 	 
-	 protected int getFilterDialogResult(double lower, double upper){
-			DecimalFormat df = new DecimalFormat("#.##");
-			Object[] options = { "Filter collection" , "Cancel", };
-			int result = JOptionPane.showOptionDialog(null, "Filter between "+df.format(lower)+"-"+df.format(upper)+"?", "Confirm filter",
+            this.add(headerPanel, BorderLayout.NORTH);
 
-					JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+            // add the scroll pane to the tab
+            scrollPane = new JScrollPane(mainPanel);
+            this.add(scrollPane, BorderLayout.CENTER);
 
-					null, options, options[0]);
-			return result;
-		}
-	 
-	 
+            this.setEnabled(false);
+        } catch (Exception e) {
+            log(Level.SEVERE, "Error creating panel", e);
+        }
+
+    }
+
+    @Override
+    public void setChartsAndTablesLoading() {
+        super.setChartsAndTablesLoading();
+        for (ExportableChartPanel p : chartPanels.values()) {
+            p.setChart(AbstractChartFactory.createLoadingChart());
+        }
+
+    }
+
+    @Override
+    protected JFreeChart createPanelChartType(ChartOptions options) {
+        return new HistogramChartFactory(options).createStatisticHistogram(component);
+    }
+
+    @Override
+    protected TableModel createPanelTableType(TableOptions options) {
+        return null;
+    }
+
+    public void setEnabled(boolean b) {
+        super.setEnabled(b);
+        useDensityPanel.setEnabled(b);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        try {
+            finest("Updating abstract histogram tab panel");
+            this.update(getDatasets());
+        } catch (Exception e1) {
+            error("Error updating histogram panel from action listener", e1);
+        }
+
+    }
+
+    protected int getFilterDialogResult(double lower, double upper) {
+        DecimalFormat df = new DecimalFormat("#.##");
+        Object[] options = { "Filter collection", "Cancel", };
+        int result = JOptionPane.showOptionDialog(null,
+                "Filter between " + df.format(lower) + "-" + df.format(upper) + "?", "Confirm filter",
+
+                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+
+                null, options, options[0]);
+        return result;
+    }
+
 }

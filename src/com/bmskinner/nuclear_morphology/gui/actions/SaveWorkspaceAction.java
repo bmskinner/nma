@@ -32,85 +32,82 @@ import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 
 public class SaveWorkspaceAction extends VoidResultAction {
-	
-	private static final String PROGRESS_LBL = "Saving workspace";
-	
-	private final List<IAnalysisDataset> datasets;
-	
-	public SaveWorkspaceAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
-		super(PROGRESS_LBL, mw);
-		this.datasets = datasets;
 
-	}
+    private static final String PROGRESS_LBL = "Saving workspace";
 
-	@Override
-	public void run() {
-		
-		if(datasets.size()==0){
-			cancel();
-    		return;
-    	}
-		
-		File file = chooseExportFile();
-		
-		if(file==null){
-			cancel();
-			return;
-		}
+    private final List<IAnalysisDataset> datasets;
 
-		
-//		log("Saving workspace...");
-		
-    	// Get all datasets
-    	IWorkspace w = new DefaultWorkspace(file);
-    	
-    	for(IAnalysisDataset d : datasets){
-    		w.add(d);
-    	}
-   
-    	WorkspaceExporter exp = new WorkspaceExporter(w);
-    	exp.export();
-    	log("Exported workspace file to "+file.getAbsolutePath());
-		
-		this.cancel();
+    public SaveWorkspaceAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
+        super(PROGRESS_LBL, mw);
+        this.datasets = datasets;
 
-		
-	}
-	
-	private File chooseExportFile(){
-		
-		String fileName = null;
-		File dir = null;
-		if(datasets.size()==1){
-			dir = datasets.get(0).getSavePath().getParentFile();
-			fileName = datasets.get(0).getName()+Importer.WRK_FILE_EXTENSION;
-			
-		} else {
-			fileName = "Workspace"+Importer.WRK_FILE_EXTENSION;
-			dir =  IAnalysisDataset.commonPathOfFiles(datasets);
-			if( ! dir.exists() || ! dir.isDirectory()){
-				dir = new File(System.getProperty("user.home"));
-			}
-		}
+    }
 
+    @Override
+    public void run() {
 
-		JFileChooser fc = new JFileChooser( dir ); 
-		fc.setSelectedFile(new File(fileName));
-		fc.setDialogTitle("Save workspace as");
+        if (datasets.size() == 0) {
+            cancel();
+            return;
+        }
 
-		int returnVal = fc.showSaveDialog(fc);
-		if (returnVal != 0)	{
-			return null; // user cancelled
-		}
+        File file = chooseExportFile();
 
-		File file = fc.getSelectedFile();
-		
-		// Add extension if needed
-		if( ! file.getAbsolutePath().endsWith(Importer.WRK_FILE_EXTENSION)){
-			file = new File(file.getAbsolutePath()+Importer.WRK_FILE_EXTENSION);
-		}
+        if (file == null) {
+            cancel();
+            return;
+        }
 
-		return file;
-	}
+        // log("Saving workspace...");
+
+        // Get all datasets
+        IWorkspace w = new DefaultWorkspace(file);
+
+        for (IAnalysisDataset d : datasets) {
+            w.add(d);
+        }
+
+        WorkspaceExporter exp = new WorkspaceExporter(w);
+        exp.export();
+        log("Exported workspace file to " + file.getAbsolutePath());
+
+        this.cancel();
+
+    }
+
+    private File chooseExportFile() {
+
+        String fileName = null;
+        File dir = null;
+        if (datasets.size() == 1) {
+            dir = datasets.get(0).getSavePath().getParentFile();
+            fileName = datasets.get(0).getName() + Importer.WRK_FILE_EXTENSION;
+
+        } else {
+            fileName = "Workspace" + Importer.WRK_FILE_EXTENSION;
+            dir = IAnalysisDataset.commonPathOfFiles(datasets);
+            if (!dir.exists() || !dir.isDirectory()) {
+                dir = new File(System.getProperty("user.home"));
+            }
+        }
+
+        JFileChooser fc = new JFileChooser(dir);
+        fc.setSelectedFile(new File(fileName));
+        fc.setDialogTitle("Save workspace as");
+
+        int returnVal = fc.showSaveDialog(fc);
+        if (returnVal != 0) {
+            return null; // user cancelled
+        }
+
+        File file = fc.getSelectedFile();
+
+        // Add extension if needed
+        if (!file.getAbsolutePath().endsWith(Importer.WRK_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Importer.WRK_FILE_EXTENSION);
+        }
+
+        return file;
+    }
 
 }

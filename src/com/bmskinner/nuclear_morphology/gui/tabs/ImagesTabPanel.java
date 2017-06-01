@@ -48,179 +48,174 @@ import ij.process.ImageProcessor;
 
 /**
  * Show the outlines of all cells in each image analysed
+ * 
  * @author bms41
  * @since 1.13.5
  *
  */
 @SuppressWarnings("serial")
 public class ImagesTabPanel extends DetailPanel {
-	
-	private JTree tree; // hold the image list
-	private JPanel imagePanel;
-	
-	private JLabel label;
-	
-	private static final String IMAGES_LBL = "Images";
-	
-	private class ImageNode {
-		private String name;
-		private File f;
 
-		public ImageNode(String name, File f) {
-			this.name = name;
-			this.f = f;			
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public File getFile(){
-			return f;
-		}
+    private JTree  tree;      // hold the image list
+    private JPanel imagePanel;
 
-		public String toString() {
-			return name;
-		}
-	}
-	
-	public ImagesTabPanel(){
-		super();
-		
-		this.setLayout(new BorderLayout());
-		
-		createUI();
-	}
-	
-	
-	private void createUI(){
-		
-		DefaultMutableTreeNode root =
-				new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
-		TreeModel treeModel = new DefaultTreeModel(root);
-		
-		
-		tree = new JTree(treeModel);
-		tree.addTreeSelectionListener(makeListener());
-		tree.setEnabled(false);
-		
-		imagePanel = new JPanel(new BorderLayout());
-		label = new JLabel();
-		label.setHorizontalAlignment(JLabel.CENTER);
-		label.setVerticalAlignment(JLabel.CENTER);
-		label.setHorizontalTextPosition(JLabel.CENTER);
-		label.setVerticalTextPosition(JLabel.CENTER);
-		imagePanel.add(label, BorderLayout.CENTER);
-		
-		JScrollPane scrollPane = new JScrollPane(tree);
-		Dimension size = new Dimension(200, 200);
-		scrollPane.setMinimumSize(size);
-		scrollPane.setPreferredSize(size);
-		
-		this.add(imagePanel, BorderLayout.CENTER);
-		this.add(scrollPane, BorderLayout.WEST);
-		
-	}
-	
+    private JLabel label;
 
-	/**
-	 * Trigger an update with a given dataset
-	 * @param dataset
-	 */
-	@Override
-	protected void updateSingle() {
-		
-		String folder = activeDataset().getCollection().getFolder().getAbsolutePath();
-		DefaultMutableTreeNode root =
-				new DefaultMutableTreeNode(new ImageNode(folder, null));
-		
+    private static final String IMAGES_LBL = "Images";
 
-		createNodes(root, activeDataset());
-		tree.setEnabled(true);
+    private class ImageNode {
+        private String name;
+        private File   f;
 
-		TreeModel model = new DefaultTreeModel(root);
+        public ImageNode(String name, File f) {
+            this.name = name;
+            this.f = f;
+        }
 
-		tree.setModel(model);
-		label.setText(null);
-	}
-	
-	@Override
-	protected void updateMultiple(){
-		updateNull();
-	}
+        public String getName() {
+            return name;
+        }
 
-	@Override
-	protected void updateNull(){
-		DefaultMutableTreeNode root =
-				new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+        public File getFile() {
+            return f;
+        }
 
+        public String toString() {
+            return name;
+        }
+    }
 
-		tree.setEnabled(false);
+    public ImagesTabPanel() {
+        super();
 
-		TreeModel model = new DefaultTreeModel(root);
-		tree.setModel(model);		
-		label.setText(Labels.MULTIPLE_DATASETS);
-		label.setIcon(null);
-	}
-	
-	/**
-	 * Create the nodes in the tree
-	 * @param root the root node
-	 * @param dataset the dataset to use
-	 */
-	private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset){
+        this.setLayout(new BorderLayout());
 
-		List<File> files = new ArrayList<File>(dataset.getCollection().getImageFiles());
-		Collections.sort(files);
-		
-	    for(File f : files){	
+        createUI();
+    }
 
-	    	String name = f.getName();
-	    	root.add(new DefaultMutableTreeNode( new ImageNode(name, f)));
-	    }
+    private void createUI() {
 
-	}
-	
-	
-	private TreeSelectionListener makeListener(){
-		
-		TreeSelectionListener l = (TreeSelectionEvent e) -> {
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+        TreeModel treeModel = new DefaultTreeModel(root);
 
-			ImageNode data = (ImageNode) node.getUserObject();
-			
-			if(this.isSingleDataset()){	
-				try{
-					
-					if(data.getFile()==null){
-						return;
-					}
-					
-					ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
-					
+        tree = new JTree(treeModel);
+        tree.addTreeSelectionListener(makeListener());
+        tree.setEnabled(false);
 
-					ImageConverter cn = new ImageConverter(ip); 
-					if(cn.isByteProcessor()){
-						cn.convertToColorProcessor();
-					}
-					ImageAnnotator an = cn.toAnnotator();
-					
-					for(ICell c : activeDataset().getCollection().getCells(data.getFile())){
-						an.annotateCellBorders(c);
-					}
-					
-					ImageFilterer ic = new ImageFilterer(an.toProcessor());
-					ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
-					label.setIcon(ic.toImageIcon());							
-					
-				} catch (Exception e1){
-					warn("Error fetching image");
-					stack("Error fetching image", e1);
-				}
-			}
-			
-		};
-		return l;
-	}
-	
+        imagePanel = new JPanel(new BorderLayout());
+        label = new JLabel();
+        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setVerticalAlignment(JLabel.CENTER);
+        label.setHorizontalTextPosition(JLabel.CENTER);
+        label.setVerticalTextPosition(JLabel.CENTER);
+        imagePanel.add(label, BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(tree);
+        Dimension size = new Dimension(200, 200);
+        scrollPane.setMinimumSize(size);
+        scrollPane.setPreferredSize(size);
+
+        this.add(imagePanel, BorderLayout.CENTER);
+        this.add(scrollPane, BorderLayout.WEST);
+
+    }
+
+    /**
+     * Trigger an update with a given dataset
+     * 
+     * @param dataset
+     */
+    @Override
+    protected void updateSingle() {
+
+        String folder = activeDataset().getCollection().getFolder().getAbsolutePath();
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(folder, null));
+
+        createNodes(root, activeDataset());
+        tree.setEnabled(true);
+
+        TreeModel model = new DefaultTreeModel(root);
+
+        tree.setModel(model);
+        label.setText(null);
+    }
+
+    @Override
+    protected void updateMultiple() {
+        updateNull();
+    }
+
+    @Override
+    protected void updateNull() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+
+        tree.setEnabled(false);
+
+        TreeModel model = new DefaultTreeModel(root);
+        tree.setModel(model);
+        label.setText(Labels.MULTIPLE_DATASETS);
+        label.setIcon(null);
+    }
+
+    /**
+     * Create the nodes in the tree
+     * 
+     * @param root
+     *            the root node
+     * @param dataset
+     *            the dataset to use
+     */
+    private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
+
+        List<File> files = new ArrayList<File>(dataset.getCollection().getImageFiles());
+        Collections.sort(files);
+
+        for (File f : files) {
+
+            String name = f.getName();
+            root.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
+        }
+
+    }
+
+    private TreeSelectionListener makeListener() {
+
+        TreeSelectionListener l = (TreeSelectionEvent e) -> {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+
+            ImageNode data = (ImageNode) node.getUserObject();
+
+            if (this.isSingleDataset()) {
+                try {
+
+                    if (data.getFile() == null) {
+                        return;
+                    }
+
+                    ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
+
+                    ImageConverter cn = new ImageConverter(ip);
+                    if (cn.isByteProcessor()) {
+                        cn.convertToColorProcessor();
+                    }
+                    ImageAnnotator an = cn.toAnnotator();
+
+                    for (ICell c : activeDataset().getCollection().getCells(data.getFile())) {
+                        an.annotateCellBorders(c);
+                    }
+
+                    ImageFilterer ic = new ImageFilterer(an.toProcessor());
+                    ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
+                    label.setIcon(ic.toImageIcon());
+
+                } catch (Exception e1) {
+                    warn("Error fetching image");
+                    stack("Error fetching image", e1);
+                }
+            }
+
+        };
+        return l;
+    }
+
 }

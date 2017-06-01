@@ -1,40 +1,33 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 /**
- * Hold stages of the detection pipeline to display 
+ * Hold stages of the detection pipeline to display
+ * 
  * @since 1.13.4
  */
 public enum DetectionImageType implements ImageType {
-	ORIGINAL            ("Input image"),
-	KUWAHARA 			("Kuwahara filtering"),
-	FLATTENED 			("Chromocentre flattening"),
-	EDGE_DETECTION 		("Edge detection"),
-	MORPHOLOGY_CLOSED 	("Gap closing"),
-	FISH_IMAGE      	("FISH image"),
-	DETECTED_OBJECTS 	("Detected objects"),
-	ANNOTAED_OBJECTS    ("Annotated objects"),
-	CYTOPLASM           ("Cytoplasm"),
-	NUCLEUS             ("Nucleus"),
-	CYTO_FLATTENED      ("Cytoplasm flattened"),
-	NUCLEUS_FLATTENED   ("Nucleus flattened"),;
+    ORIGINAL("Input image"), KUWAHARA("Kuwahara filtering"), FLATTENED("Chromocentre flattening"), EDGE_DETECTION(
+            "Edge detection"), MORPHOLOGY_CLOSED("Gap closing"), FISH_IMAGE("FISH image"), DETECTED_OBJECTS(
+                    "Detected objects"), ANNOTAED_OBJECTS("Annotated objects"), CYTOPLASM("Cytoplasm"), NUCLEUS(
+                            "Nucleus"), CYTO_FLATTENED("Cytoplasm flattened"), NUCLEUS_FLATTENED("Nucleus flattened"),;
 
-	private String name;
+    private String name;
 
-	DetectionImageType(String name){
-		this.name = name;
-	}
-	public String toString(){
-		return this.name;
-	}
+    DetectionImageType(String name) {
+        this.name = name;
+    }
 
-	public ImageType[] getValues(){
-		return DetectionImageType.values();
-	}
-	
-	@Override
-	public int getPosition() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    public String toString() {
+        return this.name;
+    }
+
+    public ImageType[] getValues() {
+        return DetectionImageType.values();
+    }
+
+    @Override
+    public int getPosition() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 }
-

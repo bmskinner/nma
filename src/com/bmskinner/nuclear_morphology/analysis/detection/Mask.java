@@ -20,63 +20,68 @@
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
 /**
- * A mask that describes whether a value is present or
- * not within each pixel
+ * A mask that describes whether a value is present or not within each pixel
+ * 
  * @author bms41
  * @since 1.13.3
  *
  */
 public interface Mask {
-	
-	int getWidth();
-	
-	int getHeight();
-	
-	/**
-	 * Offset the mask by the given amount. Empty values are filled in
-	 * with false
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	Mask offset(int x, int y);
-	
-	/**
-	 * Calculate the logical AND of the two masks
-	 * @param m
-	 * @return
-	 */
-	Mask and(Mask m);
-	
-	/**
-	 * Get the value at the given position
-	 * @param x
-	 * @param y
-	 * @return
-	 */
-	boolean get(int x, int y);
-	
-	
-	/**
-	 * Set all the values in the mask to false
-	 * @return
-	 */
-	Mask setFalse();
-	
-	/**
-	 * Set all the values in the mask to true
-	 * @return
-	 */
-	Mask setTrue();
-	
-	/**
-	 * Set the value at the given point
-	 * @param x
-	 * @param y
-	 * @param b
-	 */
-	void set(int x, int y, boolean b);
-	
-	boolean[][] toArray();
+
+    int getWidth();
+
+    int getHeight();
+
+    /**
+     * Offset the mask by the given amount. Empty values are filled in with
+     * false
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    Mask offset(int x, int y);
+
+    /**
+     * Calculate the logical AND of the two masks
+     * 
+     * @param m
+     * @return
+     */
+    Mask and(Mask m);
+
+    /**
+     * Get the value at the given position
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    boolean get(int x, int y);
+
+    /**
+     * Set all the values in the mask to false
+     * 
+     * @return
+     */
+    Mask setFalse();
+
+    /**
+     * Set all the values in the mask to true
+     * 
+     * @return
+     */
+    Mask setTrue();
+
+    /**
+     * Set the value at the given point
+     * 
+     * @param x
+     * @param y
+     * @param b
+     */
+    void set(int x, int y, boolean b);
+
+    boolean[][] toArray();
 
 }

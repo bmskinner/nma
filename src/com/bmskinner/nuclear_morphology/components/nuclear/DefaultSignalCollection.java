@@ -42,569 +42,629 @@ import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
  * The default implementation of the {@link ISignalCollection} interface
+ * 
  * @author ben
  * @since 1.13.3
  *
  */
 public class DefaultSignalCollection implements ISignalCollection {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * Holds the signals
-	 */
-	private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
-		
-	public DefaultSignalCollection(){}
-	
-	/**
-	 * Duplicate a signal collection
-	 * @param s
-	 */
-	public DefaultSignalCollection(ISignalCollection s){
-				
-		for(UUID group : s.getSignalGroupIDs()){
-			
-			List<INuclearSignal> list = new ArrayList<INuclearSignal>();
-			
-			for(INuclearSignal signal : s.getSignals(group)){
-				list.add(  signal.duplicate());
-			}
-			
-			collection.put(    group, list);
-		}
+    /**
+     * Holds the signals
+     */
+    private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
 
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List, java.util.UUID, java.io.File, int)
-	 */
-	@Override
-	public void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel){
-		if(list==null || Integer.valueOf(sourceChannel)==null || sourceFile==null || groupID==null){
-			throw new IllegalArgumentException("Signal list or channel is null");
-		}
-		
-		collection.put(    groupID, list);
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
-	 */
-	@Override
-	public Set<UUID> getSignalGroupIDs(){
-		return collection.keySet();
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#updateSignalGroupID(java.util.UUID, java.util.UUID)
-	 */
-	@Override
-	public void updateSignalGroupID(UUID oldID, UUID newID){
-		
-		if( ! collection.containsKey(oldID)){
-			// The nucleus does not have the old id - skip
-			return;
-		}
-		
-		List<INuclearSignal> list = collection.get(oldID);
-		
-		// Remove the old values
-		collection.remove(    oldID);
-		
-		// Insert the new values
-		collection.put(    newID, list);		
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSignalGroupNumber(java.util.UUID)
-	 */
-	@Override
-	public int getSignalGroupNumber(UUID signalGroup){
-		int i=0;
-		for(UUID id : collection.keySet()){
-			i++;
-			if(id.equals(signalGroup)){
-				return i;
-			}
-			
-//			if(collection.get(id).equals(signalGroup)){
-//				return i;
-//			}
-		}
-		return i;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#addSignal(components.nuclear.NuclearSignal, java.util.UUID)
-	 */
-	@Override
-	public void addSignal(INuclearSignal n, UUID signalGroup){
-		if(signalGroup==null){
-			throw new IllegalArgumentException("Group is null");
-		}
-		
-		if(collection.get(signalGroup)==null){
-			// add new list when not present
-			List<INuclearSignal> list = new ArrayList<INuclearSignal>();
-			collection.put(signalGroup, list);
-		}
-		collection.get(signalGroup).add(n);
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#addSignals(java.util.List, java.util.UUID)
-	 */
-	@Override
-	public void addSignals(List<INuclearSignal> list, UUID signalGroup){
-		if(list==null){
-			throw new IllegalArgumentException("Signal is null");
-		}
-		if(signalGroup==null){
-			throw new IllegalArgumentException("Group is null");
-		}
-		collection.get(signalGroup).addAll(list);
-	}
+    public DefaultSignalCollection() {
+    }
 
-	
-	/**
-	 * Append a list of signals to the given signal group
-	 * @param list the signals
-	 * @param signalGroupName the signal group name
-	 */
-//	public void addSignals(List<NuclearSignal> list, String signalGroupName){
-//		if(list==null){
-//			throw new IllegalArgumentException("Signal or group is null");
-//		}
-//		checkSignalGroup(signalGroupName);
-//		this.addSignals(list, names.get(signalGroupName));
-//	}
-	
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSignals()
-	 */
-	@Override
-	public List<List<INuclearSignal>> getSignals(){
-		List<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
-		for(UUID signalGroup : this.getSignalGroupIDs()){
-			result.add(getSignals(signalGroup));
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getAllSignals()
-	 */
-	@Override
-	public List<INuclearSignal> getAllSignals(){
-		List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
-		for(UUID signalGroup : this.getSignalGroupIDs()){
-			result.addAll(getSignals(signalGroup));
-		}
-		return result;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
-	 */
-	@Override
-	public List<INuclearSignal> getSignals(UUID signalGroup){
-//		checkSignalGroup(signalGroup);
-		if(this.hasSignal(signalGroup)){
-			return this.collection.get(signalGroup);
-		} else {
-			return new ArrayList<INuclearSignal>(0);
-		}
-	}
-		
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
-	 */
-	@Override
-	public File getSourceFile(UUID signalGroup){
-		if(collection.containsKey(signalGroup)){
-			
-			List<INuclearSignal> list = collection.get(signalGroup);
-			if(list!=null && ! list.isEmpty()){
-				return list.get(0).getSourceFile();
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#updateSourceFile(java.util.UUID, java.io.File)
-	 */
-	@Override
-	public void updateSourceFile(UUID signalGroup, File f){
-		
-		for(INuclearSignal s : collection.get(signalGroup)){
-			s.setSourceFile(f);
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
-	 */
-	@Override
-	public int getSourceChannel(UUID signalGroup){
-		if(collection.containsKey(signalGroup)){
-			
-			List<INuclearSignal> list = collection.get(signalGroup);
-			if(list!=null && ! list.isEmpty()){
-				return list.get(0).getChannel();
-			} else {
-				return -1;
-			}
-		} else {
-			return -1;
-		}
-		
-	}
-		
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#numberOfSignalGroups()
-	 */
-	@Override
-	public int size(){
-		return collection.size();
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#numberOfSignals()
-	 */
-	@Override
-	public int numberOfSignals(){
-		int count=0;
-		for(UUID group : collection.keySet()){
-			count += numberOfSignals(group);
-		}
-		return count;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
-	 */
-	@Override
-	public boolean hasSignal(UUID signalGroup){
-		if(signalGroup==null){
-			throw new IllegalArgumentException("Signal group is null");
-		}
-		if(!collection.containsKey(signalGroup)){
-			return false;
-		}
-		if(collection.get(signalGroup).isEmpty()){
-			return false;
-		} 
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#hasSignal()
-	 */
-	@Override
-	public boolean hasSignal(){	
-		return  !collection.isEmpty();
-	}
-		
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#numberOfSignals(java.util.UUID)
-	 */
-	@Override
-	public int numberOfSignals(UUID signalGroup){
-		if(signalGroup==null){
-			return 0;
-		}
-		
-		if(this.hasSignal(signalGroup)){
-			return collection.get(signalGroup).size();
-		} else {
-			return 0;
-		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#removeSignals()
-	 */
-	@Override
-	public void removeSignals(){
-		collection     = new LinkedHashMap<UUID, List<INuclearSignal>>();
-	}
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#removeSignals(java.util.UUID)
-	 */
-	@Override
-	public void removeSignals(UUID signalGroup){
-		collection.remove(signalGroup);
-	}	
-		
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic, components.generic.MeasurementScale, java.util.UUID)
-	 */
-	@Override
-	public List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
-		List<INuclearSignal> list = getSignals(signalGroup);
-		List<Double> result = new ArrayList<Double>(0);
-		for(int i=0;i<list.size();i++){
-			result.add(list.get(i).getStatistic(stat, scale));
-		}
-		return result;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
-	 */
-	@Override
-	public ImageProcessor getImage(final UUID signalGroup) throws UnloadableImageException{
-		
-		if(signalGroup==null){
-			throw new  UnloadableImageException("Signal group is null");
-		}
-		
-		File f = this.getSourceFile(signalGroup);
-		
-		// Will be null if no signals were reported for the cell with this collection
-		if(f==null){
-			throw new  UnloadableImageException("File for signal group is null");
-		}
-		
-		int c  = this.getSourceChannel(signalGroup);
-		
-		try {
-			return new ImageImporter(f).importImage(c);
-		} catch (ImageImportException e) {
-			stack("Error importing image source file "+f.getAbsolutePath(), e);
-			throw new  UnloadableImageException("Unable to load signal image",e);
-		}
-	}
-	
-	/**
-	 * Calculate the pairwise distances between all signals in the nucleus 
-	 */
-	@Override
-	public double[][] calculateDistanceMatrix(MeasurementScale scale){
+    /**
+     * Duplicate a signal collection
+     * 
+     * @param s
+     */
+    public DefaultSignalCollection(ISignalCollection s) {
 
-		// create a matrix to hold the data
-		// needs to be between every signal and every other signal, irrespective of colour
-		int matrixSize = numberOfSignals();
+        for (UUID group : s.getSignalGroupIDs()) {
 
-		double [][] matrix = new double[matrixSize][matrixSize];
-		
-		int matrixRow = 0;
-		int matrixCol = 0;
-		
-		for( List<INuclearSignal> signalsRow : getSignals()){
+            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
 
-			if(!signalsRow.isEmpty()){
+            for (INuclearSignal signal : s.getSignals(group)) {
+                list.add(signal.duplicate());
+            }
 
-				for(INuclearSignal row : signalsRow){
-					
-					matrixCol=0;
+            collection.put(group, list);
+        }
 
-					IPoint aCoM = row.getCentreOfMass();
+    }
 
-					for( List<INuclearSignal> signalsCol : getSignals()){
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#addSignalGroup(java.util.List,
+     * java.util.UUID, java.io.File, int)
+     */
+    @Override
+    public void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel) {
+        if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {
+            throw new IllegalArgumentException("Signal list or channel is null");
+        }
 
-						if(!signalsCol.isEmpty()){
+        collection.put(groupID, list);
+    }
 
-							for(INuclearSignal col : signalsCol){
-								IPoint bCoM = col.getCentreOfMass();
-								double value = aCoM.getLengthTo(bCoM);
-								value = PlottableStatistic.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
-								matrix[matrixRow][matrixCol] = value;
-								matrixCol++;
-							}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
+     */
+    @Override
+    public Set<UUID> getSignalGroupIDs() {
+        return collection.keySet();
+    }
 
-						}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * components.nuclear.ISignalCollection#updateSignalGroupID(java.util.UUID,
+     * java.util.UUID)
+     */
+    @Override
+    public void updateSignalGroupID(UUID oldID, UUID newID) {
 
-					}
-					matrixRow++;
-				}
-			}
-		}
-		return matrix;
-	}
-	
-	/**
-     * For each signal group pair, find the smallest pairwise distance
-     * between signals in the collection.
+        if (!collection.containsKey(oldID)) {
+            // The nucleus does not have the old id - skip
+            return;
+        }
+
+        List<INuclearSignal> list = collection.get(oldID);
+
+        // Remove the old values
+        collection.remove(oldID);
+
+        // Insert the new values
+        collection.put(newID, list);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * components.nuclear.ISignalCollection#getSignalGroupNumber(java.util.UUID)
+     */
+    @Override
+    public int getSignalGroupNumber(UUID signalGroup) {
+        int i = 0;
+        for (UUID id : collection.keySet()) {
+            i++;
+            if (id.equals(signalGroup)) {
+                return i;
+            }
+
+            // if(collection.get(id).equals(signalGroup)){
+            // return i;
+            // }
+        }
+        return i;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#addSignal(components.nuclear.
+     * NuclearSignal, java.util.UUID)
+     */
+    @Override
+    public void addSignal(INuclearSignal n, UUID signalGroup) {
+        if (signalGroup == null) {
+            throw new IllegalArgumentException("Group is null");
+        }
+
+        if (collection.get(signalGroup) == null) {
+            // add new list when not present
+            List<INuclearSignal> list = new ArrayList<INuclearSignal>();
+            collection.put(signalGroup, list);
+        }
+        collection.get(signalGroup).add(n);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#addSignals(java.util.List,
+     * java.util.UUID)
+     */
+    @Override
+    public void addSignals(List<INuclearSignal> list, UUID signalGroup) {
+        if (list == null) {
+            throw new IllegalArgumentException("Signal is null");
+        }
+        if (signalGroup == null) {
+            throw new IllegalArgumentException("Group is null");
+        }
+        collection.get(signalGroup).addAll(list);
+    }
+
+    /**
+     * Append a list of signals to the given signal group
+     * 
+     * @param list
+     *            the signals
+     * @param signalGroupName
+     *            the signal group name
+     */
+    // public void addSignals(List<NuclearSignal> list, String signalGroupName){
+    // if(list==null){
+    // throw new IllegalArgumentException("Signal or group is null");
+    // }
+    // checkSignalGroup(signalGroupName);
+    // this.addSignals(list, names.get(signalGroupName));
+    // }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getSignals()
+     */
+    @Override
+    public List<List<INuclearSignal>> getSignals() {
+        List<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
+        for (UUID signalGroup : this.getSignalGroupIDs()) {
+            result.add(getSignals(signalGroup));
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getAllSignals()
+     */
+    @Override
+    public List<INuclearSignal> getAllSignals() {
+        List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
+        for (UUID signalGroup : this.getSignalGroupIDs()) {
+            result.addAll(getSignals(signalGroup));
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
+     */
+    @Override
+    public List<INuclearSignal> getSignals(UUID signalGroup) {
+        // checkSignalGroup(signalGroup);
+        if (this.hasSignal(signalGroup)) {
+            return this.collection.get(signalGroup);
+        } else {
+            return new ArrayList<INuclearSignal>(0);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
+     */
+    @Override
+    public File getSourceFile(UUID signalGroup) {
+        if (collection.containsKey(signalGroup)) {
+
+            List<INuclearSignal> list = collection.get(signalGroup);
+            if (list != null && !list.isEmpty()) {
+                return list.get(0).getSourceFile();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * components.nuclear.ISignalCollection#updateSourceFile(java.util.UUID,
+     * java.io.File)
+     */
+    @Override
+    public void updateSourceFile(UUID signalGroup, File f) {
+
+        for (INuclearSignal s : collection.get(signalGroup)) {
+            s.setSourceFile(f);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
+     */
+    @Override
+    public int getSourceChannel(UUID signalGroup) {
+        if (collection.containsKey(signalGroup)) {
+
+            List<INuclearSignal> list = collection.get(signalGroup);
+            if (list != null && !list.isEmpty()) {
+                return list.get(0).getChannel();
+            } else {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#numberOfSignalGroups()
+     */
+    @Override
+    public int size() {
+        return collection.size();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#numberOfSignals()
+     */
+    @Override
+    public int numberOfSignals() {
+        int count = 0;
+        for (UUID group : collection.keySet()) {
+            count += numberOfSignals(group);
+        }
+        return count;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
+     */
+    @Override
+    public boolean hasSignal(UUID signalGroup) {
+        if (signalGroup == null) {
+            throw new IllegalArgumentException("Signal group is null");
+        }
+        if (!collection.containsKey(signalGroup)) {
+            return false;
+        }
+        if (collection.get(signalGroup).isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#hasSignal()
+     */
+    @Override
+    public boolean hasSignal() {
+        return !collection.isEmpty();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#numberOfSignals(java.util.UUID)
+     */
+    @Override
+    public int numberOfSignals(UUID signalGroup) {
+        if (signalGroup == null) {
+            return 0;
+        }
+
+        if (this.hasSignal(signalGroup)) {
+            return collection.get(signalGroup).size();
+        } else {
+            return 0;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#removeSignals()
+     */
+    @Override
+    public void removeSignals() {
+        collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#removeSignals(java.util.UUID)
+     */
+    @Override
+    public void removeSignals(UUID signalGroup) {
+        collection.remove(signalGroup);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * components.nuclear.ISignalCollection#getStatistics(stats.SignalStatistic,
+     * components.generic.MeasurementScale, java.util.UUID)
+     */
+    @Override
+    public List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+        List<INuclearSignal> list = getSignals(signalGroup);
+        List<Double> result = new ArrayList<Double>(0);
+        for (int i = 0; i < list.size(); i++) {
+            result.add(list.get(i).getStatistic(stat, scale));
+        }
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
+     */
+    @Override
+    public ImageProcessor getImage(final UUID signalGroup) throws UnloadableImageException {
+
+        if (signalGroup == null) {
+            throw new UnloadableImageException("Signal group is null");
+        }
+
+        File f = this.getSourceFile(signalGroup);
+
+        // Will be null if no signals were reported for the cell with this
+        // collection
+        if (f == null) {
+            throw new UnloadableImageException("File for signal group is null");
+        }
+
+        int c = this.getSourceChannel(signalGroup);
+
+        try {
+            return new ImageImporter(f).importImage(c);
+        } catch (ImageImportException e) {
+            stack("Error importing image source file " + f.getAbsolutePath(), e);
+            throw new UnloadableImageException("Unable to load signal image", e);
+        }
+    }
+
+    /**
+     * Calculate the pairwise distances between all signals in the nucleus
+     */
+    @Override
+    public double[][] calculateDistanceMatrix(MeasurementScale scale) {
+
+        // create a matrix to hold the data
+        // needs to be between every signal and every other signal, irrespective
+        // of colour
+        int matrixSize = numberOfSignals();
+
+        double[][] matrix = new double[matrixSize][matrixSize];
+
+        int matrixRow = 0;
+        int matrixCol = 0;
+
+        for (List<INuclearSignal> signalsRow : getSignals()) {
+
+            if (!signalsRow.isEmpty()) {
+
+                for (INuclearSignal row : signalsRow) {
+
+                    matrixCol = 0;
+
+                    IPoint aCoM = row.getCentreOfMass();
+
+                    for (List<INuclearSignal> signalsCol : getSignals()) {
+
+                        if (!signalsCol.isEmpty()) {
+
+                            for (INuclearSignal col : signalsCol) {
+                                IPoint bCoM = col.getCentreOfMass();
+                                double value = aCoM.getLengthTo(bCoM);
+                                value = PlottableStatistic.DISTANCE_FROM_COM.convert(value, col.getScale(), scale);
+                                matrix[matrixRow][matrixCol] = value;
+                                matrixCol++;
+                            }
+
+                        }
+
+                    }
+                    matrixRow++;
+                }
+            }
+        }
+        return matrix;
+    }
+
+    /**
+     * For each signal group pair, find the smallest pairwise distance between
+     * signals in the collection.
+     * 
      * @return a list of shortest distances for each pairwise group
      */
-	@Override
-	public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale){
-		
-		List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
-		
-		Set<UUID> completeIDs = new HashSet<UUID>();
-		
-		for( UUID id1 : this.getSignalGroupIDs()){
-			
-			if( ! this.hasSignal(id1)){
-				continue;
-			}
-			
-			List<INuclearSignal> signalList1 = this.getSignals(id1);
-			
-			for( UUID id2 : this.getSignalGroupIDs() ){
-				
-				if(id1.equals(id2)){
-					continue;
-				}
-				
-				if( ! this.hasSignal(id2)){
-					continue;
-				}
+    @Override
+    public List<PairwiseSignalDistanceValue> calculateSignalColocalisation(MeasurementScale scale) {
 
-				
-				List<INuclearSignal> signalList2 = this.getSignals(id2);
-				
-				// Compare all signal pairwise distances between groups 1 and 2
-				double smallest = Double.MAX_VALUE;
-				double scaleFactor = 1;
-				for(INuclearSignal s1 : signalList1){
-					scaleFactor = s1.getScale();
-					for(INuclearSignal s2 : signalList2){
-						
-						
-						
-						double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
-						smallest = distance < smallest ? distance : smallest;
-						
-					}
-					
-				}
+        List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
 
-				// Use arbitrary distance measure to convert scale
-				smallest = PlottableStatistic.DISTANCE_FROM_COM.convert(smallest, scaleFactor, scale);
-				
-				
-				// Assign the pairwise distance
-				PairwiseSignalDistanceValue p = new PairwiseSignalDistanceValue(id1, id2, smallest);
-				result.add(p);
+        Set<UUID> completeIDs = new HashSet<UUID>();
 
-				
-			}
-			completeIDs.add(id1);
-		}
-		return result;
-	}
-	
-	/**
-	 * Calculate the shortest distances between signals in the given signal groups. Each signal is considered
-	 * only once. Hence a group with 4 signals compared to a group with 3 signals will produce a list of 3 values.
-	 * @param id1 the first signal group
-	 * @param id2 the second signal group
-	 * @return a list of the pixel distances between paired signals
-	 */
-	public List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2){
-	
-		if(id1.equals(id2)){
-			throw new IllegalArgumentException("Signal IDs are the same");
-		}
-		
-		Set<INuclearSignal> d1 = new HashSet<INuclearSignal>(this.getSignals(id1));
-		Set<INuclearSignal> d2 = new HashSet<INuclearSignal>(this.getSignals(id2));
-		
-		List<Colocalisation<INuclearSignal>> result = findColocalisingSignals(d1, d2);
-		
-		return result;
-		
-	}
-	
-	/**
-	 * Recursively find signal pairs with the shortest distance between them.
-	 * @param d1 the nuclear signals in group 1
-	 * @param d2 the nuclear signals in group 2
-	 * @param scale the measurement scale
-	 * @return a list of best colocalising signals
-	 */
-	private List<Colocalisation<INuclearSignal>> findColocalisingSignals(Set<INuclearSignal> d1, Set<INuclearSignal> d2){
-		
-		List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
-		
-		if(d2.isEmpty() || d1.isEmpty()){
-			return result;
-		}
+        for (UUID id1 : this.getSignalGroupIDs()) {
 
-		
-		
-		double smallest = Double.MAX_VALUE;
-		
-		INuclearSignal chosen1 = null, chosen2 = null;
-		
-		// Check all pairwise comparisons before returning a Colocalisation
-		// in case the set lengths are unequal
-		Iterator<INuclearSignal> it1 = d1.iterator();
-		while(it1.hasNext()){
-			
-			INuclearSignal s1 = it1.next();
-		
-			Iterator<INuclearSignal> it2 = d2.iterator();
-			while(it2.hasNext()){
-				INuclearSignal s2 = it2.next();
-				double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
-				
-				boolean smaller = distance < smallest;
-				
-				// Replace selected signals if closer
-				smallest  = smaller ? distance : smallest;
-				chosen2   = smaller ? s2 : chosen2;
-				chosen1   = smaller ? s1 : chosen1;
-			}
-		}
-		
-		// Make a cColocalisation from the best pair
-		
-		if(chosen1 !=null && chosen2 !=null){
-			
-			Colocalisation<INuclearSignal> col = new Colocalisation<INuclearSignal>(chosen1, chosen2);
-			d1.remove(chosen1);
-			d2.remove(chosen2);
-			result.add(col);
-			
-			if( ! d1.isEmpty() && ! d2.isEmpty()){
-				result.addAll(findColocalisingSignals(d1, d2));
-			}
-		}
-		
-		
-		return result;
-	}
-	
-		
-	/* (non-Javadoc)
-	 * @see components.nuclear.ISignalCollection#toString()
-	 */
-	@Override
-	public String toString(){
-		
-		StringBuilder b = new StringBuilder("Signal groups: ");
-		b.append(size());
-		b.append("\n ");
+            if (!this.hasSignal(id1)) {
+                continue;
+            }
 
-		for(UUID group : collection.keySet()){
-			b.append(group);
-			b.append(": ");
-			b.append(" : Channel: ");
-			b.append(this.getSourceChannel(group));
-			b.append(" : File: ");
-			b.append(this.getSourceFile(group));
-			b.append("\n");
-		}
-		return b.toString();
-	}
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-	}
-	
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-		out.defaultWriteObject();
-	}
+            List<INuclearSignal> signalList1 = this.getSignals(id1);
+
+            for (UUID id2 : this.getSignalGroupIDs()) {
+
+                if (id1.equals(id2)) {
+                    continue;
+                }
+
+                if (!this.hasSignal(id2)) {
+                    continue;
+                }
+
+                List<INuclearSignal> signalList2 = this.getSignals(id2);
+
+                // Compare all signal pairwise distances between groups 1 and 2
+                double smallest = Double.MAX_VALUE;
+                double scaleFactor = 1;
+                for (INuclearSignal s1 : signalList1) {
+                    scaleFactor = s1.getScale();
+                    for (INuclearSignal s2 : signalList2) {
+
+                        double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
+                        smallest = distance < smallest ? distance : smallest;
+
+                    }
+
+                }
+
+                // Use arbitrary distance measure to convert scale
+                smallest = PlottableStatistic.DISTANCE_FROM_COM.convert(smallest, scaleFactor, scale);
+
+                // Assign the pairwise distance
+                PairwiseSignalDistanceValue p = new PairwiseSignalDistanceValue(id1, id2, smallest);
+                result.add(p);
+
+            }
+            completeIDs.add(id1);
+        }
+        return result;
+    }
+
+    /**
+     * Calculate the shortest distances between signals in the given signal
+     * groups. Each signal is considered only once. Hence a group with 4 signals
+     * compared to a group with 3 signals will produce a list of 3 values.
+     * 
+     * @param id1
+     *            the first signal group
+     * @param id2
+     *            the second signal group
+     * @return a list of the pixel distances between paired signals
+     */
+    public List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2) {
+
+        if (id1.equals(id2)) {
+            throw new IllegalArgumentException("Signal IDs are the same");
+        }
+
+        Set<INuclearSignal> d1 = new HashSet<INuclearSignal>(this.getSignals(id1));
+        Set<INuclearSignal> d2 = new HashSet<INuclearSignal>(this.getSignals(id2));
+
+        List<Colocalisation<INuclearSignal>> result = findColocalisingSignals(d1, d2);
+
+        return result;
+
+    }
+
+    /**
+     * Recursively find signal pairs with the shortest distance between them.
+     * 
+     * @param d1
+     *            the nuclear signals in group 1
+     * @param d2
+     *            the nuclear signals in group 2
+     * @param scale
+     *            the measurement scale
+     * @return a list of best colocalising signals
+     */
+    private List<Colocalisation<INuclearSignal>> findColocalisingSignals(Set<INuclearSignal> d1,
+            Set<INuclearSignal> d2) {
+
+        List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
+
+        if (d2.isEmpty() || d1.isEmpty()) {
+            return result;
+        }
+
+        double smallest = Double.MAX_VALUE;
+
+        INuclearSignal chosen1 = null, chosen2 = null;
+
+        // Check all pairwise comparisons before returning a Colocalisation
+        // in case the set lengths are unequal
+        Iterator<INuclearSignal> it1 = d1.iterator();
+        while (it1.hasNext()) {
+
+            INuclearSignal s1 = it1.next();
+
+            Iterator<INuclearSignal> it2 = d2.iterator();
+            while (it2.hasNext()) {
+                INuclearSignal s2 = it2.next();
+                double distance = s1.getCentreOfMass().getLengthTo(s2.getCentreOfMass());
+
+                boolean smaller = distance < smallest;
+
+                // Replace selected signals if closer
+                smallest = smaller ? distance : smallest;
+                chosen2 = smaller ? s2 : chosen2;
+                chosen1 = smaller ? s1 : chosen1;
+            }
+        }
+
+        // Make a cColocalisation from the best pair
+
+        if (chosen1 != null && chosen2 != null) {
+
+            Colocalisation<INuclearSignal> col = new Colocalisation<INuclearSignal>(chosen1, chosen2);
+            d1.remove(chosen1);
+            d2.remove(chosen2);
+            result.add(col);
+
+            if (!d1.isEmpty() && !d2.isEmpty()) {
+                result.addAll(findColocalisingSignals(d1, d2));
+            }
+        }
+
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.ISignalCollection#toString()
+     */
+    @Override
+    public String toString() {
+
+        StringBuilder b = new StringBuilder("Signal groups: ");
+        b.append(size());
+        b.append("\n ");
+
+        for (UUID group : collection.keySet()) {
+            b.append(group);
+            b.append(": ");
+            b.append(" : Channel: ");
+            b.append(this.getSourceChannel(group));
+            b.append(" : File: ");
+            b.append(this.getSourceFile(group));
+            b.append("\n");
+        }
+        return b.toString();
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
 }

@@ -34,63 +34,67 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDe
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 @SuppressWarnings("serial")
-public class NeutrophilImageProber  extends IntegratedImageProber {
-	
-	private static final String DIALOG_TITLE_BAR_LBL = "Neutrophil detection settings";
+public class NeutrophilImageProber extends IntegratedImageProber {
 
-	public NeutrophilImageProber(final File folder){
-		
-		try {
+    private static final String DIALOG_TITLE_BAR_LBL = "Neutrophil detection settings";
 
-			// Create the options
-			options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
+    public NeutrophilImageProber(final File folder) {
 
-			Finder<?> finder = new NeutrophilFinder(options);
-			
-			optionsSettingsPanel = new ConstructableSettingsPanel(options)
-					.addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm detection")
-					.addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
-					.addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
-					.addThresholdPanel(IAnalysisOptions.NUCLEUS, "Nucleus threshold")
-					.addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
-					.addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL)
-					.build();
-			// make the panel
-//			optionsSettingsPanel = new NeutrophilDetectionSettingsPanel(options);
-			imageProberPanel     = new GenericImageProberPanel(folder, finder, this);
+        try {
 
-			JPanel footerPanel   = createFooter();
-			
-			this.add(optionsSettingsPanel, BorderLayout.WEST);
-			this.add(imageProberPanel,     BorderLayout.CENTER);
-			this.add(footerPanel,          BorderLayout.SOUTH);
+            // Create the options
+            options = OptionsFactory.makeDefaultNeutrophilDetectionOptions(folder);
 
-			this.setTitle(DIALOG_TITLE_BAR_LBL);
-			
-			optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform update needed
-			imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable settings while working
-						
-			
-		} catch (Exception e){
-			error("Error launching analysis window", e);
-			stack(e.getMessage(), e);
-			this.dispose();
-		}	
+            Finder<?> finder = new NeutrophilFinder(options);
 
-		this.pack();
-		this.setModal(true);
-		this.setLocationRelativeTo(null); // centre on screen
-		this.setVisible(true);
-	}
-	
-	public IMutableAnalysisOptions getOptions(){
-		return options;
-	}
+            optionsSettingsPanel = new ConstructableSettingsPanel(options)
+                    .addColourThresholdWatershedSwitchPanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm detection")
+                    .addSizePanel(IAnalysisOptions.CYTOPLASM, "Cytoplasm filtering")
+                    .addTopHatPanel(IAnalysisOptions.NUCLEUS, "Nucleus detection")
+                    .addThresholdPanel(IAnalysisOptions.NUCLEUS, "Nucleus threshold")
+                    .addSizePanel(IAnalysisOptions.NUCLEUS, "Nucleus filtering")
+                    .addNucleusProfilePanel(IAnalysisOptions.NUCLEUS, ConstructableSettingsPanel.PROFILING_LBL).build();
+            // make the panel
+            // optionsSettingsPanel = new
+            // NeutrophilDetectionSettingsPanel(options);
+            imageProberPanel = new GenericImageProberPanel(folder, finder, this);
 
-	@Override
-	protected void okButtonClicked() {
-		// no other action here
-		
-	}
+            JPanel footerPanel = createFooter();
+
+            this.add(optionsSettingsPanel, BorderLayout.WEST);
+            this.add(imageProberPanel, BorderLayout.CENTER);
+            this.add(footerPanel, BorderLayout.SOUTH);
+
+            this.setTitle(DIALOG_TITLE_BAR_LBL);
+
+            optionsSettingsPanel.addProberReloadEventListener(imageProberPanel); // inform
+                                                                                 // update
+                                                                                 // needed
+            imageProberPanel.addPanelUpdatingEventListener(optionsSettingsPanel); // disable
+                                                                                  // settings
+                                                                                  // while
+                                                                                  // working
+
+        } catch (Exception e) {
+            error("Error launching analysis window", e);
+            stack(e.getMessage(), e);
+            this.dispose();
+        }
+
+        this.pack();
+        this.setModal(true);
+        this.setLocationRelativeTo(null); // centre on screen
+        this.setVisible(true);
+    }
+
+    public IMutableAnalysisOptions getOptions() {
+        return options;
+    }
+
+    @Override
+    protected void okButtonClicked() {
+        // no other action here
+
+    }
 
 }

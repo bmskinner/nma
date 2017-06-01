@@ -22,10 +22,9 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.IOException;
 import java.util.List;
 
-
-
 /**
  * A default implementation of the ICannyOptions interface
+ * 
  * @author bms41
  * @since 1.13.3
  * 
@@ -33,398 +32,421 @@ import java.util.List;
 @Deprecated
 public class DefaultCannyOptions implements IMutableCannyOptions {
 
-		private static final long serialVersionUID = 1L;
-		
-		// values for Canny edge deteection
-		private boolean useCanny; 
-		private boolean cannyAutoThreshold;
-		
-		private boolean flattenChromocentres; 	// should the white threshold be lowered to hide internal structures?
-		private int flattenThreshold; // if the white threhold is lower, this is the value
-		private boolean useKuwahara;	// perform a Kuwahara filtering to enhance edge detection?
-		private int kuwaharaKernel;		// the radius of the Kuwahara kernel - must be an odd number
-		
-		private float lowThreshold;		// the canny low threshold
-		private float highThreshold;	// the canny high threshold
-		private float kernelRadius;		// the kernel radius
-		private int   kernelWidth;		// the kernel width
-		private int   closingObjectRadius; // the circle radius for morphological closing
-		private transient boolean isAddBorder = false;
-		
-		/**
-		 * Construct with the default options in ICannyOptions
-		 */
-		public DefaultCannyOptions(){
-			
-			useCanny            = DEFAULT_USE_CANNY;
-			cannyAutoThreshold  = DEFAULT_AUTO_THRESHOLD;
-			
-			flattenChromocentres= DEFAULT_FLATTEN_CHROMOCENTRES;
-			flattenThreshold    = DEFAULT_FLATTEN_THRESHOLD;
-			useKuwahara         = DEFAULT_USE_KUWAHARA;
-			kuwaharaKernel      = DEFAULT_KUWAHARA_KERNEL_RADIUS;
-			
-			lowThreshold        = DEFAULT_CANNY_LOW_THRESHOLD;
-			highThreshold       = DEFAULT_CANNY_HIGH_THRESHOLD;
-			kernelRadius        = DEFAULT_CANNY_KERNEL_RADIUS;
-			kernelWidth         = DEFAULT_CANNY_KERNEL_WIDTH;
-			closingObjectRadius = DEFAULT_CLOSING_OBJECT_RADIUS;
-			isAddBorder         = DEFAULT_ADD_BORDER;
-						
-		}
-		
-		/**
-		 * Construct from a template options
-		 * @param template
-		 */
-		public DefaultCannyOptions(ICannyOptions template){
-			
-			useCanny             = template.isUseCanny();
-			cannyAutoThreshold   = template.isAddBorder();
-			flattenChromocentres = template.isUseFlattenImage();
-			flattenThreshold     = template.getFlattenThreshold();
-			
-			useKuwahara          = template.isUseKuwahara();
-			kuwaharaKernel       = template.getKuwaharaKernel();
-			
-			lowThreshold         = template.getLowThreshold();
-			highThreshold        = template.getHighThreshold();
-			kernelRadius         = template.getKernelRadius();
-			kernelWidth          = template.getKernelWidth();
-			closingObjectRadius  = template.getClosingObjectRadius();
-			isAddBorder          = template.isAddBorder();
-		}
-		
-		public IMutableCannyOptions unlock(){
-			return this;
-		}
-		
-		public ICannyOptions lock(){
-			return this;
-		}
-		
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#isUseCanny()
-		 */
-		@Override
-		public boolean isUseCanny() {
-			return useCanny;
-		}
+    private static final long serialVersionUID = 1L;
 
+    // values for Canny edge deteection
+    private boolean useCanny;
+    private boolean cannyAutoThreshold;
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setUseCanny(boolean)
-		 */
-		@Override
-		public void setUseCanny(boolean useCanny) {
-			this.useCanny = useCanny;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#isUseFlattenImage()
-		 */
-		@Override
-		public boolean isUseFlattenImage() {
-			return flattenChromocentres;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setFlattenImage(boolean)
-		 */
-		@Override
-		public void setFlattenImage(boolean flattenImage) {
-			this.flattenChromocentres = flattenImage;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getFlattenThreshold()
-		 */
-		@Override
-		public int getFlattenThreshold() {
-			return flattenThreshold;
-		}
+    private boolean flattenChromocentres; // should the white threshold be
+                                          // lowered to hide internal
+                                          // structures?
+    private int     flattenThreshold;     // if the white threhold is lower,
+                                          // this is the value
+    private boolean useKuwahara;          // perform a Kuwahara filtering to
+                                          // enhance edge detection?
+    private int     kuwaharaKernel;       // the radius of the Kuwahara kernel -
+                                          // must be an odd number
 
+    private float             lowThreshold;        // the canny low threshold
+    private float             highThreshold;       // the canny high threshold
+    private float             kernelRadius;        // the kernel radius
+    private int               kernelWidth;         // the kernel width
+    private int               closingObjectRadius; // the circle radius for
+                                                   // morphological closing
+    private transient boolean isAddBorder = false;
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setFlattenThreshold(int)
-		 */
-		@Override
-		public void setFlattenThreshold(int flattenThreshold) {
-			this.flattenThreshold = flattenThreshold;
-		}
-		
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#isUseKuwahara()
-		 */
-		@Override
-		public boolean isUseKuwahara() {
-			return useKuwahara;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setUseKuwahara(boolean)
-		 */
-		@Override
-		public void setUseKuwahara(boolean b){
-			this.useKuwahara = b;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getKuwaharaKernel()
-		 */
-		@Override
-		public int getKuwaharaKernel(){
-			return kuwaharaKernel;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setKuwaharaKernel(int)
-		 */
-		@Override
-		public void setKuwaharaKernel(int radius){
-			kuwaharaKernel = radius;
-		}
+    /**
+     * Construct with the default options in ICannyOptions
+     */
+    public DefaultCannyOptions() {
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getClosingObjectRadius()
-		 */
-		@Override
-		public int getClosingObjectRadius() {
-			return closingObjectRadius;
-		}
+        useCanny = DEFAULT_USE_CANNY;
+        cannyAutoThreshold = DEFAULT_AUTO_THRESHOLD;
 
+        flattenChromocentres = DEFAULT_FLATTEN_CHROMOCENTRES;
+        flattenThreshold = DEFAULT_FLATTEN_THRESHOLD;
+        useKuwahara = DEFAULT_USE_KUWAHARA;
+        kuwaharaKernel = DEFAULT_KUWAHARA_KERNEL_RADIUS;
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setClosingObjectRadius(int)
-		 */
-		@Override
-		public void setClosingObjectRadius(int closingObjectRadius) {
-			this.closingObjectRadius = closingObjectRadius;
-		}
+        lowThreshold = DEFAULT_CANNY_LOW_THRESHOLD;
+        highThreshold = DEFAULT_CANNY_HIGH_THRESHOLD;
+        kernelRadius = DEFAULT_CANNY_KERNEL_RADIUS;
+        kernelWidth = DEFAULT_CANNY_KERNEL_WIDTH;
+        closingObjectRadius = DEFAULT_CLOSING_OBJECT_RADIUS;
+        isAddBorder = DEFAULT_ADD_BORDER;
 
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#isCannyAutoThreshold()
-		 */
-		@Override
-		public boolean isCannyAutoThreshold() {
-			return cannyAutoThreshold;
-		}
+    /**
+     * Construct from a template options
+     * 
+     * @param template
+     */
+    public DefaultCannyOptions(ICannyOptions template) {
 
+        useCanny = template.isUseCanny();
+        cannyAutoThreshold = template.isAddBorder();
+        flattenChromocentres = template.isUseFlattenImage();
+        flattenThreshold = template.getFlattenThreshold();
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setCannyAutoThreshold(boolean)
-		 */
-		@Override
-		public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
-			this.cannyAutoThreshold = cannyAutoThreshold;
-		}
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getLowThreshold()
-		 */
-		@Override
-		public float getLowThreshold() {
-			return lowThreshold;
-		}
+        useKuwahara = template.isUseKuwahara();
+        kuwaharaKernel = template.getKuwaharaKernel();
 
+        lowThreshold = template.getLowThreshold();
+        highThreshold = template.getHighThreshold();
+        kernelRadius = template.getKernelRadius();
+        kernelWidth = template.getKernelWidth();
+        closingObjectRadius = template.getClosingObjectRadius();
+        isAddBorder = template.isAddBorder();
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setLowThreshold(float)
-		 */
-		@Override
-		public void setLowThreshold(float lowThreshold) {
-			this.lowThreshold = lowThreshold;
-		}
+    public IMutableCannyOptions unlock() {
+        return this;
+    }
 
+    public ICannyOptions lock() {
+        return this;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getHighThreshold()
-		 */
-		@Override
-		public float getHighThreshold() {
-			return highThreshold;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#isUseCanny()
+     */
+    @Override
+    public boolean isUseCanny() {
+        return useCanny;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setUseCanny(boolean)
+     */
+    @Override
+    public void setUseCanny(boolean useCanny) {
+        this.useCanny = useCanny;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setHighThreshold(float)
-		 */
-		@Override
-		public void setHighThreshold(float highThreshold) {
-			this.highThreshold = highThreshold;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#isUseFlattenImage()
+     */
+    @Override
+    public boolean isUseFlattenImage() {
+        return flattenChromocentres;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setFlattenImage(boolean)
+     */
+    @Override
+    public void setFlattenImage(boolean flattenImage) {
+        this.flattenChromocentres = flattenImage;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getKernelRadius()
-		 */
-		@Override
-		public float getKernelRadius() {
-			return kernelRadius;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getFlattenThreshold()
+     */
+    @Override
+    public int getFlattenThreshold() {
+        return flattenThreshold;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setFlattenThreshold(int)
+     */
+    @Override
+    public void setFlattenThreshold(int flattenThreshold) {
+        this.flattenThreshold = flattenThreshold;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setKernelRadius(float)
-		 */
-		@Override
-		public void setKernelRadius(float kernelRadius) {
-			this.kernelRadius = kernelRadius;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#isUseKuwahara()
+     */
+    @Override
+    public boolean isUseKuwahara() {
+        return useKuwahara;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setUseKuwahara(boolean)
+     */
+    @Override
+    public void setUseKuwahara(boolean b) {
+        this.useKuwahara = b;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#getKernelWidth()
-		 */
-		@Override
-		public int getKernelWidth() {
-			return kernelWidth;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getKuwaharaKernel()
+     */
+    @Override
+    public int getKuwaharaKernel() {
+        return kuwaharaKernel;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setKuwaharaKernel(int)
+     */
+    @Override
+    public void setKuwaharaKernel(int radius) {
+        kuwaharaKernel = radius;
+    }
 
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#setKernelWidth(int)
-		 */
-		@Override
-		public void setKernelWidth(int kernelWidth) {
-			this.kernelWidth = kernelWidth;
-		}
-		
-		
-		
-		/* (non-Javadoc)
-		 * @see analysis.ICannyOptions#hashCode()
-		 */
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + (cannyAutoThreshold ? 1231 : 1237);
-			result = prime * result + closingObjectRadius;
-			result = prime * result + (flattenChromocentres ? 1231 : 1237);
-			result = prime * result + flattenThreshold;
-			result = prime * result + Float.floatToIntBits(highThreshold);
-			result = prime * result + Float.floatToIntBits(kernelRadius);
-			result = prime * result + kernelWidth;
-			result = prime * result + kuwaharaKernel;
-			result = prime * result + Float.floatToIntBits(lowThreshold);
-			result = prime * result + (useCanny ? 1231 : 1237);
-			result = prime * result + (useKuwahara ? 1231 : 1237);
-			return result;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getClosingObjectRadius()
+     */
+    @Override
+    public int getClosingObjectRadius() {
+        return closingObjectRadius;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setClosingObjectRadius(int)
+     */
+    @Override
+    public void setClosingObjectRadius(int closingObjectRadius) {
+        this.closingObjectRadius = closingObjectRadius;
+    }
 
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			
-			if (obj == null)
-				return false;
-			
-			if ( ! (obj instanceof  ICannyOptions))
-				return false;
-			
-			ICannyOptions other = (ICannyOptions) obj;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#isCannyAutoThreshold()
+     */
+    @Override
+    public boolean isCannyAutoThreshold() {
+        return cannyAutoThreshold;
+    }
 
-			if (cannyAutoThreshold != other.isCannyAutoThreshold())
-				return false;
-			if (closingObjectRadius != other.getClosingObjectRadius())
-				return false;
-			if (flattenChromocentres != other.isUseFlattenImage())
-				return false;
-			if (flattenThreshold != other.getFlattenThreshold())
-				return false;
-			if (Float.floatToIntBits(highThreshold) != Float
-					.floatToIntBits(other.getHighThreshold()))
-				return false;
-			if (Float.floatToIntBits(kernelRadius) != Float
-					.floatToIntBits(other.getKernelRadius()))
-				return false;
-			if (kernelWidth != other.getKernelWidth())
-				return false;
-			if (kuwaharaKernel != other.getKuwaharaKernel())
-				return false;
-			if (Float.floatToIntBits(lowThreshold) != Float
-					.floatToIntBits(other.getLowThreshold()))
-				return false;
-			if (useCanny != other.isUseCanny())
-				return false;
-			if (useKuwahara != other.isUseKuwahara())
-				return false;
-			return true;
-		}
-		
-		private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		    
-			/*
-			 * The chromocentre flattening parameter and Kuwahara
-			 * kernel parameter are transient. When these are stored,
-			 * check if they were filled, and override if needed.
-			 */
-			in.defaultReadObject();
-		    isAddBorder = false;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setCannyAutoThreshold(boolean)
+     */
+    @Override
+    public void setCannyAutoThreshold(boolean cannyAutoThreshold) {
+        this.cannyAutoThreshold = cannyAutoThreshold;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getLowThreshold()
+     */
+    @Override
+    public float getLowThreshold() {
+        return lowThreshold;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setLowThreshold(float)
+     */
+    @Override
+    public void setLowThreshold(float lowThreshold) {
+        this.lowThreshold = lowThreshold;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getHighThreshold()
+     */
+    @Override
+    public float getHighThreshold() {
+        return highThreshold;
+    }
 
-		@Override
-		public boolean isAddBorder() {
-			return isAddBorder;
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setHighThreshold(float)
+     */
+    @Override
+    public void setHighThreshold(float highThreshold) {
+        this.highThreshold = highThreshold;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getKernelRadius()
+     */
+    @Override
+    public float getKernelRadius() {
+        return kernelRadius;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setKernelRadius(float)
+     */
+    @Override
+    public void setKernelRadius(float kernelRadius) {
+        this.kernelRadius = kernelRadius;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#getKernelWidth()
+     */
+    @Override
+    public int getKernelWidth() {
+        return kernelWidth;
+    }
 
-		@Override
-		public void setAddBorder(boolean b) {
-			isAddBorder = b;
-			
-		}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#setKernelWidth(int)
+     */
+    @Override
+    public void setKernelWidth(int kernelWidth) {
+        this.kernelWidth = kernelWidth;
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see analysis.ICannyOptions#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (cannyAutoThreshold ? 1231 : 1237);
+        result = prime * result + closingObjectRadius;
+        result = prime * result + (flattenChromocentres ? 1231 : 1237);
+        result = prime * result + flattenThreshold;
+        result = prime * result + Float.floatToIntBits(highThreshold);
+        result = prime * result + Float.floatToIntBits(kernelRadius);
+        result = prime * result + kernelWidth;
+        result = prime * result + kuwaharaKernel;
+        result = prime * result + Float.floatToIntBits(lowThreshold);
+        result = prime * result + (useCanny ? 1231 : 1237);
+        result = prime * result + (useKuwahara ? 1231 : 1237);
+        return result;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
 
+        if (obj == null)
+            return false;
 
-		@Override
-		public IMutableCannyOptions duplicate() {
-			return new DefaultCannyOptions(this);
-		}
+        if (!(obj instanceof ICannyOptions))
+            return false;
 
-		@Override
-		public void set(ICannyOptions template) {
+        ICannyOptions other = (ICannyOptions) obj;
 
-			useCanny             = template.isUseCanny();
-			cannyAutoThreshold   = template.isAddBorder();
-			flattenChromocentres = template.isUseFlattenImage();
-			flattenThreshold     = template.getFlattenThreshold();
-			
-			useKuwahara          = template.isUseKuwahara();
-			kuwaharaKernel       = template.getKuwaharaKernel();
-			
-			lowThreshold         = template.getLowThreshold();
-			highThreshold        = template.getHighThreshold();
-			kernelRadius         = template.getKernelRadius();
-			kernelWidth          = template.getKernelWidth();
-			closingObjectRadius  = template.getClosingObjectRadius();
-			isAddBorder          = template.isAddBorder();
-			
-		}
+        if (cannyAutoThreshold != other.isCannyAutoThreshold())
+            return false;
+        if (closingObjectRadius != other.getClosingObjectRadius())
+            return false;
+        if (flattenChromocentres != other.isUseFlattenImage())
+            return false;
+        if (flattenThreshold != other.getFlattenThreshold())
+            return false;
+        if (Float.floatToIntBits(highThreshold) != Float.floatToIntBits(other.getHighThreshold()))
+            return false;
+        if (Float.floatToIntBits(kernelRadius) != Float.floatToIntBits(other.getKernelRadius()))
+            return false;
+        if (kernelWidth != other.getKernelWidth())
+            return false;
+        if (kuwaharaKernel != other.getKuwaharaKernel())
+            return false;
+        if (Float.floatToIntBits(lowThreshold) != Float.floatToIntBits(other.getLowThreshold()))
+            return false;
+        if (useCanny != other.isUseCanny())
+            return false;
+        if (useKuwahara != other.isUseKuwahara())
+            return false;
+        return true;
+    }
 
-		@Override
-		public List<String> getKeys() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
-		@Override
-		public Object getValue(String key) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-	
+        /*
+         * The chromocentre flattening parameter and Kuwahara kernel parameter
+         * are transient. When these are stored, check if they were filled, and
+         * override if needed.
+         */
+        in.defaultReadObject();
+        isAddBorder = false;
+    }
+
+    @Override
+    public boolean isAddBorder() {
+        return isAddBorder;
+    }
+
+    @Override
+    public void setAddBorder(boolean b) {
+        isAddBorder = b;
+
+    }
+
+    @Override
+    public IMutableCannyOptions duplicate() {
+        return new DefaultCannyOptions(this);
+    }
+
+    @Override
+    public void set(ICannyOptions template) {
+
+        useCanny = template.isUseCanny();
+        cannyAutoThreshold = template.isAddBorder();
+        flattenChromocentres = template.isUseFlattenImage();
+        flattenThreshold = template.getFlattenThreshold();
+
+        useKuwahara = template.isUseKuwahara();
+        kuwaharaKernel = template.getKuwaharaKernel();
+
+        lowThreshold = template.getLowThreshold();
+        highThreshold = template.getHighThreshold();
+        kernelRadius = template.getKernelRadius();
+        kernelWidth = template.getKernelWidth();
+        closingObjectRadius = template.getClosingObjectRadius();
+        isAddBorder = template.isAddBorder();
+
+    }
+
+    @Override
+    public List<String> getKeys() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Object getValue(String key) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

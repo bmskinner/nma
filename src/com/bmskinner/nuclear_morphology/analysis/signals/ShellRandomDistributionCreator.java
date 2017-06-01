@@ -32,163 +32,161 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-
 public class ShellRandomDistributionCreator implements Loggable {
-	
-	public static final UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-	
-	/**
-	 * Store the shell as a key, and the number of signals measured as a value
-	 */
-	private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
-	
-	public static final int DEFAULT_ITERATIONS = 10000;
 
-	
-	public ShellRandomDistributionCreator(CellularComponent template, int shellCount, int iterations){
-		
-		if(shellCount<=1){
-			throw new IllegalArgumentException("Shell count must be > 1");
-		}
-		
-		// Make a list of random points
-		
-		double xCen = template.getBounds().getCenterX();
-		double yCen = template.getBounds().getCenterY();
-		double xMin = template.getBounds().getMinX();
-		double xMax = template.getBounds().getMaxX();
-		double yMin = template.getBounds().getMinY();
-		double yMax = template.getBounds().getMaxY();
-		
-		List<IPoint> list = new ArrayList<IPoint>();
-		for(int i=0; i<iterations; i++){
-			list.add(createRandomPoint(template));
-		}
-		
-		
-		// Find the shell for these points in the template
-		ShellDetector detector;
-		try {
-			detector = new ShellDetector(template, shellCount);
-			
-			// initialise the map
-			for(int i=-1; i<shellCount; i++){
-				map.put(i, 0);
-			}
-			
-			
-			for(IPoint p : list){
-				int shell = detector.findShell(p);
-				
-				
-				int count = map.get(shell);
-				map.put(shell, ++count);
-			}
-			
-		} catch (ShellAnalysisException e) {
-			error("Simulation failed", e);
-		}
-		
-		int neg1 = -1;
-		
-		if(map.get(neg1) > 0){
-			fine("Unable to map "+map.get(neg1)+" points");
-		}
+    public static final UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-	}
-	
-	/**
-	 * Get the number of signals measured in the given shell
-	 * @param shell
-	 * @return
-	 */
-	public int getCount(int shell){
-		if(!map.containsKey(shell)){
-			return 0;
-		}
-		return map.get(shell);
-	}
-	
-	/**
-	 * Get the total number of hits excluding unmapped points
-	 * @return
-	 */
-	private int getTotalCount(){
-		int result = 0;
-		for(int i : map.keySet()){
-			if (i==-1){
-				continue;
-			}
-			result += map.get(i);
-		}
-		return result;
-	}
-	
-	/**
-	 * Get the proportion of total signal in the given shell
-	 * @param shell
-	 * @return
-	 */
-	public double getProportion(int shell){
-		if(!map.containsKey(shell)){
-			return 0;
-		}
-		int total = getTotalCount();
-		
-		int count = map.get(shell);
-		
-		double prop = (double) count / (double) total;
+    /**
+     * Store the shell as a key, and the number of signals measured as a value
+     */
+    private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
 
-		return prop;
-	}
-	
-	public double[] getProportions(){
-		
-		int shells = map.size()-1;
-		
-		double[] result = new double[shells];
-		
-		for(int i=0; i<shells; i++){
-			result[i] = getProportion(i);
-		}
-		return result;
-	}
-	
-	public int[] getCounts(){
-		
-		int shells = map.size()-1;
-		
-		int[] result = new int[shells];
-		
-		for(int i=0; i<shells; i++){
-			result[i] = getCount(i);
-		}
-		return result;
-	}
-	
-	/**
-	 * Create a random point that lies within the template
-	 * @param template
-	 * @return
-	 */
-	private IPoint createRandomPoint(CellularComponent template){
-		
-		Rectangle2D r = template.getBounds();
-		
-		
-		// Make a random position in the rectangle
-		// nextDouble is exclusive of the top value,
-		// so add 1 to make it inclusive
-		double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
-		double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
-		
-		IPoint p = IPoint.makeNew(rx, ry);
-		
-		if(template.containsPoint(p)){
-			return p;
-		} else {
-			return createRandomPoint(template);
-		}
-		
-	}
+    public static final int DEFAULT_ITERATIONS = 10000;
+
+    public ShellRandomDistributionCreator(CellularComponent template, int shellCount, int iterations) {
+
+        if (shellCount <= 1) {
+            throw new IllegalArgumentException("Shell count must be > 1");
+        }
+
+        // Make a list of random points
+
+        double xCen = template.getBounds().getCenterX();
+        double yCen = template.getBounds().getCenterY();
+        double xMin = template.getBounds().getMinX();
+        double xMax = template.getBounds().getMaxX();
+        double yMin = template.getBounds().getMinY();
+        double yMax = template.getBounds().getMaxY();
+
+        List<IPoint> list = new ArrayList<IPoint>();
+        for (int i = 0; i < iterations; i++) {
+            list.add(createRandomPoint(template));
+        }
+
+        // Find the shell for these points in the template
+        ShellDetector detector;
+        try {
+            detector = new ShellDetector(template, shellCount);
+
+            // initialise the map
+            for (int i = -1; i < shellCount; i++) {
+                map.put(i, 0);
+            }
+
+            for (IPoint p : list) {
+                int shell = detector.findShell(p);
+
+                int count = map.get(shell);
+                map.put(shell, ++count);
+            }
+
+        } catch (ShellAnalysisException e) {
+            error("Simulation failed", e);
+        }
+
+        int neg1 = -1;
+
+        if (map.get(neg1) > 0) {
+            fine("Unable to map " + map.get(neg1) + " points");
+        }
+
+    }
+
+    /**
+     * Get the number of signals measured in the given shell
+     * 
+     * @param shell
+     * @return
+     */
+    public int getCount(int shell) {
+        if (!map.containsKey(shell)) {
+            return 0;
+        }
+        return map.get(shell);
+    }
+
+    /**
+     * Get the total number of hits excluding unmapped points
+     * 
+     * @return
+     */
+    private int getTotalCount() {
+        int result = 0;
+        for (int i : map.keySet()) {
+            if (i == -1) {
+                continue;
+            }
+            result += map.get(i);
+        }
+        return result;
+    }
+
+    /**
+     * Get the proportion of total signal in the given shell
+     * 
+     * @param shell
+     * @return
+     */
+    public double getProportion(int shell) {
+        if (!map.containsKey(shell)) {
+            return 0;
+        }
+        int total = getTotalCount();
+
+        int count = map.get(shell);
+
+        double prop = (double) count / (double) total;
+
+        return prop;
+    }
+
+    public double[] getProportions() {
+
+        int shells = map.size() - 1;
+
+        double[] result = new double[shells];
+
+        for (int i = 0; i < shells; i++) {
+            result[i] = getProportion(i);
+        }
+        return result;
+    }
+
+    public int[] getCounts() {
+
+        int shells = map.size() - 1;
+
+        int[] result = new int[shells];
+
+        for (int i = 0; i < shells; i++) {
+            result[i] = getCount(i);
+        }
+        return result;
+    }
+
+    /**
+     * Create a random point that lies within the template
+     * 
+     * @param template
+     * @return
+     */
+    private IPoint createRandomPoint(CellularComponent template) {
+
+        Rectangle2D r = template.getBounds();
+
+        // Make a random position in the rectangle
+        // nextDouble is exclusive of the top value,
+        // so add 1 to make it inclusive
+        double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
+        double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
+
+        IPoint p = IPoint.makeNew(rx, ry);
+
+        if (template.containsPoint(p)) {
+            return p;
+        } else {
+            return createRandomPoint(template);
+        }
+
+    }
 }

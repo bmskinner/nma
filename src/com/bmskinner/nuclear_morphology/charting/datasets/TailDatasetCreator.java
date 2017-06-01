@@ -27,65 +27,69 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class TailDatasetCreator implements Loggable {
-	
-	/**
-	 * Get a dataset contining the outlines of all tails within the cell
-	 * as series
-	 * @param cell the cell
-	 * @return an XY dataset
-	 */
-	public static XYDataset createTailOutline(ICell cell){
-		DefaultXYDataset ds = new DefaultXYDataset();
-		
-		int j = 0;
-		for(Flagellum tail : cell.getFlagella()){
 
-			double[] xpoints = new double[tail.getBorder().size()];
-			double[] ypoints = new double[tail.getBorder().size()];
+    /**
+     * Get a dataset contining the outlines of all tails within the cell as
+     * series
+     * 
+     * @param cell
+     *            the cell
+     * @return an XY dataset
+     */
+    public static XYDataset createTailOutline(ICell cell) {
+        DefaultXYDataset ds = new DefaultXYDataset();
 
-			int i =0;
-			for(IPoint p : tail.getBorder()){
-				xpoints[i] = p.getX();
-				ypoints[i] = p.getY();
-				i++;
-			}
+        int j = 0;
+        for (Flagellum tail : cell.getFlagella()) {
 
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Border_"+j, data);
-			j++;
-		}
-		
-		return ds;
+            double[] xpoints = new double[tail.getBorder().size()];
+            double[] ypoints = new double[tail.getBorder().size()];
 
-	}
-	
-	/**
-	 * Get a dataset contining the skeletons of all tails within the cell
-	 * as series
-	 * @param cell the cell
-	 * @return an XY dataset
-	 */
-	public static XYDataset createTailSkeleton(ICell cell){
-		DefaultXYDataset ds = new DefaultXYDataset();
+            int i = 0;
+            for (IPoint p : tail.getBorder()) {
+                xpoints[i] = p.getX();
+                ypoints[i] = p.getY();
+                i++;
+            }
 
-		int j = 0;
-		for(Flagellum tail : cell.getFlagella()){
+            double[][] data = { xpoints, ypoints };
+            ds.addSeries("Border_" + j, data);
+            j++;
+        }
 
-			double[] xpoints = new double[tail.getSkeleton().size()];
-			double[] ypoints = new double[tail.getSkeleton().size()];
+        return ds;
 
-			int i =0;
-			for(IPoint p : tail.getSkeleton()){
-				xpoints[i] = p.getX();
-				ypoints[i] = p.getY();
-				i++;
-			}
+    }
 
-			double[][] data = { xpoints, ypoints };
-			ds.addSeries("Skeleton_"+j, data);
-			j++;
-		}
-		return ds;
-	}
+    /**
+     * Get a dataset contining the skeletons of all tails within the cell as
+     * series
+     * 
+     * @param cell
+     *            the cell
+     * @return an XY dataset
+     */
+    public static XYDataset createTailSkeleton(ICell cell) {
+        DefaultXYDataset ds = new DefaultXYDataset();
+
+        int j = 0;
+        for (Flagellum tail : cell.getFlagella()) {
+
+            double[] xpoints = new double[tail.getSkeleton().size()];
+            double[] ypoints = new double[tail.getSkeleton().size()];
+
+            int i = 0;
+            for (IPoint p : tail.getSkeleton()) {
+                xpoints[i] = p.getX();
+                ypoints[i] = p.getY();
+                i++;
+            }
+
+            double[][] data = { xpoints, ypoints };
+            ds.addSeries("Skeleton_" + j, data);
+            j++;
+        }
+        return ds;
+    }
 
 }

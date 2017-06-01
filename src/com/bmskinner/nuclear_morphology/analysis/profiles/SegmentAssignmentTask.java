@@ -33,153 +33,155 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")
-public class SegmentAssignmentTask  extends AbstractProgressAction  {
-	
-	final ISegmentedProfile median;
-	final int low, high;
-	final Nucleus[] nuclei;
-	private static final int THRESHOLD = 30;
-	
-	protected SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high) throws ProfileException{
-	
-		this.low    = low;
-		this.high   = high;
-		this.nuclei = nuclei;
-		this.median = medianProfile;
-	}
-	
-	public SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei) throws ProfileException {
-		this(medianProfile, nuclei, 0, nuclei.length);
-	}
+public class SegmentAssignmentTask extends AbstractProgressAction {
 
-	protected void compute() {
-	     if (high - low < THRESHOLD)
-			try {
-				processNuclei();
-			} catch (ProfileException e) {
-	    		 warn("Error assigning segments to nuclei");
-	    		 fine("Error processing nuclei", e);
-	    	 }
-	     else {
-	    	 int mid = (low + high) >>> 1;
+    final ISegmentedProfile  median;
+    final int                low, high;
+    final Nucleus[]          nuclei;
+    private static final int THRESHOLD = 30;
 
-	    	 List<SegmentAssignmentTask> tasks = new ArrayList<SegmentAssignmentTask>();
-	    	 SegmentAssignmentTask task1;
-	    	 try {
-	    		 task1 = new SegmentAssignmentTask(median, nuclei, low, mid);
+    protected SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei, int low, int high)
+            throws ProfileException {
 
-	    		 task1.addProgressListener(this);
+        this.low = low;
+        this.high = high;
+        this.nuclei = nuclei;
+        this.median = medianProfile;
+    }
 
+    public SegmentAssignmentTask(ISegmentedProfile medianProfile, Nucleus[] nuclei) throws ProfileException {
+        this(medianProfile, nuclei, 0, nuclei.length);
+    }
 
-	    		 SegmentAssignmentTask task2 = new SegmentAssignmentTask(median, nuclei, mid, high);
-	    		 task2.addProgressListener(this);
+    protected void compute() {
+        if (high - low < THRESHOLD)
+            try {
+                processNuclei();
+            } catch (ProfileException e) {
+                warn("Error assigning segments to nuclei");
+                fine("Error processing nuclei", e);
+            }
+        else {
+            int mid = (low + high) >>> 1;
 
-	    		 tasks.add(task1);
-	    		 tasks.add(task2);
+            List<SegmentAssignmentTask> tasks = new ArrayList<SegmentAssignmentTask>();
+            SegmentAssignmentTask task1;
+            try {
+                task1 = new SegmentAssignmentTask(median, nuclei, low, mid);
 
-	    		 ForkJoinTask.invokeAll(tasks);
-	    	 } catch (ProfileException e) {
-	    		 warn("Error assigning segments to nucleus");
-	    		 fine("Error processing nuclei", e);
-	    	 }
+                task1.addProgressListener(this);
 
-	     }
-	}
-	
-	/**
-	 * From the calculated median profile segments, assign segments to each nucleus
-	 * based on the best offset fit of the start and end indexes 
-	 */
-	private void processNuclei() throws ProfileException {
+                SegmentAssignmentTask task2 = new SegmentAssignmentTask(median, nuclei, mid, high);
+                task2.addProgressListener(this);
 
-		for(int i=low; i<high; i++){
-			assignSegmentsToNucleus(nuclei[i]);
-			fireProgressEvent();
-		}
+                tasks.add(task1);
+                tasks.add(task2);
 
-	}
+                ForkJoinTask.invokeAll(tasks);
+            } catch (ProfileException e) {
+                warn("Error assigning segments to nucleus");
+                fine("Error processing nuclei", e);
+            }
 
-	/**
-	 * Assign the median segments to the nucleus, finding the best match of the nucleus
-	 * profile to the median profile
-	 * @param n the nucleus to segment
-	 * @param median the segmented median profile
-	 */
-	private void assignSegmentsToNucleus(Nucleus n) throws ProfileException {
+        }
+    }
 
-		if(n.isLocked()){
-			finest(n.getNameAndNumber()+" is locked, skipping");
-			return;
-		} else {
-			finest("Assigning segments to "+n.getNameAndNumber());
-		}
-		
-		// remove any existing segments in the nucleus
-		ISegmentedProfile nucleusProfile;
-		try {
-			nucleusProfile = n.getProfile(ProfileType.ANGLE);
-		} catch (UnavailableProfileTypeException e1) {
-			warn("Cannot get angle profile for nucleus");
-			stack("Profile type angle is not available", e1);
-			return;
-		}
-		nucleusProfile.clearSegments();
+    /**
+     * From the calculated median profile segments, assign segments to each
+     * nucleus based on the best offset fit of the start and end indexes
+     */
+    private void processNuclei() throws ProfileException {
 
-		List<IBorderSegment> nucleusSegments = new ArrayList<IBorderSegment>();
+        for (int i = low; i < high; i++) {
+            assignSegmentsToNucleus(nuclei[i]);
+            fireProgressEvent();
+        }
 
-		// go through each segment defined for the median curve
-		IBorderSegment prevSeg = null;
+    }
 
-		for(IBorderSegment segment : median.getSegments()){
+    /**
+     * Assign the median segments to the nucleus, finding the best match of the
+     * nucleus profile to the median profile
+     * 
+     * @param n
+     *            the nucleus to segment
+     * @param median
+     *            the segmented median profile
+     */
+    private void assignSegmentsToNucleus(Nucleus n) throws ProfileException {
 
-			// get the positions the segment begins and ends in the median profile
-			int startIndexInMedian 	= segment.getStartIndex();
-			int endIndexInMedian 	= segment.getEndIndex();
+        if (n.isLocked()) {
+            finest(n.getNameAndNumber() + " is locked, skipping");
+            return;
+        } else {
+            finest("Assigning segments to " + n.getNameAndNumber());
+        }
 
-			// find the positions these correspond to in the offset profiles
+        // remove any existing segments in the nucleus
+        ISegmentedProfile nucleusProfile;
+        try {
+            nucleusProfile = n.getProfile(ProfileType.ANGLE);
+        } catch (UnavailableProfileTypeException e1) {
+            warn("Cannot get angle profile for nucleus");
+            stack("Profile type angle is not available", e1);
+            return;
+        }
+        nucleusProfile.clearSegments();
 
-			// get the median profile, indexed to the start or end point
-			IProfile startOffsetMedian 	= median.offset(startIndexInMedian);
-			IProfile endOffsetMedian 	= median.offset(endIndexInMedian);
-			
-			try {
-				
-				// find the index at the point of the best fit
-				int startIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
-				int endIndex 	= n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
+        List<IBorderSegment> nucleusSegments = new ArrayList<IBorderSegment>();
 
+        // go through each segment defined for the median curve
+        IBorderSegment prevSeg = null;
 
+        for (IBorderSegment segment : median.getSegments()) {
 
-				IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(), segment.getID());
-				if(prevSeg != null){
-					seg.setPrevSegment(prevSeg);
-					prevSeg.setNextSegment(seg);
-				}
+            // get the positions the segment begins and ends in the median
+            // profile
+            int startIndexInMedian = segment.getStartIndex();
+            int endIndexInMedian = segment.getEndIndex();
 
-				nucleusSegments.add(seg);
+            // find the positions these correspond to in the offset profiles
 
-				prevSeg = seg;
-			
-			} catch(IllegalArgumentException | UnavailableProfileTypeException e){
-				warn("Cannot make segment");
-				stack("Error making segment for nucleus "+n.getNameAndNumber(), e);
-				break;
-				
-			}
+            // get the median profile, indexed to the start or end point
+            IProfile startOffsetMedian = median.offset(startIndexInMedian);
+            IProfile endOffsetMedian = median.offset(endIndexInMedian);
 
-		}
+            try {
 
-		IBorderSegment.linkSegments(nucleusSegments);
-		
-		nucleusProfile.setSegments(nucleusSegments);
+                // find the index at the point of the best fit
+                int startIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(startOffsetMedian);
+                int endIndex = n.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(endOffsetMedian);
 
-		n.setProfile(ProfileType.ANGLE, nucleusProfile);
-		finest("Assigned segments to nucleus "+n.getNameAndNumber()+":");
-		finest(nucleusProfile.toString());
-		
-		finest("Assigned segments to "+n.getNameAndNumber());
-		
-	}
+                IBorderSegment seg = IBorderSegment.newSegment(startIndex, endIndex, n.getBorderLength(),
+                        segment.getID());
+                if (prevSeg != null) {
+                    seg.setPrevSegment(prevSeg);
+                    prevSeg.setNextSegment(seg);
+                }
 
+                nucleusSegments.add(seg);
+
+                prevSeg = seg;
+
+            } catch (IllegalArgumentException | UnavailableProfileTypeException e) {
+                warn("Cannot make segment");
+                stack("Error making segment for nucleus " + n.getNameAndNumber(), e);
+                break;
+
+            }
+
+        }
+
+        IBorderSegment.linkSegments(nucleusSegments);
+
+        nucleusProfile.setSegments(nucleusSegments);
+
+        n.setProfile(ProfileType.ANGLE, nucleusProfile);
+        finest("Assigned segments to nucleus " + n.getNameAndNumber() + ":");
+        finest(nucleusProfile.toString());
+
+        finest("Assigned segments to " + n.getNameAndNumber());
+
+    }
 
 }

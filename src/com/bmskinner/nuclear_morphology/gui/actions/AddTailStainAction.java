@@ -32,50 +32,50 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.TailDetectionSettingsDialog;
 
 public class AddTailStainAction extends SingleDatasetResultAction {
 
-	public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, "Tail detection", mw);
-		
-	}
-	
-	@Override
-	public void run(){
-		try{
+    public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
+        super(dataset, "Tail detection", mw);
 
-			TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
+    }
 
-			final int channel = analysisSetup.getChannel();
+    @Override
+    public void run() {
+        try {
 
-			DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
-			String folderName = openDialog.getDirectory();
+            TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
 
-			if(folderName==null){
-				this.cancel();
-				return; // user cancelled
-			}
+            final int channel = analysisSetup.getChannel();
 
-			final File folder =  new File(folderName);
+            DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+            String folderName = openDialog.getDirectory();
 
-			if(!folder.isDirectory() ){
-				this.cancel();
-				return;
-			}
-			if(!folder.exists()){
-				this.cancel();
-				return; // check folder is ok
-			}
-			
-			IAnalysisMethod m = new TailDetectionMethod(dataset, folder, channel);
-			
-			worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+            if (folderName == null) {
+                this.cancel();
+                return; // user cancelled
+            }
 
-//			worker = new TubulinTailDetector(dataset, folder, channel);
-			worker.addPropertyChangeListener(this);
-			this.setProgressMessage("Tail detection:"+dataset.getName());
-			ThreadManager.getInstance().submit(worker);
-		} catch(Exception e){
-			this.cancel();
-			error("Error in tail analysis", e);
+            final File folder = new File(folderName);
 
-		}
-	}
+            if (!folder.isDirectory()) {
+                this.cancel();
+                return;
+            }
+            if (!folder.exists()) {
+                this.cancel();
+                return; // check folder is ok
+            }
+
+            IAnalysisMethod m = new TailDetectionMethod(dataset, folder, channel);
+
+            worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+
+            // worker = new TubulinTailDetector(dataset, folder, channel);
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Tail detection:" + dataset.getName());
+            ThreadManager.getInstance().submit(worker);
+        } catch (Exception e) {
+            this.cancel();
+            error("Error in tail analysis", e);
+
+        }
+    }
 }

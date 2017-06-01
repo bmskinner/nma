@@ -33,117 +33,124 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 /**
- * A NuclearSignal is a region within a nucleus of interest, such as a chromosome paint. 
- * It is detected from an image, and thus implements CellularComponent
+ * A NuclearSignal is a region within a nucleus of interest, such as a
+ * chromosome paint. It is detected from an image, and thus implements
+ * CellularComponent
+ * 
  * @author ben
  *
  */
 @Deprecated
 public class NuclearSignal extends AbstractCellularComponent implements INuclearSignal {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private int closestNuclearBorderPoint;
-	
-	
-	private NuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass){
-		super(roi, f, channel, position, centreOfMass);
-		
-	}
-	
-	/**
-	 * Create a copy of the given signal
-	 * @param n
-	 */
-	private NuclearSignal(NuclearSignal n){
-		super(n);
+    private int closestNuclearBorderPoint;
 
-		this.closestNuclearBorderPoint = n.closestNuclearBorderPoint;
+    private NuclearSignal(Roi roi, File f, int channel, int[] position, IPoint centreOfMass) {
+        super(roi, f, channel, position, centreOfMass);
 
-	}	
+    }
 
-	/* (non-Javadoc)
-	 * @see components.nuclear.INuclearSignal#getClosestBorderPoint()
-	 */
-	@Override
-	public int getClosestBorderPoint(){
-		return this.closestNuclearBorderPoint;
-	}
+    /**
+     * Create a copy of the given signal
+     * 
+     * @param n
+     */
+    private NuclearSignal(NuclearSignal n) {
+        super(n);
 
-	/* (non-Javadoc)
-	 * @see components.nuclear.INuclearSignal#setClosestBorderPoint(int)
-	 */
-	@Override
-	public void setClosestBorderPoint(int p){
-		this.closestNuclearBorderPoint = p;
-	}
-	
-	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-//		finest("\tReading nuclear signal");
-		in.defaultReadObject();
-//		finest("\tRead nuclear signal");
-	}
-	
-	private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-//		finest("\t\tWriting nuclear signal");
-		out.defaultWriteObject();
-//		finest("\t\tWrote nuclear signal");
-	}
+        this.closestNuclearBorderPoint = n.closestNuclearBorderPoint;
 
-	/* (non-Javadoc)
-	 * @see components.nuclear.INuclearSignal#duplicate()
-	 */
-	@Override
-	public INuclearSignal duplicate() {
-		return new NuclearSignal(this);
-	}
+    }
 
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-		
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.INuclearSignal#getClosestBorderPoint()
+     */
+    @Override
+    public int getClosestBorderPoint() {
+        return this.closestNuclearBorderPoint;
+    }
 
-	@Override
-	public String getSourceFileNameWithoutExtension() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.INuclearSignal#setClosestBorderPoint(int)
+     */
+    @Override
+    public void setClosestBorderPoint(int p) {
+        this.closestNuclearBorderPoint = p;
+    }
 
-	@Override
-	public boolean isSmoothByDefault() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+        // finest("\tReading nuclear signal");
+        in.defaultReadObject();
+        // finest("\tRead nuclear signal");
+    }
 
-	@Override
-	public ImageProcessor getRGBImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+        // finest("\t\tWriting nuclear signal");
+        out.defaultWriteObject();
+        // finest("\t\tWrote nuclear signal");
+    }
 
-	@Override
-	public ImageProcessor getComponentRGBImage()
-			throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.INuclearSignal#duplicate()
+     */
+    @Override
+    public INuclearSignal duplicate() {
+        return new NuclearSignal(this);
+    }
 
-	@Override
-	public Shape toShape(MeasurementScale scale) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void alignVertically() {
+        // TODO Auto-generated method stub
 
-	@Override
-	public void updateSourceFolder(File newFolder) {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 
-//	@Override
-//	public void setPositionWithin(CellularComponent c) {
-//		// TODO Auto-generated method stub
-//		
-//	}
+    @Override
+    public String getSourceFileNameWithoutExtension() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public boolean isSmoothByDefault() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public ImageProcessor getRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Shape toShape(MeasurementScale scale) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void updateSourceFolder(File newFolder) {
+        // TODO Auto-generated method stub
+
+    }
+
+    // @Override
+    // public void setPositionWithin(CellularComponent c) {
+    // // TODO Auto-generated method stub
+    //
+    // }
 }
