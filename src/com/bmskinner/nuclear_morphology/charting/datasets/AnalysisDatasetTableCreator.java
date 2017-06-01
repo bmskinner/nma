@@ -90,7 +90,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			"Collection source",
 			"Log file",
 			"Type",
-			"Version"};
+			"Created in"};
 	
 	
 	/**
@@ -126,7 +126,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			Vector<Object> nuclei 	= new Vector<Object>();
 
 			names.add("No merge sources");
-			nuclei.add("");
+			nuclei.add(EMPTY_STRING);
 
 
 			model.addColumn("Merge source", names);
@@ -165,7 +165,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(dataset==null){
-			model.addColumn("No data loaded");
+			model.addColumn(Labels.NO_DATA_LOADED);
 
 		} else {
 			ICellCollection collection = dataset.getCollection();
@@ -195,7 +195,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 					"Length p(unimodal)"
 			};
 
-			model.addColumn("", fieldNames);
+			model.addColumn(EMPTY_STRING, fieldNames);
 						
 			DecimalFormat pf = new DecimalFormat("#.###");
 
@@ -271,7 +271,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 
 		// Add the dataset names column
-		fieldNames.add("Dataset");
+		fieldNames.add(Labels.DATASET);
 		for(IBorderSegment segment : segments) {
 			fieldNames.add(segment.getName());
 		}
@@ -279,11 +279,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 		// Add the segment colours column
 		List<Object> colours = new ArrayList<Object>(0);
-		colours.add("");
+		colours.add(EMPTY_STRING);
 
 		
 		for(int i=0; i<segments.size();i++) {
-			colours.add("");
+			colours.add(EMPTY_STRING);
 		}
 		model.addRow(colours.toArray(new Object[0]));
 
@@ -330,21 +330,16 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 	public TableModel createAnalysisTable(){
 
 		if( ! options.hasDatasets()){
-			finest("No datasets, creating blank table");
 			return createBlankTable();
 		} 
 		
 		TableOptions op = (TableOptions) options;
-		
-		finest("Table options type "+op.getType());
-		
+				
 		if(op.getType().equals(TableType.ANALYSIS_PARAMETERS)){
-			finest("Creating analysis parameters table model");
 			return createAnalysisParametersTable();
 		}
 		
 		if(op.getType().equals(TableType.ANALYSIS_STATS)){
-			finest("Creating analysis stats table model");
 			return createStatsTable();
 		}
 		
@@ -366,7 +361,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		
 		DefaultTableModel model = new DefaultTableModel();
 
-		model.addColumn("", ANALYSIS_PARAMETERS_ROWS);
+		model.addColumn(EMPTY_STRING, ANALYSIS_PARAMETERS_ROWS);
 
 		List<IAnalysisDataset> list = options.getDatasets();
 
@@ -578,7 +573,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		}
 
 
-		model.addColumn("", columnData.toArray());
+		model.addColumn(EMPTY_STRING, columnData.toArray());
 		
 
 		for(IAnalysisDataset dataset : list){
@@ -653,7 +648,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 			columnData[row] = dataset.getName();
 			row++;
 		}
-		model.addColumn("Population", columnData);
+		model.addColumn(Labels.DATASET, columnData);
 		
 		// add columns
 		// pre-cache data to ensure all values present when we get
@@ -726,7 +721,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		DefaultTableModel model = new DefaultTableModel();
 		
 		Object[] columnNames = new Object[] {
-				"Population 1",
+				"Dataset 1",
 				"Unique %",
 				"Unique",
 				"Shared %",
@@ -734,7 +729,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				"Shared %",
 				"Unique",
 				"Unique %",
-				"Population 2"
+				"Dataset 2"
 				};
 		model.setColumnIdentifiers(columnNames);
 			
@@ -809,7 +804,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		DefaultTableModel model = new DefaultTableModel();
 
 		if(list==null){
-			Object[] columnData = { "" };
+			Object[] columnData = { EMPTY_STRING };
 			model.addColumn("Population", columnData );
 			model.addColumn("", columnData );
 		} else {
@@ -821,7 +816,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 				columnData[row] = dataset.getName();
 				row++;
 			}
-			model.addColumn("Population", columnData);
+			model.addColumn(Labels.DATASET, columnData);
 		}
 		return  model;
 	}
@@ -1167,7 +1162,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 		columnList.add("Include segments");
 		columnList.add("Tree");
 
-		model.addColumn("", columnList.toArray());
+		model.addColumn(EMPTY_STRING, columnList.toArray());
 
 		List<IAnalysisDataset> list = options.getDatasets();
 
@@ -1182,17 +1177,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
 				Object iterationString 	= op.getType().equals(ClusteringMethod.EM) 
 						? op.getIterations()
-								: "N/A";
+								: Labels.NA;
 
 						Object hierarchicalMethodString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
 								? op.getHierarchicalMethod().toString()
-										: "N/A";
+										: Labels.NA;
 
 								Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL) 
 										? op.getClusterNumber()
-												: "N/A";
+												: Labels.NA;
 
-										String tree = g.hasTree() ? g.getTree() : "N/A";
+										String tree = g.hasTree() ? g.getTree() : Labels.NA;
 
 										List<Object> dataList = new ArrayList<Object>();
 										dataList.add(g.getName());
@@ -1213,7 +1208,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 											try{
 												dataList.add(op.isIncludeStatistic(stat));
 											} catch(NullPointerException e){
-												dataList.add("N/A");
+												dataList.add(Labels.NA);
 											}
 										}
 

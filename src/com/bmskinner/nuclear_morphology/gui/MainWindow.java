@@ -76,7 +76,7 @@ public class MainWindow
 	private PopulationsPanel 		populationsPanel; 		// holds and selects open datasets
 	private ConsensusNucleusPanel	consensusNucleusPanel; 	// show refolded nuclei if present
 	
-	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a1";
+	private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"+Version.currentVersion().toString()+"a2";
 	
 	private static final String ANALYSIS_SETUP_TAB_LBL= "Analysis info";
 	private static final String CLUSTERS_TAB_LBL      = "Clusters";
