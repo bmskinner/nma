@@ -31,12 +31,10 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
@@ -61,14 +59,12 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.SignalGroupSelectionPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel.NodeData;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalWarpingDialog.ImageCache.Key;
 
@@ -86,7 +82,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private static final String TARGET_DATASET_LBL  = "Target dataset";
 	private static final String SIGNAL_GROUP_LBL    = "Signal group";
 	private static final String INCLUDE_CELLS_LBL   = "Only include cells with signals";
-	private static final String ADD_TO_IMAGE_LBL    = "Add to image";
 	private static final String STRAIGHTEN_MESH_LBL = "Straighten meshes";
 	private static final String RUN_LBL             = "Run";
 	private static final String DIALOG_TITLE        = "Signal warping";
@@ -103,20 +98,17 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private JButton runButton;
 	private JCheckBox cellsWithSignalsBox;
 	private JCheckBox straightenMeshBox;
-	private JCheckBox addToImage;
 	private JButton cowarpaliseBtn;
 	
 	private SignalWarper warper;
 	
 	private JProgressBar progressBar = new JProgressBar(0, 100);
 	
-	private boolean isAddToImage = true;
-	
 	private JTree tree;
 	
-	final private Map<ImageProcessor, Color> mergableImages = new HashMap<>(); // hold all the warped images that have been generated
+	final private Map<ImageProcessor, Color> imageColours = new HashMap<>(); // hold all the warped images that have been generated
 	private ImageCache cache = new ImageCache();
-	final private List<ImageProcessor> displayImages = new ArrayList<>();
+	
 	
 	private boolean ctrlPressed = false;
     
@@ -240,13 +232,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		cellsWithSignalsBox = new JCheckBox(INCLUDE_CELLS_LBL, true);
 		cellsWithSignalsBox.addActionListener(this);
 		upperPanel.add(cellsWithSignalsBox);
-		
-		addToImage = new JCheckBox(ADD_TO_IMAGE_LBL, true);
-		addToImage.addActionListener( e -> {
-			isAddToImage = addToImage.isSelected();
-		});
-		upperPanel.add(addToImage);
-		
+				
 		straightenMeshBox = new JCheckBox(STRAIGHTEN_MESH_LBL, false);
 		straightenMeshBox.addActionListener( e -> {
 			updateBlankChart();
@@ -277,10 +263,11 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		cowarpaliseBtn = new JButton(COW_LBL);
 		cowarpaliseBtn.addActionListener( e-> {
 			
-			if(mergableImages.size()==2){
+			if(cache.displayCount()==2){
 				
-				ImageProcessor a = displayImages.get(0);
-				ImageProcessor b = displayImages.get(1);
+				
+				ImageProcessor a = cache.getDisplayImages().get(0);
+				ImageProcessor b = cache.getDisplayImages().get(1);
 				
 				ImageProcessor w = ImageFilterer.cowarpalise(a, b);
 				
@@ -320,28 +307,30 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		updateTree();
 		
 		tree.addTreeSelectionListener( e -> {
-			
-			//TODO multiple selected images
-			
+						
 			if( ! isCtrlPressed()){
-				displayImages.clear();
+				cache.clearDisplayImages();
 			}
 			
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
 			
 			Object obj = node.getUserObject();
 			if(obj instanceof Key){
-				ImageProcessor ip = cache.get( (Key)obj );
-//				ip = ImageFilterer.recolorImage(ip, mergableImages.get(ip));
 				
-				displayImages.add(ip);
+				Key k = (Key)obj;
+				ImageProcessor ip = cache.get( k);
 				
-				updateChart(createDisplayImage(), ((Key)obj).target);
+				
+				if( isCtrlPressed() && cache.hasDisplayImage(k)){
+					cache.removeDisplayImage(k);
+				} else{
+					cache.addDisplayImage(k, ip);
+				}
+				
+				updateChart(createDisplayImage(), k.target);
 			}
 			
-			if(displayImages.size()!=2){
-				cowarpaliseBtn.setEnabled(false);
-			}
+			cowarpaliseBtn.setEnabled(cache.displayCount()==2);
 			
 		});
 		
@@ -381,11 +370,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private void runWarping(){
 		
 		finest("Running warping");
-		if(!isAddToImage){
-			mergableImages.clear();
-			cowarpaliseBtn.setEnabled(false);
-		} 
-
+		cache.clearDisplayImages();
 		progressBar.setValue(0);
 		
 		IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
@@ -433,7 +418,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 		runButton.setEnabled(b);
 		datasetBoxOne.setEnabled(b);
 		datasetBoxTwo.setEnabled(b);
-		addToImage.setEnabled(b);
+//		addToImage.setEnabled(b);
 		cowarpaliseBtn.setEnabled(b);
 	}
 	
@@ -452,14 +437,24 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 					signalBox.getSelectedID(),
 					image);
 			
+			cache.addDisplayImage(datasetBoxTwo.getSelectedDataset(), 
+					datasetBoxOne.getSelectedDataset(), 
+					signalBox.getSelectedID(),
+					image);
+			
+			Color c = assignDisplayColour(image);
+			imageColours.put(image, c); 
+			
 			updateTree();
 			
-			displayImages.add(image);
-			assignDisplayColour(image);
-			updateChart(createDisplayImage(), datasetBoxTwo.getSelectedDataset());
+			ImageProcessor display = createDisplayImage();
+						
+			updateChart(display, datasetBoxTwo.getSelectedDataset());
+			
+			
 			
 			setEnabled(true);
-			if(displayImages.size()!=2){
+			if(cache.displayCount()!=2){
 				cowarpaliseBtn.setEnabled(false);
 			}
 			setStatusLoaded();
@@ -493,8 +488,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	}
 	
 	
-	private void assignDisplayColour(final ImageProcessor image){
+	private Color assignDisplayColour(final ImageProcessor image){
 		
+		fine("Assigning display colour");
 		Color colour = Color.WHITE;
 		try {
 			colour = datasetBoxOne.getSelectedDataset().getCollection()
@@ -507,19 +503,19 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 			stack(e);
 			colour = Color.WHITE;
 		}
+		
+		return colour;
 				
 //		if(!isAddToImage){
 //			mergableImages.clear();
 //		} 
 		
-				
-		mergableImages.put(image, colour);
 		
-		if(displayImages.size()==2){
-			cowarpaliseBtn.setEnabled(true);
-		} else {
-			cowarpaliseBtn.setEnabled(false);
-		}
+//		if(displayImages.size()==2){
+//			cowarpaliseBtn.setEnabled(true);
+//		} else {
+//			cowarpaliseBtn.setEnabled(false);
+//		}
 		
 	}
 	
@@ -531,26 +527,39 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 */
 	private ImageProcessor createDisplayImage(){
 		
+		fine("Making display image");
 		// Recolour each of the grey images according to the stored colours
 		List<ImageProcessor> recoloured = new ArrayList<>();
 		
-		for(ImageProcessor ip : displayImages){
+		for(ImageProcessor ip : cache.getDisplayImages()){
 			// The image from the warper is greyscale. Change to use the signal colour			
-			recoloured.add(ImageFilterer.recolorImage(ip, mergableImages.get(ip)));
+			recoloured.add(ImageFilterer.recolorImage(ip, imageColours.get(ip)));
 		}
 				
+
+		
+		if(cache.displayCount()==0){
+			return ImageFilterer.createBlankByteProcessor(100,  100);
+		}
+		
+		if(cache.displayCount()==1){
+			return recoloured.get(0);
+		}
+		
 		// If multiple images are in the list, make an average of their RGB values
 		// so territories can be compared
+		fine("More than one display image");
 		try {
-			
+
 			ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
 			return averaged;
-			
+
 		} catch(Exception e){
 			warn("Error averaging images");
 			stack(e);
 			return ImageFilterer.createBlankByteProcessor(100,  100);
 		}
+		
 
 	}
 	
@@ -562,7 +571,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	private void updateChart(final ImageProcessor image, IAnalysisDataset target){
 		
 		Runnable task = () -> { 
-									
+			fine("Updating chart");			
 			boolean straighten = straightenMeshBox.isSelected();
 			
 			ChartOptions options = new ChartOptionsBuilder()
@@ -590,9 +599,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	 */
 	private void updateBlankChart(){
 
-		if(isAddToImage){
-			return;
-		}
+		fine("Updating blank chart");
 		JFreeChart chart = null;
 		if(straightenMeshBox.isSelected()){
 			
@@ -654,7 +661,40 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 	public class ImageCache {
 		
 		final private Map<Key, ImageProcessor> map = new HashMap<>();
+		final private Map<Key, ImageProcessor> displayImages = new HashMap<>();
 		
+		
+		public void addDisplayImage(Key k, ImageProcessor ip){
+			displayImages.put(k, ip);
+		}
+		
+		public void addDisplayImage(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId, ImageProcessor ip){
+			displayImages.put(new Key(target, template, signalGroupId), ip);
+		}
+		
+		public void removeDisplayImage(Key k){
+			displayImages.remove(k);
+		}
+		
+		public boolean hasDisplayImage(Key k){
+			return displayImages.containsKey(k);
+		}
+		
+		public int displayCount(){
+			return displayImages.size();
+		}
+		
+		public void clearDisplayImages(){
+			displayImages.clear();
+		}
+		
+		public List<ImageProcessor> getDisplayImages(){
+			return new ArrayList<>(displayImages.values());
+		}
+		
+		public ImageProcessor getDisplayImage(Key k){
+			return displayImages.get(k);
+		}
 		
 		public void add(IAnalysisDataset target, IAnalysisDataset template, UUID signalGroupId, ImageProcessor ip){
 			map.put(new Key(target, template, signalGroupId), ip);

@@ -240,30 +240,60 @@ public abstract class AbstractImageFilterer implements Loggable {
 	 */
 	public static ImageProcessor recolorImage(ImageProcessor ip, Color colour){
 		
-		float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
+		/*
+		 * The intensity of the signal is given by the 8-bit grey value. 
+		 * Intense = 0 (black) and no signal = 255 (white)
+		 * 
+		 * Translate the desired colour to HSB values.
+		 * 
+		 * Keep the hue, and make a scale for s and b towards white
+		 */
 		
+		float[] hsb = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
+				
 		// Scale the brightness from 0-bri across the image
 		ColorProcessor cp = new ColorProcessor(ip.getWidth(), ip.getHeight());
 		
 		for(int i=0; i<ip.getPixelCount(); i++){
+			
+			float h = hsb[0];
+			float s = hsb[1];
+			float b = hsb[2];
+			
 			int pixel = ip.get(i);
 			
 			if(pixel==255){ // skip fully white pixels
 				int full = RGB_WHITE;
 				cp.set(i, full);
+				
 			} else {
-				float pct = getSaturationFromIntensity(pixel);
 				
-				// The saturation is scaled with percent - lower values give whiter image 
-				// The value is scaled with percent - lower values give whiter image
-				//TODO: check calculations
-				float vScale = 1f - hsb[2]; // range for value scaling between 0 and 1
-				float v = (vScale*pct) + hsb[2]; // hsb[2] can only be increased with intensity
+				// Calculate the fractional intensity of the pixel
+				// Since we are scaling from 255-0, this is 1- the actual fraction 
 				
-				pct = 1f-pct;
-
-				int full = Color.HSBtoRGB(hsb[0], pct, 1); // if issues, replace 1 with the hsb[2] - for now it keeps the white border
+				float invF = ((float) pixel) / 255f;
+				float f = 1f-invF;
+				
+				// Set the saturation to the fractional intensity of the selected colour
+				// A maximum of s and a minimum of 0
+												
+				s *= f;
+								
+				// Set the brightness to increase from b to a maximum of 1, scaled by the fractional intensity
+				
+//				float bspace = 1- b; // the range to work in
+//				
+//				float badd = bspace * f; // the amount to add to existing b
+//				
+//				// scale this so we hit white faster as b gets closer to zero 
+//				
+//				b += badd;
+				
+				// Make the full pixel
+				
+				int full = Color.HSBtoRGB(h, s, 1);
 				cp.set(i, full);
+
 			}
 			
 			
