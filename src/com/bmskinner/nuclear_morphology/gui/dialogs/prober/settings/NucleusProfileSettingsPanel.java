@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -20,131 +37,125 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 
 /**
  * Holds other nucleus detection options. E.g. profile window
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
-public class NucleusProfileSettingsPanel extends SettingsPanel  {
-	
-	private static final double MIN_PROFILE_PROP = 0;
-	private static final double MAX_PROFILE_PROP = 1;
-	private static final double STEP_PROFILE_PROP = 0.01;
-	
-	private static final String TYPE_LBL           = "Nucleus type";
-	private static final String PROFILE_WINDOW_LBL = "Profile window";
-	
-	
-	private IMutableAnalysisOptions options;
-	
-	private JSpinner  profileWindow;
+public class NucleusProfileSettingsPanel extends SettingsPanel {
 
-	
-	private JComboBox<NucleusType> typeBox;
-	
-	public NucleusProfileSettingsPanel(final IMutableAnalysisOptions op){
-		super();
-		options = op;
-		this.add(createPanel(), BorderLayout.CENTER);
-	}
-	
-	/**
-	 * Create the settings spinners based on the input options
-	 */
-	private void createSpinners(){
+    private static final double MIN_PROFILE_PROP  = 0;
+    private static final double MAX_PROFILE_PROP  = 1;
+    private static final double STEP_PROFILE_PROP = 0.01;
 
-		typeBox = new JComboBox<NucleusType>(NucleusType.values());
-		typeBox.setSelectedItem(options.getNucleusType());
-		
-		typeBox.addActionListener( e ->{
+    private static final String TYPE_LBL           = "Nucleus type";
+    private static final String PROFILE_WINDOW_LBL = "Profile window";
 
-			IMutableDetectionOptions nucleusOptions;
-			try {
-				nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+    private IMutableAnalysisOptions options;
 
-				NucleusType type = (NucleusType) typeBox.getSelectedItem();
-				options.setNucleusType(type);
+    private JSpinner profileWindow;
 
-				if(type.equals(NucleusType.ROUND)){
-					nucleusOptions.setMinCirc(  0.0 );
-					nucleusOptions.setMaxCirc(  1.0 );				
-				}
+    private JComboBox<NucleusType> typeBox;
 
-				if(type.equals(NucleusType.RODENT_SPERM)){
-					nucleusOptions.setMinCirc(  0.2 );
-					nucleusOptions.setMaxCirc(  0.8 );
-				}
+    public NucleusProfileSettingsPanel(final IMutableAnalysisOptions op) {
+        super();
+        options = op;
+        this.add(createPanel(), BorderLayout.CENTER);
+    }
 
-				if(type.equals(NucleusType.PIG_SPERM)){
-					nucleusOptions.setMinCirc(  0.1 );
-					nucleusOptions.setMaxCirc(  0.9 );
-				}
+    /**
+     * Create the settings spinners based on the input options
+     */
+    private void createSpinners() {
 
-				fireOptionsChangeEvent();
-			} catch (Exception e1) {
-				warn("Error getting options");
-				stack(e1.getMessage(), e1);
-			}
-		});
+        typeBox = new JComboBox<NucleusType>(NucleusType.values());
+        typeBox.setSelectedItem(options.getNucleusType());
 
-		
-		profileWindow = new JSpinner(new SpinnerNumberModel(
-				options.getProfileWindowProportion(),	
-				MIN_PROFILE_PROP, 
-				MAX_PROFILE_PROP, 
-				STEP_PROFILE_PROP));
-		
-		Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
-		profileWindow.setPreferredSize(dim);
-		
-		profileWindow.addChangeListener( e -> {
-			JSpinner j = (JSpinner) e.getSource();
-			try {
-				j.commitEdit();
-				options.setAngleWindowProportion(  (Double) j.getValue());
-			} catch (Exception e1) {
-				warn("Parsing error in spinner");
-				stack("Parsing error in JSpinner", e1);
-			}
-			
-		});
-	}
-	
-	private JPanel createPanel(){
-		
-		this.createSpinners();
-		
-		JPanel panel = new JPanel(new GridBagLayout());
-		
-		List<JLabel> labels = new ArrayList<JLabel>();
-		labels.add(new JLabel(TYPE_LBL));
-		labels.add(new JLabel(PROFILE_WINDOW_LBL));
-		
+        typeBox.addActionListener(e -> {
 
-		List<Component> fields = new ArrayList<Component>();
-		
-		fields.add(typeBox);
-		fields.add(profileWindow);
-		
-		addLabelTextRows(labels, fields, panel );
+            IMutableDetectionOptions nucleusOptions;
+            try {
+                nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
 
-		return panel;
-	}
-	
-	/**
-	 * Update the spinners to current options values 
-	 */
-	@Override
-	protected void update(){
-		super.update();
-		profileWindow.setValue( options.getProfileWindowProportion());
-	}
-	
-	@Override
-	public void setEnabled(boolean b){
-		super.setEnabled(b);
-		profileWindow.setEnabled(b);
-		typeBox.setEnabled(b);
+                NucleusType type = (NucleusType) typeBox.getSelectedItem();
+                options.setNucleusType(type);
 
-	}	
+                if (type.equals(NucleusType.ROUND)) {
+                    nucleusOptions.setMinCirc(0.0);
+                    nucleusOptions.setMaxCirc(1.0);
+                }
+
+                if (type.equals(NucleusType.RODENT_SPERM)) {
+                    nucleusOptions.setMinCirc(0.2);
+                    nucleusOptions.setMaxCirc(0.8);
+                }
+
+                if (type.equals(NucleusType.PIG_SPERM)) {
+                    nucleusOptions.setMinCirc(0.1);
+                    nucleusOptions.setMaxCirc(0.9);
+                }
+
+                fireOptionsChangeEvent();
+            } catch (Exception e1) {
+                warn("Error getting options");
+                stack(e1.getMessage(), e1);
+            }
+        });
+
+        profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
+                MAX_PROFILE_PROP, STEP_PROFILE_PROP));
+
+        Dimension dim = new Dimension(BOX_WIDTH, BOX_HEIGHT);
+        profileWindow.setPreferredSize(dim);
+
+        profileWindow.addChangeListener(e -> {
+            JSpinner j = (JSpinner) e.getSource();
+            try {
+                j.commitEdit();
+                options.setAngleWindowProportion((Double) j.getValue());
+            } catch (Exception e1) {
+                warn("Parsing error in spinner");
+                stack("Parsing error in JSpinner", e1);
+            }
+
+        });
+    }
+
+    private JPanel createPanel() {
+
+        this.createSpinners();
+
+        JPanel panel = new JPanel(new GridBagLayout());
+
+        List<JLabel> labels = new ArrayList<JLabel>();
+        labels.add(new JLabel(TYPE_LBL));
+        labels.add(new JLabel(PROFILE_WINDOW_LBL));
+
+        List<Component> fields = new ArrayList<Component>();
+
+        fields.add(typeBox);
+        fields.add(profileWindow);
+
+        addLabelTextRows(labels, fields, panel);
+
+        return panel;
+    }
+
+    /**
+     * Update the spinners to current options values
+     */
+    @Override
+    protected void update() {
+        super.update();
+        profileWindow.setValue(options.getProfileWindowProportion());
+    }
+
+    @Override
+    public void setEnabled(boolean b) {
+        super.setEnabled(b);
+        profileWindow.setEnabled(b);
+        typeBox.setEnabled(b);
+
+    }
 }

@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -14,93 +31,89 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 
 /**
- * A copy button that allows nuclear detection options to be copied from 
- * an open dataset
+ * A copy button that allows nuclear detection options to be copied from an open
+ * dataset
+ * 
  * @author ben
  * @since 1.13.4
  *
  */
 @SuppressWarnings("serial")
 public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
-		
-	private static final String COPY_FROM_OPEN_LBL     = "Copy from open dataset";
-	private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
-	private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
-	private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
-	
-	private JButton copyBtn;
-	
-	public CopyFromOpenDatasetPanel(IMutableDetectionOptions op) {
-		super(op);
-		this.add(createPanel(), BorderLayout.CENTER);
-	}
 
+    private static final String COPY_FROM_OPEN_LBL     = "Copy from open dataset";
+    private static final String COPY_FROM_OPEN_TOOLTIP = "Copy from existing open dataset";
+    private static final String CHOOSE_DATASET_MSG_LBL = "Choose source dataset";
+    private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
 
-	/**
-	 * Create the settings spinners based on the input options
-	 */
-	private void createSpinners(){
+    private JButton copyBtn;
 
-		// Button to copy existing dataset options
-		copyBtn = new JButton(COPY_FROM_OPEN_LBL);
-		copyBtn.addActionListener( e ->{
-			IAnalysisDataset[] nameArray = DatasetListManager.getInstance()
-					.getAllDatasets().toArray(new IAnalysisDataset[0]);
+    public CopyFromOpenDatasetPanel(IMutableDetectionOptions op) {
+        super(op);
+        this.add(createPanel(), BorderLayout.CENTER);
+    }
 
-			IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null, 
-					CHOOSE_DATASET_MSG_LBL,
-					CHOOSE_DATASET_TTL_LBL,
-					JOptionPane.QUESTION_MESSAGE, 
-					null, 
-					nameArray, 
-					nameArray[0]);
+    /**
+     * Create the settings spinners based on the input options
+     */
+    private void createSpinners() {
 
-			if(sourceDataset!=null){
+        // Button to copy existing dataset options
+        copyBtn = new JButton(COPY_FROM_OPEN_LBL);
+        copyBtn.addActionListener(e -> {
+            IAnalysisDataset[] nameArray = DatasetListManager.getInstance().getAllDatasets()
+                    .toArray(new IAnalysisDataset[0]);
 
-				fine("Copying options from dataset: "+sourceDataset.getName());
-				try {
-					options.set(sourceDataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS));
-				} catch (Exception e1) {
-					warn("Cannot get options");
-					stack(e1.getMessage(), e1);
-				}
-				fireOptionsChangeEvent();
-			}
-		});
-		
-		copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
+            IAnalysisDataset sourceDataset = (IAnalysisDataset) JOptionPane.showInputDialog(null,
+                    CHOOSE_DATASET_MSG_LBL, CHOOSE_DATASET_TTL_LBL, JOptionPane.QUESTION_MESSAGE, null, nameArray,
+                    nameArray[0]);
 
-		copyBtn.setToolTipText(COPY_FROM_OPEN_TOOLTIP);
+            if (sourceDataset != null) {
 
-	}
+                fine("Copying options from dataset: " + sourceDataset.getName());
+                try {
+                    options.set(sourceDataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS));
+                } catch (Exception e1) {
+                    warn("Cannot get options");
+                    stack(e1.getMessage(), e1);
+                }
+                fireOptionsChangeEvent();
+            }
+        });
 
-	private JPanel createPanel(){
+        copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
 
-		this.createSpinners();
+        copyBtn.setToolTipText(COPY_FROM_OPEN_TOOLTIP);
 
-		JPanel panel = new JPanel();
+    }
 
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
+    private JPanel createPanel() {
 
-		panel.add(copyBtn);
+        this.createSpinners();
 
-		return panel;
-	}
-	
-	@Override
-	public void setEnabled(boolean b){
-		super.setEnabled(b);
-		
-		if(b){
-			copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
-		} else {
-			copyBtn.setEnabled(false);
-		}
+        JPanel panel = new JPanel();
 
-	}
+        panel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-	@Override
-	public void set(IDetectionOptions options) {}
-	
-	
+        panel.add(copyBtn);
+
+        return panel;
+    }
+
+    @Override
+    public void setEnabled(boolean b) {
+        super.setEnabled(b);
+
+        if (b) {
+            copyBtn.setEnabled(DatasetListManager.getInstance().hasDatasets());
+        } else {
+            copyBtn.setEnabled(false);
+        }
+
+    }
+
+    @Override
+    public void set(IDetectionOptions options) {
+    }
+
 }

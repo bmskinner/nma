@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
 import java.awt.geom.Path2D;
@@ -12,12 +30,18 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class NucleusMeshFace implements Loggable, MeshFace {
 
-    final private Set<MeshEdge> edges = new HashSet<MeshEdge>();
+    final Set<MeshEdge> edges = new HashSet<>();
 
-    final private Set<MeshVertex> vertices = new HashSet<MeshVertex>();
+    private final Set<MeshVertex> vertices = new HashSet<>();
 
     private double value = 1;
 
+    /**
+     * Construct from edges.
+     * @param e1 the first edge
+     * @param e2 the second edge
+     * @param e3 the third edge
+     */
     public NucleusMeshFace(final MeshEdge e1, final MeshEdge e2, final MeshEdge e3) {
 
         // Check that the edges make an enclosed space - there are only 3 unique
@@ -37,6 +61,12 @@ public class NucleusMeshFace implements Loggable, MeshFace {
 
     }
 
+    /**
+     * Construct from vertices.
+     * @param e1 the first vertex
+     * @param e2 the second vertex
+     * @param e3 the third vertex
+     */
     public NucleusMeshFace(final MeshVertex v1, final MeshVertex v2, final MeshVertex v3) {
 
         if (!v1.hasEdgeTo(v2)) {
@@ -65,9 +95,9 @@ public class NucleusMeshFace implements Loggable, MeshFace {
     }
 
     /**
-     * Duplicate the face
+     * Construct from an existing face.
      * 
-     * @param f
+     * @param f the face to duplicate
      */
     public NucleusMeshFace(final MeshFace f) {
         for (MeshEdge e : f.getEdges()) {
@@ -154,6 +184,20 @@ public class NucleusMeshFace implements Loggable, MeshFace {
     @Override
     public boolean contains(MeshVertex v) {
         return vertices.contains(v);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#contains(com.
+     * bmskinner.nuclear_morphology.components.generic.IPoint)
+     */
+    @Override
+    public boolean contains(IPoint p) {
+
+        return this.toPath().contains(p.toPoint2D());
+
     }
 
     /*
@@ -289,6 +333,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
         return IPoint.makeNew(avgX, avgY);
     }
 
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         b.append("Face: " + this.getPeripheralVertexCount() + " peripheral vertices | Area: " + this.getArea()
@@ -300,19 +345,6 @@ public class NucleusMeshFace implements Loggable, MeshFace {
         return b.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace#contains(com.
-     * bmskinner.nuclear_morphology.components.generic.IPoint)
-     */
-    @Override
-    public boolean contains(IPoint p) {
-
-        return this.toPath().contains(p.toPoint2D());
-
-    }
 
     /*
      * (non-Javadoc)

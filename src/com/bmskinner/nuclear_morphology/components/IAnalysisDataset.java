@@ -1,21 +1,20 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
 
 package com.bmskinner.nuclear_morphology.components;
 
@@ -584,16 +583,19 @@ public interface IAnalysisDataset extends Serializable, Loggable {
         for (File f : files) {
 
             Path p = f.toPath();
+            
+            if(p!=null){
 
-            Iterator<Path> it = p.iterator();
-            List<String> s = new ArrayList<String>();
-            s.add(p.getRoot().toString());
-            while (it.hasNext()) {
-                Path n = it.next();
-                s.add(n.toString());
+                Iterator<Path> it = p.iterator();
+                List<String> s = new ArrayList<>();
+                s.add(p.getRoot().toString());
+                while (it.hasNext()) {
+                    Path n = it.next();
+                    s.add(n.toString());
 
+                }
+                folders[k++] = s.toArray(new String[0]);
             }
-            folders[k++] = s.toArray(new String[0]);
 
         }
 

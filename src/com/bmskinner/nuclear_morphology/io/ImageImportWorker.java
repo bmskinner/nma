@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.io;
 
 import java.awt.Color;
@@ -10,31 +28,20 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
-import ij.gui.PolygonRoi;
 import ij.process.Blitter;
 import ij.process.ColorProcessor;
-import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
 /**
@@ -48,7 +55,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
     private final IAnalysisDataset dataset;
     private final TableModel       model;
-    private final static int       COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
+    private static final int       COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
     private int                    loaded       = 0;
     private boolean                rotate;
 

@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
@@ -153,16 +171,14 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     }
 
     private void updateScale() {
-        SpinnerNumberModel sModel = new SpinnerNumberModel(this.getCellModel().getCell().getNucleus().getScale(), 1,
-                100000, 1);
+        SpinnerNumberModel sModel = new SpinnerNumberModel(getCellModel().getCell().getNucleus().getScale(), 
+                1, 100000, 1);
+        
         JSpinner spinner = new JSpinner(sModel);
 
         int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE, null, null, null);
         if (option == JOptionPane.OK_OPTION) {
-
-            // TODO: merged datasets - apply to merge source cells only or all
-            // cells
 
             Object[] options = { APPLY_SCALE_ALL_CELLS_LBL, APPLY_SCALE_ONE_CELLS_LBL, };
             int applyAllOption = JOptionPane.showOptionDialog(null, APPLY_SCALE_ALL_MESSAGE, APPLY_SCALE_ALL_HEADER,
@@ -173,8 +189,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
             double scale = (double) spinner.getModel().getValue();
 
-            if (scale > 0) { // don't allow a scale to cause divide by zero
-                             // errors
+            if (scale > 0) { // don't allow a scale to cause divide by zero errors
+
                 if (applyAllOption == 0) { // button at index 1
 
                     activeDataset().getCollection().clear(MeasurementScale.MICRONS);

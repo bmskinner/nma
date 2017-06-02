@@ -1,21 +1,20 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
 
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
@@ -73,7 +72,11 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
     protected static final String NULL_FILE_ERROR = "File is null";
 
-    private static final String HEADER_LBL              = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
+    private static final String HEADER_LBL              = "Objects meeting detection parameters "
+            + "are outlined in yellow; "
+            + "other objects are red. "
+            + "Click an image to view larger version.";
+    
     private static final String FOLDER_LBL              = "Image ";
     private static final String PREV_IMAGE_BTN          = "Prev";
     private static final String NEXT_IMAGE_BTN          = "Next";
@@ -111,6 +114,13 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
     private JButton nextButton;
     private JButton prevButton;
 
+    /**
+     * Constructor
+     * @param folder the image folder
+     * @param finder the finder to use
+     * @param parent the parent window to the finder
+     * @throws MissingOptionException if the options cannot be found
+     */
     public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException {
 
         this.folder = folder;
@@ -123,7 +133,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * Import the given file as an image, detect objects and display the image
      * with annotated outlines
      * 
-     * @param imageFile
+     * @param imageFile the image to search
      */
     protected void importAndDisplayImage(File imageFile) {
         if (imageFile == null) {
@@ -217,7 +227,6 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
         finest("Generating file list from " + folder.getAbsolutePath());
 
-        imageFiles = new ArrayList<File>();
         imageFiles = importImages(folder);
 
         if (imageFiles.size() > 0) {
@@ -427,7 +436,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
          * fraction of the screen size and maintaining aspect ratio. I.E.: if
          * resizing the width to <i>fraction</i> of the screen width results in
          * the height begin greater than <i>fraction</i> of the screen height,
-         * the width will be reduced so height equals <i>fraction<i> of the
+         * the width will be reduced so height equals <i>fraction</i> of the
          * screen height
          * 
          * @param fraction

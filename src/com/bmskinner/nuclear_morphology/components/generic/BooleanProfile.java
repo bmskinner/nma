@@ -1,21 +1,21 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
@@ -154,7 +154,7 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     /**
-     * Get an X-axis; get a position for each point on the scale 0-<length>
+     * Get an X-axis; get a position for each point on the scale 0-<i>length</i>
      * 
      * @param length
      *            the length to scale to
@@ -169,12 +169,12 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     /**
-     * Copy the profile and offset it to start from the given index
+     * Copy the profile and offset it to start from the given index.
      * 
      * @param j
      *            the index to start from
      * @return a new offset BooleanProfile
-     * @throws Exception
+     * @throws Exception on error
      */
     public BooleanProfile offset(int j) throws Exception {
         boolean[] newArray = new boolean[this.size()];
@@ -185,9 +185,9 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     /**
-     * Returns true at each position if either profile is true at that position
+     * Returns true at each position if either profile is true at that position.
      * 
-     * @param adder
+     * @param profile
      *            the profile to compare. Must be the same length as this
      *            profile
      * @return the new profile
@@ -207,7 +207,7 @@ public class BooleanProfile implements Serializable, Loggable {
     /**
      * Returns true at each position if both profiles are true at that position
      * 
-     * @param adder
+     * @param profile
      *            the profile to compare. Must be the same length as this
      *            profile
      * @return the new profile
@@ -225,11 +225,9 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     /**
-     * Inverts the profile
+     * Inverts the profile.
      * 
-     * @param profile
-     *            the template
-     * @return
+     * @return a new profile
      */
     public BooleanProfile invert() {
         boolean[] result = new boolean[this.size()];
@@ -241,15 +239,11 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading boolean profile");
         in.defaultReadObject();
-        // finest("\tRead boolean profile");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting boolean profile");
         out.defaultWriteObject();
-        // finest("\tWrote boolean profile");
     }
 
 }

@@ -1,3 +1,20 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
@@ -15,138 +32,134 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 @SuppressWarnings("serial")
-public class ColourThresholdWatershedSwitchPanel  extends DetectionSettingsPanel implements ActionListener {
-	
-	private static final String THRESHOLD_LBL = "Colour Threshold";
-	private static final String WATERSHED_LBL      = "Watershed";
-	
-	private JPanel cardPanel;
+public class ColourThresholdWatershedSwitchPanel extends DetectionSettingsPanel implements ActionListener {
 
-	private JRadioButton thresholdBtn = new JRadioButton(THRESHOLD_LBL);
-	private JRadioButton waterBtn     = new JRadioButton(WATERSHED_LBL);
-	private ButtonGroup  group        = new ButtonGroup();
-	
-	public ColourThresholdWatershedSwitchPanel(final IMutableDetectionOptions options){
-		super(options);		
-		this.add(createPanel(), BorderLayout.CENTER);
-		
-	}
-	
-	private JPanel createPanel(){
-		
-		JPanel panel = new JPanel();
+    private static final String THRESHOLD_LBL = "Colour Threshold";
+    private static final String WATERSHED_LBL = "Watershed";
 
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		
-		JPanel switchPanel = makeSwitchPanel();		
-		cardPanel   = makeCardPanel();
-		
-		panel.add(switchPanel);
-	    panel.add(cardPanel);
-			
-		return panel;
-	}
-	
-	private JPanel makeCardPanel(){
-		JPanel cardPanel = new JPanel(new CardLayout());
+    private JPanel cardPanel;
 
+    private JRadioButton thresholdBtn = new JRadioButton(THRESHOLD_LBL);
+    private JRadioButton waterBtn     = new JRadioButton(WATERSHED_LBL);
+    private ButtonGroup  group        = new ButtonGroup();
 
-		SettingsPanel thresholdPanel = new ColourThresholdingSettingsPanel(options);
-		SettingsPanel watershedPanel = new WatershedSettingsPanel(options);
+    public ColourThresholdWatershedSwitchPanel(final IMutableDetectionOptions options) {
+        super(options);
+        this.add(createPanel(), BorderLayout.CENTER);
 
-		this.addSubPanel(thresholdPanel);
-		this.addSubPanel(watershedPanel);
+    }
 
+    private JPanel createPanel() {
 
-		cardPanel.add(thresholdPanel, THRESHOLD_LBL);
-		cardPanel.add(watershedPanel, WATERSHED_LBL);
-		CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		if(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
-			cl.show(cardPanel, WATERSHED_LBL);
-		} else {
-			cl.show(cardPanel, THRESHOLD_LBL);
-		}
+        JPanel panel = new JPanel();
 
-	    return cardPanel;
-	}
-	
-	
-	/**
-	 * A panel with the radio buttons to choose edge detection or
-	 * threshold for the nucleus
-	 * @return
-	 */
-	private JPanel makeSwitchPanel(){
-		JPanel panel = new JPanel(new FlowLayout());
-		
-		thresholdBtn.setSelected(!options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
-		waterBtn.setSelected(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
-		thresholdBtn.setActionCommand(THRESHOLD_LBL);
-		waterBtn.setActionCommand(WATERSHED_LBL);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-		//Group the radio buttons.
-		group.add(thresholdBtn);
-		group.add(waterBtn);
-		
-		thresholdBtn.addActionListener(this);
-		waterBtn.addActionListener(this);
-		
-		
-		panel.add(thresholdBtn);
-		panel.add(waterBtn);
-		
-		return panel;
-	}
+        JPanel switchPanel = makeSwitchPanel();
+        cardPanel = makeCardPanel();
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if(e.getActionCommand().equals(THRESHOLD_LBL)){
-			options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
-			
-			CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		    cl.show(cardPanel, THRESHOLD_LBL);
+        panel.add(switchPanel);
+        panel.add(cardPanel);
 
-		}
-		
-		if(e.getActionCommand().equals(WATERSHED_LBL)){
-			options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
-			CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		    cl.show(cardPanel, WATERSHED_LBL);
-		}
-		fireOptionsChangeEvent();
-				
-	}
+        return panel;
+    }
 
+    private JPanel makeCardPanel() {
+        JPanel cardPanel = new JPanel(new CardLayout());
 
-	@Override
-	public void update() {
-		super.update();
+        SettingsPanel thresholdPanel = new ColourThresholdingSettingsPanel(options);
+        SettingsPanel watershedPanel = new WatershedSettingsPanel(options);
 
-		isUpdating = true;
-		CardLayout cl = (CardLayout)(cardPanel.getLayout());
-		
-		if(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)){
-			cl.show(cardPanel, WATERSHED_LBL);
-		} else {
-			cl.show(cardPanel, THRESHOLD_LBL);
-		}
-		isUpdating = false;
-		
-	}
-	
-	@Override
-	public void setEnabled(boolean b){
-		super.setEnabled(b);
-		thresholdBtn.setEnabled(b);
-		waterBtn.setEnabled(b);
+        this.addSubPanel(thresholdPanel);
+        this.addSubPanel(watershedPanel);
 
-	}
+        cardPanel.add(thresholdPanel, THRESHOLD_LBL);
+        cardPanel.add(watershedPanel, WATERSHED_LBL);
+        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+        if (options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)) {
+            cl.show(cardPanel, WATERSHED_LBL);
+        } else {
+            cl.show(cardPanel, THRESHOLD_LBL);
+        }
 
-	@Override
-	public void set(IDetectionOptions options) {
-		this.options.set(options);
-		update();
-		
-	}
+        return cardPanel;
+    }
+
+    /**
+     * A panel with the radio buttons to choose edge detection or threshold for
+     * the nucleus
+     * 
+     * @return
+     */
+    private JPanel makeSwitchPanel() {
+        JPanel panel = new JPanel(new FlowLayout());
+
+        thresholdBtn.setSelected(!options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
+        waterBtn.setSelected(options.getBoolean(IDetectionOptions.IS_USE_WATERSHED));
+        thresholdBtn.setActionCommand(THRESHOLD_LBL);
+        waterBtn.setActionCommand(WATERSHED_LBL);
+
+        // Group the radio buttons.
+        group.add(thresholdBtn);
+        group.add(waterBtn);
+
+        thresholdBtn.addActionListener(this);
+        waterBtn.addActionListener(this);
+
+        panel.add(thresholdBtn);
+        panel.add(waterBtn);
+
+        return panel;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals(THRESHOLD_LBL)) {
+            options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, false);
+
+            CardLayout cl = (CardLayout) (cardPanel.getLayout());
+            cl.show(cardPanel, THRESHOLD_LBL);
+
+        }
+
+        if (e.getActionCommand().equals(WATERSHED_LBL)) {
+            options.setBoolean(IDetectionOptions.IS_USE_WATERSHED, true);
+            CardLayout cl = (CardLayout) (cardPanel.getLayout());
+            cl.show(cardPanel, WATERSHED_LBL);
+        }
+        fireOptionsChangeEvent();
+
+    }
+
+    @Override
+    public void update() {
+        super.update();
+
+        isUpdating = true;
+        CardLayout cl = (CardLayout) (cardPanel.getLayout());
+
+        if (options.getBoolean(IDetectionOptions.IS_USE_WATERSHED)) {
+            cl.show(cardPanel, WATERSHED_LBL);
+        } else {
+            cl.show(cardPanel, THRESHOLD_LBL);
+        }
+        isUpdating = false;
+
+    }
+
+    @Override
+    public void setEnabled(boolean b) {
+        super.setEnabled(b);
+        thresholdBtn.setEnabled(b);
+        waterBtn.setEnabled(b);
+
+    }
+
+    @Override
+    public void set(IDetectionOptions options) {
+        this.options.set(options);
+        update();
+
+    }
 
 }

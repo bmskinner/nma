@@ -1,21 +1,21 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.components.stats;
 
 import java.util.HashSet;
@@ -32,33 +32,44 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public enum NucleusStatistic implements PlottableStatistic, Loggable {
-    AREA("Area", StatisticDimension.AREA, new NucleusType[] { NucleusType.ROUND }), PERIMETER("Perimeter",
-            StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), MAX_FERET("Max feret",
-                    StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), MIN_DIAMETER("Min diameter",
-                            StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), ASPECT("Aspect",
-                                    StatisticDimension.DIMENSIONLESS,
-                                    new NucleusType[] { NucleusType.ROUND }), CIRCULARITY("Circularity",
-                                            StatisticDimension.DIMENSIONLESS,
-                                            new NucleusType[] { NucleusType.ROUND }), VARIABILITY("Variability",
-                                                    StatisticDimension.DIMENSIONLESS,
-                                                    new NucleusType[] { NucleusType.ROUND }), BOUNDING_HEIGHT(
-                                                            "Bounding height", StatisticDimension.LENGTH,
-                                                            new NucleusType[] { NucleusType.ROUND }), BOUNDING_WIDTH(
-                                                                    "Bounding width", StatisticDimension.LENGTH,
-                                                                    new NucleusType[] {
-                                                                            NucleusType.ROUND }), OP_RP_ANGLE(
-                                                                                    "Angle between reference points",
-                                                                                    StatisticDimension.ANGLE,
-                                                                                    new NucleusType[] {
-                                                                                            NucleusType.ROUND }), HOOK_LENGTH(
-                                                                                                    "Length of hook",
-                                                                                                    StatisticDimension.LENGTH,
-                                                                                                    new NucleusType[] {
-                                                                                                            NucleusType.RODENT_SPERM }), BODY_WIDTH(
-                                                                                                                    "Width of body",
-                                                                                                                    StatisticDimension.LENGTH,
-                                                                                                                    new NucleusType[] {
-                                                                                                                            NucleusType.RODENT_SPERM });
+    AREA("Area", StatisticDimension.AREA, new NucleusType[] { NucleusType.ROUND }), 
+    PERIMETER("Perimeter",
+            StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), 
+    MAX_FERET("Max feret",
+            StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), 
+    MIN_DIAMETER("Min diameter",
+            StatisticDimension.LENGTH, new NucleusType[] { NucleusType.ROUND }), 
+    ASPECT("Aspect",
+            StatisticDimension.DIMENSIONLESS,
+            new NucleusType[] { NucleusType.ROUND }), 
+    CIRCULARITY("Circularity",
+            StatisticDimension.DIMENSIONLESS,
+            new NucleusType[] { NucleusType.ROUND }), 
+    VARIABILITY("Variability",
+            StatisticDimension.DIMENSIONLESS,
+            new NucleusType[] { NucleusType.ROUND }), 
+    BOUNDING_HEIGHT(
+            "Bounding height", StatisticDimension.LENGTH,
+            new NucleusType[] { NucleusType.ROUND }), 
+    BOUNDING_WIDTH(
+            "Bounding width", StatisticDimension.LENGTH,
+            new NucleusType[] {
+                    NucleusType.ROUND }), 
+    OP_RP_ANGLE(
+            "Angle between reference points",
+            StatisticDimension.ANGLE,
+            new NucleusType[] {
+                    NucleusType.ROUND }), 
+    HOOK_LENGTH(
+            "Length of hook",
+            StatisticDimension.LENGTH,
+            new NucleusType[] {
+                    NucleusType.RODENT_SPERM }), 
+    BODY_WIDTH(
+            "Width of body",
+            StatisticDimension.LENGTH,
+            new NucleusType[] {
+                    NucleusType.RODENT_SPERM });
 
     private String             name;
     private StatisticDimension dimension;

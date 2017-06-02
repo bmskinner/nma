@@ -1,27 +1,25 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 
 import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
@@ -30,8 +28,6 @@ import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.io.Exporter;
-
-import ij.io.SaveDialog;
 
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
@@ -72,27 +68,12 @@ public class ExportableTable extends JTable {
 
         private void export() {
 
-            // get a place to save to
-            SaveDialog saveDialog = new SaveDialog("Export table to...", "Table", Exporter.TAB_FILE_EXTENSION);
+            File saveFile = FileSelector.chooseTableExportFile();
 
-            String fileName = saveDialog.getFileName();
-            String folderName = saveDialog.getDirectory();
+            if(saveFile!=null){
 
-            if (fileName != null && folderName != null) {
-                File saveFile = new File(folderName + File.separator + fileName);
-
-                // write out the model
                 String string = makeExportString();
-                PrintWriter out;
-                try {
-
-                    out = new PrintWriter(saveFile);
-                    out.println(string);
-                    out.close();
-                } catch (FileNotFoundException e) {
-
-                }
-
+                Exporter.writeString(string,saveFile);
             }
 
         }
@@ -101,17 +82,17 @@ public class ExportableTable extends JTable {
             StringBuilder builder = new StringBuilder();
             TableModel model = table.getModel();
             for (int col = 0; col < model.getColumnCount(); col++) {
-                builder.append(model.getColumnName(col) + "\t");
+                builder.append(model.getColumnName(col) + Exporter.TAB);
                 ;
             }
-            builder.append("\r\n");
+            builder.append(Exporter.NEWLINE);
             for (int row = 0; row < model.getRowCount(); row++) {
 
                 for (int col = 0; col < model.getColumnCount(); col++) {
                     Object value = model.getValueAt(row, col);
-                    builder.append(value + "\t");
+                    builder.append(value + Exporter.TAB);
                 }
-                builder.append("\r\n");
+                builder.append(Exporter.NEWLINE);
             }
             return builder.toString();
         }

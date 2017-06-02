@@ -1,21 +1,20 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
 
 package com.bmskinner.nuclear_morphology.gui;
 
@@ -38,9 +37,9 @@ public class DatasetUpdateEventHandler extends AbstractEventHandler {
     }
     
     /**
-     * Signal listeners that the given datasets should be displayed
+     * Signal listeners that the given datasets should be displayed.
      * 
-     * @param list
+     * @param list the list of datasets include in the event
      */
     public void fireDatasetUpdateEvent(List<IAnalysisDataset> list) {
         DatasetUpdateEvent e = new DatasetUpdateEvent(parent, list);
@@ -53,12 +52,16 @@ public class DatasetUpdateEventHandler extends AbstractEventHandler {
     /**
      * Add a listener for dataset update events.
      * 
-     * @param l
+     * @param l the listener to add
      */
     public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
         listeners.add(l);
     }
 
+    /**
+     * Remove the given listener.
+     * @param l the listener
+     */
     public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
         listeners.remove(l);
     }

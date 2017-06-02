@@ -1,25 +1,26 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
 
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -32,6 +33,8 @@ import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Importer;
 
+import ij.io.SaveDialog;
+
 
 /**
  * Provides methods for selecting import and export files
@@ -41,11 +44,27 @@ import com.bmskinner.nuclear_morphology.io.Importer;
  */
 public class FileSelector {
     
-//    private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
-//    private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
-//    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
-//    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
-//    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
+    //    private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
+    //    private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
+    //    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
+    //    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
+    //    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
+    
+    
+    public static File chooseTableExportFile(){
+        
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", Exporter.TAB_FILE_EXTENSION);
+        
+        File dir = GlobalOptions.getInstance().getDefaultDir();
+        File file = chooseSaveFile(dir, filter);
+     // Add extension if needed
+        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        }
+
+        return file;
+
+    }
     
     /**
      * Choose the folder to export dataset stats.
@@ -54,30 +73,19 @@ public class FileSelector {
      */
     public static File chooseStatsExportFile(List<IAnalysisDataset> datasets) {
 
-        String defaultFile = null;
         File dir = null;
         if (datasets.size() == 1) {
             dir = datasets.get(0).getSavePath().getParentFile();
-            defaultFile = datasets.get(0).getName() + Exporter.TAB_FILE_EXTENSION;
 
         } else {
-            defaultFile = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
             dir = IAnalysisDataset.commonPathOfFiles(datasets);
             if (!dir.exists() || !dir.isDirectory()) {
                 dir = GlobalOptions.getInstance().getDefaultDir();
             }
         }
-
-        JFileChooser fc = new JFileChooser(dir);
-        fc.setSelectedFile(new File(defaultFile));
-        fc.setDialogTitle("Specify a file to save as");
-
-        int returnVal = fc.showSaveDialog(fc);
-        if (returnVal != 0) {
-            return null; // user cancelled
-        }
-
-        File file = fc.getSelectedFile();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", Exporter.TAB_FILE_EXTENSION);
+        
+        File file = chooseSaveFile(dir, filter);
 
         // Add extension if needed
         if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
@@ -88,7 +96,7 @@ public class FileSelector {
     }
     
     /**
-     * Get the remapping file to be loaded
+     * Get the remapping file to be loaded.
      * 
      * @return the file
      */
@@ -102,20 +110,31 @@ public class FileSelector {
             return null;
         }
         
-        return chooseFile(defaultDir, filter);
+        return chooseOpenFile(defaultDir, filter);
 
     }
     
     /**
-     * Choose a file from a default folder with a file extension filter
+     * Choose a file from a default folder.
+     * @param defaultFolder the default folder
+     * @return the selected file, or null on cancel or error
+     */
+    private static File chooseOpenFile(File defaultFolder){
+        return chooseOpenFile(defaultFolder, null);
+    }
+    
+    /**
+     * Choose a file from a default folder with a file extension filter.
      * @param defaultFolder the default folder
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    private static File chooseFile(File defaultFolder, FileNameExtensionFilter filter){
+    private static File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
-        fc.setFileFilter(filter);
+        if(filter!=null){
+            fc.setFileFilter(filter);
+        }
 
         int returnVal = fc.showOpenDialog(fc);
         if (returnVal != 0) {
@@ -128,6 +147,34 @@ public class FileSelector {
             return null;
         }
         return file;
+    }
+    
+    
+    private static File chooseSaveFile(File defaultFolder){
+        return chooseSaveFile(defaultFolder, null);
+    }
+    
+    /**
+     * Choose a file from a default folder with a file extension filter.
+     * @param defaultFolder the default folder
+     * @param filter the filename extension filter
+     * @return the selected file, or null on cancel or error
+     */
+    private static File chooseSaveFile(File defaultFolder, FileNameExtensionFilter filter){
+        JFileChooser fc= new JFileChooser(defaultFolder);
+
+        if(filter!=null){
+            fc.setFileFilter(filter);
+        }
+
+        fc.setDialogTitle("Specify a file to save as");
+
+        int returnVal = fc.showSaveDialog(fc);
+        if (returnVal != 0) {
+            return null; // user cancelled
+        }
+
+        return fc.getSelectedFile();
     }
     
     /**

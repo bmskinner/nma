@@ -1,21 +1,20 @@
 /*******************************************************************************
- *  	Copyright (C) 2016 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
@@ -46,21 +45,19 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     private JProgressBar       progressBar = null;
 
     protected IAnalysisWorker worker   = null;
-    protected int             downFlag = 0;   // store flags to tell the action
-                                              // what to do after finishing
+    protected int             downFlag = 0;   // flags for next action
 
     private LogPanel       logPanel;
     protected MainWindow   mw;
-    private CountDownLatch latch = null; // allow threads to wait for the
-                                         // analysis to complete    
+    private CountDownLatch latch = null; // allow threads to wait
     private final DatasetEventHandler   dh = new DatasetEventHandler(this);
     private final InterfaceEventHandler ih = new InterfaceEventHandler(this);
 
     /**
-     * Constructor with no datasets - used for new analysis
+     * Constructor with no datasets - used for new analysis.
      * 
-     * @param barMessage
-     * @param mw
+     * @param barMessage the message to display in the progress bar
+     * @param mw the main window
      */
     protected VoidResultAction(String barMessage, MainWindow mw) {
 

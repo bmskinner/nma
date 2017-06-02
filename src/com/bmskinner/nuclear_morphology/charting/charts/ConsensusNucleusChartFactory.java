@@ -1,21 +1,21 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.charting.charts;
 
 import java.awt.BasicStroke;
@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 /**
- * Methods to make charts with a consensus nucleus
+ * Methods to make charts with a consensus nucleus.
  */
 public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
@@ -53,9 +53,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
     /**
      * Create an empty chart as a placeholder for nucleus outlines and consensus
-     * chart panels
+     * chart panels.
      * 
-     * @return
+     * @return an empty chart
      */
     public static JFreeChart makeEmptyChart() {
 
@@ -75,26 +75,20 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
     }
 
     /**
-     * Test if any of the datasets have a consensus nucleus folded
+     * Test if any of the datasets have a consensus nucleus.
      * 
-     * @param AnalysisDataset
-     * @return
+     * @return true if a dataset has a consensus nucleus.
      */
     public boolean hasConsensusNucleus() {
-        for (IAnalysisDataset dataset : options.getDatasets()) {
-            if (dataset.getCollection().hasConsensus()) {
-                return true;
-            }
-        }
-        return false;
+        return options.getDatasets().stream().anyMatch( d -> d.getCollection().hasConsensus());
     }
 
     /**
      * Craete a consensus chart from the given dataset. Gives an empty chart if
      * null.
      * 
-     * @param ds
-     * @return
+     * @param ds the dataset
+     * @return a chart
      */
     private JFreeChart makeConsensusChart(XYDataset ds) {
         JFreeChart chart = null;
@@ -107,247 +101,10 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         formatConsensusChart(chart);
         return chart;
     }
-
-    /**
-     * Apply basic formatting to the chart; set the backgound colour, add the
-     * markers and set the ranges
-     * 
-     * @param chart
-     */
-    private void formatConsensusChart(JFreeChart chart) {
-        chart.getPlot().setBackgroundPaint(Color.WHITE);
-        chart.getXYPlot().getDomainAxis().setVisible(false);
-        chart.getXYPlot().getRangeAxis().setVisible(false);
-        chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
-        chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
-
-        int range = 50;
-        chart.getXYPlot().getDomainAxis().setRange(-range, range);
-        chart.getXYPlot().getRangeAxis().setRange(-range, range);
-    }
-
-    /**
-     * Create a consenusus chart for the given nucleus collection. This chart
-     * draws the nucleus border in black. There are no IQRs or segments.
-     * 
-     * @param collection
-     *            the NucleusCollection to draw the consensus from
-     * @return the consensus chart
-     */
-    public JFreeChart makeNucleusOutlineChart() {
-
-        IAnalysisDataset dataset = options.firstDataset();
-
-        if (!dataset.getCollection().hasConsensus()) {
-            return makeEmptyChart();
-        }
-
-        XYDataset ds;
-        try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
-        } catch (ChartDatasetCreationException e) {
-            fine("Error creating boxplot", e);
-            return makeErrorChart();
-        }
-        JFreeChart chart = makeConsensusChart(ds);
-
-        double max = getconsensusChartRange(dataset);
-
-        XYPlot plot = chart.getXYPlot();
-
-        plot.getDomainAxis().setRange(-max, max);
-        plot.getRangeAxis().setRange(-max, max);
-
-        int seriesCount = plot.getSeriesCount();
-
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
-            plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
-            plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-        }
-        return chart;
-    }
-
-    /**
-     * Get the maximum absolute range of the axes of the chart
-     * 
-     * @param dataset
-     * @return
-     */
-    private double getconsensusChartRange(IAnalysisDataset dataset) {
-        ICellCollection collection = dataset.getCollection();
-        double maxX = Math.max(Math.abs(collection.getConsensus().getMinX()),
-                Math.abs(collection.getConsensus().getMaxX()));
-        double maxY = Math.max(Math.abs(collection.getConsensus().getMinY()),
-                Math.abs(collection.getConsensus().getMaxY()));
-
-        // ensure that the scales for each axis are the same
-        double max = Math.max(maxX, maxY);
-
-        // ensure there is room for expansion of the target nucleus due to IQR
-        max *= 1.25;
-        return max;
-    }
-
-    /**
-     * Get the maximum absolute range of the axes of the chart. The minimum
-     * returned value will be 1
-     * 
-     * @param list
-     *            the datasets to test
-     * @return
-     */
-    public double getconsensusChartRange() {
-
-        double max = 1;
-        for (IAnalysisDataset dataset : options.getDatasets()) {
-            if (dataset.getCollection().hasConsensus()) {
-                double datasetMax = getconsensusChartRange(dataset);
-                max = datasetMax > max ? datasetMax : max;
-            }
-        }
-        return max;
-    }
-
-    /**
-     * Create a consensus nucleus chart with IQR and segments drawn on it
-     * 
-     * @param dataset
-     *            the dataset to draw
-     * @return
-     */
-    private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
-
-        if (!dataset.getCollection().hasConsensus()) {
-            return makeEmptyChart();
-        }
-        XYDataset ds = null;
-
-        ICellCollection collection = dataset.getCollection();
-        try {
-            ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
-        } catch (ChartDatasetCreationException e) {
-            warn("Cannot make consensus chart");
-            fine("Error making segmented outline", e);
-            return makeErrorChart();
-        }
-
-        JFreeChart chart = makeConsensusChart(ds);
-        double max = getconsensusChartRange(dataset);
-
-        XYPlot plot = chart.getXYPlot();
-        plot.setDataset(0, ds);
-        plot.getDomainAxis().setRange(-max, max);
-        plot.getRangeAxis().setRange(-max, max);
-
-        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
-
-        formatConsensusChartSeries(plot, true, swatch);
-
-        return chart;
-    }
-
-    /**
-     * Format the series colours for a consensus nucleus
-     * 
-     * @param plot
-     */
-    private void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch) {
-
-        XYDataset ds = plot.getDataset();
-        int seriesCount = plot.getSeriesCount();
-
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, false);
-            String name = (String) ds.getSeriesKey(i);
-
-            // colour the segments
-            if (name.startsWith("Seg_")) {
-
-                plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-                plot.getRenderer().setSeriesPaint(i, Color.BLACK);
-            }
-
-            // colour the quartiles
-            if (name.startsWith("Q")) {
-
-                // get the segment component
-                // The dataset series name is Q25_Seg_1 etc
-                String segmentName = name.replaceAll("Q[2|7]5_", "");
-                int segIndex = MorphologyChartFactory.getIndexFromLabel(segmentName);
-
-                if (showIQR) {
-                    plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-                    Paint colour = ColourSelecter.getColor(segIndex);
-                    plot.getRenderer().setSeriesPaint(i, colour);
-
-                } else {
-                    plot.getRenderer().setSeriesVisible(i, false);
-                }
-            }
-        }
-
-    }
-
-    /**
-     * Create a chart with multiple consensus nuclei from the given datasets
-     * 
-     * @param list
-     * @return
-     * @throws Exception
-     */
-    private JFreeChart makeMultipleConsensusChart() {
-        // multiple nuclei
-        XYDataset ds;
-        try {
-            ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
-        } catch (ChartDatasetCreationException e) {
-            fine("Error making consensus dataset", e);
-            return makeErrorChart();
-        }
-        JFreeChart chart = makeConsensusChart(ds);
-
-        formatConsensusChart(chart);
-
-        XYPlot plot = chart.getXYPlot();
-
-        double max = getconsensusChartRange();
-
-        plot.getDomainAxis().setRange(-max, max);
-        plot.getRangeAxis().setRange(-max, max);
-
-        int seriesCount = plot.getSeriesCount();
-
-        for (int i = 0; i < seriesCount; i++) {
-            plot.getRenderer().setSeriesVisibleInLegend(i, false);
-            String name = (String) ds.getSeriesKey(i);
-            plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
-
-            int index = MorphologyChartFactory.getIndexFromLabel(name);
-            IAnalysisDataset d = options.getDatasets().get(index);
-
-            // in this context, segment colour refers to the entire
-            // dataset colour (they use the same pallates in ColourSelecter)
-            Paint color = d.getDatasetColour() == null ? ColourSelecter.getColor(i) : d.getDatasetColour();
-
-            // get the group id from the name, and make colour
-            plot.getRenderer().setSeriesPaint(i, color);
-            if (name.startsWith("Q")) {
-
-                // make the IQR distinct from the median
-                plot.getRenderer().setSeriesPaint(i, ((Color) color).darker());
-            }
-
-        }
-        return chart;
-    }
-
+    
     /**
      * Create the consensus chart for the given options.
      * 
-     * @param options
-     * @return
-     * @throws Exception
      */
     public JFreeChart makeConsensusChart() {
 
@@ -403,5 +160,238 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         finest("Options failed to match: creating empty consensus chart");
         return makeEmptyChart();
     }
+
+    /**
+     * Apply basic formatting to the chart; set the backgound colour, add the
+     * markers and set the ranges.
+     * 
+     * @param chart th chart to format
+     */
+    private void formatConsensusChart(JFreeChart chart) {
+        chart.getPlot().setBackgroundPaint(Color.WHITE);
+        chart.getXYPlot().getDomainAxis().setVisible(false);
+        chart.getXYPlot().getRangeAxis().setVisible(false);
+        chart.getXYPlot().addRangeMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
+        chart.getXYPlot().addDomainMarker(ChartComponents.CONSENSUS_ZERO_MARKER);
+
+        int range = 50;
+        chart.getXYPlot().getDomainAxis().setRange(-range, range);
+        chart.getXYPlot().getRangeAxis().setRange(-range, range);
+    }
+
+    /**
+     * Create a consenusus chart for the given nucleus collection. This chart
+     * draws the nucleus border in black. There are no IQRs or segments.
+     * 
+     * @return the consensus chart
+     */
+    public JFreeChart makeNucleusOutlineChart() {
+
+        IAnalysisDataset dataset = options.firstDataset();
+
+        if (!dataset.getCollection().hasConsensus()) {
+            return makeEmptyChart();
+        }
+
+        XYDataset ds;
+        try {
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
+        } catch (ChartDatasetCreationException e) {
+            fine("Error creating boxplot", e);
+            return makeErrorChart();
+        }
+        JFreeChart chart = makeConsensusChart(ds);
+
+        double max = getconsensusChartRange(dataset);
+
+        XYPlot plot = chart.getXYPlot();
+
+        plot.getDomainAxis().setRange(-max, max);
+        plot.getRangeAxis().setRange(-max, max);
+
+        int seriesCount = plot.getSeriesCount();
+
+        for (int i = 0; i < seriesCount; i++) {
+            plot.getRenderer().setSeriesVisibleInLegend(i, Boolean.FALSE);
+            plot.getRenderer().setSeriesStroke(i, new BasicStroke(3));
+            plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+        }
+        return chart;
+    }
+
+    /**
+     * Get the maximum absolute range of the axes of the chart for
+     * the given dataset.
+     * 
+     * @param dataset the dataset to range test
+     * @return the maximum range value
+     */
+    private double getconsensusChartRange(IAnalysisDataset dataset) {
+        ICellCollection collection = dataset.getCollection();
+        double maxX = Math.max(Math.abs(collection.getConsensus().getMinX()),
+                Math.abs(collection.getConsensus().getMaxX()));
+        double maxY = Math.max(Math.abs(collection.getConsensus().getMinY()),
+                Math.abs(collection.getConsensus().getMaxY()));
+
+        // ensure that the scales for each axis are the same
+        double max = Math.max(maxX, maxY);
+
+        // ensure there is room for expansion of the target nucleus due to IQR
+        max *= 1.25;
+        return max;
+    }
+
+    /**
+     * Get the maximum absolute range of the axes of the chart. The minimum
+     * returned value will be 1.
+     * 
+     * @return the chart maximum range in x or y
+     */
+    public double getconsensusChartRange() {
+
+        double max = 1;
+        for (IAnalysisDataset dataset : options.getDatasets()) {
+            if (dataset.getCollection().hasConsensus()) {
+                double datasetMax = getconsensusChartRange(dataset);
+                max = datasetMax > max ? datasetMax : max;
+            }
+        }
+        return max;
+    }
+
+    /**
+     * Create a consensus nucleus chart with IQR and segments drawn on it.
+     * 
+     * @param dataset
+     *            the dataset to draw
+     * @return a chart
+     */
+    private JFreeChart makeSegmentedConsensusChart(IAnalysisDataset dataset) {
+
+        if (!dataset.getCollection().hasConsensus()) {
+            return makeEmptyChart();
+        }
+        XYDataset ds = null;
+
+        ICellCollection collection = dataset.getCollection();
+        try {
+            ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
+        } catch (ChartDatasetCreationException e) {
+            warn("Cannot make consensus chart");
+            fine("Error making segmented outline", e);
+            return makeErrorChart();
+        }
+
+        JFreeChart chart = makeConsensusChart(ds);
+        double max = getconsensusChartRange(dataset);
+
+        XYPlot plot = chart.getXYPlot();
+        plot.setDataset(0, ds);
+        plot.getDomainAxis().setRange(-max, max);
+        plot.getRangeAxis().setRange(-max, max);
+
+        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
+
+        formatConsensusChartSeries(plot, true, swatch);
+
+        return chart;
+    }
+
+    /**
+     * Format the series colours for a consensus nucleus.
+     * 
+     * @param plot the chart plot
+     * @param showIQR should the IQR be displayed
+     * @param swatch the colour swatch
+     */
+    private void formatConsensusChartSeries(XYPlot plot, boolean showIQR, ColourSwatch swatch) {
+
+        XYDataset ds = plot.getDataset();
+        int seriesCount = plot.getSeriesCount();
+
+        for (int i = 0; i < seriesCount; i++) {
+            plot.getRenderer().setSeriesVisibleInLegend(i, false);
+            String name = (String) ds.getSeriesKey(i);
+
+            // colour the segments
+            if (name.startsWith("Seg_")) {
+
+                plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
+                plot.getRenderer().setSeriesPaint(i, Color.BLACK);
+            }
+
+            // colour the quartiles
+            if (name.startsWith("Q")) {
+
+                // get the segment component
+                // The dataset series name is Q25_Seg_1 etc
+                String segmentName = name.replaceAll("Q[2|7]5_", "");
+                int segIndex = MorphologyChartFactory.getIndexFromLabel(segmentName);
+
+                if (showIQR) {
+                    plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
+                    Paint colour = ColourSelecter.getColor(segIndex);
+                    plot.getRenderer().setSeriesPaint(i, colour);
+
+                } else {
+                    plot.getRenderer().setSeriesVisible(i, false);
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Create a chart with multiple consensus nuclei.
+     * 
+     * @return a chart
+     */
+    private JFreeChart makeMultipleConsensusChart() {
+        // multiple nuclei
+        XYDataset ds;
+        try {
+            ds = new NucleusDatasetCreator(options).createMultiNucleusOutline();
+        } catch (ChartDatasetCreationException e) {
+            fine("Error making consensus dataset", e);
+            return makeErrorChart();
+        }
+        JFreeChart chart = makeConsensusChart(ds);
+
+        formatConsensusChart(chart);
+
+        XYPlot plot = chart.getXYPlot();
+
+        double max = getconsensusChartRange();
+
+        plot.getDomainAxis().setRange(-max, max);
+        plot.getRangeAxis().setRange(-max, max);
+
+        int seriesCount = plot.getSeriesCount();
+
+        for (int i = 0; i < seriesCount; i++) {
+            plot.getRenderer().setSeriesVisibleInLegend(i, false);
+            String name = (String) ds.getSeriesKey(i);
+            plot.getRenderer().setSeriesStroke(i, new BasicStroke(2));
+
+            int index = MorphologyChartFactory.getIndexFromLabel(name);
+            IAnalysisDataset d = options.getDatasets().get(index);
+
+            // in this context, segment colour refers to the entire
+            // dataset colour (they use the same pallates in ColourSelecter)
+            Paint color = d.getDatasetColour() == null ? ColourSelecter.getColor(i) : d.getDatasetColour();
+
+            // get the group id from the name, and make colour
+            plot.getRenderer().setSeriesPaint(i, color);
+            if (name.startsWith("Q")) {
+
+                // make the IQR distinct from the median
+                plot.getRenderer().setSeriesPaint(i, ((Color) color).darker());
+            }
+
+        }
+        return chart;
+    }
+
+    
 
 }

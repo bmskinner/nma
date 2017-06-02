@@ -1,3 +1,21 @@
+/*******************************************************************************
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
+ *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.analysis.image;
 
 import java.awt.Color;
@@ -55,6 +73,48 @@ public class ColourMeasurometer implements Loggable {
     public static int calculateAverageIntensity(CellularComponent component, ImageProcessor ip) {
         Area a = new Area(component.toOriginalShape());
         return calculateAverageIntensity(a, ip, Quartile.MEDIAN);
+    }
+    
+    /**
+     * Get the average RGB values within the area.
+     * 
+     * @param a
+     * @param ip
+     *            a color immage processor
+     * @return
+     */
+    private static int calculateAverageIntensity(Area a, ImageProcessor ip, double quartile) {
+
+        if (!(ip instanceof ByteProcessor)) {
+            throw new IllegalArgumentException("Must be an 8-bit greyscale image processor");
+        }
+
+        Rectangle r = a.getBounds();
+
+        List<Integer> grey = new ArrayList<Integer>(100);
+
+        for (int x = 0; x < ip.getWidth(); x++) {
+
+            if (x < r.getMinX() || x > r.getMaxX()) {
+                continue;
+            }
+
+            for (int y = 0; y < ip.getHeight(); y++) {
+                if (y < r.getMinY() || y > r.getMaxY()) {
+                    continue;
+                }
+
+                if (a.contains(x, y)) {
+
+                    grey.add(ip.get(x, y));
+
+                }
+
+            }
+        }
+
+        Quartile q = new Quartile(grey, quartile);
+        return q.intValue();
     }
 
     /**
@@ -129,52 +189,8 @@ public class ColourMeasurometer implements Loggable {
 
     }
 
-    /*
-     * PRIVATE METHODS
-     * 
-     */
 
-    /**
-     * Get the average RGB values within the area.
-     * 
-     * @param a
-     * @param ip
-     *            a color immage processor
-     * @return
-     */
-    private static int calculateAverageIntensity(Area a, ImageProcessor ip, double quartile) {
 
-        if (!(ip instanceof ByteProcessor)) {
-            throw new IllegalArgumentException("Must be an 8-bit greyscale image processor");
-        }
-
-        Rectangle r = a.getBounds();
-
-        List<Integer> grey = new ArrayList<Integer>(100);
-
-        for (int x = 0; x < ip.getWidth(); x++) {
-
-            if (x < r.getMinX() || x > r.getMaxX()) {
-                continue;
-            }
-
-            for (int y = 0; y < ip.getHeight(); y++) {
-                if (y < r.getMinY() || y > r.getMaxY()) {
-                    continue;
-                }
-
-                if (a.contains(x, y)) {
-
-                    grey.add(ip.get(x, y));
-
-                }
-
-            }
-        }
-
-        Quartile q = new Quartile(grey, quartile);
-        return q.intValue();
-    }
 
     /**
      * Calculate the pixel values for cytoplasm, excluding nuclei

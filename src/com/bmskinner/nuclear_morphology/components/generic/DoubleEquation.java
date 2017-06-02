@@ -1,21 +1,21 @@
 /*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (C) 2017 Ben Skinner
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
  *******************************************************************************/
+
+
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
@@ -57,7 +57,6 @@ public class DoubleEquation implements LineEquation {
      *            the first XYPoint
      * @param b
      *            the second XYPoint
-     * @return An Equation describing the line between the points
      */
     public DoubleEquation(IPoint a, IPoint b) {
 
@@ -71,7 +70,6 @@ public class DoubleEquation implements LineEquation {
      *            the first XYPoint
      * @param b
      *            the second XYPoint
-     * @return An Equation describing the line between the points
      */
     public DoubleEquation(Point2D a, Point2D b) {
 
@@ -239,8 +237,7 @@ public class DoubleEquation implements LineEquation {
     @Override
     public boolean intersects(DoubleEquation eq) {
 
-        if (Math.abs(m - eq.m) < 0.000001) {// they are parallel within the
-                                            // bounds of FP calculations
+        if (Math.abs(m - eq.m) < 0.000001) {// parallel within FP bounds
             return Math.abs(c - eq.c) < .0000001;
         }
         return true;
@@ -250,10 +247,10 @@ public class DoubleEquation implements LineEquation {
      * Get the point that lies proportion of the way between points start and
      * end
      * 
-     * @param start
-     * @param end
-     * @param proportion
-     * @return
+     * @param start the line start point
+     * @param end the line end point
+     * @param proportion the proportion to find, from 0-1
+     * @return the point at the given proportion of the distance between start and end
      */
     public static IPoint getProportionalDistance(IPoint start, IPoint end, double proportion) {
 
