@@ -3,19 +3,14 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 
 /**
  * Creates child datasets from a .cell mapping file
@@ -40,7 +35,7 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
          * Get the file to search
          */
 
-        File file = selectFile();
+        File file = FileSelector.chooseRemappingFile(dataset);
         if (file != null) {
 
             /*
@@ -66,42 +61,6 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
         fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         this.countdownLatch();
         super.finished();
-    }
-
-    /**
-     * Get the file to be loaded
-     * 
-     * @return
-     */
-    private File selectFile() {
-
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
-        File defaultDir = null;
-        try {
-            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            warn("No nucleus options available");
-            return null;
-        }
-
-        JFileChooser fc;
-        if (defaultDir.exists()) {
-            fc = new JFileChooser(defaultDir);
-        } else {
-            fc = new JFileChooser((File) null);
-        }
-        fc.setFileFilter(filter);
-
-        int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
-            return null;
-        }
-        File file = fc.getSelectedFile();
-
-        if (file.isDirectory()) {
-            return null;
-        }
-        return file;
     }
 
 }

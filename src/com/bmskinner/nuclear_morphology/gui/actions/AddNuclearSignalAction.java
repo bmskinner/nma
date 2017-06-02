@@ -20,18 +20,15 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 
-import javax.swing.JFileChooser;
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 
 /**
@@ -43,16 +40,19 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
 public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
     private File folder;
+    
+    private static final String PROGRESS_BAR_LABEL = "Signal detection";
 
     public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Signal detection", mw);
+        super(dataset, PROGRESS_BAR_LABEL, mw);
     }
 
     @Override
     public void run() {
         try {
 
-            if (!this.getImageDirectory()) {
+            folder = FileSelector.chooseFISHDirectory(dataset);
+            if (folder==null) {
                 cancel();
                 return;
             }
@@ -62,8 +62,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
             if (analysisSetup.isOk()) {
 
                 INuclearSignalOptions options = analysisSetup.getOptions();
-                //
-                //
+
                 IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
 
                 String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).getGroupName();
@@ -93,37 +92,6 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
         cancel();
 
-    }
-
-    private boolean getImageDirectory() {
-
-        File defaultDir = null;
-        try {
-            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            warn("No nucleus options available");
-            return false;
-        }
-
-        JFileChooser fc = new JFileChooser(defaultDir); // if null, will be home
-                                                        // dir
-
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
-            return false; // user cancelled
-        }
-
-        File file = fc.getSelectedFile();
-
-        if (!file.isDirectory()) {
-            return false;
-        }
-        fine("Selected directory: " + file.getAbsolutePath());
-        folder = file;
-
-        return true;
     }
 
 }

@@ -22,13 +22,11 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.JFileChooser;
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 
 public class SaveWorkspaceAction extends VoidResultAction {
@@ -51,14 +49,12 @@ public class SaveWorkspaceAction extends VoidResultAction {
             return;
         }
 
-        File file = chooseExportFile();
+        File file = FileSelector.chooseWorkspaceExportFile(datasets);
 
         if (file == null) {
             cancel();
             return;
         }
-
-        // log("Saving workspace...");
 
         // Get all datasets
         IWorkspace w = new DefaultWorkspace(file);
@@ -74,40 +70,4 @@ public class SaveWorkspaceAction extends VoidResultAction {
         this.cancel();
 
     }
-
-    private File chooseExportFile() {
-
-        String fileName = null;
-        File dir = null;
-        if (datasets.size() == 1) {
-            dir = datasets.get(0).getSavePath().getParentFile();
-            fileName = datasets.get(0).getName() + Importer.WRK_FILE_EXTENSION;
-
-        } else {
-            fileName = "Workspace" + Importer.WRK_FILE_EXTENSION;
-            dir = IAnalysisDataset.commonPathOfFiles(datasets);
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir = new File(System.getProperty("user.home"));
-            }
-        }
-
-        JFileChooser fc = new JFileChooser(dir);
-        fc.setSelectedFile(new File(fileName));
-        fc.setDialogTitle("Save workspace as");
-
-        int returnVal = fc.showSaveDialog(fc);
-        if (returnVal != 0) {
-            return null; // user cancelled
-        }
-
-        File file = fc.getSelectedFile();
-
-        // Add extension if needed
-        if (!file.getAbsolutePath().endsWith(Importer.WRK_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Importer.WRK_FILE_EXTENSION);
-        }
-
-        return file;
-    }
-
 }

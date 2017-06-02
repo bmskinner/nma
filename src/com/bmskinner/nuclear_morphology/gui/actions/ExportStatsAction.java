@@ -22,16 +22,13 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.JFileChooser;
-
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
-import com.bmskinner.nuclear_morphology.io.Exporter;
 
 /**
  * The action for exporting stats from datasets
@@ -51,7 +48,7 @@ public class ExportStatsAction extends MultiDatasetResultAction {
     @Override
     public void run() {
 
-        File file = chooseExportFile();
+        File file = FileSelector.chooseStatsExportFile(datasets);
 
         if (file == null) {
             cancel();
@@ -73,41 +70,6 @@ public class ExportStatsAction extends MultiDatasetResultAction {
         fine("Refolding finished, cleaning up");
         super.finished();
         this.countdownLatch();
-    }
-
-    private File chooseExportFile() {
-
-        String defaultFile = null;
-        File dir = null;
-        if (datasets.size() == 1) {
-            dir = datasets.get(0).getSavePath().getParentFile();
-            defaultFile = datasets.get(0).getName() + Exporter.TAB_FILE_EXTENSION;
-
-        } else {
-            defaultFile = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
-            dir = IAnalysisDataset.commonPathOfFiles(datasets);
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir = GlobalOptions.getInstance().getDefaultDir();
-            }
-        }
-
-        JFileChooser fc = new JFileChooser(dir);
-        fc.setSelectedFile(new File(defaultFile));
-        fc.setDialogTitle("Specify a file to save as");
-
-        int returnVal = fc.showSaveDialog(fc);
-        if (returnVal != 0) {
-            return null; // user cancelled
-        }
-
-        File file = fc.getSelectedFile();
-
-        // Add extension if needed
-        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
-        }
-
-        return file;
     }
 
 }
