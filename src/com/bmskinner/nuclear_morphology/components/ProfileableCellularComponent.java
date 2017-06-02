@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -65,28 +66,17 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     private static final long serialVersionUID = 1L;
 
-    protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION; // The
-                                                                                         // proportion
-                                                                                         // of
-                                                                                         // the
-                                                                                         // perimeter
-                                                                                         // to
-                                                                                         // use
-                                                                                         // for
-                                                                                         // profiling
+    /**
+     * The proportion of the perimeter to use for profiling
+     */
+    protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
     protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<ProfileType, ISegmentedProfile>();
 
-    protected Map<Tag, Integer> borderTags = new HashMap<Tag, Integer>(0); // the
-                                                                           // indexes
-                                                                           // of
-                                                                           // tags
-                                                                           // in
-                                                                           // the
-                                                                           // profiles
-                                                                           // and
-                                                                           // border
-                                                                           // list
+    /**
+     * The indexes of tags in the profiles and border list
+     */
+    protected Map<Tag, Integer> borderTags = new HashMap<Tag, Integer>(0);
 
     private boolean segsLocked = false; // allow locking of segments and tags if
                                         // manually assigned
@@ -99,11 +89,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                                                     // for the nucleus based on
                                                     // proportion
 
-    // public ProfileableCellularComponent(Roi roi, File f, int channel, int[]
-    // position){
-    // super(roi, f, channel, position);
-    //
-    // }
 
     /**
      * Construct with an ROI, a source image and channel, and the original
@@ -584,10 +569,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         ProfileCreator creator = new ProfileCreator(this);
 
         for (ProfileType type : ProfileType.values()) {
-            // fine("Creating profile "+type);
             ISegmentedProfile profile = creator.createProfile(type);
             profileMap.put(type, profile);
-            // fine("Created profile "+type);
         }
     }
 

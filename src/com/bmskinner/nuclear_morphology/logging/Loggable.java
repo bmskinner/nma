@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import ij.IJ;
 
 /**
- * This interface provides default methods for logging to the program log panel
+ * This interface provides default methods for logging to the program log panel.
  * 
  * @author bms41
  *
@@ -36,7 +36,7 @@ public interface Loggable {
     }
 
     /**
-     * Log the given message to the program log window
+     * Log the given message to the program log window.
      * 
      * @param level
      *            the log level
@@ -111,10 +111,10 @@ public interface Loggable {
 
     /**
      * Log an error to the program log window with Level.FINE Use to show stack
-     * traces when debugging
+     * traces when debugging.
      * 
-     * @param message
-     * @param t
+     * @param message the error message
+     * @param t the throwable
      */
     default void fine(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);

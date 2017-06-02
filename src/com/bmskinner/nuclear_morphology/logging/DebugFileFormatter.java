@@ -43,7 +43,9 @@ public class DebugFileFormatter extends Formatter {
         String sourceMethod = record.getSourceMethodName();
         String sourceClass = record.getSourceClassName();
 
-        if (sourceMethod.equals("log") || sourceMethod.startsWith("stack") || sourceMethod.startsWith("error")) {
+        if (sourceMethod.equals("log") 
+                || sourceMethod.startsWith("stack") 
+                || sourceMethod.startsWith("error")) {
             // work back to the actual calling method
             // this should be before the Loggable call
 
@@ -68,8 +70,16 @@ public class DebugFileFormatter extends Formatter {
 
         String date = calcDate(record.getMillis());
 
-        buffer.append(date).append(SEPARATOR).append(record.getLevel()).append(SEPARATOR).append(sourceClass)
-                .append(SEPARATOR).append(sourceMethod).append(SEPARATOR).append(record.getMessage()).append(NEWLINE);
+        buffer.append(date)
+            .append(SEPARATOR)
+            .append(record.getLevel())
+            .append(SEPARATOR)
+            .append(sourceClass)
+            .append(SEPARATOR)
+            .append(sourceMethod)
+            .append(SEPARATOR)
+            .append(record.getMessage())
+            .append(NEWLINE);
 
         if (record.getLevel() == Level.SEVERE || record.getLevel() == Loggable.TRACE) {
 

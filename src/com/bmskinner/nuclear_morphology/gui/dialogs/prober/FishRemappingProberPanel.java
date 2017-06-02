@@ -14,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,9 +32,8 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
  * The image panel for FISH remapping. Stores the cells selected for remapping
@@ -51,33 +49,33 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;
     private static final double PANEL_SCREEN_WIDTH_PROP = 0.7;
+    
+    private static final String HEADER_LBL = "Unselected nuclei are blue. Use left and right mouse buttons to select nuclei.";
 
     private final IAnalysisDataset dataset;
 
-    // private final File fishDir;
 
-    private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96); // Nuclei
-                                                                      // selected
-                                                                      // with
-                                                                      // the
-                                                                      // left
-                                                                      // button
-    private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96); // Nuclei
-                                                                      // selected
-                                                                      // with
-                                                                      // the
-                                                                      // right
-                                                                      // button
+    
+    /**
+     * Nuclei selected with the left button
+     */
+    private List<UUID> selectedNucleiLeft  = new ArrayList<UUID>(96);
+    
+    /**
+     * Nuclei selected with the right button
+     */
+    private List<UUID> selectedNucleiRight = new ArrayList<UUID>(96);
 
     private Set<ICell> openCells = new HashSet<ICell>();
 
-    public FishRemappingProberPanel(IAnalysisDataset dataset, Finder finder, Window parent)
+    public FishRemappingProberPanel(IAnalysisDataset dataset, Finder<?> finder, Window parent)
             throws MissingOptionException {
 
         super(dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder(), finder, parent);
 
+        this.setHeaderLabelText(HEADER_LBL);
         this.dataset = dataset;
-        // this.fishDir = fishDir;
+
 
         // // Make sure the images fit in the table
         Dimension minPanelSize = getPreferredSize();
@@ -91,19 +89,6 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
     @Override
     protected JTable createTable(TableModel model) {
         JTable table = super.createTable(model);
-
-        // // change the table widths
-        // Dimension screenSize =
-        // java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        // // set the new width
-        // double ratio = (double) screenSize.getWidth() / (double)
-        // screenSize.getHeight();
-        // int newWidth = (int) ( screenSize.getWidth() *
-        // PANEL_SCREEN_WIDTH_PROP);
-        // int newHeight = (int) ( (double) newWidth / ratio);
-        //
-        // table.setRowHeight(newHeight);
-        // table.setC
 
         for (MouseListener l : table.getMouseListeners()) {
             table.removeMouseListener(l);
@@ -306,39 +291,33 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
         Color oldColor = g2.getColor();
         g2.setColor(getCellColour(c));
+        
+        for(Nucleus n : c.getNuclei()){
+            Shape p = n.toOriginalShape();
+            g2.fill(p);
+        }
 
-        Shape p = c.getNucleus().toOriginalShape();
-
-        g2.fill(p);
+        
         g2.setColor(oldColor);
 
     }
 
     /**
-     * Choose the color to fill nuclei based on the colour swatch and whether
+     * Choose the colour to fill nuclei based on whether
      * they are selected.
      * 
      * @param c
      *            the cell
-     * @return
+     * @return the nucleus colour
      */
     private Color getCellColour(ICell c) {
         Color color = Color.BLUE;
-        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
         if (selectedNucleiLeft.contains(c.getId())) {
+            color = ColourSelecter.getRemappingColour(0);
 
-            if (swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)) {
-                color = Color.CYAN;
-            } else {
-                color = Color.GREEN;
-            }
         }
         if (selectedNucleiRight.contains(c.getId())) {
-            if (swatch.equals(ColourSwatch.ACCESSIBLE_SWATCH)) {
-                color = Color.ORANGE;
-            } else {
-                color = Color.RED;
-            }
+            color = ColourSelecter.getRemappingColour(1);
         }
 
         return color;

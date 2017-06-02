@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 import java.awt.Color;
 
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
 public class ColourSelecter {
 
@@ -195,6 +196,34 @@ public class ColourSelecter {
      */
     public static Color getSignalColour(int channel) {
         return getSignalColour(channel, false);
+    }
+    
+    
+    /**
+     * Get the highlight colour for FISH remapping groups. Takes a group number from 0 and
+     * returns the appropriate colour based on the selected swatch
+     * @param group the group, zero indexed
+     * @return the colour for the group
+     */
+    public static Color getRemappingColour(int group){
+        ColourSwatch swatch = GlobalOptions.getInstance().getSwatch();
+        
+        if(ColourSwatch.ACCESSIBLE_SWATCH.equals(swatch)){
+            
+            if(group==0){
+                return Color.CYAN;
+            } else {
+                return Color.ORANGE;
+            }
+            
+        } else {
+            if(group==0){
+                return Color.GREEN;
+            } else {
+                return Color.RED;
+            }
+        }
+        
     }
 
     /**

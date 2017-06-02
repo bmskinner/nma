@@ -28,8 +28,6 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EventObject;
@@ -37,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -75,10 +74,11 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
     protected static final String NULL_FILE_ERROR = "File is null";
 
     private static final String HEADER_LBL              = "Objects meeting detection parameters are outlined in yellow; other objects are red. Click an image to view larger version.";
-    private static final String FOLDER_LBL              = "Probing ";
+    private static final String FOLDER_LBL              = "Image ";
     private static final String PREV_IMAGE_BTN          = "Prev";
     private static final String NEXT_IMAGE_BTN          = "Next";
     private static final String WORKING_LBL             = "Working...";
+    private static final String LOOKING_LBL             = "Looking for images...";
     private static final double IMAGE_SCREEN_PROPORTION = 0.80;
 
     /*
@@ -87,7 +87,8 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
     private Window                           parent;
     private JLabel                           imageLabel;
-    private int                              rowHeight         = 200;
+    private JLabel                           headerLabel; // Basic info. Default to HEADER_LBL
+
     private List<PanelUpdatingEventListener> updatingListeners = new ArrayList<PanelUpdatingEventListener>();
 
     /*
@@ -106,6 +107,9 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
     protected int          fileIndex = 0; // the index of the open file
 
     protected final File folder; // the folder of files
+    
+    private JButton nextButton;
+    private JButton prevButton;
 
     public GenericImageProberPanel(File folder, Finder<?> finder, Window parent) throws MissingOptionException {
 
@@ -127,9 +131,12 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         }
         try {
             finer("Firing panel updating event");
-            setImageLabel(imageFile.getAbsolutePath());
+            int imageNumber = fileIndex+1;
+            setImageLabel(FOLDER_LBL+ imageNumber+" of "+imageFiles.size()+ ": "+imageFile.getAbsolutePath());
             firePanelUpdatingEvent(PanelUpdatingEvent.UPDATING);
             progressBar.setVisible(true);
+            nextButton.setEnabled(false);
+            prevButton.setEnabled(false);
 
             finder.findInImage(imageFile);
 
@@ -141,6 +148,8 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         } finally {
 
             progressBar.setVisible(false);
+            nextButton.setEnabled(true);
+            prevButton.setEnabled(true);
             firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
         }
     }
@@ -151,14 +160,14 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         JPanel headerPanel = createHeader();
         JPanel tablePanel = createTablePanel();
 
-        JButton nextButton = new JButton(NEXT_IMAGE_BTN);
+        nextButton = new JButton(NEXT_IMAGE_BTN);
         nextButton.addActionListener(e -> {
             openImage = getNextImage();
             imageLabel.setText(openImage.getAbsolutePath());
             run();
         });
 
-        JButton prevButton = new JButton(PREV_IMAGE_BTN);
+        prevButton = new JButton(PREV_IMAGE_BTN);
         prevButton.addActionListener(e -> {
             openImage = getPrevImage();
             imageLabel.setText(openImage.getAbsolutePath());
@@ -196,7 +205,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * @param s
      */
     protected void setImageLabel(String s) {
-        imageLabel.setText(FOLDER_LBL + s);
+        imageLabel.setText(s);
     }
 
     /**
@@ -251,19 +260,6 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
         });
 
-        // for (File file : folder.listFiles()) {
-        //
-        // boolean ok = ImageImporter.fileIsImportable(file); // check file
-        // extension
-        //
-        // if(ok){
-        // files.add(file);
-        // }
-        //
-        // if(file.isDirectory()){
-        // files.addAll(importImages(file));
-        // }
-        // }
         return files;
     }
 
@@ -338,12 +334,23 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        panel.add(new JLabel(HEADER_LBL));
+        headerLabel = new JLabel(HEADER_LBL);
+        panel.add(headerLabel);
 
-        imageLabel = new JLabel("Looking for images...");
+        imageLabel = new JLabel(LOOKING_LBL);
         panel.add(imageLabel);
+        
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
         return panel;
+    }
+    
+    /**
+     * Set the text on the header label of the prober.
+     * @param s the new text
+     */
+    protected void setHeaderLabelText(String s){
+        headerLabel.setText(s);
     }
 
     protected JTable createTable(TableModel model) {
@@ -492,7 +499,6 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * @author ben
      *
      */
-    @SuppressWarnings("serial")
     class IconCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
@@ -544,7 +550,6 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * screen width or size
      *
      */
-    @SuppressWarnings("serial")
     public class LargeImageDialog extends JDialog {
 
         // public static final double DEFAULT_SCREEN_PROPORTION = 0.9;
@@ -578,33 +583,6 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
     }
 
-    // @Override
-    // public void propertyChange(PropertyChangeEvent evt) {
-    // int value = 0;
-    // try{
-    // Object newValue = evt.getNewValue();
-    //
-    // if(newValue.getClass().isAssignableFrom(Integer.class)){
-    // value = (int) newValue;
-    //
-    // }
-    // if(value >=0 && value <=100){
-    // progressBar.setValue(value);
-    // }
-    //
-    //
-    // if(evt.getPropertyName().equals("Finished")){
-    //
-    // progressBar.setVisible(false);
-    // firePanelUpdatingEvent(PanelUpdatingEvent.COMPLETE);
-    //
-    // }
-    //
-    // } catch (Exception e){
-    // error("Error getting value from property change", e);
-    // }
-    //
-    // }
 
     @Override
     public void proberReloadEventReceived(ProberReloadEvent e) {
@@ -631,7 +609,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
         void panelUpdatingEventReceived(PanelUpdatingEvent e);
     }
 
-    @SuppressWarnings("serial")
+    
     public class PanelUpdatingEvent extends EventObject {
 
         public static final int UPDATING = 0;
