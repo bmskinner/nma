@@ -18,23 +18,21 @@
 
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.plugin.ImageCalculator;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
-import ij.process.TypeConverter;
-
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
+import ij.process.TypeConverter;
 
 /**
  * Contains methods for manipulating ImageProcessors, and provides conversion
@@ -534,6 +532,15 @@ public abstract class AbstractImageFilterer implements Loggable {
         rgb = (rgb << 8) + b;
         return rgb;
     }
+    
+    protected static int[] intToRgb(int i){
+    	// pixel values for this image
+    	int[] rgb = new int[3];
+        rgb[0] = (i >> 16) & 0xFF;
+        rgb[1] = (i >> 8) & 0xFF;
+        rgb[2] = i & 0xFF;
+        return rgb;
+    }
 
     /**
      * Express the given pixel intensity as a fraction of 255
@@ -549,7 +556,7 @@ public abstract class AbstractImageFilterer implements Loggable {
     /**
      * Merge the given list of images by averaging the RGB values
      * 
-     * @param list
+     * @param list a list of RGB images
      * @return a new colour processor with the averaged values
      */
     public static ImageProcessor averageRGBImages(List<ImageProcessor> list) {
@@ -576,49 +583,26 @@ public abstract class AbstractImageFilterer implements Loggable {
         ImageProcessor cp = new ColorProcessor(w, h);
 
         // Average the colours at each pixel
-        // White counts as empty here
         for (int i = 0; i < w * h; i++) {
 
-            // int rt=0, gt=0, bt=0; // count of images with pixel value
             int r = 0, g = 0, b = 0; // total pixel values
 
             for (ImageProcessor ip : list) {
                 int pixel = ip.get(i);
 
-                if (ip instanceof ColorProcessor) {
-                    // pixel values for this image
-                    int rp = (pixel >> 16) & 0xFF;
-                    int gp = (pixel >> 8) & 0xFF;
-                    int bp = pixel & 0xFF;
+                // pixel values for this image
+                int[] rgb = intToRgb(pixel);
 
-                    // rt = rp<255 ? rt+1 : rt;
-                    // gt = gp<255 ? gt+1 : gt;
-                    // bt = bp<255 ? bt+1 : bt;
-
-                    r += rp;
-                    g += gp;
-                    b += bp;
-
-                } else {
-                    r += pixel;
-                    g += pixel;
-                    b += pixel;
-                    // rt++;
-                    // gt++;
-                    // bt++;
-                }
-
+                r += rgb[0];
+                g += rgb[1];
+                b += rgb[2];
             }
-
-            // r/=rt;
-            // g/=gt;
-            // b/=bt;
 
             r /= list.size();
             g /= list.size();
             b /= list.size();
 
-            int rgb = rgbToInt(r, 255, b);
+            int rgb = rgbToInt(r, g, b);
             cp.set(i, rgb);
 
         }
