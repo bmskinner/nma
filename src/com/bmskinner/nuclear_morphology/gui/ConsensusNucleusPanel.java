@@ -81,7 +81,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         runRefoldingButton.addActionListener(e -> {
             fine("Heard refold button clicked");
-            fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
             runRefoldingButton.setVisible(false);
         });
 
@@ -312,7 +312,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         JButton refoldBtn = new JButton("Re-Refold");
         refoldBtn.addActionListener(e -> {
-            fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
         });
 
         constraints.gridwidth = 3;
@@ -548,7 +548,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
             this.clearChartCache(getDatasets());
 
             if (event.type().startsWith("Log_")) {
-                fireSignalChangeEvent(event.type());
+                getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
             }
 
             if (event.type().equals("RotateConsensus")) {

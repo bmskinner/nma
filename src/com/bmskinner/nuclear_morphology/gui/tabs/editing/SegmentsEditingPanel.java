@@ -321,7 +321,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             double windowSize = (double) windowSizeSpinner.getModel().getValue();
             setCollectionWindowSize(windowSize);
             this.refreshChartCache();
-            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
             this.setAnalysing(false);
         }
 
@@ -385,24 +385,24 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             SegmentsEditingPanel.this.setAnalysing(true);
 
             if (e.getSource().equals(mergeButton)) {
-                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
                 mergeAction(medianProfile);
 
             }
 
             if (e.getSource().equals(unmergeButton)) {
-                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
                 unmergeAction(medianProfile);
             }
 
             if (e.getSource().equals(splitButton)) {
-                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
                 splitAction(medianProfile);
 
             }
 
             if (e.getSource() == updatewindowButton) {
-                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, getDatasets());
                 updateCollectionWindowSize();
             }
 

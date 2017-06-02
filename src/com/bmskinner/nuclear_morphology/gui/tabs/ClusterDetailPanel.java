@@ -147,15 +147,15 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         clusterButton.addActionListener(e -> {
-            fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLUSTER, getDatasets());
         });
 
         buildTreeButton.addActionListener(e -> {
-            fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.BUILD_TREE, getDatasets());
         });
 
         saveClassifierButton.addActionListener(e -> {
-            fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
         });
 
         saveClassifierButton.setEnabled(false);
@@ -333,14 +333,14 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         super.datasetEventReceived(event);
 
         if (event.getSource() instanceof ClusterTreeDialog) {
-            fireDatasetEvent(event);
+            this.getDatasetEventHandler().fireDatasetEvent(event);
         }
     }
 
     public void interfaceEventReceived(InterfaceEvent event) {
         super.interfaceEventReceived(event);
         if (event.getSource() instanceof ClusterTreeDialog) {
-            fireInterfaceEvent(event);
+            getInterfaceEventHandler().fireInterfaceEvent(event);
         }
     }
 

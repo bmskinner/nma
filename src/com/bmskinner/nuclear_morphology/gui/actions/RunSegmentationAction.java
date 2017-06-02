@@ -200,7 +200,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                  * Recache charts if the dataset exists
                  */
                 finer("Firing clear cache event");
-                fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, dataset);
 
                 /*
                  * Ideally, wait for the charts to clear before firing the
@@ -211,13 +211,13 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                  * Save the dataset, regardless of flags
                  */
                 finer("Saving the dataset");
-                fireDatasetEvent(DatasetEvent.SAVE, dataset);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
                 if ((downFlag & ADD_POPULATION) == ADD_POPULATION) {
                     finest("Adding dataset to list manager");
                     DatasetListManager.getInstance().addDataset(dataset);
                     finest("Firing add dataset signal");
-                    fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
                 }
 
@@ -232,7 +232,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                     // fireDatasetEvent(DatasetMethod.REFRESH_CACHE, dataset);
 
                     finer("Firing select dataset event");
-                    fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
+                    getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SELECT_ONE_DATASET, dataset);
 
                     RunSegmentationAction.super.finished();
 

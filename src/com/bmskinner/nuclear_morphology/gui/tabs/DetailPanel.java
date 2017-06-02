@@ -50,14 +50,17 @@ import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -75,10 +78,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         InterfaceEventListener, Loggable, ChartOptionsRenderedEventListener {
 
     private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
-    private final List<Object> signalListeners    = new CopyOnWriteArrayList<Object>();
-    private final List<Object> datasetListeners   = new CopyOnWriteArrayList<Object>();
-    private final List<Object> interfaceListeners = new CopyOnWriteArrayList<Object>();
-    private final List<Object> updateListeners    = new CopyOnWriteArrayList<Object>();
 
     private final List<TabPanel> subPanels = new ArrayList<TabPanel>();
 
@@ -89,6 +88,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     protected final Cache tableCache = new TableCache();
 
     volatile private AtomicBoolean isUpdating = new AtomicBoolean(false);
+    
+    private final DatasetEventHandler       dh  = new DatasetEventHandler(this);
+    private final InterfaceEventHandler     ih  = new InterfaceEventHandler(this);
+    private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
+    private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
 
     public DetailPanel() {
         this.addChartOptionsRenderedEventListener(this);
@@ -681,27 +685,35 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     }
 
     public synchronized void addSignalChangeListener(SignalChangeListener l) {
-        signalListeners.add(l);
+        sh.addSignalChangeListener(l);
     }
 
     public synchronized void removeSignalChangeListener(SignalChangeListener l) {
-        signalListeners.remove(l);
+        sh.removeSignalChangeListener(l);
     }
 
     public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        datasetListeners.add(l);
+        dh.addDatasetEventListener(l);//datasetListeners.add(l);
     }
 
     public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        datasetListeners.remove(l);
+        dh.removeDatasetEventListener(l);//datasetListeners.remove(l);
+    }
+    
+    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+        duh.addDatasetUpdateEventListener(l);//datasetListeners.add(l);
+    }
+
+    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+        duh.removeDatasetUpdateEventListener(l);//datasetListeners.remove(l);
     }
 
     public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        interfaceListeners.add(l);
+        ih.addInterfaceEventListener(l);// interfaceListeners.add(l);
     }
 
     public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        interfaceListeners.remove(l);
+        ih.removeInterfaceEventListener(l);//interfaceListeners.remove(l);
     }
 
     @Override
@@ -710,85 +722,29 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         update(getDatasets());
     }
 
-    /**
-     * A message to write in the main window status line
-     * 
-     * @param message
-     */
-    public void status(String message) {
-        fireSignalChangeEvent("Status_" + message);
+//    /**
+//     * A message to write in the main window status line
+//     * 
+//     * @param message
+//     */
+//    public void status(String message) {
+//        sh.fireSignalChangeEvent("Status_" + message);
+//    }
+    
+    protected DatasetEventHandler getDatasetEventHandler(){
+        return dh;
     }
-
-    protected synchronized void fireSignalChangeEvent(String message) {
-
-        SignalChangeEvent event = new SignalChangeEvent(this, message, this.getClass().getSimpleName());
-        Iterator<Object> iterator = signalListeners.iterator();
-        while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
-        }
+    
+    protected InterfaceEventHandler getInterfaceEventHandler(){
+        return ih;
     }
-
-    protected synchronized void fireSignalChangeEvent(SignalChangeEvent event) {
-        Iterator<Object> iterator = signalListeners.iterator();
-        while (iterator.hasNext()) {
-            ((SignalChangeListener) iterator.next()).signalChangeReceived(event);
-        }
+    
+    protected DatasetUpdateEventHandler getDatasetUpdateEventHandler(){
+        return duh;
     }
-
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
-
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
-    }
-
-    /**
-     * Fire an event on a single dataset.
-     * 
-     * @param method
-     * @param dataset
-     */
-    protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
-
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        list.add(dataset);
-        fireDatasetEvent(method, list);
-    }
-
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
-            IAnalysisDataset template) {
-
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, template);
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
-    }
-
-    protected synchronized void fireDatasetEvent(DatasetEvent event) {
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
-    }
-
-    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-        InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
-    }
-
-    protected synchronized void fireInterfaceEvent(InterfaceEvent event) {
-
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
+    
+    protected SignalChangeEventHandler getSignalChangeEventHandler(){
+        return sh;
     }
 
     public void interfaceEventReceived(InterfaceEvent event) {
@@ -796,7 +752,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
                 finest("Passing interface event upwards");
-                fireInterfaceEvent(new InterfaceEvent(this, event));
+                ih.fireInterfaceEvent(new InterfaceEvent(this, event));
             }
         }
     }
@@ -807,7 +763,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
                 finest("Passing dataset event upwards");
-                fireDatasetEvent(new DatasetEvent(this, event));
+                dh.fireDatasetEvent(new DatasetEvent(this, event));
             }
         }
     }
@@ -817,7 +773,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
                 finest("Passing signal change event upwards");
-                fireSignalChangeEvent(new SignalChangeEvent(this, event));
+                sh.fireSignalChangeEvent(new SignalChangeEvent(this, event));
             }
         }
     }
@@ -983,32 +939,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         listeners.remove(l);
     }
 
-    /**
-     * Signal listeners that the given datasets should be displayed
-     * 
-     * @param list
-     */
-    public void fireDatasetUpdateEvent(List<IAnalysisDataset> list) {
-        DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-        Iterator<Object> iterator = updateListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetUpdateEventListener) iterator.next()).datasetUpdateEventReceived(e);
-        }
-    }
-
-    /**
-     * Add a listener for dataset update events.
-     * 
-     * @param l
-     */
-    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        updateListeners.add(l);
-    }
-
-    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
-        updateListeners.remove(l);
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -1035,7 +965,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         // setChartsAndTablesLoading();
 
         // Signal sub panels to update
-        fireDatasetUpdateEvent(e.getDatasets());
+        duh.fireDatasetUpdateEvent(e.getDatasets());
         this.update(e.getDatasets());
 
     }

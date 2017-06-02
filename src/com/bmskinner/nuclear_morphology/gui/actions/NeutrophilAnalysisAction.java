@@ -163,7 +163,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
                 log("No datasets returned");
             } else {
                 // log("Fire profiling");
-                fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.PROFILING_ACTION, datasets);
 
             }
 

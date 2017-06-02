@@ -88,7 +88,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     public void finished() {
         finer("Finished signal detection");
         this.cleanup(); // remove the property change listener
-        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+//        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+        
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
         cancel();
 

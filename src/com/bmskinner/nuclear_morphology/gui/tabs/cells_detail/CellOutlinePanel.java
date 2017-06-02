@@ -179,7 +179,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         super.datasetEventReceived(event);
         // Pass messages upwards
         if (event.getSource() instanceof CellCollectionOverviewDialog) {
-            fireDatasetEvent(new DatasetEvent(this, event));
+            this.getDatasetEventHandler().fireDatasetEvent(new DatasetEvent(this, event));
         }
     }
 

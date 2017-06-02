@@ -100,10 +100,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
         if (tag.type().equals(BorderTagType.CORE)) {
 
-            fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
         } else {
             fine("Firing refresh cache request for loaded datasets");
-            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+            getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         }
 
         this.setAnalysing(false);
@@ -124,7 +124,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
         list.addAll(getDatasets());
         list.addAll(activeDataset().getAllChildDatasets());
 
-        fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, list);
     }
 
     /**
@@ -146,7 +146,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
         // Update each nucleus profile
         finest("Firing refresh morphology action");
-        fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
     }
 

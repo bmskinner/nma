@@ -34,5 +34,13 @@ public interface IAnalysisMethod extends Callable<IAnalysisResult>, Loggable {
      *            the listener
      */
     void removeProgressListener(ProgressListener l);
+    
+    /**
+     * Attempt to cancel the current task.
+     * 
+     */
+    default void cancel(){
+        Thread.currentThread().interrupt();
+    }
 
 }

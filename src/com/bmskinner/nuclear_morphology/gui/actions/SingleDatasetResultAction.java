@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
  */
 public abstract class SingleDatasetResultAction extends VoidResultAction {
 
+    
     // Flags to pass to ProgressableActions to determine the analyses
     // to carry out in subsequently
     public static final int NO_FLAG          = 0;
@@ -43,15 +44,12 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
     public static final int EXPORT_COMPOSITE = 16;
     public static final int SAVE_DATASET     = 32;
     public static final int ASSIGN_SEGMENTS  = 64;
-
-    private List<IAnalysisDataset> processList = new ArrayList<IAnalysisDataset>(0); // list
-                                                                                     // of
-                                                                                     // datasets
-                                                                                     // that
-                                                                                     // need
-                                                                                     // processing
-                                                                                     // after
-                                                                                     // this
+ 
+    // the dataset being worked on
+    protected IAnalysisDataset dataset     = null; 
+    
+    // list of datasets that need processing next
+    private List<IAnalysisDataset> processList = new ArrayList<>(0);
 
     /**
      * Construct with a dataset to analyse, a message to display, and the window
@@ -68,12 +66,9 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
         super(barMessage, mw);
         if (dataset == null) {
             warn("Unable to create action");
-            throw new IllegalArgumentException("Must have dataset for progressible action");
+            throw new IllegalArgumentException("Must have dataset for progressable action");
         }
         this.dataset = dataset;
-
-        finest("Created progressable action");
-
     }
 
     /**

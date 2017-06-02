@@ -199,7 +199,7 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
                     }
                 }
                 log(Level.FINEST, "Firing population update request");
-                fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
                 // fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
             }
         }

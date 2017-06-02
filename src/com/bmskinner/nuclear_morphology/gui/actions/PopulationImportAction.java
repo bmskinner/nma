@@ -136,7 +136,7 @@ public class PopulationImportAction extends VoidResultAction {
 
             // Save newly converted datasets
             if (r.getBoolean(DatasetImportMethod.WAS_CONVERTED_BOOL)) {
-                fireDatasetEvent(DatasetEvent.SAVE, dataset);
+                getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
             }
 
         } catch (InterruptedException e) {
@@ -150,7 +150,7 @@ public class PopulationImportAction extends VoidResultAction {
         }
         fine("Opened dataset");
 
-        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
 
         fine("Finishing action");
 

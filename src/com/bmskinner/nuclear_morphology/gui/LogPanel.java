@@ -286,7 +286,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
                             if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)) {
                                 finer("Opening file " + f.getAbsolutePath());
 
-                                fireSignalChangeEvent("Open|" + f.getAbsolutePath());
+                                getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
 
                             } else {
                                 finer("File is not nmd, ignoring");
@@ -294,7 +294,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
                             if (f.isDirectory()) {
                                 // Pass to new analysis
-                                fireSignalChangeEvent("New|" + f.getAbsolutePath());
+                                getSignalChangeEventHandler().fireSignalChangeEvent("New|" + f.getAbsolutePath());
 
                             }
 
@@ -480,7 +480,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
     private void runCommand(String command) {
 
         if (commandMap.containsKey(command)) {
-            fireInterfaceEvent(commandMap.get(command));
+            getInterfaceEventHandler().fireInterfaceEvent(commandMap.get(command));
         } else {
 
             if (LOCAL_CMDS.containsKey(command)) {

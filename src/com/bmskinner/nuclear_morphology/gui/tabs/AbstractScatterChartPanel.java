@@ -225,7 +225,7 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         log("Filtered datasets");
 
         finer("Firing population update request");
-        fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
     }
 
     @Override

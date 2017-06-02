@@ -58,7 +58,7 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
     @Override
     public void finished() {
         fine("Firing refresh of populations");
-        fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         this.countdownLatch();
         super.finished();
     }

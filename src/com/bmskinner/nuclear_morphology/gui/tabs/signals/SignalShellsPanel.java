@@ -187,7 +187,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         JPanel panel = new JPanel();
 
         newAnalysis.addActionListener(e -> {
-            fireDatasetEvent(DatasetEvent.RUN_SHELL_ANALYSIS, activeDataset());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.RUN_SHELL_ANALYSIS, activeDataset());
         });
         newAnalysis.setToolTipText(RUN_ANALYSIS_TOOLTIP);
 

@@ -91,7 +91,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                         SignalColourChanger sc = new SignalColourChanger(SignalsAnalysisPanel.this);
                         sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
                         update(getDatasets());
-                        fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
                 }
@@ -193,7 +193,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                 activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupName(newName);
 
                 refreshTableCache();
-                fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
                 finest("Updated name of signal group " + oldName + " to " + newName);
 
             } catch (UnavailableSignalGroupException e) {

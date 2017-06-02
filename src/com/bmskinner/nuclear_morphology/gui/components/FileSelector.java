@@ -41,11 +41,11 @@ import com.bmskinner.nuclear_morphology.io.Importer;
  */
 public class FileSelector {
     
-    private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
-    private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
-    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
-    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
-    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
+//    private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
+//    private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
+//    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
+//    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
+//    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
     
     /**
      * Choose the folder to export dataset stats.

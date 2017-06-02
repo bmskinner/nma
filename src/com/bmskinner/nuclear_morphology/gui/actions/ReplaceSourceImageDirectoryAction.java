@@ -71,7 +71,7 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
         // Do not use super.finished(), or it will trigger another save action
         fine("Folder update complete");
         cancel();
-        this.removeInterfaceEventListener(mw.getEventHandler());
-        this.removeDatasetEventListener(mw.getEventHandler());
+        getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
+        getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
     }
 }

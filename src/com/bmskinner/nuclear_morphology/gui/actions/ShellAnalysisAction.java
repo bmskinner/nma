@@ -66,7 +66,7 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
-        fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
         super.finished();
     }
 }

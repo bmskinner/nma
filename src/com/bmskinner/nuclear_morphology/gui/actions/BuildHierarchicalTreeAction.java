@@ -103,14 +103,14 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
     public void datasetEventReceived(DatasetEvent event) {
         finest("BuildHierarchicalTreeAction heard dataset event");
         if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
-            fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
+            getDatasetEventHandler().fireDatasetEvent(DatasetEvent.COPY_PROFILE_SEGMENTATION, event.getDatasets(), event.secondaryDataset());
         }
 
     }
 
     @Override
     public void interfaceEventReceived(InterfaceEvent event) {
-        fireInterfaceEvent(event.method());
+        getInterfaceEventHandler().fireInterfaceEvent(event.method());
 
     }
 

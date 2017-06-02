@@ -159,7 +159,7 @@ public class MergesDetailPanel extends DetailPanel {
 
             JButton button = new JButton(RECOVER_BUTTON_TEXT);
             button.addActionListener(e -> {
-                fireDatasetEvent(DatasetEvent.EXTRACT_SOURCE, source);
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.EXTRACT_SOURCE, source);
             });
 
             result.add(button);

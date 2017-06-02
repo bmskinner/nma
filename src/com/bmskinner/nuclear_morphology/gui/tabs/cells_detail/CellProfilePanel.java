@@ -211,7 +211,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     public void datasetEventReceived(DatasetEvent event) {
         if (event.getSource() instanceof CellResegmentationDialog) { // Pass
                                                                      // upwards
-            fireDatasetEvent(event.method(), event.getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());
         }
     }
 
@@ -241,7 +241,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
                 // Recache necessary charts
                 refreshChartCache();
-                fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
             } catch (Exception e) {
                 error("Error updating segment", e);
             }

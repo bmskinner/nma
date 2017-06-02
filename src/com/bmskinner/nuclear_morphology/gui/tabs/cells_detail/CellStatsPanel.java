@@ -143,7 +143,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
             if (newColor != null) {
                 activeDataset().getCollection().getSignalGroup(id).setGroupColour(newColor);
                 this.update(getDatasets());
-                fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
             }
 
         } catch (UnavailableSignalGroupException e) {
@@ -196,12 +196,12 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
                 } else {
                     finest("Updating scale for single cell");
-                    this.getCellModel().getCell().getNucleus().setScale(scale);
+                    this.getCellModel().getCell().getNuclei().stream().forEach( n-> {  n.setScale(scale);  } );
 
                 }
                 finest("Refreshing cache");
                 this.refreshTableCache();
-                fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
 
             } else {
                 warn("Cannot set a scale to zero");

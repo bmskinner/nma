@@ -60,6 +60,10 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
     @Override
     public void progressEventReceived(ProgressEvent event) {
 
+        if(this.isCancelled()){
+            method.cancel();
+        }
+        
         if (event.hasMessage()) {
             if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
                 progressTotal = event.getValue();

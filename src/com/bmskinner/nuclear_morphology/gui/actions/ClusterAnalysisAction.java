@@ -86,8 +86,8 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
             stack("Error clustering", e);
         }
 
-        fireDatasetEvent(DatasetEvent.SAVE, dataset);
-        fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         super.finished();
 
     }

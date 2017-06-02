@@ -158,7 +158,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                         SignalColourChanger sc = new SignalColourChanger(SignalsOverviewPanel.this);
                         sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
                         update(getDatasets());
-                        fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
                 }
@@ -221,7 +221,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                         } catch (UnavailableSignalGroupException e1) {
                             stack(e1);
                         }
-                        fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
+                        getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
                         this.refreshChartCache(getDatasets());
                     });
                     panel.add(box);
@@ -341,14 +341,14 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().startsWith("GroupVisble_")) {
+        if (e.getActionCommand().startsWith(SET_SIGNAL_GROUP_VISIBLE_ACTION)) {
 
             try {
 
                 UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
                 JCheckBox box = (JCheckBox) e.getSource();
                 activeDataset().getCollection().getSignalGroup(signalGroup).setVisible(box.isSelected());
-                fireSignalChangeEvent("GroupVisble_");
+                getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
                 this.refreshChartCache(getDatasets());
             } catch (UnavailableSignalGroupException e1) {
                 fine("Error getting signal group", e1);

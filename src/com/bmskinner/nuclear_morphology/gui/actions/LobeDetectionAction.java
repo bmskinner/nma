@@ -54,7 +54,7 @@ public class LobeDetectionAction extends SingleDatasetResultAction {
         // }
 
         // fireDatasetEvent(DatasetEvent.SAVE, dataset);
-        fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         super.finished();
 
     }

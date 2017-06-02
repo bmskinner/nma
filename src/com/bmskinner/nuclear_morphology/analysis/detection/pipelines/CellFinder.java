@@ -43,6 +43,11 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
         }
 
         Stream.of(arr).parallel().forEach(f -> {
+            
+            if(Thread.interrupted()){
+                return;
+            }
+            
             if (!f.isDirectory()) {
 
                 if (ImageImporter.fileIsImportable(f)) {

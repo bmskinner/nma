@@ -104,7 +104,7 @@ public class EditingDetailPanel extends DetailPanel
 
         // Pass downwards if the signal was not generated internally
         if (!this.getSubPanels().contains(event.getSource())) {
-            fireSignalChangeEvent(event.type());
+           getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
         }
 
         // if(event.sourceName().equals("CellDetailPanel")

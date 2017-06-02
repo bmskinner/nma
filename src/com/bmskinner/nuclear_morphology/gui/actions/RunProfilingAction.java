@@ -107,8 +107,8 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             if (!hasRemainingDatasetsToProcess()) {
 
                 cancel();
-                RunProfilingAction.this.removeInterfaceEventListener(mw.getEventHandler());
-                RunProfilingAction.this.removeDatasetEventListener(mw.getEventHandler());
+                getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
+                getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
                 //
                 RunProfilingAction.this.countdownLatch();
 

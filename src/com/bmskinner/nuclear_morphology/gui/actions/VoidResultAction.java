@@ -19,26 +19,19 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JProgressBar;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -48,10 +41,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.6
  *
  */
-public abstract class VoidResultAction implements PropertyChangeListener, Loggable, MouseListener, Runnable {
+public abstract class VoidResultAction implements PropertyChangeListener, Loggable, Runnable {
 
-    protected IAnalysisDataset dataset     = null; // the dataset being worked
-                                                   // on
     private JProgressBar       progressBar = null;
 
     protected IAnalysisWorker worker   = null;
@@ -61,10 +52,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     private LogPanel       logPanel;
     protected MainWindow   mw;
     private CountDownLatch latch = null; // allow threads to wait for the
-                                         // analysis to complete
-
-    private List<Object> interfaceListeners = new ArrayList<Object>();
-    private List<Object> datasetListeners   = new ArrayList<Object>();
+                                         // analysis to complete    
+    private final DatasetEventHandler   dh = new DatasetEventHandler(this);
+    private final InterfaceEventHandler ih = new InterfaceEventHandler(this);
 
     /**
      * Constructor with no datasets - used for new analysis
@@ -78,7 +68,22 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
         this.progressBar.setString(barMessage);
         this.progressBar.setStringPainted(true);
         this.progressBar.setIndeterminate(true);
-        this.progressBar.addMouseListener(this);
+        this.progressBar.addMouseListener( new MouseAdapter(){
+            
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getSource() == progressBar) {
+                    if (e.getClickCount() == 2) {
+
+                        worker.cancel(true);
+                        cleanup();
+                    }
+
+                }
+
+            }
+            
+        });
 
         this.mw = mw;
         this.logPanel = mw.getLogPanel();
@@ -87,8 +92,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
         logPanel.revalidate();
         logPanel.repaint();
 
-        this.addInterfaceEventListener(mw.getEventHandler());
-        this.addDatasetEventListener(mw.getEventHandler());
+        ih.addInterfaceEventListener(mw.getEventHandler());
+        dh.addDatasetEventListener(mw.getEventHandler());
         finest("Created progressable action");
 
     }
@@ -125,8 +130,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     public void cancel() {
         finest("Removing interface and dataset listeners");
         removeProgressBar();
-        removeDatasetEventListener(mw.getEventHandler());
-        removeInterfaceEventListener(mw.getEventHandler());
+//        removeDatasetEventListener(mw.getEventHandler());
+        dh.removeDatasetEventListener(mw.getEventHandler());
+        ih.removeInterfaceEventListener(mw.getEventHandler());
     }
 
     protected void setProgressBarVisible(boolean b) {
@@ -192,8 +198,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
         finer("Removed property change listener from worker");
         removeProgressBar();
 
-        this.removeInterfaceEventListener(mw.getEventHandler());
-        this.removeDatasetEventListener(mw.getEventHandler());
+        ih.removeInterfaceEventListener(mw.getEventHandler());
+        dh.removeDatasetEventListener(mw.getEventHandler());
+//        this.removeDatasetEventListener(mw.getEventHandler());
         finer("Removed event listeners from action");
     }
 
@@ -208,91 +215,13 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     public synchronized boolean isDone() {
         return worker.isDone();
     }
-
-    protected synchronized void fireInterfaceEvent(InterfaceMethod method) {
-
-        InterfaceEvent event = new InterfaceEvent(this, method, this.getClass().getSimpleName());
-        Iterator<Object> iterator = interfaceListeners.iterator();
-        while (iterator.hasNext()) {
-            ((InterfaceEventListener) iterator.next()).interfaceEventReceived(event);
-        }
+    
+    protected DatasetEventHandler getDatasetEventHandler(){
+        return dh;
+    }
+    
+    protected InterfaceEventHandler getInterfaceEventHandler(){
+        return ih;
     }
 
-    protected synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
-
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        list.add(dataset);
-        fireDatasetEvent(method, list);
-    }
-
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
-
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list);
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
-    }
-
-    protected synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
-            IAnalysisDataset secondary) {
-
-        DatasetEvent event = new DatasetEvent(this, method, this.getClass().getSimpleName(), list, secondary);
-        Iterator<Object> iterator = datasetListeners.iterator();
-        while (iterator.hasNext()) {
-            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-        }
-    }
-
-    public synchronized void addDatasetEventListener(DatasetEventListener l) {
-        datasetListeners.add(l);
-    }
-
-    public synchronized void removeDatasetEventListener(DatasetEventListener l) {
-        datasetListeners.remove(l);
-    }
-
-    public synchronized void addInterfaceEventListener(InterfaceEventListener l) {
-        interfaceListeners.add(l);
-    }
-
-    public synchronized void removeInterfaceEventListener(InterfaceEventListener l) {
-        interfaceListeners.remove(l);
-    }
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-        if (e.getSource() == progressBar) {
-            if (e.getClickCount() == 2) {
-                if (progressBar.isIndeterminate()) {
-                    this.removeProgressBar();
-                }
-            }
-        }
-
-    }
-
-    @Override
-    public void mouseEntered(MouseEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
-
-    }
 }

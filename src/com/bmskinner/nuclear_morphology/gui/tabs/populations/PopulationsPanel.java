@@ -285,9 +285,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
             // Force the chart caches to clear, but don't trigger a panel update
             finest("Firing clearing chart cache signals from population colour change");
-            fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
         }
-        fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     }
 
     /**
@@ -398,7 +398,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             saveFile.delete();
         }
 
-        fireDatasetEvent(DatasetEvent.SAVE, dataset);
+        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
 
         update(dataset);
 
@@ -469,7 +469,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
         update();
         finest("Firing update panel event");
-        fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
         finest("Deletion complete");
 
@@ -584,7 +584,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                             }
                         }
                         finer("Firing update panel event due to tree selection");
-                        fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
                     }
                 }
             } catch (Exception ex) {
@@ -671,7 +671,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         default: {
             // Pass on events from the popup menu
             if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)) {
-                fireSignalChangeEvent(event.type());
+                getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
                 finest("Firing signal change event: " + event.type());
             }
             break;

@@ -196,7 +196,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard interface event");
-            fireInterfaceEvent(event.method());
+            getInterfaceEventHandler().fireInterfaceEvent(event.method());
         }
 
     }
@@ -207,7 +207,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         if (event.getSource() instanceof RulesetDialog) {
             fine("Heard dataset event");
-            fireDatasetEvent(event.method(), event.getDatasets());
+            this.getDatasetEventHandler().fireDatasetEvent(event.method(), event.getDatasets());
         }
     }
 

@@ -46,7 +46,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
 
-    List<IAnalysisDataset> datasets;
+    List<IAnalysisDataset> datasets = new ArrayList<>();;
 
     /**
      * Construct a detector on the given folder, and output the results to the
@@ -90,6 +90,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                     + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
 
             fine("Creating cell collections");
+            
+            if(Thread.interrupted()){
+                return;
+            }
 
             // Get the collections containing nuclei
             List<ICellCollection> folderCollection = this.getNucleiCollections();
@@ -308,6 +312,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         if (arr == null) {
             return;
         }
+        
+        if(Thread.interrupted()){
+            return;
+        }
 
         // Recurse over all folders in the supplied folder
         for (File f : arr) {
@@ -340,22 +348,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         } catch (ImageImportException | ComponentCreationException e) {
             stack("Error searching folder", e);
         }
-
-        /*
-         * OLD METHOD
-         */
-        // File[] listOfFiles = folder.listFiles();
-        //
-        // NucleusDetectionTask task = new NucleusDetectionTask(folder,
-        // listOfFiles, folderCollection, outputFolder, analysisOptions);
-        // task.addProgressListener(this);
-        // task.invoke();
-        //
-        // for(File f : listOfFiles){
-        // if(f.isDirectory()){
-        // processFolder(f); // recurse over each folder
-        // }
-        // }
 
     } // end function
 
