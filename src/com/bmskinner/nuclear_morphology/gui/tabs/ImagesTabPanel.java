@@ -60,7 +60,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     private JLabel label;
 
-    private static final String IMAGES_LBL = "Images";
+    private static final String IMAGES_LBL = "Images in dataset";
 
     private class ImageNode {
         private String name;
@@ -120,28 +120,34 @@ public class ImagesTabPanel extends DetailPanel {
     }
 
     /**
-     * Trigger an update with a given dataset
+     * Trigger an update with a given dataset.
      * 
-     * @param dataset
      */
     @Override
     protected void updateSingle() {
+        updateMultiple();
+    }
 
-        String folder = activeDataset().getCollection().getFolder().getAbsolutePath();
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(folder, null));
+    @Override
+    protected void updateMultiple() {
 
-        createNodes(root, activeDataset());
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
+
+        for(IAnalysisDataset d : getDatasets()){
+            createNodes(root, d);
+        }
+        
         tree.setEnabled(true);
 
         TreeModel model = new DefaultTreeModel(root);
 
         tree.setModel(model);
+        
+        for(int i=0; i<tree.getRowCount(); i++){
+            tree.expandRow(i);
+        }
+        
         label.setText(null);
-    }
-
-    @Override
-    protected void updateMultiple() {
-        updateNull();
     }
 
     @Override
@@ -152,7 +158,7 @@ public class ImagesTabPanel extends DetailPanel {
 
         TreeModel model = new DefaultTreeModel(root);
         tree.setModel(model);
-        label.setText(Labels.MULTIPLE_DATASETS);
+        label.setText(Labels.NULL_DATASETS);
         label.setIcon(null);
     }
 
@@ -165,15 +171,18 @@ public class ImagesTabPanel extends DetailPanel {
      *            the dataset to use
      */
     private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
-
+        
+        DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(new ImageNode(dataset.getName(), null));
         List<File> files = new ArrayList<File>(dataset.getCollection().getImageFiles());
         Collections.sort(files);
 
         for (File f : files) {
 
             String name = f.getName();
-            root.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
+            datasetRoot.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
         }
+        
+        root.add(datasetRoot);
 
     }
 
@@ -184,10 +193,10 @@ public class ImagesTabPanel extends DetailPanel {
 
             ImageNode data = (ImageNode) node.getUserObject();
 
-            if (this.isSingleDataset()) {
                 try {
 
                     if (data.getFile() == null) {
+                        label.setIcon(null);
                         return;
                     }
 
@@ -211,7 +220,6 @@ public class ImagesTabPanel extends DetailPanel {
                     warn("Error fetching image");
                     stack("Error fetching image", e1);
                 }
-            }
 
         };
         return l;
