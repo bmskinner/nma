@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 
@@ -446,5 +447,17 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
         // TODO Auto-generated method stub
         warn("Unimplemented method in " + this.getClass().getName());
     }
+
+	@Override
+	public Map<String, Object> getEntries() {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
+
+	@Override
+	public Object getValue(String key) {
+		warn("Unimplemented method in " + this.getClass().getName());
+		return null;
+	}
 
 }

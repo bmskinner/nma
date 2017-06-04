@@ -170,25 +170,30 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
         }
         return "N/A";
     }
+    
+    public Map<String, Object> getEntries(){
+    	Map<String, Object> result = new HashMap<>();
+    	addEntries(intMap, result);
+    	addEntries(dblMap, result);
+    	addEntries(boolMap, result);
+    	addEntries(fltMap, result);
+    	return result;
+    }
+    
+    private void addEntries(Map<String, ?> source, Map<String, Object> target){
+    	for (String s : source.keySet()) {
+            target.put(s, intMap.get(s));
+        }
+    }
 
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
+        
+        Map<String, Object> map = getEntries();
 
-        for (String s : intMap.keySet()) {
-            sb.append("\t" + s + ": " + intMap.get(s) + IDetectionOptions.NEWLINE);
-        }
-
-        for (String s : dblMap.keySet()) {
-            sb.append("\t" + s + ": " + dblMap.get(s) + IDetectionOptions.NEWLINE);
-        }
-
-        for (String s : boolMap.keySet()) {
-            sb.append("\t" + s + ": " + boolMap.get(s) + IDetectionOptions.NEWLINE);
-        }
-
-        for (String s : fltMap.keySet()) {
-            sb.append("\t" + s + ": " + fltMap.get(s) + IDetectionOptions.NEWLINE);
+        for (String s : map.keySet()) {
+            sb.append("\t" + s + ": " + map.get(s) + IDetectionOptions.NEWLINE);
         }
 
         return sb.toString();

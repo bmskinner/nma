@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The default implementation of the nuclear signal options interface
@@ -243,5 +245,16 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
         warn("Unimplemented method in " + this.getClass().getName());
 
     }
+    
+//    @Override
+//    public Map<String, Object> getEntries(){
+//    	Map<String, Object> result = new HashMap<>();
+//    	return result;
+//    }
+//
+//	@Override
+//	public Object getValue(String key) {
+//		return null;
+//	}
 
 }

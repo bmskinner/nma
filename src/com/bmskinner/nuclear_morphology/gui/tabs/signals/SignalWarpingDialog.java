@@ -41,6 +41,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JSlider;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -97,6 +98,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     private JCheckBox cellsWithSignalsBox;
     private JCheckBox straightenMeshBox;
     private JButton   cowarpaliseBtn;
+    private JSlider   thresholdSlider;
 
     private SignalWarper warper;
 
@@ -272,6 +274,22 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         });
         lowerPanel.add(cowarpaliseBtn);
         cowarpaliseBtn.setEnabled(false);
+        
+        
+        thresholdSlider = new JSlider(0, 255);
+        lowerPanel.add(thresholdSlider);
+        thresholdSlider.setVisible(false);
+        thresholdSlider.addChangeListener( e-> {
+        	if(cache.getDisplayKeys().size()==1){
+        		
+        		JSlider s = (JSlider) e.getSource();
+        		int value = 255 - s.getValue();
+        		Key k = cache.getDisplayKeys().get(0);
+        		cache.setThreshold(k, value);
+        		ImageProcessor display = createDisplayImage();
+                updateChart(display, k.target);
+        	}
+        });
 
         lowerPanel.add(progressBar);
         progressBar.setVisible(false);
@@ -315,11 +333,13 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
                 } else {
                     cache.addDisplayImage(k);
                 }
-
+                thresholdSlider.setValue(255-cache.getThreshold(k));
                 updateChart(createDisplayImage(), k.target);
             }
 
             cowarpaliseBtn.setEnabled(cache.displayCount() == 2);
+            thresholdSlider.setVisible(cache.displayCount() == 1);
+            
 
         });
 
@@ -357,6 +377,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         finest("Running warping");
         cache.clearDisplayImages();
+        thresholdSlider.setVisible(false);
         progressBar.setValue(0);
 
         IAnalysisDataset sourceDataset = datasetBoxOne.getSelectedDataset();
@@ -422,12 +443,14 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             Color c = assignDisplayColour(image);
             cache.setColour(k, c);
+            
+            cache.setThreshold(k, 255);
 
             updateTree();
-
+            
             ImageProcessor display = createDisplayImage();
 
-            updateChart(display, datasetBoxTwo.getSelectedDataset());
+            updateChart(display, k.target);
 
             setEnabled(true);
             if (cache.displayCount() != 2) {
@@ -495,7 +518,12 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         for (Key k : cache.getDisplayKeys()) {
             // The image from the warper is greyscale. Change to use the signal
             // colour
-            recoloured.add(ImageFilterer.recolorImage(cache.get(k), cache.getColour(k)));
+        	
+        	ImageProcessor raw = cache.get(k);
+        	ImageProcessor thresh = raw.duplicate();
+        	ImageProcessor recol = ImageFilterer.recolorImage(thresh, cache.getColour(k));
+        	recol.setMinAndMax(0, cache.getThreshold(k));
+            recoloured.add(recol);
         }
 
         if (cache.displayCount() == 0) {
@@ -514,6 +542,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
             return averaged;
+//            return ImageFilterer.rescaleRGBImageIntensity(averaged);
 
         } catch (Exception e) {
             warn("Error averaging images");
@@ -609,17 +638,10 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
      */
     public class ImageCache {
 
-        final private Map<Key, ImageProcessor> map           = new HashMap<>();   // all
-                                                                                  // generated
-                                                                                  // images
-        final private List<Key>                displayImages = new ArrayList<>(); // images
-                                                                                  // currently
-                                                                                  // displayed
-        final private Map<Key, Color>          imageColours  = new HashMap<>();   // hold
-                                                                                  // colours
-                                                                                  // for
-                                                                                  // warped
-                                                                                  // images
+        final private Map<Key, ImageProcessor> map  = new HashMap<>();   // all generated images
+        final private List<Key> displayImages = new ArrayList<>(); // images currently displayed
+        final private Map<Key, Color> imageColours  = new HashMap<>();   // colours for warped images
+        final private Map<Key, Integer> thresholds  = new HashMap<>();   // thresholds for warped images
 
         public void addDisplayImage(Key k) {
             displayImages.add(k);
@@ -652,6 +674,20 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
         public List<Key> getDisplayKeys() {
             return displayImages;
+        }
+        
+        public int getThreshold(Key k){
+        	return thresholds.get(k);
+        }
+        
+        /**
+         * Set the thresholding value for the image. This is the minimum intensity
+         * to display. 
+         * @param k
+         * @param i
+         */
+        public void setThreshold(Key k, int i) {
+        	thresholds.put(k, i);
         }
 
         public Color getColour(Key k) {

@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -386,5 +388,16 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public Map<String, Object> getEntries(){
+    	Map<String, Object> result = new HashMap<>();
+    	return result;
+    }
+
+	@Override
+	public Object getValue(String key) {
+		return null;
+	}
 
 }

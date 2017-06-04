@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public interface HashOptions extends Serializable {
 
@@ -95,12 +96,18 @@ public interface HashOptions extends Serializable {
      * @return
      */
     List<String> getKeys();
+    
+    /**
+     * Get the complete set of keys and value objects within the options
+     * @return
+     */
+    Map<String, Object> getEntries();
 
-    // /**
-    // * Get the object stored with the given key as a string.
-    // * @param key
-    // * @return
-    // */
-    // String getValue(String key);
+     /**
+     * Get the object stored with the given key as a string.
+     * @param key
+     * @return
+     */
+     Object getValue(String key);
 
 }
