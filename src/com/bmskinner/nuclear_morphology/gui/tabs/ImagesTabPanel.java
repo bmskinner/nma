@@ -84,6 +84,9 @@ public class ImagesTabPanel extends DetailPanel {
         }
     }
 
+    /**
+     * Create the panel. 
+     */
     public ImagesTabPanel() {
         super();
 

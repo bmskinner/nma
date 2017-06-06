@@ -47,19 +47,15 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
 
     protected final Version version;
 
-    protected Set<IAnalysisDataset> childDatasets = new HashSet<IAnalysisDataset>(1); // direct
-                                                                                      // child
-                                                                                      // collections
+    // direct child collections
+    protected Set<IAnalysisDataset> childDatasets = new HashSet<IAnalysisDataset>(1);
 
     protected ICellCollection cellCollection;
 
     protected Paint datasetColour = null;
 
-    protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0); // hold
-                                                                                   // groups
-                                                                                   // of
-                                                                                   // cluster
-                                                                                   // results
+    // groups of cluster results
+    protected List<IClusterGroup> clusterGroups = new ArrayList<IClusterGroup>(0);
 
     /**
      * Create a dataset from a cell collection

@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -34,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public class DefaultWorkspace implements IWorkspace {
 
-    Set<File> datasets = new HashSet<File>();
+    Set<File> datasets = new LinkedHashSet<File>();
 
     File saveFile = null;
 
