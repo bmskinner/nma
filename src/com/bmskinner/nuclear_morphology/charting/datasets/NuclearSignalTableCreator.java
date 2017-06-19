@@ -513,7 +513,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         DecimalFormat pFormat = new DecimalFormat("#0.000");
 
-        Object[] columnNames = { Labels.DATASET, Labels.SIGNAL_GROUP_LABEL, Labels.PROBABILITY, };
+        Object[] columnNames = { Labels.DATASET, Labels.SIGNAL_GROUP_LABEL, Labels.AVERAGE_POSITION, Labels.PROBABILITY, };
 
         model.setColumnIdentifiers(columnNames);
 
@@ -530,10 +530,21 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                         String groupName = group.getGroupName();
 
                         IShellResult r = group.getShellResult();
+                        
+                        double mean = options.isNormalised() 
+                        		? r.getNormalisedMeanShell(options.getCountType())
+                        		: r.getRawMeanShell(options.getCountType());
+                        		
+                       double pval =  options.isNormalised() 
+                       		? r.getNormalisedPValue(options.getCountType())
+                       		: r.getRawPValue(options.getCountType());
 
                         Object[] rowData = {
 
-                                d.getName(), groupName, pFormat.format(r.getRawPValue(options.getCountType())) };
+                                d.getName(), 
+                                groupName, 
+                                pFormat.format(mean),
+                                pFormat.format(pval) };
 
                         model.addRow(rowData);
                     }

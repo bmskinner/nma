@@ -290,8 +290,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         setChart(consensusChartOptions);
 
-        TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).setCountType(type)
-                .setTarget(table).setRenderer(2, new PValueTableCellRenderer()).build();
+        TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+        		.setCountType(type)
+        		.setNormalised(dapiNormalise.isSelected())
+                .setTarget(table)
+                .setRenderer(2, new PValueTableCellRenderer()).build();
 
         setTable(tableOptions);
 

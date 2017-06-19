@@ -65,6 +65,7 @@ public abstract class AbstractOptions implements DisplayOptions {
     private ColourSwatch             swatch      = ColourSwatch.REGULAR_SWATCH;
     private ICell                    cell        = null;
     private CountType                type        = CountType.SIGNAL;
+    private boolean isNormalised = false;
 
     /**
      * Create with a list of datasets.
@@ -304,6 +305,14 @@ public abstract class AbstractOptions implements DisplayOptions {
     public void setCountType(CountType t) {
         type = t;
     }
+    
+    public boolean isNormalised(){
+    	return isNormalised;
+    }
+    
+    public void setNormalised(boolean b){
+    	isNormalised = b;
+    }
 
     @Override
     public int hashCode() {
@@ -317,6 +326,7 @@ public abstract class AbstractOptions implements DisplayOptions {
         result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
         result = prime * result + ((cell == null) ? 0 : cell.hashCode());
         result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + (isNormalised ? 1231 : 1237);
         return result;
     }
 
@@ -364,7 +374,8 @@ public abstract class AbstractOptions implements DisplayOptions {
                 return false;
         } else if (!type.equals(other.type))
             return false;
-
+        if (isNormalised != other.isNormalised)
+            return false;
         return true;
     }
 }

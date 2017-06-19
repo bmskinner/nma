@@ -110,6 +110,11 @@ public class TableOptionsBuilder {
         options.setCountType(type);
         return this;
     }
+    
+    public TableOptionsBuilder setNormalised(boolean b){
+    	options.setNormalised(b);
+    	return this;
+    }
 
     public TableOptions build() {
         return options;

@@ -90,5 +90,7 @@ public interface TableOptions extends DisplayOptions {
      * @return
      */
     Set<Integer> getRendererColumns();
+    
+    boolean isNormalised();
 
 }

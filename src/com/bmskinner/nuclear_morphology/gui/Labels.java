@@ -91,6 +91,7 @@ public class Labels {
     public static final String NUMBER_OF_SIGNAL_GROUPS = "Number of signal groups";
     public static final String SIGNALS_LABEL           = "Signals";
     public static final String SIGNALS_PER_NUCLEUS     = "Signals per nucleus";
+    public static final String AVERAGE_POSITION        = "Average shell";
 
     public static final String DATASET     = "Dataset";
     public static final String PROBABILITY = "p";

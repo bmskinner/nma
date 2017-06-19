@@ -108,6 +108,20 @@ public interface IShellResult extends Serializable, Loggable {
      *         shell
      */
     double getNormalisedPValue(CountType type);
+    
+    /**
+     * Get the mean shell position from all measured signals
+     * @param type the counting type
+     * @return the mean of the shell positions for all signals
+     */
+    double getRawMeanShell(CountType type);
+    
+    /**
+     * Get the mean shell position from all measured signals
+     * @param type the counting type
+     * @return the mean of the shell positions for all signals
+     */
+    double getNormalisedMeanShell(CountType type);
 
     /**
      * Get the number of shells in the shell result
@@ -115,5 +129,6 @@ public interface IShellResult extends Serializable, Loggable {
      * @return the shell count
      */
     int getNumberOfShells();
+    
 
 }

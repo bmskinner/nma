@@ -186,4 +186,16 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
         // TODO Auto-generated method stub
         return 0;
     }
+
+	@Override
+	public double getRawMeanShell(CountType type) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getNormalisedMeanShell(CountType type) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

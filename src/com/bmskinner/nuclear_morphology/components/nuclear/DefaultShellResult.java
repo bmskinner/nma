@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
@@ -422,6 +423,62 @@ public class DefaultShellResult implements IShellResult {
             result.add(i);
         }
         return result;
+    }
+    
+    @Override
+    public double getRawMeanShell(CountType type){
+        switch (type) {
+	        case SIGNAL: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*signalRawMeans[i];
+	        	}
+	        	return mean;
+	        }
+	        case NUCLEUS: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*nucleusRawMeans[i];
+	        	}
+	        	return mean;
+	        }
+	        default: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*signalRawMeans[i];
+	        	}
+	        	return mean;
+	        }
+        }
+
+    }
+    
+    @Override
+    public double getNormalisedMeanShell(CountType type){
+        switch (type) {
+	        case SIGNAL: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*signalNormMeans[i];
+	        	}
+	        	return mean;
+	        }
+	        case NUCLEUS: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*nucleusNormMeans[i];
+	        	}
+	        	return mean;
+	        }
+	        default: {
+	        	double mean = 0;
+	        	for(int i=0; i<shellCount; i++){
+	        		mean += i*signalNormMeans[i];
+	        	}
+	        	return mean;
+	        }
+        }
+
     }
 
     /*
