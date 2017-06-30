@@ -22,6 +22,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Shape;
 
+import org.jfree.chart.event.MarkerChangeListener;
 import org.jfree.chart.plot.ValueMarker;
 import org.jfree.util.ShapeUtilities;
 
@@ -50,17 +51,35 @@ public class ChartComponents {
     /**
      * A horizontal black line at y=180 with width 2
      */
-    public static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE);
+    public static final ValueMarker DEGREE_LINE_180 = new ValueMarker(180, Color.BLACK, MARKER_STROKE){
+        
+        @Override
+        public void addChangeListener(MarkerChangeListener listener){
+            return;
+        }
+    };
 
     /**
      * A horizontal grey line at y=0 with width 1
      */
-    public static final ValueMarker CONSENSUS_ZERO_MARKER = new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f));
+    public static final ValueMarker CONSENSUS_ZERO_MARKER = new ValueMarker(0, Color.LIGHT_GRAY, new BasicStroke(1.0f)){
+        
+        @Override
+        public void addChangeListener(MarkerChangeListener listener){
+            return;
+        }
+    };
 
     /**
      * A horizontal black line at y=0 with width 2
      */
-    public static final ValueMarker ZERO_MARKER = new ValueMarker(0, Color.BLACK, MARKER_STROKE);
+    public static final ValueMarker ZERO_MARKER = new ValueMarker(0, Color.BLACK, MARKER_STROKE){
+        
+        @Override
+        public void addChangeListener(MarkerChangeListener listener){
+            return;
+        }
+    };
 
     public static final Shape DEFAULT_POINT_SHAPE = ShapeUtilities.createDiamond(5);
 }

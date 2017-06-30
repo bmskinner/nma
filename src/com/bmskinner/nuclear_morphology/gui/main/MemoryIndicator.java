@@ -46,8 +46,8 @@ public class MemoryIndicator extends JPanel
     private static final String LOW_MEMORY_TTL = "Low memory";
     private static final String LOW_MEMORY_MSG = "Memory is running low!";
     
-    public boolean hasWarned = false;
-    public boolean mustWarn = false;
+    private boolean hasWarned = false;
+    private boolean mustWarn = false;
     
     public MemoryIndicator() {
       Thread t = new Thread(this);

@@ -26,7 +26,7 @@ import java.util.UUID;
 
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.DefaultXYDataset;
+//import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
@@ -102,7 +102,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return the updated dataset
      * @throws ProfileException
      */
-    private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, DefaultXYDataset ds,
+    private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
             int length, double offset) throws ProfileException {
 
         IProfile xpoints = profile.getPositions(length);
@@ -117,7 +117,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     IProfile subProfile = profile.getSubregion(seg.getStartIndex(), profile.size() - 1);
                     IProfile subPoints = xpoints.getSubregion(seg.getStartIndex(), profile.size() - 1);
 
-                    double[][] data = { subPoints.toDoubleArray(), subProfile.toDoubleArray() };
+                    float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
 
                     // check if the series key is taken
                     String seriesName = checkSeriesName(ds, seg.getName());
@@ -133,14 +133,14 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     IProfile subProfileA = profile.getSubregion(0, lowerIndex);
                     IProfile subPointsA = xpoints.getSubregion(0, lowerIndex);
 
-                    double[][] dataA = { subPointsA.toDoubleArray(), subProfileA.toDoubleArray() };
+                    float[][] dataA = { subPointsA.toFloatArray(), subProfileA.toFloatArray() };
                     ds.addSeries(seg.getName() + "_A", dataA);
 
                     // end of array
                     IProfile subProfileB = profile.getSubregion(upperIndex, profile.size() - 1);
                     IProfile subPointsB = xpoints.getSubregion(upperIndex, profile.size() - 1);
 
-                    double[][] dataB = { subPointsB.toDoubleArray(), subProfileB.toDoubleArray() };
+                    float[][] dataB = { subPointsB.toFloatArray(), subProfileB.toFloatArray() };
                     ds.addSeries(seg.getName() + "_B", dataB);
                 }
 
@@ -150,7 +150,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfile subProfile = profile.getSubregion(seg);
             IProfile subPoints = xpoints.getSubregion(seg);
 
-            double[][] data = { subPoints.toDoubleArray(), subProfile.toDoubleArray() };
+            float[][] data = { subPoints.toFloatArray(), subProfile.toFloatArray() };
 
             // check if the series key is taken
             String seriesName = checkSeriesName(ds, seg.getName());
@@ -185,13 +185,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
     }
 
-    public DefaultXYDataset createAnnotationRectangleDataset(int w, int h) {
-        DefaultXYDataset ds = new DefaultXYDataset();
+    public FloatXYDataset createAnnotationRectangleDataset(int w, int h) {
+        FloatXYDataset ds = new FloatXYDataset();
 
-        double[] xpoints = { 0, 0, w, w };
-        double[] ypoints = { 0, h, 0, h };
+        float[] xpoints = { 0, 0, w, w };
+        float[] ypoints = { 0, h, 0, h };
 
-        double[][] data = { xpoints, ypoints };
+        float[][] data = { xpoints, ypoints };
         ds.addSeries("Bounds", data);
         return ds;
     }
@@ -207,10 +207,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      *            the segment to add in each dataset
      * @return an XYDataset to plot
      */
-    public DefaultXYDataset createMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName)
+    public FloatXYDataset createMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName)
             throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
         for (int i = 0; i < list.size(); i++) {
 
             ICellCollection collection = list.get(i).getCollection();
@@ -220,7 +220,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                         Quartile.MEDIAN);
 
                 IProfile xpoints = profile.getPositions(100);
-                double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+                float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
                 ds.addSeries("Profile_" + i, data);
 
                 List<IBorderSegment> segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
@@ -290,9 +290,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return a dataset to plot
      * @throws Exception
      */
-    public DefaultXYDataset createRawMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName,
+    public FloatXYDataset createRawMultiProfileSegmentDataset(List<IAnalysisDataset> list, String segName,
             ProfileAlignment alignment) throws ChartDatasetCreationException {
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         double length = getMaximumMedianProfileLength(list);
 
@@ -311,7 +311,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     offset = differenceToMaxLength;
                     xpoints = xpoints.add(differenceToMaxLength);
                 }
-                double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+                float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
                 ds.addSeries("Profile_" + i, data);
 
                 List<IBorderSegment> segments = collection.getProfileCollection().getSegments(Tag.REFERENCE_POINT);
@@ -351,7 +351,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createNonsegmentedMedianProfileDataset(IAnalysisDataset dataset, boolean normalised,
             ProfileAlignment alignment, Tag point) throws ChartDatasetCreationException {
         ICellCollection collection = dataset.getCollection();
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         int maxLength = (int) getMaximumNucleusProfileLength(collection);
         int medianProfileLength = (int) collection.getMedianArrayLength();
@@ -377,7 +377,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
 
         // rendering order will be first on top
-        double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+        float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
         ds.addSeries("Profile_" + dataset.getName(), data);
 
         return ds;
@@ -396,7 +396,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createSegmentedMedianProfileDataset() throws ChartDatasetCreationException {
 
         ICellCollection collection = options.firstDataset().getCollection();
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         // Find the longest nucleus profile in the collection (for alignment)
         int maxLength = (int) getMaximumNucleusProfileLength(collection);
@@ -462,7 +462,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         Tag borderTag = options.getTag();
         ProfileType type = options.getType();
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         int maxLength = (int) getMaximumNucleusProfileLength(collection);
         int medianProfileLength = (int) collection.getMedianArrayLength();
@@ -519,9 +519,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
         }
 
-        double[][] data25 = { xpoints.toDoubleArray(), profile25.toDoubleArray() };
+        float[][] data25 = { xpoints.toFloatArray(), profile25.toFloatArray() };
         ds.addSeries("Q25", data25);
-        double[][] data75 = { xpoints.toDoubleArray(), profile75.toDoubleArray() };
+        float[][] data75 = { xpoints.toFloatArray(), profile75.toFloatArray() };
         ds.addSeries("Q75", data75);
 
         // add the individual nuclei
@@ -549,7 +549,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 if (angles == null || x == null) {
                     throw new ChartDatasetCreationException("Nucleus profile is null");
                 }
-                double[][] ndata = { x.toDoubleArray(), angles.toDoubleArray() };
+                float[][] ndata = { x.toFloatArray(), angles.toFloatArray() };
 
                 ds.addSeries("Nucleus_" + n.getSourceFileName() + "-" + n.getNucleusNumber(), ndata);
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
@@ -569,7 +569,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public DefaultXYDataset createMultiProfileDataset() throws ChartDatasetCreationException {
+    public FloatXYDataset createMultiProfileDataset() throws ChartDatasetCreationException {
 
         List<IAnalysisDataset> list = options.getDatasets();
         boolean normalised = options.isNormalised();
@@ -577,7 +577,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         Tag borderTag = options.getTag();
         ProfileType type = options.getType();
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         double length = getMaximumMedianProfileLength(list);
 
@@ -605,7 +605,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 xpoints = xpoints.add(differenceToMaxLength);
             }
 
-            double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+            float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
             ds.addSeries("Profile_" + i, data);
         }
         return ds;
@@ -623,13 +623,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public DefaultXYDataset createMultiProfileFrankenDataset() throws ChartDatasetCreationException {
+    public FloatXYDataset createMultiProfileFrankenDataset() throws ChartDatasetCreationException {
 
         List<IAnalysisDataset> list = options.getDatasets();
 
         Tag borderTag = options.getTag();
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         int i = 0;
         for (IAnalysisDataset dataset : list) {
@@ -643,7 +643,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             }
             IProfile xpoints = profile.getPositions(100);
 
-            double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+            float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
             ds.addSeries("Profile_" + i, data);
             i++;
         }
@@ -795,7 +795,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
     private XYDataset createSingleIQRVariabilityDataset() throws ChartDatasetCreationException {
 
-        XYDataset ds = new DefaultXYDataset();
+        XYDataset ds = new FloatXYDataset();
 
         try {
 
@@ -806,7 +806,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             List<IBorderSegment> segments = collection.getProfileCollection()
                     .getSegmentedProfile(options.getType(), options.getTag(), Quartile.MEDIAN).getOrderedSegments();
 
-            ds = addSegmentsFromProfile(segments, profile, new DefaultXYDataset(), 100, 0);
+            ds = addSegmentsFromProfile(segments, profile, new FloatXYDataset(), 100, 0);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
                 | UnsegmentedProfileException e) {
             fine("Error creating single dataset variability data", e);
@@ -817,7 +817,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
     private XYDataset createMultiIQRVariabilityDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         int i = 0;
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -831,7 +831,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
             IProfile xpoints = profile.getPositions(100);
-            double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
+            float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
             ds.addSeries("Profile_" + i + "_" + collection.getName(), data);
             i++;
         }
@@ -848,7 +848,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public XYDataset createFrankenSegmentDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         ICellCollection collection = options.firstDataset().getCollection();
         boolean normalised = options.isNormalised();
@@ -893,9 +893,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             fine("Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
         }
-        double[][] data25 = { xpoints.toDoubleArray(), profile25.toDoubleArray() };
+        float[][] data25 = { xpoints.toFloatArray(), profile25.toFloatArray() };
         ds.addSeries("Q25", data25);
-        double[][] data75 = { xpoints.toDoubleArray(), profile75.toDoubleArray() };
+        float[][] data75 = { xpoints.toFloatArray(), profile75.toFloatArray() };
         ds.addSeries("Q75", data75);
 
         // add the individual nuclei
@@ -911,19 +911,19 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 throw new ChartDatasetCreationException("Unable to get quartile profile", e);
             } // do not offset, the offsets for a nucleus do not match a
               // frankenprofile
-            double[] xArray = xpoints.toDoubleArray();
-            double[] yArray = angles.toDoubleArray();
+            float[] xArray = xpoints.toFloatArray();
+            float[] yArray = angles.toFloatArray();
 
             if (xArray.length != yArray.length) { // ensure length mismatches
                                                   // don't crash the system
 
-                yArray = new double[xArray.length];
+                yArray = new float[xArray.length];
                 for (int i = 0; i < xArray.length; i++) {
                     yArray[i] = 0;
                 }
 
             }
-            double[][] ndata = new double[][] { xArray, yArray };
+            float[][] ndata = new float[][] { xArray, yArray };
 
             ds.addSeries("Nucleus_" + profileCount, ndata);
             profileCount++;
@@ -944,7 +944,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createSegmentedProfileDataset(Nucleus nucleus) throws ChartDatasetCreationException {
 
         ProfileType type = options.getType();
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         ISegmentedProfile profile;
 
@@ -1252,7 +1252,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @throws Exception
      */
     public XYDataset createSegmentedNucleusOutline(ICellCollection collection) throws ChartDatasetCreationException {
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         // get the consensus nucleus for the population
         Nucleus n = collection.getConsensus();
@@ -1319,8 +1319,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 addSegmentIQRToConsensus(seg, ds, n, scaledRange, pointType);
 
                 // draw the segment itself
-                double[] xpoints = new double[seg.length() + 1];
-                double[] ypoints = new double[seg.length() + 1];
+                float[] xpoints = new float[seg.length() + 1];
+                float[] ypoints = new float[seg.length() + 1];
 
                 // go through each index in the segment.
                 for (int j = 0; j <= seg.length(); j++) {
@@ -1336,11 +1336,11 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     } catch (UnavailableBorderPointException e) {
                         throw new ChartDatasetCreationException("Unable to get border point", e);
                     } // get the border points in the segment
-                    xpoints[j] = p.getX();
-                    ypoints[j] = p.getY();
+                    xpoints[j] = (float) p.getX();
+                    ypoints[j] = (float) p.getY();
                 }
 
-                double[][] data = { xpoints, ypoints };
+                float[][] data = { xpoints, ypoints };
                 ds.addSeries(seg.getName(), data);
             }
         }
@@ -1360,7 +1360,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param scaledRange
      *            the IQR scale profile
      */
-    private void addSegmentIQRToConsensus(IBorderSegment segment, DefaultXYDataset ds, Nucleus n, IProfile scaledRange,
+    private void addSegmentIQRToConsensus(IBorderSegment segment, FloatXYDataset ds, Nucleus n, IProfile scaledRange,
             Tag pointType) throws ChartDatasetCreationException {
 
         // what we need to do is match the profile positions to the borderpoints
@@ -1369,10 +1369,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // arrays to hold the positions for the IQR lines
         int arrayLength = segment.length() + 1;
 
-        double[] innerIQRX = new double[arrayLength];
-        double[] innerIQRY = new double[arrayLength];
-        double[] outerIQRX = new double[arrayLength];
-        double[] outerIQRY = new double[arrayLength];
+        float[] innerIQRX = new float[arrayLength];
+        float[] innerIQRY = new float[arrayLength];
+        float[] outerIQRX = new float[arrayLength];
+        float[] outerIQRY = new float[arrayLength];
 
         // Go through each position in the segment.
         // The zero index of the segmented profile is the pointType selected
@@ -1424,10 +1424,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 IPoint outerPoint = nucleusRoi.contains((float) bPoint.getX(), (float) bPoint.getY()) ? aPoint : bPoint;
 
                 // assign the points
-                innerIQRX[i] = innerPoint.getX();
-                innerIQRY[i] = innerPoint.getY();
-                outerIQRX[i] = outerPoint.getX();
-                outerIQRY[i] = outerPoint.getY();
+                innerIQRX[i] = (float) innerPoint.getX();
+                innerIQRY[i] = (float) innerPoint.getY();
+                outerIQRX[i] = (float) outerPoint.getX();
+                outerIQRY[i] = (float) outerPoint.getY();
 
             } catch (UnavailableBorderPointException e) {
                 throw new ChartDatasetCreationException("Unable to get border point", e);
@@ -1435,9 +1435,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         }
 
-        double[][] inner = { innerIQRX, innerIQRY };
+        float[][] inner = { innerIQRX, innerIQRY };
         ds.addSeries("Q25_" + segment.getName(), inner);
-        double[][] outer = { outerIQRX, outerIQRY };
+        float[][] outer = { outerIQRX, outerIQRY };
         ds.addSeries("Q75_" + segment.getName(), outer);
     }
 
@@ -1469,7 +1469,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public XYDataset createNucleusIndexTags(Nucleus nucleus) throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
         try {
             for (Tag tag : nucleus.getBorderTags().keySet()) {
                 IBorderPoint tagPoint;
@@ -1477,9 +1477,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 int tagIndex = nucleus.getBorderIndex(tag);
                 tagPoint = nucleus.getOriginalBorderPoint(tagIndex);
 
-                double[] xpoints = { tagPoint.getX() - 0.5, nucleus.getOriginalCentreOfMass().getX() - 0.5 };
-                double[] ypoints = { tagPoint.getY() - 0.5, nucleus.getOriginalCentreOfMass().getY() - 0.5 };
-                double[][] data = { xpoints, ypoints };
+                float[] xpoints = { (float) (tagPoint.getX() - 0.5), (float) (nucleus.getOriginalCentreOfMass().getX() - 0.5) };
+                float[] ypoints = { (float) (tagPoint.getY() - 0.5), (float) (nucleus.getOriginalCentreOfMass().getY() - 0.5) };
+                float[][] data = { xpoints, ypoints };
                 ds.addSeries("Tag_" + tag, data);
             }
         } catch (UnavailableBorderPointException e) {
@@ -1667,7 +1667,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createModalityProbabililtyDataset(double xposition, IAnalysisDataset dataset, ProfileType type)
             throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         ICellCollection collection = dataset.getCollection();
         KernelEstimator est = createProfileProbabililtyKernel(xposition, dataset, type);
@@ -1675,22 +1675,22 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // List<Double> xValues = new ArrayList<Double>();
         // List<Double> yValues = new ArrayList<Double>();
 
-        double[] xvalues = new double[3600];
-        double[] yvalues = new double[3600];
+        float[] xvalues = new float[3600];
+        float[] yvalues = new float[3600];
 
-        double step = 0.1;
+        float step = 0.1f;
 
         // for(double i=0; i<=360; i+=0.1){
         for (int i = 0; i < xvalues.length; i++) {
 
-            double position = (double) i * step;
+            float position = (float) i * step;
             xvalues[i] = position;
-            yvalues[i] = est.getProbability(position);
+            yvalues[i] = (float) est.getProbability(position);
 
             // xValues.add(i);
             // yValues.add(est.getProbability(i));
         }
-        double[][] data = { xvalues, yvalues };
+        float[][] data = { xvalues, yvalues };
         // double[][] data = { Utils.getdoubleFromDouble(xValues.toArray(new
         // Double[0])),
         // Utils.getdoubleFromDouble(yValues.toArray(new Double[0])) };
@@ -1712,7 +1712,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createModalityProfileDataset() throws ChartDatasetCreationException {
 
         // log("Creating modality p-value dataset");
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
@@ -1720,10 +1720,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
 
-            double[] yvalues = pvalues.toDoubleArray();
-            double[] xvalues = pvalues.getPositions(100).toDoubleArray();
+            float[] yvalues = pvalues.toFloatArray();
+            float[] xvalues = pvalues.getPositions(100).toFloatArray();
 
-            double[][] data = { xvalues, yvalues };
+            float[][] data = { xvalues, yvalues };
             ds.addSeries(collection.getName(), data);
         }
 
@@ -1743,23 +1743,25 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset dataset, ProfileType type)
             throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         ICellCollection collection = dataset.getCollection();
 
-        double[] values;
+        float[] values;
+        
+       
         try {
-            values = collection.getProfileCollection().getValuesAtPosition(type, xposition);
-        } catch (UnavailableProfileTypeException e) {
+            values = new ArrayConverter( collection.getProfileCollection().getValuesAtPosition(type, xposition)).toFloatArray();
+        } catch (UnavailableProfileTypeException | ArrayConversionException e) {
             throw new ChartDatasetCreationException("Cannot get profile values at position " + xposition, e);
         }
 
-        double[] xvalues = new double[values.length];
+        float[] xvalues = new float[values.length];
         for (int i = 0; i < values.length; i++) {
             xvalues[i] = 0;
         }
 
-        double[][] data = { values, xvalues };
+        float[][] data = { values, xvalues };
         ds.addSeries(collection.getName(), data);
         return ds;
     }
@@ -1855,21 +1857,21 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      *            the array of values to use
      * @return a dataset for charting
      */
-    public XYDataset createQQDataset(double[] values) throws ChartDatasetCreationException {
-        DefaultXYDataset ds = new DefaultXYDataset();
+    public XYDataset createQQDataset(float[] values) throws ChartDatasetCreationException {
+        FloatXYDataset ds = new FloatXYDataset();
 
         Arrays.sort(values);
         // double[] percentiles = new double[values.length];
-        double[] zscores = new double[values.length];
+        float[] zscores = new float[values.length];
 
         for (int i = 0; i < values.length; i++) {
 
             int rank = i + 1;
-            double percentile = (double) (rank - 0.5) / (double) values.length;
-            zscores[i] = DipTester.getInvNormProbabililty(percentile);
+            float percentile = (float) (rank - 0.5) / (float) values.length;
+            zscores[i] = (float) DipTester.getInvNormProbabililty(percentile);
 
         }
-        double[][] data = { values, zscores };
+        float[][] data = { values, zscores };
         ds.addSeries("Q-Q", data);
         return ds;
 
@@ -1885,7 +1887,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public XYDataset createKruskalProfileDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
 
         IAnalysisDataset setOne = options.getDatasets().get(0);
         IAnalysisDataset setTwo = options.getDatasets().get(1);
@@ -1893,10 +1895,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile pvalues = new KruskalTester().testCollectionGetPValues(setOne, setTwo, options.getTag(),
                 options.getType());
 
-        double[] yvalues = pvalues.toDoubleArray();
-        double[] xvalues = pvalues.getPositions(100).toDoubleArray();
+        float[] yvalues = pvalues.toFloatArray();
+        float[] xvalues = pvalues.getPositions(100).toFloatArray();
 
-        double[][] data = { xvalues, yvalues };
+        float[][] data = { xvalues, yvalues };
         ds.addSeries(setOne.getCollection().getName(), data);
 
         return ds;
@@ -1912,13 +1914,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      */
     public XYDataset createFrankenKruskalProfileDataset() throws ChartDatasetCreationException {
 
-        DefaultXYDataset ds = new DefaultXYDataset();
+        FloatXYDataset ds = new FloatXYDataset();
         IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
 
-        double[] yvalues = pvalues.toDoubleArray();
-        double[] xvalues = pvalues.getPositions(100).toDoubleArray();
+        float[] yvalues = pvalues.toFloatArray();
+        float[] xvalues = pvalues.getPositions(100).toFloatArray();
 
-        double[][] data = { xvalues, yvalues };
+        float[][] data = { xvalues, yvalues };
         ds.addSeries(options.firstDataset().getCollection().getName(), data);
 
         return ds;
@@ -1998,7 +2000,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
     public XYDataset createBooleanProfileDataset(IProfile p, BooleanProfile limits)
             throws ChartDatasetCreationException {
-        DefaultXYDataset result = new DefaultXYDataset();
+        FloatXYDataset result = new FloatXYDataset();
 
         List<Double> trueXValues = new ArrayList<Double>();
         List<Double> trueYValues = new ArrayList<Double>();
@@ -2022,27 +2024,27 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         }
 
-        double[] xTrueData;
-        double[] yTrueData;
-        double[] xFalseData;
-        double[] yFalseData;
+        float[] xTrueData;
+        float[] yTrueData;
+        float[] xFalseData;
+        float[] yFalseData;
 
         try {
 
-            xTrueData = new ArrayConverter(trueXValues).toDoubleArray();
-            yTrueData = new ArrayConverter(trueYValues).toDoubleArray();
-            xFalseData = new ArrayConverter(falseXValues).toDoubleArray();
-            yFalseData = new ArrayConverter(falseYValues).toDoubleArray();
+            xTrueData = new ArrayConverter(trueXValues).toFloatArray();
+            yTrueData = new ArrayConverter(trueYValues).toFloatArray();
+            xFalseData = new ArrayConverter(falseXValues).toFloatArray();
+            yFalseData = new ArrayConverter(falseYValues).toFloatArray();
 
         } catch (ArrayConversionException e) {
             error("Error converting arrays", e);
-            xTrueData = new double[0];
-            yTrueData = new double[0];
-            xFalseData = new double[0];
-            yFalseData = new double[0];
+            xTrueData = new float[0];
+            yTrueData = new float[0];
+            xFalseData = new float[0];
+            yFalseData = new float[0];
         }
-        double[][] trueData = { xTrueData, yTrueData };
-        double[][] falseData = { xFalseData, yFalseData };
+        float[][] trueData = { xTrueData, yTrueData };
+        float[][] falseData = { xFalseData, yFalseData };
 
         result.addSeries("True", trueData);
 
