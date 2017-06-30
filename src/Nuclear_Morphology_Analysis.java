@@ -90,6 +90,7 @@ public class Nuclear_Morphology_Analysis
 		instance.runStandalone();
 	}
 	
+	
 	/**
 	 * Reset all found files to false
 	 */

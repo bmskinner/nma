@@ -22,12 +22,17 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The interface for all hash options classes
+ * @author bms41
+ *
+ */
 public interface HashOptions extends Serializable {
 
     static final String TOP_HAT_RADIUS = "Top hat radius";
 
     /**
-     * Get the double value with the given key
+     * Get the double value with the given key.
      * 
      * @param s
      * @return
@@ -35,7 +40,7 @@ public interface HashOptions extends Serializable {
     double getDouble(String s);
 
     /**
-     * Get the int value with the given key
+     * Get the int value with the given key.
      * 
      * @param s
      * @return
@@ -43,7 +48,7 @@ public interface HashOptions extends Serializable {
     int getInt(String s);
 
     /**
-     * Get the boolean value with the given key
+     * Get the boolean value with the given key.
      * 
      * @param s
      * @return
@@ -51,7 +56,7 @@ public interface HashOptions extends Serializable {
     boolean getBoolean(String s);
 
     /**
-     * Set the double value with the given key
+     * Set the double value with the given key.
      * 
      * @param s
      * @param d
@@ -59,7 +64,7 @@ public interface HashOptions extends Serializable {
     void setDouble(String s, double d);
 
     /**
-     * ] Set the int value with the given key
+     * ] Set the int value with the given key.
      * 
      * @param s
      * @param i
@@ -67,7 +72,7 @@ public interface HashOptions extends Serializable {
     void setInt(String s, int i);
 
     /**
-     * Set the boolean value with the given key
+     * Set the boolean value with the given key.
      * 
      * @param s
      * @param b
@@ -75,7 +80,7 @@ public interface HashOptions extends Serializable {
     void setBoolean(String s, boolean b);
 
     /**
-     * Get the float value with the given key
+     * Get the float value with the given key.
      * 
      * @param s
      * @return
@@ -83,7 +88,7 @@ public interface HashOptions extends Serializable {
     float getFloat(String s);
 
     /**
-     * Set the float value with the given key
+     * Set the float value with the given key.
      * 
      * @param s
      * @param f
@@ -91,14 +96,14 @@ public interface HashOptions extends Serializable {
     void setFloat(String s, float f);
 
     /**
-     * Get the keys to all the values in this options
+     * Get the keys to all the values in this options.
      * 
      * @return
      */
     List<String> getKeys();
     
     /**
-     * Get the complete set of keys and value objects within the options
+     * Get the complete set of keys and value objects within the options.
      * @return
      */
     Map<String, Object> getEntries();

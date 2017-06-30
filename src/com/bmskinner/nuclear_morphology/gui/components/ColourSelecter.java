@@ -69,7 +69,7 @@ public class ColourSelecter {
      *
      */
     public enum ColourSwatch {
-        REGULAR_SWATCH("Regular"), NO_SWATCH("No colours"), AI_SWATCH("AI swatch"), ACCESSIBLE_SWATCH(
+        REGULAR_SWATCH("Regular"), NO_SWATCH("No colours"), ACCESSIBLE_SWATCH(
                 "Acessible colours");
 
         private final String name;
@@ -105,9 +105,9 @@ public class ColourSelecter {
         case REGULAR_SWATCH:
             color = getRegularColor(i);
             break;
-        case AI_SWATCH:
-            color = getAIColor(i);
-            break;
+//        case AI_SWATCH:
+//            color = getAIColor(i);
+//            break;
         default:
             color = getRegularColor(i);
             break;

@@ -19,12 +19,16 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -46,25 +50,57 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private static final String NEW_STANDARD_LBL   = "Fluorescent nuclei";
     private static final String NEW_NEUTROPHIL_LBL = "Neutrophils";
 
-    private static final String LOAD_DATASET_LBL   = "Load dataset";
+    private static final String LOAD_DATASET_LBL   = "Open dataset";
     private static final String SAVE_ALL_LBL       = "Save all";
     private static final String SAVE_WORKSPACE_LBL = "Save workspace";
     private static final String OPTIONS_LBL        = "Options";
+    
+    private static final String MEMORY_LBL        = "Memory:";
 
     private MainWindow mw;
 
     public MainHeaderPanel(MainWindow mw) {
         this.mw = mw;
 
-        setLayout(new FlowLayout());
+        setLayout(new GridBagLayout());
+        
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.gridx = 0;
+        c.gridy = 0;
+        JPanel btnPanel = createHeaderButtonPanel();
 
-        createHeaderButtons();
+        add(btnPanel, c);
+        
+        
+        JPanel memPanel = createMemoryPanel();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.anchor = GridBagConstraints.LINE_END;
+        c.weightx = 0.5;
+        add(memPanel, c);
+        
+    }
+
+    /**
+     * Create the panel of primary buttons.
+     */
+    private JPanel createMemoryPanel() {
+        JPanel memPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));        
+
+        MemoryIndicator m = new MemoryIndicator();
+        m.setBorder(BorderFactory.createBevelBorder(1));
+        memPanel.add(new JLabel(MEMORY_LBL));
+        memPanel.add(m);
+        return memPanel;
     }
 
     /**
      * Create the panel of primary buttons
      */
-    private void createHeaderButtons() {
+    private JPanel createHeaderButtonPanel() {
+        
+        JPanel panel = new JPanel(new FlowLayout());       
 
         JButton btnNewAnalysis = new JButton(NEW_ANALYSIS_LBL);
 
@@ -98,7 +134,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             });
         }
 
-        add(btnNewAnalysis);
+        panel.add(btnNewAnalysis);
 
         // ---------------
         // load saved dataset button
@@ -112,7 +148,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             r.run();
         });
 
-        add(btnLoadSavedDataset);
+        panel.add(btnLoadSavedDataset);
 
         // ---------------
         // save button
@@ -124,7 +160,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             mw.getEventHandler().saveRootDatasets();
         });
 
-        add(btnSavePopulation);
+        panel.add(btnSavePopulation);
 
         // ---------------
         // save workspace button
@@ -136,7 +172,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
                     new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
         });
 
-        add(btnSaveWorkspace);
+        panel.add(btnSaveWorkspace);
 
         JButton optionsButton = new JButton(OPTIONS_LBL);
         optionsButton.addActionListener(
@@ -146,11 +182,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
                     MainOptionsDialog dialog = new MainOptionsDialog(mw);
                     dialog.addInterfaceEventListener(mw.getEventHandler());
                 });
-        add(optionsButton);
+        panel.add(optionsButton);
 
         MeasurementUnitSettingsPanel unitsPanel = new MeasurementUnitSettingsPanel();
         unitsPanel.addInterfaceEventListener(mw.getEventHandler());
-        add(unitsPanel);
+        panel.add(unitsPanel);
+        
+        return panel;
 
     }
 
