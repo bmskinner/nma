@@ -22,7 +22,10 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -494,7 +497,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                     double y = (Double) ySpinner.getModel().getValue();
 
                     activeDataset().getCollection().getConsensus().offset(x, y);
-                    ;
+                    
                     this.update(activeDatasetToList());
                 }
 
@@ -518,25 +521,38 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                 this.update(activeDatasetToList());
             }
         } else {
-            log(Level.WARNING, "Cannot offset: must have one dataset selected");
+            warn("Cannot offset: must have one dataset selected");
         }
     }
 
     private void exportConsensusNuclei() {
-        if (activeDataset() != null) {
-
-            if (activeDataset().getCollection().hasConsensus()) {
-
-                File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
-                        activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
-                SVGWriter wr = new SVGWriter(exportFile);
-
-                wr.export(activeDataset().getCollection().getConsensus());
-
-            }
-        } else {
-            warn("Cannot export: must have one dataset selected");
-        }
+    	
+    	File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
+                activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
+        
+    	SVGWriter wr = new SVGWriter(exportFile);
+    	
+    	List<Nucleus> consensi = getDatasets().stream()
+    			.map(d -> d.getCollection().getConsensus())
+    			.filter(n -> n!=null)
+    			.collect(Collectors.toList());
+    	
+    	wr.export(consensi);
+    	
+//        if (activeDataset() != null) {
+//
+//            if (activeDataset().getCollection().hasConsensus()) {
+//
+//                File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
+//                        activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
+//                SVGWriter wr = new SVGWriter(exportFile);
+//
+//                wr.export(activeDataset().getCollection().getConsensus());
+//
+//            }
+//        } else {
+//            warn("Cannot export: must have one dataset selected");
+//        }
     }
 
     @Override

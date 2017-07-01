@@ -23,7 +23,9 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,6 +36,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -188,6 +191,29 @@ public class ImagesTabPanel extends DetailPanel {
         root.add(datasetRoot);
 
     }
+    
+    /**
+     * Given an end node, get the dataset this came from
+     * @param node
+     * @return
+     */
+    private Optional<IAnalysisDataset> getDataset(DefaultMutableTreeNode node){
+    	
+    	DefaultMutableTreeNode n = (DefaultMutableTreeNode) node.getPath()[1];
+
+    	if(n.getUserObject() instanceof ImageNode){
+    		ImageNode im = (ImageNode) n.getUserObject();
+    		for(IAnalysisDataset d : getDatasets()){
+    			if(im.getName().equals(d.getName())){
+    				return Optional.of(d);
+    			}
+    		}
+
+    	}
+
+    	
+    	return null;
+    }
 
     private TreeSelectionListener makeListener() {
 
@@ -210,10 +236,9 @@ public class ImagesTabPanel extends DetailPanel {
                         cn.convertToColorProcessor();
                     }
                     ImageAnnotator an = cn.toAnnotator();
-
-                    for (ICell c : activeDataset().getCollection().getCells(data.getFile())) {
-                        an.annotateCellBorders(c);
-                    }
+                    
+                    Optional<IAnalysisDataset> dataset = getDataset(node);
+                    dataset.ifPresent( d -> d.getCollection().getCells(data.getFile()).stream().forEach( c-> an.annotateCellBorders(c)) );
 
                     ImageFilterer ic = new ImageFilterer(an.toProcessor());
                     ic.resize(imagePanel.getWidth(), imagePanel.getHeight());

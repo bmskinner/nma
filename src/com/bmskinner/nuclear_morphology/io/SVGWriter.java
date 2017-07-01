@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
@@ -54,39 +55,82 @@ public class SVGWriter implements Exporter, Loggable {
         }
         file = f;
     }
+    
+    /**
+     * Export the given component outlines to file
+     * 
+     * @param c
+     */
+    public void export(List<? extends CellularComponent> list) {
+    	
+    	double w = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
+    	double h = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
+    	
+    	SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
+    	
+    	double x = 0;
 
+    	for(CellularComponent c : list){
+     		Shape s = c.toShape();
+
+            Rectangle2D r = s.getBounds();
+
+            // Centre the shape on the canvas
+            
+            if(x==0){
+            	x= -r.getMinX();
+            }
+            double minY = r.getMinY();
+    		export(s, g2, x, minY);
+    		x+=r.getWidth();
+    	}
+
+    	write(file, g2);
+    }
+    
+    public void export(CellularComponent c) {
+    	if (c == null) {
+            throw new IllegalArgumentException("Component cannot be null");
+        }
+
+    	Shape s = c.toShape();
+    	//
+    	//     // Make a canvas of the correct size
+    	Rectangle2D r = s.getBounds();
+
+    	// Make a canvas of the correct size
+    	SVGGraphics2D g2 = new SVGGraphics2D((int) r.getWidth(), (int) r.getHeight());
+    	double minX = -r.getMinX();
+    	double minY = r.getMinY();
+    	export(s, g2, minX, minY);
+    	write(file, g2);
+
+    }
     /**
      * Export the given component outline to file
      * 
      * @param c
      */
-    public void export(CellularComponent c) {
-
-        if (c == null) {
-            throw new IllegalArgumentException("Component cannot be null");
-        }
-
-        Shape s = c.toShape();
-
-        // Flip vertically because awt graphics count y from top to bottom
+    private void export(Shape s, SVGGraphics2D g2, double x, double y) {
+    	
+       	// Flip vertically because awt graphics count y from top to bottom
         AffineTransform at = AffineTransform.getScaleInstance(1, -1);
         s = at.createTransformedShape(s);
 
-        // Make a canvas of the correct size
-        Rectangle2D r = s.getBounds();
-        SVGGraphics2D g2 = new SVGGraphics2D((int) r.getWidth(), (int) r.getHeight());
 
-        // Centre the shape on the canvas
-        double minX = r.getMinX();
-        double minY = r.getMinY();
-        at = AffineTransform.getTranslateInstance(-minX, -minY);
+        at = AffineTransform.getTranslateInstance(x, -y);
 
         // Draw the shape
         g2.setPaint(Color.BLACK);
         g2.setTransform(at);
         g2.draw(s);
 
-        String svgElement = g2.getSVGElement();
+
+        
+    }
+    
+    private void write(File f, SVGGraphics2D g2){
+    	String svgElement = g2.getSVGElement();
 
         try (PrintWriter out = new PrintWriter(file)) {
 

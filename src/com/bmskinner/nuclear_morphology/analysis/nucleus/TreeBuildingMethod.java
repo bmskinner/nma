@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import weka.clusterers.HierarchicalClusterer;
@@ -203,7 +204,8 @@ public class TreeBuildingMethod extends AbstractAnalysisMethod {
         }
 
         Mesh<Nucleus> mesh = null;
-        if (options.isIncludeMesh() && collection.hasConsensus()) {
+
+        if(options.isIncludeMesh() && collection.hasConsensus()){
             mesh = new NucleusMesh(collection.getConsensus());
             attributeCount += mesh.getFaces().size();
         }
