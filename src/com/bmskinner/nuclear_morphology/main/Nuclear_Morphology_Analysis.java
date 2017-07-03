@@ -1,21 +1,4 @@
-/*******************************************************************************
- *  	Copyright (C) 2015 Ben Skinner
- *   
- *     This file is part of Nuclear Morphology Analysis.
- *
- *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
+package com.bmskinner.nuclear_morphology.main;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,20 +25,18 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.plugin.PlugIn;
 
 /**
- * This is designed to work as a plugin for ImageJ - this
- * means this launching class must be in the default package.
- * This also launches the program when run as standalone.
+ * This is the main class that runs the program.
  * @author bms41
- * @since 1.6.1
+ * @since 1.13.7
  *
  */
 public class Nuclear_Morphology_Analysis
-	implements PlugIn, Loggable {
+	implements Loggable {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
+	private static CommandParser parser;
 	
 	/*
 	 * Keep a strong reference to the loggers so they can be accessed
@@ -172,6 +153,7 @@ public class Nuclear_Morphology_Analysis
 			// load the config file properties
 			new PropertiesReader();
 			loadMainWindow(true);
+			parser = new CommandParser();
 		} catch(Exception e){
 			error("Error loading main window", e);
 			System.err.println("Error loading main window");
@@ -375,4 +357,3 @@ public class Nuclear_Morphology_Analysis
 		return allPluginsFound();
 	}
 }
-

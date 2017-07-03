@@ -735,6 +735,10 @@ public class ShellDetector extends Detector {
         public Area toArea() {
             return new Area(this.toShape());
         }
+        
+        public Roi toRoi(){
+        	return shellRoi;
+        }
 
         public String toString() {
 

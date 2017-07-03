@@ -32,6 +32,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
+import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
@@ -115,6 +116,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
         }
         return this;
     }
+    
+    public ImageAnnotator annotate(ShellDetector.Shell shell){
+    	
+    	annotateRoi(shell.toRoi(), Color.GREEN);
+    	return this;
+    }
 
     /**
      * Draw a point on the image processor
@@ -177,6 +184,13 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     private ImageAnnotator annotatePolygon(PolygonRoi p, Paint c) {
+        ip.setColor((Color) c);
+        ip.setLineWidth(2);
+        ip.draw(p);
+        return this;
+    }
+    
+    private ImageAnnotator annotateRoi(Roi p, Paint c) {
         ip.setColor((Color) c);
         ip.setLineWidth(2);
         ip.draw(p);

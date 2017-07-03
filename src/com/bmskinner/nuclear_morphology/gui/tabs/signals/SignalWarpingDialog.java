@@ -540,6 +540,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         fine("More than one display image");
         try {
 
+        	fine("Averaging RGB images");
             ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
             return averaged;
 //            return ImageFilterer.rescaleRGBImageIntensity(averaged);

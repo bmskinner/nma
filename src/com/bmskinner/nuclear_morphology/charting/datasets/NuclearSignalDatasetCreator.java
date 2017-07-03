@@ -47,6 +47,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -625,9 +626,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             boolean isNormalised = options.isNormalised();
 
             if (collection.getSignalManager().hasSignals(signalGroup)) {
-
-                if (collection.getSignalGroup(signalGroup).hasShellResult()) {
-                    IShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+            	ISignalGroup group = collection.getSignalGroup(signalGroup);
+                if (group.hasShellResult()) {
+                    IShellResult r = group.getShellResult();
 
                     for (int shell = 0; shell < r.getNumberOfShells(); shell++) {
 
@@ -637,7 +638,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
                         Double std = isNormalised ? r.getNormalisedStandardErrors(type).get(shell)
                                 : r.getRawStandardErrors(type).get(shell);
                         ds.add(signalGroup, d * 100, std.doubleValue() * 100,
-                                "Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
+                                "Group_" + group.getGroupName() + "_" + collection.getName(), String.valueOf(shell));
                         // we need the string value for shell otherwise we get
                         // error
                         // "the method addValue(Number, Comparable, Comparable)
