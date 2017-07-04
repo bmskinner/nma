@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {

@@ -70,7 +70,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
-import com.bmskinner.nuclear_morphology.gui.dialogs.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;

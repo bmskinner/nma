@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.dialogs;
+package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,9 +26,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -52,52 +50,27 @@ import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
 /**
- * This displays all the nuclei in the given dataset
+ * This displays all the nuclei in the given dataset, annotated
+ * to show nuclei.
  * 
  * @author bms41
  *
  */
 @SuppressWarnings("serial")
-public class CellCollectionOverviewDialog extends LoadingIconDialog implements PropertyChangeListener {
-
-    public static final int COLUMN_COUNT = 3;
-
-    private IAnalysisDataset dataset;
-    private JTable           table;
-    private JProgressBar     progressBar;
+public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
     public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
-        super();
-        this.dataset = dataset;
-
-        createUI();
-
-        ImageImportWorker worker = new ImageImportWorker(dataset, table.getModel(), true);
-        worker.addPropertyChangeListener(this);
-
-        worker.execute();
-
-        this.setModal(false);
-        this.pack();
-        this.setVisible(true);
+        super(dataset);
     }
 
-    private void createUI() {
-
-        this.setLayout(new BorderLayout());
-        this.setTitle("Showing " + dataset.getCollection().size() + " nuclei in " + dataset.getName());
-
-        int cellCount = dataset.getCollection().size();
-
-        int remainder = cellCount % COLUMN_COUNT == 0 ? 0 : 1;
-
-        int rows = cellCount / COLUMN_COUNT + remainder;
-
-        progressBar = new JProgressBar();
-        progressBar.setString("Loading");
-        progressBar.setStringPainted(true);
-
-        JPanel header = new JPanel(new FlowLayout());
+	protected void createWorker(){
+		worker = new ImageImportWorker(dataset, table.getModel(), true);
+        worker.addPropertyChangeListener(this);
+        worker.execute();
+	}
+	
+	protected JPanel createHeader(){
+		JPanel header = new JPanel(new FlowLayout());
 
         JCheckBox rotateBtn = new JCheckBox("Rotate vertical", true);
         rotateBtn.addActionListener(e -> {
@@ -135,7 +108,27 @@ public class CellCollectionOverviewDialog extends LoadingIconDialog implements P
         });
 
         header.add(curateBtn);
+        return header;
+		
+	}
 
+	protected void createUI() {
+
+        this.setLayout(new BorderLayout());
+        this.setTitle("Showing " + dataset.getCollection().size() + " cells in " + dataset.getName());
+
+        int cellCount = dataset.getCollection().size();
+
+        int remainder = cellCount % COLUMN_COUNT == 0 ? 0 : 1;
+
+        int rows = cellCount / COLUMN_COUNT + remainder;
+
+        progressBar = new JProgressBar();
+        progressBar.setString(LOADING_LBL);
+        progressBar.setStringPainted(true);
+
+        
+        JPanel header = createHeader();
         getContentPane().add(header, BorderLayout.NORTH);
         getContentPane().add(progressBar, BorderLayout.SOUTH);
 
