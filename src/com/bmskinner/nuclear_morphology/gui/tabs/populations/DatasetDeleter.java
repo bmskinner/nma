@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -88,7 +89,7 @@ public class DatasetDeleter implements Loggable {
                                                                 // cluster
                                                                 // groups from
                                                                 // datasets
-
+            
             fine("Updating cluster groups in tree panel");
             fine("Deletion complete");
         } catch (Exception e) {

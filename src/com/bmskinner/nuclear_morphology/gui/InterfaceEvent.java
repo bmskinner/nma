@@ -78,13 +78,18 @@ public class InterfaceEvent extends EventObject {
     public enum InterfaceMethod {
 
         // UPDATE_POPULATIONS ("Update populations"),
-        UPDATE_PANELS("Update panels"), REFRESH_POPULATIONS("Refresh population panel datasets"), SAVE_ROOT(
-                "Save root datasets"), CLEAR_CHART_CACHE("Clear the chart caches"), RECACHE_CHARTS(
-                        "Recache charts"), LIST_SELECTED_DATASETS("List selected datasets"), CLEAR_LOG_WINDOW(
-                                "Clear log window"), UPDATE_IN_PROGRESS("Updating"), UPDATE_COMPLETE(
-                                        "Update finished"), DUMP_LOG_INFO("Dump logs for nuclei"), INFO(
-                                                "Show information about the selected dataset"), KILL_ALL_TASKS(
-                                                        "Attempt to halt all tasks in the executor service");
+        UPDATE_PANELS("Update panels"), 
+        REFRESH_POPULATIONS("Refresh population panel datasets"), 
+        SAVE_ROOT("Save root datasets"), 
+        CLEAR_CHART_CACHE("Clear the chart caches"), 
+        RECACHE_CHARTS("Recache charts"), 
+        LIST_SELECTED_DATASETS("List selected datasets"), 
+        CLEAR_LOG_WINDOW("Clear log window"), 
+        UPDATE_IN_PROGRESS("Updating"), 
+        UPDATE_COMPLETE("Update finished"), 
+        DUMP_LOG_INFO("Dump logs for nuclei"), 
+        INFO("Show information about the selected dataset"), 
+        KILL_ALL_TASKS("Attempt to halt all tasks in the executor service");
 
         private final String name;
 

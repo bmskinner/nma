@@ -295,11 +295,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      * 
      * @return
      */
-    public synchronized List<IAnalysisDataset> getSelectedDatasets() {
-
-        // return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
-        return DatasetListManager.getInstance().getSelectedDatasets();
-    }
+//    public synchronized List<IAnalysisDataset> getSelectedDatasets() {
+//
+//        // return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
+//        return DatasetListManager.getInstance().getSelectedDatasets();
+//    }
 
     /**
      * Add the given dataset to the main population list Check that the name is
@@ -412,7 +412,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      */
     private void moveDataset(boolean isDown) {
         finer("Move dataset heard");
-        List<IAnalysisDataset> datasets = getSelectedDatasets();
+        List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
         List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
         if (nodes.isEmpty() || nodes.size() > 1) {
@@ -438,7 +438,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     }
 
     private void deleteSelectedDatasets() {
-        final List<IAnalysisDataset> datasets = getSelectedDatasets();
+        final List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
         final List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
         // Check if cluster groups need removing
@@ -463,14 +463,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         }
 
         // TODO: Check if root datasets need saving before closing
-
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
         DatasetDeleter deleter = new DatasetDeleter();
         deleter.deleteDatasets(datasets);
-
+        
         update();
         finest("Firing update panel event");
-        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-
+        
+//        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
         finest("Deletion complete");
 
     }

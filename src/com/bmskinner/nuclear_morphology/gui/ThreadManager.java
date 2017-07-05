@@ -51,6 +51,10 @@ public class ThreadManager implements Loggable {
 
     protected ThreadManager() {
     }
+    
+    public int queueLength(){
+    	return queueLength.get();
+    }
 
     /**
      * Fetch an instance

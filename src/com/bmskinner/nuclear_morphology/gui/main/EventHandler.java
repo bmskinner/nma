@@ -111,9 +111,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         public ActionFactory() {
 
-            selectedDatasets = mw.getPopulationsPanel().getSelectedDatasets();
-            selectedDataset = mw.getPopulationsPanel().getSelectedDatasets().isEmpty() ? null
-                    : mw.getPopulationsPanel().getSelectedDatasets().get(0);
+            selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
+            selectedDataset = selectedDatasets.isEmpty() ? null
+                    : selectedDatasets.get(0);
 
         }
 
@@ -154,7 +154,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return new LobeDetectionAction(selectedDataset, mw);
             }
             
-            
+            if (event.type().equals(SignalChangeEvent.MERGE_COLLECTION_ACTION)) {
+                return new MergeCollectionAction(selectedDatasets, mw);
+            }
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
 
@@ -177,10 +179,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             				double scale = (double) spinner.getModel().getValue();
 
             				if (scale > 0) { // don't allow a scale to cause divide by zero errors
-            					log("Updating scale to "+scale);
-            					DatasetListManager.getInstance().getSelectedDatasets()
-            					.stream().forEach(d->d.getCollection().setScale(scale));
-            					log("Updated scale");
+            					selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
+            					log("Updated scale to "+scale);
             					interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
             				}
             			}
@@ -323,22 +323,16 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         finer("Heard signal change event: " + event.type());
 
-        final IAnalysisDataset selectedDataset = mw.getPopulationsPanel().getSelectedDatasets().isEmpty() ? null
-                : mw.getPopulationsPanel().getSelectedDatasets().get(0);
+        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
+        final IAnalysisDataset selectedDataset = selected.isEmpty() ? null
+                : selected.get(0);
 
         // Try to launch via factory
         new ActionFactory().run(event);
 
-        if (event.type().equals("MergeCollectionAction")) {
-
-            Runnable task = new MergeCollectionAction(mw.getPopulationsPanel().getSelectedDatasets(), mw);
-            ThreadManager.getInstance().execute(task);
-        }
-
         if (event.type().equals("CurateCollectionAction")) {
 
-            CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(
-                    mw.getPopulationsPanel().getSelectedDatasets().get(0));
+            CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
             d.addDatasetEventListener(this);
 
         }
@@ -362,15 +356,15 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
 
         if (event.type().equals("UpdatePanels")) {
-            fireDatasetUpdateEvent(mw.getPopulationsPanel().getSelectedDatasets());
+            fireDatasetUpdateEvent(selected);
         }
 
-        if (event.type().equals("UpdatePanelsNull")) {
-            fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
+        if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) ){
+        	fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
         }
 
         if (event.type().equals("UpdatePopulationPanel")) {
-            this.mw.getPopulationsPanel().update(mw.getPopulationsPanel().getSelectedDatasets());
+            this.mw.getPopulationsPanel().update(selected);
         }
 
         if (event.type().equals("SaveCollectionAction")) {
@@ -438,7 +432,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         InterfaceMethod method = event.method();
         finest("Heard interface event: " + event.method().toString());
 
-        final List<IAnalysisDataset> selected = mw.getPopulationsPanel().getSelectedDatasets();
+        
+        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 
         switch (method) {
 
@@ -456,9 +451,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         case UPDATE_PANELS: {
             finer("Updating tab panels with list of " + selected.size() + " datasets");
             fireDatasetUpdateEvent(selected);
-            // threadManager.executeAndCancelUpdate( new PanelUpdateTask(list)
-            // );
-            // this.updatePanels(list);
             break;
         }
 
@@ -756,7 +748,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 // Wait for loading state to be set
                 while (!f.isDone() && !isCancelled.get()) {
                     fine("Waiting for chart loading set...");
-                    Thread.sleep(1);
+                    Thread.sleep(10);
                 }
 
                 if (isCancelled.get()) {
@@ -801,9 +793,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     public class PanelLoadingUpdater implements Callable {
-        public PanelLoadingUpdater() {
-
-        }
 
         @Override
         public Boolean call() {

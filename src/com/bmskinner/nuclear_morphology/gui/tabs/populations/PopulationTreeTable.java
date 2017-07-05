@@ -131,7 +131,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
     public void selectDatasets(List<IAnalysisDataset> list) {
         finer("Selecting list of " + list.size() + " datasets in populations panel");
 
-        PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
+//        PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
 
         Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
         int selectedIndexOrder = 0;
@@ -144,23 +144,16 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 
             TreeSelectionModel treeSelectionModel = getTreeSelectionModel();
 
+         // if we don't remove the listener, the clearing will trigger an update
             finest("Removing tree selection listener");
-            treeSelectionModel.removeTreeSelectionListener(treeListener); // if
-                                                                          // we
-                                                                          // don't
-                                                                          // remove
-                                                                          // the
-                                                                          // listener,
-                                                                          // the
-                                                                          // clearing
-                                                                          // will
-                                                                          // trigger
-                                                                          // an
-                                                                          // update
+            treeSelectionModel.removeTreeSelectionListener(treeListener); 
             finest("Clearing tree selection");
-            selectionModel.clearSelection(); // if the new selection is the same
-                                             // as the old, the charts will not
-                                             // recache
+            
+         // if the new selection is the same
+         // as the old, the charts will not recache
+            selectionModel.clearSelection(); 
+                                             
+
             finest("Restoring tree selection listener");
             treeSelectionModel.addTreeSelectionListener(treeListener);
 

@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.main;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -55,6 +56,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private static final String SAVE_WORKSPACE_LBL = "Save workspace";
     private static final String OPTIONS_LBL        = "Options";
     
+    private static final String TASK_QUEUE_LBL    = "Task queue:";
     private static final String MEMORY_LBL        = "Memory:";
 
     private MainWindow mw;
@@ -88,6 +90,12 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private JPanel createMemoryPanel() {
         JPanel memPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));        
 
+        TaskListMonitor t = new TaskListMonitor();
+        t.setPreferredSize( new Dimension(30, 20));
+        t.setBorder(BorderFactory.createBevelBorder(1));
+        memPanel.add(new JLabel(TASK_QUEUE_LBL));
+        memPanel.add(t);
+        
         MemoryIndicator m = new MemoryIndicator();
         m.setBorder(BorderFactory.createBevelBorder(1));
         memPanel.add(new JLabel(MEMORY_LBL));

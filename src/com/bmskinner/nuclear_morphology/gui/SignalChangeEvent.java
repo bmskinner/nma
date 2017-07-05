@@ -33,6 +33,9 @@ public class SignalChangeEvent extends EventObject {
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
+    public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
+    public static final String MERGE_COLLECTION_ACTION     ="MergeCollectionAction";
+
 
     private static final long serialVersionUID = 1L;
     private String            message;

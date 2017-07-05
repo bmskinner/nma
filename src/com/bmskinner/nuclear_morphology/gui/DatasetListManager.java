@@ -283,7 +283,7 @@ public final class DatasetListManager implements Loggable {
 
     public synchronized void removeDataset(IAnalysisDataset d) {
 
-        if (!d.isRoot()) {
+        if (!d.isRoot()) { // only remove root datasets
             return;
         }
 
