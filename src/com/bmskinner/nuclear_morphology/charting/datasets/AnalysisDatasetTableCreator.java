@@ -56,6 +56,7 @@ import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
@@ -824,13 +825,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
         PlottableStatistic stat = options.getStat();
+        
+        MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
         // add columns
         DecimalFormat df = new DecimalFormat("#0.0000");
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
             double[] d1Values = dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS,
-                    MeasurementScale.PIXELS);
+            		scale);
 
             Object[] popData = new Object[options.datasetCount()];
 
@@ -844,7 +847,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 } else {
 
                     double[] d2Values = dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS,
-                            MeasurementScale.PIXELS);
+                    		scale);
 
                     double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal);
 
@@ -972,6 +975,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
         PlottableStatistic stat = options.getStat();
+        
+        MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
         // add columns
         DecimalFormat df = new DecimalFormat("#0.0000");
@@ -980,7 +985,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             double value1;
             try {
                 value1 = dataset.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS,
-                        MeasurementScale.PIXELS);
+                		scale);
             } catch (Exception e) {
                 fine("Error getting median statistic", e);
                 return createBlankTable();
@@ -1001,7 +1006,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     double value2;
                     try {
                         value2 = dataset2.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS,
-                                MeasurementScale.PIXELS);
+                        		scale);
                     } catch (Exception e) {
                         fine("Error getting median statistic", e);
                         return createBlankTable();
@@ -1034,7 +1039,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
-
+        MeasurementScale scale = GlobalOptions.getInstance().getScale();
         // add columns
         DecimalFormat df = new DecimalFormat("#0.0000");
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -1052,7 +1057,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             double value1 = new Quartile(
                     dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
-                            CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg1.getID()),
+                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()),
                     Quartile.MEDIAN).doubleValue();
 
             Object[] popData = new Object[options.datasetCount()];
@@ -1078,7 +1083,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     }
 
                     double value2 = new Quartile(dataset2.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
-                            CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, medianSeg2.getID()),
+                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),
                             Quartile.MEDIAN).doubleValue();
 
                     double magnitude = value2 / value1;
