@@ -447,6 +447,16 @@ public class DefaultCell implements IMutableCell {
     public void setCytoplasm(ICytoplasm cytoplasm) {
         this.cytoplasm = cytoplasm;
     }
+    
+    @Override
+    public void setScale(double scale) {
+        nuclei.stream().forEach(n->n.setScale(scale));
+        tails.stream().forEach(n->n.setScale(scale));
+        acrosomes.stream().forEach(n->n.setScale(scale));
+        if(cytoplasm!=null){
+        	cytoplasm.setScale(scale);
+        }
+    }
 
     /*
      * (non-Javadoc)

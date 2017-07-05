@@ -398,4 +398,11 @@ public class Cell implements IMutableCell {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    @Override
+    public void setScale(double scale) {
+        nucleus.setScale(scale);
+        tails.stream().forEach(n->n.setScale(scale));
+        acrosomes.stream().forEach(n->n.setScale(scale));
+    }
 }

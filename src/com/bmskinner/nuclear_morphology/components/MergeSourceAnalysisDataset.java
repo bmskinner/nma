@@ -62,7 +62,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
         super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getUUID(),
                 mergeSource.getCollection())
-
         );
 
         this.parent = merged;
@@ -79,6 +78,13 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         } catch (ProfileException e) {
             warn("Unable to create merge source dataset");
             fine("Error copying offsets", e);
+        }
+        
+        // Ensure merge sources from the source datasets are retained
+        if(mergeSource.hasMergeSources()){
+        	for(IAnalysisDataset d : mergeSource.getMergeSources()){
+        		this.addMergeSource(d);
+        	}
         }
 
     }

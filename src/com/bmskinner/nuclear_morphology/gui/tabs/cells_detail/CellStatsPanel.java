@@ -193,16 +193,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
                 if (applyAllOption == 0) { // button at index 1
 
-                    activeDataset().getCollection().clear(MeasurementScale.MICRONS);
-                    finest("Updating scale for all cells");
-                    for (Nucleus n : activeDataset().getCollection().getNuclei()) {
-                        n.setScale(scale);
-                    }
-                    if (activeDataset().getCollection().hasConsensus()) {
-                        activeDataset().getCollection().getConsensus().setScale(scale);
-                    }
+                	activeDataset().getCollection().setScale(scale);
 
-                    try {
+                	try {
                         activeDataset().getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS)
                                 .setScale(scale);
                     } catch (MissingOptionException e) {

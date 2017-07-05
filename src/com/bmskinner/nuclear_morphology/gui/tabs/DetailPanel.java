@@ -308,15 +308,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
         fine("Preparing to update");
 
-        // List<IAnalysisDataset> list =
-        // DatasetListManager.getInstance().getSelectedDatasets();
-        // this.list.clear();
-        //
-        // if(list!=null){
-        //
-        // this.list.addAll(list);
-        // }
-        // fine("Set dataset list of "+this.list.size()+" datasets");
         setUpdating(true);
 
         for (TabPanel t : this.getSubPanels()) {

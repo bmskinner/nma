@@ -1266,6 +1266,20 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
     }
+    
+    @Override
+    public void setScale(double scale){
+    	clear(MeasurementScale.MICRONS);
+        
+        for (ICell c : getCells()) {
+            c.setScale(scale);
+        }
+
+        if (hasConsensus()) {
+        	consensusNucleus.setScale(scale);
+        }
+
+    }
 
     // public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) {
     //

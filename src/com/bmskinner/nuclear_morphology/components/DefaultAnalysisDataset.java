@@ -376,11 +376,29 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      */
     @Override
     public IAnalysisDataset getMergeSource(UUID id) {
-        if (this.mergeSources.contains(id)) {
-            return this.getAssociatedDataset(id);
+    	
+    	if (this.hasMergeSource(id)) {
+    		return this.getAssociatedDataset(id);
+//            for (IAnalysisDataset c : childDatasets) {
+//                if (c.getUUID().equals(id)) {
+//                    return c;
+//                }
+//            }
+
         } else {
-            return null;
+            for (IAnalysisDataset child : this.getAllMergeSources()) {
+                if (child.getUUID().equals(id)) {
+                    return child;
+                }
+            }
         }
+        return null;
+        
+//        if (this.mergeSources.contains(id)) {
+//            
+//        } else {
+//            return null;
+//        }
     }
 
     /*

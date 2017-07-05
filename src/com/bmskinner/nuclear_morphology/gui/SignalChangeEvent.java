@@ -28,6 +28,7 @@ public class SignalChangeEvent extends EventObject {
 
     public static final String LOBE_DETECTION              = "LobeDetection";
     public static final String EXPORT_STATS                = "ExportStatsAction";
+    public static final String CHANGE_SCALE                = "ChangeScaleAction";
     public static final String EXPORT_WORKSPACE            = "ExportWorkspace";
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";

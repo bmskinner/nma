@@ -428,7 +428,11 @@ public interface ICellCollection
      */
     int getMaxProfileLength();
 
-    // double getMedianPathLength();
+    /**
+     * Update the image scale for all cells in the collection
+     * @param scale
+     */
+    void setScale(double scale);
 
     /**
      * Get the perimeter normalised veriabililty of a nucleus angle profile

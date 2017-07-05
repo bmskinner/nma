@@ -1619,6 +1619,19 @@ public class CellCollection implements ICellCollection {
         }
         return count;
     }
+    
+    @Override
+    public void setScale(double scale){
+    	clear(MeasurementScale.MICRONS);
+        
+        for (Nucleus n : getNuclei()) {
+            n.setScale(scale);
+        }
+        if (hasConsensus()) {
+            getConsensus().setScale(scale);
+        }
+
+    }
 
     public String toString() {
 

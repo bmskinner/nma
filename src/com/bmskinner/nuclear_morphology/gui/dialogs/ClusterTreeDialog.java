@@ -87,13 +87,13 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
     private List<ICellCollection> clusterList = new ArrayList<ICellCollection>(0);
 
-    private boolean hasMergeSources; // cache this to speed comparisons
+//    private boolean hasMergeSources; // cache this to speed comparisons
 
     public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
         super();
         this.dataset = dataset;
         this.group = group;
-        this.hasMergeSources = dataset.hasMergeSources();
+//        this.hasMergeSources = dataset.hasMergeSources();
 
         try {
 
@@ -331,6 +331,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
                 // Find the appropriate dataset
                 IAnalysisDataset cluster = null;
 
+                
                 if (dataset.hasChild(id)) {
 
                     cluster = dataset.getChildDataset(id);
@@ -338,6 +339,8 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
                 } else if (dataset.hasMergeSource(id)) {
 
                     cluster = dataset.getMergeSource(id);
+                } else if(dataset.getAllMergeSourceIDs().contains(id)){
+                	cluster = dataset.getMergeSource(id);
                 } else {
                     // If the cluster was not found, stop
                     warn("Child dataset not found, cancelling");
@@ -424,16 +427,15 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
         if (name.equals(nucleusName)) { // 'C:\bla\image.tiff-image.tiff-1'
             return true;
         } else {
-            // return false;
             // otherwise look for the folder and name
 
             nucleusName = nucleus.getSourceFolder().getAbsolutePath() + "-" + nucleus.getNameAndNumber();
-            // log(Level.FINEST, "\t\tTesting "+nucleusName);
+
             if (name.equals(nucleusName)) {
                 return true;
             } else {
                 // // Can't get just names from merge sources
-                if (hasMergeSources) {
+                if (dataset.hasMergeSources()) {
                     // log(Level.FINEST, "Cannot test further in a merge
                     // source");
                     return false;
@@ -553,8 +555,10 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
         setClusterBoxNull();
 
         List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        for (UUID id : dataset.getMergeSourceIDs()) {
-            list.add(dataset.getMergeSource(id));
+        for (UUID id : dataset.getAllMergeSourceIDs()) {
+        	IAnalysisDataset mgeSource = dataset.getMergeSource(id);
+        	fine(mgeSource.getName());
+            list.add(mgeSource);
         }
 
         IClusterGroup mergeGroup = makeNewClusterGroup(list);

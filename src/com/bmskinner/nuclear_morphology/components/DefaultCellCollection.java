@@ -61,6 +61,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
@@ -1492,6 +1494,20 @@ public class DefaultCellCollection implements ICellCollection {
             }
         }
         return count;
+    }
+    
+    @Override
+    public void setScale(double scale){
+    	clear(MeasurementScale.MICRONS);
+        
+        for (ICell c : cells) {
+            c.setScale(scale);
+        }
+
+        if (hasConsensus()) {
+        	consensusNucleus.setScale(scale);
+        }
+
     }
 
     public String toString() {

@@ -42,7 +42,11 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
     public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
     public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
+    
+    public static final String CHANGE_SCALE_LBL = "Set scale";
 
+    JMenuItem changeScaleItem;
+    
     JMenuItem mergeMenuItem;
     JMenuItem curateMenuItem;
 
@@ -125,6 +129,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
         this.add(replaceFolderMenuItem);
         this.add(exportStatsMenuItem);
+        this.add(changeScaleItem);
 
         this.addSeparator();
 
@@ -169,7 +174,13 @@ public class PopulationListPopupMenu extends JPopupMenu {
         booleanMenuItem.addActionListener(e -> {
             fireSignalChangeEvent("DatasetArithmeticAction");
         });
+        
 
+        changeScaleItem = new JMenuItem(CHANGE_SCALE_LBL);
+        changeScaleItem.addActionListener(e -> {
+            fireSignalChangeEvent(SignalChangeEvent.CHANGE_SCALE);
+        });
+        
         exportStatsMenuItem = new JMenuItem("Export stats");
         exportStatsMenuItem.addActionListener(e -> {
             fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS);
@@ -275,6 +286,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
     public void setExportStatsEnabled(boolean b) {
         this.exportStatsMenuItem.setEnabled(b);
+    }
+    
+    public void setChangeScaleEnabled(boolean b){
+    	this.changeScaleItem.setEnabled(b);
     }
 
     public synchronized void addSignalChangeListener(SignalChangeListener l) {

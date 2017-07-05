@@ -29,6 +29,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
@@ -149,6 +152,45 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.type().equals(SignalChangeEvent.LOBE_DETECTION)) {
                 return new LobeDetectionAction(selectedDataset, mw);
+            }
+            
+            
+
+            if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
+
+            	Runnable r = () -> {
+
+            		try {
+            			final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
+
+            			SpinnerNumberModel sModel = new SpinnerNumberModel(1d, 
+            					1d, 100000d, 1d);
+
+            			JSpinner spinner = new JSpinner(sModel);
+
+            			int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, 
+            					JOptionPane.OK_CANCEL_OPTION,
+            					JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+            			if (option == JOptionPane.OK_OPTION) {
+
+            				double scale = (double) spinner.getModel().getValue();
+
+            				if (scale > 0) { // don't allow a scale to cause divide by zero errors
+            					log("Updating scale to "+scale);
+            					DatasetListManager.getInstance().getSelectedDatasets()
+            					.stream().forEach(d->d.getCollection().setScale(scale));
+            					log("Updated scale");
+            					interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
+            				}
+            			}
+            		}catch(Exception e){
+            			warn("Error updating scale");
+            			stack("Error updating scale", e);
+            		}
+            	};
+            	return r;
+            	
             }
 
             if (event.type().startsWith("Open|")) {

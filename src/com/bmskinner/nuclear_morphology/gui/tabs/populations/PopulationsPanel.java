@@ -567,6 +567,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                                                        // or clusters
                             // single dataset
                             populationPopup.setEnabled(false);
+                            populationPopup.setChangeScaleEnabled(true);
                             populationPopup.enableMerge();
                             populationPopup.enableDelete();
                             populationPopup.enableBoolean();
@@ -624,6 +625,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
     private void setMenuForSingleDataset(IAnalysisDataset d) {
 
+    	
         populationPopup.enableDelete();
         populationPopup.disableMerge();
         populationPopup.enableBoolean();
@@ -632,6 +634,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         populationPopup.setRelocateCellsEnabled(true);
         populationPopup.enableSaveCells();
         populationPopup.setExportStatsEnabled(true);
+        populationPopup.setChangeScaleEnabled(true);
 
         if (d instanceof ChildAnalysisDataset) {
             populationPopup.setAddNuclearSignalEnabled(false);
