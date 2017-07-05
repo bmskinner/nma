@@ -189,7 +189,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                     }
                     warn("Dataset is corrupted");
                     warn("Saving child dataset info");
-                    new MappingFileExporter().exportCellLocations(dataset);
+                    new CellFileExporter().exportCellLocations(dataset);
 
                     warn("Curated cells saved");
                     warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");

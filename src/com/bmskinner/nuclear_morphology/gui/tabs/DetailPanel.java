@@ -79,6 +79,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
     private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
 
+    private final TabPanel parentPanel;
     private final List<TabPanel> subPanels = new ArrayList<TabPanel>();
 
     // The chart cache holds rendered charts for all selected options, until a
@@ -95,6 +96,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
 
     public DetailPanel() {
+        this(null);
+    }
+    
+    public DetailPanel(TabPanel parent) {
+    	parentPanel = parent;
         this.addChartOptionsRenderedEventListener(this);
     }
 
@@ -123,6 +129,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     @Override
     public boolean hasSubPanels() {
         return subPanels.size() > 0;
+    }
+    
+    @Override
+    public TabPanel getParentPanel(){
+    	return parentPanel;
     }
 
     /**

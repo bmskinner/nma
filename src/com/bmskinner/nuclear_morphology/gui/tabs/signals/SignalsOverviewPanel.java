@@ -61,6 +61,7 @@ import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
@@ -221,8 +222,9 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                         } catch (UnavailableSignalGroupException e1) {
                             stack(e1);
                         }
-                        getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
+                        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.GROUP_VISIBLE_PREFIX);
                         this.refreshChartCache(getDatasets());
+//                        this.getParentPanel().refreshChartCache(getDatasets());
                     });
                     panel.add(box);
 

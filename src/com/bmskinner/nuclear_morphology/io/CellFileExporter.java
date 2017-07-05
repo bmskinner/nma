@@ -36,7 +36,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author ben
  *
  */
-public class MappingFileExporter implements Exporter, Loggable {
+public class CellFileExporter implements Exporter, Loggable {
 
     public boolean exportCellLocations(IAnalysisDataset d) {
 

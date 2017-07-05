@@ -103,7 +103,8 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
         if (event.type().startsWith(SignalChangeEvent.GROUP_VISIBLE_PREFIX)) {
 
             for (TabPanel p : this.getSubPanels()) {
-                p.update(getDatasets());
+            	p.refreshChartCache(getDatasets());
+//                p.update(getDatasets());
             }
         }
     }

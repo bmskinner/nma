@@ -484,8 +484,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             }
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-
-                addRealShellData(ds, collection, options, signalGroup);
+            	try {
+            		if(collection.getSignalGroup(signalGroup).isVisible()){
+            			addRealShellData(ds, collection, options, signalGroup);
+            		}
+            	} catch (UnavailableSignalGroupException e) {
+            		stack("Signal group not found", e);
+            	}
             }
             result.add(ds);
         }

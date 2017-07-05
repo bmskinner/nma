@@ -72,6 +72,8 @@ public interface TabPanel extends DatasetUpdateEventListener {
      *            the panel to add
      */
     void addSubPanel(TabPanel panel);
+    
+    TabPanel getParentPanel();
 
     /**
      * Add a listener for signal change events from this panel

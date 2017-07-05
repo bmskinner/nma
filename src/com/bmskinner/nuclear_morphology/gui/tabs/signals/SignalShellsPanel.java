@@ -270,23 +270,23 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         boolean showRandom = showRandomCheckbox.isSelected();
 
-        ChartOptions barChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setTarget(chartPanel)
-                .setNormalised(dapiNormalise.isSelected()).setShowAnnotations(showRandom) // proxy
-                                                                                          // for
-                                                                                          // random
-                                                                                          // signal
-                                                                                          // distribution
+        ChartOptions barChartOptions = new ChartOptionsBuilder()
+        		.setDatasets(getDatasets())
+        		.setTarget(chartPanel)
+                .setNormalised(dapiNormalise.isSelected())
+                .setShowAnnotations(showRandom) // proxy fpr random
                 .setCountType(type).build();
 
         setChart(barChartOptions);
 
-        ChartOptions consensusChartOptions = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setTarget(consensusPanel).setNormalised(dapiNormalise.isSelected()).setShowAnnotations(showRandom) // proxy
-                                                                                                                    // for
-                                                                                                                    // random
-                                                                                                                    // signal
-                                                                                                                    // distribution
-                .setShowXAxis(false).setShowYAxis(false).setCountType(type).build();
+        ChartOptions consensusChartOptions = new ChartOptionsBuilder()
+        		.setDatasets(getDatasets())
+                .setTarget(consensusPanel)
+                .setNormalised(dapiNormalise.isSelected())
+                .setShowAnnotations(showRandom) // proxy                                                                                   // distribution
+                .setShowXAxis(false)
+                .setShowYAxis(false)
+                .setCountType(type).build();
 
         setChart(consensusChartOptions);
 

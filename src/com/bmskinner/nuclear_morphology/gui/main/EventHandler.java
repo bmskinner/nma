@@ -75,7 +75,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.io.MappingFileExporter;
+import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -303,7 +303,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         if (event.type().equals("SaveCellLocations")) {
             log("Exporting cell locations...");
-            if (new MappingFileExporter().exportCellLocations(selectedDataset)) {
+            if (new CellFileExporter().exportCellLocations(selectedDataset)) {
                 log("Export complete");
             } else {
                 log("Export failed");
