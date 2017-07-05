@@ -130,11 +130,11 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
      * @throws CollectionFilteringException
      */
     @Override
-    public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper)
+    public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException {
 
         finer("Filtering on " + stat);
-        ICellCollection filtered = collection.filterCollection(stat, MeasurementScale.PIXELS, lower, upper);
+        ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
 
         if (filtered == null) {
             throw new CollectionFilteringException("No collection returned");

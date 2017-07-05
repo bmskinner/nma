@@ -56,6 +56,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -147,14 +148,21 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         PlottableStatistic statA = (PlottableStatistic) statABox.getSelectedItem();
         PlottableStatistic statB = (PlottableStatistic) statBBox.getSelectedItem();
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
-                .addStatistic(statB).setScale(GlobalOptions.getInstance().getScale())
-                .setSwatch(GlobalOptions.getInstance().getSwatch()).setTarget(chartPanel).build();
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+        		.addStatistic(statA)
+                .addStatistic(statB)
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setSwatch(GlobalOptions.getInstance()
+                .getSwatch())
+                .setTarget(chartPanel).build();
 
         setChart(options);
 
-        TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(statA)
-                .addStatistic(statB).setScale(GlobalOptions.getInstance().getScale()).setTarget(rhoTable).build();
+        TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
+        		.addStatistic(statA)
+                .addStatistic(statB)
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setTarget(rhoTable).build();
 
         setTable(tableOptions);
 
@@ -200,6 +208,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         finer("Gating datasets on " + statABox.getSelectedItem().toString() + " and "
                 + statBBox.getSelectedItem().toString());
 
+        MeasurementScale scale = GlobalOptions.getInstance().getScale();
+        
         Filterer<ICellCollection> f = new CellCollectionFilterer();
 
         for (IAnalysisDataset d : getDatasets()) {
@@ -213,9 +223,9 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
             try {
 
                 ICellCollection stat1 = f.filter(d.getCollection(), statA, domain.getLowerBound(),
-                        domain.getUpperBound());
+                        domain.getUpperBound(), scale);
 
-                ICellCollection stat2 = f.filter(stat1, statB, range.getLowerBound(), range.getUpperBound());
+                ICellCollection stat2 = f.filter(stat1, statB, range.getLowerBound(), range.getUpperBound(), scale);
 
                 ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
                 for (ICell c : stat2.getCells()) {

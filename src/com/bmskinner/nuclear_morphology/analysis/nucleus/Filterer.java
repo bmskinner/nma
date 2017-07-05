@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import com.bmskinner.nuclear_morphology.components.Filterable;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -97,7 +98,7 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      * @return a new cell collection with copies of the original cells
      * @throws CollectionFilteringException
      */
-    public abstract E filter(E collection, PlottableStatistic stat, double lower, double upper)
+    public abstract E filter(E collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException;
 
     /**
