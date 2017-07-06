@@ -3,6 +3,10 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,9 +29,12 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
+import ij.ImagePlus;
+import ij.io.FileSaver;
 import ij.process.ImageProcessor;
 
 /**
@@ -40,19 +47,21 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	
 	private static final int DEGREES_180 = 180;
 	private static final int DEGREES_360 = 360;
+	private static final String HEADER_LBL = "Double click a nucleus to export image to ";
 	
 	public ShellOverviewDialog(IAnalysisDataset dataset) {
         super(dataset);
     }
 
 	protected void createWorker(){
-		worker = new ShellAnnotationWorker(dataset, table.getModel(), true);
+		worker = new ShellAnnotationWorker(dataset, table.getModel(), false);
         worker.addPropertyChangeListener(this);
         worker.execute();
 	}
 	
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
+		header.add(new JLabel(HEADER_LBL + dataset.getCollection().getOutputFolder().getAbsolutePath()));
         return header;
 		
 	}
@@ -100,40 +109,82 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         ListSelectionModel cellSelectionModel = table.getSelectionModel();
         cellSelectionModel.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-//        table.addMouseListener(new MouseAdapter() {
-//
-//            @Override
-//            public void mouseClicked(MouseEvent e) {
-//                if (e.getClickCount() == 2) {
-//
-//                    // Get the data model for this table
-//                    TableModel model = (TableModel) table.getModel();
-//
-//                    Point pnt = e.getPoint();
-//                    int row = table.rowAtPoint(pnt);
-//                    int col = table.columnAtPoint(pnt);
-//
-//                    LabelInfo selected = (LabelInfo) model.getValueAt(row, col);
-//                    
-//                    Image img = selected.getIcon().getImage();
-//
-//
-//                    BufferedImage bi = new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.);
-//                    File folder = dataset.getCollection().getOutputFolder();
-//                    File outputfile = new File(folder,  selected.getCell().getNucleus().getNameAndNumber()+".jpg");
-//                    try {
-//						ImageIO.write(bi, "jpg", outputfile);
-//					} catch (IOException e1) {
-//						warn("Could not save image");
-//						stack(e1.getMessage(), e1);
-//					}
-//
-//
-//
-//                }
-//            }
-//
-//        });
+        table.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 2) {
+
+                    // Get the data model for this table
+                    TableModel model = (TableModel) table.getModel();
+
+                    Point pnt = e.getPoint();
+                    int row = table.rowAtPoint(pnt);
+                    int col = table.columnAtPoint(pnt);
+
+                    LabelInfo selected = (LabelInfo) model.getValueAt(row, col);
+                    
+                    ICell c = selected.getCell();
+                    
+                    ImageProcessor full = renderFullImage(c);
+
+                    File folder = dataset.getCollection().getOutputFolder();
+                    File outputfile = new File(folder,  c.getNucleus().getNameAndNumber()+".tiff");
+
+                    FileSaver saver = new FileSaver(new ImagePlus("", full));
+                    saver.saveAsTiff(outputfile.getAbsolutePath());
+                }
+            }
+            
+            private ImageProcessor renderFullImage(ICell c){
+            	ImageProcessor ip;
+
+    	        try {
+    	            if (c.hasCytoplasm()) {
+    	                ip = c.getCytoplasm().getComponentRGBImage();
+    	            } else {
+    	                ip = c.getNucleus().getComponentImage();
+    	            }
+    	        } catch (UnloadableImageException e) {
+    	            stack("Cannot load image for component", e);
+    	            return null;
+    	        }
+
+    	        ImageAnnotator an = new ImageAnnotator(ip);
+
+    	        for (Nucleus n : c.getNuclei()) {
+
+    	        	 try {
+    	        		
+    	 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
+    	 				
+    	 				for(Shell shell : shells){
+    	 					fine("Drawing shell at "+shell.getBase().toString());
+    	 					an = an.annotate(shell, Color.ORANGE);
+    	 				}
+    	 			} catch (ShellAnalysisException e1) {
+    	 				warn("Error making shells");
+    	 				stack(e1.getMessage(), e1);
+    	 			}
+    	        	 
+    	        	 ISignalCollection signalCollection = n.getSignalCollection();
+    	             for (UUID id : signalCollection.getSignalGroupIDs()) {
+    	             	     
+    					try {
+    						Color colour = dataset.getCollection().getSignalGroup(id).getGroupColour();
+    						an = an.annotateSignal(n, id, colour);
+    					} catch (UnavailableSignalGroupException e) {
+    						stack("No signal group", e);
+    					}	                 
+    	        	}
+    	        }
+    	        
+    	        ip = an.toProcessor();
+
+    	        return ip;
+            }
+
+        });
 
         JScrollPane scrollPane = new JScrollPane();
         scrollPane.setViewportView(table);
@@ -158,10 +209,6 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	            } else {
 	                ip = c.getNucleus().getComponentImage();
 	            }
-
-	            // Nucleus n = c.getNucleus();
-	            // ip = n.getComponentImage();
-
 	        } catch (UnloadableImageException e) {
 	            stack("Cannot load image for component", e);
 	            return new ImageIcon();
@@ -172,7 +219,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 	        for (Nucleus n : c.getNuclei()) {
 
 	        	 try {
-	        		 //TODO - get existing shell count
+	        		
 	 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
 	 				
 	 				for(Shell shell : shells){
@@ -192,16 +239,10 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 						an = an.annotateSignal(n, id, colour);
 					} catch (UnavailableSignalGroupException e) {
 						stack("No signal group", e);
-					}
-	            	 
-
-	                 
+					}	                 
 	        	}
-	        	 
-	        	
 	        }
 	        
-
 	        ip = an.toProcessor();
 
 	        if (rotate) {
