@@ -80,7 +80,7 @@ public class MainWindow extends JFrame implements Loggable {
                                                          // if present
 
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
-            + Version.currentVersion().toString() + "a3";
+            + Version.currentVersion().toString();
 
     private static final String ANALYSIS_SETUP_TAB_LBL = "Analysis info";
     private static final String CLUSTERS_TAB_LBL       = "Clusters";
