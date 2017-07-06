@@ -1372,4 +1372,10 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         return true;
     }
 
+	@Override
+	public IPoint getBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

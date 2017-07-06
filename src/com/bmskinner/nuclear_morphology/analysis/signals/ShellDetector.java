@@ -34,11 +34,13 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -458,7 +460,7 @@ public class ShellDetector extends Detector {
         double[] areas = new double[shellCount];
 
         areas[0] = initialArea;
-        shells.add(new Shell(nucleusRoi));
+        shells.add(new Shell(nucleusRoi, c));
 
         // start with the next shell in nucleus, and shrink shell by shell
         for (int i = 1; i < shellCount; i++) {
@@ -507,7 +509,7 @@ public class ShellDetector extends Detector {
             // Make the shell
             fine("\tFinal shell area: " + area);
             areas[i] = area;
-            shells.add(new Shell((Roi) shrinkingRoi.clone()));
+            shells.add(new Shell((Roi) shrinkingRoi.clone(), c));
         }
         fine("Shell areas: " + new ArrayConverter(areas).toString());
 
@@ -559,7 +561,7 @@ public class ShellDetector extends Detector {
         return s;
     }
 
-    public class Shell {
+    public class Shell implements Imageable {
 
         /**
          * The roi of the shell at the original position in the source image of
@@ -567,9 +569,15 @@ public class ShellDetector extends Detector {
          * to it must be offset to the same coordinate space
          */
         private Roi shellRoi;
+        private Imageable source;
 
-        public Shell(Roi r) {
+        public Shell(Roi r, Imageable source) {
             this.shellRoi = r;
+            this.source = source;
+        }
+        
+        public Imageable getSource(){
+        	return source;
         }
 
         /**
@@ -709,9 +717,9 @@ public class ShellDetector extends Detector {
          * 
          * @return
          */
-        public double[] getPosition() {
-            double[] result = { shellRoi.getBounds().getX(), shellRoi.getBounds().getY(),
-                    shellRoi.getBounds().getWidth(), shellRoi.getBounds().getHeight() };
+        public int[] getPosition() {
+            int[] result = { (int) shellRoi.getBounds().getX(), (int) shellRoi.getBounds().getY(),
+                    (int) shellRoi.getBounds().getWidth(), (int) shellRoi.getBounds().getHeight() };
             return result;
         }
 
@@ -745,6 +753,78 @@ public class ShellDetector extends Detector {
             return this.getBounds().toString();
 
         }
+
+		@Override
+		public IPoint getOriginalBase() {
+			return IPoint.makeNew(shellRoi.getXBase(), shellRoi.getYBase());
+		}
+
+		@Override
+		public int getChannel() {
+			return source.getChannel();
+		}
+
+		@Override
+		public ImageProcessor getImage() throws UnloadableImageException {
+			return source.getImage();
+		}
+
+		@Override
+		public ImageProcessor getRGBImage() throws UnloadableImageException {
+			return source.getRGBImage();
+		}
+
+		@Override
+		public ImageProcessor getComponentImage() throws UnloadableImageException {
+			return source.getComponentImage();
+		}
+
+		@Override
+		public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
+			return source.getComponentRGBImage();
+		}
+
+		@Override
+		public File getSourceFolder() {
+			return source.getSourceFolder();
+		}
+
+		@Override
+		public File getSourceFile() {
+			return source.getSourceFile();
+		}
+
+		@Override
+		public String getSourceFileName() {
+			return source.getSourceFileName();
+		}
+
+		@Override
+		public String getSourceFileNameWithoutExtension() {
+			return source.getSourceFileNameWithoutExtension();
+		}
+
+		@Override
+		public void updateSourceFolder(File newFolder) {		
+		}
+
+		@Override
+		public void setSourceFile(File sourceFile) {			
+		}
+
+		@Override
+		public void setChannel(int channel) {
+			
+		}
+
+		@Override
+		public void setSourceFolder(File sourceFolder) {
+		}
+
+		@Override
+		public IPoint getBase() {
+			return IPoint.makeNew(shellRoi.getXBase(), shellRoi.getYBase());
+		}
 
     }
 

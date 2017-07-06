@@ -86,6 +86,13 @@ public interface Imageable {
      * @return the base coordinate in the original image
      */
     IPoint getOriginalBase();
+    
+    /**
+     * Get the base X and Y position of the component in the image.
+     * Corresponds to the minimum X and Y points in the border
+     * @return the base XY coordinate in the image
+     */
+    IPoint getBase();
 
     /**
      * Get the RGB channel the object was detected in
@@ -236,7 +243,13 @@ public interface Imageable {
          * This means these must be corrected for when translating coordinates
          * between component images.
          * 
-         * 30 _Template____________ | | | Target | | _____ | | | | | 20 | | X |
+         * 30 _Template____________
+         *  |                      |
+         *  | Target               |
+         *  | _____                |
+         *  |      |               |
+         *  | 20   |               | 
+         *  X |
          * 5 | | |____| | | 5 | |___________________|
          * 
          * 
@@ -248,20 +261,18 @@ public interface Imageable {
 
         IPoint temBase = template.getOriginalBase();
         IPoint tarBase = target.getOriginalBase();
+        
+        IPoint diff = tarBase.minus(temBase);
+        
+        return point.plus(diff);
 
-        double xDiff = tarBase.getX() - temBase.getX();
-        double yDiff = tarBase.getY() - temBase.getY();
-
-        double newX = point.getX() + xDiff;
-        double newY = point.getY() + yDiff;
-
-        return IPoint.makeNew(newX, newY);
-        //
-        // int xOffset = (int) cyCom.getX() +
-        // CellularComponent.COMPONENT_BUFFER;
-        // int yOffset = (int) cyCom.getY() +
-        // CellularComponent.COMPONENT_BUFFER;
-
+//        double xDiff = tarBase.getX() - temBase.getX();
+//        double yDiff = tarBase.getY() - temBase.getY();
+//
+//        double newX = point.getX() + xDiff;
+//        double newY = point.getY() + yDiff;
+//
+//        return IPoint.makeNew(newX, newY);
     }
 
     /**
@@ -355,5 +366,21 @@ public interface Imageable {
         return IPoint.makeNew(x, y);
 
     }
+    
+//    /**
+//     * Move the border of the given object so that it lies within the target
+//     * component space. 
+//     * 
+//     * This assumes both objects came from the same image. 
+//     * This takes the absolute position of the object, finds the difference to the
+//     * absolute position of the target, and applies the offset to move the object into
+//     * the component image of the target.
+//     * @param object
+//     * @param target
+//     * @return
+//     */
+//    default Imageable translateObjecttoComponentSpace(Imageable object, Imageable target){
+//    	IPoint difference = object.getBase().minus(target.getBase());
+//    }
 
 }

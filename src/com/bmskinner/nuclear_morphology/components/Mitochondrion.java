@@ -23,6 +23,7 @@ import ij.process.ImageProcessor;
 import java.io.File;
 import java.io.IOException;
 
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
 @Deprecated
@@ -106,5 +107,11 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
         // TODO Auto-generated method stub
 
     }
+
+	@Override
+	public IPoint getBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

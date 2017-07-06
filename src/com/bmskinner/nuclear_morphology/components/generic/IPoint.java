@@ -183,5 +183,38 @@ public interface IPoint {
         double ny = (a.getY() + b.getY()) / 2;
         return IPoint.makeNew(nx, ny);
     }
+    
+    
+    /**
+     * Subtract the given point from this point. Creates
+     * a new point at x - p.x and y - p.y.
+     * @param p
+     * @return
+     */
+    IPoint minus(IPoint p);
+    
+    /**
+     * Add the given point to this point. Creates
+     * a new point at x + p.x and y + p.y.
+     * @param p
+     * @return
+     */
+    IPoint plus(IPoint p);
+    
+    /**
+     * Add the given value to this point. Creates
+     * a new point at x + value and y + value.
+     * @param p
+     * @return
+     */
+    IPoint plus(double value);
+    
+    /**
+     * Subtract the given value from this point. Creates
+     * a new point at x - value and y - value.
+     * @param p
+     * @return
+     */
+    IPoint minus(double value);
 
 }

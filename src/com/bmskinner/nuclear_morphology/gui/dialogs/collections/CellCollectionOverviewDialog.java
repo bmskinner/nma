@@ -218,29 +218,7 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
         }
     }
 
-    private TableModel createEmptyTableModel(int rows, int cols) {
-        DefaultTableModel model = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) { // custom
-                                                                 // isCellEditable
-                                                                 // function
-                return false;
-            }
-        };
-
-        model.setRowCount(rows);
-        model.setColumnCount(cols);
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-
-                LabelInfo l = new LabelInfo(null, null);
-                model.setValueAt(l, row, col);
-            }
-        }
-
-        return model;
-    }
+    
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -268,28 +246,6 @@ public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
 
     }
 
-    // @SuppressWarnings("serial")
-    public class LabelInfoRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
-                int row, int column) {
-
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            LabelInfo info = (LabelInfo) value;
-            setIcon(info.getIcon());
-            setHorizontalAlignment(JLabel.CENTER);
-            setHorizontalTextPosition(JLabel.CENTER);
-            setVerticalTextPosition(JLabel.BOTTOM);
-
-            if (info.isSelected()) {
-                setBackground(Color.GREEN);
-            } else {
-                setBackground(Color.WHITE);
-            }
-
-            return this;
-        }
-    }
+    
 
 }

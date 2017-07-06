@@ -146,6 +146,12 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 
     }
 
+	@Override
+	public IPoint getBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
     // @Override
     // public void setPositionWithin(CellularComponent c) {
     // // TODO Auto-generated method stub

@@ -184,4 +184,10 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 
     }
 
+	@Override
+	public IPoint getBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

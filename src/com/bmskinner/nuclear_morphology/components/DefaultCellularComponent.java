@@ -389,6 +389,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public IPoint getOriginalBase() {
         return IPoint.makeNew(position[X_BASE], position[Y_BASE]);
     }
+    
+    @Override
+    public IPoint getBase() {
+        return IPoint.makeNew(bounds.getMinX(), bounds.getMinY());
+    }
 
     @Override
     public Rectangle2D getBounds() {

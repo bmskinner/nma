@@ -303,7 +303,9 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     int wrapIndex(int i);
 
     /**
-     * Turn a list of border points into a polygon.
+     * Turn a list of border points into a polygon. These have the
+     * positions of the points as they exist in the border list, not
+     * in the original image.
      * 
      * @param list
      *            the list of border points

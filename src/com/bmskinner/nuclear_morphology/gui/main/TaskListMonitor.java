@@ -1,5 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
+import java.awt.Dimension;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
@@ -30,9 +32,9 @@ implements Runnable, Loggable {
 		} while(true);
 	}
 
-//	@Override
-//	public Dimension getPreferredSize(){
-//		return new Dimension(50, 20);
-//	}
+	@Override
+	public Dimension getPreferredSize(){
+		return new Dimension(30, 20);
+	}
 
 }

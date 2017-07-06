@@ -50,6 +50,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
+import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 /**
@@ -67,13 +68,16 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private static final String RUN_ANALYSIS_LBL   = "Run new";
     private static final String DAPI_NORM_LBL      = "DAPI normalise";
     private static final String SHOW_RANDOM_LBL    = "Show random";
+    private static final String SHOW_SHELLS_LBL    = "Show nuclei";
 
     private static final String RUN_ANALYSIS_TOOLTIP   = "Run a shell analysis on all signal groups, replacing any existing analysis";
     private static final String WITHIN_SIGNALS_TOOLTIP = "Analyse only pixels that are within defined signals";
     private static final String WITHIN_NUCLEI_TOOLTIP  = "Analyse any pixels that are within the nucleus";
     private static final String DAPI_NORM_TOOLTIP      = "Apply a correction for nuclear flattening based on the DNA counterstain";
     private static final String SHOW_RANDOM_TOOLTIP    = "Show a random distribution of signals in the consensus nucleus";
+    private static final String SHOW_NUCLEI_TOOLTIP    = "Show nuclei in the dataset with shells annotated";
 
+    
     private ExportableChartPanel chartPanel;
     private ExportableChartPanel consensusPanel;
 
@@ -82,6 +86,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private ButtonGroup  coverageGroup    = new ButtonGroup();
 
     private JButton newAnalysis = new JButton(RUN_ANALYSIS_LBL);
+    private JButton showNuclei  = new JButton(SHOW_SHELLS_LBL);
 
     private JCheckBox dapiNormalise      = new JCheckBox(DAPI_NORM_LBL, true);
     private JCheckBox showRandomCheckbox = new JCheckBox(SHOW_RANDOM_LBL, false);
@@ -108,6 +113,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         withinSignalsBtn.setEnabled(b);
         dapiNormalise.setEnabled(b);
         showRandomCheckbox.setEnabled(b);
+        showNuclei.setEnabled(b);
     }
 
     /**
@@ -216,7 +222,13 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         showRandomCheckbox.addActionListener(this);
         showRandomCheckbox.setToolTipText(SHOW_RANDOM_TOOLTIP);
         panel.add(showRandomCheckbox);
-
+        
+        showNuclei.addActionListener(e->{
+        	new ShellOverviewDialog(activeDataset());
+        });
+        showNuclei.setToolTipText(SHOW_NUCLEI_TOOLTIP);
+        panel.add(showNuclei);
+        
         setEnabled(false);
 
         return panel;

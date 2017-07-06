@@ -91,7 +91,6 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         JPanel memPanel = new JPanel(new FlowLayout(FlowLayout.TRAILING));        
 
         TaskListMonitor t = new TaskListMonitor();
-        t.setPreferredSize( new Dimension(30, 20));
         t.setBorder(BorderFactory.createBevelBorder(1));
         memPanel.add(new JLabel(TASK_QUEUE_LBL));
         memPanel.add(t);

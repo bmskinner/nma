@@ -117,9 +117,27 @@ public class ImageAnnotator extends AbstractImageFilterer {
         return this;
     }
     
+    /**
+     * Draw the given shell. Shells are assumed to be at the shell location
+     * in the source image ofthe component
+     * @param shell
+     * @return
+     */
     public ImageAnnotator annotate(ShellDetector.Shell shell){
     	
-    	annotateRoi(shell.toRoi(), Color.GREEN);
+    	// This is in source image coordinates
+    	Roi roi = shell.toRoi();
+    	
+    	IPoint diff = shell.getSource().getOriginalBase().minus(shell.getOriginalBase());
+    	
+    	
+    	
+    	// add an adjustment for the buffer, and for the location within the nucleus
+    	
+    	IPoint base = shell.getSource().getBase().plus(Imageable.COMPONENT_BUFFER).minus(diff);
+    	
+    	roi.setLocation(base.getX(), base.getY());
+    	annotateRoi(roi, Color.GREEN, 1);
     	return this;
     }
 
@@ -191,8 +209,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
     
     private ImageAnnotator annotateRoi(Roi p, Paint c) {
+        return annotateRoi(p, c, 2);
+    }
+    
+    private ImageAnnotator annotateRoi(Roi p, Paint c, int width) {
         ip.setColor((Color) c);
-        ip.setLineWidth(2);
+        ip.setLineWidth(width);
         ip.draw(p);
         return this;
     }
@@ -495,7 +517,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
     /**
      * Draw the segments of a profilable component in the global colour swatch
-     * colours. Draw the segments at their positions in the template compent
+     * colours. Draw the segments at their positions in the template component
      * image
      * 
      * @param n
@@ -550,7 +572,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
     }
 
     /**
-     * Draw the signals within a nucleus
+     * Draw the signals within a nucleus on the current image. This assumes that the current image
+     * is a nucleus component image.
      * 
      * @param n
      *            the nucleus
@@ -560,19 +583,26 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         ISignalCollection signalCollection = n.getSignalCollection();
         for (UUID id : signalCollection.getSignalGroupIDs()) {
+        	
             int i = signalCollection.getSignalGroupNumber(id);
-            List<INuclearSignal> signals = signalCollection.getSignals(id);
-            Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
-                    : i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
+            
+            if(signalCollection.hasSignal(id)){
+            	
+            	Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
+            			: i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
 
-            if (!signals.isEmpty()) {
+            	List<INuclearSignal> signals = signalCollection.getSignals(id);
+
 
                 for (INuclearSignal s : signals) {
 
-                    annotatePoint(s.getCentreOfMass(), colour);
+                    annotatePoint(s.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), colour);
+                	IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
 
                     FloatPolygon p = s.toPolygon();
                     PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+
+                    roi.setLocation(base.getX(), base.getY());
                     annotatePolygon(roi, colour);
                 }
             }

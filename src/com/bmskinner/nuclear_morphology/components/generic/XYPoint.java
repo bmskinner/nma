@@ -337,5 +337,25 @@ public class XYPoint implements Serializable, Loggable, IMutablePoint {
             return false;
         return true;
     }
+    
+    @Override
+	public IPoint minus(IPoint p) {
+		return new XYPoint(x-p.getX(), y-p.getY());
+	}
+
+	@Override
+	public IPoint plus(IPoint p) {
+		return new XYPoint(x+p.getX(), y+p.getY());
+	}
+	
+	@Override
+	public IPoint minus(double value) {
+		return new FloatPoint(x-value, y-value);
+	}
+
+	@Override
+	public IPoint plus(double value) {
+		return new FloatPoint(x+value, y+value);
+	}
 
 }

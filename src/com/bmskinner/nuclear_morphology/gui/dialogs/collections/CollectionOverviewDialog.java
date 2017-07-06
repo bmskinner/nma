@@ -1,13 +1,21 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.collections;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
 /**
@@ -56,5 +64,78 @@ public abstract class CollectionOverviewDialog extends LoadingIconDialog impleme
     protected abstract void createUI();
     
     protected abstract JPanel createHeader();
+    
+    protected TableModel createEmptyTableModel(int rows, int cols) {
+        DefaultTableModel model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) { // custom
+                                                                 // isCellEditable
+                                                                 // function
+                return false;
+            }
+        };
 
+        model.setRowCount(rows);
+        model.setColumnCount(cols);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+
+                LabelInfo l = new LabelInfo(null, null);
+                model.setValueAt(l, row, col);
+            }
+        }
+
+        return model;
+    }
+    
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        int value = 0;
+        try {
+            Object newValue = evt.getNewValue();
+
+            if (newValue.getClass().isAssignableFrom(Integer.class)) {
+                value = (int) newValue;
+
+            }
+            if (value >= 0 && value <= 100) {
+                progressBar.setValue(value);
+            }
+
+            if (evt.getPropertyName().equals("Finished")) {
+                finest("Worker signaled finished");
+                progressBar.setVisible(false);
+
+            }
+
+        } catch (Exception e) {
+            error("Error getting value from property change", e);
+        }
+
+    }
+
+ // @SuppressWarnings("serial")
+    public class LabelInfoRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            LabelInfo info = (LabelInfo) value;
+            setIcon(info.getIcon());
+            setHorizontalAlignment(JLabel.CENTER);
+            setHorizontalTextPosition(JLabel.CENTER);
+            setVerticalTextPosition(JLabel.BOTTOM);
+
+            if (info.isSelected()) {
+                setBackground(Color.GREEN);
+            } else {
+                setBackground(Color.WHITE);
+            }
+
+            return this;
+        }
+    }
 }

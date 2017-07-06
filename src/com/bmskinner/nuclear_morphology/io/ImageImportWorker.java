@@ -53,11 +53,11 @@ import ij.process.ImageProcessor;
  */
 public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implements Loggable {
 
-    private final IAnalysisDataset dataset;
-    private final TableModel       model;
-    private static final int       COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
-    private int                    loaded       = 0;
-    private boolean                rotate;
+	protected final IAnalysisDataset dataset;
+	protected final TableModel       model;
+	protected static final int       COLUMN_COUNT = CellCollectionOverviewDialog.COLUMN_COUNT;
+	protected int                    loaded       = 0;
+	protected boolean                rotate;
 
     public ImageImportWorker(IAnalysisDataset dataset, TableModel model, boolean rotate) {
         super();
@@ -111,7 +111,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
 
     }
 
-    private ImageIcon importCellImage(ICell c) {
+    protected ImageIcon importCellImage(ICell c) {
         ImageProcessor ip;
 
         try {
@@ -172,7 +172,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         return ic;
     }
 
-    private ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
+    protected ImageProcessor rotateToVertical(ICell c, ImageProcessor ip) throws UnavailableBorderTagException {
         // Calculate angle for vertical rotation
         Nucleus n = c.getNucleus();
 
@@ -248,7 +248,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         return newIp;
     }
 
-    private ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
+    protected ImageProcessor createEnlargedProcessor(ImageProcessor ip, double degrees) {
 
         double rad = Math.toRadians(degrees);
 
@@ -284,7 +284,7 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         return newIp;
     }
 
-    private ImageProcessor scaleImage(ImageProcessor ip) {
+    protected ImageProcessor scaleImage(ImageProcessor ip) {
         double aspect = (double) ip.getWidth() / (double) ip.getHeight();
         double finalWidth = 150 * aspect; // fix height
         finalWidth = finalWidth > 150 ? 150 : finalWidth; // but constrain width
@@ -293,71 +293,6 @@ public class ImageImportWorker extends SwingWorker<Boolean, LabelInfo> implement
         ip = ip.resize((int) finalWidth);
         return ip;
     }
-
-    // /**
-    // * Draw the outline of a nucleus on the given processor
-    // * @param cell
-    // * @param ip
-    // */
-    // private void drawNucleus(ICell cell, ImageProcessor ip) {
-    // if(cell==null){
-    // throw new IllegalArgumentException("Input cell is null");
-    // }
-    //
-    // Nucleus n = cell.getNucleus();
-    //
-    // // annotate the image processor with the nucleus outline
-    // List<IBorderSegment> segmentList;
-    // try {
-    // segmentList = n.getProfile(ProfileType.ANGLE).getSegments();
-    // } catch (UnavailableProfileTypeException e) {
-    // warn("Angle profile not present");
-    // return;
-    // }
-    //
-    // ip.setLineWidth(2);
-    // if(!segmentList.isEmpty()){ // only draw if there are segments
-    //
-    // for(IBorderSegment seg : segmentList){
-    //
-    // float[] x = new float[seg.length()+1];
-    // float[] y = new float[seg.length()+1];
-    //
-    // try {
-    // for(int j=0; j<=seg.length();j++){
-    // int k = n.wrapIndex(seg.getStartIndex()+j);
-    // IBorderPoint p = n.getBorderPoint(k); // get the border points in the
-    // segment
-    // x[j] = (float) p.getX();
-    // y[j] = (float) p.getY();
-    // }
-    //
-    // int segIndex = AbstractChartFactory.getIndexFromLabel (seg.getName());
-    // ip.setColor((Color) ColourSelecter.getColor(segIndex));
-    //
-    // PolygonRoi segRoi = new PolygonRoi(x, y, PolygonRoi.POLYLINE);
-    //
-    // segRoi.setLocation(segRoi.getBounds().getMinX()+CellularComponent.COMPONENT_BUFFER,
-    // segRoi.getBounds().getMinY()+CellularComponent.COMPONENT_BUFFER);
-    //
-    // ip.draw(segRoi);
-    // } catch (UnavailableBorderPointException e) {
-    // warn("Missing border point in segment");
-    // stack(e.getMessage(), e);
-    // }
-    //
-    // }
-    // } else {
-    //
-    // ip.setColor(Color.ORANGE);
-    // FloatPolygon polygon = n.toPolygon();
-    // PolygonRoi roi = new PolygonRoi(polygon, PolygonRoi.POLYGON);
-    // roi.setLocation(CellularComponent.COMPONENT_BUFFER,
-    // CellularComponent.COMPONENT_BUFFER);
-    // ip.draw(roi);
-    // }
-    //
-    // }
 
     @Override
     protected void process(List<LabelInfo> chunks) {
