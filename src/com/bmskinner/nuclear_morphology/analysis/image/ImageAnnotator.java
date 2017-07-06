@@ -123,7 +123,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
      * @param shell
      * @return
      */
-    public ImageAnnotator annotate(ShellDetector.Shell shell){
+    public ImageAnnotator annotate(ShellDetector.Shell shell, Color colour){
     	
     	// This is in source image coordinates
     	Roi roi = shell.toRoi();
@@ -137,7 +137,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
     	IPoint base = shell.getSource().getBase().plus(Imageable.COMPONENT_BUFFER).minus(diff);
     	
     	roi.setLocation(base.getX(), base.getY());
-    	annotateRoi(roi, Color.GREEN, 1);
+    	annotateRoi(roi, colour, 1);
     	return this;
     }
 
@@ -583,7 +583,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
 
         ISignalCollection signalCollection = n.getSignalCollection();
         for (UUID id : signalCollection.getSignalGroupIDs()) {
-        	
+        	        	
             int i = signalCollection.getSignalGroupNumber(id);
             
             if(signalCollection.hasSignal(id)){
@@ -607,6 +607,40 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 }
             }
         }
+        return this;
+    }
+    
+    /**
+     * Annotate the given signal group on the nucleus
+     * @param n
+     * @param signalId
+     * @param colour the signal colour
+     * @return
+     */
+    public ImageAnnotator annotateSignal(Nucleus n, UUID signalId, Color colour) {
+
+        ISignalCollection signalCollection = n.getSignalCollection();
+        
+        	
+            int i = signalCollection.getSignalGroupNumber(signalId);
+            
+            if(signalCollection.hasSignal(signalId)){
+            	
+            	List<INuclearSignal> signals = signalCollection.getSignals(signalId);
+
+                for (INuclearSignal s : signals) {
+
+//                    annotatePoint(s.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), colour);
+                	IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
+
+                    FloatPolygon p = s.toPolygon();
+                    PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
+
+                    roi.setLocation(base.getX(), base.getY());
+                    annotatePolygon(roi, colour);
+                }
+            }
+        
         return this;
     }
 }
