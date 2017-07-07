@@ -41,7 +41,6 @@ import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
-import com.bmskinner.nuclear_morphology.gui.main.MemoryIndicator;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;

@@ -45,8 +45,6 @@ import ij.process.ImageProcessor;
  */
 public class ShellOverviewDialog extends CollectionOverviewDialog {
 	
-	private static final int DEGREES_180 = 180;
-	private static final int DEGREES_360 = 360;
 	private static final String HEADER_LBL = "Double click a nucleus to export image to ";
 	
 	public ShellOverviewDialog(IAnalysisDataset dataset) {
@@ -136,53 +134,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
                 }
             }
             
-            private ImageProcessor renderFullImage(ICell c){
-            	ImageProcessor ip;
-
-    	        try {
-    	            if (c.hasCytoplasm()) {
-    	                ip = c.getCytoplasm().getComponentRGBImage();
-    	            } else {
-    	                ip = c.getNucleus().getComponentImage();
-    	            }
-    	        } catch (UnloadableImageException e) {
-    	            stack("Cannot load image for component", e);
-    	            return null;
-    	        }
-
-    	        ImageAnnotator an = new ImageAnnotator(ip);
-
-    	        for (Nucleus n : c.getNuclei()) {
-
-    	        	 try {
-    	        		
-    	 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
-    	 				
-    	 				for(Shell shell : shells){
-    	 					fine("Drawing shell at "+shell.getBase().toString());
-    	 					an = an.annotate(shell, Color.ORANGE);
-    	 				}
-    	 			} catch (ShellAnalysisException e1) {
-    	 				warn("Error making shells");
-    	 				stack(e1.getMessage(), e1);
-    	 			}
-    	        	 
-    	        	 ISignalCollection signalCollection = n.getSignalCollection();
-    	             for (UUID id : signalCollection.getSignalGroupIDs()) {
-    	             	     
-    					try {
-    						Color colour = dataset.getCollection().getSignalGroup(id).getGroupColour();
-    						an = an.annotateSignal(n, id, colour);
-    					} catch (UnavailableSignalGroupException e) {
-    						stack("No signal group", e);
-    					}	                 
-    	        	}
-    	        }
-    	        
-    	        ip = an.toProcessor();
-
-    	        return ip;
-            }
+            
 
         });
 
@@ -193,6 +145,54 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 
     }
 	
+	private ImageProcessor renderFullImage(ICell c){
+    	ImageProcessor ip;
+
+        try {
+            if (c.hasCytoplasm()) {
+                ip = c.getCytoplasm().getComponentRGBImage();
+            } else {
+                ip = c.getNucleus().getComponentImage();
+            }
+        } catch (UnloadableImageException e) {
+            stack("Cannot load image for component", e);
+            return null;
+        }
+
+        ImageAnnotator an = new ImageAnnotator(ip);
+
+        for (Nucleus n : c.getNuclei()) {
+
+        	 try {
+        		
+ 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
+ 				
+ 				for(Shell shell : shells){
+ 					fine("Drawing shell at "+shell.getBase().toString());
+ 					an = an.annotate(shell, Color.ORANGE);
+ 				}
+ 			} catch (ShellAnalysisException e1) {
+ 				warn("Error making shells");
+ 				stack(e1.getMessage(), e1);
+ 			}
+        	 
+        	 ISignalCollection signalCollection = n.getSignalCollection();
+             for (UUID id : signalCollection.getSignalGroupIDs()) {
+             	     
+				try {
+					Color colour = dataset.getCollection().getSignalGroup(id).getGroupColour();
+					an = an.annotateSignal(n, id, colour);
+				} catch (UnavailableSignalGroupException e) {
+					stack("No signal group", e);
+				}	                 
+        	}
+        }
+        
+        ip = an.toProcessor();
+
+        return ip;
+    }
+	
 	public class ShellAnnotationWorker extends ImageImportWorker {
 
 	    public ShellAnnotationWorker(IAnalysisDataset dataset, TableModel model, boolean rotate) {
@@ -201,49 +201,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 
 	    @Override
 	    protected ImageIcon importCellImage(ICell c) {
-	        ImageProcessor ip;
-
-	        try {
-	            if (c.hasCytoplasm()) {
-	                ip = c.getCytoplasm().getComponentRGBImage();
-	            } else {
-	                ip = c.getNucleus().getComponentImage();
-	            }
-	        } catch (UnloadableImageException e) {
-	            stack("Cannot load image for component", e);
-	            return new ImageIcon();
-	        }
-
-	        ImageAnnotator an = new ImageAnnotator(ip);
-
-	        for (Nucleus n : c.getNuclei()) {
-
-	        	 try {
-	        		
-	 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
-	 				
-	 				for(Shell shell : shells){
-	 					fine("Drawing shell at "+shell.getBase().toString());
-	 					an = an.annotate(shell, Color.ORANGE);
-	 				}
-	 			} catch (ShellAnalysisException e1) {
-	 				warn("Error making shells");
-	 				stack(e1.getMessage(), e1);
-	 			}
-	        	 
-	        	 ISignalCollection signalCollection = n.getSignalCollection();
-	             for (UUID id : signalCollection.getSignalGroupIDs()) {
-	             	     
-					try {
-						Color colour = dataset.getCollection().getSignalGroup(id).getGroupColour();
-						an = an.annotateSignal(n, id, colour);
-					} catch (UnavailableSignalGroupException e) {
-						stack("No signal group", e);
-					}	                 
-	        	}
-	        }
-	        
-	        ip = an.toProcessor();
+	        ImageProcessor ip = renderFullImage(c);
 
 	        if (rotate) {
 	            try {

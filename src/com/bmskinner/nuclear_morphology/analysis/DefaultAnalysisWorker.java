@@ -135,12 +135,15 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
             stack("Stack overflow in worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (InterruptedException e) {
-            warn("Interruption to swing worker");
+            warn("Interruption to swing worker: "+e.getMessage());
             stack("Interruption to swing worker", e);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         } catch (ExecutionException e) {
-            warn("Execution error in swing worker");
+            warn("Execution error in swing worker: "+e.getMessage());
             stack("Execution error in swing worker", e);
+            Throwable cause = e.getCause();
+            warn("Causing error: "+cause.getMessage());
+            stack("Causing error: ", cause);
             firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
         }
 

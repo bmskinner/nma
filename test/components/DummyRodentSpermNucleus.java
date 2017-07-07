@@ -743,4 +743,10 @@ public class DummyRodentSpermNucleus extends DummyNucleus {
 		return null;
 	}
 
+	@Override
+	public IPoint getBase() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

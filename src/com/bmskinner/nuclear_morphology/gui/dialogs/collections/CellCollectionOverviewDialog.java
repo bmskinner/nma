@@ -58,6 +58,9 @@ import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
  */
 @SuppressWarnings("serial")
 public class CellCollectionOverviewDialog extends CollectionOverviewDialog {
+	
+	private static final int DEGREES_180 = 180;
+	private static final int DEGREES_360 = 360;
 
     public CellCollectionOverviewDialog(IAnalysisDataset dataset) {
         super(dataset);
