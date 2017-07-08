@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This is the core of the program UI. All display panels are contained here.
@@ -79,7 +80,7 @@ public class MainWindow extends JFrame implements Loggable {
                                                          // if present
 
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
-            + Version.currentVersion().toString();
+            + Version.currentVersion().toString()+"a1";
 
     private static final String ANALYSIS_SETUP_TAB_LBL = "Analysis info";
     private static final String CLUSTERS_TAB_LBL       = "Clusters";

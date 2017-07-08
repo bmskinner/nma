@@ -68,6 +68,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -478,8 +479,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
      * @param command
      */
     private void runCommand(String command) {
-
-        if (commandMap.containsKey(command)) {
+    	if (commandMap.containsKey(command)) {
             getInterfaceEventHandler().fireInterfaceEvent(commandMap.get(command));
         } else {
 

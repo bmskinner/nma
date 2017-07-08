@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.charting.datasets;
+package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -29,6 +29,9 @@ import javax.swing.table.TableModel;
 import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;

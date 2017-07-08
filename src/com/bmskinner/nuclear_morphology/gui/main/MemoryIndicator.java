@@ -119,6 +119,8 @@ public class MemoryIndicator extends JPanel
         this.mustWarn = true;
       }
     }
+    
+    
             
 
     

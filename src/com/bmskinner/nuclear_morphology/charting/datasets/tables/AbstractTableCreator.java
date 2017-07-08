@@ -16,11 +16,12 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.charting.datasets;
+package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 

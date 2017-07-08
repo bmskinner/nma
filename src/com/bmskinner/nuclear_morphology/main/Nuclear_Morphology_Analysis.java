@@ -16,7 +16,6 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
@@ -69,6 +68,14 @@ public class Nuclear_Morphology_Analysis
 	public static void main(String[] args){
 		instance = new Nuclear_Morphology_Analysis();
 		instance.runStandalone();
+	}
+	
+	public static Nuclear_Morphology_Analysis getInstance(){
+		return instance;
+	}
+	
+	public CommandParser getParser(){
+		return parser;
 	}
 	
 	

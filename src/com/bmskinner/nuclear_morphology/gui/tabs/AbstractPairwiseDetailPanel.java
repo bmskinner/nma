@@ -31,7 +31,7 @@ import javax.swing.JTable;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 
 @SuppressWarnings("serial")

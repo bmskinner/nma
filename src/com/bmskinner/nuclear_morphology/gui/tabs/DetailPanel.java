@@ -62,8 +62,8 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The DetailPanels hold chart and table caches, and track other DetailPanels

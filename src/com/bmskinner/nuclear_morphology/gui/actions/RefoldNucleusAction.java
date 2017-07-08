@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * Refold the consensus nucleus for the selected dataset using default

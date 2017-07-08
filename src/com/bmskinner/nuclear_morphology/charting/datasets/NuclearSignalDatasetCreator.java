@@ -22,17 +22,13 @@ import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
-
-import weka.estimators.KernelEstimator;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
@@ -44,256 +40,18 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
     public NuclearSignalDatasetCreator(final ChartOptions o) {
         super(o);
-    }
-
-    /**
-     * Create a histogram dataset covering the signal statistic for the given
-     * analysis datasets
-     * 
-     * @param list
-     *            the list of datasets
-     * @return a histogram of angles
-     * @throws Exception
-     */
-    public List<HistogramDataset> createSignalStatisticHistogramDataset(List<IAnalysisDataset> list,
-            PlottableStatistic stat, MeasurementScale scale) throws ChartDatasetCreationException {
-
-        List<HistogramDataset> result = new ArrayList<HistogramDataset>();
-
-        for (IAnalysisDataset dataset : list) {
-            HistogramDataset ds = new HistogramDataset();
-            ICellCollection collection = dataset.getCollection();
-
-            for (UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()) {
-
-                try {
-
-                    if (collection.getSignalGroup(signalGroup).isVisible()) {
-
-                        if (collection.getSignalManager().hasSignals(signalGroup)) {
-
-                            double[] values = collection.getSignalManager().getSignalStatistics(stat, scale,
-                                    signalGroup);
-
-                            ds.addSeries(
-                                    CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_" + collection.getName(),
-                                    values, 12);
-                        }
-                    }
-
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group " + signalGroup + " is not present in collection", e);
-                }
-            }
-            result.add(ds);
-
-        }
-        return result;
-    }
-
-    /**
-     * Make an XY dataset corresponding to the probability density of a given
-     * nuclear statistic
-     * 
-     * @param list
-     *            the datasets to draw
-     * @param stat
-     *            the statistic to measure
-     * @return a charting dataset
-     * @throws Exception
-     */
-    public List<DefaultXYDataset> createSignalDensityHistogramDataset() throws ChartDatasetCreationException {
-
-        List<IAnalysisDataset> list = options.getDatasets();
-        PlottableStatistic stat = options.getStat();
-        MeasurementScale scale = options.getScale();
-
-        List<DefaultXYDataset> result = new ArrayList<DefaultXYDataset>();
-
-        int[] minMaxRange = calculateMinAndMaxRange(list, stat, scale);
-
-        for (IAnalysisDataset dataset : list) {
-
-            DefaultXYDataset ds = new DefaultXYDataset();
-
-            ICellCollection collection = dataset.getCollection();
-
-            for (UUID uuid : collection.getSignalManager().getSignalGroupIDs()) {
-
-                String groupLabel = CellularComponent.NUCLEAR_SIGNAL + "_" + uuid + "_" + stat.toString();
-                boolean ignoreSignalGroup = false;
-
-                // If the angle is always zero, the estimator will fail
-                if (collection.getNucleusType().equals(NucleusType.ROUND) && stat.equals(PlottableStatistic.ANGLE)) {
-                    ignoreSignalGroup = true;
-                }
-
-                // If the group is present but empty, the estimator will fail
-                if (!collection.getSignalManager().hasSignals(uuid)) {
-                    ignoreSignalGroup = true;
-                }
-
-                // Skip if needed
-                if (ignoreSignalGroup) {
-                    // Add an empty series
-                    double[] xData = { 0 };
-                    double[] yData = { 0 };
-                    double[][] data = { xData, yData };
-                    ds.addSeries(groupLabel, data);
-                    continue;
-                }
-
-                double[] values = findSignalDatasetValues(dataset, stat, scale, uuid);
-
-                // Cannot estimate pdf with too few values
-                if (values.length < 3) {
-                    // Add an empty series
-                    double[] xData = { 0 };
-                    double[] yData = { 0 };
-                    double[][] data = { xData, yData };
-                    ds.addSeries(groupLabel, data);
-                    continue;
-                }
-
-                KernelEstimator est;
-                try {
-                    est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, 0.001);
-                } catch (Exception e1) {
-                    stack("Error creating probability kernel", e1);
-                    throw new ChartDatasetCreationException("Cannot make probability dataset", e1);
-                }
-
-                double min = Arrays.stream(values).min().orElse(0); // Stats.min(values);
-                double max = Arrays.stream(values).max().orElse(0); // Stats.max(values);
-
-                int log = (int) Math.floor(Math.log10(min)); // get the log
-                                                             // scale
-
-                int roundLog = log - 1 == 0 ? log - 2 : log - 1;
-                double roundAbs = Math.pow(10, roundLog);
-
-                int binLog = log - 2;
-                double stepSize = Math.pow(10, binLog);
-
-                // use int truncation to round to nearest 100 above max
-                int maxRounded = (int) ((((int) max + (roundAbs)) / roundAbs) * roundAbs);
-                maxRounded = roundAbs > 1 ? maxRounded + (int) roundAbs : maxRounded + 1; // correct
-                                                                                          // offsets
-                                                                                          // for
-                                                                                          // measures
-                                                                                          // between
-                                                                                          // 0-1
-                int minRounded = (int) (((((int) min + (roundAbs)) / roundAbs) * roundAbs) - roundAbs);
-                minRounded = roundAbs > 1 ? minRounded - (int) roundAbs : minRounded - 1; // correct
-                                                                                          // offsets
-                                                                                          // for
-                                                                                          // measures
-                                                                                          // between
-                                                                                          // 0-1
-                minRounded = minRounded < 0 ? 0 : minRounded; // ensure all
-                                                              // measures start
-                                                              // from at least
-                                                              // zero
-
-                List<Double> xValues = new ArrayList<Double>();
-                List<Double> yValues = new ArrayList<Double>();
-
-                for (double i = minMaxRange[0]; i <= minMaxRange[1]; i += stepSize) {
-                    xValues.add(i);
-                    yValues.add(est.getProbability(i));
-                }
-
-                double[] xData;
-                double[] yData;
-
-                try {
-
-                    xData = new ArrayConverter(xValues).toDoubleArray();
-                    yData = new ArrayConverter(yValues).toDoubleArray();
-
-                } catch (ArrayConversionException e) {
-                    xData = new double[0];
-                    yData = new double[0];
-                }
-                double[][] data = { xData, yData };
-
-                ds.addSeries(groupLabel, data);
-
-            }
-            result.add(ds);
-        }
-
-        return result;
-    }
-
-    /**
-     * Calculate the minimum and maximum ranges in a list of datasets for the
-     * given stat type
-     * 
-     * @param list
-     *            the datasets
-     * @param stat
-     *            the statistic to use
-     * @return an array with the min and max of the range
-     * @throws Exception
-     */
-    private int[] calculateMinAndMaxRange(List<IAnalysisDataset> list, PlottableStatistic stat, MeasurementScale scale)
-            throws ChartDatasetCreationException {
-
-        int[] result = new int[2];
-        result[0] = Integer.MAX_VALUE; // holds min
-        result[1] = 0; // holds max
-
-        for (IAnalysisDataset dataset : list) {
-
-            for (UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()) {
-
-                if (dataset.getCollection().getSignalManager().hasSignals(signalGroup)) {
-
-                    double[] values = findSignalDatasetValues(dataset, stat, scale, signalGroup);
-                    NuclearHistogramDatasetCreator.updateMinMaxRange(result, values);
-                }
-
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Given a dataset and a stats parameter, get the values for that stat
-     * 
-     * @param dataset
-     *            the Analysis Dataset
-     * @param stat
-     *            the statistic to fetch
-     * @param scale
-     *            the scale to display at
-     * @return the array of values
-     * @throws Exception
-     */
-    public double[] findSignalDatasetValues(IAnalysisDataset dataset, PlottableStatistic stat, MeasurementScale scale,
-            UUID signalGroup) throws ChartDatasetCreationException {
-
-        ICellCollection collection = dataset.getCollection();
-        double[] values = collection.getSignalManager().getSignalStatistics(stat, scale, signalGroup);
-        return values;
     }
 
     /**

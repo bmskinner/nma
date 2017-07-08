@@ -27,8 +27,8 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class SaveDatasetAction extends SingleDatasetResultAction {
 

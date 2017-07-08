@@ -39,8 +39,8 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
-import com.bmskinner.nuclear_morphology.charting.datasets.NuclearHistogramDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.charts.NuclearHistogramDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.charts.SignalHistogramDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -195,7 +195,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
         List<HistogramDataset> list;
         try {
-            list = options.hasDatasets() ? new NuclearSignalDatasetCreator(options)
+            list = options.hasDatasets() ? new SignalHistogramDatasetCreator(options)
                     .createSignalStatisticHistogramDataset(options.getDatasets(), stat, options.getScale()) : null;
         } catch (ChartDatasetCreationException e) {
             stack("Error making signal dataset", e);
@@ -282,7 +282,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
         List<DefaultXYDataset> list;
         try {
-            list = new NuclearSignalDatasetCreator(options).createSignalDensityHistogramDataset();
+            list = new SignalHistogramDatasetCreator(options).createSignalDensityHistogramDataset();
         } catch (ChartDatasetCreationException e) {
             return makeErrorChart();
         }

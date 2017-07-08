@@ -52,6 +52,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
     private JComboBox<ColourSwatch> colourBox;
     private JCheckBox               violinBox;
     private JCheckBox               fillConsensusBox;
+    private JCheckBox               refoldOverrideBox;
     private JCheckBox               antiAliasBox;
     private JCheckBox               convertDatasetsBox; // should opened
                                                         // datasets be converted
@@ -136,6 +137,13 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
         labels.add(fillConsensusLabel);
         fields.add(fillConsensusBox);
+        
+        JLabel overrideRefoldLabel = new JLabel("Refold override");
+        refoldOverrideBox = new JCheckBox((String) null, GlobalOptions.getInstance().isOverrideRefold());
+        refoldOverrideBox.addActionListener(this);
+
+        labels.add(overrideRefoldLabel);
+        fields.add(refoldOverrideBox);
 
         JLabel antiAliasLabel = new JLabel("Antialiasing");
         antiAliasBox = new JCheckBox((String) null, GlobalOptions.getInstance().isAntiAlias());
@@ -194,6 +202,12 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         if (GlobalOptions.getInstance().isConvertDatasets() != convertDatasets) {
             GlobalOptions.getInstance().setConvertDatasets(convertDatasets);
         }
+        
+        boolean overrideRefold = refoldOverrideBox.isSelected();
+        if (GlobalOptions.getInstance().isOverrideRefold() != overrideRefold) {
+            GlobalOptions.getInstance().setOverrideRefold(overrideRefold);
+        }
+
 
     }
 

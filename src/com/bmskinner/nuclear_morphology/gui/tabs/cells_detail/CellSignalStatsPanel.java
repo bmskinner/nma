@@ -29,9 +29,9 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.CellTableDatasetCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;

@@ -172,6 +172,14 @@ public class GlobalOptions extends AbstractHashOptions {
     public synchronized void setFillConsensus(boolean fillConsensus) {
         setBoolean(DEFAULT_FILL_CONSENSUS_KEY, fillConsensus);
     }
+    
+    public synchronized boolean isOverrideRefold() {
+        return getBoolean(REFOLD_OVERRIDE_KEY);
+    }
+
+    public synchronized void setOverrideRefold(boolean b) {
+        setBoolean(REFOLD_OVERRIDE_KEY, b);
+    }
 
     public synchronized boolean isAntiAlias() {
         return getBoolean(IS_USE_ANTIALIASING);

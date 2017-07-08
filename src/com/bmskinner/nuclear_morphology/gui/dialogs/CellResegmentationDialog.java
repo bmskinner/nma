@@ -60,10 +60,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.AbstractCellEditingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This dialog permits complete resegmentation of a cell via a coupled profile

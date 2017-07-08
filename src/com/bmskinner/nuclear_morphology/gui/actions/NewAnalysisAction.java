@@ -40,9 +40,9 @@ import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * Run a new analysis

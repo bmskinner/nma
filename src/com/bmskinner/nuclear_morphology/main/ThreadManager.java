@@ -16,19 +16,19 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.main;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ThreadManager implements Loggable {
@@ -38,7 +38,7 @@ public class ThreadManager implements Loggable {
      * Handle threading
      */
 
-    public static final int corePoolSize    = 8;
+    public static final int corePoolSize    = 100;
     public static final int maximumPoolSize = 100;
     public static final int keepAliveTime   = 10000;
 
@@ -88,7 +88,7 @@ public class ThreadManager implements Loggable {
                                                // done.
             }
         });
-        fine("Submitted runnable. Queue is " + queueLength.get());
+//        fine("Submitted runnable. Queue is " + queueLength.get());
         return f;
     }
 

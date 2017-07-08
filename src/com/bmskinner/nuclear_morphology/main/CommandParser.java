@@ -17,7 +17,7 @@ public class CommandParser implements Loggable {
 		}
 		
 	}
-	
+
 	private void execute(String s){
 		log(s);
 	}

@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class RunProfilingAction extends SingleDatasetResultAction {
 

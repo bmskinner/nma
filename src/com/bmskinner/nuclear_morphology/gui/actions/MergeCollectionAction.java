@@ -34,9 +34,9 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * Carry out a merge of datasets

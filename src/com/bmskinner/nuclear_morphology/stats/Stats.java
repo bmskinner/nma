@@ -27,11 +27,17 @@
 
 package com.bmskinner.nuclear_morphology.stats;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.DoubleStream;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.apache.commons.math3.stat.inference.OneWayAnova;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -160,6 +166,48 @@ public class Stats implements Loggable {
         return t;
 
     }
+    
+    /**
+     * Test if the given data is normally distributed.
+     * Creates a normal distribution with the data mean
+     * and stdev, and tests against the actual data with 
+     * the KolmogorovSmirnov. If the p-value is greater than
+     * the given threshold, the data is considered normal.
+     * 
+     * @param data the data to test
+     * @param pvalue the p-value threshold for rejecting the null hypothesis of equality
+     * @return true if the data is normally distributed
+     */
+    public static boolean isNormallyDistributed(double[] data, double pvalue) {
+    	// Check all arrays are normal
+    	SummaryStatistics ss = new SummaryStatistics();
+    	Arrays.stream(data).forEach(d->ss.addValue(d));
+    	
+    	NormalDistribution nd = new NormalDistribution(ss.getMean(), ss.getStandardDeviation());
+    	KolmogorovSmirnovTest kt = new KolmogorovSmirnovTest();
+    	double p = kt.kolmogorovSmirnovTest(nd, data);
+    	return p > 0.05;
+    	
+    }
+    
+    /**
+     * Perform a one-way ANOVA on the given data. The data should all be normally
+     * distributed. If not, the test will return 1.
+     * @param data
+     * @return
+     */
+    public static double getOneWayAnovaPValue(Collection<double[]> data){
+    	
+    	for(double[] d : data){
+    		if(!isNormallyDistributed(d, 0.05)){
+    			return 1;
+    		}
+    	}
+    	OneWayAnova an = new OneWayAnova();
+    	
+    	return an.anovaPValue(data);
+    }
+
 
     /**
      * Run a Wilcoxon test on the given arrays.
