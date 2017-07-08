@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.comparisons;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.Tab
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {

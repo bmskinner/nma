@@ -16,38 +16,47 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
 import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+
 @SuppressWarnings("serial")
-public class InterDatasetComparisonDetailPanel extends DetailPanel {
+public class NucleusProfilesPanel extends DetailPanel {
 
-    private static final String BASIC_VENN_TAB_LBL  = "Venn";
-    private static final String DETAIL_VENN_TAB_LBL = "Detailed Venn";
-    private static final String KRUSKAL_TAB_LBL     = "Kruskal";
+    private static final String MODALITY_TAB_LBL    = "Modality";
+    private static final String VARIABILITY_TAB_LBL = "Variability";
 
-    public InterDatasetComparisonDetailPanel() {
+    public NucleusProfilesPanel() {
         super();
-
         this.setLayout(new BorderLayout());
-
         JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel vennPanel = new VennDetailPanel();
-        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
-        DetailPanel kruskalPanel = new KruskalDetailPanel();
+        for (ProfileType type : ProfileType.displayValues()) {
 
-        this.addSubPanel(vennPanel);
-        this.addSubPanel(pairwiseVennPanel);
-        this.addSubPanel(kruskalPanel);
+            DetailPanel panel = new ProfileDisplayPanel(type);
+            this.addSubPanel(panel);
+            tabPanel.addTab(type.toString(), panel);
+        }
 
-        tabPanel.addTab(BASIC_VENN_TAB_LBL, vennPanel);
-        tabPanel.addTab(DETAIL_VENN_TAB_LBL, pairwiseVennPanel);
-        tabPanel.addTab(KRUSKAL_TAB_LBL, kruskalPanel);
+        /*
+         * Create the other profile panels
+         */
+
+        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
+        DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
+
+        this.addSubPanel(variabilityChartPanel);
+        this.addSubPanel(modalityDisplayPanel);
+
+        tabPanel.addTab(VARIABILITY_TAB_LBL, variabilityChartPanel);
+        tabPanel.addTab(MODALITY_TAB_LBL, modalityDisplayPanel);
 
         this.add(tabPanel, BorderLayout.CENTER);
+
     }
 }

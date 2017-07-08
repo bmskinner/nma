@@ -33,8 +33,8 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
-import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * Show the minimum distances between signals within a dataset

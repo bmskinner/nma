@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.comparisons;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.dialogs.KruskalTestDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel extends DetailPanel {

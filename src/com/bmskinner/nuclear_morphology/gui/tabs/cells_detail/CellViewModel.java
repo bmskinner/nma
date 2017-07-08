@@ -23,7 +23,6 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.gui.tabs.CellEditingTabPanel;
 
 public class CellViewModel {
 

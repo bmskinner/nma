@@ -29,8 +29,8 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 public class PopulationTreeTableModel extends DefaultTreeTableModel implements Loggable {
 

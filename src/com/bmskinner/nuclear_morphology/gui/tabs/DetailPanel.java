@@ -52,7 +52,6 @@ import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
@@ -63,6 +62,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**

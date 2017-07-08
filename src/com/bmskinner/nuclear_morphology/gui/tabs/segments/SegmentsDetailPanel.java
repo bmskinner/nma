@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.segments;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -27,12 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentBoxplotsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentHistogramsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentMagnitudePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentProfilePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentWilcoxonPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {

@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.BorderLayout;
 
@@ -24,13 +24,8 @@ import javax.swing.JTabbedPane;
 
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalScatterChartPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalShellsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsAnalysisPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsBoxplotPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsColocalisationPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsHistogramPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsOverviewPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 
 /**
  * The top level tab panel showing information on signals at the dataset level

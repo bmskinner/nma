@@ -18,7 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
-import com.bmskinner.nuclear_morphology.gui.tabs.CellEditingTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.AbstractEditingPanel;
 
 @SuppressWarnings("serial")

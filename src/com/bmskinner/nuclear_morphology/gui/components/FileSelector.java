@@ -29,9 +29,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.GlobalOptions;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 import ij.io.SaveDialog;
 

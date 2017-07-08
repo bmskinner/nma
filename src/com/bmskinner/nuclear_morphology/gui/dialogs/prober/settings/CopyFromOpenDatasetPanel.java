@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 /**
  * A copy button that allows nuclear detection options to be copied from an open

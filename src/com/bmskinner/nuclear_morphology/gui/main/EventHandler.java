@@ -44,7 +44,6 @@ import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
-import com.bmskinner.nuclear_morphology.gui.DatasetListManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
@@ -73,12 +72,13 @@ import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
-import com.bmskinner.nuclear_morphology.gui.tabs.NuclearStatisticsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.SegmentsDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
