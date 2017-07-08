@@ -141,7 +141,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
      * @return
      * @throws Exception
      */
-    public static JFreeChart createRandomSampleHistogram(List<Double> list) throws Exception {
+    public static JFreeChart createRandomSampleHistogram(List<Double> list) throws ChartDatasetCreationException {
         HistogramDataset ds = NuclearHistogramDatasetCreator.createHistogramDatasetFromList(list);
         JFreeChart chart = createHistogram(ds, "Magnitude difference between populations", "Observed instances");
         chart.getXYPlot().addDomainMarker(new ValueMarker(1, Color.BLACK, ChartComponents.MARKER_STROKE));
@@ -153,9 +153,10 @@ public class HistogramChartFactory extends AbstractChartFactory {
      * 
      * @param list
      * @return
+     * @throws ChartDatasetCreationException 
      * @throws Exception
      */
-    public JFreeChart createRandomSampleDensity(List<Double> list) throws Exception {
+    public JFreeChart createRandomSampleDensity(List<Double> list) throws ChartDatasetCreationException {
         XYDataset ds = new NuclearHistogramDatasetCreator(options).createDensityDatasetFromList(list, 0.0001);
         String xLabel = "Magnitude difference between populations";
         JFreeChart chart = ChartFactory.createXYLineChart(null, xLabel, "Probability", ds, PlotOrientation.VERTICAL,

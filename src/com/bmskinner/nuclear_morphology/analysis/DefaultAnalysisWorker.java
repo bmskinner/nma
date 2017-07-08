@@ -117,17 +117,17 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
     @Override
     public void done() {
 
-        fine("Worker completed task");
+//        fine("Worker completed task");
 
         try {
 
             if (this.get() != null) {
-                fine("Firing trigger for sucessful task");
-                firePropertyChange("Finished", getProgress(), IAnalysisWorker.FINISHED);
+//                fine("Firing trigger for sucessful task");
+                firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
             } else {
-                fine("Firing trigger for failed task");
-                firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+//                fine("Firing trigger for failed task");
+                firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
             }
 
         } catch (StackOverflowError e) {

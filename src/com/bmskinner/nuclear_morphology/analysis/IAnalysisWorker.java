@@ -36,6 +36,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, ProgressListener, Loggable {
 
+	String FINISHED_MSG = "Finished";
+	String ERROR_MSG    = "Error";
+	
     int FINISHED = -1; // signal cleanup of progress bar
 
     int ERROR = -2; // signal error occurred in analysis

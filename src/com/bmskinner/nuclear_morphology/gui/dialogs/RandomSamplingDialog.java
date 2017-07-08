@@ -21,17 +21,12 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -47,17 +42,23 @@ import javax.swing.event.ChangeListener;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.RandomSampler;
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
+import com.bmskinner.nuclear_morphology.analysis.RandomSamplingMethod;
+import com.bmskinner.nuclear_morphology.analysis.RandomSamplingMethod.RandomSamplingResult;
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 @SuppressWarnings("serial")
 public class RandomSamplingDialog extends LoadingIconDialog
-        implements ActionListener, ChangeListener, PropertyChangeListener {
+        implements ChangeListener, PropertyChangeListener {
 
     private IAnalysisDataset     dataset;
     private ExportableChartPanel chartPanel;
@@ -68,16 +69,10 @@ public class RandomSamplingDialog extends LoadingIconDialog
     private JComboBox<PlottableStatistic> statsBox;
     private JButton                       runButton;
     private JCheckBox                     showDensity;
-    private RandomSampler                 sampler;
+    private IAnalysisWorker               sampler;
 
-    private JSpinner magnitudeTestSpinner;                                       // Enter
-                                                                                 // an
-                                                                                 // observed
-                                                                                 // magnitude,
-                                                                                 // to
-                                                                                 // get
-                                                                                 // observed
-                                                                                 // count
+    // Enter a magnitude to get observed proportion of datasets
+    private JSpinner magnitudeTestSpinner;
     private JLabel   observedPctLabel = new JLabel("Lower in 0.000% of samples");
 
     private JProgressBar progressBar = new JProgressBar(0, 100);
@@ -97,7 +92,33 @@ public class RandomSamplingDialog extends LoadingIconDialog
         this.setTitle("Random sampling: " + dataset.getName());
         this.setLayout(new BorderLayout());
 
-        statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic
+        this.add(createHeader(), BorderLayout.NORTH);
+        this.add(createFooter(), BorderLayout.SOUTH);
+
+        try {
+            chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
+            this.add(chartPanel, BorderLayout.CENTER);
+        } catch (Exception e) {
+            error("Error making chart", e);
+        }
+
+    }
+
+    @Override
+    public void setEnabled(boolean b) {
+        runButton.setEnabled(b);
+        showDensity.setEnabled(b);
+        magnitudeTestSpinner.setEnabled(b);
+
+        set1SizeSpinner.setEnabled(b);
+        set2SizeSpinner.setEnabled(b);
+        iterattionsSpinner.setEnabled(b);
+        statsBox.setEnabled(b);
+        runButton.setEnabled(b);
+    }
+    
+    private JPanel createButtonPanel(){
+    	statsBox = new JComboBox<PlottableStatistic>(PlottableStatistic
                 .getNucleusStats(dataset.getCollection().getNucleusType()).toArray(new PlottableStatistic[0]));
 
         int cellCount = dataset.getCollection().size();
@@ -119,19 +140,8 @@ public class RandomSamplingDialog extends LoadingIconDialog
         iterattionsSpinner.setToolTipText("Number of iterations to run");
 
         runButton = new JButton("Run");
-        runButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent arg0) {
+        runButton.addActionListener(e->{ runSampling(); });
 
-                Thread thr = new Thread() {
-                    public void run() {
-                        runSampling();
-                    }
-                };
-                thr.start();
-
-            }
-        });
 
         JPanel topPanel = new JPanel(new FlowLayout());
         topPanel.add(set1SizeSpinner);
@@ -144,8 +154,13 @@ public class RandomSamplingDialog extends LoadingIconDialog
 
         progressBar.setValue(0);
         topPanel.add(this.progressBar);
+        progressBar.setVisible(false);
+        return topPanel;
+    }
+    
+    private JPanel createHeader() {
 
-        JPanel headerPanel = new JPanel();
+    	JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
 
         JPanel labelPanel = new JPanel(new FlowLayout());
@@ -155,39 +170,33 @@ public class RandomSamplingDialog extends LoadingIconDialog
                 JLabel.LEFT));
 
         headerPanel.add(labelPanel);
-        headerPanel.add(topPanel);
-
-        this.add(headerPanel, BorderLayout.NORTH);
-
-        this.add(createFooter(), BorderLayout.SOUTH);
-
-        try {
-            chartPanel = new ExportableChartPanel(HistogramChartFactory.createRandomSampleHistogram(resultList));
-            this.add(chartPanel, BorderLayout.CENTER);
-        } catch (Exception e) {
-            log(Level.SEVERE, "Error making chart", e);
-        }
-
-    }
-
-    @Override
-    public void setEnabled(boolean b) {
-        runButton.setEnabled(b);
-        showDensity.setEnabled(b);
-        magnitudeTestSpinner.setEnabled(b);
-
-        set1SizeSpinner.setEnabled(b);
-        set2SizeSpinner.setEnabled(b);
-        iterattionsSpinner.setEnabled(b);
-        statsBox.setEnabled(b);
-        runButton.setEnabled(b);
+        
+        JPanel btnPanel = createButtonPanel();
+        headerPanel.add(btnPanel);
+        return headerPanel;
     }
 
     private JPanel createFooter() {
-        
 
-        showDensity = new JCheckBox("Density");
-        showDensity.addActionListener(this);
+
+    	showDensity = new JCheckBox("Density");
+    	showDensity.addActionListener(e->{
+    		JFreeChart chart = null;
+    		try {
+    			if (showDensity.isSelected()) {
+    				ChartOptions options = new DefaultChartOptions(dataset);
+    				chart = new HistogramChartFactory(options).createRandomSampleDensity(resultList);
+
+    			} else {
+    				chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
+    			}
+    		} catch (ChartDatasetCreationException e1) {
+    			chart = HistogramChartFactory.makeErrorChart();
+    			stack(e1.getMessage(), e1);
+    		}
+
+    		chartPanel.setChart(chart);
+    	});
 
         SpinnerNumberModel magnitudeSpinnerModel = new SpinnerNumberModel(1d, 0d, 1d, 0.0001d);
         magnitudeTestSpinner = new JSpinner(magnitudeSpinnerModel);
@@ -205,35 +214,43 @@ public class RandomSamplingDialog extends LoadingIconDialog
 
     private void runSampling() {
 
-        int iterations = (Integer) iterattionsSpinner.getValue();
-        int firstCount = (Integer) set1SizeSpinner.getValue();
-        int secondCount = (Integer) set2SizeSpinner.getValue();
+        int iterations = (int) iterattionsSpinner.getValue();
+        int firstCount = (int) set1SizeSpinner.getValue();
+        int secondCount = (int) set2SizeSpinner.getValue();
         PlottableStatistic stat = (PlottableStatistic) statsBox.getSelectedItem();
 
         try {
             setStatusLoading();
+            progressBar.setValue(0);
+            progressBar.setVisible(true);
             setEnabled(false);
 
-            sampler = new RandomSampler(dataset, stat, iterations, firstCount, secondCount);
+            IAnalysisMethod randomMethod = new RandomSamplingMethod(dataset, stat, iterations, firstCount, secondCount);
+            sampler = new DefaultAnalysisWorker(randomMethod, iterations);
             sampler.addPropertyChangeListener(this);
-            sampler.execute();
+            ThreadManager.getInstance().submit(sampler);
 
         } catch (Exception e) {
-            log(Level.SEVERE, "Error running sampling", e);
+            error("Error running sampling", e);
             setEnabled(true);
         }
     }
 
     public void finished() {
         try {
-            resultList = sampler.getResults();
+        	
+        	progressBar.setValue(0);
+        	progressBar.setVisible(false);
+            setEnabled(true);
+        	
+        	RandomSamplingResult r = (RandomSamplingResult) sampler.get();
+            resultList = r.getValues();
             Collections.sort(resultList);
             double observedPct = calculateObservedPercent();
             DecimalFormat df = new DecimalFormat("#0.000");
             observedPctLabel.setText("Lower in " + df.format(observedPct) + "% of samples");
             sampler = null;
-            progressBar.setValue(0);
-            setEnabled(true);
+            
 
             JFreeChart chart = null;
             if (showDensity.isSelected()) {
@@ -248,24 +265,6 @@ public class RandomSamplingDialog extends LoadingIconDialog
             warn("Error running sampling");
             stack("Error running sampling", e);
         }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        JFreeChart chart = null;
-        try {
-            if (showDensity.isSelected()) {
-                ChartOptions options = new DefaultChartOptions(dataset);
-                chart = new HistogramChartFactory(options).createRandomSampleDensity(resultList);
-
-            } else {
-                chart = HistogramChartFactory.createRandomSampleHistogram(resultList);
-            }
-        } catch (Exception e) {
-            log(Level.SEVERE, "Error running sampling", e);
-        }
-        chartPanel.setChart(chart);
-
     }
 
     @Override
@@ -309,7 +308,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
             }
 
         } catch (Exception e1) {
-            log(Level.SEVERE, "Error in spinners", e1);
+            error("Error in spinners", e1);
         }
 
     }
@@ -339,7 +338,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
 
         if (evt.getNewValue() instanceof Integer) {
             int value = (Integer) evt.getNewValue(); // should be percent
-            log(Level.FINEST, "Property change: " + value);
+
 
             if (value >= 0 && value <= 100) {
 
@@ -350,8 +349,7 @@ public class RandomSamplingDialog extends LoadingIconDialog
             }
         }
 
-        if (evt.getPropertyName().equals("Finished")) {
-            log(Level.FINEST, "Worker signaled finished");
+        if (evt.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
             finished();
         }
 
