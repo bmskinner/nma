@@ -519,7 +519,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
                 activeDataset().getCollection().getConsensus().moveCentreOfMass(point);
                 ;
-                this.update(activeDatasetToList());
+                this.update(activeDataset());
             }
         } else {
             warn("Cannot offset: must have one dataset selected");
@@ -530,30 +530,19 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     	
     	File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
                 activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
+    	
         
     	SVGWriter wr = new SVGWriter(exportFile);
     	
-    	List<Nucleus> consensi = getDatasets().stream()
-    			.map(d -> d.getCollection().getConsensus())
-    			.filter(n -> n!=null)
-    			.collect(Collectors.toList());
-    	
-    	wr.export(consensi);
-    	
-//        if (activeDataset() != null) {
-//
-//            if (activeDataset().getCollection().hasConsensus()) {
-//
-//                File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
-//                        activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
-//                SVGWriter wr = new SVGWriter(exportFile);
-//
-//                wr.export(activeDataset().getCollection().getConsensus());
-//
-//            }
-//        } else {
-//            warn("Cannot export: must have one dataset selected");
-//        }
+    	wr.exportConsensusOutlines(getDatasets());
+//    	
+//    	List<Nucleus> consensi = getDatasets().stream()
+//    			.map(d -> d.getCollection().getConsensus())
+//    			.filter(n -> n!=null)
+//    			.collect(Collectors.toList());
+//    	
+//    	wr.export(consensi);
+  
     }
 
     @Override

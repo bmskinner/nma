@@ -302,6 +302,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         updateDetail();
 
     }
+    
+    protected synchronized void update(final IAnalysisDataset d) {
+        update(activeDatasetToList());
+    }
 
     @Override
     public synchronized void update(final List<IAnalysisDataset> list) {
