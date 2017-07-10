@@ -58,6 +58,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
 
+    private static final String REFOLD_BTN_LBL = "Refold";
+    
     private ConsensusNucleusChartPanel consensusChartPanel;
     private JButton                    runRefoldingButton;
 
@@ -81,10 +83,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
         consensusChartPanel.addSignalChangeListener(this);
 
-        runRefoldingButton = new JButton("Refold");
+        runRefoldingButton = new JButton(REFOLD_BTN_LBL);
 
         runRefoldingButton.addActionListener(e -> {
-            fine("Heard refold button clicked");
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, getDatasets());
             runRefoldingButton.setVisible(false);
         });
@@ -375,7 +376,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         setChart(options);
 
-        runRefoldingButton.setVisible(false);
+        // Only show the refold button if no selected datasets have a consensus
+        runRefoldingButton.setVisible(getDatasets().stream().noneMatch(d->d.getCollection().hasConsensus()));
         offsetsPanel.setVisible(false);
     }
 

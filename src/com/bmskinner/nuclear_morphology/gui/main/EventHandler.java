@@ -385,7 +385,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         if (!list.isEmpty()) {
 
             if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-                refoldConsensus(event.firstDataset());
+                for(IAnalysisDataset d : list){
+                    refoldConsensus(d);
+                }
+//                refoldConsensus(event.firstDataset());
             }
 
             if (event.method().equals(DatasetEvent.SELECT_DATASETS)) {
@@ -532,8 +535,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * @param dataset
      */
     private void refoldConsensus(final IAnalysisDataset dataset) {
-        fine("Refolding consensus");
-        finest("Refold consensus dataset method is EDT: " + SwingUtilities.isEventDispatchThread());
 
         Runnable r = () -> {
             /*
@@ -542,7 +543,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
              * countdown latch does nothing here, but must be retained for
              * compatibility.
              */
-            fine("Clearing chart cache for consensus charts");
 
             final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
             list.add(dataset);
@@ -555,14 +555,14 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             }
 
             final CountDownLatch latch = new CountDownLatch(1);
-            finest("Created latch: " + latch.getCount());
+
             Runnable task = new RefoldNucleusAction(dataset, mw, latch);
             task.run();
-            finest("Running refolding");
+
             try {
-                fine("Awaiting latch");
+
                 latch.await();
-                fine("Latch has released from refolding");
+
                 if (dataset.hasAnalysisOptions()) {
 
                     IMutableAnalysisOptions op;
