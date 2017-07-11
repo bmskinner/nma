@@ -147,17 +147,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         return DatasetListManager.getInstance().getActiveDataset();
     }
 
-    /**
-     * Make a new list holding only the active dataset. This is used to pass the
-     * active dataset back to update()
-     * 
-     * @return
-     */
-    public synchronized List<IAnalysisDataset> activeDatasetToList() {
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        list.add(activeDataset());
-        return list;
-    }
 
     /**
      * Test if only a single dataset is selected
@@ -239,17 +228,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    // @Override
-    // public synchronized void setEnabled(boolean b){
-    //
-    // for(Component c : this.getComponents()){
-    // c.setEnabled(b);
-    // }
-    //
-    //// for(TabPanel panel : this.subPanels){
-    //// panel.setEnabled(b);
-    //// }
-    // }
 
     /**
      * Force any chart panels currently visible on screen to redraw, allowing
@@ -303,8 +281,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
     }
     
+    /**
+     * Update with the given dataset. 
+     * @param d
+     */
     protected synchronized void update(final IAnalysisDataset d) {
-        update(activeDatasetToList());
+        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        list.add(d);
+        update(list);
     }
 
     @Override

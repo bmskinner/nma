@@ -22,10 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
-import java.util.List;
-import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -317,7 +314,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
         JButton refoldBtn = new JButton("Re-Refold");
         refoldBtn.addActionListener(e -> {
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDatasetToList());
+            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFOLD_CONSENSUS, activeDataset());
         });
 
         constraints.gridwidth = 3;
@@ -408,7 +405,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                     double angle = (Double) spinner.getModel().getValue();
                     activeDataset().getCollection().getConsensus().rotate(angle - 90);
 
-                    this.update(activeDatasetToList());
+                    this.update(activeDataset());
                 }
             }
         } else {
@@ -425,7 +422,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
                 if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.TOP_VERTICAL)) {
                     alignConsensusAlongVerticalPoints();
-                    this.update(activeDatasetToList());
+                    this.update(activeDataset());
                     return;
                 }
 
@@ -433,7 +430,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                     IBorderPoint orientationPoint = cons.getBorderTag(Tag.ORIENTATION_POINT);
 
                     cons.rotatePointToBottom(orientationPoint);
-                    this.update(activeDatasetToList());
+                    this.update(activeDataset());
                     return;
                 } catch (UnavailableBorderTagException e) {
                     fine("Cannot get OP index in nucleus profile", e);
@@ -461,7 +458,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
                         fine("Cannot align points on vertical", e);
                     }
 
-                    this.update(activeDatasetToList());
+                    this.update(activeDataset());
 
                 } else {
                     log(Level.WARNING, "Top and bottom vertical points are not available");
@@ -501,12 +498,12 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
                     activeDataset().getCollection().getConsensus().offset(x, y);
                     
-                    this.update(activeDatasetToList());
+                    this.update(activeDataset());
                 }
 
             }
         } else {
-            log(Level.WARNING, "Cannot offset: must have one dataset selected");
+            warn("Cannot offset: must have one dataset selected");
         }
     }
 
