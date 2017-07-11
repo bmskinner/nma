@@ -34,6 +34,7 @@ import org.jfree.graphics2d.svg.SVGGraphics2D;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -74,9 +75,12 @@ public class SVGWriter implements Exporter, Loggable {
         
         double w = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
         double h = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
+        
+        w += Imageable.COMPONENT_BUFFER*consensi.size();
+        h += Imageable.COMPONENT_BUFFER*2;
         SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
         
-        double x = 0;
+        double x = Imageable.COMPONENT_BUFFER;
 
         for(IAnalysisDataset d : datasets){
             CellularComponent c = d.getCollection().getConsensus();
@@ -84,17 +88,9 @@ public class SVGWriter implements Exporter, Loggable {
 
             Rectangle2D r = s.getBounds();
 
-            // Centre the shape on the canvas
-            
-            if(x==0){
-                x= -r.getMinX();
-            }
-            double minY = r.getMinY();
-            
-
-            export(s, g2, x, minY-10, d.getName());
-            exportString(d.getName(), (float) r.getMinX(), (float) minY, g2);
-            x+=r.getWidth();
+            export(s, g2, x, Imageable.COMPONENT_BUFFER+10);
+            export(d.getName(), g2, (float) x, Imageable.COMPONENT_BUFFER);
+            x+=r.getWidth()+Imageable.COMPONENT_BUFFER;
         }
 
         write(file, g2);
@@ -156,41 +152,57 @@ public class SVGWriter implements Exporter, Loggable {
     /**
      * Export the given component outline to file
      * 
-     * @param c
+     * @param s the shape
+     * @param g the graphics context
+     * @param x the x coordinate in the graphics context
+     * @param y the y coordinate in the graphics context
      */
-    private void export(Shape s, SVGGraphics2D g2, double x, double y) {	
-       	export(s, g2, x, y, null);
-    }
-    
-    /**
-     * Export the given component outline to file
-     * 
-     * @param c
-     */
-    private void export(Shape s, SVGGraphics2D g2, double x, double y, String label) {
+    private void export(final Shape s, final SVGGraphics2D g, double x, double y) {
+        
+        SVGGraphics2D g2 = (SVGGraphics2D) g.create();
+        // Get the locations of the shape
+        Rectangle2D r = s.getBounds();
+        double rx = r.getMinX();
+        double ry = r.getMinY();
+        
+        //  Transform the shape to the needed location for drawing
+        
+        double diffx = x - rx;
+        double diffy = y - ry;
+        
         Paint c = g2.getPaint();
         // Flip vertically because awt graphics count y from top to bottom
         AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-        s = at.createTransformedShape(s);
-        at = AffineTransform.getTranslateInstance(x, -y);
-        
+        Shape newS = at.createTransformedShape(s);
+        at = AffineTransform.getTranslateInstance(diffx, diffy);
 
         // Draw the shape
         g2.setPaint(Color.BLACK);
-        g2.setFont(new Font("Arial", Font.PLAIN, 10)); 
         g2.setTransform(at);
-        g2.draw(s);
+        g2.draw(newS);
         g2.setPaint(c);
+        g2.dispose();
     }
     
-    private void exportString(String s, float x, float y, SVGGraphics2D g2){
-        Paint c = g2.getPaint();
+    /**
+     * Export the given string to the graphics context
+     * 
+     * @param s the string
+     * @param g the graphics context
+     * @param x the x coordinate in the graphics context
+     * @param y the y coordinate in the graphics context
+     */
+    private void export(final String s, final SVGGraphics2D g, float x, float y){
+        SVGGraphics2D g2 = (SVGGraphics2D) g.create();
+
         if(s !=null){
+            g2.setFont(new Font("Arial", Font.PLAIN, 10)); 
             g2.setPaint(Color.BLACK);
-            g2.drawString(s, (float) x, (float)y);
+            g2.drawString(s, x, y);
         }
-        g2.setPaint(c);
+        g2.dispose();
     }
+    
     
     private void write(File f, SVGGraphics2D g2){
     	String svgElement = g2.getSVGElement();
