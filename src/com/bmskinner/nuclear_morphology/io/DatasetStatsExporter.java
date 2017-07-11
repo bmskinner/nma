@@ -158,7 +158,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
      */
     private void writeHeader(StringBuilder outLine) {
 
-        outLine.append("Dataset\tCellID\tComponent\tImage\tCentre_of_mass\t");
+        outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
         for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
 
@@ -242,9 +242,12 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
 
                 for (Nucleus n : cell.getNuclei()) {
 
-                    outLine.append(d.getName() + "\t").append(cell.getId() + "\t")
-                            .append("Nucleus_" + n.getNameAndNumber() + "\t").append(n.getSourceFileName() + "\t")
-                            .append(n.getOriginalCentreOfMass().toString() + "\t");
+                    outLine.append(d.getName() + TAB)
+                        .append(cell.getId() + TAB)
+                        .append("Nucleus_" + n.getNameAndNumber() + TAB)
+                        .append(n.getSourceFolder() + TAB)
+                        .append(n.getSourceFileName() + TAB)
+                        .append(n.getOriginalCentreOfMass().toString() + TAB);
                     appendNucleusStats(outLine, d, cell, n);
 
                     if (includeProfiles) {
