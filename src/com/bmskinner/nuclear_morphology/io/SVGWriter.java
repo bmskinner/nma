@@ -20,7 +20,6 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -76,7 +75,7 @@ public class SVGWriter implements Exporter, Loggable {
         double w = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
         double h = consensi.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
         
-        w += Imageable.COMPONENT_BUFFER*consensi.size();
+        w += Imageable.COMPONENT_BUFFER*(consensi.size()+1);
         h += Imageable.COMPONENT_BUFFER*2;
         SVGGraphics2D g2 = new SVGGraphics2D((int) w, (int) h);
         
@@ -160,27 +159,24 @@ public class SVGWriter implements Exporter, Loggable {
     private void export(final Shape s, final SVGGraphics2D g, double x, double y) {
         
         SVGGraphics2D g2 = (SVGGraphics2D) g.create();
-        // Get the locations of the shape
+        
+        // Get the location of the shape
         Rectangle2D r = s.getBounds();
         double rx = r.getMinX();
         double ry = r.getMinY();
-        
-        //  Transform the shape to the needed location for drawing
-        
+
+        // Flip vertically because awt graphics count y from top to bottom
+        Shape newS = AffineTransform.getScaleInstance(1, -1).createTransformedShape(s);
+       
+        // Transform the shape to the needed location for drawing
         double diffx = x - rx;
         double diffy = y - ry;
+        AffineTransform at = AffineTransform.getTranslateInstance(diffx, diffy);
         
-        Paint c = g2.getPaint();
-        // Flip vertically because awt graphics count y from top to bottom
-        AffineTransform at = AffineTransform.getScaleInstance(1, -1);
-        Shape newS = at.createTransformedShape(s);
-        at = AffineTransform.getTranslateInstance(diffx, diffy);
-
         // Draw the shape
         g2.setPaint(Color.BLACK);
         g2.setTransform(at);
         g2.draw(newS);
-        g2.setPaint(c);
         g2.dispose();
     }
     
