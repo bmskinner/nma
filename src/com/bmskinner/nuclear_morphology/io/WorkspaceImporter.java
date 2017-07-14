@@ -24,8 +24,9 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
-import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.DefaultWorkspace;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -39,6 +40,7 @@ public class WorkspaceImporter implements Loggable, Importer {
 
     private final File  file;
     public final String CHARSET = "ISO-8859-1";
+    private final IWorkspace w;
 
     /**
      * Construct with a file to import.
@@ -54,6 +56,7 @@ public class WorkspaceImporter implements Loggable, Importer {
         }
 
         file = f;
+        w = new DefaultWorkspace(file);
     }
 
     /**
@@ -63,7 +66,7 @@ public class WorkspaceImporter implements Loggable, Importer {
      */
     public IWorkspace importWorkspace() {
 
-        IWorkspace w = new DefaultWorkspace(file);
+        
         try {
 
             FileInputStream fstream = new FileInputStream(file);
@@ -73,13 +76,7 @@ public class WorkspaceImporter implements Loggable, Importer {
             String strLine;
             while ((strLine = br.readLine()) != null) {
                 i++;
-
-                File f = new File(strLine);
-
-                if (f.exists()) {
-                    w.add(f);
-                }
-
+                parseLine(strLine);
             }
             fstream.close();
         } catch (Exception e) {
@@ -87,6 +84,37 @@ public class WorkspaceImporter implements Loggable, Importer {
         }
 
         return w;
+    }
+    
+    private void parseLine(String line){
+        
+        // Check line format
+        // Pre 1.13.8 have just the dataset file name.
+        
+        File f = null;
+        
+        if(line.endsWith(Importer.SAVE_FILE_EXTENSION)){
+            // old format
+            f = new File(line);
+            
+        } else {
+            
+            String[] arr = line.split(TAB);
+            f = new File(arr[0]);
+            
+            String group = arr[1];
+            
+            w.addBioSample(group);
+            
+            w.getBioSample(group).addDataset(f);
+            
+            
+
+        }
+
+        if (f.exists()) {
+            w.add(f);
+        }
     }
 
 }

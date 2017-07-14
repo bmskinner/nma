@@ -18,15 +18,16 @@
 
 package com.bmskinner.nuclear_morphology.io;
 
+import java.io.File;
+
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.ChannelSplitter;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
-
-import java.io.File;
-
-import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
  * This class takes any given input image, and will convert it to the ImageStack

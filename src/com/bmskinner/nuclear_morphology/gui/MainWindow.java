@@ -35,7 +35,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
@@ -225,6 +225,7 @@ public class MainWindow extends JFrame implements Loggable {
             // Create the log panel
             // ---------------
             logPanel = new LogPanel();
+//            logPanel.setDropTarget(this.getDropTarget());
 
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());

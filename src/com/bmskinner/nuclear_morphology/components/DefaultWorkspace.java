@@ -16,14 +16,12 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis;
+package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * This is a grouping of open AnalysisDatasets, which can act as a shortcut to
@@ -36,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 public class DefaultWorkspace implements IWorkspace {
 
     Set<File> datasets = new LinkedHashSet<File>();
+    Set<BioSample> samples = new LinkedHashSet<BioSample>();
 
     File saveFile = null;
 
@@ -87,6 +86,31 @@ public class DefaultWorkspace implements IWorkspace {
     public void save() {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void addBioSample(String name) {
+        for(BioSample s : samples){
+            if(s.getName().equals(name)){
+                return;
+            }
+        }
+        samples.add(new DefaultBioSample(name)); 
+    }
+
+    @Override
+    public BioSample getBioSample(File f) {
+        return samples.stream().filter( s-> s.hasDataset(f)).findFirst().orElse(null);
+    }
+    
+    @Override
+    public BioSample getBioSample(String name) {
+        return samples.stream().filter( s-> s.getName().equals(name)).findFirst().orElse(null);
+    }
+
+    @Override
+    public Set<BioSample> getBioSamples() {
+        return samples;
     }
 
 }
