@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
+import com.bmskinner.nuclear_morphology.components.generic.OpenBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -507,7 +508,12 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         // A segment has built in methods for iterating through just the points
         // it contains
-        IBorderSegment region = IBorderSegment.newSegment(topIndex, btmIndex, totalSize);
+        // TODO: This has problems if we have short regions. Replace.
+        
+        for(int i= topIndex; i<=btmIndex; i++){
+            
+        }
+        IBorderSegment region = new OpenBorderSegment(topIndex, btmIndex, totalSize);
 
         int index = topIndex;
 
