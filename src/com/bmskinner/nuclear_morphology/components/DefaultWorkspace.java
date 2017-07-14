@@ -33,13 +33,19 @@ import java.util.Set;
  */
 public class DefaultWorkspace implements IWorkspace {
 
-    Set<File> datasets = new LinkedHashSet<File>();
-    Set<BioSample> samples = new LinkedHashSet<BioSample>();
+    private Set<File> datasets = new LinkedHashSet<File>();
+    private Set<BioSample> samples = new LinkedHashSet<BioSample>();
 
-    File saveFile = null;
+    private File saveFile = null;
+    private String name;
 
     public DefaultWorkspace(File f) {
         this.saveFile = f;
+        this.name = f.getName();
+    }
+    
+    public void setName(String s){
+        this.name = s;
     }
 
     @Override
@@ -111,6 +117,11 @@ public class DefaultWorkspace implements IWorkspace {
     @Override
     public Set<BioSample> getBioSamples() {
         return samples;
+    }
+    
+    @Override
+    public String toString(){
+        return name;
     }
 
 }

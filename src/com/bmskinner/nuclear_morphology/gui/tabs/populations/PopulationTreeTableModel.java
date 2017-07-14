@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -29,6 +30,7 @@ import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
@@ -50,9 +52,34 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
         PopulationTreeTableNode root = new PopulationTreeTableNode();
         this.setRoot(root);
         this.setColumnIdentifiers(columns);
-
+        addExistingWorkspaces();
         addExistingRootDatasets();
 
+    }
+    
+    private void addExistingWorkspaces(){
+     
+   
+        try {
+
+            if (DatasetListManager.getInstance().hasWorkspaces()) {
+
+//                finer("List manager has " + DatasetListManager.getInstance().workspaceCount() + " workspaces");
+                List<IWorkspace> ws = DatasetListManager.getInstance().getWorkspaces();
+
+                for (IWorkspace workspace : ws) {
+                    addWorkspace(workspace);                    
+                }
+
+                finer("Added datasets to nodes");
+
+            } else {
+                finer("No datasets loaded");
+            }
+        } catch (Exception e) {
+            error("Error adding nodes to table model", e);
+        }
+        
     }
 
     private void addExistingRootDatasets() {
@@ -61,12 +88,14 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
             if (DatasetListManager.getInstance().hasDatasets()) {
 
-                finer("List manager has " + DatasetListManager.getInstance().count() + " datasets");
+                finer("List manager has " + DatasetListManager.getInstance().datasetCount() + " datasets");
 
                 for (IAnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()) {
                     finer("Adding " + rootDataset.getName() + " as node");
-
-                    this.addRootDataset(rootDataset);
+                    
+                    if(! DatasetListManager.getInstance().isInWorkspace(rootDataset)){
+                        this.addRootDataset(rootDataset);
+                    }
                 }
 
                 finer("Added datasets to nodes");
@@ -133,6 +162,19 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
         parentNode.add(newNode);
     }
+    
+    public void addWorkspace(IWorkspace ws) {
+
+        if (this.getNode(ws) != null) {
+            return; // ignore datasets already present
+        }
+
+        PopulationTreeTableNode parentNode = ((PopulationTreeTableNode) this.getRoot());
+
+        PopulationTreeTableNode newNode = createNodes(ws);
+
+        parentNode.add(newNode);
+    }
 
     /**
      * Create a node in the tree table, recursively adding all the children of
@@ -181,6 +223,34 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
         finer("Added all child nodes for dataset " + dataset.toString());
 
         // category.sortNode(COLUMN_NAME, true, false);
+        return category;
+    }
+    
+    /**
+     * Create a node in the tree table, recursively adding all the children of
+     * the given dataset id. If the child of a dataset is not already in the
+     * names list, add it
+     * 
+     * @param dataset
+     *            the dataset to add
+     * @return
+     */
+    private PopulationTreeTableNode createNodes(IWorkspace ws) {
+
+        if (ws == null) {
+            throw new IllegalArgumentException("Workspace is null when generating population table nodes");
+        }
+
+        PopulationTreeTableNode category = new PopulationTreeTableNode(ws);
+        
+        Set<File> files = ws.getFiles();
+        for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
+            if(files.contains(d.getSavePath())){
+                PopulationTreeTableNode rootNode = createNodes(d);
+                category.add(rootNode);
+            } 
+        }
+
         return category;
     }
 
@@ -288,6 +358,35 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
             PopulationTreeTableNode p = en.nextElement();
             if (p.hasClusterGroup()) {
                 if (p.getGroup() == g) {
+                    return p;
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Get the node in the tree corresponding to the given group, or null if no
+     * group is found
+     * 
+     * @param g
+     * @return
+     */
+    public PopulationTreeTableNode getNode(IWorkspace w) {
+
+        if (w == null) {
+            throw new IllegalArgumentException("Cluster group cannot be null");
+        }
+        PopulationTreeTableNode result = null;
+
+        PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();
+
+        Enumeration<PopulationTreeTableNode> en = (Enumeration<PopulationTreeTableNode>) root.children();
+
+        while (en.hasMoreElements()) {
+            PopulationTreeTableNode p = en.nextElement();
+            if (p.hasWorkspace()) {
+                if (p.getWorkspace() == w) {
                     return p;
                 }
             }

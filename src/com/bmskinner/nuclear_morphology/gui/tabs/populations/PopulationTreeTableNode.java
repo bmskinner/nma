@@ -27,6 +27,7 @@ import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 
 public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
@@ -34,7 +35,12 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
 
     IAnalysisDataset dataset = null; // the dataset in the node
     IClusterGroup    group   = null;
-
+    IWorkspace          ws   = null;
+    
+    public PopulationTreeTableNode(){
+        super();
+    }
+    
     public PopulationTreeTableNode(IAnalysisDataset dataset) {
         super(dataset.getUUID().toString());
         this.dataset = dataset;
@@ -42,14 +48,18 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
         columnData[1] = dataset.getCollection().size();
     }
 
-    public PopulationTreeTableNode() {
-        super();
-    }
-
     public PopulationTreeTableNode(IClusterGroup group) {
         super(UUID.randomUUID().toString());
         this.group = group;
         columnData[0] = group;
+        columnData[1] = "";
+
+    }
+    
+    public PopulationTreeTableNode(IWorkspace ws) {
+        super(UUID.randomUUID().toString());
+        this.ws = ws;
+        columnData[0] = ws;
         columnData[1] = "";
 
     }
@@ -61,6 +71,10 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
     public boolean hasClusterGroup() {
         return group != null;
     }
+    
+    public boolean hasWorkspace() {
+        return ws != null;
+    }
 
     public IAnalysisDataset getDataset() {
         return dataset;
@@ -69,6 +83,11 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
     public IClusterGroup getGroup() {
         return group;
     }
+    
+    public IWorkspace getWorkspace() {
+        return ws;
+    }
+    
 
     public int getColumnCount() {
         return 3;
@@ -88,6 +107,10 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
         }
         if (this.hasClusterGroup()) {
             return group.toString();
+        }
+        
+        if (this.hasWorkspace()) {
+            return ws.toString();
         }
         return "No name found";
     }

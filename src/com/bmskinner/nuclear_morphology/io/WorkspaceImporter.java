@@ -56,7 +56,7 @@ public class WorkspaceImporter implements Loggable, Importer {
         }
 
         file = f;
-        w = new DefaultWorkspace(file);
+        w = new DefaultWorkspace(file);        
     }
 
     /**

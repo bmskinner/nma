@@ -136,8 +136,6 @@ public class MainWindow extends JFrame implements Loggable {
                                                                            // iterating
                                                                            // messsages
 
-    private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
-
     private final EventHandler eh = new EventHandler(this);
 
     private boolean isStandalone = false;
@@ -403,10 +401,6 @@ public class MainWindow extends JFrame implements Loggable {
      */
     public EventHandler getEventHandler() {
         return eh;
-    }
-
-    public void addWorkspace(IWorkspace w) {
-        this.workspaces.add(w);
     }
 
     @Override

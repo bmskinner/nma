@@ -30,6 +30,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationTreeTableNode;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -67,6 +69,8 @@ public final class DatasetListManager implements Loggable {
                                                                          // a
                                                                          // dataset
                                                                          // id
+    
+    private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 
     protected DatasetListManager() {
     }
@@ -320,7 +324,11 @@ public final class DatasetListManager implements Loggable {
      * 
      * @return
      */
-    public synchronized int count() {
+    public synchronized int datasetCount() {
+        return map.size();
+    }
+    
+    public synchronized int workspaceCount() {
         return map.size();
     }
 
@@ -390,6 +398,31 @@ public final class DatasetListManager implements Loggable {
         for (IAnalysisDataset d : list) {
             updateHashCode(d);
         }
+    }
+    
+    
+    
+    public synchronized void addWorkspace(IWorkspace w) {
+        workspaces.add(w);
+    }
+    
+    public synchronized List<IWorkspace> getWorkspaces() {
+        return workspaces;
+    }
+    
+    public synchronized boolean hasWorkspaces() {
+        return workspaces.size() > 0;
+    }
+    
+    public synchronized boolean isInWorkspace(IAnalysisDataset d){
+
+        for(IWorkspace w : workspaces){
+            
+            if(w.getFiles().contains(d.getSavePath())){
+                return true;
+            } 
+        }
+        return false;
     }
 
 }

@@ -32,6 +32,8 @@ import java.util.Set;
  */
 public interface IWorkspace {
 
+    void setName(String s);
+    
     /**
      * Add the given datasest to the workspace
      * @param d
@@ -56,7 +58,7 @@ public interface IWorkspace {
     void setSaveFile(File f);
 
     File getSaveFile();
-    
+        
     /**
      * This describes the information available for 
      * biological samples. Individual datasets can belong

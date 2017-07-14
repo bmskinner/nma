@@ -34,6 +34,7 @@ import org.jdesktop.swingx.treetable.TreeTableModel;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel.TreeSelectionHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
@@ -199,18 +200,6 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
         return result;
     }
 
-    private List<Integer> getSelectedDatasetIndexes() {
-        List<Integer> result = new ArrayList<Integer>();
-        List<IAnalysisDataset> datasets = getSelectedDatasets();
-        PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
-
-        for (IAnalysisDataset d : datasets) {
-            // result.add( model.getRowIndex(d));
-            result.add(getRowIndex(d));
-        }
-        return result;
-
-    }
 
     private List<IAnalysisDataset> getSelectedDatasets() {
         List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>();
@@ -306,6 +295,21 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
 
         if (columnOneObject instanceof ClusterGroup) {
             return (IClusterGroup) columnOneObject; // row i, column 0
+        }
+        return null;
+    }
+    
+    /**
+     * Get the IWorkspace at the given row, or null if no workspace is present
+     * 
+     * @param rowIndex
+     * @return
+     */
+    public IWorkspace getWorkspaceAtRow(int rowIndex){
+        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+
+        if (columnOneObject instanceof IWorkspace) {
+            return (IWorkspace) columnOneObject; // row i, column 0
         }
         return null;
     }
