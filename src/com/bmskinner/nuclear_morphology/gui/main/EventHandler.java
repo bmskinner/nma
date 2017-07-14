@@ -79,6 +79,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -289,6 +290,16 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
             }
+            
+            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
+                Runnable r = () -> {
+                    for(IAnalysisDataset d : selectedDatasets){
+                        refoldConsensus(d);
+                    }
+                };
+                return r;
+
+            }
 
             return null;
         }
@@ -384,12 +395,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         final List<IAnalysisDataset> list = event.getDatasets();
         if (!list.isEmpty()) {
 
-            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-                for(IAnalysisDataset d : list){
-                    refoldConsensus(d);
-                }
-//                refoldConsensus(event.firstDataset());
-            }
+//            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
+//                for(IAnalysisDataset d : list){
+//                    refoldConsensus(d);
+//                }
+//            }
 
             if (event.method().equals(DatasetEvent.SELECT_DATASETS)) {
                 mw.getPopulationsPanel().selectDatasets(event.getDatasets());
@@ -433,8 +443,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public void interfaceEventReceived(final InterfaceEvent event) {
 
         InterfaceMethod method = event.method();
-        finest("Heard interface event: " + event.method().toString());
-
         
         final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 
