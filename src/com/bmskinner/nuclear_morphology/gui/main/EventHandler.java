@@ -34,6 +34,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
+import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -77,6 +78,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
+import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
@@ -161,7 +163,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
 
-            	Runnable r = () -> {
+                return () -> {
 
             		try {
             			final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
@@ -190,7 +192,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             			stack("Error updating scale", e);
             		}
             	};
-            	return r;
             	
             }
 
@@ -199,6 +200,22 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 File f = new File(s);
 
                 return new PopulationImportAction(mw, f);
+            }
+            
+            if (event.type().startsWith("Wrk|")) {
+                String s = event.type().replace("Wrk|", "");
+                File f = new File(s);
+
+                return () -> {
+
+                    IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+
+                    mw.addWorkspace(w);
+
+                    for (File dataFile : w.getFiles()) {
+                        new PopulationImportAction(mw, dataFile).run();
+                    }
+                };
             }
 
             if (event.type().startsWith("New|")) {

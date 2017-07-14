@@ -290,8 +290,12 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
                                 getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
 
-                            } else {
-                                finer("File is not nmd, ignoring");
+                            }
+                            
+                            if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
+                                fine("File is wrk");
+                                getSignalChangeEventHandler().fireSignalChangeEvent("Wrk|" + f.getAbsolutePath());
+
                             }
 
                             if (f.isDirectory()) {
