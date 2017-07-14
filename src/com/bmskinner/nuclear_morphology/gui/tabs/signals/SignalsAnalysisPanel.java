@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 import ij.io.DirectoryChooser;
@@ -49,6 +50,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
     private ExportableTable table;     // table for analysis parameters
     private JScrollPane     scrollPane;
+    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     public SignalsAnalysisPanel() {
         super();
@@ -88,8 +90,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                     if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
                         IAnalysisDataset d = getDatasets().get(column - 1);
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        SignalColourChanger sc = new SignalColourChanger(SignalsAnalysisPanel.this);
-                        sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
                         update(getDatasets());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }

@@ -63,6 +63,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
@@ -89,8 +90,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     private static final String SET_SIGNAL_GROUP_VISIBLE_ACTION = "GroupVisble_";
     private static final String WARP_LBL                        = "Warp signals";
 
-    // private GenericCheckboxPanel warpPanel = new
-    // GenericCheckboxPanel("Warp");
+
+    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     public SignalsOverviewPanel() {
         super();
@@ -155,10 +156,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-
-                        SignalColourChanger sc = new SignalColourChanger(SignalsOverviewPanel.this);
-                        sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
-                        update(getDatasets());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+//                        update(getDatasets());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 
