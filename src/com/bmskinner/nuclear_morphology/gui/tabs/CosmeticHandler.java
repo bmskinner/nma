@@ -31,6 +31,7 @@ import javax.swing.JOptionPane;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -159,6 +160,35 @@ public class CosmeticHandler implements Loggable {
             warn("Cannot change signal colour");
             stack("Error getting signal group", e);
         }
+    }
+    
+    /**
+     * Update the name of a signal group in the active dataset
+     * 
+     * @param signalGroup
+     */
+    public void renameSignalGroup(IAnalysisDataset d, UUID signalGroup) {
+
+        try {
+            String oldName = d.getCollection().getSignalGroup(signalGroup).getGroupName();
+
+            String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
+
+            if (newName == null) {
+                finest("New name is null - not changing");
+                return;
+            }
+
+            d.getCollection().getSignalGroup(signalGroup).setGroupName(newName);
+
+            parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+            finest("Updated name of signal group " + oldName + " to " + newName);
+
+        } catch (UnavailableSignalGroupException e) {
+            warn("Cannot change signal name");
+            fine("Error getting signal group", e);
+        }
+
     }
 
 }
