@@ -82,6 +82,9 @@ public class SVGWriter implements Exporter, Loggable {
         double x = Imageable.COMPONENT_BUFFER;
 
         for(IAnalysisDataset d : datasets){
+            if(!d.getCollection().hasConsensus()){
+                continue;
+            }
             CellularComponent c = d.getCollection().getConsensus();
             Shape s = c.toShape();
 

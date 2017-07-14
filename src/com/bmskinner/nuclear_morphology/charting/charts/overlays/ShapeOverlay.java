@@ -77,7 +77,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
         }
     }
 
-    public void clearShapes() {
+    public synchronized void clearShapes() {
         if (this.shapes.isEmpty()) {
             return; // nothing to do
         }
@@ -90,7 +90,7 @@ public class ShapeOverlay extends AbstractOverlay implements Overlay, PropertyCh
         fireOverlayChanged();
     }
 
-    public List<ShapeOverlayObject> getShapes() {
+    public synchronized List<ShapeOverlayObject> getShapes() {
         return new ArrayList<ShapeOverlayObject>(this.shapes);
     }
 
