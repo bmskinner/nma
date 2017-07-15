@@ -38,7 +38,8 @@ import java.util.regex.Pattern;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+//import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 

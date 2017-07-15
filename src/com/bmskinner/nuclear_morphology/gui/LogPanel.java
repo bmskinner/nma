@@ -67,7 +67,8 @@ import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+//import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 
@@ -290,8 +291,12 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
                                 getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
 
-                            } else {
-                                finer("File is not nmd, ignoring");
+                            }
+                            
+                            if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
+                                fine("File is wrk");
+                                getSignalChangeEventHandler().fireSignalChangeEvent("Wrk|" + f.getAbsolutePath());
+
                             }
 
                             if (f.isDirectory()) {

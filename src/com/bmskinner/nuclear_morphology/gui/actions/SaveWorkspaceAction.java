@@ -21,9 +21,9 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultWorkspace;
-import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;

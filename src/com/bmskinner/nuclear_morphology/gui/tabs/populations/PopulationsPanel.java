@@ -49,11 +49,13 @@ import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
@@ -78,6 +80,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     private final Set<IAnalysisDataset> datasetSelectionOrder = new LinkedHashSet<IAnalysisDataset>();
 
     final private TreeSelectionHandler treeListener = new TreeSelectionHandler();
+    
+    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     private boolean ctrlPressed = false;
 
@@ -217,6 +221,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                     if (o instanceof IAnalysisDataset) {
                         datasetClicked((IAnalysisDataset) o, row, column);
                     }
+                    
+                    if (o instanceof IWorkspace) {
+                        workspaceClicked((IWorkspace) o);
+                    }
                 }
 
                 // right click - show the popup, but change delete to close for
@@ -240,18 +248,23 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             private void clusterGroupClicked(IClusterGroup g) {
                 // No functionality assigned yet
             }
+            
+            private void workspaceClicked(IWorkspace w) {
+                cosmeticHandler.renameWorkspace(w);
+            }
 
             private void datasetClicked(IAnalysisDataset d, int row, int column) {
 
                 switch (column) {
 
                 case PopulationTreeTable.COLUMN_NAME: {
-                    renameCollection(d);
+                    cosmeticHandler.renameDataset(d);
+//                    renameCollection(d);
                     break;
                 }
 
                 case PopulationTreeTable.COLUMN_COLOUR: {
-                    changeDatasetColour(d, row);
+                    cosmeticHandler.changeDatasetColour(d);
                     break;
                 }
 
@@ -270,38 +283,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     }
 
     /**
-     * Make a JColorChooser for the given dataset, and set the color.
-     * 
-     * @param dataset
-     * @param row
-     */
-    private void changeDatasetColour(IAnalysisDataset dataset, int row) {
-        Paint oldColour = ColourSelecter.getColor(row);
-
-        Color newColor = JColorChooser.showDialog(PopulationsPanel.this, "Choose dataset Color", (Color) oldColour);
-
-        if (newColor != null) {
-            dataset.setDatasetColour(newColor);
-
-            // Force the chart caches to clear, but don't trigger a panel update
-            finest("Firing clearing chart cache signals from population colour change");
-            this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-        }
-        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-    }
-
-    /**
-     * Get the datasets currently selected
-     * 
-     * @return
-     */
-//    public synchronized List<IAnalysisDataset> getSelectedDatasets() {
-//
-//        // return new ArrayList<IAnalysisDataset>(datasetSelectionOrder);
-//        return DatasetListManager.getInstance().getSelectedDatasets();
-//    }
-
-    /**
      * Add the given dataset to the main population list Check that the name is
      * valid, and update if needed
      * 
@@ -318,9 +299,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             DatasetListManager.getInstance().addDataset(dataset);
 
         }
-        // PopulationTreeTableModel model = (PopulationTreeTableModel)
-        // treeTable.getTreeTableModel();
-        // model.addDataset(dataset);
     }
 
     /**
@@ -359,50 +337,50 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         DatasetListManager.getInstance().setSelectedDataset(d);
     }
 
-    /**
-     * Rename an existing dataset and update the population list.
-     * 
-     * @param dataset
-     *            the dataset to rename
-     */
-    private void renameCollection(IAnalysisDataset dataset) {
-        ICellCollection collection = dataset.getCollection();
-        String newName = JOptionPane.showInputDialog(this, "Choose a new name", "Rename collection",
-                JOptionPane.INFORMATION_MESSAGE, null, null, collection.getName()).toString();
-
-        // validate
-        if (newName == null || newName.isEmpty()) {
-            fine("New name null or empty");
-            return;
-        }
-
-        // Get the existing names and check duplicates
-        List<String> currentNames = treeTable.getDatasetNames();
-
-        if (currentNames.contains(newName)) {
-            fine("Checking duplicate name is OK");
-            int result = JOptionPane.showConfirmDialog(this, "Chosen name exists. Use anyway?");
-
-            if (result != JOptionPane.OK_OPTION) {
-                log("User cancelled name change");
-                return;
-            }
-        }
-
-        collection.setName(newName);
-
-        log("Collection renamed: " + newName);
-
-        File saveFile = dataset.getSavePath();
-        if (saveFile.exists()) {
-            saveFile.delete();
-        }
-
-        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
-
-        update(dataset);
-
-    }
+//    /**
+//     * Rename an existing dataset and update the population list.
+//     * 
+//     * @param dataset
+//     *            the dataset to rename
+//     */
+//    private void renameCollection(IAnalysisDataset dataset) {
+//        ICellCollection collection = dataset.getCollection();
+//        String newName = JOptionPane.showInputDialog(this, "Choose a new name", "Rename collection",
+//                JOptionPane.INFORMATION_MESSAGE, null, null, collection.getName()).toString();
+//
+//        // validate
+//        if (newName == null || newName.isEmpty()) {
+//            fine("New name null or empty");
+//            return;
+//        }
+//
+//        // Get the existing names and check duplicates
+//        List<String> currentNames = treeTable.getDatasetNames();
+//
+//        if (currentNames.contains(newName)) {
+//            fine("Checking duplicate name is OK");
+//            int result = JOptionPane.showConfirmDialog(this, "Chosen name exists. Use anyway?");
+//
+//            if (result != JOptionPane.OK_OPTION) {
+//                log("User cancelled name change");
+//                return;
+//            }
+//        }
+//
+//        collection.setName(newName);
+//
+//        log("Collection renamed: " + newName);
+//
+//        File saveFile = dataset.getSavePath();
+//        if (saveFile.exists()) {
+//            saveFile.delete();
+//        }
+//
+//        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+//
+//        update(dataset);
+//
+//    }
 
     /**
      * Move the selected dataset in the list

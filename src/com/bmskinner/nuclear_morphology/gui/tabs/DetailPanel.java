@@ -712,28 +712,23 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         update(getDatasets());
     }
 
-//    /**
-//     * A message to write in the main window status line
-//     * 
-//     * @param message
-//     */
-//    public void status(String message) {
-//        sh.fireSignalChangeEvent("Status_" + message);
-//    }
-    
-    protected DatasetEventHandler getDatasetEventHandler(){
+    @Override
+    public DatasetEventHandler getDatasetEventHandler(){
         return dh;
     }
     
-    protected InterfaceEventHandler getInterfaceEventHandler(){
+    @Override
+    public InterfaceEventHandler getInterfaceEventHandler(){
         return ih;
     }
     
-    protected DatasetUpdateEventHandler getDatasetUpdateEventHandler(){
+    @Override
+    public DatasetUpdateEventHandler getDatasetUpdateEventHandler(){
         return duh;
     }
     
-    protected SignalChangeEventHandler getSignalChangeEventHandler(){
+    @Override
+    public SignalChangeEventHandler getSignalChangeEventHandler(){
         return sh;
     }
 

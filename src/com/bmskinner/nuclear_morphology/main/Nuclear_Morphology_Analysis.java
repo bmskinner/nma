@@ -16,7 +16,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
@@ -49,6 +49,8 @@ public class Nuclear_Morphology_Analysis
 	// Store which plugins have been found
 	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
 	
+	private MainWindow mw;
+	
 	
 	// The plugins that are needed for the program to start
 	private static String[] fileNames = { "commons-math3",
@@ -72,6 +74,10 @@ public class Nuclear_Morphology_Analysis
 	
 	public static Nuclear_Morphology_Analysis getInstance(){
 		return instance;
+	}
+	
+	public MainWindow getMainWindow(){
+	    return mw;
 	}
 	
 	public CommandParser getParser(){
@@ -172,23 +178,22 @@ public class Nuclear_Morphology_Analysis
 	}
 	
 	private void loadMainWindow(boolean standalone){
-		java.awt.EventQueue.invokeLater(new Runnable() {
-			public void run() {
+	    
+	    Runnable r = () -> {
 
-				IJ.setBackgroundColor(0, 0, 0);	 // default background is black
+                IJ.setBackgroundColor(0, 0, 0);  // default background is black
+                try {
+                    UIManager.setLookAndFeel(
+                            UIManager.getSystemLookAndFeelClassName());
+                } catch (Exception e) {
 
-				try {
-					UIManager.setLookAndFeel(
-							UIManager.getSystemLookAndFeelClassName());
-				} catch (Exception e) {
+                    logToImageJ("Error initialising", e);
+                }
 
-					logToImageJ("Error initialising", e);
-				}
-
-				MainWindow frame = new MainWindow(standalone);
-				frame.setVisible(true);
-			}
-		});
+                mw = new MainWindow(standalone);
+                mw.setVisible(true);
+        };
+		java.awt.EventQueue.invokeLater( r );
 	}
 	
 	/*

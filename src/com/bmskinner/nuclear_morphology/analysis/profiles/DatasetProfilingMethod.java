@@ -186,9 +186,6 @@ public class DatasetProfilingMethod extends AbstractAnalysisMethod {
 
                 collection.getProfileManager().offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
                 fine("Assigned offset in nucleus profiles for " + tag);
-
-                fine("Current state of profile collection:" + collection.getProfileCollection().tagString());
-
             }
 
             fine("Finished profiling collection");

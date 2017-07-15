@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 
 public class DatasetMergeMethod extends AbstractAnalysisMethod {
 

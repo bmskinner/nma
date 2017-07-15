@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.overlays.ShapeOverlayObj
 import com.bmskinner.nuclear_morphology.charting.datasets.ComponentOutlineDataset;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;

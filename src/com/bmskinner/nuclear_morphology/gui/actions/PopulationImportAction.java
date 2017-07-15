@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 

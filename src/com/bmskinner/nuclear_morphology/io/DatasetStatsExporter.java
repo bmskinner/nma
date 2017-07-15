@@ -164,7 +164,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
 
             String label = s.label(MeasurementScale.PIXELS).replaceAll(" ", "_").replaceAll("\\(", "_")
                     .replaceAll("\\)", "").replaceAll("__", "_");
-            outLine.append(label + "\t");
+            outLine.append(label + TAB);
 
             if (!s.isDimensionless() && !s.isAngle()) { // only give micron
                                                         // measurements when
@@ -173,7 +173,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
                 label = s.label(MeasurementScale.MICRONS).replaceAll(" ", "_").replaceAll("\\(", "_")
                         .replaceAll("\\)", "").replaceAll("__", "_");
 
-                outLine.append(label + "\t");
+                outLine.append(label + TAB);
             }
 
         }
@@ -184,7 +184,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
                 String label = type.toString().replaceAll(" ", "_");
                 for (int i = 0; i < 100; i++) {
 
-                    outLine.append(label + "_" + i + "\t");
+                    outLine.append(label + "_" + i + TAB);
                 }
 
             }
@@ -244,7 +244,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
 
                     outLine.append(d.getName() + TAB)
                         .append(cell.getId() + TAB)
-                        .append("Nucleus_" + n.getNameAndNumber() + TAB)
+                        .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB)
                         .append(n.getOriginalCentreOfMass().toString() + TAB);
@@ -283,9 +283,9 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
                 varM = c.getStatistic(s, MeasurementScale.MICRONS);
             }
 
-            outLine.append(varP + "\t");
+            outLine.append(varP + TAB);
             if (!s.isDimensionless() && !s.isAngle()) {
-                outLine.append(varM + "\t");
+                outLine.append(varM + TAB);
             }
         }
     }
@@ -300,21 +300,9 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
                 double idx = ((double) i) / 100d;
 
                 double value = p.get(idx);
-                outLine.append(value + "\t");
+                outLine.append(value + TAB);
             }
 
         }
     }
-
-    // private File makeFile(String fileName){
-    //// if(fileName==null){
-    //// throw new IllegalArgumentException("Filename is null");
-    //// }
-    //// File f = new File(exportFolder, fileName+TAB_FILE_EXTENSION);
-    // if(exportFile.exists()){
-    // exportFile.delete();
-    // }
-    //// return f;
-    // }
-
 }

@@ -21,9 +21,13 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventHandler;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 
 public interface TabPanel extends DatasetUpdateEventListener {
@@ -222,5 +226,17 @@ public interface TabPanel extends DatasetUpdateEventListener {
      *            the list of datasets to be redrawn
      */
     void refreshTableCache(List<IAnalysisDataset> list);
+    
+
+    DatasetEventHandler getDatasetEventHandler();
+    
+
+    InterfaceEventHandler getInterfaceEventHandler();
+    
+
+    DatasetUpdateEventHandler getDatasetUpdateEventHandler();
+    
+
+    SignalChangeEventHandler getSignalChangeEventHandler();
 
 }

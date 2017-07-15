@@ -29,13 +29,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
-import com.bmskinner.nuclear_morphology.io.Importer;
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget implements Loggable {
@@ -106,8 +107,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
         finer("Opening workgroup file " + f.getAbsolutePath());
 
         IWorkspace w = new WorkspaceImporter(f).importWorkspace();
-
-        mw.addWorkspace(w);
+        DatasetListManager.getInstance().addWorkspace(w);
 
         for (File dataFile : w.getFiles()) {
             receiveDatasetFile(dataFile);

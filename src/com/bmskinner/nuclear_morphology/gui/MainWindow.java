@@ -35,7 +35,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.analysis.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
@@ -136,8 +136,6 @@ public class MainWindow extends JFrame implements Loggable {
                                                                            // iterating
                                                                            // messsages
 
-    private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
-
     private final EventHandler eh = new EventHandler(this);
 
     private boolean isStandalone = false;
@@ -225,6 +223,7 @@ public class MainWindow extends JFrame implements Loggable {
             // Create the log panel
             // ---------------
             logPanel = new LogPanel();
+//            logPanel.setDropTarget(this.getDropTarget());
 
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
@@ -402,10 +401,6 @@ public class MainWindow extends JFrame implements Loggable {
      */
     public EventHandler getEventHandler() {
         return eh;
-    }
-
-    public void addWorkspace(IWorkspace w) {
-        this.workspaces.add(w);
     }
 
     @Override

@@ -37,6 +37,7 @@ import javax.swing.SwingUtilities;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -77,8 +78,10 @@ import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
+import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -160,7 +163,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
 
-            	Runnable r = () -> {
+                return () -> {
 
             		try {
             			final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
@@ -189,7 +192,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             			stack("Error updating scale", e);
             		}
             	};
-            	return r;
             	
             }
 
@@ -198,6 +200,22 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 File f = new File(s);
 
                 return new PopulationImportAction(mw, f);
+            }
+            
+            if (event.type().startsWith("Wrk|")) {
+                String s = event.type().replace("Wrk|", "");
+                File f = new File(s);
+
+                return () -> {
+
+                    IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+
+                    DatasetListManager.getInstance().addWorkspace(w);
+                    
+                    for (File dataFile : w.getFiles()) {
+                        new PopulationImportAction(mw, dataFile).run();
+                    }
+                };
             }
 
             if (event.type().startsWith("New|")) {
@@ -288,6 +306,16 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 fine("Recalculating the median for the given datasets");
 
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
+            }
+            
+            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
+                Runnable r = () -> {
+                    for(IAnalysisDataset d : selectedDatasets){
+                        refoldConsensus(d);
+                    }
+                };
+                return r;
+
             }
 
             return null;
@@ -384,12 +412,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         final List<IAnalysisDataset> list = event.getDatasets();
         if (!list.isEmpty()) {
 
-            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-                for(IAnalysisDataset d : list){
-                    refoldConsensus(d);
-                }
-//                refoldConsensus(event.firstDataset());
-            }
+//            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
+//                for(IAnalysisDataset d : list){
+//                    refoldConsensus(d);
+//                }
+//            }
 
             if (event.method().equals(DatasetEvent.SELECT_DATASETS)) {
                 mw.getPopulationsPanel().selectDatasets(event.getDatasets());
@@ -433,8 +460,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public void interfaceEventReceived(final InterfaceEvent event) {
 
         InterfaceMethod method = event.method();
-        finest("Heard interface event: " + event.method().toString());
-
         
         final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 

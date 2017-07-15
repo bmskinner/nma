@@ -23,7 +23,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -35,11 +34,10 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTa
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 import ij.io.DirectoryChooser;
@@ -49,6 +47,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
     private ExportableTable table;     // table for analysis parameters
     private JScrollPane     scrollPane;
+    private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     public SignalsAnalysisPanel() {
         super();
@@ -67,7 +66,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                 int row = table.rowAtPoint(e.getPoint());
                 int column = table.columnAtPoint(e.getPoint());
-
+                IAnalysisDataset d = getDatasets().get(column - 1);
                 // double click
                 if (e.getClickCount() == 2) {
 
@@ -81,15 +80,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     if (rowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
-                        updateSignalName(signalGroup);
+                        cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
                     }
 
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
-                        IAnalysisDataset d = getDatasets().get(column - 1);
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        SignalColourChanger sc = new SignalColourChanger(SignalsAnalysisPanel.this);
-                        sc.updateSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
                         update(getDatasets());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
@@ -108,37 +105,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
         // return UUID.fromString( table.getModel().getValueAt(row,
         // column).toString() );
     }
-
-    /**
-     * Update the colour of the clicked signal group
-     * 
-     * @param row
-     *            the row selected (the colour bar, one above the group name)
-     */
-    // private void updateSignalColour(SignalTableCell signalGroup){
-    //
-    // if(isSingleDataset()){
-    //
-    // try {
-    // Color oldColour = signalGroup.getColor();
-    //
-    // Color newColor = JColorChooser.showDialog(
-    // this,
-    // "Choose signal Color",
-    // oldColour);
-    //
-    // if(newColor != null){
-    // activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupColour(newColor);
-    // this.update(getDatasets());
-    // fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-    // }
-    //
-    // } catch(UnavailableSignalGroupException e){
-    // warn("Cannot change signal colour");
-    // fine("Error getting signal group", e);
-    // }
-    // }
-    // }
 
     private void updateSignalSource(SignalTableCell signalGroup) {
         if (isSingleDataset()) {
@@ -167,39 +133,6 @@ public class SignalsAnalysisPanel extends DetailPanel {
             // SignalsDetailPanel.this.update(getDatasets());
             refreshTableCache();
             finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
-        }
-    }
-
-    /**
-     * Update the name of a signal group in the active dataset
-     * 
-     * @param signalGroup
-     */
-    private void updateSignalName(SignalTableCell signalGroup) {
-        if (isSingleDataset()) {
-
-            try {
-
-                String oldName = signalGroup.toString();
-                finest("Updating signal name for signal group " + signalGroup);
-
-                String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
-
-                if (newName == null) {
-                    finest("New name is null - not changing");
-                    return;
-                }
-
-                activeDataset().getCollection().getSignalGroup(signalGroup.getID()).setGroupName(newName);
-
-                refreshTableCache();
-                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-                finest("Updated name of signal group " + oldName + " to " + newName);
-
-            } catch (UnavailableSignalGroupException e) {
-                warn("Cannot change signal name");
-                fine("Error getting signal group", e);
-            }
         }
     }
 
