@@ -42,6 +42,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultXYDataset;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -54,8 +55,12 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 @SuppressWarnings("serial")
@@ -73,7 +78,6 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
     public AngleWindowSizeExplorer(final IAnalysisDataset dataset) {
         super();
         this.dataset = dataset;
-        finest("Creating angle window explorer UI");
         try {
             createUI();
         } catch (Exception e) {
@@ -81,7 +85,6 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         }
         this.setModal(false);
         this.pack();
-        finest("Displaying angle window explorer");
         this.setVisible(true);
     }
 
@@ -119,9 +122,6 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
                 windowSizeMax, 0.001d);
         windowSizeMinSpinner = new JSpinner(minSpinnerModel);
         windowSizeMinSpinner.setPreferredSize(dim);
-        // JSpinner.NumberEditor numberEditorMin = new
-        // JSpinner.NumberEditor(windowSizeMinSpinner,"0.01");
-        // windowSizeMinSpinner.setEditor(numberEditorMin);
         windowSizeMinSpinner.addChangeListener(this);
         windowSizeMinSpinner.setToolTipText("Minimum window size");
 
@@ -129,18 +129,13 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
                 windowSizeMax, 0.001d);
         windowSizeMaxSpinner = new JSpinner(maxSpinnerModel);
         windowSizeMaxSpinner.setPreferredSize(dim);
-        // JSpinner.NumberEditor numberEditorMax = new JSpinner.NumberEditor(
-        // windowSizeMaxSpinner,"0.01");
-        // windowSizeMaxSpinner.setEditor(numberEditorMax);
         windowSizeMaxSpinner.addChangeListener(this);
         windowSizeMaxSpinner.setToolTipText("Maximum window size");
 
         SpinnerNumberModel stepSpinnerModel = new SpinnerNumberModel(0.01d, 0.001d, 0.50d, 0.001d);
         stepSizeSpinner = new JSpinner(stepSpinnerModel);
         stepSizeSpinner.setPreferredSize(dim);
-        // JSpinner.NumberEditor numberEditorStep = new JSpinner.NumberEditor(
-        // stepSizeSpinner,"0.01");
-        // stepSizeSpinner.setEditor(numberEditorStep);
+
         stepSizeSpinner.addChangeListener(this);
         stepSizeSpinner.setToolTipText("Step size");
 
@@ -152,24 +147,31 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         panel.add(stepSizeSpinner);
 
         runButton = new JButton("Run");
-        runButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent arg0) {
-
-                Thread thr = new Thread() {
-                    public void run() {
-
-                        try {
-                            runAnalysis();
-                        } catch (Exception e) {
-                            log(Level.SEVERE, "Error testing", e);
-                        }
-                    }
-                };
-                thr.start();
-
-            }
+        runButton.addActionListener(e->{
+        	Runnable r = () -> {
+        		runAnalysis();
+        	};
+        	ThreadManager.getInstance().submit(r);
+        	
         });
+//        runButton.addMouseListener(new MouseAdapter() {
+//            @Override
+//            public void mouseClicked(MouseEvent arg0) {
+//
+//                Thread thr = new Thread() {
+//                    public void run() {
+//
+//                        try {
+//                            runAnalysis();
+//                        } catch (Exception e) {
+//                            log(Level.SEVERE, "Error testing", e);
+//                        }
+//                    }
+//                };
+//                thr.start();
+//
+//            }
+//        });
         panel.add(runButton);
 
         return panel;
@@ -199,6 +201,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         }
     }
 
+    @Override
     public void setEnabled(boolean b) {
         runButton.setEnabled(b);
         windowSizeMinSpinner.setEnabled(b);
@@ -206,11 +209,16 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         stepSizeSpinner.setEnabled(b);
     }
 
-    private void runAnalysis() throws Exception {
+    private void runAnalysis() {
 
-        windowSizeMinSpinner.commitEdit();
-        windowSizeMaxSpinner.commitEdit();
-        stepSizeSpinner.commitEdit();
+        try {
+        	windowSizeMinSpinner.commitEdit();
+			windowSizeMaxSpinner.commitEdit();
+			stepSizeSpinner.commitEdit();
+		} catch (ParseException e) {
+			warn("Error setting values in spinners");
+			stack(e.getMessage(), e);
+		}
 
         double windowSizeMin = (double) windowSizeMinSpinner.getValue();
         double windowSizeMax = (double) windowSizeMaxSpinner.getValue();
@@ -223,39 +231,42 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         log("Testing " + windowSizeMin + " - " + windowSizeMax);
 
-        for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
+        try {
+        	for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
 
-            // make a duplicate collection
-            ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
+        		// make a duplicate collection
+        		ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
 
-            // put each cell into the new collection
-            for (ICell c : dataset.getCollection().getCells()) {
+        		// put each cell into the new collection
+        		for (ICell c : dataset.getCollection().getCells()) {
 
-                ICell newCell = new DefaultCell(c);
-                newCell.getNucleus().setWindowProportion(ProfileType.ANGLE, i); // triggers
-                                                                                // recalc
-                                                                                // of
-                                                                                // profile
+        			ICell newCell = new DefaultCell(c);
+        			for(Nucleus n : newCell.getNuclei()){
+        				n.setWindowProportion(ProfileType.ANGLE, i);
+        			}
+        			duplicateCollection.addCell(newCell);
+        		}
 
-                duplicateCollection.addCell(newCell);
-            }
+        		// recalc the aggregate
+        		IProfileCollection pc = duplicateCollection.getProfileCollection();
 
-            // recalc the aggregate
-            IProfileCollection pc = duplicateCollection.getProfileCollection();
+        		pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
 
-            pc.createProfileAggregate(duplicateCollection, dataset.getCollection().getProfileCollection().length());
+        		for (Tag tag : dataset.getCollection().getProfileCollection().getBorderTags()) {
+        			pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
+        		}
 
-            for (Tag tag : dataset.getCollection().getProfileCollection().getBorderTags()) {
-                pc.addIndex(tag, dataset.getCollection().getProfileCollection().getIndex(tag));
-            }
+        		// get the profile median
+        		IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
 
-            // get the profile median
-            IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+        		// add to the chart
+        		updateChart(median, i);
 
-            // add to the chart
-            updateChart(median, i);
-
-            duplicateCollection = null;
+        		duplicateCollection = null;
+        	}
+        } catch(UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e){
+        	warn("Error making profile collections");
+        	stack(e.getMessage(), e);
         }
         setAnalysing(false);
         log("Profiling complete");
