@@ -184,7 +184,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 rowData.add(segment.getStartIndex());
                 rowData.add(segment.getEndIndex());
 
-                double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH,
+                double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
 
                 double mean = DoubleStream.of(meanLengths).average().orElse(0);
@@ -286,7 +286,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IBorderSegment segment : segs) {
 
-                double[] meanLengths = collection.getMedianStatistics(PlottableStatistic.LENGTH,
+                double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, segment.getID());
                 double mean = DoubleStream.of(meanLengths).average().orElse(0);
 
@@ -581,7 +581,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
             // log("Getting stats for "+stat);
-            double[] stats = collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
+            double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             double mean = DoubleStream.of(stats).average().orElse(0);
             double sem = Stats.stderr(stats);
@@ -833,7 +833,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DecimalFormat df = new DecimalFormat("#0.0000");
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
-            double[] d1Values = dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS,
+            double[] d1Values = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
             		scale);
 
             Object[] popData = new Object[options.datasetCount()];
@@ -847,7 +847,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     isGetPVal = true;
                 } else {
 
-                    double[] d2Values = dataset2.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS,
+                    double[] d2Values = dataset2.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
                     		scale);
 
                     double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal);
@@ -917,11 +917,11 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         return createBlankTable();
                     }
 
-                    popData[i] = df.format(Stats.runWilcoxonTest(dataset.getCollection().getMedianStatistics(
+                    popData[i] = df.format(Stats.runWilcoxonTest(dataset.getCollection().getRawValues(
                             PlottableStatistic.LENGTH, CellularComponent.NUCLEAR_BORDER_SEGMENT,
                             MeasurementScale.PIXELS, medianSeg1.getID()),
 
-                            dataset2.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
+                            dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
                                     CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
                                     medianSeg2.getID()),
 
@@ -985,7 +985,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             double value1;
             try {
-                value1 = dataset.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS,
+                value1 = dataset.getCollection().getMedian(stat, CellularComponent.NUCLEUS,
                 		scale);
             } catch (Exception e) {
                 fine("Error getting median statistic", e);
@@ -1006,7 +1006,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                     double value2;
                     try {
-                        value2 = dataset2.getCollection().getMedianStatistic(stat, CellularComponent.NUCLEUS,
+                        value2 = dataset2.getCollection().getMedian(stat, CellularComponent.NUCLEUS,
                         		scale);
                     } catch (Exception e) {
                         fine("Error getting median statistic", e);
@@ -1057,7 +1057,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             }
 
             double value1 = new Quartile(
-                    dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
+                    dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()),
                     Quartile.MEDIAN).doubleValue();
 
@@ -1083,7 +1083,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         return createBlankTable();
                     }
 
-                    double value2 = new Quartile(dataset2.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
+                    double value2 = new Quartile(dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),
                             Quartile.MEDIAN).doubleValue();
 

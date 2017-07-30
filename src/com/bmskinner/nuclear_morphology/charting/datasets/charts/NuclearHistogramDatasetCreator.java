@@ -74,7 +74,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             ICellCollection collection = dataset.getCollection();
 
             PlottableStatistic stat = options.getStat();
-            double[] values = collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, options.getScale());
+            double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, options.getScale());
 
             double[] minMaxStep = findMinAndMaxForHistogram(values);
             int minRounded = (int) minMaxStep[0];
@@ -120,7 +120,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
             ICellCollection collection = dataset.getCollection();
 
             String groupLabel = stat.toString();
-            double[] values = collection.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
+            double[] values = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             KernelEstimator est;
             try {
@@ -198,7 +198,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
                 double[] values;
 
-                values = collection.getMedianStatistics(PlottableStatistic.LENGTH,
+                values = collection.getRawValues(PlottableStatistic.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, options.getScale(), medianSeg.getID());
 
                 double[] minMaxStep = findMinAndMaxForHistogram(values);

@@ -94,7 +94,7 @@ public class DummyRodentCollection extends DefaultCellCollection {
 		double area;
 		try {
 			System.out.println("Fetching areas");
-			area = collection.getMedianStatistic(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+			area = collection.getMedian(PlottableStatistic.AREA, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 			System.out.println("Median area: "+area);
 		} catch (Exception e) {
 			e.printStackTrace();

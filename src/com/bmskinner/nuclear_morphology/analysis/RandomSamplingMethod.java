@@ -60,8 +60,8 @@ public class RandomSamplingMethod extends AbstractAnalysisMethod {
             finest("Made collection");
 
             // get the stat magnitude
-            double value1 = collections[0].getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-            double value2 = collections[1].getMedianStatistic(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+            double value1 = collections[0].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+            double value2 = collections[1].getMedian(stat, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
             double magnitude = value2 / value1;
             finest("Found value");

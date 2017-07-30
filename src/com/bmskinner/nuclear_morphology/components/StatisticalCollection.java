@@ -63,7 +63,7 @@ public interface StatisticalCollection {
      * @return the median statistic value
      * @throws Exception
      */
-    double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
+    double getMedian(PlottableStatistic stat, String component, MeasurementScale scale) throws Exception;
 
     /**
      * Get the median stat for a value with an ID - i.e. a nuclear signal or a
@@ -75,8 +75,51 @@ public interface StatisticalCollection {
      * @return
      * @throws Exception
      */
-    double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
+    double getMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
             throws Exception;
+    
+    
+    /**
+     * Get the minimum value of the given stat in the collection
+     * @param stat
+     * @param component
+     * @param scale
+     * @param id
+     * @return the minumum or Statistical.ERROR_CALCULATING_STAT
+     */
+    double getMin(PlottableStatistic stat, String component, MeasurementScale scale);
+    
+    /**
+     * Get the minimum value of the given stat in the collection
+     * @param stat
+     * @param component
+     * @param scale
+     * @param id
+     * @return the minumum or Statistical.ERROR_CALCULATING_STAT
+     */
+    double getMin(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    
+    /**
+     * Get the maximum value of the given stat in the collection
+     * @param stat
+     * @param component
+     * @param scale
+     * @param id
+     * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+     */
+    double getMax(PlottableStatistic stat, String component, MeasurementScale scale);
+   
+    /**
+     * Get the maximum value of the given stat in the collection
+     * @param stat
+     * @param component
+     * @param scale
+     * @param id
+     * @return the maxumum or Statistical.ERROR_CALCULATING_STAT
+     */
+    double getMax(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    
+    
 
     /**
      * Get the raw values for the given stat for each object in the collection
@@ -89,7 +132,7 @@ public interface StatisticalCollection {
      *            the scale to convert values to
      * @return the values in the collection
      */
-    double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale);
+    double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale);
 
     /**
      * Get the raw values for the given stat for each object in the collectionw
@@ -105,5 +148,8 @@ public interface StatisticalCollection {
      *            the id of the compenent to fetch
      * @return the values in the collection
      */
-    double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale, UUID id);
+    
+    
+    
 }

@@ -62,7 +62,7 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
                     for (PlottableStatistic stat : stats) {
                         double med;
                         try {
-                            med = collection.getMedianStatistic(stat, CellularComponent.NUCLEUS,
+                            med = collection.getMedian(stat, CellularComponent.NUCLEUS,
                                     MeasurementScale.PIXELS);
                         } catch (Exception e) {
                             stack("Cannot get median stat", e);

@@ -129,7 +129,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             // Add the boxplot values
 
-            double[] stats = c.getMedianStatistics(stat, CellularComponent.WHOLE_CELL, scale);
+            double[] stats = c.getRawValues(stat, CellularComponent.WHOLE_CELL, scale);
             List<Number> list = new ArrayList<Number>();
             for (double d : stats) {
                 list.add(new Double(d));
@@ -165,7 +165,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             // Add the boxplot values
 
-            double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
+            double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
             List<Number> list = new ArrayList<Number>();
             for (double d : stats) {
                 list.add(new Double(d));

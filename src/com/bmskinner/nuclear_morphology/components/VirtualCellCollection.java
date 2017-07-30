@@ -57,6 +57,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
+import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
@@ -1006,7 +1008,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale)
+    public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
             throws Exception {
         if (this.size() == 0) {
             return 0;
@@ -1015,13 +1017,13 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component,
+    public synchronized double[] getRawValues(PlottableStatistic stat, String component,
             MeasurementScale scale) {
-        return getMedianStatistics(stat, component, scale, null);
+        return getRawValues(stat, component, scale, null);
     }
 
     @Override
-    public synchronized double[] getMedianStatistics(PlottableStatistic stat, String component, MeasurementScale scale,
+    public synchronized double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
             UUID id) {
 
         try {
@@ -1047,10 +1049,64 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
+    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
             throws Exception {
 
         return getMedianStatistic(stat, component, scale, null, id);
+    }
+    
+    @Override
+    public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale) {
+        return getMinStatistic(stat, component, scale, null);
+    }
+    
+    @Override
+    public synchronized double getMin(PlottableStatistic stat, String component, MeasurementScale scale,
+            UUID id){
+
+    	// Handle old segment andSignalStatistic enums
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+            return getMinStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
+        }
+
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+            return getMinStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
+        }
+        return getMinStatistic(stat, component, scale, id);
+    }
+    
+    private synchronized double getMinStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+    		UUID id) {
+
+    	double[] values = getRawValues(stat, component, scale, id);
+    	return Arrays.stream(values).min().orElse(Statistical.ERROR_CALCULATING_STAT);
+    }
+    
+    @Override
+    public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale) {
+        return getMaxStatistic(stat, component, scale, null);
+    }
+    
+    @Override
+    public synchronized double getMax(PlottableStatistic stat, String component, MeasurementScale scale,
+            UUID id){
+
+    	// Handle old segment andSignalStatistic enums
+        if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
+            return getMaxStatistic(stat, CellularComponent.NUCLEAR_SIGNAL, scale, id);
+        }
+
+        if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
+            return getMaxStatistic(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
+        }
+        return getMaxStatistic(stat, component, scale, id);
+    }
+    
+    private synchronized double getMaxStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
+    		UUID id) {
+
+    	double[] values = getRawValues(stat, component, scale, id);
+    	return Arrays.stream(values).max().orElse(Statistical.ERROR_CALCULATING_STAT);
     }
 
     /**

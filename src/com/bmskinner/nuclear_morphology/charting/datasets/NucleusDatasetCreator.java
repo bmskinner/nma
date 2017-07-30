@@ -987,7 +987,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             ICellCollection c = datasets.get(i).getCollection();
 
             List<Double> list = new ArrayList<Double>();
-            double[] stats = c.getMedianStatistics(stat, CellularComponent.NUCLEUS, scale);
+            double[] stats = c.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             for (double d : stats) {
                 list.add(new Double(d));

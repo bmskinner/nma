@@ -56,6 +56,9 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
  */
 public class ShellAnalysisMethod extends AbstractAnalysisMethod {
 
+	public static final int MINIMUM_AREA_PER_SHELL = 100;
+	public static final double MINIMUM_CIRCULARITY = 0.3;
+	
     private final int shells;
 
     private int totalPixels = 0;

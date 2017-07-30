@@ -26,13 +26,29 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
+/**
+ * Prepare and run a shell analysis on the provided dataset.
+ * @author ben
+ *
+ */
 public class ShellAnalysisAction extends SingleDatasetResultAction {
-
+	
+	private static final String CIRC_ERROR_MESSAGE = "Min nucleus circularity is too low to make shells";
+	private static final String AREA_ERROR_MESSAGE = "Min nucleus area is too small to break into shells";
+	
+    /**
+     * Construct with a dataset and main event window
+     * @param dataset
+     * @param mw
+     */
     public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
         super(dataset, "Shell analysis", mw);
 
@@ -53,6 +69,11 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         } else if (option == JOptionPane.OK_OPTION) {
 
             int shellCount = (Integer) spinner.getModel().getValue();
+            
+            if(! datasetParametersOk(shellCount)){
+            	this.cancel();
+            	return;
+            }
 
             IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
             worker = new DefaultAnalysisWorker(m);
@@ -62,6 +83,34 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
         }
+    }
+    
+    private boolean datasetParametersOk(int shells){
+    		
+			double area = dataset.getCollection()
+					.getMin(PlottableStatistic.AREA, 
+							CellularComponent.NUCLEUS, 
+							MeasurementScale.PIXELS);
+			double minArea = ShellAnalysisMethod.MINIMUM_AREA_PER_SHELL * shells;
+			if(area < minArea){
+				JOptionPane.showMessageDialog(null, AREA_ERROR_MESSAGE);
+				return false;
+			}
+			
+			
+			double circ = dataset.getCollection()
+					.getMin(PlottableStatistic.CIRCULARITY, 
+							CellularComponent.NUCLEUS, 
+							MeasurementScale.PIXELS);
+
+			if(circ < ShellAnalysisMethod.MINIMUM_CIRCULARITY){
+				JOptionPane.showMessageDialog(null, CIRC_ERROR_MESSAGE);
+				return false;
+			}
+    	
+    	return true;
+    	
+    	
     }
 
     @Override

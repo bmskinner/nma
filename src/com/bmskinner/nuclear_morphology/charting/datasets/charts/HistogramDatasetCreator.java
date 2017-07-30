@@ -126,7 +126,7 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
 
         for (IAnalysisDataset dataset : list) {
 
-            double[] values = dataset.getCollection().getMedianStatistics(stat, component, scale);
+            double[] values = dataset.getCollection().getRawValues(stat, component, scale);
 
             updateMinMaxRange(result, values);
         }

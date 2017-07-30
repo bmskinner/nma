@@ -271,7 +271,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
             String pval = "";
             try {
-                double[] stats = dataset.getCollection().getMedianStatistics(stat, CellularComponent.NUCLEUS,
+                double[] stats = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
                         MeasurementScale.PIXELS);
                 double diptest = DipTester.getDipTestPValue(stats);
                 pval = pf.format(diptest);
@@ -296,7 +296,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
             String pval = "";
             try {
-                double[] stats = dataset.getCollection().getMedianStatistics(PlottableStatistic.LENGTH,
+                double[] stats = dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
                         CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS, s.getID());
                 double diptest = DipTester.getDipTestPValue(stats);
                 pval = pf.format(diptest);
