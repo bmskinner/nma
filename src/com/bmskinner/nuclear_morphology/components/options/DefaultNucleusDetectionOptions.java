@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -204,6 +205,30 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
 
 	@Override
 	public Object getValue(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getBooleanKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getIntegerKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getDoubleKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getFloatKeys() {
 		// TODO Auto-generated method stub
 		return null;
 	}

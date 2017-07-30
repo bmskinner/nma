@@ -245,6 +245,30 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
         warn("Unimplemented method in " + this.getClass().getName());
 
     }
+
+	@Override
+	public List<String> getBooleanKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getIntegerKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getDoubleKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getFloatKeys() {
+		// TODO Auto-generated method stub
+		return null;
+	}
     
 //    @Override
 //    public Map<String, Object> getEntries(){

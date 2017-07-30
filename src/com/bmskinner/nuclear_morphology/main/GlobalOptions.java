@@ -39,24 +39,17 @@ public class GlobalOptions extends AbstractHashOptions {
     private static final Object           lockObject = new Object(); // synchronisation
 
     public static final String DEFAULT_IMAGE_SCALE_KEY      = "DEFAULT_IMAGE_SCALE";
-    public static final String DEFAULT_FILL_CONSENSUS_KEY   = "FILL_CONSENSUS";     // Should
-                                                                                    // the
-                                                                                    // consensus
-                                                                                    // nucleus
-                                                                                    // plots
-                                                                                    // be
-                                                                                    // filled,
-                                                                                    // or
-                                                                                    // empty
+    
+    // Should the consensus plots be filled or empty
+    public static final String DEFAULT_FILL_CONSENSUS_KEY   = "FILL_CONSENSUS";
     public static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
     public static final String REFOLD_OVERRIDE_KEY          = "REFOLD_OVERRIDE";
-    public static final String IS_VIOLIN_KEY                = "IS_VIOLIN";          // show
-                                                                                    // violin
-                                                                                    // plots
-                                                                                    // or
-                                                                                    // just
-                                                                                    // boxplots
+    
+    // Should violin plots be shown instead of boxplots
+    public static final String IS_VIOLIN_KEY                = "IS_VIOLIN";
     public static final String IS_USE_ANTIALIASING          = "USE_ANTIALIASING";
+    
+    public static final String IS_CONVERT_DATASETS_KEY      = "CONVERT_DATASETS";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files
@@ -67,15 +60,10 @@ public class GlobalOptions extends AbstractHashOptions {
 
     private ColourSwatch swatch;
 
-    private boolean convertDatasets = true;
-
     private static double DEFAULT_SCALE = 1;
 
     private NucleusType defaultType;
 
-    /**
-     * 
-     */
 
     /**
      * Get the global options for the program.
@@ -114,6 +102,7 @@ public class GlobalOptions extends AbstractHashOptions {
         this.defaultDir = new File(System.getProperty("user.home"));
         this.defaultType = NucleusType.RODENT_SPERM;
         setBoolean(REFOLD_OVERRIDE_KEY, false);
+        setBoolean(IS_CONVERT_DATASETS_KEY, true);
     }
 
     public NucleusType getDefaultType() {
@@ -190,11 +179,11 @@ public class GlobalOptions extends AbstractHashOptions {
     }
 
     public synchronized boolean isConvertDatasets() {
-        return convertDatasets;
+    	return getBoolean(IS_CONVERT_DATASETS_KEY);
     }
 
     public synchronized void setConvertDatasets(boolean convertDatasets) {
-        this.convertDatasets = convertDatasets;
+    	setBoolean(IS_CONVERT_DATASETS_KEY, convertDatasets);
     }
 
     /**

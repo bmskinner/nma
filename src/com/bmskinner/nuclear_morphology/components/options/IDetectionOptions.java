@@ -52,6 +52,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
     static final String DYNAMIC               = "Dynamic";
     static final String EROSION               = "Erosion";
     static final String IS_USE_WATERSHED      = "Use watershed";
+    static final String TOP_HAT_RADIUS        = "Top hat radius";
 
     static final double  DEFAULT_SCALE        = GlobalOptions.getInstance().getImageScale();
     static final double  DEFAULT_MIN_CIRC     = 0;

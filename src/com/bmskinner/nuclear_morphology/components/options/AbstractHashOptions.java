@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A base for all the options classes that need to store options as a key value
@@ -129,24 +130,35 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
     public void setFloat(String s, float f) {
         fltMap.put(s, f);
     }
+    
+    public List<String> getBooleanKeys() {
+    	return sortedKeyList(boolMap);
+    }
+    
+    public List<String> getIntegerKeys() {
+    	return sortedKeyList(intMap);
+    }
+    
+    public List<String> getDoubleKeys() {
+    	return sortedKeyList(dblMap);
+    }
+    
+    public List<String> getFloatKeys() {
+    	return sortedKeyList(fltMap);
+    }
+    
+    private List<String> sortedKeyList(Map<String, ?> map){
+    	return map.keySet().stream().sorted().collect(Collectors.toList());
+    }
 
     public List<String> getKeys() {
         List<String> list = new ArrayList<String>();
-        for (String s : intMap.keySet()) {
-            list.add(s);
-        }
+        
+        list.addAll(getBooleanKeys());
+        list.addAll(getIntegerKeys());
+        list.addAll(getDoubleKeys());
+        list.addAll(getFloatKeys());
 
-        for (String s : dblMap.keySet()) {
-            list.add(s);
-        }
-
-        for (String s : boolMap.keySet()) {
-            list.add(s);
-        }
-
-        for (String s : fltMap.keySet()) {
-            list.add(s);
-        }
         Collections.sort(list);
         return list;
     }
@@ -182,7 +194,7 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
     
     private void addEntries(Map<String, ?> source, Map<String, Object> target){
     	for (String s : source.keySet()) {
-            target.put(s, intMap.get(s));
+            target.put(s, source.get(s));
         }
     }
 

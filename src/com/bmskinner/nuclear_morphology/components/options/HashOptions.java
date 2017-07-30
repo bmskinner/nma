@@ -29,8 +29,6 @@ import java.util.Map;
  */
 public interface HashOptions extends Serializable {
 
-    static final String TOP_HAT_RADIUS = "Top hat radius";
-
     /**
      * Get the double value with the given key.
      * 
@@ -95,6 +93,34 @@ public interface HashOptions extends Serializable {
      */
     void setFloat(String s, float f);
 
+    /**
+     * Get the keys to all the boolean values in this options.
+     * 
+     * @return
+     */
+    List<String> getBooleanKeys();
+    
+    /**
+     * Get the keys to all the integer values in this options.
+     * 
+     * @return
+     */
+    List<String> getIntegerKeys();
+    
+    /**
+     * Get the keys to all the double values in this options.
+     * 
+     * @return
+     */
+    List<String> getDoubleKeys();
+    
+    /**
+     * Get the keys to all the float values in this options.
+     * 
+     * @return
+     */
+    List<String> getFloatKeys();
+    
     /**
      * Get the keys to all the values in this options.
      * 
