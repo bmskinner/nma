@@ -951,11 +951,28 @@ public class CellCollection implements ICellCollection {
         return this.getNuclei().toArray(new Nucleus[0]);
     }
 
+    
+    /*
+     * 
+     * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
+     * 
+     */
+    
     @Override
     public void clear(PlottableStatistic stat, String component) {
-        // statsCache.clear(stat, component);
+
     }
 
+    @Override
+    public void clear(PlottableStatistic stat, String component, UUID id) {
+
+    }
+
+    @Override
+    public void clear(MeasurementScale scale) {
+
+    }
+    
     public double getMedianStatistic(PlottableStatistic stat, MeasurementScale scale) throws Exception {
         if (this.getNucleusCount() == 0) {
             return 0;
@@ -1943,10 +1960,5 @@ public class CellCollection implements ICellCollection {
         return 0;
     }
 
-    @Override
-    public void clear(MeasurementScale scale) {
-        // TODO Auto-generated method stub
-
-    }
 
 }

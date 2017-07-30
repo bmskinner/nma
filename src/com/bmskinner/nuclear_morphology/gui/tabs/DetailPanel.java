@@ -269,8 +269,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     @Override
     public synchronized void update() {
 
-        fine("Preparing to update");
-
         setUpdating(true);
 
         for (TabPanel t : this.getSubPanels()) {
@@ -294,8 +292,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     @Override
     public synchronized void update(final List<IAnalysisDataset> list) {
 
-        fine("Preparing to update");
-
         setUpdating(true);
 
         for (TabPanel t : this.getSubPanels()) {
@@ -313,22 +309,18 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     private synchronized void updateDetail() {
         List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
-        finer("Updating detail panel");
+
         try {
-            finest("Checking dataset list");
             if (list.isEmpty()) {
-                finer("No datasets present");
                 updateNull();
                 return;
             }
 
             if (list.size() > 1) {
-                finer("Multiple datasets present");
                 updateMultiple();
                 return;
             }
 
-            finer("Single dataset present");
             updateSingle();
 
         } catch (Exception e) {
@@ -353,7 +345,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when a single dataset is selected
      */
     protected synchronized void updateSingle() {
-        finest(this.getClass().getName() + ": Updating single dataset");
+//        finest(this.getClass().getName() + ": Updating single dataset");
     }
 
     /**
@@ -361,7 +353,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when multiple datasets are selected
      */
     protected synchronized void updateMultiple() {
-        finest(this.getClass().getName() + ": Updating multiple datasets");
+//        finest(this.getClass().getName() + ": Updating multiple datasets");
     }
 
     /**
@@ -369,7 +361,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * actual update when no datasets are selected
      */
     protected synchronized void updateNull() {
-        finest(this.getClass().getName() + ": Updating null dataset");
+//        finest(this.getClass().getName() + ": Updating null dataset");
     }
 
     /**
@@ -383,7 +375,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     protected synchronized void setChart(ChartOptions options) {
         if (chartCache.has(options)) {
-            fine("Fetched cached chart with hashcode " + options.hashCode());
+//            fine("Fetched cached chart with hashcode " + options.hashCode());
             JFreeChart chart = getChartCache().get(options);
 
             if (options.getTarget() != null) {
@@ -391,7 +383,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             }
 
         } else { // No cached chart
-            fine("No cached chart available with hashcode " + options.hashCode());
+//            fine("No cached chart available with hashcode " + options.hashCode());
             // Make a background worker to generate the chart and
             // update the target chart panel when done
             ChartFactoryWorker worker = new ChartFactoryWorker(options);
@@ -411,7 +403,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     protected synchronized void setTable(TableOptions options) {
         if (chartCache.has(options)) {
-            finest("Fetched cached chart with hashcode " + options.hashCode());
+//            finest("Fetched cached chart with hashcode " + options.hashCode());
             TableModel model = getTableCache().get(options);
 
             if (options.getTarget() != null) {
@@ -419,7 +411,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             }
 
         } else { // No cached chart
-            finest("No cached table model available with hashcode " + options.hashCode());
+//            finest("No cached table model available with hashcode " + options.hashCode());
             // Make a background worker to generate the chart and
             // update the target chart panel when done
             TableFactoryWorker worker = new TableFactoryWorker(options);
@@ -439,11 +431,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     protected synchronized JFreeChart getChart(ChartOptions options) {
         JFreeChart chart;
         if (chartCache.has(options)) {
-            finest("Fetched cached chart with hashcode " + options.hashCode());
+//            finest("Fetched cached chart with hashcode " + options.hashCode());
             chart = getChartCache().get(options);
 
         } else { // No cached chart
-            finest("No cached chart available with hashcode " + options.hashCode());
+//            finest("No cached chart available with hashcode " + options.hashCode());
 
             try {
                 chart = createPanelChartType(options);
@@ -455,7 +447,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                 chart = ScatterChartFactory.makeEmptyChart();
             }
             getChartCache().add(options, chart);
-            finest("Added cached chart");
+//            finest("Added cached chart");
         }
         return chart;
     }
@@ -471,7 +463,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
         TableModel model;
         if (getTableCache().has(options)) {
-            finest("Fetched cached table");
+//            finest("Fetched cached table");
             model = getTableCache().get(options);
         } else {
             try {
@@ -481,7 +473,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                 fine(this.getClass().getName() + ": Error creating table", e);
                 model = AnalysisDatasetTableCreator.createBlankTable();
             }
-            finest("Added cached table");
+//            finest("Added cached table");
             getTableCache().add(options, model);
         }
         return model;
@@ -517,12 +509,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearChartCache() {
-        finest("Clearing chart cache");
+//        finest("Clearing chart cache");
         this.getChartCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearChartCache();
         }
-        finest("Chart cache cleared");
+//        finest("Chart cache cleared");
     }
 
     /**
@@ -531,16 +523,16 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-        finest("Clearing chart cache for specific datasets");
+//        finest("Clearing chart cache for specific datasets");
         this.getChartCache().clear(list);
-        finest("Panel chart cache cleared");
+//        finest("Panel chart cache cleared");
         if (this.hasSubPanels()) {
-            finest("Clearing sub-panel chart caches");
+//            finest("Clearing sub-panel chart caches");
             for (TabPanel panel : this.subPanels) {
                 panel.clearChartCache(list);
             }
         }
-        finest("Chart cache cleared");
+//        finest("Chart cache cleared");
     }
 
     /**
@@ -550,7 +542,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     public synchronized void refreshChartCache() {
         clearChartCache();
-        finest("Updating charts after clear");
+//        finest("Updating charts after clear");
         this.update(getDatasets());
     }
 
@@ -562,9 +554,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
-        finest("Refreshing chart cache for specific datasets");
+//        finest("Refreshing chart cache for specific datasets");
         clearChartCache(list);
-        finest("Updating panel for specific datasets");
+//        finest("Updating panel for specific datasets");
         this.update(getDatasets());
     }
 
@@ -578,12 +570,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearTableCache() {
-        finest("Clearing table cache");
+//        finest("Clearing table cache");
         this.getTableCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearTableCache();
         }
-        finest("Table cache cleared");
+//        finest("Table cache cleared");
     }
 
     /**
@@ -593,14 +585,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
-        finest("Clearing table cache for specific datasets");
+//        finest("Clearing table cache for specific datasets");
         this.getTableCache().clear(list);
         if (this.hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
                 panel.clearTableCache(list);
             }
         }
-        finest("Table cache cleared for specific datasets");
+//        finest("Table cache cleared for specific datasets");
     }
 
     /**
@@ -610,7 +602,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     public synchronized void refreshTableCache() {
         clearTableCache();
-        finest("Updating tables after clear");
+//        finest("Updating tables after clear");
         this.update(getDatasets());
     }
 

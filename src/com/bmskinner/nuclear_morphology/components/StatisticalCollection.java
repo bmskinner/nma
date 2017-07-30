@@ -42,6 +42,17 @@ public interface StatisticalCollection {
      *            the cellular component to fetch from
      */
     void clear(PlottableStatistic stat, String component);
+    
+    /**
+     * Force the given statistic to be recalculated
+     * 
+     * @param stat
+     *            the statistic to recalculate
+     * @param component
+     *            the cellular component to fetch from
+     * @param id the sub-component id 
+     */
+    void clear(PlottableStatistic stat, String component, UUID id);
 
     /**
      * Force the statistics at the given scale to be recalculated

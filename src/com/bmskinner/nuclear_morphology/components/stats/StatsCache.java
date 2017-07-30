@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
@@ -41,11 +42,13 @@ public class StatsCache {
         private final PlottableStatistic stat;
         private final String             component;
         private final MeasurementScale   scale;
+        private final UUID 				 id;
 
-        public Key(PlottableStatistic stat, String component, MeasurementScale scale) {
+        public Key(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
             this.stat = stat;
             this.component = component;
             this.scale = scale;
+            this.id = id;
         }
 
         @Override
@@ -64,6 +67,9 @@ public class StatsCache {
 
             if (!scale.equals(key.scale))
                 return false;
+            
+            if(!id.equals(key.id))
+            	return false;
 
             return true;
         }
@@ -78,6 +84,8 @@ public class StatsCache {
             result = prime * result + component.hashCode();
 
             result = prime * result + scale.hashCode();
+            
+            result = prime * result + id.hashCode();
 
             return result;
         }
@@ -100,9 +108,9 @@ public class StatsCache {
      * @param scale
      * @param d
      */
-    public void setMedian(PlottableStatistic stat, String component, MeasurementScale scale, double d) {
+    public void setMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id, double d) {
 
-        Key key = new Key(stat, component, scale);
+        Key key = new Key(stat, component, scale, id);
 
         cache.put(key, d);
 
@@ -115,16 +123,16 @@ public class StatsCache {
      * @param scale
      * @param d
      */
-    public void setValues(PlottableStatistic stat, String component, MeasurementScale scale, double[] list) {
+    public void setValues(PlottableStatistic stat, String component, MeasurementScale scale, UUID id, double[] list) {
 
-        Key key = new Key(stat, component, scale);
+        Key key = new Key(stat, component, scale, id);
         values.put(key, list);
     }
 
-    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale) {
+    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
-        if (this.hasMedian(stat, component, scale)) {
-            Key key = new Key(stat, component, scale);
+        if (this.hasMedian(stat, component, scale, id)) {
+            Key key = new Key(stat, component, scale, id);
             return cache.get(key);
         } else {
             return 0;
@@ -139,8 +147,8 @@ public class StatsCache {
      * @param component
      * @param scale
      */
-    public void clear(PlottableStatistic stat, String component, MeasurementScale scale) {
-        Key key = new Key(stat, component, scale);
+    public void clear(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
+        Key key = new Key(stat, component, scale, id);
         values.remove(key);
         cache.remove(key);
     }
@@ -152,10 +160,10 @@ public class StatsCache {
      * @param component
      * @param scale
      */
-    public void clear(PlottableStatistic stat, String component) {
+    public void clear(PlottableStatistic stat, String component, UUID id) {
 
         for (MeasurementScale s : MeasurementScale.values()) {
-            Key key = new Key(stat, component, s);
+            Key key = new Key(stat, component, s, id);
             values.remove(key);
             cache.remove(key);
         }
@@ -188,10 +196,10 @@ public class StatsCache {
      * @param scale
      * @return
      */
-    public double[] getValues(PlottableStatistic stat, String component, MeasurementScale scale) {
+    public double[] getValues(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
-        if (this.hasValues(stat, component, scale)) {
-            Key key = new Key(stat, component, scale);
+        if (this.hasValues(stat, component, scale, id)) {
+            Key key = new Key(stat, component, scale, id);
             return values.get(key);
         } else {
             return new double[0];
@@ -199,9 +207,9 @@ public class StatsCache {
 
     }
 
-    public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale) {
+    public boolean hasMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
-        Key key = new Key(stat, component, scale);
+        Key key = new Key(stat, component, scale, id);
         return cache.containsKey(key);
 
     }
@@ -214,9 +222,9 @@ public class StatsCache {
      * @param scale
      * @return
      */
-    public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale) {
+    public boolean hasValues(PlottableStatistic stat, String component, MeasurementScale scale, UUID id) {
 
-        Key key = new Key(stat, component, scale);
+        Key key = new Key(stat, component, scale, id);
         return values.containsKey(key);
 
     }

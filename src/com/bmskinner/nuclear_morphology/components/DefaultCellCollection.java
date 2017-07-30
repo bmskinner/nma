@@ -43,6 +43,9 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
@@ -831,10 +834,15 @@ public class DefaultCellCollection implements ICellCollection {
      * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
      * 
      */
-
+    
     @Override
     public void clear(PlottableStatistic stat, String component) {
-        statsCache.clear(stat, component);
+        statsCache.clear(stat, component, null);
+    }
+
+    @Override
+    public void clear(PlottableStatistic stat, String component, UUID id) {
+        statsCache.clear(stat, component, id);
     }
 
     @Override
@@ -845,7 +853,7 @@ public class DefaultCellCollection implements ICellCollection {
     @Override
     public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale)
             throws Exception {
-        return getMedianStatistic(stat, component, scale, null, null);
+        return getMedianStatistic(stat, component, scale, null);
     }
 
     @Override
@@ -853,11 +861,11 @@ public class DefaultCellCollection implements ICellCollection {
             UUID id) throws Exception {
 
         if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
-            return getMedianStatistic(stat, component, scale, id, null);
+            return getMedianStatistic(stat, component, scale, id);
         }
 
         if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component) || stat.getClass() == SegmentStatistic.class) {
-            return getMedianStatistic(stat, component, scale, null, id);
+            return getMedianStatistic(stat, component, scale, id);
         }
         return 0;
     }
@@ -887,49 +895,37 @@ public class DefaultCellCollection implements ICellCollection {
 
             }
         } catch (Exception e) {
-            stack("Unable to get median stats of " + stat + " for " + component + " at " + scale, e);
+            stack("Unable to get raw values of " + stat + " for " + component + " at " + scale, e);
             return null;
         }
 
-        warn("No stats of type " + stat + " can be handled");
+        warn("No component of type " + component + " can be handled");
         return null;
     }
 
     private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID signalGroup, UUID segId) throws Exception {
+            UUID id) throws Exception {
 
-        if (statsCache.hasMedian(stat, component, scale)) {
+        if (statsCache.hasMedian(stat, component, scale, id)) {
 
-            return statsCache.getMedian(stat, component, scale);
+            return statsCache.getMedian(stat, component, scale, id);
 
         } else {
 
             double median = Statistical.ERROR_CALCULATING_STAT;
 
             if (this.hasCells()) {
+            	
+            	double[] values = getRawValues(stat, component, scale, id);
 
-                double[] values = null;
-
-                if (CellularComponent.WHOLE_CELL.equals(component)) {
-                    values = getCellStatistics(stat, scale);
+                DescriptiveStatistics  s = new DescriptiveStatistics ();
+                for(double v  : values){
+                	s.addValue(v);
                 }
-
-                if (CellularComponent.NUCLEUS.equals(component)) {
-                    values = getNuclearStatistics(stat, scale);
-                }
-
-                if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-                    values = getSignalManager().getSignalStatistics(stat, scale, signalGroup);
-                }
-
-                if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-                    values = getSegmentStatistics(stat, scale, segId);
-                }
-
-                median = Quartile.quartile(values, Quartile.MEDIAN);
+                median = s.getPercentile(Quartile.MEDIAN);
             }
 
-            statsCache.setMedian(stat, component, scale, median);
+            statsCache.setMedian(stat, component, scale, id, median);
             return median;
         }
     }
@@ -1004,15 +1000,15 @@ public class DefaultCellCollection implements ICellCollection {
 
         double[] result = null;
 
-        if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale)) {
-            return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale);
+        if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null)) {
+            return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
 
         } else {
 
             result = cells.parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).toArray();
 
             Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, result);
+            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
 
         }
 
@@ -1035,8 +1031,8 @@ public class DefaultCellCollection implements ICellCollection {
 
         double[] result = null;
 
-        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)) {
-            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
+            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
         } else {
 
@@ -1047,7 +1043,7 @@ public class DefaultCellCollection implements ICellCollection {
                 result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
             }
             Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, result);
+            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         }
 
         return result;
@@ -1174,71 +1170,6 @@ public class DefaultCellCollection implements ICellCollection {
         };
 
         return filter(pred);
-
-        // Make the new collection, named with the filter
-        // String name =
-        // "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper);
-        // ICellCollection subCollection = new DefaultCellCollection(this,
-        // name);
-        //
-        // List<ICell> filteredCells;
-        //
-        // finest("Filtering collection on "+stat);
-        //
-        // if(stat.equals(PlottableStatistic.VARIABILITY)){ // the variability
-        // must be handled differently
-        // filteredCells = new ArrayList<ICell>();
-        // for(ICell c : this.getCells()){
-        //
-        // boolean include = true;
-        // for(Nucleus n : c.getNuclei()){
-        // double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT,
-        // n);
-        // if(value< lower || value> upper){
-        // include = false;
-        // }
-        //
-        // }
-        //
-        // if(include){
-        // filteredCells.add(c);
-        // }
-        // }
-        //
-        // } else {
-        //
-        // filteredCells = getCells()
-        // .parallelStream()
-        // .filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
-        // .filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
-        // .collect(Collectors.toList());
-        // }
-        //
-        // finest("Adding cells to new collection");
-        // for(ICell cell : filteredCells){
-        // subCollection.addCell(new DefaultCell(cell));
-        // }
-        //
-        // if(subCollection.size()==0){
-        // warn("No cells in collection");
-        // }
-        //
-        //
-        // try {
-        //
-        // //TODO - this fails on converted collections from (at least) 1.13.0
-        // with no profiles in aggregate
-        // this.getProfileManager().copyCollectionOffsets(subCollection);
-        // this.getSignalManager().copySignalGroups(subCollection);
-        //
-        // } catch (ProfileException e) {
-        // warn("Error copying collection offsets");
-        // stack("Error in offsetting", e);
-        // }
-        //
-        //
-        //
-        // return subCollection;
     }
 
     @Override
@@ -1326,8 +1257,8 @@ public class DefaultCellCollection implements ICellCollection {
                 n.updateDependentStats();
             });
 
-            statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS);
-            statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS);
+            statsCache.clear(PlottableStatistic.BODY_WIDTH, CellularComponent.NUCLEUS, null);
+            statsCache.clear(PlottableStatistic.HOOK_LENGTH, CellularComponent.NUCLEUS, null);
         } catch (Exception e) {
             warn("Cannot update all vertical nuclei");
             stack("Error updating vertical nuclei", e);

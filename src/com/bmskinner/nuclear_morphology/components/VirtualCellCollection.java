@@ -34,6 +34,8 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
@@ -997,9 +999,20 @@ public class VirtualCellCollection implements ICellCollection {
         return Arrays.stream(this.getArrayLengths()).max().orElse(0); // Stats.max(values);
     }
 
+    /*
+     * 
+     * METHODS IMPLEMENTING THE STATISTICAL COLLECTION INTERFACE
+     * 
+     */
+    
     @Override
     public void clear(PlottableStatistic stat, String component) {
-        statsCache.clear(stat, component);
+        statsCache.clear(stat, component, null);
+    }
+
+    @Override
+    public void clear(PlottableStatistic stat, String component, UUID id) {
+        statsCache.clear(stat, component, id);
     }
 
     @Override
@@ -1013,7 +1026,7 @@ public class VirtualCellCollection implements ICellCollection {
         if (this.size() == 0) {
             return 0;
         }
-        return getMedianStatistic(stat, component, scale, null, null);
+        return getMedianStatistic(stat, component, scale, null);
     }
 
     @Override
@@ -1052,7 +1065,7 @@ public class VirtualCellCollection implements ICellCollection {
     public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale, UUID id)
             throws Exception {
 
-        return getMedianStatistic(stat, component, scale, null, id);
+        return getMedianStatistic(stat, component, scale, id);
     }
     
     @Override
@@ -1171,8 +1184,8 @@ public class VirtualCellCollection implements ICellCollection {
 
         double[] result = null;
 
-        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)) {
-            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
+            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
         } else {
 
@@ -1183,7 +1196,7 @@ public class VirtualCellCollection implements ICellCollection {
                 result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
             }
             Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, result);
+            statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         }
 
         return result;
@@ -1204,15 +1217,15 @@ public class VirtualCellCollection implements ICellCollection {
 
         double[] result = null;
 
-        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale)) {
-            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale);
+        if (statsCache.hasValues(stat, CellularComponent.NUCLEUS, scale, null)) {
+            return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
         } else {
 
             result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
 
             Arrays.sort(result);
-            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, result);
+            statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
         }
 
         return result;
@@ -1284,40 +1297,27 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
-            UUID signalGroup, UUID segId) throws Exception {
+            UUID id) throws Exception {
 
-        if (this.statsCache.hasMedian(stat, component, scale)) {
-            return statsCache.getMedian(stat, component, scale);
+        if (this.statsCache.hasMedian(stat, component, scale, id)) {
+            return statsCache.getMedian(stat, component, scale,id);
 
         } else {
 
-            double median = Statistical.ERROR_CALCULATING_STAT;
+        	double median = Statistical.ERROR_CALCULATING_STAT;
 
             if (this.hasCells()) {
+            	
+            	double[] values = getRawValues(stat, component, scale, id);
 
-                double[] values = null;
-
-                if (CellularComponent.WHOLE_CELL.equals(component)) {
-                    values = getCellStatistics(stat, scale);
+                DescriptiveStatistics  s = new DescriptiveStatistics ();
+                for(double v  : values){
+                	s.addValue(v);
                 }
-
-                if (CellularComponent.NUCLEUS.equals(component)) {
-                    values = getNuclearStatistics(stat, scale);
-                }
-
-                if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-                    values = getSignalManager().getSignalStatistics(stat, scale, signalGroup);
-                }
-
-                if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-                    values = getSegmentStatistics(stat, scale, segId);
-                }
-
-                median = Quartile.quartile(values, Quartile.MEDIAN);
-                // median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+                median = s.getPercentile(Quartile.MEDIAN);
             }
 
-            statsCache.setMedian(stat, component, scale, median);
+            statsCache.setMedian(stat, component, scale, id, median);
             return median;
         }
 

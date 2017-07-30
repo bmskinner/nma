@@ -78,13 +78,16 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
             worker = new DefaultAnalysisWorker(m);
 
-            // worker = new ShellAnalysisWorker(dataset,shellCount);
-
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
         }
     }
     
+    /**
+     * Check if the nuclei in the dataset are suitable for shell analysis
+     * @param shells
+     * @return
+     */
     private boolean datasetParametersOk(int shells){
     		
 			double area = dataset.getCollection()
