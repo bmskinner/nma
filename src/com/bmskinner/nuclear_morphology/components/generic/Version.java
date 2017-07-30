@@ -21,8 +21,6 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-
 /**
  * Hold version information, and parsing methods
  * 

@@ -90,7 +90,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     @Override
     public IAnalysisResult call() throws Exception {
 
-        run();
+    	try{ 
+    		run();
+        
+    	} catch (UnsupportedVersionException e) {
+    		throw(e);
+    	}
 
         if (dataset == null) {
             throw new UnloadableDatasetException("Could not load file '" + file.getAbsolutePath() + "'");
@@ -106,6 +111,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         try {
 
             // Clean up old log lock files
+        	// Legacy.
             cleanLockFilesInDir(file.getParentFile());
 
             try {
@@ -113,7 +119,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             } catch (UnsupportedVersionException e) {
             	warn("Version "+e.getMessage()+" not supported");
             	warn("Dataset is too old");
-            	return;
+            	throw(e);
                 
             } catch (UnloadableDatasetException e) {
                 warn(e.getMessage());
@@ -307,7 +313,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * @param version
      * @return a pass or fail
      */
-    public boolean checkVersion(Version version) {
+    private boolean checkVersion(Version version) {
 
         if (version == null) { // allow for debugging, but warn
             warn("No version info found: functions may not work as expected");

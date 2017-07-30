@@ -27,7 +27,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
@@ -78,7 +80,45 @@ public class PopulationImportAction extends VoidResultAction {
         if (file != null) {
 
             IAnalysisMethod m = new DatasetImportMethod(file);
-            worker = new DefaultAnalysisWorker(m);
+            worker = new DefaultAnalysisWorker(m){
+            	@Override
+                public void done() {
+
+                    try {
+
+                        if (this.get() != null) {
+//                            fine("Firing trigger for sucessful task");
+                            firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+
+                        } else {
+//                            fine("Firing trigger for failed task");
+                            firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
+                        }
+                    } catch (StackOverflowError e) {
+                        warn("Stack overflow detected");
+                        stack("Stack overflow in worker", e);
+                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+                    } catch (InterruptedException e) {
+                        warn("Interruption to swing worker: "+e.getMessage());
+                        stack("Interruption to swing worker", e);
+                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+                    } catch (ExecutionException e) {
+                    	
+                    	if(e.getCause() instanceof UnsupportedVersionException){
+                    		firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+                    		return;
+                    	}
+
+                        warn("Execution error in swing worker: "+e.getMessage());
+                        stack("Execution error in swing worker", e);
+                        Throwable cause = e.getCause();
+                        warn("Causing error: "+cause.getMessage());
+                        stack("Causing error: ", cause);
+                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+                    }
+
+                }
+            };
 
             worker.addPropertyChangeListener(this);
 
