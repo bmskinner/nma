@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.process.ImageProcessor;
 
@@ -217,40 +218,44 @@ public class ImagesTabPanel extends DetailPanel {
 
     private TreeSelectionListener makeListener() {
 
-        TreeSelectionListener l = (TreeSelectionEvent e) -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
+    	TreeSelectionListener l = (TreeSelectionEvent e) -> {
+    		DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
 
-            ImageNode data = (ImageNode) node.getUserObject();
+    		ImageNode data = (ImageNode) node.getUserObject();
 
-                try {
+    		if (data.getFile() == null) {
+    			label.setIcon(null);
+    			return;
+    		}
 
-                    if (data.getFile() == null) {
-                        label.setIcon(null);
-                        return;
-                    }
+    		Runnable r = () -> {
+    			try {
 
-                    ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
+    				ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
 
-                    ImageConverter cn = new ImageConverter(ip);
-                    if (cn.isByteProcessor()) {
-                        cn.convertToColorProcessor();
-                    }
-                    ImageAnnotator an = cn.toAnnotator();
-                    
-                    Optional<IAnalysisDataset> dataset = getDataset(node);
-                    dataset.ifPresent( d -> d.getCollection().getCells(data.getFile()).stream().forEach( c-> an.annotateCellBorders(c)) );
+    				ImageConverter cn = new ImageConverter(ip);
+    				if (cn.isByteProcessor()) {
+    					cn.convertToColorProcessor();
+    				}
+    				ImageAnnotator an = cn.toAnnotator();
 
-                    ImageFilterer ic = new ImageFilterer(an.toProcessor());
-                    ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
-                    label.setIcon(ic.toImageIcon());
+    				Optional<IAnalysisDataset> dataset = getDataset(node);
+    				dataset.ifPresent( d -> d.getCollection().getCells(data.getFile()).stream().forEach( c-> an.annotateCellBorders(c)) );
 
-                } catch (Exception e1) {
-                    warn("Error fetching image");
-                    stack("Error fetching image", e1);
-                }
+    				ImageFilterer ic = new ImageFilterer(an.toProcessor());
+    				ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
+    				label.setIcon(ic.toImageIcon());
 
-        };
-        return l;
+    			} catch (Exception e1) {
+    				warn("Error fetching image");
+    				stack("Error fetching image", e1);
+    			}
+    		};
+
+    		ThreadManager.getInstance().submit(r);
+
+    	};
+    	return l;
     }
 
 }
