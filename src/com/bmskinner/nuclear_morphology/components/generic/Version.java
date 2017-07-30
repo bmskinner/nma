@@ -18,7 +18,10 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.io.IOException;
 import java.io.Serializable;
+
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * Hold version information, and parsing methods
@@ -51,6 +54,7 @@ public class Version implements Serializable {
     public static final Version v_1_13_3 = new Version(1, 13, 3);
     public static final Version v_1_13_4 = new Version(1, 13, 4);
     public static final Version v_1_13_5 = new Version(1, 13, 5);
+    public static final Version v_1_13_7 = new Version(1, 13, 7);
 
     public Version(final int major, final int minor, final int revision) {
         this.major = major;
@@ -154,6 +158,53 @@ public class Version implements Serializable {
 
     public String toString() {
         return major + SEPARATOR + minor + SEPARATOR + revision;
+    }
+    
+    /**
+     * Check a version string to see if the program will be able to open a
+     * dataset. The major and minor version must be the same. Bugfixing revision
+     * versions are not checked.
+     * 
+     * @param version
+     * @return a pass or fail
+     */
+    public boolean versionIsSupported(Version version) {
+
+        if (version == null) {
+            return false;
+        }
+
+        // major version MUST be the same
+        if (version.getMajor() != VERSION_MAJOR) {
+            return false;
+        }
+        
+        if (version.getMinor() != VERSION_MINOR) {
+            return false;
+        }
+
+        return true;
+    }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+
+        in.defaultReadObject();
+
+        if(!versionIsSupported(this)){
+        	throw new UnsupportedVersionException(this.toString());
+        }
+    }
+        
+    /**
+     * Throw if the version being deserialised is not supported 
+     * @author ben
+     *
+     */
+    public class UnsupportedVersionException extends IOException {
+    	
+    	public UnsupportedVersionException(String s){
+    		super(s);
+    	}
     }
 
 }

@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
@@ -109,6 +110,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
             try {
                 dataset = readDataset(file);
+            } catch (UnsupportedVersionException e) {
+            	warn("Version "+e.getMessage()+" not supported");
+            	warn("Dataset is too old");
+            	return;
+                
             } catch (UnloadableDatasetException e) {
                 warn(e.getMessage());
                 warn("Dataset version may be too old");
@@ -322,7 +328,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         return true;
     }
 
-    private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException {
+    private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
 
         finest("Checking input file");
 
@@ -336,17 +342,18 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
             fis = new FileInputStream(inputFile.getAbsolutePath());
             finest("Created file stream");
-            ois = new PackageReplacementObjectInputStream(fis); // enable moving
-                                                                // classes
-                                                                // between
-                                                                // packages
-                                                                // between
-                                                                // versions
+            
+            // This was needed when classes changed packages between versions
+            ois = new PackageReplacementObjectInputStream(fis);
             finest("Created object stream");
 
             finest("Attempting to read object");
             dataset = (IAnalysisDataset) ois.readObject();
             finest("Read object as analysis dataset");
+
+        } catch (UnsupportedVersionException e1) {
+                
+        	throw(e1);
 
         } catch (NullPointerException e1) {
             stack("NPE Error reading '" + file.getAbsolutePath() + "': ", e1);

@@ -187,6 +187,9 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 
+    	// The first thing to be deserialised in this dataset will be the Version.
+    	// If not supported, an UnsupportedVersionException will be thrown, and
+    	// passed upwards here for the import method to handle.
         in.defaultReadObject();
 
         if (cellCollection == null) {
