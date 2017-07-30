@@ -68,7 +68,11 @@ public class StatsCache {
             if (!scale.equals(key.scale))
                 return false;
             
-            if(!id.equals(key.id))
+            if(id!=null)
+            	if(!id.equals(key.id))
+            		return false;
+            
+            if(id==null && key.id!=null)
             	return false;
 
             return true;
@@ -85,7 +89,8 @@ public class StatsCache {
 
             result = prime * result + scale.hashCode();
             
-            result = prime * result + id.hashCode();
+            if(id!=null)
+            	result = prime * result + id.hashCode();
 
             return result;
         }
