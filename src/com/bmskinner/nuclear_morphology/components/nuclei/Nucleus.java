@@ -107,7 +107,7 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
 
     /**
      * Is the reference point of the vertically rotated nucleus pointing to the
-     * right?
+     * right (i.e. is the tip pointing in a clockwise direction)?
      * 
      * @return
      */

@@ -58,12 +58,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     private static final long serialVersionUID = 1L;
 
-    // public DefaultRodentSpermNucleus(Roi roi, File f, int channel, int[]
-    // position, int number) {
-    // super(roi, f, channel, position, number);
-    //
-    // }
-
     /**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
@@ -215,52 +209,55 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
             return;
         }
-
+        
         /*
          * Find the distance from the vertical X position to the min and max
          * points of the bounding box. VertX must lie between these points.
+         * 
          */
 
-        double distanceLower = vertX - minBoundingX;
-        double distanceHigher = maxBoundingX - vertX;
+//        double distanceLower = vertX - minBoundingX;
+//        double distanceHigher = maxBoundingX - vertX;
 
         /*
          * To determine if the point is hook or hump, take the X position of the
          * tip. This must lie on the hook side of the vertX
          */
 
-        double distanceHook = 0;
-        double distanceHump = 0;
-        double referenceX;
-        try {
-            referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
-        } catch (UnavailableBorderTagException e) {
-            stack("Cannot get border tag", e);
-            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
-            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
-            return;
+        double dHook = 0;
+        double dBody = 0;
+//        double referenceX;
+//        try {
+//            referenceX = testNucleus.getBorderTag(Tag.REFERENCE_POINT).getX();
+//        } catch (UnavailableBorderTagException e) {
+//            stack("Cannot get border tag", e);
+//            setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
+//            setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
+//            return;
+//        }
+
+        if(testNucleus.isClockwiseRP()){
+        	dBody = vertX - minBoundingX;
+        	dHook = maxBoundingX - vertX;
+        	
+        } else{
+        	dHook = vertX - minBoundingX;
+        	dBody = maxBoundingX - vertX;
         }
 
-        finer("TV is at " + vertX);
-        finer("Max bounding x is " + maxBoundingX);
-        finer("Min bounding x is " + minBoundingX);
-        finer("RP x is " + referenceX);
-        finer("Distance lower is " + distanceLower);
-        finer("Distance higher is " + distanceHigher);
+//        if (referenceX < vertX) {
+//            distanceHook = distanceLower;
+//            distanceHump = distanceHigher;
+//        } else {
+//            distanceHook = distanceHigher;
+//            distanceHump = distanceLower;
+//        }
 
-        if (referenceX < vertX) {
-            distanceHook = distanceLower;
-            distanceHump = distanceHigher;
-        } else {
-            distanceHook = distanceHigher;
-            distanceHump = distanceLower;
-        }
+        setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
+        setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
 
-        setStatistic(PlottableStatistic.HOOK_LENGTH, distanceHook);
-        setStatistic(PlottableStatistic.BODY_WIDTH, distanceHump);
-
-        fine("Hook length is " + distanceHook);
-        fine("Body width is " + distanceHump);
+        fine("Hook length is " + dHook);
+        fine("Body width is " + dBody);
 
         finest("Hook length and body width calculated");
     }
