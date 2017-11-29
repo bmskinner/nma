@@ -36,9 +36,9 @@ public class FloatEquation implements LineEquation {
      * @return An Equation describing the line
      */
     public FloatEquation(final float m, final float c) {
-        if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
-            throw new IllegalArgumentException("m or c is null");
-        }
+//        if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
+//            throw new IllegalArgumentException("m or c is null");
+//        }
         this.m = m;
         this.c = c;
     }

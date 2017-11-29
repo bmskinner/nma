@@ -150,6 +150,10 @@ public class DoubleEquation implements LineEquation {
      */
     @Override
     public IPoint getPointOnLine(IPoint p, double distance) {
+        
+        if(!this.isOnLine(p)){
+            throw new IllegalArgumentException("The given point is not on this line: "+p.toString());
+        }
 
         double xA = p.getX();
 
@@ -351,5 +355,35 @@ public class DoubleEquation implements LineEquation {
     public String toString() {
         return "y=" + m + ".x+" + c;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(c);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(m);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DoubleEquation other = (DoubleEquation) obj;
+        if (Double.doubleToLongBits(c) != Double.doubleToLongBits(other.c))
+            return false;
+        if (Double.doubleToLongBits(m) != Double.doubleToLongBits(other.m))
+            return false;
+        return true;
+    }
+    
+    
 
 }

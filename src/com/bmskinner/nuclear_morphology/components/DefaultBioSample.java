@@ -25,6 +25,12 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.IWorkspace.BioSample;
 
+/**
+ * The default implementation of BioSamples.
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
 public class DefaultBioSample implements BioSample {
     
     private String name;

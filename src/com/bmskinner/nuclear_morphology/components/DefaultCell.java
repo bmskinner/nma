@@ -497,15 +497,25 @@ public class DefaultCell implements IMutableCell {
         if (!this.hasNucleus()) {
             return -1;
         }
+        
+        
+        // If different number of nuclei
+        if(this.getNuclei().size()!=o.getNuclei().size()){
+            return this.getNuclei().size() - o.getNuclei().size();
+        }
+        
+        int val = 0;
+        List<Nucleus> other = o.getNuclei();
+        
+        for(int i=0; i<other.size(); i++){
+            val += this.getNuclei().get(i).compareTo(other.get(i));
+        }
 
-        return this.getNucleus().compareTo(o.getNucleus());
-        // return this.nucleus.compareTo(o.getNucleus());
+        return val;
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting cell");
         out.defaultWriteObject();
-        // finest("\tWrote cell");
     }
 
     /*

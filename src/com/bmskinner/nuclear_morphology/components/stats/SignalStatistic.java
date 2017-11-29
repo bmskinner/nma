@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
+@Deprecated
 public enum SignalStatistic implements PlottableStatistic {
 
     ANGLE("Angle", StatisticDimension.ANGLE), AREA("Area", StatisticDimension.AREA), PERIMETER("Perimeter",

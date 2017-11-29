@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.stats;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 
+@Deprecated
 public enum SegmentStatistic implements PlottableStatistic {
 
     LENGTH("Length", StatisticDimension.LENGTH), DISPLACEMENT("Displacement", StatisticDimension.ANGLE);
