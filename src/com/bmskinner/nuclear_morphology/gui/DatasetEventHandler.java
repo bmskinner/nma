@@ -37,13 +37,23 @@ public class DatasetEventHandler extends AbstractEventHandler {
         super(parent);
     }
 
+    /**
+     * Fire a dataset event with the given name
+     * @param method the method name
+     * @param dataset the dataset to run the method on
+     */
     public synchronized void fireDatasetEvent(String method, IAnalysisDataset dataset) {
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+        List<IAnalysisDataset> list = new ArrayList<>();
         list.add(dataset);
         fireDatasetEvent(method, list);
     }
 
+    /**
+     * Fire a dataset event with the given name
+     * @param method the method name
+     * @param list the datasets to run the method on
+     */
     public synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list) {
 
         DatasetEvent event = new DatasetEvent(parent, method, parent.getClass().getSimpleName(), list);
@@ -53,6 +63,12 @@ public class DatasetEventHandler extends AbstractEventHandler {
         }
     }
 
+    /**
+     * Fire a dataset event with the given name and secondary dataset
+     * @param method method the method name
+     * @param list list the datasets to run the method on
+     * @param secondary the secondary or template dataset
+     */
     public synchronized void fireDatasetEvent(String method, List<IAnalysisDataset> list,
             IAnalysisDataset secondary) {
 
@@ -63,17 +79,30 @@ public class DatasetEventHandler extends AbstractEventHandler {
         }
     }
     
+    /**
+     * Fire the given dataset event
+     * @param event the event
+     */
     public synchronized void fireDatasetEvent(DatasetEvent event) {
-      Iterator<Object> iterator = listeners.iterator();
-      while (iterator.hasNext()) {
-          ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
-      }
-  }
+        Iterator<Object> iterator = listeners.iterator();
+        while (iterator.hasNext()) {
+            ((DatasetEventListener) iterator.next()).datasetEventReceived(event);
+        }
+    }
 
+    
+    /**
+     * Add the given event listener to this handler
+     * @param l the listener
+     */
     public synchronized void addDatasetEventListener(DatasetEventListener l) {
         listeners.add(l);
     }
 
+    /**
+     * Remove the given event listener from this handler
+     * @param l the listener
+     */
     public synchronized void removeDatasetEventListener(DatasetEventListener l) {
         listeners.remove(l);
     }
