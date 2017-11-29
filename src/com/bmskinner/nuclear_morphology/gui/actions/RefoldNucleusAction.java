@@ -58,7 +58,7 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
             IAnalysisMethod m;
 
-            if (override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL)) {
+            if (override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL) || dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)){
                 m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
             } else {
                 m = new ConsensusAveragingMethod(dataset);

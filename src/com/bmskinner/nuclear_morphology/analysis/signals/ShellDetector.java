@@ -496,7 +496,7 @@ public class ShellDetector extends Detector {
                 prevDiffToTarget = diffToTarget;
                 diffToTarget = area - maxArea;
 
-                fine("\tShrunk by 1 pixel to " + area + ": Diff to target: " + diffToTarget);
+                fine("\tShrunk by 1 pixel to " + area + ": Diff to target of "+maxArea+": " + diffToTarget);
             }
 
             // Correct overspills by enlarging the roi again
