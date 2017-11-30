@@ -12,7 +12,7 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class RandomSamplingMethod extends AbstractAnalysisMethod {
+public class RandomSamplingMethod extends SingleDatasetAnalysisMethod {
 	
 	private List<Double>       magnitudes = new ArrayList<Double>();
     private int                iterations;

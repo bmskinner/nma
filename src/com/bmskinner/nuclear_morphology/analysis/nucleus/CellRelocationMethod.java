@@ -26,9 +26,9 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.options.MissingOptionExceptio
  * @since 1.13.4
  *
  */
-public class CellRelocationMethod extends AbstractAnalysisMethod {
+public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
     private static final String TAB          = "\\t";
     private static final String UUID_KEY     = "UUID";

@@ -21,9 +21,9 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.awt.Rectangle;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -35,7 +35,6 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.Statistical;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclear.LobeFactory;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -70,7 +69,7 @@ import inra.ijpb.watershed.Watershed;
  * @since 1.13.4
  *
  */
-public class LobeDetectionMethod extends AbstractAnalysisMethod {
+public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
     private IHoughDetectionOptions options;
 

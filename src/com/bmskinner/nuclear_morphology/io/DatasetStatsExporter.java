@@ -19,13 +19,11 @@
 package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -50,7 +48,7 @@ import ij.IJ;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends AbstractAnalysisMethod implements Exporter, Loggable, IAnalysisMethod {
+public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
 
     private static final String EXPORT_MESSAGE          = "Exporting stats...";
     private File                exportFile;
@@ -58,16 +56,14 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
 
     private boolean includeProfiles = true;
 
-    private List<IAnalysisDataset> list = new ArrayList<>();
-
     /**
      * Create specifying the folder stats will be exported into
      * 
      * @param folder
      */
     public DatasetStatsExporter(File file, List<IAnalysisDataset> list) {
-        super(null);
-        this.list = list;
+        super(list);
+//        this.list = list;
         if (file.isDirectory()) {
             file = new File(file, DEFAULT_MULTI_FILE_NAME);
         }
@@ -85,8 +81,7 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
      * @param folder
      */
     public DatasetStatsExporter(File file, IAnalysisDataset dataset) {
-        super(null);
-        list.add(dataset);
+        super(dataset);
 
         if (file.isDirectory()) {
             file = new File(file, DEFAULT_MULTI_FILE_NAME);
@@ -102,8 +97,8 @@ public class DatasetStatsExporter extends AbstractAnalysisMethod implements Expo
     @Override
     public IAnalysisResult call() {
 
-        export(list);
-        return new DefaultAnalysisResult(list);
+        export(datasets);
+        return new DefaultAnalysisResult(datasets);
     }
 
     /**

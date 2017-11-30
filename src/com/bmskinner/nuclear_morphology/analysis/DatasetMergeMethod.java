@@ -36,9 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.io.Orter.Importer;
 
-public class DatasetMergeMethod extends AbstractAnalysisMethod {
-
-    private List<IAnalysisDataset> datasets;
+public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
     private File saveFile;
 
@@ -57,8 +55,7 @@ public class DatasetMergeMethod extends AbstractAnalysisMethod {
      *            the file to save the new dataset as
      */
     public DatasetMergeMethod(List<IAnalysisDataset> datasets, File saveFile) {
-        super(datasets.get(0));
-        this.datasets = datasets;
+        super(datasets);
         this.saveFile = saveFile;
     }
 

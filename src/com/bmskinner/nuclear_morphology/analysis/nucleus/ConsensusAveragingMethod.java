@@ -27,10 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.ComponentMeasurer;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -63,11 +63,11 @@ import com.bmskinner.nuclear_morphology.utility.CircleTools;
  * @since 1.13.5
  *
  */
-public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
+public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
     private static final double PROFILE_LENGTH = 200d;
 
-    public ConsensusAveragingMethod(IAnalysisDataset dataset) {
+    public ConsensusAveragingMethod(final IAnalysisDataset dataset) {
         super(dataset);
     }
 
@@ -81,7 +81,6 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
 
     private void run() {
 
-        // runFromPoint(3);
         try {
             List<IPoint> border = getPointAverage();
 
@@ -92,10 +91,6 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
         } catch (Exception e) {
             error("Error getting points", e);
         }
-        // for(int i=0; i<16; i++){
-        // runFromPoint(i);
-        // }
-
     }
 
     private Nucleus makeConsensus(List<IPoint> list)
@@ -168,7 +163,9 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
         IPoint com = IPoint.makeNew(0, 0);
         dataset.getCollection().getNuclei().stream().forEach(n -> {
             try {
+                
                 Nucleus v = n.getVerticallyRotatedNucleus();
+
                 v.moveCentreOfMass(com);
                 IProfile p = v.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
 
@@ -223,180 +220,6 @@ public class ConsensusAveragingMethod extends AbstractAnalysisMethod {
         IPoint avgRP = IPoint.makeNew(xMed, yMed);
         return avgRP;
     }
-
-    // private void runFromPoint(int start) {
-    //
-    // try {
-    //
-    // IProfile angleProfile = dataset.getCollection()
-    // .getProfileCollection()
-    // .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-    //
-    // IProfile radiusProfile = dataset.getCollection()
-    // .getProfileCollection()
-    // .getProfile(ProfileType.RADIUS, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-    //
-    //// IProfile p2pProfile = dataset.getCollection()
-    //// .getProfileCollection()
-    //// .getProfile(ProfileType.P2P, Tag.REFERENCE_POINT, Quartile.MEDIAN);
-    //
-    //
-    // angleProfile.reverse();
-    // radiusProfile.reverse();
-    // List<IPoint> list = new ArrayList<>();
-    //
-    // IPoint com = IPoint.makeNew(0, 0);
-    //
-    // // Make the first point on the x axis, radius from zero.
-    // // This is the reference point
-    // log("First point radius is "+radiusProfile.get(start));
-    // IPoint first = IPoint.makeNew( 0, radiusProfile.get(start));
-    //
-    // /*
-    // * The angle profile measures points at every windowsize intervals.
-    // * Therefore we need to measure the angles between points spaced
-    // * windowsize apart when building a skeleton outline
-    // * Move windowsize points along the profile and get the angle.
-    // * The interpolation of nucleus periperies has put points every ~1 pixel.
-    // * The rough distance to move to the next point is one pixel * the window
-    // size
-    // */
-    //
-    // int totalPoints = angleProfile.size();
-    // int window = (int)
-    // (dataset.getAnalysisOptions().getProfileWindowProportion() *
-    // totalPoints);
-    // // Get the distance between points
-    // double distance = p2pProfile.get(start);
-    //
-    // log("Setting distance between points to "+distance);
-    //
-    // list.add(first);
-    // log(first.toString());
-    //
-    // // Now calculate the position of the next point, which is
-    // // radius away from CoM, and can be in any direction from
-    // // the first point
-    //
-    // /*
-    // * Looking for the intersection of the circles
-    // * with radii described
-    // */
-    // log("Second point radius is "+radiusProfile.get(window));
-    // IPoint second = calculateSecondPoint(first, distance, com,
-    // radiusProfile.get(window));
-    // log("Second point distance from CoM: "+second.getLengthTo(com));
-    // list.add(second);
-    // log("Second: "+second.toString());
-    //
-    // /*
-    // * We can now use the angle from the previous point with the radius
-    // * to find a position.
-    // */
-    //
-    // Path2D outline = new Path2D.Double();
-    // outline.moveTo(first.getX(), first.getY());
-    // outline.lineTo( second.getX(), second.getY() );
-    //
-    //// int finalPoint = 0;
-    // for(int i=start+window, k=totalPoints, j=1; i<totalPoints; i+=window,
-    // j++, k--){
-    //
-    // double r = radiusProfile.get(CellularComponent.wrapIndex(i+1,
-    // radiusProfile.size()));
-    // double a = angleProfile.get( CellularComponent.wrapIndex(i+1,
-    // angleProfile.size()) );
-    // distance = p2pProfile.get( CellularComponent.wrapIndex(i+1,
-    // p2pProfile.size()) );
-    //
-    // // In the first iteration of the loop
-    // // a is the angle from first to third via second
-    // // r is the distance from com to third
-    //
-    // // The next point must be one of the intersections between
-    // // point two circle and the com circle
-    //
-    // // Get the current and previous points to work from
-    // IPoint prev = list.get(j-1);
-    // IPoint current = list.get(j);
-    //
-    // // Find which circle intersection is closest to the desired angle
-    // IPoint[] inters = CircleTools.findIntersections(com, r, current,
-    // distance);
-    //
-    // // We have the two intersections of the circles. One of these will be
-    // closer
-    // // to the desired angle
-    //
-    // IPoint i0 = inters[0];
-    // IPoint i1 = inters[1];
-    //
-    // double a1 = current.findAngle(prev, i0);
-    // double a2 = current.findAngle(prev, i1);
-    //
-    // // The angle should be the interior angle of the object being drawn
-    // // If the desired angle is >180 degrees, correct
-    ////
-    //// if(a>180){
-    //// a1+=180;
-    //// a2+=180;
-    //// }
-    //
-    // // get the differences to the desired angle
-    //
-    // double d1 = Math.abs(a1-a);
-    // double d2 = Math.abs(a2-a);
-    //
-    //
-    //
-    // IPoint next = d1 < d2 ? i0 : i1;
-    //
-    // /*
-    // * If the angle is near 90 degrees, the wrong choice may be made.
-    // * We need to direct the point further.
-    // *
-    // * Check if the chosen point-CoM line crosses the Current-PrevPoint line
-    // */
-    //
-    // Line2D l1 = new Line2D.Double(current.toPoint2D(), prev.toPoint2D());
-    // Line2D l2 = new Line2D.Double(next.toPoint2D(), com.toPoint2D());
-    // if(l1.intersectsLine(l2)){
-    // next = next==i0 ? i1 : i0;
-    // }
-    //
-    // if(intersects(outline, l2)){ // swap points if the point would intersect
-    // the existing path
-    // next = next==i0 ? i1 : i0;
-    // }
-    //
-    //
-    //
-    // // if(next.getLengthTo(current) > distance){
-    // // log("Error getting points");
-    // // }
-    // outline.lineTo( next.getX(), next.getY() );
-    // list.add(next);
-    //// finalPoint = i;
-    // }
-    //
-    // log("##################");
-    // for(IPoint p : list){
-    // log("\t"+p.getX()+"\t"+p.getY());
-    // }
-    //
-    //
-    // // Try to go further around the perimeter
-    //
-    // if(angleProfile.size()%window==0){
-    // log("Exact multiple of window, cannot move to another point set");
-    // } else{
-    //
-    // }
-    //
-    // } catch(Exception e){
-    // error("Profile refold error", e);
-    // }
-    // }
 
     private static boolean intersects(Path2D path, Line2D line) {
         double x1 = -1, y1 = -1, x2 = -1, y2 = -1;
