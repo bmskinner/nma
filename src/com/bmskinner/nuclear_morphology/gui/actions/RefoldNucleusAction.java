@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
 public class RefoldNucleusAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Refolding";
+    private static final int PROGRESS_BAR_LENGTH = 100;
 
     /**
      * Refold the given selected dataset
@@ -49,22 +50,34 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
 
     @Override
     public void run() {
-
+        this.setProgressBarIndeterminate();
+        
         try {
-
-            this.setProgressBarIndeterminate();
-
             boolean override = GlobalOptions.getInstance().getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY);
 
             IAnalysisMethod m;
 
-            if (override || dataset.getCollection().getNucleusType().equals(NucleusType.NEUTROPHIL) || dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)){
+            // The averaging method does not work for nuclei that are round, or have extreme variability. 
+            // In these cases, or if the program config file has been set to override, use the old profile method.
+            if (override){
                 m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
             } else {
-                m = new ConsensusAveragingMethod(dataset);
+                
+                NucleusType t = dataset.getCollection().getNucleusType();
+                switch(t){
+                    case ROUND:
+                    case NEUTROPHIL: {
+                        m = new ProfileRefoldMethod(dataset, CurveRefoldingMode.FAST);
+                        break;
+                    }
+                    
+                    default: {
+                        m = new ConsensusAveragingMethod(dataset);
+                    }
+                }
             }
 
-            worker = new DefaultAnalysisWorker(m, 100);
+            worker = new DefaultAnalysisWorker(m, PROGRESS_BAR_LENGTH);
             worker.addPropertyChangeListener(this);
 
             this.setProgressMessage(PROGRESS_LBL + ": " + dataset.getName());
