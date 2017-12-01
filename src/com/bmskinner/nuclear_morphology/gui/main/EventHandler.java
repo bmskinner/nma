@@ -540,14 +540,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      */
     private void addDataset(final IAnalysisDataset dataset) {
 
-        fine("Adding dataset");
-
         mw.getPopulationsPanel().addDataset(dataset);
         for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
             mw.getPopulationsPanel().addDataset(child);
         }
-
-        finer("Ordering update of populations panel");
 
         // This will also trigger a dataset update event as the dataset
         // is selected, so don't trigger another update here.
@@ -715,16 +711,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
     }
 
-    // private void recacheCharts(final AnalysisDataset dataset){
-    // final List<AnalysisDataset> list = new ArrayList<AnalysisDataset>();
-    // list.add(dataset);
-    // recacheCharts(list);
-    // }
 
     private void recacheCharts(final List<IAnalysisDataset> list) {
 
         Runnable task = () -> {
-            fine("Heard recache request for list of  " + list.size() + " datasets");
             for (TabPanel panel : mw.getTabPanels()) {
                 panel.refreshChartCache(list);
                 panel.refreshTableCache(list);
@@ -755,8 +745,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
     public class PanelUpdater implements CancellableRunnable {
         private final List<IAnalysisDataset> list;
+        
+        private static final int SLEEP_MILLISECONDS = 20;
 
-        private AtomicBoolean isCancelled = new AtomicBoolean(false);
+        private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
         public PanelUpdater(final List<IAnalysisDataset> list) {
             this.list = list;
@@ -764,24 +756,27 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         @Override
         public void run() {
-            PanelLoadingUpdater loader = new PanelLoadingUpdater();
+            final PanelLoadingUpdater loader = new PanelLoadingUpdater();
 
             try {
 
-                Future<?> f = ThreadManager.getInstance().submit(loader);
+                final Future<?> f = ThreadManager.getInstance().submit(loader);
 
                 // Wait for loading state to be set
                 while (!f.isDone() && !isCancelled.get()) {
-                    fine("Waiting for chart loading set...");
-                    Thread.sleep(10);
+                    Thread.sleep(SLEEP_MILLISECONDS);
                 }
 
+                // Again stop if a cancel signal was heard 
                 if (isCancelled.get()) {
                     return;
                 }
-
+                
                 Boolean ok = (Boolean) f.get();
-                fine("Chart loading is set: " + ok);
+                
+                if(!ok){
+                    warn("Error updating the UI panels");
+                }
 
             } catch (InterruptedException e1) {
                 warn("Interrupted update");
@@ -792,10 +787,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 error("Error setting loading state", e1);
                 error("Cause of loading state error", e1.getCause());
                 return;
+            } catch (Exception e1){
+                error("Undefined error setting panel loading state", e1);
             }
 
             // Now fire the update
-            fine("Firing general update for " + list.size() + " datasets");
             DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
             Iterator<Object> iterator = updateListeners.iterator();
             while (iterator.hasNext()) {
@@ -811,8 +807,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         public void cancel() {
             fine("Cancelling thread");
             isCancelled.set(true);
-            // Thread.currentThread().interrupt();
-
         }
 
     }
@@ -821,12 +815,15 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         @Override
         public Boolean call() {
-
-            // log("Setting charts and tables loading");
             // Update charts and panels to loading
 
-            for (TabPanel p : mw.getTabPanels()) {
-                p.setChartsAndTablesLoading();
+            try {
+                for (TabPanel p : mw.getTabPanels()) {
+                    p.setChartsAndTablesLoading();
+                }
+            } catch(Exception e){
+                error("Error setting loading state", e);
+                return false;
             }
             return true;
 
