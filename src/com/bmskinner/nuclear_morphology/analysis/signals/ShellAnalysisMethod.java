@@ -271,10 +271,12 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             dataset.getCollection().addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
-            fine("Creating random sample of " + totalPixels + " pixels");
+            
+            int iterations = totalPixels < 100000 ? totalPixels : 100000; // stop stupidly long calculations 
+            fine("Creating random sample of " + iterations + " pixels");
 
             ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensus(), shells,
-                    totalPixels);
+                    iterations);
 
             double[] c = sr.getProportions();
 
