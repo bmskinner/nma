@@ -45,6 +45,7 @@ import ij.io.DirectoryChooser;
 @SuppressWarnings("serial")
 public class SignalsAnalysisPanel extends DetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Detection settings";
     private ExportableTable table;     // table for analysis parameters
     private JScrollPane     scrollPane;
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
@@ -100,6 +101,12 @@ public class SignalsAnalysisPanel extends DetailPanel {
         this.add(scrollPane, BorderLayout.CENTER);
     }
 
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
         return (SignalTableCell) table.getModel().getValueAt(row, column);
         // return UUID.fromString( table.getModel().getValueAt(row,

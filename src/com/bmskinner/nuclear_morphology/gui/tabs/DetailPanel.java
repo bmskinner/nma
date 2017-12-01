@@ -103,6 +103,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     	parentPanel = parent;
         this.addChartOptionsRenderedEventListener(this);
     }
+    
+    /**
+     * Get the preferred name of the panel for use in tabs
+     * @return the title
+     */
+    public abstract String getPanelTitle();
 
     /**
      * Add another detail panel as a sub panel to this. This will pass on

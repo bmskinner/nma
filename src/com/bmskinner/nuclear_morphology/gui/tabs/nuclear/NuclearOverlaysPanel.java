@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class NuclearOverlaysPanel extends DetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Overlays";
     private ExportableChartPanel chartPanel;            // hold the nuclei
     private GenericCheckboxPanel checkBoxPanel;         // use for aligning
                                                         // nuclei
@@ -85,6 +86,11 @@ public class NuclearOverlaysPanel extends DetailPanel {
             stack("Error creating overlays panel", e);
         }
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private JPanel createHeader() {

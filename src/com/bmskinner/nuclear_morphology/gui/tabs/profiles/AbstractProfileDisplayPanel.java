@@ -87,6 +87,11 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 
         this.add(buttonPanel, BorderLayout.NORTH);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return type.toString();
+    }
 
     private ExportableChartPanel makeProfileChartPanel(JFreeChart chart) {
         ExportableChartPanel panel = new ExportableChartPanel(chart) {

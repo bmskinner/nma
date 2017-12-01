@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 @SuppressWarnings("serial")
 public class ComponentListPanel extends AbstractCellDetailPanel implements ListSelectionListener {
 
+    private static final String PANEL_TITLE_LBL = "Components";
     private JList<ComponentListCell> list;
     private JScrollPane              scrollPane;
     private String                   prevComponent = "";
@@ -69,6 +70,11 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
         scrollPane.setPreferredSize(size);
 
         this.add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

@@ -51,6 +51,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Border tags";
+    
     private JPanel buttonsPanel;
 
     private JButton ruleSetButton;
@@ -92,6 +94,11 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
         this.add(chartPanel, BorderLayout.CENTER);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     public void setButtonsEnabled(boolean b) {

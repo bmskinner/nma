@@ -72,6 +72,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public abstract class AbstractScatterChartPanel extends DetailPanel implements ActionListener {
 
+    private static final String PANEL_TITLE_LBL = "Scatter";
     protected ExportableChartPanel chartPanel;  // hold the charts
     protected JPanel               headerPanel; // hold buttons
 
@@ -116,6 +117,11 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
         this.add(scrollPane, BorderLayout.WEST);
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     private JPanel createHeader() {
         statABox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));
         statBBox = new JComboBox<PlottableStatistic>(PlottableStatistic.getStats(component));

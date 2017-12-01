@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
-import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -41,7 +40,6 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
@@ -49,9 +47,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class NuclearLobesPanel extends DetailPanel {
 
-    // private static final String RUN_LOBE_DETECTION_LBL = "Run lobe
-    // detection";
-    // private JButton runLobeDetectionBtn;
+    private static final String PANEL_TITLE_LBL = "Lobes";
 
     private ExportableChartPanel chartPanel;
     private ExportableTable      table;
@@ -68,6 +64,11 @@ public class NuclearLobesPanel extends DetailPanel {
 
         this.add(createTablePanel(), BorderLayout.WEST);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private JPanel createHeader() {

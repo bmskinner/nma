@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class PairwiseVennDetailPanel extends DetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Detailed Venn";
     private JPanel mainPanel = new JPanel();
 
     private ExportableTable pairwiseVennTable;
@@ -74,6 +75,11 @@ public class PairwiseVennDetailPanel extends DetailPanel {
             log(Level.SEVERE, "Error updating pairwise venn table", e);
         }
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

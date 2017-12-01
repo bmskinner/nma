@@ -47,6 +47,8 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOv
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Outline";
+            
     private RotationSelectionSettingsPanel rotationPanel;
 
     private ExportableChartPanel panel;
@@ -99,6 +101,11 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     private synchronized void updateSettingsPanels() {
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {

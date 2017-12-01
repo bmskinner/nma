@@ -50,6 +50,8 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptions
 @SuppressWarnings("serial")
 public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Tags"
+            + "";
     private BorderTagDualChartPanel dualPanel;
 
     private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
@@ -94,6 +96,12 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         setButtonsEnabled(false);
     }
 
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     private JPanel makeButtonPanel() {
 
         JPanel panel = new JPanel(new FlowLayout()) {

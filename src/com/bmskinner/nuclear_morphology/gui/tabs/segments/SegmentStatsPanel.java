@@ -43,6 +43,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 public class SegmentStatsPanel extends DetailPanel {
+    
+    private static final String PANEL_TITLE_LBL = "Segment stats";
 
     private static final long serialVersionUID = 1L;
     private ExportableTable   table;                // individual segment stats
@@ -71,21 +73,20 @@ public class SegmentStatsPanel extends DetailPanel {
 
         this.add(scrollPane, BorderLayout.CENTER);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
 
     @Override
     protected void updateSingle() {
-
-        // table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-
         TableOptions options = makeOptions();
         setTable(options);
     }
 
     @Override
     protected void updateMultiple() {
-
-        // table.setModel(AnalysisDatasetTableCreator.createLoadingTable());
-
         TableOptions options = makeOptions();
         setTable(options);
 

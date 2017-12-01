@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Signals";
     private static final String HEADER_LBL    = "Pairwise distances between the centres of mass of all signals";
     private static final String TABLE_TOOLTIP = "Shows the distances between the centres of mass of signals";
 
@@ -70,6 +71,11 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
         this.add(scrollPane, BorderLayout.CENTER);
 
         this.setEnabled(false);
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

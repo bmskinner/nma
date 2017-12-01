@@ -69,6 +69,8 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 @SuppressWarnings("serial")
 public class PopulationsPanel extends DetailPanel implements SignalChangeListener {
 
+    private static final String PANEL_TITLE_LBL = "Populations";
+    
     final private PopulationTreeTable treeTable;
 
     private PopulationListPopupMenu populationPopup;
@@ -90,7 +92,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             return ctrlPressed;
         }
     }
-
+  
     public PopulationsPanel() {
         super();
         this.setLayout(new BorderLayout());
@@ -138,6 +140,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     @Override
     public void update(final List<IAnalysisDataset> list) {
         this.update();

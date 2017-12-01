@@ -33,7 +33,9 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
 
-    JTable table;
+    private static final String PANEL_TITLE_LBL = "Segment table";
+    
+    private JTable table;
 
     public CellSegTablePanel(final CellViewModel model) {
         super(model);
@@ -50,6 +52,11 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
 
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     @Override
     public synchronized void update() {
         if (this.isMultipleDatasets() || !this.hasDatasets()) {

@@ -97,6 +97,11 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         add(offsetsPanel, BorderLayout.EAST);
         offsetsPanel.setVisible(false);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return "Consensus panel";
+    }
 
     @Override
     public void setChartsAndTablesLoading() {

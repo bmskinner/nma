@@ -42,7 +42,8 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
  */
 @SuppressWarnings("serial")
 public class AnalysisDetailPanel extends DetailPanel {
-
+    
+    private static final String PANEL_TITLE_LBL = "Analysis info";
     private ExportableTable tableAnalysisParameters;
 
     public AnalysisDetailPanel() {
@@ -55,6 +56,11 @@ public class AnalysisDetailPanel extends DetailPanel {
 
         this.add(parametersPanel, BorderLayout.CENTER);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

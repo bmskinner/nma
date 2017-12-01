@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,7 +36,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.MergesDetailPanel;
@@ -80,61 +81,12 @@ public class MainWindow extends JFrame implements Loggable {
                                                          // if present
 
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
-            + Version.currentVersion().toString()+"a1";
+            + Version.currentVersion().toString()+"a2";
 
-    private static final String ANALYSIS_SETUP_TAB_LBL = "Analysis info";
-    private static final String CLUSTERS_TAB_LBL       = "Clusters";
-    private static final String MERGES_TAB_LBL         = "Merges";
-    private static final String CELLS_TAB_LBL          = "Cell charts";
-    private static final String NUCLEI_TAB_LBL         = "Nuclear charts";
-    private static final String PROFILES_TAB_LBL       = "Nuclear profiles";
-    private static final String SIGNALS_TAB_LBL        = "Nuclear signals";
-    private static final String SEGMENTS_TAB_LBL       = "Nuclear segments";
-    private static final String COMPARISONS_TAB_LBL    = "Comparisons";
-    private static final String EDITING_TAB_LBL        = "Editing";
-    private static final String IMAGES_TAB_LBL         = "Images";
+    private JTabbedPane tabbedPane; // bottom panel tabs
 
-    private JTabbedPane tabbedPane; // bottom panel tabs. Contains:
-
-    private NucleusProfilesPanel              nucleusProfilesPanel; // the angle
-                                                                    // profiles
-    private AnalysisDetailPanel               analysisDetailPanel;  // nucleus
-                                                                    // detection
-                                                                    // parameters
-                                                                    // and stats
-    private SignalsDetailPanel                signalsDetailPanel;   // nuclear
-                                                                    // signals
-    private CellsDetailPanel                  cellsDetailPanel;     // cells
-                                                                    // stats -
-                                                                    // areas,
-                                                                    // perimeters
-                                                                    // etc
-    private NuclearStatisticsPanel            nuclearChartsPanel;   // nuclear
-                                                                    // stats -
-                                                                    // areas,
-                                                                    // perimeters
-                                                                    // etc
-    private SegmentsDetailPanel               segmentsDetailPanel;  // segmented
-                                                                    // profiles
-    private ClusterDetailPanel                clusterDetailPanel;   // clustering
-                                                                    // within
-                                                                    // populations
-    private MergesDetailPanel                 mergesDetailPanel;    // merges
-                                                                    // between
-                                                                    // populations
-    private InterDatasetComparisonDetailPanel comparisonsPanel;
-    private EditingDetailPanel                editingDetailPanel;   // for
-                                                                    // altering
-                                                                    // data
-    private ImagesTabPanel                    imagesTabPanel;       // for
-                                                                    // altering
-                                                                    // data
-
-    private final List<TabPanel> detailPanels = new ArrayList<TabPanel>(); // store
-                                                                           // panels
-                                                                           // for
-                                                                           // iterating
-                                                                           // messsages
+    // store panels for iterating messages
+    private final List<TabPanel> detailPanels = new ArrayList<>();
 
     private final EventHandler eh = new EventHandler(this);
 
@@ -275,19 +227,6 @@ public class MainWindow extends JFrame implements Loggable {
             createTabs();
 
             // ---------------
-            // Register change listeners
-            // ---------------
-
-            signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
-            editingDetailPanel.addSignalChangeListener(signalsDetailPanel); // allow
-                                                                            // the
-                                                                            // panels
-                                                                            // to
-                                                                            // communicate
-                                                                            // colour
-                                                                            // updates
-
-            // ---------------
             // Add the top and bottom rows to the main panel
             // ---------------
             JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topRow, tabbedPane);
@@ -308,46 +247,46 @@ public class MainWindow extends JFrame implements Loggable {
     private void createTabs() {
         tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 
-        analysisDetailPanel = new AnalysisDetailPanel();
-        nucleusProfilesPanel = new NucleusProfilesPanel();
-        cellsDetailPanel = new CellsDetailPanel();
-        nuclearChartsPanel = new NuclearStatisticsPanel();
-        signalsDetailPanel = new SignalsDetailPanel();
-        clusterDetailPanel = new ClusterDetailPanel();
-        mergesDetailPanel = new MergesDetailPanel();
-        segmentsDetailPanel = new SegmentsDetailPanel();
-        comparisonsPanel = new InterDatasetComparisonDetailPanel();
-        editingDetailPanel = new EditingDetailPanel();
-        imagesTabPanel = new ImagesTabPanel();
+        // Create the top level tabs in the UI
+        DetailPanel analysisDetailPanel  = new AnalysisDetailPanel();
+        DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
+        DetailPanel cellsDetailPanel     = new CellsDetailPanel();
+        DetailPanel nuclearChartsPanel   = new NuclearStatisticsPanel();
+        DetailPanel signalsDetailPanel   = new SignalsDetailPanel();
+        DetailPanel clusterDetailPanel   = new ClusterDetailPanel();
+        DetailPanel mergesDetailPanel    = new MergesDetailPanel();
+        DetailPanel segmentsDetailPanel  = new SegmentsDetailPanel();
+        DetailPanel comparisonsPanel     = new InterDatasetComparisonDetailPanel();
+        DetailPanel editingDetailPanel   = new EditingDetailPanel();
+        DetailPanel imagesTabPanel       = new ImagesTabPanel();
 
         detailPanels.add(analysisDetailPanel);
-        detailPanels.add(clusterDetailPanel);
-        detailPanels.add(mergesDetailPanel);
+        detailPanels.add(imagesTabPanel);
+        
         detailPanels.add(cellsDetailPanel);
+        
         detailPanels.add(nuclearChartsPanel);
         detailPanels.add(nucleusProfilesPanel);
         detailPanels.add(signalsDetailPanel);
         detailPanels.add(segmentsDetailPanel);
+        
         detailPanels.add(comparisonsPanel);
+        
+        detailPanels.add(clusterDetailPanel);
+        detailPanels.add(mergesDetailPanel);
+        
         detailPanels.add(editingDetailPanel);
-        detailPanels.add(imagesTabPanel);
-
-        tabbedPane.addTab(ANALYSIS_SETUP_TAB_LBL, analysisDetailPanel);
-        tabbedPane.addTab(IMAGES_TAB_LBL, imagesTabPanel);
-
-        tabbedPane.addTab(CELLS_TAB_LBL, cellsDetailPanel);
-
-        tabbedPane.addTab(NUCLEI_TAB_LBL, nuclearChartsPanel);
-        tabbedPane.addTab(PROFILES_TAB_LBL, null, nucleusProfilesPanel, null);
-        tabbedPane.addTab(SIGNALS_TAB_LBL, signalsDetailPanel);
-        tabbedPane.addTab(SEGMENTS_TAB_LBL, null, segmentsDetailPanel, null);
-
-        tabbedPane.addTab(COMPARISONS_TAB_LBL, null, comparisonsPanel, null);
-
-        tabbedPane.addTab(CLUSTERS_TAB_LBL, clusterDetailPanel);
-        tabbedPane.addTab(MERGES_TAB_LBL, mergesDetailPanel);
-
-        tabbedPane.addTab(EDITING_TAB_LBL, null, editingDetailPanel, null);
+        
+        for(TabPanel t : detailPanels){
+            if(t instanceof ConsensusNucleusPanel){
+                continue;
+            }
+            DetailPanel p = (DetailPanel)t;
+            tabbedPane.addTab(p.getPanelTitle(), p);
+        }
+        
+        signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
+        editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
 
     }
 

@@ -26,10 +26,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class InterDatasetComparisonDetailPanel extends DetailPanel {
-
-    private static final String BASIC_VENN_TAB_LBL  = "Venn";
-    private static final String DETAIL_VENN_TAB_LBL = "Detailed Venn";
-    private static final String KRUSKAL_TAB_LBL     = "Kruskal";
+    
+    private static final String PANEL_TITLE_LBL = "Comparisons";
 
     public InterDatasetComparisonDetailPanel() {
         super();
@@ -46,10 +44,16 @@ public class InterDatasetComparisonDetailPanel extends DetailPanel {
         this.addSubPanel(pairwiseVennPanel);
         this.addSubPanel(kruskalPanel);
 
-        tabPanel.addTab(BASIC_VENN_TAB_LBL, vennPanel);
-        tabPanel.addTab(DETAIL_VENN_TAB_LBL, pairwiseVennPanel);
-        tabPanel.addTab(KRUSKAL_TAB_LBL, kruskalPanel);
+        tabPanel.addTab(vennPanel.getPanelTitle(), vennPanel);
+        tabPanel.addTab(pairwiseVennPanel.getPanelTitle(), pairwiseVennPanel);
+        tabPanel.addTab(kruskalPanel.getPanelTitle(), kruskalPanel);
 
         this.add(tabPanel, BorderLayout.CENTER);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
 }

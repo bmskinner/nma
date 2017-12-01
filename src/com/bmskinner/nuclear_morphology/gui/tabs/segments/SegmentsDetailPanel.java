@@ -32,10 +32,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
 
-    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
-    private static final String HISTOGRAM_TAB_LBL = "Histograms";
-    private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
-    private static final String MAGNITUDE_TAB_LBL = "Magnitude";
+    private static final String PANEL_TITLE_LBL = "Nuclear segments";
 
     public SegmentsDetailPanel() {
         super();
@@ -69,10 +66,10 @@ public class SegmentsDetailPanel extends DetailPanel {
         this.addSubPanel(segmentMagnitudePanel);
         this.addSubPanel(segmentStatsPanel);
 
-        tabPanel.addTab(BOXPLOTS_TAB_LBL, segmentBoxplotsPanel);
-        tabPanel.addTab(HISTOGRAM_TAB_LBL, segmentHistogramsPanel);
-        tabPanel.addTab(WILCOXON_TAB_LBL, segmentWilcoxonPanel);
-        tabPanel.addTab(MAGNITUDE_TAB_LBL, segmentMagnitudePanel);
+        tabPanel.addTab(segmentBoxplotsPanel.getPanelTitle(), segmentBoxplotsPanel);
+        tabPanel.addTab(segmentHistogramsPanel.getPanelTitle(), segmentHistogramsPanel);
+        tabPanel.addTab(segmentWilcoxonPanel.getPanelTitle(), segmentWilcoxonPanel);
+        tabPanel.addTab(segmentMagnitudePanel.getPanelTitle(), segmentMagnitudePanel);
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
@@ -103,4 +100,10 @@ public class SegmentsDetailPanel extends DetailPanel {
         this.add(mainPanel, BorderLayout.CENTER);
 
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
 }

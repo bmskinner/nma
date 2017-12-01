@@ -62,6 +62,7 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class VariabilityDisplayPanel extends DetailPanel implements ActionListener, ChangeListener {
 
+    private static final String PANEL_TITLE_LBL = "Variability";
     private JPanel                 buttonPanel = new JPanel(new FlowLayout());
     protected ExportableChartPanel chartPanel;
     private JSpinner               pvalueSpinner;
@@ -113,6 +114,12 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
         this.add(buttonPanel, BorderLayout.NORTH);
     }
 
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     public void setEnabled(boolean b) {
         // borderTagOptionsPanel.setEnabled(b);
         profileCollectionTypeSettingsPanel.setEnabled(b);

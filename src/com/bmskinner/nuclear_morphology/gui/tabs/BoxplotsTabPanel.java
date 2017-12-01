@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public abstract class BoxplotsTabPanel extends DetailPanel implements ActionListener {
 
+    private static final String PANEL_TITLE_LBL = "Violin plots";
     protected volatile Map<String, ExportableChartPanel> chartPanels = new HashMap<String, ExportableChartPanel>();
 
     protected JPanel mainPanel;   // hold the charts
@@ -80,6 +81,11 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
             error("Error creating panel", e);
         }
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

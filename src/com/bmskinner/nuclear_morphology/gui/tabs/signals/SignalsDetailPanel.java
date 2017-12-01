@@ -36,14 +36,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 @SuppressWarnings("serial")
 public class SignalsDetailPanel extends DetailPanel implements SignalChangeListener {
 
-    private static final String OVERVIEW_TAB_LBL  = "Overview";
-    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
-    private static final String HISTOGRAM_TAB_LBL = "Histograms";
-    private static final String SHELLS_TAB_LBL    = "Shells";
-    private static final String SETTINGS_TAB_LBL  = "Detection settings";
-    private static final String SCATTER_TAB_LBL   = "Scatter";
-    private static final String COLOCAL_TAB_LBL   = "Colocalisation";
-
+   
+    private static final String PANEL_TITLE_LBL = "Nuclear signals";
     private JTabbedPane signalsTabPane;
 
     /**
@@ -65,13 +59,13 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
             DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
             DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
 
-            signalsTabPane.addTab(OVERVIEW_TAB_LBL, overviewPanel);
-            signalsTabPane.addTab(SETTINGS_TAB_LBL, analysisPanel);
-            signalsTabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
-            signalsTabPane.addTab(HISTOGRAM_TAB_LBL, histogramPanel);
-            signalsTabPane.addTab(SCATTER_TAB_LBL, signalScatterChartPanel);
-            signalsTabPane.addTab(SHELLS_TAB_LBL, shellsPanel);
-            signalsTabPane.addTab(COLOCAL_TAB_LBL, colocalistionPanel);
+            signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
+            signalsTabPane.addTab(analysisPanel.getPanelTitle(), analysisPanel);
+            signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
+            signalsTabPane.addTab(histogramPanel.getPanelTitle(), histogramPanel);
+            signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
+            signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
+            signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
 
             this.addSubPanel(overviewPanel);
             this.addSubPanel(boxplotPanel);
@@ -88,6 +82,11 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
         }
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     @Override
     public void signalChangeReceived(SignalChangeEvent event) {
         super.signalChangeReceived(event);

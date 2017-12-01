@@ -65,6 +65,7 @@ public class ImagesTabPanel extends DetailPanel {
     private JLabel label;
 
     private static final String IMAGES_LBL = "Images in dataset";
+    private static final String PANEL_TITLE_LBL = "Images";
 
     private class ImageNode {
         private String name;
@@ -87,7 +88,7 @@ public class ImagesTabPanel extends DetailPanel {
             return name;
         }
     }
-
+    
     /**
      * Create the panel. 
      */
@@ -97,6 +98,11 @@ public class ImagesTabPanel extends DetailPanel {
         this.setLayout(new BorderLayout());
 
         createUI();
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private void createUI() {

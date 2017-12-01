@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
+    private static final String PANEL_TITLE_LBL = "Average stats";
     private ExportableTable tablePopulationStats;
 
     public NuclearStatsPanel() {
@@ -59,6 +60,11 @@ public class NuclearStatsPanel extends DetailPanel implements ActionListener {
 
         this.add(statsPanel, BorderLayout.CENTER);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

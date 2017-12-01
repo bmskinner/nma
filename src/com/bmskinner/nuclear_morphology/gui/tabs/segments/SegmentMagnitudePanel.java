@@ -43,8 +43,15 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 @SuppressWarnings("serial")
 public class SegmentMagnitudePanel extends AbstractPairwiseDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Magnitude";
+    
     public SegmentMagnitudePanel() {
         super();
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

@@ -63,6 +63,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
+    private static final String PANEL_TITLE_LBL = "Shells";
     private static final String WITHIN_SIGNALS_LBL = "Within signals";
     private static final String WITHIN_NUCLEI_LBL  = "Within nuclei";
     private static final String RUN_ANALYSIS_LBL   = "Run new";
@@ -105,6 +106,11 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
         this.updateSize();
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     public void setEnabled(boolean b) {

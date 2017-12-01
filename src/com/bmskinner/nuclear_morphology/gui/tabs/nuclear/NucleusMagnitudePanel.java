@@ -42,10 +42,17 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Magnitude";
+    
     private JButton randomSamplingButton;
 
     public NucleusMagnitudePanel() {
         super();
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

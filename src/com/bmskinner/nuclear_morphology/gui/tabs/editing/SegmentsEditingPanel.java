@@ -68,6 +68,8 @@ import com.bmskinner.nuclear_morphology.stats.Quartile;
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Segmentation";
+    
     private SegmentationDualChartPanel dualPanel;
 
     private JPanel  buttonsPanel;
@@ -119,6 +121,11 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         dualPanel.getMainPanel().getChart().getXYPlot().getDomainAxis().setVisible(false);
         dualPanel.getMainPanel().getChart().getXYPlot().getRangeAxis().setVisible(false);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override
