@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public abstract class EnumeratedOptionsPanel extends JPanel implements ActionListener, Loggable {
 
-    private List<ActionListener> listeners          = new ArrayList<ActionListener>();
+    protected List<ActionListener> listeners          = new ArrayList<ActionListener>();
     private final List<Object>   interfaceListeners = new ArrayList<Object>();
 
     public EnumeratedOptionsPanel() {
@@ -53,6 +53,10 @@ public abstract class EnumeratedOptionsPanel extends JPanel implements ActionLis
 
     public void addActionListener(ActionListener a) {
         this.listeners.add(a);
+    }
+    
+    public synchronized void removeActionListener(ActionListener l) {
+        listeners.remove(l);
     }
 
     public synchronized void addInterfaceEventListener(InterfaceEventListener l) {

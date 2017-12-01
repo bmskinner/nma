@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.gui.components.panels;
 
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JComboBox;
@@ -56,6 +58,17 @@ public class DatasetSelectionPanel extends EnumeratedOptionsPanel {
     public void setEnabled(boolean b) {
         super.setEnabled(b);
         box.setEnabled(b);
+    }
+    
+    
+    /**
+     * Clear the selection. 
+     */
+    public void setSelectionNull(){
+        List<ActionListener> oldListeners = new ArrayList<>(listeners);
+        listeners.clear();
+        box.setSelectedIndex(-1);
+        listeners = oldListeners;
     }
 
     public void setSelectionIndex(int i) {

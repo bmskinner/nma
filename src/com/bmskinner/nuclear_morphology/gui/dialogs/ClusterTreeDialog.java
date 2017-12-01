@@ -61,6 +61,8 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.DraggableTreeViewer;
 import com.bmskinner.nuclear_morphology.gui.components.VariableNodePainter;
+import com.bmskinner.nuclear_morphology.gui.components.panels.ClusterGroupSelectionPanel;
+import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPanel;
 
 import jebl.evolution.graphs.Node;
 import jebl.evolution.io.ImportException;
@@ -74,20 +76,23 @@ import jebl.gui.trees.treeviewer.TreePaneSelector.SelectionMode;
 import jebl.gui.trees.treeviewer.TreeViewer.TreeLayoutType;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
 
+/**
+ * Display hierarchical clustering trees and apply colours based on clusters.
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
-public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener {
+public class ClusterTreeDialog extends LoadingIconDialog {
 
     private JPanel              buttonPanel;
     private DraggableTreeViewer viewer;
     private IAnalysisDataset    dataset;
     private IClusterGroup       group;
 
-    private JComboBox<IAnalysisDataset> selectedClusterBox;
-    private JComboBox<IClusterGroup>    selectedClusterGroupBox;
+    private DatasetSelectionPanel selectedClusterBox;
+    private ClusterGroupSelectionPanel selectedClusterGroupBox;
 
     private List<ICellCollection> clusterList = new ArrayList<ICellCollection>(0);
-
-//    private boolean hasMergeSources; // cache this to speed comparisons
 
     public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
         super();
@@ -225,11 +230,9 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
         }
 
         if (isUUID) {
-            // log("Found UUID taxon name: "+id.toString());
             return dataset.getCollection().getCell(id);
 
         } else {
-            // log("Found regular taxon name");
             for (ICell c : dataset.getCollection().getCells()) {
 
                 if (taxonNamesMatch(t.getName(), c.getNucleus())) {
@@ -266,22 +269,39 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
             panel.add(mergeSourceButton);
         }
 
-        selectedClusterBox = new JComboBox<IAnalysisDataset>();
-        selectedClusterBox.addItem(dataset);
-        for (IAnalysisDataset d : dataset.getAllChildDatasets()) {
-            selectedClusterBox.addItem(d);
-        }
-        selectedClusterBox.setSelectedIndex(-1);
-        selectedClusterBox.addItemListener(this);
+        List<IAnalysisDataset> l = dataset.getAllChildDatasets();
+        l.add(0, dataset);
+        selectedClusterBox = new DatasetSelectionPanel(l);
+        selectedClusterBox.setSelectionNull();
+        selectedClusterBox.addActionListener(e -> {
+            selectedClusterGroupBox.setSelectionNull();
+            colourTreeNodesByCluster(selectedClusterBox.getSelectedDataset().getCollection());
+        });
         panel.add(selectedClusterBox);
+        
+//        selectedClusterBox = new JComboBox<IAnalysisDataset>();
+//        selectedClusterBox.addItem(dataset);
+//        for (IAnalysisDataset d : dataset.getAllChildDatasets()) {
+//            selectedClusterBox.addItem(d);
+//        }
+//        selectedClusterBox.setSelectedIndex(-1);
+//        selectedClusterBox.addItemListener(this);
+//        panel.add(selectedClusterBox);
 
-        selectedClusterGroupBox = new JComboBox<IClusterGroup>();
-        for (IClusterGroup g : dataset.getClusterGroups()) {
-            selectedClusterGroupBox.addItem(g);
-        }
-        selectedClusterGroupBox.setSelectedItem(group);
-        selectedClusterGroupBox.addItemListener(this);
+        
+        selectedClusterGroupBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
+        selectedClusterGroupBox.setSelectedGroup(group);
+        selectedClusterGroupBox.addActionListener(e->{
+            selectedClusterBox.setSelectionNull();
+            colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
+        });
         panel.add(selectedClusterGroupBox);
+//        for (IClusterGroup g : dataset.getClusterGroups()) {
+//            selectedClusterGroupBox.addItem(g);
+//        }
+//        selectedClusterGroupBox.setSelectedItem(group);
+//        selectedClusterGroupBox.addItemListener(this);
+//        panel.add(selectedClusterGroupBox);
 
         panel.add(this.getLoadingLabel());
 
@@ -353,7 +373,7 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
                 finer("Node colours assigned");
 
             }
-            updateNodePainter();
+//            updateNodePainter();
 
         } else { // no cluster group, colour everything black
             setNodeColour(dataset.getCollection(), Color.BLACK);
@@ -551,22 +571,18 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
 
     private void showMergeSources() {
         // Disable the selection dropdown boxes
-        setClusterGroupBoxNull();
-        setClusterBoxNull();
+        selectedClusterGroupBox.setSelectionNull();
+        selectedClusterBox.setSelectionNull();
 
-        List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
-        for (UUID id : dataset.getAllMergeSourceIDs()) {
-        	IAnalysisDataset mgeSource = dataset.getMergeSource(id);
-        	fine(mgeSource.getName());
-            list.add(mgeSource);
-        }
+
+        List<IAnalysisDataset> list = new ArrayList<>(dataset.getAllMergeSources());
 
         IClusterGroup mergeGroup = makeNewClusterGroup(list);
 
         for (IAnalysisDataset d : list) {
             mergeGroup.addDataset(d);
         }
-
+        
         colourTreeNodesByClusterGroup(mergeGroup);
     }
 
@@ -586,26 +602,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
         ClusterGroup newGroup = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, newOptions,
                 group.getTree());
         return newGroup;
-    }
-
-    /**
-     * Set the cluster group drop down menu to null. Removes and replaces the
-     * item listener to avoid recursive firing
-     */
-    private void setClusterGroupBoxNull() {
-        selectedClusterGroupBox.removeItemListener(this);
-        selectedClusterGroupBox.setSelectedIndex(-1);
-        selectedClusterGroupBox.addItemListener(this);
-    }
-
-    /**
-     * Set the cluster drop down menu to null. Removes and replaces the item
-     * listener to avoid recursive firing
-     */
-    private void setClusterBoxNull() {
-        selectedClusterBox.removeItemListener(this);
-        selectedClusterBox.setSelectedIndex(-1);
-        selectedClusterBox.addItemListener(this);
     }
 
     /**
@@ -698,26 +694,6 @@ public class ClusterTreeDialog extends LoadingIconDialog implements ItemListener
             }
 
         }
-    }
-
-    @Override
-    public void itemStateChanged(ItemEvent e) {
-
-        if (e.getSource().equals(selectedClusterBox)) {
-
-            setClusterGroupBoxNull();
-            IAnalysisDataset selected = (IAnalysisDataset) selectedClusterBox.getSelectedItem();
-            colourTreeNodesByCluster(selected.getCollection());
-
-        }
-
-        if (e.getSource().equals(selectedClusterGroupBox)) {
-
-            setClusterBoxNull();
-            colourTreeNodesByClusterGroup((IClusterGroup) selectedClusterGroupBox.getSelectedItem());
-
-        }
-
     }
 
     protected class MouseClusterSelectionAdapter extends MouseAdapter {
