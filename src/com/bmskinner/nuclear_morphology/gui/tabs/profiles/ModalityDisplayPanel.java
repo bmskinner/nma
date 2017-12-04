@@ -56,6 +56,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class ModalityDisplayPanel extends DetailPanel implements ActionListener, ListSelectionListener {
 
+    private static final String PANEL_TITLE_LBL = "Modality";
+    
     private JPanel               mainPanel = new JPanel(new BorderLayout());
     private JList<Double>        pointList;
     private ExportableChartPanel angleDistributionPanel;
@@ -67,15 +69,18 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
                                                                             // across
                                                                             // the
                                                                             // profile
-    // private ProfileCollectionTypeSettingsPanel
-    // profileCollectionTypeSettingsPanel = new
-    // ProfileCollectionTypeSettingsPanel();
+
     private ProfileTypeOptionsPanel profileCollectionTypeSettingsPanel = new ProfileTypeOptionsPanel();
 
     public ModalityDisplayPanel() {
         super();
         createUI();
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private void createUI() {

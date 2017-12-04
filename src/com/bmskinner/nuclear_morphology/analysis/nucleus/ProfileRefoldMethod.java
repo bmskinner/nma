@@ -18,9 +18,9 @@
 
 package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -48,7 +48,7 @@ import com.bmskinner.nuclear_morphology.stats.Quartile;
  * @since 1.13.4
  *
  */
-public class ProfileRefoldMethod extends AbstractAnalysisMethod {
+public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
     private IProfile targetCurve;
 
     private Nucleus refoldNucleus;

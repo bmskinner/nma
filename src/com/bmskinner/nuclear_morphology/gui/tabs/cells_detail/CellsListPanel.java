@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
 
+    private static final String PANEL_TITLE_LBL = "Cell list";
     private JTree tree;
 
     public CellsListPanel(CellViewModel model) {
@@ -66,6 +67,11 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
         scrollPane.setPreferredSize(size);
 
         this.add(scrollPane, BorderLayout.CENTER);
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

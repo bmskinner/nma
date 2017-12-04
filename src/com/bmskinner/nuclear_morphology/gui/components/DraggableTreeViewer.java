@@ -30,6 +30,11 @@ import org.virion.jam.controlpanels.ControlPalette;
 import jebl.gui.trees.treeviewer.TreeViewer;
 //import jebl.gui.trees.treeviewer_dev.DefaultTreeViewer;
 
+/**
+ * An extension to jebl's tree viewer that allows lines to be added to the tree
+ * @author bms41
+ *
+ */
 @SuppressWarnings("serial")
 public class DraggableTreeViewer extends TreeViewer {
 
@@ -48,16 +53,6 @@ public class DraggableTreeViewer extends TreeViewer {
         clearLines();
         this.lines.add(line);
     }
-
-    // @Override
-    // public void setTree(Tree tree){
-    // super.setTree(tree);
-    // sampleTreePane.setTree((RootedTree) tree, null);
-    // }
-
-    // public Set<Node> getNodesAtPoint(Graphics2D g2, Rectangle r){
-    // return sampleTreePane.getNodesAtPoint(g2, r);
-    // }
 
     public void clearLines() {
         this.lines = new ArrayList<Line2D.Double>();

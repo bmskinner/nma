@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public abstract class HistogramsTabPanel extends DetailPanel implements ActionListener {
 
+    private static final String PANEL_TITLE_LBL = "Histograms";
     protected Map<String, SelectableChartPanel> chartPanels = new HashMap<String, SelectableChartPanel>();
 
     protected JPanel               mainPanel;                                                                 // hold
@@ -93,6 +94,11 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
             log(Level.SEVERE, "Error creating panel", e);
         }
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

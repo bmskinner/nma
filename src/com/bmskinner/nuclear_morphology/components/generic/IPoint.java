@@ -20,6 +20,12 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
 
+/**
+ * The interface for 2D points. It provides some extra methods beyond what
+ * is in the Point2D classes.
+ * @author bms41
+ *
+ */
 public interface IPoint {
 
     /**
@@ -31,7 +37,7 @@ public interface IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IPoint makeNew(float x, float y) {
+    static IPoint makeNew(final float x, final float y) {
         return new FloatPoint(x, y);
     }
 
@@ -44,7 +50,7 @@ public interface IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IPoint makeNew(double x, double y) {
+    static IPoint makeNew(final double x, final double y) {
         return makeNew((float) x, (float) y);
     }
 
@@ -57,7 +63,7 @@ public interface IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IPoint makeNew(IPoint a) {
+    static IPoint makeNew(final IPoint a) {
         return makeNew(a.getX(), a.getY());
     }
 
@@ -70,7 +76,7 @@ public interface IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IPoint makeNew(Point2D a) {
+    static IPoint makeNew(final Point2D a) {
         return makeNew(a.getX(), a.getY());
     }
 
@@ -118,15 +124,15 @@ public interface IPoint {
      *            the point to test against
      * @return boolean whether they overlap as integers
      */
-    boolean overlaps(IPoint a);
+    boolean overlaps(final IPoint a);
 
-    boolean isAbove(IPoint p);
+    boolean isAbove(final IPoint p);
 
-    boolean isBelow(IPoint p);
+    boolean isBelow(final IPoint p);
 
-    boolean isLeftOf(IPoint p);
+    boolean isLeftOf(final IPoint p);
 
-    boolean isRightOf(IPoint p);
+    boolean isRightOf(final IPoint p);
 
     /**
      * Tests if the two points overlap with double precision
@@ -135,14 +141,7 @@ public interface IPoint {
      *            the point to test against
      * @return boolean whether they overlap as doubles
      */
-    boolean overlapsPerfectly(IPoint a);
-
-    /**
-     * Writes the integer x and y values together in the format "x,y"
-     *
-     * @return the string with the integer coordinates
-     */
-    String toString();
+    boolean overlapsPerfectly(final IPoint a);
 
     /**
      * Fetch the point as Point2D
@@ -161,11 +160,7 @@ public interface IPoint {
      *            the second line endpoint
      * @return
      */
-    double findAngle(IPoint a, IPoint b);
-
-    int hashCode();
-
-    boolean equals(Object obj);
+    double findAngle(final IPoint a, final IPoint b);
 
     /**
      * Get the midpoint of the two points
@@ -174,7 +169,7 @@ public interface IPoint {
      * @param b
      * @return
      */
-    static IPoint getMidpoint(IPoint a, IPoint b) {
+    static IPoint getMidpoint(final IPoint a, final IPoint b) {
         if (a == null || b == null) {
             throw new IllegalArgumentException("Points cannot be null");
         }
@@ -191,7 +186,7 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint minus(IPoint p);
+    IPoint minus(final IPoint p);
     
     /**
      * Add the given point to this point. Creates
@@ -199,7 +194,7 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint plus(IPoint p);
+    IPoint plus(final IPoint p);
     
     /**
      * Add the given value to this point. Creates
@@ -207,7 +202,7 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint plus(double value);
+    IPoint plus(final double value);
     
     /**
      * Subtract the given value from this point. Creates
@@ -215,6 +210,6 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint minus(double value);
+    IPoint minus(final double value);
 
 }

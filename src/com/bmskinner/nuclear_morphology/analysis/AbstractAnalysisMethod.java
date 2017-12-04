@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-
 /**
  * Stores the basic methods for an IAnalysisMethod
  * 
@@ -32,13 +30,12 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
  */
 public abstract class AbstractAnalysisMethod implements IAnalysisMethod, ProgressListener {
 
-    protected IAnalysisDataset dataset;
+//    protected IAnalysisDataset dataset;
     private List<Object>       listeners = new ArrayList<Object>();
     protected IAnalysisResult  result    = null;
 
-    public AbstractAnalysisMethod(IAnalysisDataset dataset) {
-        this.dataset = dataset;
-    }
+    public AbstractAnalysisMethod() {}
+    
 
     @Override
     public void addProgressListener(ProgressListener l) {
@@ -64,7 +61,6 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
 
     @Override
     public void progressEventReceived(ProgressEvent event) {
-        // log("Heard progress event in method");
         fireProgressEvent(); // pass upwards
 
     }

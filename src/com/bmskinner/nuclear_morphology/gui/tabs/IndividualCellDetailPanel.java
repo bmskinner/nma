@@ -48,12 +48,13 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 
     private JTabbedPane tabPane;
 
-    private static final String CELL_INFO_LBL     = "Info";
-    private static final String CELL_SEGS_LBL     = "Segments";
-    private static final String CELL_TAGS_LBL     = "Tags";
-    private static final String CELL_OUTLINE_LBL  = "Outline";
-    private static final String CELL_SIGNALS_LBL  = "Signals";
-    private static final String CELL_SEGTABLE_LBL = "Segtable";
+//    private static final String CELL_INFO_LBL     = "Info";
+//    private static final String CELL_SEGS_LBL     = "Segments";
+//    private static final String CELL_TAGS_LBL     = "Tags";
+//    private static final String CELL_OUTLINE_LBL  = "Outline";
+//    private static final String CELL_SIGNALS_LBL  = "Signals";
+//    private static final String CELL_SEGTABLE_LBL = "Segtable";
+    private static final String PANEL_TITLE_LBL = "Cells";
 
     protected CellsListPanel       cellsListPanel;       // the list of cells in
                                                          // the active dataset
@@ -101,17 +102,15 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
             this.addSubPanel(cellsListPanel);
             this.addSubPanel(signalListPanel);
             this.addSubPanel(cellsignalStatsPanel);
-            // this.addSubPanel(cellSegTablePanel);
 
             tabPane = new JTabbedPane(JTabbedPane.LEFT);
             this.add(tabPane, BorderLayout.CENTER);
 
-            tabPane.add(CELL_INFO_LBL, cellStatsPanel);
-            tabPane.add(CELL_SEGS_LBL, segmentProfilePanel);
-            tabPane.add(CELL_TAGS_LBL, cellBorderTagPanel);
-            tabPane.add(CELL_OUTLINE_LBL, outlinePanel);
-            tabPane.add(CELL_SIGNALS_LBL, cellsignalStatsPanel);
-            // tabPane.add(CELL_SEGTABLE_LBL, cellSegTablePanel);
+            tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
+            tabPane.add(segmentProfilePanel.getPanelTitle(), segmentProfilePanel);
+            tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
+            tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
+            tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
 
             this.validate();
         } catch (Exception e) {
@@ -119,6 +118,12 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
             stack("Error creating cell detail panel", e);
         }
 
+    }
+    
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private void createSubPanels() {

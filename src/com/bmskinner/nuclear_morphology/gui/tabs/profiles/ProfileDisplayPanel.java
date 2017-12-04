@@ -42,7 +42,7 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
             this.profileAlignmentOptionsPanel.setEnabled(false);
         }
     }
-
+    
     @Override
     protected void updateSingle() {
         super.updateSingle();

@@ -27,9 +27,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
-
-    private static final String MODALITY_TAB_LBL    = "Modality";
-    private static final String VARIABILITY_TAB_LBL = "Variability";
+    
+    private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
     public NucleusProfilesPanel() {
         super();
@@ -40,7 +39,7 @@ public class NucleusProfilesPanel extends DetailPanel {
 
             DetailPanel panel = new ProfileDisplayPanel(type);
             this.addSubPanel(panel);
-            tabPanel.addTab(type.toString(), panel);
+            tabPanel.addTab(panel.getPanelTitle(), panel);
         }
 
         /*
@@ -53,10 +52,15 @@ public class NucleusProfilesPanel extends DetailPanel {
         this.addSubPanel(variabilityChartPanel);
         this.addSubPanel(modalityDisplayPanel);
 
-        tabPanel.addTab(VARIABILITY_TAB_LBL, variabilityChartPanel);
-        tabPanel.addTab(MODALITY_TAB_LBL, modalityDisplayPanel);
+        tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
+        tabPanel.addTab(modalityDisplayPanel.getPanelTitle(), modalityDisplayPanel);
 
         this.add(tabPanel, BorderLayout.CENTER);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 }

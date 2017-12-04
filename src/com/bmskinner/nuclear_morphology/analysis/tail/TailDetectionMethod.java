@@ -24,6 +24,7 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -31,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.IMutableCell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
-public class TailDetectionMethod extends AbstractAnalysisMethod {
+public class TailDetectionMethod extends SingleDatasetAnalysisMethod {
 
     private final File folder;
     private final int  channel;
@@ -55,7 +56,7 @@ public class TailDetectionMethod extends AbstractAnalysisMethod {
         log("Beginning tail detection");
 
         try {
-            int progress = 0;
+
             for (ICell c : dataset.getCollection().getCells()) {
 
                 IMutableCell cell = (IMutableCell) c;

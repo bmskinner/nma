@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class KruskalDetailPanel extends DetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Kruskal";
     private static final String COMPARE_FRANKENPROFILE_LBL = "Compare frankenprofiles";
     private static final String COMPARE_INFO_LBL           = "Kruskal-Wallis comparison of datasets (Bonferroni-corrected p-values)";
 
@@ -54,6 +55,11 @@ public class KruskalDetailPanel extends DetailPanel {
         createUI();
 
         setEnabled(false);
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

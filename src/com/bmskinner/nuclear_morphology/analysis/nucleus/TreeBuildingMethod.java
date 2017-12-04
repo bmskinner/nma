@@ -20,20 +20,11 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-import weka.clusterers.HierarchicalClusterer;
-import weka.core.Attribute;
-import weka.core.EuclideanDistance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.SparseInstance;
-
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
@@ -56,9 +47,16 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 
-public class TreeBuildingMethod extends AbstractAnalysisMethod {
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.Attribute;
+import weka.core.EuclideanDistance;
+import weka.core.FastVector;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.SparseInstance;
+
+public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
 
     protected Map<Instance, UUID> cellToInstanceMap = new HashMap<Instance, UUID>();
 

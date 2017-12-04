@@ -69,6 +69,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Overview";
     private ConsensusNucleusChartPanel chartPanel;                // consensus
                                                                   // nucleus
                                                                   // plus
@@ -104,6 +105,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
         consensusAndCheckboxPanel = createConsensusPanel();
         this.add(consensusAndCheckboxPanel);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private JPanel createConsensusPanel() {

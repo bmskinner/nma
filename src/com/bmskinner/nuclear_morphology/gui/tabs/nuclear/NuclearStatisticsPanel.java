@@ -27,14 +27,15 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class NuclearStatisticsPanel extends DetailPanel {
 
-    private static final String OVERVIEW_TAB_LBL  = "Average stats";
-    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
-    private static final String HISTOGRAM_TAB_LBL = "Histograms";
-    private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
-    private static final String MAGNITUDE_TAB_LBL = "Magnitude";
-    private static final String OVERLAYS_TAB_LBL  = "Overlays";
-    private static final String SCATTER_TAB_LBL   = "Scatter";
-    private static final String LOBES_TAB_LBL     = "Lobes";
+    private static final String PANEL_TITLE_LBL = "Nuclear charts";
+//    private static final String OVERVIEW_TAB_LBL  = "Average stats";
+//    private static final String BOXPLOTS_TAB_LBL  = "Boxplots";
+//    private static final String HISTOGRAM_TAB_LBL = "Histograms";
+//    private static final String WILCOXON_TAB_LBL  = "Wilcoxon stats";
+//    private static final String MAGNITUDE_TAB_LBL = "Magnitude";
+//    private static final String OVERLAYS_TAB_LBL  = "Overlays";
+//    private static final String SCATTER_TAB_LBL   = "Scatter";
+//    private static final String LOBES_TAB_LBL     = "Lobes";
 
     private JTabbedPane tabPane;
 
@@ -62,15 +63,20 @@ public class NuclearStatisticsPanel extends DetailPanel {
         this.addSubPanel(nuclearScatterChartPanel);
         this.addSubPanel(nuclearLobesPanel);
 
-        tabPane.addTab(OVERVIEW_TAB_LBL, nuclearStatsPanel);
-        tabPane.addTab(BOXPLOTS_TAB_LBL, boxplotPanel);
-        tabPane.addTab(HISTOGRAM_TAB_LBL, histogramsPanel);
-        tabPane.addTab(WILCOXON_TAB_LBL, wilcoxonPanel);
-        tabPane.addTab(MAGNITUDE_TAB_LBL, null, nucleusMagnitudePanel, "Pop, pop");
-        // tabPane.addTab(OVERLAYS_TAB_LBL, nuclearOverlaysPanel);
-        tabPane.addTab(SCATTER_TAB_LBL, nuclearScatterChartPanel);
-        tabPane.addTab(LOBES_TAB_LBL, nuclearLobesPanel);
+        tabPane.addTab(nuclearStatsPanel.getPanelTitle(), nuclearStatsPanel);
+        tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
+        tabPane.addTab(histogramsPanel.getPanelTitle(), histogramsPanel);
+        tabPane.addTab(wilcoxonPanel.getPanelTitle(), wilcoxonPanel);
+        tabPane.addTab(nucleusMagnitudePanel.getPanelTitle(), null, nucleusMagnitudePanel, "Pop, pop");
+        tabPane.addTab(nuclearScatterChartPanel.getPanelTitle(), nuclearScatterChartPanel);
+        tabPane.addTab(nuclearLobesPanel.getPanelTitle(), nuclearLobesPanel);
 
         this.add(tabPane, BorderLayout.CENTER);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
 }

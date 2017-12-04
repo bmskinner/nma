@@ -98,5 +98,8 @@ public class Labels {
     public static final String NA          = "N/A";
 
     public static final String CHOOSE_SIGNAL_COLOUR = "Choose signal color";
+    
+    public static final String NUCLEI = "nuclei";
+    
 
 }

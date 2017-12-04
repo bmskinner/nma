@@ -32,31 +32,58 @@ import java.util.Set;
  */
 public interface IWorkspace {
 
-    void setName(String s);
+    /**
+     * Set the name of the workspace
+     * @param s
+     */
+    void setName(final String s);
     
     /**
      * Add the given datasest to the workspace
      * @param d
      */
-    void add(IAnalysisDataset d);
+    void add(final IAnalysisDataset d);
 
     /**
      * Add the given file to the workspace
-     * @param d
+     * @param f the file
      */
-    void add(File f);
+    void add(final File f);
 
     
-    void remove(IAnalysisDataset d);
+    /**
+     * Remove the given dataset from the workspace
+     * @param d the dataset
+     */
+    void remove(final IAnalysisDataset d);
 
-    void remove(File f);
+    /**
+     * Remove the given file from the workspace
+     * @param f the file to remove
+     */
+    void remove(final File f);
 
+    /**
+     * Save the workspace
+     */
     void save();
 
+    /**
+     * Get the files in the workspace
+     * @return
+     */
     Set<File> getFiles();
 
-    void setSaveFile(File f);
+    /**
+     * Set the save path of the workspace
+     * @param f
+     */
+    void setSaveFile(final File f);
 
+    /**
+     * Get the save file of the workspace
+     * @return
+     */
     File getSaveFile();
         
     /**
@@ -101,27 +128,31 @@ public interface IWorkspace {
         
     }
        
+    /**
+     * Get the samples in the workspace
+     * @return
+     */
     Set<BioSample> getBioSamples();
     
     /**
      * Add a new sample to the workspace
      * @param name
      */
-    void addBioSample(String name);
+    void addBioSample(final String name);
     
     /**
      * Get the biosample associated with the given dataset
      * @param dataset
      * @return
      */
-    BioSample getBioSample(File dataset);
+    BioSample getBioSample(final File dataset);
     
     /**
      * Get the biosample with the given name
      * @param dataset
      * @return
      */
-    BioSample getBioSample(String name);
+    BioSample getBioSample(final String name);
 
 
 }

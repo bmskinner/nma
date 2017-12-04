@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 @SuppressWarnings("serial")
 public class VennDetailPanel extends DetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Venn";
     private JPanel mainPanel = new JPanel();
 
     private ExportableTable vennTable;
@@ -66,6 +67,11 @@ public class VennDetailPanel extends DetailPanel {
             error("Error creating venn panel", e);
         }
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

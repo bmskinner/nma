@@ -65,6 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 @SuppressWarnings("serial")
 public class ClusterDetailPanel extends DetailPanel implements DatasetEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Clusters";
     private static final String NEW_CLUSTER_LBL = "Cluster cells";
     private static final String NEW_TREE_LBL    = "Create tree";
     private static final String NEW_CLASS_LBL   = "Create classifier";
@@ -98,6 +99,11 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
         setEnabled(false);
 
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     /**

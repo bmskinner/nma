@@ -80,7 +80,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      *            the options to detect with
      */
     public NucleusDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options) {
-        super(null);
+
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
     }

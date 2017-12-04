@@ -42,8 +42,15 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 @SuppressWarnings("serial")
 public class SegmentWilcoxonPanel extends AbstractPairwiseDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Wilcoxon stats";
+    
     public SegmentWilcoxonPanel() {
         super();
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     @Override

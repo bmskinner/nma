@@ -32,10 +32,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel
         implements SignalChangeListener, DatasetEventListener, InterfaceEventListener {
-
-    // protected CellDetailPanel cellDetailPanel;
-    // protected SegmentsEditingPanel segmentsEditingPanel;
-    // protected BorderTagEditingPanel borderTagEditingPanel;
+    
+    private static final String PANEL_TITLE_LBL = "Editing";
 
     public EditingDetailPanel() {
 
@@ -57,7 +55,7 @@ public class EditingDetailPanel extends DetailPanel
         this.addSignalChangeListener(segmentsEditingPanel);
         this.addSignalChangeListener(borderTagEditingPanel);
 
-        tabPane.addTab("Cells", cellDetailPanel);
+        tabPane.addTab(cellDetailPanel.getPanelTitle(), cellDetailPanel);
 
         /*
          * Signals come from the segment panel to this container Signals can be
@@ -70,31 +68,11 @@ public class EditingDetailPanel extends DetailPanel
         tabPane.addTab("Border tags", borderTagEditingPanel);
 
     }
-
-    /**
-     * This method must be overridden by the extending class to perform the
-     * actual update when a single dataset is selected
-     */
-    // protected void updateSingle() {
-    // updateMultiple();
-    // }
-    //
-    // /**
-    // * This method must be overridden by the extending class
-    // * to perform the actual update when a multiple datasets are selected
-    // */
-    // protected void updateMultiple() {
-    //// cellDetailPanel.setEnabled(true);
-    //// segmentsEditingPanel.setEnabled(true);
-    // }
-
-    /**
-     * This method must be overridden by the extending class to perform the
-     * actual update when a no datasets are selected
-     */
-    // protected void updateNull() {
-    // updateMultiple();
-    // }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
 
     @Override
     public void signalChangeReceived(SignalChangeEvent event) {
@@ -106,18 +84,5 @@ public class EditingDetailPanel extends DetailPanel
         if (!this.getSubPanels().contains(event.getSource())) {
            getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
         }
-
-        // if(event.sourceName().equals("CellDetailPanel")
-        // || event.sourceName().equals("SegmentsEditingPanel")
-        // || event.sourceName().equals("BorderTagEditingPanel")){
-        // fireSignalChangeEvent(event.type());
-        // }
-
-        // fireSignalChangeEvent(event.type());
-        //
-        // cellDetailPanel.signalChangeReceived(event);
-        // segmentsEditingPanel.signalChangeReceived(event);
-        // borderTagEditingPanel.signalChangeReceived(event);
-
     }
 }

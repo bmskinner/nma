@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author ben
  *
  */
+@Deprecated
 public enum NucleusStatistic implements PlottableStatistic, Loggable {
     AREA("Area", StatisticDimension.AREA, new NucleusType[] { NucleusType.ROUND }), 
     PERIMETER("Perimeter",

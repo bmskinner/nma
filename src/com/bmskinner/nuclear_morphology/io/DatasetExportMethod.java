@@ -28,9 +28,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
  * @author bms41
  *
  */
-public class DatasetExportMethod extends AbstractAnalysisMethod {
+public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
 
     private File saveFile = null;
     // private boolean useHDF5 = false;

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
-import ij.ImageStack;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +25,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -47,6 +45,8 @@ import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
+import ij.ImageStack;
+
 /**
  * Detect signal proportions within concentric shells of a nucleus
  * 
@@ -54,7 +54,7 @@ import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionEx
  * @since 1.13.4
  *
  */
-public class ShellAnalysisMethod extends AbstractAnalysisMethod {
+public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
 	public static final int MINIMUM_AREA_PER_SHELL = 100;
 	public static final double MINIMUM_CIRCULARITY = 0.3;
@@ -271,10 +271,12 @@ public class ShellAnalysisMethod extends AbstractAnalysisMethod {
             dataset.getCollection().addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
-            fine("Creating random sample of " + totalPixels + " pixels");
+            
+            int iterations = totalPixels < 100000 ? totalPixels : 100000; // stop stupidly long calculations 
+            fine("Creating random sample of " + iterations + " pixels");
 
             ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensus(), shells,
-                    totalPixels);
+                    iterations);
 
             double[] c = sr.getProportions();
 

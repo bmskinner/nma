@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import java.util.Optional;
-
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a
  * component

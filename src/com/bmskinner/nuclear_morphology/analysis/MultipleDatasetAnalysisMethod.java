@@ -17,64 +17,41 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.analysis;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IWorkspace.BioSample;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
- * The default implementation of BioSamples.
+ * An abstract class of analysis method designed for handling multiple analysis datasets
+ * e.g. merging datasets together.
  * @author bms41
  * @since 1.13.8
  *
  */
-public class DefaultBioSample implements BioSample {
+public abstract class MultipleDatasetAnalysisMethod  extends AbstractAnalysisMethod {
     
-    private String name;
-    private List<File> datasets = new ArrayList<>();
+    final protected List<IAnalysisDataset> datasets;
     
-    public DefaultBioSample(String name){
-        if(name==null){
-            throw new IllegalArgumentException("Name cannot be null");
-        }
-        this.name = name;
+    /**
+     * Construct with a list of datasets to be analysed
+     * @param datasets
+     */
+    public MultipleDatasetAnalysisMethod(List<IAnalysisDataset> datasets) {
+        super();
+        this.datasets = datasets;
     }
     
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public List<File> getDatasets() {
-        return datasets;
-
-    }
-
-    @Override
-    public void addDataset(File dataset) {
-        if(dataset==null){
-            return;
-        }
+    /**
+     * Construct with a single dataset to be analysed
+     * @param datasets
+     */
+    public MultipleDatasetAnalysisMethod(IAnalysisDataset dataset) {
+        super();
+        this.datasets = new ArrayList<>();
         datasets.add(dataset);
-
-    }
-
-    @Override
-    public void removeDataset(File dataset) {
-        if(dataset==null){
-            return;
-        }
-       datasets.remove(dataset);
-        
-    }
-
-    @Override
-    public boolean hasDataset(File dataset) {
-        return datasets.contains(dataset);
     }
 
 }

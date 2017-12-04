@@ -51,6 +51,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSetEventListener {
 
+    private static final String PANEL_TITLE_LBL = "Segments";
+    
     private SegmentationDualChartPanel dualPanel;
 
     private ProfileTypeOptionsPanel profileOptions = new ProfileTypeOptionsPanel();
@@ -109,6 +111,11 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
         setEnabled(false);
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     private JPanel makeButtonPanel() {
 
         JPanel panel = new JPanel(new FlowLayout()) {

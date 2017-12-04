@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  * @since 1.13.4
  *
  */
-public class NeutrophilDetectionMethod extends AbstractAnalysisMethod {
+public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
 
     private static final String spacerString = "---------";
 

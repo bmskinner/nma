@@ -67,6 +67,7 @@ public class MergesDetailPanel extends DetailPanel {
     private JLabel headerLabel = new JLabel(Labels.NULL_DATASETS);
 
     private static final String RECOVER_BUTTON_TEXT = "Recover source";
+    private static final String PANEL_TITLE_LBL = "Merges";
 
     private JPanel mainPanel;
 
@@ -80,6 +81,11 @@ public class MergesDetailPanel extends DetailPanel {
         } catch (Exception e) {
             log(Level.SEVERE, "Error creating merge panel", e);
         }
+    }
+    
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
     }
 
     private void createUI() throws Exception {

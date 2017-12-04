@@ -56,6 +56,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class CellStatsPanel extends AbstractCellDetailPanel {
 
+    private static final String PANEL_TITLE_LBL = "Info";
+    
     private ExportableTable table; // individual cell stats
 
     private JScrollPane scrollPane;
@@ -118,6 +120,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         this.setEnabled(false);
     }
 
+    @Override
+    public String getPanelTitle(){
+        return PANEL_TITLE_LBL;
+    }
+    
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);

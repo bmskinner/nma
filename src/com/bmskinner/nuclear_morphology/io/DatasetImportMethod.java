@@ -74,7 +74,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      *            the saved dataset file
      */
     public DatasetImportMethod(final File f) {
-        super(null);
+        super();
 
         if (!Importer.isSuitableImportFile(f)) {
             throw new IllegalArgumentException(INVALID_FILE_ERROR);

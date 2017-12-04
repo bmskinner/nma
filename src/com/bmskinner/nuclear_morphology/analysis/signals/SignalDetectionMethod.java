@@ -18,17 +18,15 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
-import ij.ImageStack;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -43,10 +41,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
-public class SignalDetectionMethod extends AbstractAnalysisMethod {
+public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
     protected IMutableNuclearSignalOptions options = null;
     protected File                         folder;

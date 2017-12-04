@@ -147,6 +147,11 @@ public class LogPanel extends DetailPanel implements ActionListener {
         makeCommandList();
         this.add(logPanel, BorderLayout.CENTER);
     }
+    
+    @Override
+    public String getPanelTitle(){
+        return "Log panel";
+    }
 
     /**
      * Create the log panel for updates
