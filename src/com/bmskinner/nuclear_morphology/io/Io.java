@@ -26,7 +26,7 @@ import java.net.URISyntaxException;
 
 import ij.IJ;
 
-public interface Orter {
+public interface Io {
     
     static final String TAB_FILE_EXTENSION = ".txt";
     static final String SVG_FILE_EXTENSION = ".svg";
@@ -64,7 +64,7 @@ public interface Orter {
      * @author ben
      *
      */
-    public interface Exporter extends Orter {
+    public interface Exporter extends Io {
         
         
         static void writeString(final String s, final File f){
@@ -83,7 +83,7 @@ public interface Orter {
         }
     }
     
-    public interface Importer extends Orter {
+    public interface Importer extends Io {
 
         /**
          * Replace the old file extension in the given file and return a new file
@@ -93,7 +93,7 @@ public interface Orter {
          * @param newExt
          * @return
          */
-        static File replaceFileExtension(File f, String oldExt, String newExt) {
+        static File replaceFileExtension(final File f, final String oldExt, final String newExt) {
 
             if (!f.getName().endsWith(oldExt)) {
                 throw new IllegalArgumentException("Old extension not found");
@@ -128,7 +128,12 @@ public interface Orter {
 
         }
 
-        static boolean isSuitableImportFile(File f) {
+        /**
+         * Test if the given file can be imported
+         * @param f
+         * @return
+         */
+        static boolean isSuitableImportFile(final File f) {
 
             if (f == null) {
                 return false;

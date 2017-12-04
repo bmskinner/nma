@@ -20,7 +20,7 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 
-import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -63,6 +63,8 @@ public class ImageImporter implements Loggable, Importer {
                                                       // numbered from 1; first
                                                       // slice is blue
 
+    private static final int EIGHT_BIT = 8;
+    
     private final File f;
 
     /**
@@ -277,8 +279,12 @@ public class ImageImporter implements Loggable, Importer {
      *            the image to convert
      * @return a stack with the input image as position 0
      */
-    private ImageStack convertGreyscale(ImagePlus image) {
-        ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, 8);
+    private ImageStack convertGreyscale(final ImagePlus image) {
+    	
+    	if(image==null){
+    		throw new IllegalArgumentException("Image cannot be null");
+    	}
+        ImageStack result = ImageStack.create(image.getWidth(), image.getHeight(), 0, EIGHT_BIT);
         result.addSlice("counterstain", image.getProcessor());
         result.deleteSlice(1); // remove the blank first slice
         return result;
@@ -291,8 +297,12 @@ public class ImageImporter implements Loggable, Importer {
      *            the image to convert to a stack
      * @return the stack
      */
-    private ImageStack convertRGB(ImagePlus image) {
+    private ImageStack convertRGB(final ImagePlus image) {
 
+    	if(image==null){
+    		throw new IllegalArgumentException("Image cannot be null");
+    	}
+    	
         int imageDepth = 0; // number of images in the stack to begin
         int bitDepth = 8; // default 8 bit images
 
