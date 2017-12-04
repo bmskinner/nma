@@ -83,6 +83,10 @@ import jebl.gui.trees.treeviewer.painters.BasicLabelPainter.PainterIntent;
  */
 @SuppressWarnings("serial")
 public class ClusterTreeDialog extends LoadingIconDialog {
+    
+    private static final String ANALYSE_LBL = "Analyse new clusters";
+    private static final String SHOW_MGE_SRC_LBL = "Show merge sources";
+    private static final String EXTRACT_LBL = "Extract selected as cluster";
 
     private JPanel              buttonPanel;
     private DraggableTreeViewer viewer;
@@ -92,17 +96,15 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     private DatasetSelectionPanel selectedClusterBox;
     private ClusterGroupSelectionPanel selectedClusterGroupBox;
 
-    private List<ICellCollection> clusterList = new ArrayList<ICellCollection>(0);
+    private List<ICellCollection> clusterList = new ArrayList<>(0);
 
     public ClusterTreeDialog(final IAnalysisDataset dataset, final IClusterGroup group) {
         super();
         this.dataset = dataset;
         this.group = group;
-//        this.hasMergeSources = dataset.hasMergeSources();
 
         try {
 
-            finest("Building tree view");
             this.setLayout(new BorderLayout());
             this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
             this.viewer = new DraggableTreeViewer(
@@ -248,7 +250,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
     private JPanel createButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout());
 
-        JButton extractButton = new JButton("Extract selected as cluster");
+        JButton extractButton = new JButton(EXTRACT_LBL);
         extractButton.addActionListener(a -> {
             try {
                 extractSelectedNodesToCluster();
@@ -259,12 +261,12 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         });
         panel.add(extractButton);
 
-        JButton analyseButton = new JButton("Analyse new clusters");
+        JButton analyseButton = new JButton(ANALYSE_LBL);
         analyseButton.addActionListener(a -> analyseClusters());
         panel.add(analyseButton);
 
         if (dataset.hasMergeSources()) {
-            JButton mergeSourceButton = new JButton("Show merge sources");
+            JButton mergeSourceButton = new JButton(SHOW_MGE_SRC_LBL);
             mergeSourceButton.addActionListener(a -> showMergeSources());
             panel.add(mergeSourceButton);
         }
@@ -279,16 +281,6 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         });
         panel.add(selectedClusterBox);
         
-//        selectedClusterBox = new JComboBox<IAnalysisDataset>();
-//        selectedClusterBox.addItem(dataset);
-//        for (IAnalysisDataset d : dataset.getAllChildDatasets()) {
-//            selectedClusterBox.addItem(d);
-//        }
-//        selectedClusterBox.setSelectedIndex(-1);
-//        selectedClusterBox.addItemListener(this);
-//        panel.add(selectedClusterBox);
-
-        
         selectedClusterGroupBox = new ClusterGroupSelectionPanel(dataset.getClusterGroups());
         selectedClusterGroupBox.setSelectedGroup(group);
         selectedClusterGroupBox.addActionListener(e->{
@@ -296,12 +288,6 @@ public class ClusterTreeDialog extends LoadingIconDialog {
             colourTreeNodesByClusterGroup(selectedClusterGroupBox.getSelectedItem());
         });
         panel.add(selectedClusterGroupBox);
-//        for (IClusterGroup g : dataset.getClusterGroups()) {
-//            selectedClusterGroupBox.addItem(g);
-//        }
-//        selectedClusterGroupBox.setSelectedItem(group);
-//        selectedClusterGroupBox.addItemListener(this);
-//        panel.add(selectedClusterGroupBox);
 
         panel.add(this.getLoadingLabel());
 

@@ -107,21 +107,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             }
 
             // make the shells and measure the values
-
-            final AtomicInteger counter = new AtomicInteger(0);
-
-            // collection.getNuclei().parallelStream().forEach( n ->{
-            // analyseNucleus(n);
-            // int i = counter.incrementAndGet();
-            // publish(i);
-            // });
-
             for (Nucleus n : collection.getNuclei()) {
 
                 analyseNucleus(n);
-                int i = counter.incrementAndGet();
                 fireProgressEvent();
-                //
             }
 
             ProgressEvent e = new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0);

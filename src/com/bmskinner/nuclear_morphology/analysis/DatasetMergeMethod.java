@@ -179,7 +179,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
                     newCollection.addCell(newCell); // make a copy of the cell
                                                     // so segments can be merged
-
                 }
             }
 
@@ -203,12 +202,6 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
             // Make a new virtual collection for the sources
             newDataset.addMergeSource(d);
-
-            // try {
-            // d.getCollection().getProfileManager().copyCollectionOffsets(newDataset.getCollection());
-            // } catch (ProfileException e) {
-            // error("Cannot copy profile offsets to merge source", e);
-            // }
         }
 
         // a merged dataset should not have analysis options

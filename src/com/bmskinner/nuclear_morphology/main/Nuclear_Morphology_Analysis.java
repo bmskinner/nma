@@ -35,7 +35,7 @@ public class Nuclear_Morphology_Analysis
 	implements Loggable {
 	
 	private static Nuclear_Morphology_Analysis instance; // for launching without ImageJ
-	private static CommandParser parser;
+	private CommandParser parser;
 	
 	/*
 	 * Keep a strong reference to the loggers so they can be accessed
@@ -67,22 +67,28 @@ public class Nuclear_Morphology_Analysis
 			"jfreesvg"
 	};
 	
+	
+	private Nuclear_Morphology_Analysis(String[] args){
+	    this.parser = new CommandParser(args);
+	}
+	
+	public Nuclear_Morphology_Analysis(){
+	    String[] arr = new String[1];
+        arr[0] = "";
+        main(arr);
+	}
+	
 	public static void main(String[] args){
-		instance = new Nuclear_Morphology_Analysis();
-		instance.runStandalone();
+		instance = new Nuclear_Morphology_Analysis(args);
 	}
 	
 	public static Nuclear_Morphology_Analysis getInstance(){
 		return instance;
 	}
 	
-	public MainWindow getMainWindow(){
-	    return mw;
-	}
-	
-	public CommandParser getParser(){
-		return parser;
-	}
+//	public CommandParser getParser(){
+//		return parser;
+//	}
 	
 	
 	/**
@@ -156,45 +162,44 @@ public class Nuclear_Morphology_Analysis
 		}
 	}
 	
-	/**
-	 * Load the program as standalone
-	 */
-	private void runStandalone(){
-		loadLogger();
-		try {
-			
-			// load the config file properties
-			new PropertiesReader();
-			loadMainWindow(true);
-			parser = new CommandParser();
-		} catch(Exception e){
-			error("Error loading main window", e);
-			System.err.println("Error loading main window");
-			e.printStackTrace();
-		} 
-		
-			
-		
-	}
-	
-	private void loadMainWindow(boolean standalone){
-	    
-	    Runnable r = () -> {
-
-                IJ.setBackgroundColor(0, 0, 0);  // default background is black
-                try {
-                    UIManager.setLookAndFeel(
-                            UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception e) {
-
-                    logToImageJ("Error initialising", e);
-                }
-
-                mw = new MainWindow(standalone);
-                mw.setVisible(true);
-        };
-		java.awt.EventQueue.invokeLater( r );
-	}
+//	/**
+//	 * Load the program as standalone
+//	 */
+//	private void runStandalone(){
+//		loadLogger();
+//		try {
+//			
+//			// load the config file properties
+//			new PropertiesReader();
+//			loadMainWindow(true);
+//		} catch(Exception e){
+//			error("Error loading main window", e);
+//			System.err.println("Error loading main window");
+//			e.printStackTrace();
+//		} 
+//		
+//			
+//		
+//	}
+//	
+//	private void loadMainWindow(boolean standalone){
+//	    
+//	    Runnable r = () -> {
+//
+//                IJ.setBackgroundColor(0, 0, 0);  // default background is black
+//                try {
+//                    UIManager.setLookAndFeel(
+//                            UIManager.getSystemLookAndFeelClassName());
+//                } catch (Exception e) {
+//
+//                    logToImageJ("Error initialising", e);
+//                }
+//
+//                mw = new MainWindow(standalone);
+//                mw.setVisible(true);
+//        };
+//		java.awt.EventQueue.invokeLater( r );
+//	}
 	
 	/*
 	 * Check all dependencies are present, the
@@ -214,7 +219,7 @@ public class Nuclear_Morphology_Analysis
 //				ThresholdAdjuster.update();
 
 				
-				loadMainWindow(false);
+//				loadMainWindow(false);
 
 			} else {
 

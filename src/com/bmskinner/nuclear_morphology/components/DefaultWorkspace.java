@@ -23,6 +23,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+
 /**
  * This is a grouping of open AnalysisDatasets, which can act as a shortcut to
  * opening a lot of nmd files in one go.
@@ -39,9 +41,9 @@ public class DefaultWorkspace implements IWorkspace {
     private File saveFile = null;
     private String name;
 
-    public DefaultWorkspace(File f) {
+    public DefaultWorkspace(final File f) {
         this.saveFile = f;
-        this.name = f.getName();
+        this.name = f.getName().replace(Importer.WRK_FILE_EXTENSION, "");
     }
     
     public void setName(String s){
@@ -49,7 +51,7 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public void add(IAnalysisDataset d) {
+    public void add(final IAnalysisDataset d) {
         if (d.isRoot()) {
             datasets.add(d.getSavePath());
         }
@@ -58,12 +60,12 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public void add(File f) {
+    public void add(final File f) {
         datasets.add(f);
     }
 
     @Override
-    public void remove(IAnalysisDataset d) {
+    public void remove(final IAnalysisDataset d) {
         datasets.remove(d.getSavePath());
     }
 

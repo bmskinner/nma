@@ -11,7 +11,8 @@ public class ImageJLoader implements PlugIn {
 	public void run(String paramString){
 				
 		try {
-			new Nuclear_Morphology_Analysis().run(paramString);
+		    
+			new Nuclear_Morphology_Analysis();
 
 		} catch(Exception e){
 			IJ.log(e.toString());

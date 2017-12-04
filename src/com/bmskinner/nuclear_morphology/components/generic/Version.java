@@ -200,7 +200,9 @@ public class Version implements Serializable {
      */
     public class UnsupportedVersionException extends IOException {
     	
-    	public UnsupportedVersionException(String s){
+        private static final long serialVersionUID = 1L;
+
+        public UnsupportedVersionException(String s){
     		super(s);
     	}
     }

@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 /**
@@ -169,7 +170,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
         chart.getCategoryPlot().getRangeAxis().setRange(range);
 
         String percentLabel = options.isNormalised() ? "Normalised percent" : "Percent";
-        String locationLabel = options.getCountType().equals(CountType.NUCLEUS) ? "nuclei" : "signals";
+        String locationLabel = options.getCountType().equals(CountType.NUCLEUS) ? Labels.NUCLEI : "flurochrome border";
 
         chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " of signal within " + locationLabel);
 

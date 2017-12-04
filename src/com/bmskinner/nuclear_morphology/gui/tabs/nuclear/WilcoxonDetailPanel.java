@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
 @SuppressWarnings("serial")
 public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
 
-    private static final String PANEL_TITLE_LBL = "NWilcoxon stats";
+    private static final String PANEL_TITLE_LBL = "Wilcoxon stats";
     public WilcoxonDetailPanel() {
         super();
     }
@@ -53,7 +53,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
         tablePanel.add(panel);
 
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
     }
     
