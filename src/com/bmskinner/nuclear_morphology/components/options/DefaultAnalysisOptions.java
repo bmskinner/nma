@@ -45,7 +45,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     private boolean isRefoldNucleus, isKeepFailed;
 
     /**
-     * The default constructor, which sets default options specificed in
+     * The default constructor, which sets default options specified in
      * IAnalysisOptions
      */
     public DefaultAnalysisOptions() {
@@ -215,8 +215,14 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
         for (String s : detectionOptions.keySet()) {
             IDetectionOptions d = detectionOptions.get(s);
             try {
-                if (!d.equals(other.getDetectionOptions(s)))
+                if (!d.equals(other.getDetectionOptions(s))){
+                    
+                    System.out.println("Inequality in suboptions:");
+                    System.out.println(d.getClass().getName());
+                    System.out.println(other.getDetectionOptions(s).getClass().getName());
                     return false;
+                }
+                   
             } catch (MissingOptionException e) {
                 return false;
             }
@@ -237,6 +243,22 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
             return false;
 
         return true;
+    }
+    
+    
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder("Analysis options"+IDetectionOptions.NEWLINE);
+        for (String s : detectionOptions.keySet()) {
+            b.append(s+IDetectionOptions.NEWLINE);
+            IDetectionOptions d = detectionOptions.get(s);
+            b.append(d.toString());
+        }
+        b.append(IDetectionOptions.NEWLINE+profileWindowProportion);
+        b.append(IDetectionOptions.NEWLINE+type);
+        b.append(IDetectionOptions.NEWLINE+isRefoldNucleus);
+        b.append(IDetectionOptions.NEWLINE+isKeepFailed);
+        return b.toString();
     }
 
 }

@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 import java.awt.BorderLayout;
 import java.util.logging.Level;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
@@ -44,6 +45,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 public class AnalysisDetailPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Analysis info";
+    private static final String HEADER_LBL      = "Green rows have the same value in all columns";
     private ExportableTable tableAnalysisParameters;
 
     public AnalysisDetailPanel() {
@@ -52,8 +54,12 @@ public class AnalysisDetailPanel extends DetailPanel {
 
         this.setLayout(new BorderLayout());
 
+        JPanel header = new JPanel();
+        header.add(new JLabel(HEADER_LBL));
+        
         JScrollPane parametersPanel = createAnalysisParametersPanel();
 
+        this.add(header, BorderLayout.NORTH);
         this.add(parametersPanel, BorderLayout.CENTER);
 
     }

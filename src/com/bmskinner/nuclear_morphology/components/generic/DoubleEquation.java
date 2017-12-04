@@ -32,6 +32,10 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 public class DoubleEquation implements LineEquation {
 
     final double m, c;
+    
+    final boolean isVert;
+    
+    double xf; // fixed value vertical
 
     /**
      * Constructor using gradient and intercept.
@@ -46,8 +50,13 @@ public class DoubleEquation implements LineEquation {
         if (Double.valueOf(m) == null || Double.valueOf(c) == null) {
             throw new IllegalArgumentException("m or c is null");
         }
+        if (Double.isInfinite(m) || Double.isInfinite(c)) {
+            throw new IllegalArgumentException("m or c is infinite");
+        }
+        
         this.m = m;
         this.c = c;
+        this.isVert=false;
     }
 
     /**
@@ -79,7 +88,11 @@ public class DoubleEquation implements LineEquation {
         // y=mx+c
         double deltaX = a.getX() - b.getX();
         double deltaY = a.getY() - b.getY();
-
+        
+        isVert=deltaX==0;
+        
+        xf = a.getX();
+        
         this.m = deltaY / deltaX;
 
         // y - y1 = m(x - x1)
@@ -95,7 +108,7 @@ public class DoubleEquation implements LineEquation {
     @Override
     public double getX(double y) {
         // x = (y-c)/m
-        return (y - this.c) / this.m;
+        return isVert?xf:(y - this.c) / this.m;
     }
 
     /*
@@ -137,8 +150,8 @@ public class DoubleEquation implements LineEquation {
      * .bmskinner.nuclear_morphology.components.generic.IPoint)
      */
     @Override
-    public boolean isOnLine(IPoint p) {
-        return Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
+    public boolean isOnLine(IPoint p) {     
+        return isVert?p.getX()-xf<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
     }
 
     /*
@@ -152,7 +165,7 @@ public class DoubleEquation implements LineEquation {
     public IPoint getPointOnLine(IPoint p, double distance) {
         
         if(!this.isOnLine(p)){
-            throw new IllegalArgumentException("The given point is not on this line: "+p.toString());
+            throw new IllegalArgumentException("The given point "+p.toString()+" is not on this line: "+toString());
         }
 
         double xA = p.getX();
@@ -353,7 +366,7 @@ public class DoubleEquation implements LineEquation {
      * @return The Equation of the line
      */
     public String toString() {
-        return "y=" + m + ".x+" + c;
+        return "y=" + m + " . x+" + c;
     }
 
     @Override

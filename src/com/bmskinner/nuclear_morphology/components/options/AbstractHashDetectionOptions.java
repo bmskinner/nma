@@ -390,10 +390,14 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
         try {
             if (!getCannyOptions().equals(other.getCannyOptions())) {
+                finer("Inequality in canny options");
+                finer(getCannyOptions().getClass().getName());
+                finer(other.getCannyOptions().getClass().getName());
                 return false;
             }
         } catch (MissingOptionException e) {
             error("Canny options missing in comparison", e);
+            return false;
         }
 
         return true;

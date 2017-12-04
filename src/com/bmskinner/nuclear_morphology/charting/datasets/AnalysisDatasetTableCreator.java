@@ -64,6 +64,11 @@ import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
+/**
+ * Creates the tables for display in the UI.
+ * @author bms41
+ *
+ */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
     private static final String NA_MERGE = "N/A - merge";
@@ -397,8 +402,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 } catch (MissingOptionException e) {
                     fine("No option present for " + l.get(0).getName());
                 }
-
-                // Provide an options to be used
 
             } else {
                 // Merge sources have different options

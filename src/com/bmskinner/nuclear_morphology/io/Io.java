@@ -26,6 +26,13 @@ import java.net.URISyntaxException;
 
 import ij.IJ;
 
+/**
+ * Top level interface for IO operations. Track the common file extensions
+ * and provide access to the separate import and export operations.
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
 public interface Io {
     
     static final String TAB_FILE_EXTENSION = ".txt";

@@ -343,9 +343,6 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 
         IDetectionOptions other = (IDetectionOptions) o;
 
-        // if(! folder.equals(other.getFolder()))
-        // return false;
-
         if (threshold != other.getThreshold())
             return false;
 
@@ -375,8 +372,8 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
                 return false;
             }
         } catch (MissingOptionException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
+            return false;
         }
 
         return true;

@@ -216,4 +216,57 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
     public void set(ICannyOptions options) {
         warn("Setting Canny options not yet implemented");
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+
+        if (o == null)
+            return false;
+
+        if (!(o instanceof ICannyOptions))
+            return false;
+
+        ICannyOptions other = (ICannyOptions) o;
+
+        if (isUseCanny() != other.isUseCanny())
+            return false;
+
+        if (isUseFlattenImage() != other.isUseFlattenImage())
+            return false;
+        
+        if(getFlattenThreshold()!=other.getFlattenThreshold())
+            return false;
+        
+        if (isCannyAutoThreshold() != other.isCannyAutoThreshold())
+            return false;
+        
+        if (isUseKuwahara() != other.isUseKuwahara())
+            return false;
+        
+        if(getKuwaharaKernel()!=other.getKuwaharaKernel())
+            return false;
+        
+        if(getClosingObjectRadius()!=other.getClosingObjectRadius())
+            return false;
+        
+        if(Double.doubleToLongBits(getLowThreshold())!=Double.doubleToLongBits(other.getLowThreshold()))
+            return false;
+        
+        if(Double.doubleToLongBits(getHighThreshold())!=Double.doubleToLongBits(other.getHighThreshold()))
+            return false;
+        
+        if(Double.doubleToLongBits(getKernelRadius())!=Double.doubleToLongBits(other.getKernelRadius()))
+            return false;
+                
+        if(getKernelWidth()!=other.getKernelWidth())
+            return false;
+        
+        if(isAddBorder()!=other.isAddBorder())
+            return false;
+
+        return true;
+
+    }
 }

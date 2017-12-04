@@ -19,11 +19,10 @@
 package com.bmskinner.nuclear_morphology.components;
 
 import java.io.File;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
  * This is a grouping of open AnalysisDatasets, which can act as a shortcut to

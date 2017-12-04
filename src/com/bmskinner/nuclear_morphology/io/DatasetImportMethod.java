@@ -123,7 +123,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 
             } catch (UnloadableDatasetException e) {
                 warn(e.getMessage());
-                warn("Dataset version may be too old");
                 stack("Error reading dataset", e);
             }
 

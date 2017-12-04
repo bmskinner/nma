@@ -11,16 +11,19 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 
-public class AnalysisDatasetReadTest {
+import analysis.SampleDatasetReader;
+
+public class AnalysisDatasetReadTest extends SampleDatasetReader {
 	
-	public static final String TEST_PATH_1 = "C:\\Users\\ben\\Documents\\Datasets\\Testing\\2017-05-21_21-02-44\\Testing.nmd";
+	public static final String TEST_PATH_1 = SAMPLE_DATASET_PATH + "Testing_1_13_7.nmd";
+	public static final String TEST_PATH_2 = SAMPLE_DATASET_PATH + "Testing_multiple3.nmd";
 
 	@Test
-	public void testDatasetCanBeRead() {
+	public void testSample1DatasetCanBeRead() {
 		File f = new File(TEST_PATH_1);
+				
 		try {
 			IAnalysisDataset d = openDataset(f);
-//			
 			assertEquals(d.getSavePath(), f);
 			
 		} catch (Exception e) {
@@ -29,30 +32,30 @@ public class AnalysisDatasetReadTest {
 		}
 	}
 	
+	@Test
+    public void testSample2DatasetCanBeRead() {
+        File f = new File(TEST_PATH_2);
+                
+        try {
+            IAnalysisDataset d = openDataset(f);
+            assertEquals(d.getSavePath(), f);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+	
 	
 	@Test
 	public void testHookBodyDataset() {
 		File f = new File("C:\\Users\\ben\\Documents\\Borked datasets\\Hook_body_calc\\(PWK X LEW) X LEW (30+ 43).nmd");
 		try {
 			IAnalysisDataset d = openDataset(f);
-//			
-			
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail();
 		}
 	}
-	
-	private IAnalysisDataset openDataset(File f) throws Exception{
-		IAnalysisMethod m = new DatasetImportMethod(f);
-
-		System.out.println("Importing "+f.toString());
-		IAnalysisResult r = m.call();
-
-		IAnalysisDataset d = r.getFirstDataset();
-		return d;
-
-	}
-
 }
