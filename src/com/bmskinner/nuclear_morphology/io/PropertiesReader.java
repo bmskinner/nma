@@ -27,7 +27,7 @@ import java.util.Properties;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
-import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 

@@ -26,7 +26,7 @@ import java.nio.charset.Charset;
 
 import com.bmskinner.nuclear_morphology.components.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
-import com.bmskinner.nuclear_morphology.io.Orter.Importer;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

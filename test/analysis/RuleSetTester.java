@@ -6,7 +6,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 
-import Samples.IndividualNuclei;
+import samples.IndividualNuclei;
 
 public class RuleSetTester {
 	
