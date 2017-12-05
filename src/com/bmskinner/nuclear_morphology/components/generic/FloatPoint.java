@@ -18,12 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import ij.IJ;
-import ij.Prefs;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.measure.Calibration;
-
 import java.awt.geom.Point2D;
 
 /**
@@ -37,6 +31,7 @@ import java.awt.geom.Point2D;
 public class FloatPoint extends Point2D.Float implements IMutablePoint {
 
     private static final long serialVersionUID = 1L;
+    private static final double EPSILON = 0.000001;
 
     public FloatPoint(float x, float y) {
         super(x, y);
@@ -335,6 +330,27 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
     public int hashCode() {
         return super.hashCode();
     }
+    
+//    
+//    /**
+//     * An equality check that uses the values of the point, 
+//     * not the class
+//     * @param obj
+//     * @return
+//     */
+//    public boolean equals(IPoint obj) {
+//        if (this == obj)
+//            return true;
+//        if (obj == null)
+//            return false;
+//        
+//        if (java.lang.Double.valueOf(x) - obj.getX() < -EPSILON || java.lang.Double.valueOf(x) - obj.getX() > EPSILON)
+//            return false;
+//        
+//        if (java.lang.Double.valueOf(y) - obj.getY() < -EPSILON || java.lang.Double.valueOf(y) - obj.getY() > EPSILON)
+//            return false;
+//        return true;
+//    }
 
     /*
      * (non-Javadoc)
@@ -347,6 +363,10 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
             return true;
         if (obj == null)
             return false;
+        
+//        if(obj instanceof IPoint)
+//            return equals((IPoint) obj);
+        
         if (getClass() != obj.getClass())
             return false;
         FloatPoint other = (FloatPoint) obj;

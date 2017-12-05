@@ -58,6 +58,13 @@ public class DoubleEquation implements LineEquation {
         this.c = c;
         this.isVert=false;
     }
+    
+    public DoubleEquation(final double x) {
+        isVert=true;
+        xf=x;
+        m=0;
+        c=0;
+    }
 
     /**
      * Constructor using two XYPoints.
@@ -85,18 +92,27 @@ public class DoubleEquation implements LineEquation {
         if (a == null || b == null) {
             throw new IllegalArgumentException("Point a or b is null");
         }
+        
+        if(a.getX()==b.getX() && a.getY()==b.getY()){
+            throw new IllegalArgumentException("Point a and b are identical: "+a.toString());
+        }
+        
+        double aX = a.getX();
+        double bX = b.getX();
+                
         // y=mx+c
-        double deltaX = a.getX() - b.getX();
+        double deltaX = aX - bX;
         double deltaY = a.getY() - b.getY();
         
-        isVert=deltaX==0;
         
-        xf = a.getX();
+
+        isVert=deltaX==0;
+        xf = aX;
         
         this.m = deltaY / deltaX;
 
         // y - y1 = m(x - x1)
-        this.c = a.getY() - (m * a.getX());
+        this.c = a.getY() - (m * aX);
     }
 
     /*
@@ -151,7 +167,8 @@ public class DoubleEquation implements LineEquation {
      */
     @Override
     public boolean isOnLine(IPoint p) {     
-        return isVert?p.getX()-xf<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
+        
+        return isVert?Math.abs(p.getX()-xf)<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
     }
 
     /*
@@ -167,6 +184,8 @@ public class DoubleEquation implements LineEquation {
         if(!this.isOnLine(p)){
             throw new IllegalArgumentException("The given point "+p.toString()+" is not on this line: "+toString());
         }
+        
+        if(isVert) return IPoint.makeNew(p.getX(), p.getY()+distance);
 
         double xA = p.getX();
 
@@ -191,7 +210,9 @@ public class DoubleEquation implements LineEquation {
      */
     @Override
     public LineEquation getPerpendicular(IPoint p) {
-
+        
+        if(isVert) return new DoubleEquation(0, p.getY());
+        
         if ((int) p.getY() != (int) this.getY(p.getX())) {
             return new DoubleEquation(0, 0);
         }
@@ -214,6 +235,8 @@ public class DoubleEquation implements LineEquation {
     @Override
     public LineEquation translate(IPoint p) {
 
+        if(isVert) return this;
+        
         double oldY = this.getY(p.getX());
         double desiredY = p.getY();
 
@@ -366,7 +389,7 @@ public class DoubleEquation implements LineEquation {
      * @return The Equation of the line
      */
     public String toString() {
-        return "y=" + m + " . x+" + c;
+        return isVert?"y="+xf:"y=" + m + " . x+" + c;
     }
 
     @Override

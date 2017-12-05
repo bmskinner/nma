@@ -227,17 +227,6 @@ public class ProfileCreator implements Loggable {
     private ISegmentedProfile calculateZahnRoskieProfile()
             throws UnavailableBorderPointException, UnavailableBorderTagException {
 
-        // Ensure all nuclei point in the same direction
-
-        // Taggable template;
-        // if(target instanceof Nucleus){
-        // This does not work, the vertical nucleus has not been established
-        // when profiling begins
-        // template = ((Nucleus)target).getVerticallyRotatedNucleus();
-        // } else {
-        // template = target;
-        // }
-
         float[] profile = new float[target.getBorderLength()];
         int window = target.getWindowSize(ProfileType.ANGLE);
         int index = 0;
@@ -249,9 +238,6 @@ public class ProfileCreator implements Loggable {
 
             IBorderPoint prev = point.prevPoint(window);
             IBorderPoint next = point.nextPoint(window);
-
-            // IBorderPoint prev = point.prevPoint();
-            // IBorderPoint next = point.nextPoint();
 
             // Get the equation between the first two points
             LineEquation eq = new DoubleEquation(prev, point);
@@ -279,10 +265,6 @@ public class ProfileCreator implements Loggable {
                 angle = 180 + (angle + 180);
                 // angle = -180-angle;
             }
-            //
-            // if(angle < 0){
-            // angle = 0-angle;
-            // }
 
             profile[index++] = (float) angle;
 

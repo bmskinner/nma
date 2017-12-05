@@ -49,6 +49,14 @@ public class DoubleEquationTest {
     public void testDoubleEquationDoubleDouble() {
         DoubleEquation d = new DoubleEquation(1, 0);
     }   
+    
+    @Test
+    public void testDoubleEquationCanHandleVerticalLines() {
+        Point2D p1 = new Point2D.Double(0, 0);
+        Point2D p2 = new Point2D.Double(0, 1);
+        DoubleEquation d = new DoubleEquation(p1, p2);
+    }
+    
 
     /**
      * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DoubleEquation#DoubleEquation(com.bmskinner.nuclear_morphology.components.generic.IPoint, com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
@@ -129,7 +137,16 @@ public class DoubleEquationTest {
         
         System.out.println(pPos.toString());
         System.out.println(pNeg.toString());
-        fail("Not yet implemented");
+        
+        IPoint p1 = IPoint.makeNew(Math.sqrt(0.5),Math.sqrt(0.5)); 
+        assertEquals("x", p1.getX(), pPos.getX(), 0.000001); 
+        assertEquals("y", p1.getY(), pPos.getY(), 0.000001);
+        
+        IPoint p2 = IPoint.makeNew(-Math.sqrt(0.5),-Math.sqrt(0.5)); 
+        assertEquals("x", p2.getX(), pNeg.getX(), 0.000001); 
+        assertEquals("y", p2.getY(), pNeg.getY(), 0.000001);
+        
+        
     }
 
     /**

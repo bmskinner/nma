@@ -37,6 +37,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
+/**
+ * Extract virtual merge source datasets into real root datasets.
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
 public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     
     public MergeSourceExtractionMethod(List<IAnalysisDataset> toExtract) {
@@ -51,9 +57,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
     }
     
     public List<IAnalysisDataset> extractSourceDatasets(){
-        List<IAnalysisDataset> result = new ArrayList<>();
-        log("Recovering source dataset");
-        
+        List<IAnalysisDataset> result = new ArrayList<>();     
         
         for (IAnalysisDataset virtualMergeSource : datasets) {
             
@@ -80,9 +84,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
                 MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
 
-                try {
-                    log("Copying profile offsets");
-                    
+                try {                    
                     IAnalysisDataset parent =  d.getParent();
                     // When the parent is also a virtual cell collection, recurse up to the root dataset
                     while (parent instanceof MergeSourceAnalysisDataset) {
