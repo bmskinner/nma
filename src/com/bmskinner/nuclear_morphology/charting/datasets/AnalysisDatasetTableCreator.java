@@ -478,17 +478,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             Arrays.fill(err, 0, 22, "Error");
             return err;
         }
-        
-//        List<Object> values = new ArrayList<>();
-//        for(String s :nucleusOptions.getEntries().keySet()){
-//        	values.add(nucleusOptions.getValue(s));
-//        }
-//        
-//        while(values.size()<22){
-//        	values.add("");
-//        }
-        
-               
+                       
 
         String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 

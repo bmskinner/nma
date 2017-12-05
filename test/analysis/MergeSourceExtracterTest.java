@@ -29,7 +29,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
+import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -65,18 +65,18 @@ public class MergeSourceExtracterTest extends SampleDatasetReader {
                 break;
             }
             
-            
-            List<IAnalysisDataset> mergeSourcesToExtract = new ArrayList<>();
+            List<IAnalysisDataset> idsToExtact = new ArrayList<>();
             for(IAnalysisDataset m : d.getAllMergeSources()){
                 System.out.println(m.getName());
                 if(m.getName().equals("Test 1a - Rodent small")){
                     System.out.println("Found merge source to extract");
-                    mergeSourcesToExtract.add(m);
+                    idsToExtact.add(m);
                 }
             }
-            MergeSourceExtractor ex = new MergeSourceExtractor(mergeSourcesToExtract);
             
-            List<IAnalysisDataset> extracted = ex.extractSourceDatasets(mergeSourcesToExtract);
+            
+            MergeSourceExtractionMethod mse = new MergeSourceExtractionMethod(idsToExtact);
+            List<IAnalysisDataset> extracted = mse.call().getDatasets();
             
             System.out.println("Extracted "+extracted.size()+" datasets");
             

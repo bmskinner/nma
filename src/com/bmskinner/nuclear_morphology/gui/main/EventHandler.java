@@ -34,7 +34,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
-import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractor;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
@@ -61,6 +60,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
+import com.bmskinner.nuclear_morphology.gui.actions.MergeSourceExtractionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RefoldNucleusAction;
@@ -308,6 +308,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
             }
             
+            
+            if (event.method().equals(DatasetEvent.EXTRACT_SOURCE)) {
+                return new MergeSourceExtractionAction(event.getDatasets(), mw);
+            }
+            
             if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
                 Runnable r = () -> {
                     for(IAnalysisDataset d : selectedDatasets){
@@ -412,12 +417,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         final List<IAnalysisDataset> list = event.getDatasets();
         if (!list.isEmpty()) {
 
-//            if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
-//                for(IAnalysisDataset d : list){
-//                    refoldConsensus(d);
-//                }
-//            }
-
             if (event.method().equals(DatasetEvent.SELECT_DATASETS)) {
                 mw.getPopulationsPanel().selectDatasets(event.getDatasets());
             }
@@ -428,12 +427,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.method().equals(DatasetEvent.SAVE)) {
                 saveDataset(event.firstDataset(), false);
-            }
-
-            if (event.method().equals(DatasetEvent.EXTRACT_SOURCE)) {
-                MergeSourceExtractor ext = new MergeSourceExtractor(list);
-                ext.addDatasetEventListener(this);
-                ext.extractSourceDataset();
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_CACHE)) {
