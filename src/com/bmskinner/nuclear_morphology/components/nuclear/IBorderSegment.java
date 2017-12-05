@@ -70,7 +70,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     }
 
     /**
-     * Create the preferred segment type for this interface
+     * Create the preferred segment type based on the given template
      * 
      * @param startIndex
      * @param endIndex
@@ -463,82 +463,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
             s.setPosition(i);
 
         }
-
-        // IBorderSegment prevSeg = null;
-        //
-        // int position = 0;
-        // for(IBorderSegment segment : list){
-        //
-        // if(prevSeg != null){
-        // segment.setPrevSegment(prevSeg);
-        // prevSeg.setNextSegment(segment);
-        // }
-        // segment.setPosition(position);
-        //
-        // prevSeg = segment;
-        // position++;
-        // }
-        //
-        //
-        //
-        // IBorderSegment firstSegment = list.get(0);
-        // IBorderSegment lastSegment = list.get(list.size()-1);
-        //
-        // /*
-        // * Ensure the end of the final segment is the same index as the start
-        // of the first segment.
-        // *
-        // * Unlock the first segment while the update proceeds
-        // */
-        //
-        // boolean lockState = firstSegment.isLocked();
-        // firstSegment.setLocked(false);
-        //
-        //
-        // try {
-        //
-        //
-        // firstSegment.update(lastSegment.getEndIndex(),
-        // firstSegment.getEndIndex());
-        //
-        // } catch(IllegalArgumentException e){
-        // throw new ProfileException("Error linking final segment:
-        // "+e.getMessage()+"\n"+IBorderSegment.toString(list));
-        // }
-        //
-        // lastSegment.setNextSegment(firstSegment); // ensure they match up at
-        // the end
-        // firstSegment.setPrevSegment(lastSegment);
-        //
-        // // if the first segment is starting at the last index of the profile,
-        // correct
-        // // it to start at 0
-        // if(firstSegment.getStartIndex()==firstSegment.getTotalLength()-1){
-        // firstSegment.update(0, firstSegment.getEndIndex());
-        // }
-        // /*
-        // * Relock the segment if it was previously locked
-        // */
-        // firstSegment.setLocked(lockState);
-
     }
-
-    // static void nudgeUnlinked(IBorderSegment seg, int offset){
-    //
-    // int newStart = CellularComponent.wrapIndex(seg.getStartIndex()+offset,
-    // seg.getTotalLength());
-    // int newEnd = CellularComponent.wrapIndex(seg.getEndIndex()+offset,
-    // seg.getTotalLength());
-    //
-    // seg.update(newStart, newEnd);
-    // if(seg.hasMergeSources()){
-    //
-    // for(IBorderSegment s: seg.getMergeSources()){
-    // nudgeUnlinked(s, offset);
-    // }
-    // }
-    //
-    // }
 
     /**
      * Nudge segments that are not linked together into a complete profile. Used

@@ -434,8 +434,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 MergeSourceExtractor ext = new MergeSourceExtractor(list);
                 ext.addDatasetEventListener(this);
                 ext.extractSourceDataset();
-                ;
-
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_CACHE)) {

@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -102,15 +103,18 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         super(roi, centreOfMass, f, channel, position);
     }
 
-    public ProfileableCellularComponent(CellularComponent c) throws UnprofilableObjectException {
+    /**
+     * Create a new component based on the given template object. If the object has segments,
+     * these will be copied to the new component.
+     * @param c
+     * @throws UnprofilableObjectException
+     */
+    public ProfileableCellularComponent(final CellularComponent c) throws UnprofilableObjectException {
         super(c);
 
         if (c instanceof Taggable) {
 
             Taggable comp = (Taggable) c;
-
-            finest("Created cellular component");
-            // log("Duplicating "+this.getClass().getSimpleName());
 
             this.angleWindowProportion = comp.getWindowProportion(ProfileType.ANGLE);
             this.angleProfileWindowSize = comp.getWindowSize(ProfileType.ANGLE);
@@ -118,9 +122,19 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             for (ProfileType type : ProfileType.values()) {
 
                 try {
-
+                    fine("Duplicating profile "+type);
                     ISegmentedProfile oldProfile = comp.getProfile(type);
                     ISegmentedProfile newProfile = ISegmentedProfile.makeNew(oldProfile);
+                    
+                    List<UUID> oldIds = oldProfile.getSegmentIDs();
+                    List<UUID> newIds = newProfile.getSegmentIDs();
+                    
+                    
+                    for(int i=0; i<oldIds.size(); i++){
+                        if(!oldIds.get(i).equals(newIds.get(i))){
+                            throw new UnprofilableObjectException("Segment ID lists did not copy correctly for "+type);
+                        }
+                    }
 
                     this.profileMap.put(type, newProfile);
 

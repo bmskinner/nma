@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
@@ -561,7 +562,8 @@ public class ProfileManager implements Loggable {
          */
         destPC.createProfileAggregate(destination, profileLength);
         fine("Created new profile aggregates with length " + profileLength);
-
+        
+        
         /*
          * Copy the offset keys from the source collection
          */
@@ -579,7 +581,24 @@ public class ProfileManager implements Loggable {
             fine("Cannot add segments to RP", e);
         }
         fine("Copied tags to new collection");
-
+        
+        
+        // Final sanity check - did the segment IDs get copied properly?
+        fine("Testing profiles");
+        List<IBorderSegment> newSegs;
+        try {
+            newSegs = destPC.getSegments(Tag.REFERENCE_POINT);
+        } catch (UnavailableBorderTagException e1) {
+            warn("RP not found in destination collection");
+            fine("Error getting destination segments from RP", e1);
+            return;
+        }
+        
+        for(int i=0; i<newSegs.size(); i++){
+            if(!segments.get(i).getID().equals(newSegs.get(i).getID())){
+                throw new ProfileException("Segment IDs are not consistent with the old profile");
+            }
+        }
     }
 
     /**

@@ -120,9 +120,9 @@ public class DefaultBorderSegment implements IBorderSegment {
      * @param n
      */
     public DefaultBorderSegment(IBorderSegment n) {
-        this.uuid = n.getID();
-        this.startIndex = n.getStartIndex();
-        this.endIndex = n.getEndIndex();
+        this.uuid        = n.getID();
+        this.startIndex  = n.getStartIndex();
+        this.endIndex    = n.getEndIndex();
         this.totalLength = n.getTotalLength();
         this.nextSegment = n.nextSegment();
         this.prevSegment = n.prevSegment();

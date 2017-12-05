@@ -54,7 +54,7 @@ public class MergeSourceExtractor implements Loggable {
 
     private final List<Object>           datasetListeners = new CopyOnWriteArrayList<Object>();
     private final List<IAnalysisDataset> list;
-
+    
     /**
      * Construct with a list of datasets that are to be extracted from their
      * parents.
@@ -64,6 +64,96 @@ public class MergeSourceExtractor implements Loggable {
      */
     public MergeSourceExtractor(final List<IAnalysisDataset> list) {
         this.list = list;
+    }
+    
+    
+    public List<IAnalysisDataset> extractSourceDatasets(final List<IAnalysisDataset> sources){
+        List<IAnalysisDataset> result = new ArrayList<>();
+        log("Recovering source dataset");
+        for (IAnalysisDataset virtualMergeSource : sources) {
+
+            ICellCollection templateCollection = virtualMergeSource.getCollection();
+            // Make a new real cell collection from the virtual collection
+            ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
+                    templateCollection.getName(), templateCollection.getNucleusType());
+
+            for (ICell c : templateCollection.getCells()) {
+
+                newCollection.addCell(new DefaultCell(c));
+            }
+
+            IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
+            newDataset.setRoot(true);
+
+            // Copy over the profile collections
+            newDataset.getCollection().createProfileCollection();
+
+            // Copy the merged dataset segmentation into the new dataset.
+            // This wil match cell segmentations by default, since the cells
+            // have been copied from the merged dataset.
+            if (virtualMergeSource instanceof MergeSourceAnalysisDataset) {
+
+                MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
+
+                try {
+                    log("Copying profile offsets");
+                    
+                    IAnalysisDataset parent =  d.getParent();
+                    // When the parent is also a virtual cell collection, recurse up to the root dataset
+                    while (parent instanceof MergeSourceAnalysisDataset) {
+                        parent = ((MergeSourceAnalysisDataset) parent).getParent();
+                    }
+
+                   parent.getCollection().getProfileManager()
+                            .copyCollectionOffsets(newDataset.getCollection());
+
+                } catch (ProfileException e) {
+                    error("Cannot copy profile offsets to recovered merge source", e);
+                }
+            }
+
+            // Copy over the signal collections where appropriate
+            copySignalGroups(templateCollection, newDataset);
+
+            try {
+                newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
+            } catch (MissingOptionException e) {
+                warn("Missing analysis options");
+                stack(e.getMessage(), e);
+            }
+
+            result.add(newDataset);
+
+        }
+        return result;
+    }
+    
+    
+    private void copySignalGroups(ICellCollection templateCollection, IAnalysisDataset newDataset){
+        ICellCollection newCollection = newDataset.getCollection();
+        for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
+
+            ISignalGroup newGroup;
+            try {
+
+                // We only want to make a signal group if a cell with
+                // the signal
+                // is present in the merge source.
+                boolean addSignalGroup = false;
+                for (Nucleus n : newCollection.getNuclei()) {
+                    addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
+                }
+
+                if (addSignalGroup) {
+                    newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
+                    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
+                }
+
+            } catch (UnavailableSignalGroupException e) {
+                warn("Unable to copy signal groups");
+                fine("Signal group not present", e);
+            }
+        }
     }
 
     /**
@@ -99,43 +189,22 @@ public class MergeSourceExtractor implements Loggable {
                     MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
 
                     try {
-                        log("Copying profile offsets");
-                        d.getParent().getCollection().getProfileManager()
-                                .copyCollectionOffsets(newDataset.getCollection());
+                        IAnalysisDataset parent =  d.getParent();
+                        // When the parent is also a virtual cell collection, recurse up to the root dataset
+                        while (parent instanceof MergeSourceAnalysisDataset) {
+                            parent = ((MergeSourceAnalysisDataset) parent).getParent();
+                        }
 
+                       parent.getCollection().getProfileManager()
+                                .copyCollectionOffsets(newDataset.getCollection());
                     } catch (ProfileException e) {
                         error("Cannot copy profile offsets to recovered merge source", e);
                     }
                 }
 
                 // Copy over the signal collections where appropriate
-
-                // templateCollection.getSignalManager().copySignalGroups(newCollection);
-                for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
-
-                    ISignalGroup newGroup;
-                    try {
-
-                        // We only want to make a signal group if a cell with
-                        // the signal
-                        // is present in the merge source.
-                        boolean addSignalGroup = false;
-                        for (Nucleus n : newCollection.getNuclei()) {
-                            addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
-                        }
-
-                        if (addSignalGroup) {
-                            newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
-                            newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
-                        }
-
-                    } catch (UnavailableSignalGroupException e) {
-                        warn("Unable to copy signal groups");
-                        fine("Signal group not present", e);
-                    }
-
-                }
-
+                copySignalGroups(templateCollection, newDataset);
+                
                 try {
                     newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
                 } catch (MissingOptionException e) {

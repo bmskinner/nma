@@ -39,13 +39,15 @@ public class ClusterGroupSelectionPanel extends EnumeratedOptionsPanel {
 
     JComboBox<IClusterGroup> box;
 
-    public ClusterGroupSelectionPanel(List<IClusterGroup> list) {
+    public ClusterGroupSelectionPanel(final List<IClusterGroup> list) {
+        
         box = new JComboBox<IClusterGroup>();
         for (IClusterGroup d : list) {
             box.addItem(d);
         }
 
-        box.setSelectedItem(list.get(0));
+        if(!list.isEmpty())
+            box.setSelectedItem(list.get(0));
 
         box.addActionListener(this);
 

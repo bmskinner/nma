@@ -1064,19 +1064,13 @@ public class DefaultCellCollection implements ICellCollection {
 
         double[] result = null;
 
-        // if(statsCache.hasValues(stat,
-        // CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
-        // return statsCache.getValues(stat,
-        // CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
-        //
-        // } else {
-        //
         result = getNuclei().parallelStream().mapToDouble(n -> {
             IBorderSegment segment;
             try {
+                
                 segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
             } catch (ProfileException | UnavailableComponentException e) {
-                stack("Unable to get segment statistic", e);
+                warn("Unable to get segment statistic for segment "+id.toString());
                 return 0;
             }
             double perimeterLength = 0;
@@ -1089,11 +1083,6 @@ public class DefaultCellCollection implements ICellCollection {
 
         }).toArray();
         Arrays.sort(result);
-
-        // statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT,
-        // scale, result);
-        // }
-
         return result;
     }
 
