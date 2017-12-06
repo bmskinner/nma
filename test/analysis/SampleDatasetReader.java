@@ -26,10 +26,22 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 
+/**
+ * Provides a simple access point to open datasets for testing classes
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
 public class SampleDatasetReader {
     
     public static final String SAMPLE_DATASET_PATH = "test/samples/datasets/";
     
+    /**
+     * Open the dataset in the given file.
+     * @param f
+     * @return
+     * @throws Exception
+     */
     public IAnalysisDataset openDataset(File f) throws Exception{
         
         if(f==null){

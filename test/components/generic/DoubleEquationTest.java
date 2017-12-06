@@ -55,6 +55,11 @@ public class DoubleEquationTest {
         Point2D p1 = new Point2D.Double(0, 0);
         Point2D p2 = new Point2D.Double(0, 1);
         DoubleEquation d = new DoubleEquation(p1, p2);
+        
+        LineEquation eq = d.getPerpendicular(IPoint.makeNew(p1));
+        assertEquals(eq.getM(), 0, 0.0000001);
+        assertEquals(eq.getC(), 0, 0.0000001);
+        
     }
     
 

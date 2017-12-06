@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.awt.geom.Point2D;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
@@ -25,6 +26,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 public class FloatEquation implements LineEquation {
 
     final float m, c;
+    final boolean isVert;
+    
+    float xf; // fixed value vertical
 
     /**
      * Constructor using gradient and intercept.
@@ -36,24 +40,19 @@ public class FloatEquation implements LineEquation {
      * @return An Equation describing the line
      */
     public FloatEquation(final float m, final float c) {
-//        if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
-//            throw new IllegalArgumentException("m or c is null");
-//        }
+
+        if (Float.valueOf(m) == null || Float.valueOf(c) == null) {
+            throw new IllegalArgumentException("m or c is null");
+        }
+        if (Float.isInfinite(m) || Float.isInfinite(c)) {
+            throw new IllegalArgumentException("m or c is infinite");
+        }
+        
         this.m = m;
         this.c = c;
+        this.isVert=false;
     }
 
-    // /**
-    // * Constructor using two XYPoints.
-    // *
-    // * @param a the first XYPoint
-    // * @param b the second XYPoint
-    // * @return An Equation describing the line between the points
-    // */
-    // public FloatEquation (){
-    //
-    // this(a.toPoint2D(), b.toPoint2D());
-    // }
 
     /**
      * Constructor using two Points.
@@ -66,17 +65,35 @@ public class FloatEquation implements LineEquation {
      */
     public FloatEquation(IPoint a, IPoint b) {
 
+        this(a.toPoint2D(), b.toPoint2D());
+    }
+    
+    public FloatEquation(Point2D a, Point2D b) {
+
         if (a == null || b == null) {
             throw new IllegalArgumentException("Point a or b is null");
         }
+        
+        if(a.getX()==b.getX() && a.getY()==b.getY()){
+            throw new IllegalArgumentException("Point a and b are identical: "+a.toString());
+        }
+        
+        float aX = (float) a.getX();
+        float bX = (float) b.getX();
+                
         // y=mx+c
-        float deltaX = (float) a.getX() - (float) b.getX();
-        float deltaY = (float) a.getY() - (float) b.getY();
+        float deltaX = aX - bX;
+        float deltaY = (float) (a.getY() - b.getY());
+        
+        
 
-        this.m = (deltaY / deltaX);
+        isVert=deltaX==0;
+        xf = aX;
+        
+        this.m = deltaY / deltaX;
 
         // y - y1 = m(x - x1)
-        this.c = ((float) a.getY() - (m * (float) a.getX()));
+        this.c = (float) (a.getY() - (m * aX));
     }
 
     /*
@@ -88,7 +105,7 @@ public class FloatEquation implements LineEquation {
     @Override
     public double getX(double y) {
         // x = (y-c)/m
-        return (y - this.c) / this.m;
+        return isVert?xf:(y - c) / m;
     }
 
     /*
@@ -131,7 +148,7 @@ public class FloatEquation implements LineEquation {
      */
     @Override
     public boolean isOnLine(IPoint p) {
-        return Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
+        return isVert?Math.abs(p.getX()-xf)<0.0000001:Math.abs(p.getY() - ((m * p.getX()) + c)) < .0000001;
     }
 
     /*
@@ -143,7 +160,7 @@ public class FloatEquation implements LineEquation {
      */
     @Override
     public IPoint getPointOnLine(IPoint p, double distance) {
-
+        if(isVert) return IPoint.makeNew(p.getX(), p.getY()+distance);
         double xA = p.getX();
 
         /*
@@ -168,6 +185,8 @@ public class FloatEquation implements LineEquation {
     @Override
     public LineEquation getPerpendicular(IPoint p) {
 
+        if(isVert) return new FloatEquation(0, (float) p.getY());
+        
         if ((int) p.getY() != (int) this.getY(p.getX())) {
             return new DoubleEquation(0, 0);
         }
@@ -189,7 +208,8 @@ public class FloatEquation implements LineEquation {
      */
     @Override
     public LineEquation translate(IPoint p) {
-
+        if(isVert) return this;
+        
         double oldY = this.getY(p.getX());
         double desiredY = p.getY();
 

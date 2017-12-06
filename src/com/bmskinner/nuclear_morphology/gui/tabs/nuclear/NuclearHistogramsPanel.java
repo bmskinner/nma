@@ -164,41 +164,34 @@ public class NuclearHistogramsPanel extends HistogramsTabPanel implements Signal
 
             if (result == 0) { // button at index 0 - continue
 
-                // List<AnalysisDataset> newList = new
-                // ArrayList<AnalysisDataset>();
-
                 // create a new sub-collection with the given parameters for
                 // each dataset
                 for (IAnalysisDataset dataset : getDatasets()) {
                     ICellCollection collection = dataset.getCollection();
                     try {
 
-                        log(Level.INFO,
-                                "Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
+                        log("Filtering on " + stat.toString() + ": " + df.format(lower) + " - " + df.format(upper));
 
                         ICellCollection subCollection = collection.filterCollection(stat, scale, lower, upper);
 
                         if (subCollection.hasCells()) {
 
-                            log(Level.INFO, "Filtered " + subCollection.size() + " nuclei");
+                            log("Filtered " + subCollection.size() + " nuclei");
                             dataset.addChildCollection(subCollection);
                             try {
                                 dataset.getCollection().getProfileManager().copyCollectionOffsets(subCollection);
                             } catch (Exception e1) {
-                                log(Level.SEVERE, "Error applying segments", e1);
+                                error("Error applying segments", e1);
                             }
-                            // newList.add(
-                            // dataset.getChildDataset(subCollection.getID() ));
                         }
 
                     } catch (Exception e) {
-                        log(Level.SEVERE, "Error filtering", e);
+                        error("Error filtering", e);
 
                     }
                 }
-                log(Level.FINEST, "Firing population update request");
+                finest("Firing population update request");
                 getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
-                // fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
             }
         }
     }
