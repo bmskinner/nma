@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
@@ -134,7 +135,6 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
         // segment the profiles from head
         runSegmentation(dataset.getCollection(), pointType);
-
         fine("Core morphology analysis complete");
 
         return new DefaultAnalysisResult(dataset);

@@ -1108,6 +1108,7 @@ public class DefaultCellCollection implements ICellCollection {
 
         if (subCollection.size() == 0) {
             warn("No cells in collection");
+            return subCollection;
         }
 
         try {

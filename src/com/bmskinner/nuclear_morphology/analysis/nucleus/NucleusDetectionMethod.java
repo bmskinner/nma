@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
@@ -72,8 +73,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * 
      * @param outputFolder
      *            the name of the folder for results
-     * @param programLogger
-     *            the logger to the log panel
      * @param debugFile
      *            the dataset log file
      * @param options
@@ -178,13 +177,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                 filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
                 log("Filtered OK");
 
-                // boolean ok = new CollectionFilterer().run(collection,
-                // failedNuclei); // put fails into failedNuclei, remove from r
-                // if(ok){
-                // log("Filtered OK");
-                // } else {
-                // log("Filtering error");
-                // }
+                
+                // Ensure medians do not include filtered nuclei
+                collection.clear(MeasurementScale.PIXELS);
+                collection.clear(MeasurementScale.MICRONS);
+                
 
                 /*
                  * Keep the failed nuclei - they can be manually assessed later
