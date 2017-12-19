@@ -352,7 +352,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             ois = new PackageReplacementObjectInputStream(fis);
             finest("Created object stream");
 
-            finest("Attempting to read object");
             dataset = (IAnalysisDataset) ois.readObject();
             finest("Read object as analysis dataset");
 
@@ -403,7 +402,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             throw new UnloadableDatasetException("Stack overflow loading '" + file.getAbsolutePath() + "'", e);
 
         } finally {
-            finest("Closing file stream");
+
             try {
                 ois.close();
                 fis.close();
@@ -416,7 +415,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         // Replace existing save file path with the path to the file that has
         // been opened
-        finest("Checking file path");
         if (!dataset.getSavePath().equals(inputFile)) {
             log("Old save path: " + dataset.getSavePath().getAbsolutePath());
             log("Input file: " + inputFile.getAbsolutePath());
@@ -494,6 +492,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 dataset.updateSourceImageDirectory(expectedImageDirectory);
             } catch (IllegalArgumentException e) {
                 warn("Cannot update image file paths: " + e.getMessage());
+                warn("Nucleus images will not be displayed");
             }
 
             fine("Checking if signal folders need updating");

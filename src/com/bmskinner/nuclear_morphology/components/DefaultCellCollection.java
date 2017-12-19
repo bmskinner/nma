@@ -235,7 +235,7 @@ public class DefaultCellCollection implements ICellCollection {
 
     }
 
-    public void addCell(ICell r) {
+    public void addCell(final ICell r) {
 
         if (r == null) {
             throw new IllegalArgumentException("Cell is null");
@@ -1260,6 +1260,7 @@ public class DefaultCellCollection implements ICellCollection {
         File oldFile = this.getFolder();
         boolean ok = false;
 
+        finest("Updating the source folder of all nuclei");
         if (newFolder.exists()) {
 
             try {
@@ -1273,11 +1274,11 @@ public class DefaultCellCollection implements ICellCollection {
             } catch (IllegalArgumentException e) {
                 // one of the nuclei failed to update
                 // reset all to previous
+                warn("At least one nucleus did not update folder location properly");
                 this.folder = oldFile;
 
                 for (Nucleus n : this.getNuclei()) {
-
-                    n.updateSourceFolder(oldFile);
+                    n.updateSourceFolder(oldFile); 
                 }
                 ok = false;
             }

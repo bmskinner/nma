@@ -74,7 +74,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     protected DefaultRodentSpermNucleus(Nucleus n) throws UnprofilableObjectException {
         super(n);
-        finer("Created rodent sperm nucleus");
     }
 
     @Override
@@ -155,17 +154,17 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
     private void calculateHookAndBodyLength() {
 
         // Copy the nucleus
-        fine("Calculating hook and body length");
+//        fine("Calculating hook and body length");
 
         // Start with the vertically rotated nucleus
         Nucleus testNucleus = getVerticallyRotatedNucleus();
 
-        fine("Nucleus " + this.getNameAndNumber());
+//        fine("Nucleus " + this.getNameAndNumber());
         // Only proceed if the verticals have been set
 
         if (testNucleus == null) {
 
-            fine("Vertical nucleus is not present");
+//            fine("Vertical nucleus is not present");
             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
             return;
@@ -245,21 +244,13 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
         	dBody = maxBoundingX - vertX;
         }
 
-//        if (referenceX < vertX) {
-//            distanceHook = distanceLower;
-//            distanceHump = distanceHigher;
-//        } else {
-//            distanceHook = distanceHigher;
-//            distanceHump = distanceLower;
-//        }
-
         setStatistic(PlottableStatistic.HOOK_LENGTH, dHook);
         setStatistic(PlottableStatistic.BODY_WIDTH, dBody);
 
-        fine("Hook length is " + dHook);
-        fine("Body width is " + dBody);
-
-        finest("Hook length and body width calculated");
+//        fine("Hook length is " + dHook);
+//        fine("Body width is " + dBody);
+//
+//        finest("Hook length and body width calculated");
     }
 
     /**
@@ -489,7 +480,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          */
         super.getVerticallyRotatedNucleus();
 
-        fine("Fetched vertical nucleus from round nucleus");
+//        fine("Fetched vertical nucleus from round nucleus");
         if (verticalNucleus == null) {
             warn("Unknown error creating vertical nucleus");
             return null;
@@ -505,7 +496,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
             return verticalNucleus;
         }
-        fine("Checking hook position");
+//        fine("Checking hook position");
         /*
          * If the reference point is left of the centre of mass, the nucleus is
          * pointing left. If not, flip the nucleus

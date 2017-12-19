@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.CellFactory;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -53,13 +54,13 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     final private ComponentFactory<Nucleus> nuclFactory;
 
-    public FluorescentNucleusFinder(IAnalysisOptions op) {
+    public FluorescentNucleusFinder(final IAnalysisOptions op) {
         super(op);
         nuclFactory = new NucleusFactory(op.getNucleusType());
     }
 
     @Override
-    public List<ICell> findInImage(File imageFile) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInImage(final File imageFile) throws ImageImportException, ComponentCreationException {
         List<ICell> list = new ArrayList<>();
 
         try {
@@ -89,7 +90,7 @@ public class FluorescentNucleusFinder extends CellFinder {
 
             for (Nucleus n : nuclei) {
                 if (nuclOptions.isValid(n)) {
-                    list.add(new DefaultCell(n));
+                    list.add(CellFactory.buildInstance(n));
                 }
             }
         } catch (Exception e) {
@@ -170,8 +171,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     }
 
-    private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions nuclOptions, ImageProcessor ip, int objectNumber,
-            Detector gd) throws ComponentCreationException {
+    private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, final ImageProcessor ip, int objectNumber,
+            final Detector gd) throws ComponentCreationException {
 
         // measure the area, density etc within the nucleus
         StatsMap values = gd.measure(roi, ip);

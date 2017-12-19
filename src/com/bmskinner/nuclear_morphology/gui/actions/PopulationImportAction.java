@@ -76,7 +76,7 @@ public class PopulationImportAction extends VoidResultAction {
     @Override
     public void run() {
         setProgressBarIndeterminate();
-        fine("Running dataset open action");
+//        fine("Running dataset open action");
         if (file != null) {
 
             IAnalysisMethod m = new DatasetImportMethod(file);
@@ -191,9 +191,6 @@ public class PopulationImportAction extends VoidResultAction {
         fine("Opened dataset");
 
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
-        fine("Finishing action");
-
         super.finished();
     }
 

@@ -351,10 +351,10 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-        fine("Getting vertically rotated nucleus");
+//        fine("Getting vertically rotated nucleus");
 
         if (verticalNucleus != null) {
-            fine("Vertical nucleus not null, not creating");
+//            fine("Vertical nucleus not null, not creating");
             return verticalNucleus;
         }
 
@@ -366,7 +366,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         // of the template nucleus, then moved to the current CoM.
         // Now align the nucleus on vertical.
 
-        fine("Creating new vertical nucleus: " + verticalNucleus.getClass().getSimpleName());
+//        fine("Creating new vertical nucleus: " + verticalNucleus.getClass().getSimpleName());
 
         verticalNucleus.alignVertically();
 
@@ -419,30 +419,30 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
 
-            fine(this.getNameAndNumber() + ": TV and BV are present");
+//            fine(this.getNameAndNumber() + ": TV and BV are present");
             int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
             int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
 
             if (topPoint == BORDER_INDEX_NOT_FOUND) { // check if the point was
                                                       // set but not found
-                fine(this.getNameAndNumber() + ": TV index not found");
+//                fine(this.getNameAndNumber() + ": TV index not found");
                 useTVandBV = false;
             }
 
             if (bottomPoint == BORDER_INDEX_NOT_FOUND) {
-                fine(this.getNameAndNumber() + ": BV index not found");
+//                fine(this.getNameAndNumber() + ": BV index not found");
                 useTVandBV = false;
             }
 
             if (topPoint == bottomPoint) { // Situation when something went very
                                            // wrong
-                fine(this.getNameAndNumber() + ": TV index == BV index");
+//                fine(this.getNameAndNumber() + ": TV index == BV index");
                 useTVandBV = false;
             }
 
         } else {
 
-            fine(this.getNameAndNumber() + ": TV and BV are not present");
+//            fine(this.getNameAndNumber() + ": TV and BV are not present");
             useTVandBV = false;
 
         }
@@ -468,7 +468,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
             // Default if top and bottom vertical points have not been specified
 
-            fine(this.getNameAndNumber() + ": Rotating OP to bottom");
+//            fine(this.getNameAndNumber() + ": Rotating OP to bottom");
             try {
                 rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {

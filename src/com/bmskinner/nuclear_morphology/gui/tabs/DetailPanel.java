@@ -304,7 +304,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             t.update(list);
         }
 
-        // finest("Set updating state");
         updateDetail();
 
     }
@@ -342,7 +341,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             }
         } finally {
             setUpdating(false);
-            fine("Finished update");
         }
     }
 

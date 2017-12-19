@@ -91,7 +91,6 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
 
         ih.addInterfaceEventListener(mw.getEventHandler());
         dh.addDatasetEventListener(mw.getEventHandler());
-        finest("Created progressable action");
 
     }
 
@@ -125,7 +124,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      * Remove the progress bar and dataset and interface listeners
      */
     public void cancel() {
-        finest("Removing interface and dataset listeners");
+//        finest("Removing interface and dataset listeners");
         removeProgressBar();
 //        removeDatasetEventListener(mw.getEventHandler());
         dh.removeDatasetEventListener(mw.getEventHandler());
@@ -142,9 +141,9 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     public void cleanup() {
         if (this.worker.isDone() || this.worker.isCancelled()) {
             this.worker.removePropertyChangeListener(this);
-            finest("Removed property change listener from worker");
+//            finest("Removed property change listener from worker");
             this.removeProgressBar();
-            finest("Removed progress bar");
+//            finest("Removed progress bar");
 
         }
     }
@@ -160,7 +159,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
             value = (int) newValue;
         }
 
-        finer("Property change event heard: " + value);
+//        finer("Property change event heard: " + value);
 
         if (value >= 0 && value <= 100) {
 
@@ -192,13 +191,13 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      */
     public void finished() {
         this.worker.removePropertyChangeListener(this);
-        finer("Removed property change listener from worker");
+//        finer("Removed property change listener from worker");
         removeProgressBar();
 
         ih.removeInterfaceEventListener(mw.getEventHandler());
         dh.removeDatasetEventListener(mw.getEventHandler());
 //        this.removeDatasetEventListener(mw.getEventHandler());
-        finer("Removed event listeners from action");
+//        finer("Removed event listeners from action");
     }
 
     /**

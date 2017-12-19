@@ -157,7 +157,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
 
-        for (ICellCollection collection : folderCollection) {
+        for (final ICellCollection collection : folderCollection) {
 
             IAnalysisDataset dataset = new DefaultAnalysisDataset(collection);
             dataset.setAnalysisOptions(analysisOptions);
@@ -265,7 +265,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         fine("Removed collections");
 
         List<ICellCollection> result = new ArrayList<ICellCollection>();
-        for (ICellCollection c : collectionGroup.values()) {
+        for (final ICellCollection c : collectionGroup.values()) {
             result.add(c);
         }
         return result;
@@ -280,13 +280,13 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      *            the folder to count
      * @return the number of analysable image files
      */
-    private static int countSuitableImages(File folder) {
+    private static int countSuitableImages(final File folder) {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
         }
 
-        File[] listOfFiles = folder.listFiles();
+        final File[] listOfFiles = folder.listFiles();
 
         if (listOfFiles == null) {
             return 0;
@@ -317,7 +317,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param folder
      *            the folder of images to be analysed
      */
-    protected void processFolder(File folder) {
+    protected void processFolder(final File folder) {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
@@ -348,12 +348,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
          * NEW METHOD - appears to be working
          */
 
-        Finder<List<ICell>> finder = new FluorescentNucleusFinder(analysisOptions);
+        final Finder<List<ICell>> finder = new FluorescentNucleusFinder(analysisOptions);
         finder.addProgressListener(this);
 
         try {
-            List<ICell> cells = finder.findInFolder(folder);
-            for (ICell cell : cells) {
+            final List<ICell> cells = finder.findInFolder(folder);
+            for (final ICell cell : cells) {
                 folderCollection.addCell(cell);
             }
 

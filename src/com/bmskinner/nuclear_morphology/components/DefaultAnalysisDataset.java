@@ -724,9 +724,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             throw new IllegalArgumentException("Target folder contains no images");
         }
 
-        fine("Target folder contains at least one image");
-
-        fine("Updating dataset image paths");
+        fine("Updating dataset image paths...");
         boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
         if (!ok) {
             warn("Error updating dataset image paths; update cancelled");

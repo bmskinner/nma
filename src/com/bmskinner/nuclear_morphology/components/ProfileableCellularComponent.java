@@ -122,7 +122,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             for (ProfileType type : ProfileType.values()) {
 
                 try {
-                    fine("Duplicating profile "+type);
+//                    fine("Duplicating profile "+type);
                     ISegmentedProfile oldProfile = comp.getProfile(type);
                     ISegmentedProfile newProfile = ISegmentedProfile.makeNew(oldProfile);
                     
