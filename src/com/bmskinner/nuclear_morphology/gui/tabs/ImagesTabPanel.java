@@ -23,9 +23,12 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -186,8 +189,36 @@ public class ImagesTabPanel extends DetailPanel {
     private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
         
         DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(new ImageNode(dataset.getName(), null));
-        List<File> files = new ArrayList<File>(dataset.getCollection().getImageFiles());
-        Collections.sort(files);
+        List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());        
+        
+        Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
+        
+        // Sort numerically where possible
+        Comparator<File> comp = (f1, f2) -> {
+            Matcher m1 = p.matcher(f1.getName());
+            Matcher m2 = p.matcher(f2.getName());
+
+            if(m1.matches() && m2.matches()){
+                
+                String s1 = m1.group(1);
+                String s2 = m2.group(1);
+
+                try {
+                    
+                    int i1 = Integer.parseInt(s1);
+                    int i2 = Integer.parseInt(s2);
+                    return i1 - i2;
+                } catch(NumberFormatException e) {
+                    stack("Error parsing number", e);
+                    return f1.compareTo(f2);
+                }
+                
+            } else {
+                return f1.compareTo(f2);
+            }
+        };
+        
+        files.sort(comp);
 
         for (File f : files) {
 

@@ -184,6 +184,30 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     public boolean hasClusterGroup(IClusterGroup group) {
         return clusterGroups.contains(group);
     }
+    
+    @Override
+    public String toString(){
+        return getName();
+//        String newLine = System.getProperty("line.separator");
+//        StringBuilder b = new StringBuilder(this.getName()+newLine);
+//        b.append(this.getUUID().toString()+newLine);
+//        b.append(version.toString()+newLine);
+//        b.append( (datasetColour==null?"":datasetColour.toString())+newLine);
+//        
+//        b.append( "Children:"+newLine);
+//        for(IAnalysisDataset d : childDatasets){
+//            b.append( "\t"+d.getUUID()+newLine);
+//        }
+//        
+//        b.append( "Cluster groups:"+newLine);
+//        for(IClusterGroup g : clusterGroups){
+//            b.append( "\t"+g.getName()+newLine);
+//        }
+//        
+//        b.append( cellCollection.toString()+newLine);
+//        
+//        return b.toString();
+    }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
 

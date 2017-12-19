@@ -108,9 +108,15 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public IAnalysisDataset duplicate() throws Exception {
         IAnalysisDataset result = new DefaultAnalysisDataset(cellCollection);
 
-        for (ICell c : cellCollection.getCells()) {
-
-            result.getCollection().addCell(new DefaultCell(c));
+        List<ICell> l = new ArrayList<>();
+        for (final ICell c : cellCollection.getCells()) {
+            ICell n = new DefaultCell(c);
+            l.add(n);
+        }
+        
+        ICellCollection col = result.getCollection();
+        for (final ICell c : l) {
+            col.addCell(c);
         }
 
         // TODO: Add child collections, clusters etc
@@ -695,7 +701,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     @Override
     public String toString() {
-        return this.getName();
+        return super.toString();
     }
 
     /*

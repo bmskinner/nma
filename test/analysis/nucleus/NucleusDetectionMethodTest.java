@@ -59,6 +59,8 @@ public class NucleusDetectionMethodTest {
     
     private static final String TESTING_PIG_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_pig";
     
+    private static final String TESTING_ROUND_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_round";
+    
     private static final String OUT_FOLDER = "UnitTest_"+com.bmskinner.nuclear_morphology.components.generic.Version.currentVersion();
    
     
@@ -69,9 +71,8 @@ public class NucleusDetectionMethodTest {
     @Test
     public void testRodentDetectionMatchesSavedDataset() {
         
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+"Testing_1_13_8.nmd");
         try {
-            IAnalysisDataset exp = new SampleDatasetReader().openDataset(f);
+            IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
             
             
             File testFolder = new File(TESTING_RODENT_FOLDER);
@@ -97,10 +98,9 @@ public class NucleusDetectionMethodTest {
      */
     @Test
     public void testPigDetectionMatchesSavedDataset() {
-        
-        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+"Testing_pig_1_13_8.nmd");
+
         try {
-            IAnalysisDataset exp = new SampleDatasetReader().openDataset(f);
+            IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
             
             
             File testFolder = new File(TESTING_PIG_FOLDER);
@@ -114,6 +114,40 @@ public class NucleusDetectionMethodTest {
             op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
             
             File outFile = new File(TESTING_PIG_FOLDER+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
+            IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+                        
+            testDatasetEquality(exp, obs);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+        
+        
+    }
+    
+    /**
+     * Run the current pipeline with default settings on the testing
+     * pig folder and check the created dataset matches expected values.
+     */
+    @Test
+    public void testRoundDetectionMatchesSavedDataset() {
+
+        try {
+            IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
+            
+            
+            File testFolder = new File(TESTING_ROUND_FOLDER);
+            IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+            op.setNucleusType(NucleusType.ROUND);
+            
+            IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+            nop.setMinCirc(0.0);
+            nop.setMaxCirc(1.0);
+            
+            op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
+            
+            File outFile = new File(TESTING_ROUND_FOLDER+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
             IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
                         
             testDatasetEquality(exp, obs);

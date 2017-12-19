@@ -24,6 +24,8 @@ import java.awt.Paint;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JLabel;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
