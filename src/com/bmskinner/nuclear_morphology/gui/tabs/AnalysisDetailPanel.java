@@ -50,7 +50,7 @@ public class AnalysisDetailPanel extends DetailPanel {
 
     public AnalysisDetailPanel() {
 
-        super();
+        super(PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
@@ -62,11 +62,6 @@ public class AnalysisDetailPanel extends DetailPanel {
         this.add(header, BorderLayout.NORTH);
         this.add(parametersPanel, BorderLayout.CENTER);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
 
     @Override

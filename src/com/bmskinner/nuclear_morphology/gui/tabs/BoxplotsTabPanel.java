@@ -60,7 +60,7 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
     protected String component;
 
     public BoxplotsTabPanel(String component) {
-        super();
+        super(PANEL_TITLE_LBL);
         this.component = component;
         this.setLayout(new BorderLayout());
 
@@ -83,11 +83,6 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     @Override
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();

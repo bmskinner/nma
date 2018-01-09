@@ -44,12 +44,13 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class PairwiseVennDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Detailed Venn";
+    private static final String HEADER_LBL      = "Shows a dataset by dataset comparison of shared and non-shared nuclei";
     private JPanel mainPanel = new JPanel();
 
     private ExportableTable pairwiseVennTable;
 
     public PairwiseVennDetailPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
@@ -58,6 +59,10 @@ public class PairwiseVennDetailPanel extends DetailPanel {
             JScrollPane scrollPane = new JScrollPane();
             scrollPane.setViewportView(mainPanel);
 
+            JPanel header = new JPanel();
+            header.add(new JLabel(HEADER_LBL));
+            
+            this.add(header, BorderLayout.NORTH);
             this.add(scrollPane, BorderLayout.CENTER);
 
             JPanel pairwisePanel = new JPanel(new BorderLayout());
@@ -78,44 +83,26 @@ public class PairwiseVennDetailPanel extends DetailPanel {
     }
     
     @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
-    @Override
     public void setChartsAndTablesLoading() {
-        // log("Updating venn detail panel with loading state");
         pairwiseVennTable.setModel(AbstractTableCreator.createLoadingTable());
     }
 
     @Override
     protected void updateSingle() {
-        // log("Updating venn detail panel with single state");
         pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
     }
 
     @Override
     protected void updateMultiple() {
-        // log("Updating pairwise venn table for multiple datasets");
-        // Exception e = new Exception("Updating venn detail panel with multiple
-        // state");
-        // error("Cause of multiple update", e);
-        // pairwiseVennTable.setModel(AbstractDatasetCreator.createLoadingTable());
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.PAIRWISE_VENN)
                 .setTarget(pairwiseVennTable)
                 .setRenderer(TableOptions.ALL_COLUMNS, new PairwiseVennTableCellRenderer(getDatasets())).build();
 
         setTable(options);
-
-        finest("Updated pairwise venn panel");
     }
 
     @Override
     protected void updateNull() {
-        // log("Updating venn detail panel with null state");
-        // Exception e = new Exception("Updating venn detail panel with null
-        // state");
-        // error("Cause of null update", e);
         pairwiseVennTable.setModel(AbstractTableCreator.createBlankTable());
     }
 

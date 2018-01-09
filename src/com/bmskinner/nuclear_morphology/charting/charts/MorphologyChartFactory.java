@@ -986,6 +986,10 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         return chart;
     }
 
+    /**
+     * Create a chart showing the modality profiles for the given options
+     * @return a modality chart, or a chart with an error label if the data could not be found
+     */
     public JFreeChart createModalityProfileChart() {
 
         XYDataset ds;

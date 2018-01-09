@@ -51,7 +51,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
     public SignalsAnalysisPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         table = new ExportableTable(new DefaultTableModel());
@@ -100,17 +100,9 @@ public class SignalsAnalysisPanel extends DetailPanel {
         scrollPane = new JScrollPane(table);
         this.add(scrollPane, BorderLayout.CENTER);
     }
-
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
     
     private SignalTableCell getSignalGroupFromTable(JTable table, int row, int column) {
         return (SignalTableCell) table.getModel().getValueAt(row, column);
-        // return UUID.fromString( table.getModel().getValueAt(row,
-        // column).toString() );
     }
 
     private void updateSignalSource(SignalTableCell signalGroup) {

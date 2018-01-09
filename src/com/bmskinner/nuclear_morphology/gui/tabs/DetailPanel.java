@@ -87,6 +87,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     // The table cache does the same for table models
     protected final Cache chartCache = new ChartCache();
     protected final Cache tableCache = new TableCache();
+    
+    private static final String DEFAULT_TAB_TITLE = "Default";
+    private final String panelTabTitleLbl;
 
     volatile private AtomicBoolean isUpdating = new AtomicBoolean(false);
     
@@ -96,19 +99,30 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
 
     public DetailPanel() {
-        this(null);
+        this(DEFAULT_TAB_TITLE);
     }
     
     public DetailPanel(TabPanel parent) {
-    	parentPanel = parent;
+    	this(parent, DEFAULT_TAB_TITLE);
+    }
+    
+    public DetailPanel(String title) {
+        this(null, title);        
+    }
+    
+    public DetailPanel(TabPanel parent, String title) {
+        parentPanel = parent;
         this.addChartOptionsRenderedEventListener(this);
+        panelTabTitleLbl = title;
     }
     
     /**
      * Get the preferred name of the panel for use in tabs
      * @return the title
      */
-    public abstract String getPanelTitle();
+    public String getPanelTitle(){
+        return panelTabTitleLbl;
+    }
 
     /**
      * Add another detail panel as a sub panel to this. This will pass on
@@ -170,20 +184,25 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return
      */
     public synchronized boolean isMultipleDatasets() {
-        // return(this.list.size()>1);
         return DatasetListManager.getInstance().isMultipleDatasets();
     }
 
     public synchronized boolean hasDatasets() {
-        // return !list.isEmpty();
         return DatasetListManager.getInstance().hasSelectedDatasets();
     }
 
+    /**
+     * Get the datasets currently displayed in this panel
+     * @return a list of datasets
+     */
     protected synchronized List<IAnalysisDataset> getDatasets() {
-        // return new ArrayList<IAnalysisDataset>( this.list);
         return DatasetListManager.getInstance().getSelectedDatasets();
     }
 
+    /**
+     * Get the chart cache for the panel
+     * @return
+     */
     public synchronized Cache getChartCache() {
         return this.chartCache;
     }
@@ -216,8 +235,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         if (b) {
 
             for (Component c : this.getComponents()) {
-                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // new
-                                                                             // Cursor(Cursor.WAIT_CURSOR));
+                c.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             }
 
             this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -379,7 +397,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     protected synchronized void setChart(ChartOptions options) {
         if (chartCache.has(options)) {
-//            fine("Fetched cached chart with hashcode " + options.hashCode());
             JFreeChart chart = getChartCache().get(options);
 
             if (options.getTarget() != null) {
@@ -387,12 +404,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             }
 
         } else { // No cached chart
-//            fine("No cached chart available with hashcode " + options.hashCode());
             // Make a background worker to generate the chart and
             // update the target chart panel when done
             ChartFactoryWorker worker = new ChartFactoryWorker(options);
-            // ThreadManager.getInstance().submitAndCancelUpdate(worker);
-            ThreadManager.getInstance().submit(worker);// worker.execute();
+            ThreadManager.getInstance().submit(worker);
         }
     }
 
@@ -407,7 +422,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     protected synchronized void setTable(TableOptions options) {
         if (chartCache.has(options)) {
-//            finest("Fetched cached chart with hashcode " + options.hashCode());
             TableModel model = getTableCache().get(options);
 
             if (options.getTarget() != null) {
@@ -415,12 +429,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             }
 
         } else { // No cached chart
-//            finest("No cached table model available with hashcode " + options.hashCode());
+
             // Make a background worker to generate the chart and
             // update the target chart panel when done
             TableFactoryWorker worker = new TableFactoryWorker(options);
 
-            // ThreadManager.getInstance().submitAndCancelUpdate(worker);
             ThreadManager.getInstance().submit(worker);// worker.execute();
         }
     }
@@ -435,11 +448,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     protected synchronized JFreeChart getChart(ChartOptions options) {
         JFreeChart chart;
         if (chartCache.has(options)) {
-//            finest("Fetched cached chart with hashcode " + options.hashCode());
             chart = getChartCache().get(options);
 
         } else { // No cached chart
-//            finest("No cached chart available with hashcode " + options.hashCode());
 
             try {
                 chart = createPanelChartType(options);
@@ -451,7 +462,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                 chart = ScatterChartFactory.makeEmptyChart();
             }
             getChartCache().add(options, chart);
-//            finest("Added cached chart");
         }
         return chart;
     }
@@ -783,10 +793,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                     options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                     options.getTarget().setChart(AbstractChartFactory.createLoadingChart());
                 }
-                finest("Creating chart type");
-                // JFreeChart chart = AbstractChartFactory.createEmptyChart();
+
                 JFreeChart chart = createPanelChartType(options);
-                finest("Adding chart type to cache");
                 chartCache.add(options, chart);
 
                 return chart;
@@ -805,7 +813,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                 if (options.hasTarget()) {
 
                     options.getTarget().setChart(get());
-                    finest("Set chart panel to new chart");
+//                    finest("Set chart panel to new chart");
                     options.getTarget().setCursor(Cursor.getDefaultCursor());
                 }
             } catch (InterruptedException e) {
