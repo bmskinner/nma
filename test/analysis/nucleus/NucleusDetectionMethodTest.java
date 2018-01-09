@@ -20,7 +20,6 @@
 package analysis.nucleus;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 
@@ -35,10 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
@@ -55,11 +51,16 @@ import analysis.SampleDatasetReader;
  */
 public class NucleusDetectionMethodTest {
     
-    private static final String TESTING_RODENT_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing";
+	private static final String IMAGE_FOLDER = "test/samples/images/";
+	
+//    private static final String TESTING_RODENT_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing";
+    private static final String TESTING_RODENT_FOLDER = IMAGE_FOLDER +"Testing";
     
-    private static final String TESTING_PIG_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_pig";
+    private static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";
+//    private static final String TESTING_PIG_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_pig";
     
-    private static final String TESTING_ROUND_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_round";
+    private static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER +"Testing_round";
+//    private static final String TESTING_ROUND_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_round";
     
     private static final String OUT_FOLDER = "UnitTest_"+com.bmskinner.nuclear_morphology.components.generic.Version.currentVersion();
    
@@ -69,27 +70,17 @@ public class NucleusDetectionMethodTest {
      * rodent folder and check the created dataset matches expected values.
      */
     @Test
-    public void testRodentDetectionMatchesSavedDataset() {
-        
-        try {
-            IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
-            
-            
-            File testFolder = new File(TESTING_RODENT_FOLDER);
-            IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-            op.setDetectionOptions(IAnalysisOptions.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
-            
-            File outFile = new File(TESTING_RODENT_FOLDER+File.separator+OUT_FOLDER, OUT_FOLDER+".nmd");
-            IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
-                        
-            testDatasetEquality(exp, obs);
+    public void testRodentDetectionMatchesSavedDataset() throws Exception{
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-        
-        
+    	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
+
+    	File testFolder = new File(TESTING_RODENT_FOLDER);
+    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+
+    	File outFile = makeOutfile(TESTING_RODENT_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+
+    	testDatasetEquality(exp, obs);         
     }
     
     /**
@@ -97,33 +88,18 @@ public class NucleusDetectionMethodTest {
      * pig folder and check the created dataset matches expected values.
      */
     @Test
-    public void testPigDetectionMatchesSavedDataset() {
+    public void testPigDetectionMatchesSavedDataset() throws Exception{
 
-        try {
-            IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
-            
-            
-            File testFolder = new File(TESTING_PIG_FOLDER);
-            IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-            op.setNucleusType(NucleusType.PIG_SPERM);
-            
-            IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-            nop.setMinCirc(0.1);
-            nop.setMaxCirc(0.9);
-            
-            op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
-            
-            File outFile = new File(TESTING_PIG_FOLDER+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
-            IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
-                        
-            testDatasetEquality(exp, obs);
+    	IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-        
-        
+    	File testFolder = new File(TESTING_PIG_FOLDER);
+    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+
+    	File outFile = makeOutfile(TESTING_PIG_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+
+    	testDatasetEquality(exp, obs);       
+
     }
     
     /**
@@ -131,33 +107,17 @@ public class NucleusDetectionMethodTest {
      * pig folder and check the created dataset matches expected values.
      */
     @Test
-    public void testRoundDetectionMatchesSavedDataset() {
+    public void testRoundDetectionMatchesSavedDataset() throws Exception{
 
-        try {
-            IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
-            
-            
-            File testFolder = new File(TESTING_ROUND_FOLDER);
-            IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
-            op.setNucleusType(NucleusType.ROUND);
-            
-            IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-            nop.setMinCirc(0.0);
-            nop.setMaxCirc(1.0);
-            
-            op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
-            
-            File outFile = new File(TESTING_ROUND_FOLDER+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
-            IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
-                        
-            testDatasetEquality(exp, obs);
+    	IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-        
-        
+    	File testFolder = new File(TESTING_ROUND_FOLDER);
+    	IMutableAnalysisOptions op = OptionsFactory.makeDefaulRoundAnalysisOptions(testFolder);
+
+    	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
+    	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
+
+    	testDatasetEquality(exp, obs);        
     }
     
     /**
@@ -191,29 +151,28 @@ public class NucleusDetectionMethodTest {
      * @param exp the expected (reference) dataset
      * @param obs the observed (newly created) dataset
      */
-    private void testDatasetEquality(IAnalysisDataset exp, IAnalysisDataset obs){
-        try{
-            assertEquals(exp.getName(), obs.getName());
+    private void testDatasetEquality(IAnalysisDataset exp, IAnalysisDataset obs) throws Exception{
+    	assertEquals(exp.getName(), obs.getName());
 
-            assertEquals(exp.getAnalysisOptions(), obs.getAnalysisOptions());
+    	assertEquals(exp.getAnalysisOptions(), obs.getAnalysisOptions());
 
-            assertEquals(exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
+    	assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
 
-            assertEquals(exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
+    	assertEquals("Number of images", exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
 
-            // Check the stats are the same
-            for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
-                System.out.println("Testing equality of "+s);
-                double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
-                double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+    	// Check the stats are the same
+    	for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){
+    		System.out.println("Testing equality of "+s);
+    		double eMed = exp.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
+    		double oMed = obs.getCollection().getMedian(s, CellularComponent.NUCLEUS, MeasurementScale.PIXELS);
 
-                assertEquals(s.toString(), eMed, oMed, 0.3);
-                //            assertEquals(s.toString(), eMed, oMed, 0.00000001); // TODO fails for variability. Not yet sure why. Something different after saving.
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
+    		assertEquals(s.toString(), eMed, oMed, 0.3);
+    		//            assertEquals(s.toString(), eMed, oMed, 0.00000001); // TODO fails for variability. Not yet sure why. Something different after saving.
+    	}
+    }
+    
+    private File makeOutfile(String folder){
+    	return new File(folder+File.separator+OUT_FOLDER, OUT_FOLDER+Io.SAVE_FILE_EXTENSION);
     }
 
 }

@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,10 +30,15 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
  */
 public class DefaultBorderSegmentTest {
 
-	DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+	private DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
+	
+	@Before
+	public void setUp(){
+		test = new DefaultBorderSegment(0, 20, 100);
+	}
 	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#DefaultBorderSegment(int, int, int, java.util.UUID)}.
@@ -40,7 +46,7 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testDefaultBorderSegmentIntIntIntUUID() {
 		UUID id = UUID.randomUUID();
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100, id);
+		test = new DefaultBorderSegment(0, 20, 100, id);
 		
 		exception.expect(IllegalArgumentException.class);
 		test = new DefaultBorderSegment(0, 20, 100, null);
@@ -74,7 +80,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetMergeSources() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 						
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 11, 100);
 		DefaultBorderSegment s2 = new DefaultBorderSegment(11, 20, 100);
@@ -99,28 +104,40 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testAddMergeSource() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
-		
 		// proper merge source
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 10, 100);
 		test.addMergeSource(s1);
 		
+		assertEquals(s1, test.getMergeSources().get(0));
+	}
+	
+	@Test
+	public void testAddMergeSourceOutOfRangeArg0() {
 		// invalid merge source - out of range
 		DefaultBorderSegment s2 = new DefaultBorderSegment(10, 30, 100);
-		
+
 		exception.expect(IllegalArgumentException.class);
 		test.addMergeSource(s2);
-
-		// invalid merge source - wrong length
-		DefaultBorderSegment s3 = new DefaultBorderSegment(10, 20, 200);
-		exception.expect(IllegalArgumentException.class);
-		test.addMergeSource(s3);
-		
+	}
+	
+	@Test
+	public void testAddMergeSourceOutOfRangeArg1() {	
 		// invalid merge source - out of range
 		DefaultBorderSegment s4 = new DefaultBorderSegment(-1, 20, 100);
 		exception.expect(IllegalArgumentException.class);
 		test.addMergeSource(s4);
-		
+	}
+	
+	@Test
+	public void testAddMergeSourceWrongLength() {
+		// invalid merge source - wrong length
+		DefaultBorderSegment s = new DefaultBorderSegment(10, 20, 200);
+		exception.expect(IllegalArgumentException.class);
+		test.addMergeSource(s);
+	}
+	
+	@Test
+	public void testAddMergeSourceNull() {
 		// invalid merge source - null
 		exception.expect(IllegalArgumentException.class);
 		test.addMergeSource(null);
@@ -131,8 +148,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testHasMergeSources() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
-		
 		// with no sources
 		assertFalse(test.hasMergeSources());
 		
@@ -153,9 +168,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetStartIndex() {
-
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
-		
 		assertEquals(0, test.getStartIndex());
 	}
 
@@ -164,8 +176,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetEndIndex() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
-		
 		assertEquals(20, test.getEndIndex());
 	}
 
@@ -174,7 +184,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetProportionalIndex() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals(10, test.getProportionalIndex(0.5));
 	}
 
@@ -183,7 +192,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetIndexProportion() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals(0.5, test.getIndexProportion(10), 0);
 	}
 
@@ -192,7 +200,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetName() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals("Seg_0", test.getName());
 		
 		test.setPosition(1);
@@ -204,7 +211,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetMidpointIndex() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals(10, test.getMidpointIndex());
 		
 		/*
@@ -219,10 +225,6 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetDistanceToStart() {
-		/*
-		 * Within segment
-		 */
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals(5, test.getDistanceToStart(5));
 		
 		/*
@@ -237,16 +239,8 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetDistanceToEnd() {
-		/*
-		 * Within segment
-		 */
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
-		assertEquals(15, test.getDistanceToEnd(5));
-		
-		/*
-		 * Outside segment
-		 */
-		assertEquals(30, test.getDistanceToEnd(90));
+		assertEquals("Within segment", 15, test.getDistanceToEnd(5));
+		assertEquals("Outside segment", 30, test.getDistanceToEnd(90));
 	}
 
 	/**
@@ -254,8 +248,7 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testIsLocked() {
-		// Created unlocked
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
+
 		assertFalse(test.isLocked());
 		
 		test.setLocked(true);
@@ -269,9 +262,7 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testGetTotalLength() {
-		DefaultBorderSegment test = new DefaultBorderSegment(0, 20, 100);
 		assertEquals(100, test.getTotalLength());
-		
 	}
 
 	/**
@@ -393,103 +384,168 @@ public class DefaultBorderSegmentTest {
 		assertTrue(s1.testContains(90, 25, 90));
 		assertFalse(s1.testContains(90, 25, 89));
 	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#update(int, int)}.
-	 */
+	
+	
 	@Test
-	public void testUpdate() {
-		
-		try {
-			
-			/*
-			 * Lone segment
-			 */
-			DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-			assertTrue(s1.update(0, 25));
-			assertTrue(s1.update(90, 20));
-			assertTrue(s1.update(0, 25));
+	public void testUpdateLoneSegment() throws SegmentUpdateException {
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+		assertTrue(s1.update(0, 25));
+		assertEquals(0, s1.getStartIndex());
+		assertEquals(25, s1.getEndIndex());
 
-			/*
-			 * Linked segment
-			 */
-			DefaultBorderSegment s2 = new DefaultBorderSegment(25,  40, 100);
-			s1.setNextSegment(s2);
-			s2.setPrevSegment(s1);
+		assertTrue(s1.update(90, 20));
+		assertEquals(90, s1.getStartIndex());
+		assertEquals(20, s1.getEndIndex());
 
-			// No effect on end of s2, but start is updated
-			assertTrue(s1.update(0, 26));
-			assertEquals(26, s2.getStartIndex());
-			assertEquals(40, s2.getEndIndex());
-
-			// Out of range of s2; should fail
-			assertFalse(s1.update(0, 42));
-
-			// Out of range of s2; should fail
-			assertFalse(s2.update(90, 42));
-			
-			
-			/*
-			 * Complete profile of segments
-			 */
-			List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-			DefaultBorderSegment p1 = new DefaultBorderSegment(10, 20, 100);
-			DefaultBorderSegment p2 = new DefaultBorderSegment(20, 45, 100);
-			DefaultBorderSegment p3 = new DefaultBorderSegment(45, 89, 100);
-			DefaultBorderSegment p4 = new DefaultBorderSegment(89, 10, 100);
-			
-			list.add(p1);
-			list.add(p2);
-			list.add(p3);
-			list.add(p4);
-			
-			IBorderSegment.linkSegments(list);
-			
-			p1.update(5, 20);
-			assertEquals(5, p1.getStartIndex());
-			assertEquals(5, p4.getEndIndex());
-			
-			p4.update(89, 1);
-			assertEquals(1, p1.getStartIndex());
-			assertEquals(1, p4.getEndIndex());
-			
-			/*
-			 * Can the profile be offset and still have segments adjusted?
-			 */
-			IProfile profile = new FloatProfile(10, 100);
-			ISegmentedProfile sp = new SegmentedFloatProfile(profile, list);
-			
-//			sp = sp.offset(1);
-//			assertEquals(0, p1.getStartIndex());
-//			assertEquals(0, p4.getEndIndex());
-			
-			
-		} catch(SegmentUpdateException | ProfileException e){
-			fail("Error updating segments");
-			e.printStackTrace();
-		}
+		assertTrue(s1.update(0, 25));
+		assertEquals(0, s1.getStartIndex());
+		assertEquals(25, s1.getEndIndex());
 	}
 	
 	@Test
-	public void testUpdateWithMergeSources(){
+	public void testUpdateLoneSegmentFailsWhenLocked() throws SegmentUpdateException {
+		test.setLocked(true);
+		assertFalse(test.update(10, 20));
+	}
+	
+	@Test
+	public void testUpdateLoneSegmentFailsWhenTooShort() throws SegmentUpdateException {
+		assertFalse(test.update(0, 2));
+		assertTrue(test.update(0,  3));
+	}
+	
+	
+	@Test
+	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
+		exception.expect(IllegalArgumentException.class);
+		test.update(-1, 20);
+	}
+	
+	@Test
+	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsHigh() throws SegmentUpdateException {
+		exception.expect(IllegalArgumentException.class);
+		test.update(101, 20);
+	}
+	
+	@Test
+	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsLow() throws SegmentUpdateException {
+		exception.expect(IllegalArgumentException.class);
+		test.update(0, -1);
+	}
+	
+	@Test
+	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsHigh() throws SegmentUpdateException {
+		exception.expect(IllegalArgumentException.class);
+		test.update(0, 101);
+	}
+	
+	private List<IBorderSegment> createLinkedList() throws ProfileException{
+		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  25, 100);
+		DefaultBorderSegment s2 = new DefaultBorderSegment(25,  40, 100);
+		DefaultBorderSegment s3 = new DefaultBorderSegment(40,  0, 100);
+		List<IBorderSegment> list = new ArrayList<>();
+		list.add(s1);
+		list.add(s2);
+		list.add(s3);
+		IBorderSegment.linkSegments(list);
+		return list;
+	}
+		
+	@Test
+	public void testUpdatingLinkedSegmentsAffectsTwoSegments() throws SegmentUpdateException, ProfileException{
+		List<IBorderSegment> list = createLinkedList();
+		IBorderSegment s1 = list.get(0);
+		IBorderSegment s2 = list.get(1);
+		assertTrue(s1.hasNextSegment());
+
+		// No effect on end of s2, but start is updated
+		assertTrue(s1.update(0, 26));
+		assertEquals(0, s1.getStartIndex());
+		assertEquals(26, s1.getEndIndex());
+		assertEquals(26, s2.getStartIndex());
+		assertEquals(40, s2.getEndIndex());
+	}
+	
+	
+	/**
+	 * @throws SegmentUpdateException
+	 * @throws ProfileException 
+	 */
+	@Test
+	public void testUpdateLinkedSegmentFailsWhenIndexOutOfBounds() throws SegmentUpdateException, ProfileException{
+		List<IBorderSegment> list = createLinkedList();
+		IBorderSegment s1 = list.get(0);
+		IBorderSegment s2 = list.get(1);
+		assertTrue(s1.hasNextSegment());
+
+
+		// Out of range of s2; should fail
+		assertFalse(s1.update(0, 42)); // s2 is 25-40; this should fail
+		assertEquals(0, s1.getStartIndex());
+		assertEquals(26, s1.getEndIndex());
+		assertEquals(26, s2.getStartIndex());
+		assertEquals(40, s2.getEndIndex());
+
+		// Out of range of s2; should fail
+		assertFalse(s2.update(90, 42));
+		assertEquals(0, s1.getStartIndex());
+		assertEquals(26, s1.getEndIndex());
+		assertEquals(26, s2.getStartIndex());
+		assertEquals(40, s2.getEndIndex());
+	}
+
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#update(int, int)}.
+	 * @throws ProfileException 
+	 * @throws SegmentUpdateException 
+	 */
+	@Test
+	public void testUpdate() throws ProfileException, SegmentUpdateException {
+		/*
+		 * Complete profile of segments
+		 */
+		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
+		DefaultBorderSegment p1 = new DefaultBorderSegment(10, 20, 100);
+		DefaultBorderSegment p2 = new DefaultBorderSegment(20, 45, 100);
+		DefaultBorderSegment p3 = new DefaultBorderSegment(45, 89, 100);
+		DefaultBorderSegment p4 = new DefaultBorderSegment(89, 10, 100);
+
+		list.add(p1);
+		list.add(p2);
+		list.add(p3);
+		list.add(p4);
+
+		IBorderSegment.linkSegments(list);
+
+		p1.update(5, 20);
+		assertEquals(5, p1.getStartIndex());
+		assertEquals(5, p4.getEndIndex());
+
+		p4.update(89, 1);
+		assertEquals(1, p1.getStartIndex());
+		assertEquals(1, p4.getEndIndex());
+
+		/*
+		 * Can the profile be offset and still have segments adjusted?
+		 */
+		IProfile profile = new FloatProfile(10, 100);
+		ISegmentedProfile sp = new SegmentedFloatProfile(profile, list);
+	}
+	
+	@Test
+	public void testUpdateWithMergeSources() throws SegmentUpdateException{
 		IBorderSegment p1 = new DefaultBorderSegment(10, 30, 100);
 		IBorderSegment m1 = new DefaultBorderSegment(10, 20, 100);
 		IBorderSegment m2 = new DefaultBorderSegment(20, 30, 100);
-		
+
 		p1.addMergeSource(m1);
 		p1.addMergeSource(m2);
-		
-		try {
-			p1.update(14, 30);
-			
-			List<IBorderSegment> merges = p1.getMergeSources();
-			assertEquals(0, merges.size());
-			
-		} catch (SegmentUpdateException e) {
-			e.printStackTrace();
-			fail("Error updating segments");
-		}
-		
+
+		p1.update(14, 30);
+
+		List<IBorderSegment> merges = p1.getMergeSources();
+		assertEquals(0, merges.size());
+
 	}
 	
 	/**
@@ -619,8 +675,8 @@ public class DefaultBorderSegmentTest {
 		testNudgeUnlinkedWithMergeSources();
 	}
 	
-	@Test
-	public void testNudgeUnlinkedWithoutMergeSources(){
+
+	private void testNudgeUnlinkedWithoutMergeSources(){
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
 		
@@ -667,8 +723,7 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	
-	@Test
-	public void testNudgeUnlinkedWithMergeSources(){
+	private void testNudgeUnlinkedWithMergeSources(){
 		
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
