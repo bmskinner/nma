@@ -61,7 +61,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
 
     public CellOutlinePanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
         this.setLayout(new BorderLayout());
         JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();
@@ -99,11 +99,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         this.add(panel, BorderLayout.CENTER);
 
-    }
-
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     private synchronized void updateSettingsPanels() {

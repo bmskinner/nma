@@ -38,7 +38,7 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
     private JTable table;
 
     public CellSegTablePanel(final CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
         this.setBorder(null);
@@ -50,11 +50,6 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
         sp.setColumnHeaderView(table.getTableHeader());
         add(sp, BorderLayout.CENTER);
 
-    }
-
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     @Override

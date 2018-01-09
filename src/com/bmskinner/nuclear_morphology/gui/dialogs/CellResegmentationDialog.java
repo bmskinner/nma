@@ -28,7 +28,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -38,6 +41,8 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -88,6 +93,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     private JButton resegmentBtn;
     private JButton reassignRpBtn;
     private JButton reverseProfileBtn;
+    private JComboBox<Taggable> taggableList = new JComboBox<Taggable>();
 
     private JTable           table;
     private static final int COLUMN_STATE = 1;
@@ -103,8 +109,17 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     public void load(final ICell cell, final IAnalysisDataset dataset) {
 
         super.load(cell, dataset);
+        
+        List<Taggable> taggables = cell.getTaggables();
+        
         table.setModel(createTableModel(""));
-        this.setTitle("Resegmenting " + cell.getNucleus().getNameAndNumber());
+        this.setTitle("Resegmenting " + taggables.get(0).toString());
+
+        ComboBoxModel<Taggable> m = new DefaultComboBoxModel<Taggable>(taggables.toArray(new Taggable[0]));
+        taggableList.setModel(m);
+        taggableList.setSelectedIndex(0);
+        taggableList.revalidate();
+        taggableList.repaint();
         updateCharts(cell);
         setVisible(true);
     }
@@ -167,6 +182,14 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
     private JPanel createHeader() {
         JPanel panel = new JPanel(new FlowLayout());
+        
+        taggableList = new JComboBox<Taggable>(new Taggable[0]);
+        taggableList.addActionListener(e -> {
+            Taggable obj = (Taggable) taggableList.getSelectedItem();
+            drawCurrentSegments(obj);
+        });
+        panel.add(taggableList);
+        
 
         reassignRpBtn = new JButton("Reassign RP");
         reassignRpBtn.addActionListener(e -> {
@@ -181,22 +204,24 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
         resegmentBtn = new JButton("Resegment");
         resegmentBtn.addActionListener(e -> {
+            Taggable obj = (Taggable) taggableList.getSelectedItem();
             this.isRunning = true;
             newSegments = new ArrayList<IBorderSegment>();
             table.setModel(createTableModel("Not set"));
             table.getColumnModel().getColumn(COLUMN_STATE).setCellRenderer(new SegmentStateRenderer());
             segCount = 0;
-            segStart = workingCell.getNucleus().getBorderIndex(Tag.REFERENCE_POINT);
+            segStart = obj.getBorderIndex(Tag.REFERENCE_POINT);
             log("Select endpoint for segment 0");
-            drawCurrentSegments(); // clear the segment chart
+            drawCurrentSegments(obj); // clear the segment chart
             setEnabled(false);
         });
         panel.add(resegmentBtn);
 
         reverseProfileBtn = new JButton("Flip profile");
         reverseProfileBtn.addActionListener(e -> {
+            Taggable obj = (Taggable) taggableList.getSelectedItem();
             setCellChanged(true);
-            workingCell.getNucleus().reverse();
+            obj.reverse();
             updateCharts(workingCell);
         });
         panel.add(reverseProfileBtn);
@@ -218,14 +243,13 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
         resegmentBtn.setEnabled(b);
         reassignRpBtn.setEnabled(b);
         reverseProfileBtn.setEnabled(b);
+        taggableList.setEnabled(b);
     }
 
     /**
      * Draw the segments currently assigned to the nucleus
      */
-    private void drawCurrentSegments() {
-
-        Nucleus n = workingCell.getNucleus();
+    private void drawCurrentSegments(Taggable n) {
 
         finer("Assigned all segments");
         try {
@@ -239,7 +263,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                                                             // of resegmentation
             }
             // Get the segment ID to make the new segment
-            UUID id = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount)
+            UUID id = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments().get(segCount)
                     .getID();
 
             // Make a final segment after the last clicked position
@@ -248,7 +272,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             tempList.add(last);
             IBorderSegment.linkSegments(tempList);
 
-            ISegmentedProfile newProfile = workingCell.getNucleus().getProfile(ProfileType.ANGLE);
+            ISegmentedProfile newProfile = n.getProfile(ProfileType.ANGLE);
             newProfile.setSegments(tempList);
             finer("Segments added: ");
             finer(IBorderSegment.toString(tempList));
@@ -257,7 +281,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
 
             finer("RP index: " + n.getBorderIndex(Tag.REFERENCE_POINT));
 
-            workingCell.getNucleus().setProfile(ProfileType.ANGLE, newProfile);
+            n.setProfile(ProfileType.ANGLE, newProfile);
 
         } catch (ProfileException e) {
             error("Cannot link segments", e);
@@ -343,7 +367,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             JFreeChart profileChart = new MorphologyChartFactory(profileOptions).makeIndividualNucleusProfileChart();
             JFreeChart outlineChart = new OutlineChartFactory(outlineOptions).makeCellOutlineChart();
             finer("Updating charts");
-            panel.setCell(cell);
+            panel.setObject(cell.getNucleus());
             panel.getProfilePanel().setChart(profileChart);
             panel.getOutlinePanel().setChart(outlineChart);
         };
@@ -354,7 +378,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
     @Override
     public void borderPointEventReceived(BorderPointEvent event) {
         IBorderPoint p = event.getPoint();
-        Nucleus n = workingCell.getNucleus();
+        Taggable n = (Taggable) taggableList.getSelectedItem();
 
         if (isSelectRP) {
             setCellChanged(true);
@@ -379,10 +403,10 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                 segCount++;
                 log("Select endpoint for segment " + segCount);
 
-                drawCurrentSegments();
+                drawCurrentSegments(n);
 
                 // Check against the original cell segment count
-                if (segCount == cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()
+                if (segCount == n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentCount()
                         - 1) {
                     resegmentationComplete();
                 }

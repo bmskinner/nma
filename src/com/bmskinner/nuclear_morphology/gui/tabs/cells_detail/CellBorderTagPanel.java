@@ -59,7 +59,7 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
     private JPanel buttonsPanel;
 
     public CellBorderTagPanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
@@ -94,12 +94,6 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
         this.setBorder(null);
 
         setButtonsEnabled(false);
-    }
-
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     private JPanel makeButtonPanel() {
@@ -229,7 +223,6 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
     @Override
     public void refreshChartCache() {
         clearChartCache();
-        finest("Updating chart after clear");
         this.update();
     }
 

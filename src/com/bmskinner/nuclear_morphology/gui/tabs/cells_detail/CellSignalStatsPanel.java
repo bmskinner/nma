@@ -51,7 +51,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
     private JScrollPane scrollPane;
 
     public CellSignalStatsPanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();
@@ -73,11 +73,6 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
         this.setEnabled(false);
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     /**
      * Create the header panel
      * 

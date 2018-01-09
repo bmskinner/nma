@@ -52,7 +52,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     private JTree tree;
 
     public CellsListPanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));
@@ -69,11 +69,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
         this.add(scrollPane, BorderLayout.CENTER);
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     /**
      * Trigger an update with a given dataset
      * 

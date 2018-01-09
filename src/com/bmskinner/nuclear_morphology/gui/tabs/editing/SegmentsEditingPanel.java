@@ -86,7 +86,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 
     public SegmentsEditingPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         dualPanel = new SegmentationDualChartPanel();
@@ -123,11 +123,6 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     @Override
     public void setAnalysing(boolean b) {
         super.setAnalysing(b);

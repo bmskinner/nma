@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -111,6 +112,13 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      * @return the cytoplasm, or null if not present
      */
     ICytoplasm getCytoplasm();
+    
+    
+    /**
+     * Get all the taggable components of the cell
+     * @return
+     */
+    List<Taggable> getTaggables();
 
     /**
      * Test if the cell has a nucleus
