@@ -96,7 +96,8 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
         try {
 
-            getTotalImagesToAnalyse();
+            int i = getTotalImagesToAnalyse();
+            if(i==0) return;
 
             log("Running nucleus detector");
 
@@ -130,7 +131,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     }
 
-    private void getTotalImagesToAnalyse() {
+    private int getTotalImagesToAnalyse() {
 
         log("Counting images to analyse");
         try {
@@ -139,10 +140,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             int totalImages = countSuitableImages(folder);
             fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
             log("Analysing " + totalImages + " images");
+            return totalImages;
 
         } catch (MissingOptionException e) {
             warn("No folder to analyse");
             stack(e.getMessage(), e);
+            return 0;
         }
 
     }

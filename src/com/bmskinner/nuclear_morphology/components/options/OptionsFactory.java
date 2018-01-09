@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDe
  * @since 1.13.4
  *
  */
-public interface OptionsFactory {
+public class OptionsFactory {
 
     /**
      * Create the default options type for nucleus detection
@@ -40,7 +40,7 @@ public interface OptionsFactory {
      *            the folder to be searched
      * @return
      */
-    static IMutableDetectionOptions makeNucleusDetectionOptions(File folder) {
+	public static IMutableDetectionOptions makeNucleusDetectionOptions(File folder) {
         return new DefaultNucleusHashDetectionOptions(folder);
     }
 
@@ -51,7 +51,7 @@ public interface OptionsFactory {
      *            the template options
      * @return
      */
-    static IMutableDetectionOptions makeNucleusDetectionOptions(IDetectionOptions template) {
+	public static IMutableDetectionOptions makeNucleusDetectionOptions(IDetectionOptions template) {
         return new DefaultNucleusHashDetectionOptions(template);
     }
 
@@ -60,7 +60,7 @@ public interface OptionsFactory {
      * 
      * @return
      */
-    static IMutableCannyOptions makeCannyOptions() {
+	public static IMutableCannyOptions makeCannyOptions() {
         return new DefaultCannyHashOptions();
     }
 
@@ -72,7 +72,7 @@ public interface OptionsFactory {
      *            the template options
      * @return
      */
-    static IMutableCannyOptions makeCannyOptions(ICannyOptions template) {
+	public static IMutableCannyOptions makeCannyOptions(ICannyOptions template) {
         return new DefaultCannyHashOptions(template);
     }
 
@@ -81,7 +81,7 @@ public interface OptionsFactory {
      * 
      * @return
      */
-    static IHoughDetectionOptions makeHoughOptions() {
+	public static IHoughDetectionOptions makeHoughOptions() {
         return new DefaultHoughOptions();
     }
 
@@ -92,7 +92,7 @@ public interface OptionsFactory {
      *            the template options
      * @return
      */
-    static IHoughDetectionOptions makeHoughOptions(IHoughDetectionOptions template) {
+	public static IHoughDetectionOptions makeHoughOptions(IHoughDetectionOptions template) {
         return new DefaultHoughOptions(template);
     }
 
@@ -101,7 +101,7 @@ public interface OptionsFactory {
      * 
      * @return
      */
-    static IDetectionSubOptions makePreprocessingOptions() {
+	public static IDetectionSubOptions makePreprocessingOptions() {
         return new PreprocessingOptions();
     }
 
@@ -112,7 +112,7 @@ public interface OptionsFactory {
      *            the folder to be searched
      * @return
      */
-    static IMutableNuclearSignalOptions makeNuclearSignalOptions(File folder) {
+	public static IMutableNuclearSignalOptions makeNuclearSignalOptions(File folder) {
         return new DefaultNuclearSignalHashOptions(folder);
     }
 
@@ -124,7 +124,7 @@ public interface OptionsFactory {
      *            the template options
      * @return
      */
-    static IMutableNuclearSignalOptions makeNuclearSignalOptions(INuclearSignalOptions template) {
+	public static IMutableNuclearSignalOptions makeNuclearSignalOptions(INuclearSignalOptions template) {
         return new DefaultNuclearSignalHashOptions(template);
     }
 
@@ -133,7 +133,7 @@ public interface OptionsFactory {
      * 
      * @return
      */
-    static IMutableAnalysisOptions makeAnalysisOptions() {
+    public static IMutableAnalysisOptions makeAnalysisOptions() {
         return new DefaultAnalysisOptions();
     }
 
@@ -144,15 +144,60 @@ public interface OptionsFactory {
      *            the template options
      * @return
      */
-    static IMutableAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
+    public static IMutableAnalysisOptions makeAnalysisOptions(IAnalysisOptions template) {
         return new DefaultAnalysisOptions(template);
     }
+    
+    /**
+     * Create the default analysis options for rodent sperm detection
+     * @param testFolder the folder of images to analyse
+     * @return the options
+     */
+    public static IMutableAnalysisOptions makeDefaultRodentAnalysisOptions(File testFolder) {
+        IMutableAnalysisOptions op = makeAnalysisOptions();
+        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, OptionsFactory.makeNucleusDetectionOptions(testFolder));
+        return op;
+    }
+    
+    /**
+     * Create the default analysis options for pig sperm detection
+     * @param testFolder the folder of images to analyse
+     * @return the options
+     */
+    public static IMutableAnalysisOptions makeDefaultPigAnalysisOptions(File testFolder) {
+    	IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+        op.setNucleusType(NucleusType.PIG_SPERM);
+        
+        IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        nop.setMinCirc(0.1);
+        nop.setMaxCirc(0.9);
+        
+        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
+        return op;
+    }
+    
+    /**
+     * Create the default analysis options for round nucleus detection
+     * @param testFolder the folder of images to analyse
+     * @return the options
+     */
+    public static IMutableAnalysisOptions makeDefaulRoundAnalysisOptions(File testFolder) {
+    	IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
+        op.setNucleusType(NucleusType.ROUND);
+        
+        IMutableDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
+        nop.setMinCirc(0.0);
+        nop.setMaxCirc(1.0);
+        
+        op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);
+        return op;
+    }
 
-    static IMutableClusteringOptions makeClusteringOptions() {
+    public static IMutableClusteringOptions makeClusteringOptions() {
         return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
     }
 
-    static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template) {
+    public static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template) {
         return new ClusteringOptions(template);
     }
 
@@ -164,7 +209,7 @@ public interface OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    static IMutableDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder)
+    public static IMutableDetectionOptions makeDefaultNeutrophilCytoplasmDetectionOptions(File folder)
             throws MissingOptionException {
 
         IMutableDetectionOptions cytoOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
@@ -200,7 +245,7 @@ public interface OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    static IMutableDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder)
+    public static IMutableDetectionOptions makeDefaultNeutrophilNucleusDetectionOptions(File folder)
             throws MissingOptionException {
 
         IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
@@ -237,7 +282,7 @@ public interface OptionsFactory {
      * @return
      * @throws MissingOptionException
      */
-    static IMutableAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
+    public static IMutableAnalysisOptions makeDefaultNeutrophilDetectionOptions(File folder) throws MissingOptionException {
 
         IMutableAnalysisOptions options = OptionsFactory.makeAnalysisOptions();
         options.setNucleusType(NucleusType.NEUTROPHIL);

@@ -167,7 +167,7 @@ public class Version implements Serializable {
      * @param version
      * @return a pass or fail
      */
-    public boolean versionIsSupported(Version version) {
+    public static boolean versionIsSupported(Version version) {
 
         if (version == null) {
             return false;
