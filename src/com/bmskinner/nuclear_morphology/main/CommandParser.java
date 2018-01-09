@@ -73,7 +73,8 @@ public class CommandParser {
                     UIManager.setLookAndFeel(
                             UIManager.getSystemLookAndFeelClassName());
                 } catch (Exception e) {
-
+                	System.err.println("Error setting UI look and feel");
+                    e.printStackTrace();
                 }
 
                 MainWindow mw = new MainWindow(standalone);

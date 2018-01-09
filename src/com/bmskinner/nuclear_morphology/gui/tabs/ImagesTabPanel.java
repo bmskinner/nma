@@ -188,9 +188,12 @@ public class ImagesTabPanel extends DetailPanel {
      */
     private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
         
-        DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(new ImageNode(dataset.getName(), null));
-        List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());        
-        
+    	List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());
+    	
+    	ImageNode r = new ImageNode(dataset.getName()+" ("+files.size()+")", null);
+        DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(r);
+                
+        // The only pattern to recognise for now is eg. "s12.tiff"
         Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
         
         // Sort numerically where possible
@@ -249,8 +252,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     	}
 
-    	
-    	return null;
+    	return Optional.empty();
     }
 
     private TreeSelectionListener makeListener() {
