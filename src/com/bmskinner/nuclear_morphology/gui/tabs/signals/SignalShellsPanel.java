@@ -345,7 +345,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         chartPanel.setChart(AbstractChartFactory.createLoadingChart());
         consensusPanel.setChart(AbstractChartFactory.createLoadingChart());

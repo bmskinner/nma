@@ -234,7 +234,7 @@ public class ImagesTabPanel extends DetailPanel {
     }
     
     /**
-     * Given an end node, get the dataset this came from
+     * Given an leaf node, get the dataset this came from
      * @param node
      * @return
      */
@@ -245,13 +245,12 @@ public class ImagesTabPanel extends DetailPanel {
     	if(n.getUserObject() instanceof ImageNode){
     		ImageNode im = (ImageNode) n.getUserObject();
     		for(IAnalysisDataset d : getDatasets()){
-    			if(im.getName().equals(d.getName())){
+    			if(im.getName().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")")){
     				return Optional.of(d);
     			}
     		}
 
     	}
-
     	return Optional.empty();
     }
 

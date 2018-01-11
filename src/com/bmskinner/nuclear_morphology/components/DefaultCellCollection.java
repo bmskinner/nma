@@ -1513,6 +1513,11 @@ public class DefaultCellCollection implements ICellCollection {
             int count = this.getSignalManager().getSignalCount(signalGroupID);
             b.append(signalGroupID.toString() + ": " + group.toString() + " | " + count + newLine);
         }
+        
+        if(this.hasConsensus()){
+            b.append("Consensus:" + newLine);
+            b.append(getConsensus().toString()+newLine);
+        }
 
         return b.toString();
     }

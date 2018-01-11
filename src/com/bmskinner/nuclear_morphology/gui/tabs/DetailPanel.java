@@ -937,7 +937,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * call super.setChartsAndTablesLoading()
      */
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         for (TabPanel p : subPanels) {
             p.setChartsAndTablesLoading();
         }
