@@ -41,6 +41,11 @@ import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
         implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
+    
+    
+    public AbstractEditingPanel(String title){
+        super(title);
+    }
 
     /**
      * Check if any of the cells in the active collection are locked for

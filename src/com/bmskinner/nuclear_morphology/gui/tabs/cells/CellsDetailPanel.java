@@ -39,7 +39,7 @@ public class CellsDetailPanel extends DetailPanel {
     private JTabbedPane tabPane;
 
     public CellsDetailPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
         tabPane = new JTabbedPane(JTabbedPane.TOP);
@@ -54,10 +54,5 @@ public class CellsDetailPanel extends DetailPanel {
 
         this.add(tabPane, BorderLayout.CENTER);
     }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-    
+
 }

@@ -49,7 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.MergesDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells.CellsDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.comparisons.InterDatasetComparisonDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.comparisons.ComparisonDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.profiles.NucleusProfilesPanel;
@@ -256,7 +256,7 @@ public class MainWindow extends JFrame implements Loggable {
         DetailPanel clusterDetailPanel   = new ClusterDetailPanel();
         DetailPanel mergesDetailPanel    = new MergesDetailPanel();
         DetailPanel segmentsDetailPanel  = new SegmentsDetailPanel();
-        DetailPanel comparisonsPanel     = new InterDatasetComparisonDetailPanel();
+        DetailPanel comparisonsPanel     = new ComparisonDetailPanel();
         DetailPanel editingDetailPanel   = new EditingDetailPanel();
         DetailPanel imagesTabPanel       = new ImagesTabPanel();
 

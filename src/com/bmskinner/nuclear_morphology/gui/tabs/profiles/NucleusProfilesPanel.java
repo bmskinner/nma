@@ -31,7 +31,7 @@ public class NucleusProfilesPanel extends DetailPanel {
     private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
     public NucleusProfilesPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
         JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
@@ -46,21 +46,16 @@ public class NucleusProfilesPanel extends DetailPanel {
          * Create the other profile panels
          */
 
-        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
+//        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
         DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
 
         this.addSubPanel(variabilityChartPanel);
-        this.addSubPanel(modalityDisplayPanel);
+//        this.addSubPanel(modalityDisplayPanel);
 
         tabPanel.addTab(variabilityChartPanel.getPanelTitle(), variabilityChartPanel);
-        tabPanel.addTab(modalityDisplayPanel.getPanelTitle(), modalityDisplayPanel);
+//        tabPanel.addTab(modalityDisplayPanel.getPanelTitle(), modalityDisplayPanel);
 
         this.add(tabPanel, BorderLayout.CENTER);
 
-    }
-    
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
 }

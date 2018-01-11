@@ -96,9 +96,13 @@ public class DoubleEquation implements LineEquation {
         if(a.getX()==b.getX() && a.getY()==b.getY()){
             throw new IllegalArgumentException("Point a and b are identical: "+a.toString());
         }
-        
+                
         double aX = a.getX();
         double bX = b.getX();
+        
+        if(aX==Double.NaN || bX==Double.NaN){
+            throw new IllegalArgumentException("Point a or b have NaN x: "+a.toString()+", "+b.toString());
+        }
                 
         // y=mx+c
         double deltaX = aX - bX;

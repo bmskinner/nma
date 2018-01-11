@@ -24,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -186,14 +188,6 @@ public class DefaultCell implements IMutableCell {
         // Get the scale of one of the components of the cell
         double sc = this.hasNucleus() ? this.getNucleus().getScale()
                 : this.hasCytoplasm() ? this.getCytoplasm().getScale() : 1d;
-
-        // if(hasStatistic(stat)){
-        // return statistics.get(stat);
-        // } else {
-        // double result = calculateStatistic(stat);
-        // statistics.put(stat, result);
-        // return result;
-        // }
 
         if (hasStatistic(stat)) {
 
@@ -446,6 +440,32 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void setCytoplasm(ICytoplasm cytoplasm) {
         this.cytoplasm = cytoplasm;
+    }
+    
+    
+    @Override
+    public List<Taggable> getTaggables() {
+        List<Taggable> result = new ArrayList<Taggable>(0);
+        
+        result.addAll(getTaggables(acrosomes));
+        result.addAll(getTaggables(mitochondria));
+        result.addAll(getTaggables(nuclei));
+        result.addAll(getTaggables(tails));
+        
+        if(hasCytoplasm()){
+            if(cytoplasm instanceof Taggable){
+                result.add((Taggable) cytoplasm);
+            }
+        }
+        
+        return result;
+
+    }
+    
+    private List<Taggable> getTaggables(List<? extends CellularComponent> l){
+        return l.stream().filter(e-> e instanceof Taggable)
+        .map( e->(Taggable)e)
+        .collect(Collectors.toList());
     }
     
     @Override

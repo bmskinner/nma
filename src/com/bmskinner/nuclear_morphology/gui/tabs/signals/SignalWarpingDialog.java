@@ -272,7 +272,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             }
         });
-        lowerPanel.add(cowarpaliseBtn);
+//        lowerPanel.add(cowarpaliseBtn); //TODO reenable when ready
         cowarpaliseBtn.setEnabled(false);
         
         

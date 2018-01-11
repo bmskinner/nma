@@ -90,8 +90,6 @@ public class DipTester implements Loggable, SignificanceTest {
             resultProfile = createErrorPValueProfile();
 
         }
-        // log("result profile");
-        // log(resultProfile.toString());
         return resultProfile;
     }
 

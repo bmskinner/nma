@@ -150,6 +150,10 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     }
 
+    /**
+     * Get the datasets identified in this method
+     * @return
+     */
     public List<IAnalysisDataset> getDatasets() {
         return this.datasets;
     }

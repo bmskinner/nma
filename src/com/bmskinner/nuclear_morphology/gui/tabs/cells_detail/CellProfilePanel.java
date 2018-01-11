@@ -62,18 +62,16 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     private JButton resegmentButton;
 
     // A JDialog is a top level container, and these are not subject to GC on
-    // disposal
-    // according to
+    // disposal according to
     // https://stackoverflow.com/questions/15863178/memory-leaking-on-jdialog-closing
     // Hence, only keep one dialog, and prevent multiple copies spawning by
-    // loading the active cell
-    // in when needed
-    private final CellResegmentationDialog resegDialog;
+    // loading the active cell in when needed
+//    private final CellResegmentationDialog resegDialog;
 
     public CellProfilePanel(final CellViewModel model) {
-        super(model); // lol
+        super(model, PANEL_TITLE_LBL);
 
-        resegDialog = new CellResegmentationDialog(model);
+//        resegDialog = new CellResegmentationDialog(model);
 
         this.setLayout(new BorderLayout());
         this.setBorder(null);
@@ -106,14 +104,9 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
         buttonsPanel = makeButtonPanel();
         this.add(buttonsPanel, BorderLayout.NORTH);
 
-        resegDialog.addDatasetEventListener(this);
+//        resegDialog.addDatasetEventListener(this);
 
         setEnabled(false);
-    }
-
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     private JPanel makeButtonPanel() {
@@ -131,14 +124,14 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
         panel.add(profileOptions);
         profileOptions.addActionListener(e -> update());
 
-        resegmentButton = new JButton("Resegment");
-        panel.add(resegmentButton);
-        resegmentButton.setEnabled(false);
-
-        resegmentButton.addActionListener(e -> {
-
-            resegDialog.load(getCellModel().getCell(), activeDataset());
-        });
+//        resegmentButton = new JButton("Resegment");
+//        panel.add(resegmentButton);
+//        resegmentButton.setEnabled(false);
+//
+//        resegmentButton.addActionListener(e -> {
+//            CellResegmentationDialog d = new CellResegmentationDialog(getCellModel());
+//            d.load(getCellModel().getCell(), activeDataset());
+//        });
 
         return panel;
 
@@ -147,7 +140,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     public void setEnabled(boolean b) {
         super.setEnabled(b);
         profileOptions.setEnabled(b);
-        resegmentButton.setEnabled(b);
+//        resegmentButton.setEnabled(b);
     }
 
     public synchronized void update() {

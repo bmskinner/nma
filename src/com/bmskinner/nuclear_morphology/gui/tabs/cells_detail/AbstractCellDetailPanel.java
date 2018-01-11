@@ -25,8 +25,8 @@ public abstract class AbstractCellDetailPanel extends AbstractEditingPanel imple
 
     private CellViewModel model;
 
-    public AbstractCellDetailPanel(final CellViewModel model) {
-        super();
+    public AbstractCellDetailPanel(final CellViewModel model, String title) {
+        super(title);
         this.model = model;
     }
 

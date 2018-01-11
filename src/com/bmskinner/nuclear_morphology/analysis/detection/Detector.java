@@ -25,23 +25,35 @@
 */
 package com.bmskinner.nuclear_morphology.analysis.detection;
 
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
 import ij.ImagePlus;
 import ij.Prefs;
+import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.gui.Wand;
+import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.plugin.frame.ThresholdAdjuster;
 import ij.process.ByteProcessor;
+import ij.process.ByteStatistics;
+import ij.process.ColorStatistics;
+import ij.process.FloatProcessor;
+import ij.process.FloatStatistics;
+import ij.process.FloodFiller;
 import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
+import ij.process.PolygonFiller;
 import ij.process.ShortProcessor;
-
-import java.util.Arrays;
-import java.util.List;
-
-import com.bmskinner.nuclear_morphology.logging.Loggable;
+import ij.process.ShortStatistics;
 
 /**
  * This abstract class is extended for detecting objects in images. This
@@ -69,10 +81,8 @@ public abstract class Detector implements Loggable {
 
     private boolean includeHoles = true;
 
-    private Integer threshold;
-
-    // private List<Roi> roiList; // the detected ROIs
-
+    private int threshold = 128;
+    
     /**
      * Set the minimum and maximum size ROIs to detect
      * 
@@ -128,8 +138,8 @@ public abstract class Detector implements Loggable {
     public void setIncludeHoles(boolean b) {
         includeHoles = b;
     }
-
-    protected List<Roi> detectRois(ImageProcessor image) {
+    
+    protected synchronized Map<Roi, StatsMap> detectRois(ImageProcessor image){
         if (image == null) {
             throw new IllegalArgumentException("No image to analyse");
         }
@@ -145,14 +155,8 @@ public abstract class Detector implements Loggable {
         if (this.minCirc >= this.maxCirc) {
             throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
         }
-
-        if (threshold == null) {
-            threshold = 128;
-            // warn("Using default theshold "+threshold);
-        }
-
+                
         return findInImage(image);
-        // return roiList;
     }
 
     /**
@@ -163,7 +167,7 @@ public abstract class Detector implements Loggable {
      *            the region to measure
      * @return
      */
-    public StatsMap measure(Roi roi, ImageProcessor image) {
+    private synchronized StatsMap measure(Roi roi, ImageProcessor image) {
 
         if (image == null || roi == null) {
             throw new IllegalArgumentException("Image or roi is null");
@@ -191,7 +195,7 @@ public abstract class Detector implements Loggable {
      * 
      */
 
-    private List<Roi> findInImage(ImageProcessor image) {
+    private synchronized Map<Roi, StatsMap> findInImage(ImageProcessor image) {
 
         if (!(image instanceof ByteProcessor || image instanceof ShortProcessor)) {
             throw new IllegalArgumentException("Processor must be byte or short");
@@ -200,58 +204,338 @@ public abstract class Detector implements Loggable {
         ImageProcessor searchProcessor = image.duplicate();
 
         searchProcessor.threshold(this.threshold);
-        // ImagePlus imp = new ImagePlus("Search Processor",
-        // searchProcessor.duplicate());
-        // imp.show();
 
         return this.runAnalyser(searchProcessor);
-
-        // TODO: this needs to be figured out and removed
-        // There is a link to Prefs.blackBackground, but setting this explicitly
-        // is not enough
-        // when the jar is created
-        // if(roiList.size()==0){
-        // // As of 2017-04-15, manetheren needs this inversion to work, but
-        // other PCs don't. Don't yet know why.
-        // searchProcessor.invert();
-        // roiList = this.runAnalyser(searchProcessor);
-        // }
-        // return roiList;
     }
+//
+//    private synchronized Map<Roi, StatsMap> runAnalyser(ImageProcessor processor) {
+//        Map<Roi, StatsMap> list = new HashMap<>();
+//
+//        ImagePlus image = new ImagePlus(null, processor);
+//
+//        RoiManager manager = new RoiManager(true);
+//        manager.reset(); // RoiManager is initialized as a static instance
+//
+//        Prefs.blackBackground = true;
+//
+//        // run the particle analyser
+//        // By default, add all particles to the ROI manager, and do not count
+//        // anythig touching the edge
+//        int options = ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+//        if (includeHoles) {
+//            options = options | ParticleAnalyzer.INCLUDE_HOLES;
+//        }
+//
+//        ParticleAnalyzer pa = new ParticleAnalyzer(options, Measurements.FERET, minSize, maxSize, minCirc,
+//                maxCirc);
+//
+//        pa.setRoiManager(manager);
+//        boolean success = pa.analyze(image);
+//        if (!success) {
+//            warn("Unable to perform particle analysis");
+//        }
+//
+//        image.close();
+//        for(Roi r : manager.getRoisAsArray()){
+//            StatsMap m = measure(r, processor);
+//            list.put(r, m);
+//        }
+//
+//
+//        manager.reset(); 
+//        return list;
+//    }
 
-    private List<Roi> runAnalyser(ImageProcessor processor) {
-        ImagePlus image = new ImagePlus(null, processor);
-        RoiManager manager = new RoiManager(true);
-
-        Prefs.blackBackground = true;
-        // ThresholdAdjuster.update();
+    private synchronized Map<Roi, StatsMap> runAnalyser(ImageProcessor processor) {
+        Map<Roi, StatsMap> list = new HashMap<>();
 
         // run the particle analyser
-        ResultsTable rt = new ResultsTable();
-
         // By default, add all particles to the ROI manager, and do not count
-        // anythig touching the edge
-        int options = ParticleAnalyzer.ADD_TO_MANAGER | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+        // anything touching the edge
+        int options = ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
         if (includeHoles) {
             options = options | ParticleAnalyzer.INCLUDE_HOLES;
         }
 
-        ParticleAnalyzer pa = new ParticleAnalyzer(options, ParticleAnalyzer.FERET, rt, minSize, maxSize, minCirc,
-                maxCirc);
+        ParticleAnalyzer pa = new ParticleAnalyzer(options);
 
-        try {
-            ParticleAnalyzer.setRoiManager(manager);
-            boolean success = pa.analyze(image);
-            if (!success) {
-                fine("Unable to perform particle analysis");
-            }
-        } catch (Exception e) {
-            warn("Error in particle analyser");
-            stack("Error in particle analyser", e);
-        } finally {
-            image.close();
+
+        boolean success = pa.analyze(processor);
+        if (!success) {
+            warn("Unable to perform particle analysis");
         }
-        return Arrays.asList(manager.getSelectedRoisAsArray());
-    }
 
+        for(Roi r : pa.getRois()){
+            StatsMap m = measure(r, processor);
+            list.put(r, m);
+        }
+
+        return list;
+    }
+    
+
+    
+    /**
+     * This recapitulates the basic function of the ImageJ particle
+     * analyzer without static roi management 
+     * @author bms41
+     * @since 1.13.8
+     *
+     */
+    protected class ParticleAnalyzer implements Measurements {
+                
+        /** Do not measure particles touching edge of image. */
+        public static final int EXCLUDE_EDGE_PARTICLES = 8;
+
+        /** Flood fill to ignore interior holes. */
+        public static final int INCLUDE_HOLES = 1024;
+        
+        
+        /** Use 4-connected particle tracing. */
+        private static final int FOUR_CONNECTED = 8192;
+
+        
+        static final String OPTIONS = "ap.options";
+        
+        static final int BYTE=0, SHORT=1, FLOAT=2, RGB=3;
+        static final double DEFAULT_MIN_SIZE = 0.0;
+        static final double DEFAULT_MAX_SIZE = Double.POSITIVE_INFINITY;
+
+        protected static final int NOTHING=0, OUTLINES=1, BARE_OUTLINES=2, ELLIPSES=3, MASKS=4, ROI_MASKS=5,
+            OVERLAY_OUTLINES=6, OVERLAY_MASKS=7;
+
+        protected int slice;
+        protected boolean processStack;
+        protected boolean excludeEdgeParticles,
+           floodFill;
+
+        private double level1, level2;
+
+        private int options;
+        private int measurements;
+
+        private double fillColor;
+        private int width;
+
+        private Wand wand;
+        private int imageType, imageType2;
+        private int minX, maxX, minY, maxY;
+
+        private PolygonFiller pf;
+
+        private Rectangle r;
+
+        private FloodFiller ff;
+        private Polygon polygon;
+
+        private int roiType;
+        private int wandMode = Wand.LEGACY_MODE;
+
+        boolean blackBackground;
+        
+        private final Set<Roi> rois = new HashSet<>();
+
+                
+        /** Constructs a ParticleAnalyzer.
+            @param options  a flag word created by Oring SHOW_RESULTS, EXCLUDE_EDGE_PARTICLES, etc.
+        */
+        public ParticleAnalyzer(int options) {
+            this.options = options;
+            this.measurements = Measurements.FERET;
+
+            slice = 1;
+
+            if ((options&FOUR_CONNECTED)!=0) {
+                wandMode = Wand.FOUR_CONNECTED;
+                options |= INCLUDE_HOLES;
+            }
+        }
+        
+        /**
+         * Get the detected Rois
+         * @return
+         */
+        public Set<Roi> getRois(){
+            return rois;
+        }
+        
+
+        /** Performs particle analysis on the specified ImagePlus and
+            ImageProcessor. Returns false if there is an error. */
+        public boolean analyze(ImageProcessor ip) {
+            rois.clear();
+
+            excludeEdgeParticles = (options&EXCLUDE_EDGE_PARTICLES)!=0;
+            floodFill = (options&INCLUDE_HOLES)==0;
+
+            ip.snapshot();
+
+            if (!setThresholdLevels(ip))
+                return false;
+            width = ip.getWidth();
+            
+            byte[] pixels = null;
+            if (ip instanceof ByteProcessor)
+                pixels = (byte[])ip.getPixels();
+            if (r==null) {
+                r = ip.getRoi();
+            }
+            minX=r.x; maxX=r.x+r.width; minY=r.y; maxY=r.y+r.height;
+
+            int offset;
+            double value;
+
+            wand = new Wand(ip);
+            pf = new PolygonFiller();
+            if (floodFill) {
+                ImageProcessor ipf = ip.duplicate();
+                ipf.setValue(fillColor);
+                ff = new FloodFiller(ipf);
+            }
+            roiType = Wand.allPoints()?Roi.FREEROI:Roi.TRACED_ROI;
+
+            boolean done = false;
+            for (int y=r.y; y<(r.y+r.height); y++) {
+                offset = y*width;
+                for (int x=r.x; x<(r.x+r.width); x++) {
+                    if (pixels!=null)
+                        value = pixels[offset+x]&255;
+                    else if (imageType==SHORT)
+                        value = ip.getPixel(x, y);
+                    else
+                        value = ip.getPixelValue(x, y);
+                    if (value>=level1 && value<=level2 && !done) {
+                        analyzeParticle(x, y, ip);
+                        done = level1==0.0&&level2==255.0;
+                    }
+                }
+            }
+
+            ip.resetRoi();
+            ip.reset();
+
+            return true;
+        }
+        
+       private boolean setThresholdLevels(ImageProcessor ip) {
+            double t1 = ip.getMinThreshold();
+            double t2 = ip.getMaxThreshold();
+
+            if (ip instanceof ShortProcessor)
+                imageType = SHORT;
+            else if (ip instanceof FloatProcessor)
+                imageType = FLOAT;
+            else
+                imageType = BYTE;
+            if (t1==ImageProcessor.NO_THRESHOLD) {
+
+                if (imageType!=BYTE)
+                    return false;
+
+                boolean threshold255 = false;
+                if (Prefs.blackBackground)
+                    threshold255 = !threshold255;
+                if (threshold255) {
+                    level1 = 255;
+                    level2 = 255;
+                    fillColor = 64;
+                } else {
+                    level1 = 0;
+                    level2 = 0;
+                    fillColor = 192;
+                }
+            } else {
+                level1 = t1;
+                level2 = t2;
+                if (imageType==BYTE) {
+                    if (level1>0)
+                        fillColor = 0;
+                    else if (level2<255)
+                        fillColor = 255;
+                } else if (imageType==SHORT) {
+                    if (level1>0)
+                        fillColor = 0;
+                    else if (level2<65535)
+                        fillColor = 65535;
+                } else if (imageType==FLOAT)
+                        fillColor = -Float.MAX_VALUE;
+                else
+                    return false;
+            }
+            imageType2 = imageType;
+
+            return true;
+        }
+                
+       private void analyzeParticle(int x, int y, ImageProcessor ip) {
+
+            wand.autoOutline(x, y, level1, level2, wandMode);
+            if (wand.npoints==0)
+                {return;}
+            Roi roi = new PolygonRoi(wand.xpoints, wand.ypoints, wand.npoints, roiType);
+            Rectangle r = roi.getBounds();
+            if (r.width>1 && r.height>1) {
+                PolygonRoi proi = (PolygonRoi)roi;
+                pf.setPolygon(proi.getXCoordinates(), proi.getYCoordinates(), proi.getNCoordinates());
+                ip.setMask(pf.getMask(r.width, r.height));
+                if (floodFill) ff.particleAnalyzerFill(x, y, level1, level2, ip.getMask(), r);
+            }
+            ip.setRoi(r);
+            ip.setValue(fillColor);
+            ImageStatistics stats = getStatistics(ip, measurements);
+            boolean include = true;
+            if (excludeEdgeParticles) {
+                if (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY)
+                    include = false;
+                if (polygon!=null) {
+                    Rectangle bounds = roi.getBounds();
+                    int x1=bounds.x+wand.xpoints[wand.npoints-1];
+                    int y1=bounds.y+wand.ypoints[wand.npoints-1];
+                    int x2, y2;
+                    for (int i=0; i<wand.npoints; i++) {
+                        x2=bounds.x+wand.xpoints[i];
+                        y2=bounds.y+wand.ypoints[i];
+                        if (!polygon.contains(x2, y2))
+                            {include = false; break;}
+                        if ((x1==x2 && ip.getPixel(x1,y1-1)==fillColor) || (y1==y2 && ip.getPixel(x1-1,y1)==fillColor))
+                            {include = false; break;}
+                        x1=x2; y1=y2;
+                    }
+                }
+            }
+            ImageProcessor mask = ip.getMask();
+            if (minCirc>0.0 || maxCirc<1.0) {
+                double perimeter = roi.getLength();
+                double circularity = perimeter==0.0?0.0:4.0*Math.PI*(stats.pixelCount/(perimeter*perimeter));
+                if (circularity>1.0) circularity = 1.0;
+
+                if (circularity<minCirc || circularity>maxCirc) include = false;
+            }
+            if (stats.pixelCount>=minSize && stats.pixelCount<=maxSize && include) {
+                stats.xstart=x; stats.ystart=y;
+                rois.add( (Roi) roi.clone());
+            }
+
+            ip.fill(mask);
+        }
+
+       private ImageStatistics getStatistics(ImageProcessor ip, int mOptions) {
+            
+            Calibration cal = new Calibration();
+            switch (imageType2) {
+                case BYTE:
+                    return new ByteStatistics(ip, mOptions, cal);
+                case SHORT:
+                    return new ShortStatistics(ip, mOptions, cal);
+                case FLOAT:
+                    return new FloatStatistics(ip, mOptions, cal);
+                case RGB:
+                    return new ColorStatistics(ip, mOptions, cal);
+                default:
+                    return null;
+            }
+        }
+        
+
+    }
 }

@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -220,6 +222,31 @@ public class Cell implements IMutableCell {
     @Override
     public boolean hasMitochondria() {
         return !this.mitochondria.isEmpty();
+    }
+    
+    
+    @Override
+    public List<Taggable> getTaggables() {
+        List<Taggable> result = new ArrayList<Taggable>(0);
+        
+        result.addAll(getTaggables(acrosomes));
+        result.addAll(getTaggables(mitochondria));
+        result.addAll(getTaggables(tails));
+        
+
+        if(nucleus instanceof Taggable){
+            result.add((Taggable) nucleus);
+        }
+        
+        
+        return result;
+
+    }
+    
+    private List<Taggable> getTaggables(List<? extends CellularComponent> l){
+        return l.stream().filter(e-> e instanceof Taggable)
+        .map( e->(Taggable)e)
+        .collect(Collectors.toList());
     }
 
     /*

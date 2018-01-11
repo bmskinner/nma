@@ -72,7 +72,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
 
     public CellStatsPanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         scrollPane = new JScrollPane();
@@ -118,11 +118,6 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         this.add(header, BorderLayout.NORTH);
 
         this.setEnabled(false);
-    }
-
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
     }
     
     @Override

@@ -50,18 +50,13 @@ public class KruskalDetailPanel extends DetailPanel {
     JButton                      frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
 
     public KruskalDetailPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
 
         createUI();
 
         setEnabled(false);
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     @Override
     public void setEnabled(boolean b) {
         super.setEnabled(b);

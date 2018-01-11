@@ -73,7 +73,7 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
 
     private void run() {
         try {
-            boolean result = merge();
+            merge();
         } catch (Exception e) {
             error("Error merging datasets", e);
         }

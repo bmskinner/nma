@@ -31,7 +31,9 @@ import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import skeleton_analysis.AnalyzeSkeleton_;
@@ -40,6 +42,7 @@ import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.Flagellum;
 import com.bmskinner.nuclear_morphology.components.SpermTail;
@@ -103,7 +106,7 @@ public class TailDetector extends Detector {
             ImageStack edges = new ImageFilterer(stack).runEdgeDetector(stackNumber, options).toStack();
 
             // get objects found by edge detector
-            List<Roi> borderRois = getROIs(edges, Detector.CLOSED_OBJECTS, 1);
+            Map<Roi, StatsMap> borderRois = getROIs(edges, Detector.CLOSED_OBJECTS, 1);
             log(Level.INFO, "Found " + borderRois.size() + " potential tails in image");
 
             // create the skeletons of the detected objects
@@ -151,12 +154,12 @@ public class TailDetector extends Detector {
      * @return a new stack
      * @throws Exception
      */
-    private ImageStack skeletoniseStack(ImageStack stack, List<Roi> objects) throws Exception {
+    private ImageStack skeletoniseStack(ImageStack stack, Map<Roi, StatsMap> objects) throws Exception {
 
         // fill rois with white so they are properly skeletonised
         ByteProcessor bp = (ByteProcessor) stack.getProcessor(1);
         bp.setColor(Color.WHITE);
-        for (Roi r : objects) {
+        for (Roi r : objects.keySet()) {
             log(Level.FINE, "Filling roi");
             bp.fill(r);
         }
@@ -561,7 +564,7 @@ public class TailDetector extends Detector {
      *            the rgb channel with the tubulin stain (0 if greyscale)
      * @return a list of sperm tails (empty if none found)
      */
-    private List<Flagellum> buildSpermTails(List<Roi> usableSkeletons, List<Roi> borderRois, File tubulinFile,
+    private List<Flagellum> buildSpermTails(List<Roi> usableSkeletons, Map<Roi, StatsMap> borderRois, File tubulinFile,
             int channel) {
 
         List<Flagellum> tails = new ArrayList<Flagellum>(0);
@@ -580,7 +583,7 @@ public class TailDetector extends Detector {
                 // find the corresponding border roi
                 Roi tailBorder = null;
 
-                for (Roi border : borderRois) {
+                for (Roi border : borderRois.keySet()) {
 
                     // find the border roi that contains the first and last
                     // points of the skeleton
@@ -813,9 +816,9 @@ public class TailDetector extends Detector {
      *            the stack of the image to search
      * @return the Map linking an roi to its stats
      */
-    private List<Roi> getROIs(ImageStack image, int closed, int channel) {
+    private Map<Roi, StatsMap> getROIs(ImageStack image, int closed, int channel) {
 
-        List<Roi> result = new ArrayList<Roi>();
+        Map<Roi, StatsMap> result = new HashMap<>();
 
         // Values are hard coded for debugging
 

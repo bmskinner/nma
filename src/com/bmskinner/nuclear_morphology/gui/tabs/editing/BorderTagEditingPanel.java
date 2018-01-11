@@ -63,7 +63,7 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     public BorderTagEditingPanel() {
 
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         buttonsPanel = makeButtonPanel();
@@ -96,11 +96,6 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     public void setButtonsEnabled(boolean b) {
         ruleSetButton.setEnabled(b);
     }

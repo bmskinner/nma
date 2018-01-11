@@ -51,7 +51,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
     private String                   prevComponent = "";
 
     public ComponentListPanel(CellViewModel model) {
-        super(model);
+        super(model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
@@ -72,11 +72,6 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
         this.add(scrollPane, BorderLayout.CENTER);
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     /**
      * Create a list with all the components in the active cell
      * 

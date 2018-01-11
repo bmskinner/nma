@@ -23,8 +23,8 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.CellFactory;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -46,7 +45,6 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
-import ij.Prefs;
 import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
@@ -95,7 +93,6 @@ public class FluorescentNucleusFinder extends CellFinder {
             }
         } catch (Exception e) {
             error("Error searching in image " + imageFile.getAbsolutePath(), e);
-            // stack(e);
         }
 
         fireProgressEvent();
@@ -115,10 +112,12 @@ public class FluorescentNucleusFinder extends CellFinder {
 
         ImageImporter importer = new ImageImporter(imageFile);
 
-        ImageProcessor original = importer.toConverter().convertToGreyscale(stackNumber).invert().toProcessor();
+        ImageProcessor original = importer.toConverter()
+                .convertToGreyscale(stackNumber)
+                .invert()
+                .toProcessor();
 
         ImageProcessor ip = importer.importToStack().getProcessor(stackNumber);
-        // fireDetectionEvent(original.duplicate(), "Input image");
 
         ImageFilterer filt = new ImageFilterer(ip.duplicate());
         if (cannyOptions.isUseKuwahara()) {
@@ -152,31 +151,34 @@ public class FluorescentNucleusFinder extends CellFinder {
             fireDetectionEvent(ip.duplicate(), "Thresholded");
         }
 
-        // filt.invert();
-
         GenericDetector gd = new GenericDetector();
-        gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight());
+        gd.setSize(MIN_PROFILABLE_OBJECT_SIZE, original.getWidth() * original.getHeight()); // do not use the minimum nucleus size - we want the roi outlined in red
 
         ImageProcessor img = filt.toProcessor();
 
-        List<Roi> rois = gd.getRois(img.duplicate());
-
-        for (int i = 0; i < rois.size(); i++) {
-            Roi roi = rois.get(i);
-            Nucleus n = makeNucleus(roi, imageFile, nuclOptions, img, i, gd);
+        
+        Map<Roi, StatsMap> rois = gd.getRois(img.duplicate());
+        fine("Image: "+imageFile.getName()+": "+rois.size()+" rois");
+        
+        int i=0;
+        for (Roi r: rois.keySet()) {
+            StatsMap s = rois.get(r);
+            Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
             list.add(n);
-
+            i++;
         }
         return list;
 
     }
 
-    private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, final ImageProcessor ip, int objectNumber,
-            final Detector gd) throws ComponentCreationException {
+    private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, int objectNumber,
+            final StatsMap values) throws ComponentCreationException {
 
         // measure the area, density etc within the nucleus
-        StatsMap values = gd.measure(roi, ip);
-        // log("\tMeasured stats");
+//        StatsMap values = gd.measure(roi, ip);
+        
+        fine("Roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
+
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();
         int ybase = (int) roi.getYBase();

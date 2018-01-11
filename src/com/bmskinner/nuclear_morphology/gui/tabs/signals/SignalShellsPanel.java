@@ -78,6 +78,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     private static final String SHOW_RANDOM_TOOLTIP    = "Show a random distribution of signals in the consensus nucleus";
     private static final String SHOW_NUCLEI_TOOLTIP    = "Show nuclei in the dataset with shells annotated";
 
+    private static final int P_VALUE_COLUMN = 2;
     
     private ExportableChartPanel chartPanel;
     private ExportableChartPanel consensusPanel;
@@ -95,7 +96,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     protected ExportableTable table;
 
     public SignalShellsPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();
@@ -109,10 +110,6 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
     
     @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     public void setEnabled(boolean b) {
         newAnalysis.setEnabled(b);
         withinNucleiBtn.setEnabled(b);
@@ -301,7 +298,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         		.setDatasets(getDatasets())
                 .setTarget(consensusPanel)
                 .setNormalised(dapiNormalise.isSelected())
-                .setShowAnnotations(showRandom) // proxy                                                                                   // distribution
+                .setShowAnnotations(showRandom) // proxy distribution
                 .setShowXAxis(false)
                 .setShowYAxis(false)
                 .setCountType(type).build();
@@ -312,7 +309,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
         		.setCountType(type)
         		.setNormalised(dapiNormalise.isSelected())
                 .setTarget(table)
-                .setRenderer(2, new PValueTableCellRenderer()).build();
+                .setRenderer(P_VALUE_COLUMN, new PValueTableCellRenderer()).build();
 
         setTable(tableOptions);
 
@@ -348,7 +345,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         chartPanel.setChart(AbstractChartFactory.createLoadingChart());
         consensusPanel.setChart(AbstractChartFactory.createLoadingChart());

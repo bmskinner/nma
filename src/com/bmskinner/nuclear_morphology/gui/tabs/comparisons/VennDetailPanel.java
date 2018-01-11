@@ -40,22 +40,28 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 public class VennDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Venn";
+    private static final String HEADER_LBL      = "Shows the percentage of each row's cells shared with each column";
     private JPanel mainPanel = new JPanel();
 
     private ExportableTable vennTable;
 
     public VennDetailPanel() {
-        super();
+        super(PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 
         try {
             JPanel vennPanel = new JPanel(new BorderLayout());
+            
+            JPanel header = new JPanel();
+            header.add(new JLabel(HEADER_LBL));
 
             JScrollPane scrollPane = new JScrollPane();
             scrollPane.setViewportView(mainPanel);
 
+            this.add(header, BorderLayout.NORTH);
             this.add(scrollPane, BorderLayout.CENTER);
+            
 
             vennTable = new ExportableTable(AnalysisDatasetTableCreator.createBlankTable());
             vennPanel.add(vennTable, BorderLayout.CENTER);
@@ -69,11 +75,6 @@ public class VennDetailPanel extends DetailPanel {
 
     }
     
-    @Override
-    public String getPanelTitle(){
-        return PANEL_TITLE_LBL;
-    }
-
     @Override
     public void setChartsAndTablesLoading() {
         // log("Set venn to loading");
