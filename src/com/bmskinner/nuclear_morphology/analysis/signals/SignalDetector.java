@@ -165,12 +165,11 @@ public class SignalDetector extends Detector {
         setMaxCirc(options.getMaxCirc());
         setThreshold(options.getThreshold());
 
-        List<Roi> roiList = new ArrayList<Roi>();
+        Map<Roi, StatsMap> roiList = new HashMap<>();
 
         try {
 
             ImageProcessor ip = stack.getProcessor(stackNumber);
-            // ip.invert();
             roiList = detectRois(ip);
 
         } catch (Exception e) {
@@ -186,9 +185,9 @@ public class SignalDetector extends Detector {
 
         fine(roiList.size() + " signals in stack " + stackNumber);
 
-        for (Roi r : roiList) {
-            ImageProcessor ip = stack.getProcessor(stackNumber);
-            StatsMap values = measure(r, ip);
+        for (Roi r : roiList.keySet()) {
+
+            StatsMap values = roiList.get(r);
 
             int xbase = (int) r.getXBase();
             int ybase = (int) r.getYBase();

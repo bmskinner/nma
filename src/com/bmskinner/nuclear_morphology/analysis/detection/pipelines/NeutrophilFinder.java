@@ -24,6 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
@@ -178,15 +179,18 @@ public class NeutrophilFinder extends CellFinder {
             GenericDetector gd = new GenericDetector();
             gd.setCirc(cytoOptions.getMinCirc(), cytoOptions.getMaxCirc());
             gd.setSize(cytoOptions.getMinSize(), cytoOptions.getMaxSize());
-            // gd.setThreshold(cytoOptions.getThreshold());
-            List<Roi> rois = gd.getRois(ip.duplicate());
+
+            Map<Roi, StatsMap> rois = gd.getRois(ip.duplicate());
+            
+//            List<Roi> rois = gd.getRois(ip.duplicate());
 
             List<ICytoplasm> list = new ArrayList<>();
-            for (int i = 0; i < rois.size(); i++) {
-
-                Roi roi = rois.get(i);
-                ICytoplasm cyto = makeCytoplasm(roi, imageFile, cytoOptions, ip.duplicate(), i, gd);
+            int i = 0;
+            for (Roi r : rois.keySet()) {
+                StatsMap m = rois.get(r);
+                ICytoplasm cyto = makeCytoplasm(r, imageFile, cytoOptions, i, m);
                 list.add(cyto);
+                i++;
 
             }
 
@@ -333,11 +337,11 @@ public class NeutrophilFinder extends CellFinder {
 
     }
 
-    private ICytoplasm makeCytoplasm(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber,
-            Detector gd) throws ComponentCreationException {
+    private ICytoplasm makeCytoplasm(Roi roi, File f, IDetectionOptions options, int objectNumber,
+            StatsMap values) throws ComponentCreationException {
 
         // measure the area, density etc within the nucleus
-        StatsMap values = gd.measure(roi, ip);
+
 
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();
@@ -400,13 +404,14 @@ public class NeutrophilFinder extends CellFinder {
             gd.setCirc(nuclOptions.getMinCirc(), nuclOptions.getMaxCirc());
             gd.setSize(nuclOptions.getMinSize(), nuclOptions.getMaxSize());
             gd.setThreshold(thresholdMin);
-            List<Roi> rois = gd.getRois(bin);
+            Map<Roi, StatsMap> rois = gd.getRois(bin);
 
-            for (int i = 0; i < rois.size(); i++) {
-
-                Roi roi = rois.get(i);
-                Nucleus n = makeNucleus(roi, imageFile, nuclOptions, bin, i, gd);
+            int i=0;
+            for (Roi r : rois.keySet()) {
+                StatsMap m = rois.get(r);
+                Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, m);
                 list.add(n);
+                i++;
 
             }
 
@@ -449,11 +454,9 @@ public class NeutrophilFinder extends CellFinder {
         return result;
     }
 
-    private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, ImageProcessor ip, int objectNumber,
-            Detector gd) throws ComponentCreationException {
+    private Nucleus makeNucleus(Roi roi, File f, IDetectionOptions options, int objectNumber,
+            StatsMap values) throws ComponentCreationException {
 
-        // measure the area, density etc within the nucleus
-        StatsMap values = gd.measure(roi, ip);
 
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();
@@ -551,12 +554,13 @@ public class NeutrophilFinder extends CellFinder {
         GenericDetector gd = new GenericDetector();
         gd.setIncludeHoles(false);
         gd.setSize(minArea, maxArea);
-        List<Roi> rois = gd.getRois(ip);
-
-        for (Roi roi : rois) {
+        Map<Roi, StatsMap> rois = gd.getRois(ip);
+        
+        
+        for (Roi roi : rois.keySet()) {
             for (Nucleus n : list) {
                 LobedNucleus l = (LobedNucleus) n;
-                StatsMap m = gd.measure(roi, ip);
+                StatsMap m = rois.get(roi);
                 int x = m.get(GenericDetector.COM_X).intValue();
                 int y = m.get(GenericDetector.COM_Y).intValue();
                 IPoint com = IPoint.makeNew(x, y);

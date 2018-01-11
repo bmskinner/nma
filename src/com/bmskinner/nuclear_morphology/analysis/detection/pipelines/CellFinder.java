@@ -43,13 +43,13 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
      * 
      * @param op
      */
-    public CellFinder(IAnalysisOptions op) {
+    public CellFinder(final IAnalysisOptions op) {
         super(op);
 
     }
 
     @Override
-    public List<ICell> findInFolder(File folder) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInFolder(final File folder) throws ImageImportException, ComponentCreationException {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
@@ -59,7 +59,7 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
         if (arr == null) {
             return null;
         }
-
+        
         Stream.of(arr).parallel().forEach(f -> {
             
             if(Thread.interrupted()){

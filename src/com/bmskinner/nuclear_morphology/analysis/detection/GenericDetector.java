@@ -22,6 +22,7 @@ import ij.gui.Roi;
 import ij.process.ImageProcessor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A generic use of the detector with no filtering on size or shape by default
@@ -48,9 +49,8 @@ public class GenericDetector extends Detector {
      * @param ip
      * @return
      */
-    public List<Roi> getRois(ImageProcessor ip) {
-        this.setMaxSize(ip.getWidth() * ip.getHeight());
-        // this.setThreshold(128); // should be already set
+    public synchronized Map<Roi, StatsMap> getRois(ImageProcessor ip) {
+        this.setMaxSize(ip.getWidth() * ip.getHeight()); // object cannot be larger than the image
         return this.detectRois(ip);
     }
 

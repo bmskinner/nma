@@ -22,7 +22,11 @@ package analysis.nucleus;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
@@ -34,6 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -41,6 +46,9 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.Io;
 
 import analysis.SampleDatasetReader;
+import ij.IJ;
+import ij.Prefs;
+import ij.plugin.frame.RoiManager;
 
 /**
  * Test the detection methods to ensure they match previously 
@@ -53,17 +61,19 @@ public class NucleusDetectionMethodTest {
     
 	private static final String IMAGE_FOLDER = "test/samples/images/";
 	
-//    private static final String TESTING_RODENT_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing";
     private static final String TESTING_RODENT_FOLDER = IMAGE_FOLDER +"Testing";
     
-    private static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";
-//    private static final String TESTING_PIG_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_pig";
-    
+    private static final String TESTING_PIG_FOLDER = IMAGE_FOLDER +"Testing_pig";    
     private static final String TESTING_ROUND_FOLDER = IMAGE_FOLDER +"Testing_round";
-//    private static final String TESTING_ROUND_FOLDER = "J:\\Protocols\\Scripts and macros\\Testing_round";
     
     private static final String OUT_FOLDER = "UnitTest_"+com.bmskinner.nuclear_morphology.components.generic.Version.currentVersion();
    
+    
+    @Before
+    public void setUp(){
+       Prefs.blackBackground = true;
+       IJ.setBackgroundColor(0, 0, 0);
+    }
     
     /**
      * Run the current pipeline with default settings on the testing
@@ -112,7 +122,7 @@ public class NucleusDetectionMethodTest {
     	IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
 
     	File testFolder = new File(TESTING_ROUND_FOLDER);
-    	IMutableAnalysisOptions op = OptionsFactory.makeDefaulRoundAnalysisOptions(testFolder);
+    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
     	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
@@ -152,13 +162,25 @@ public class NucleusDetectionMethodTest {
      * @param obs the observed (newly created) dataset
      */
     private void testDatasetEquality(IAnalysisDataset exp, IAnalysisDataset obs) throws Exception{
-    	assertEquals(exp.getName(), obs.getName());
+    	assertEquals("Dataset name", exp.getName(), obs.getName());
 
-    	assertEquals(exp.getAnalysisOptions(), obs.getAnalysisOptions());
-
-    	assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
+    	assertEquals("Options",exp.getAnalysisOptions(), obs.getAnalysisOptions());
 
     	assertEquals("Number of images", exp.getCollection().getImageFiles().size(), obs.getCollection().getImageFiles().size());
+    	
+    	List<Nucleus> expN = new ArrayList<>(exp.getCollection().getNuclei());
+    	List<Nucleus> obsN = new ArrayList<>(obs.getCollection().getNuclei());
+    	
+    	Collections.sort(expN);
+    	Collections.sort(obsN);
+    	
+    	for(int i=0; i<expN.size(); i++){
+    	    assertEquals("Nucleus file name for: "+expN.get(i).getNameAndNumber(), expN.get(i).getSourceFileName(), obsN.get(i).getSourceFileName());
+    	}
+//    	
+    	assertEquals("Detected nuclei", exp.getCollection().getNucleusCount(), obs.getCollection().getNucleusCount());
+
+    	
 
     	// Check the stats are the same
     	for(PlottableStatistic s : PlottableStatistic.getStats(CellularComponent.NUCLEUS)){

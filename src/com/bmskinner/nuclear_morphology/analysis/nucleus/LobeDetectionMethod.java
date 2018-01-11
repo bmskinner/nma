@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 
 import java.awt.Rectangle;
 import java.util.List;
+import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -276,15 +277,17 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
         GenericDetector gd = new GenericDetector();
         gd.setIncludeHoles(false);
         gd.setSize(DEFAULT_MIN_LOBE_AREA, cell.getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA));
-        List<Roi> rois = gd.getRois(ws);
-        addLobesToNuclei(cell, rois);
+//        List<Roi> rois = gd.getRois(ws);
+        
+        Map<Roi, StatsMap> rois = gd.getRois(ws);
 
+        addLobesToNuclei(cell, rois);
     }
 
-    private void addLobesToNuclei(ICell cell, List<Roi> rois)
+    private void addLobesToNuclei(ICell cell, Map<Roi, StatsMap> rois)
             throws UnloadableImageException, ComponentCreationException {
 
-        GenericDetector gd = new GenericDetector();
+//        GenericDetector gd = new GenericDetector();
 
         List<Nucleus> nuclei = cell.getNuclei();
 
@@ -296,10 +299,8 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
                 // Add this to the roi centre of mass
 
-                // log("Testing "+l.getNameAndNumber()+":
-                // "+l.getOriginalCentreOfMass().toString());
-                for (Roi roi : rois) {
-                    StatsMap m = gd.measure(roi, ip);
+                for (Roi roi : rois.keySet()) {
+                    StatsMap m = rois.get(roi);
                     int x = m.get(GenericDetector.COM_X).intValue();
                     int y = m.get(GenericDetector.COM_Y).intValue();
                     IPoint com = IPoint.makeNew(x, y);
@@ -383,9 +384,10 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
                     // Now look for ROIs in the byte processor
                     GenericDetector dt = new GenericDetector();
-                    List<Roi> rois = dt.getRois(bp);
-                    for (Roi roi : rois) {
-                        StatsMap m = dt.measure(roi, bp);
+                    
+                    Map<Roi, StatsMap> rois = dt.getRois(bp);
+                    for (Roi roi : rois.keySet()) {
+                        StatsMap m = rois.get(roi);
                         int x = m.get(GenericDetector.COM_X).intValue();
                         int y = m.get(GenericDetector.COM_Y).intValue();
 
