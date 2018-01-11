@@ -181,7 +181,7 @@ public class OptionsFactory {
      * @param testFolder the folder of images to analyse
      * @return the options
      */
-    public static IMutableAnalysisOptions makeDefaulRoundAnalysisOptions(File testFolder) {
+    public static IMutableAnalysisOptions makeDefaultRoundAnalysisOptions(File testFolder) {
     	IMutableAnalysisOptions op = OptionsFactory.makeAnalysisOptions();
         op.setNucleusType(NucleusType.ROUND);
         
