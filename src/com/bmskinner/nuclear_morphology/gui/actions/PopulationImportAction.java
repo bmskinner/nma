@@ -76,51 +76,56 @@ public class PopulationImportAction extends VoidResultAction {
     @Override
     public void run() {
         setProgressBarIndeterminate();
-//        fine("Running dataset open action");
+
         if (file != null) {
 
-            IAnalysisMethod m = new DatasetImportMethod(file);
-            worker = new DefaultAnalysisWorker(m){
-            	@Override
-                public void done() {
+            try{
+                IAnalysisMethod m = new DatasetImportMethod(file);
+                worker = new DefaultAnalysisWorker(m){
+                    @Override
+                    public void done() {
 
-                    try {
+                        try {
 
-                        if (this.get() != null) {
-//                            fine("Firing trigger for sucessful task");
-                            firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+                            if (this.get() != null) {
+                                firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
 
-                        } else {
-//                            fine("Firing trigger for failed task");
-                            firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
+                            } else {
+                                firePropertyChange(ERROR_MSG, getProgress(), IAnalysisWorker.ERROR);
+                            }
+                        } catch (StackOverflowError e) {
+                            warn("Stack overflow detected");
+                            stack("Stack overflow in worker", e);
+                            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+                        } catch (InterruptedException e) {
+                            warn("Interruption to swing worker: "+e.getMessage());
+                            stack("Interruption to swing worker", e);
+                            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
+                        } catch (ExecutionException e) {
+                            
+                            if(e.getCause() instanceof UnsupportedVersionException){
+                                firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
+                                return;
+                            }
+
+                            warn("Execution error in swing worker: "+e.getMessage());
+                            stack("Execution error in swing worker", e);
+                            Throwable cause = e.getCause();
+                            warn("Causing error: "+cause.getMessage());
+                            stack("Causing error: ", cause);
+                            firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
                         }
-                    } catch (StackOverflowError e) {
-                        warn("Stack overflow detected");
-                        stack("Stack overflow in worker", e);
-                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-                    } catch (InterruptedException e) {
-                        warn("Interruption to swing worker: "+e.getMessage());
-                        stack("Interruption to swing worker", e);
-                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
-                    } catch (ExecutionException e) {
-                    	
-                    	if(e.getCause() instanceof UnsupportedVersionException){
-                    		firePropertyChange(FINISHED_MSG, getProgress(), IAnalysisWorker.FINISHED);
-                    		return;
-                    	}
 
-                        warn("Execution error in swing worker: "+e.getMessage());
-                        stack("Execution error in swing worker", e);
-                        Throwable cause = e.getCause();
-                        warn("Causing error: "+cause.getMessage());
-                        stack("Causing error: ", cause);
-                        firePropertyChange("Error", getProgress(), IAnalysisWorker.ERROR);
                     }
-
-                }
-            };
-
-            worker.addPropertyChangeListener(this);
+                };
+                
+                worker.addPropertyChangeListener(this);
+                
+            } catch(IllegalArgumentException e){
+                warn("Unable to import file");
+                fine(e.getMessage(), e);
+                cancel();
+            }
 
             setProgressMessage(PROGRESS_BAR_LABEL);
 
