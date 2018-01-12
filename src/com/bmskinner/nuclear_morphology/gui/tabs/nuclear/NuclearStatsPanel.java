@@ -22,7 +22,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.logging.Level;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -30,13 +29,12 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import ij.io.DirectoryChooser;
-
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
@@ -29,6 +27,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.TailDetectionSettingsDialog;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
+
+import ij.io.DirectoryChooser;
 
 public class AddTailStainAction extends SingleDatasetResultAction {
 

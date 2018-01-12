@@ -155,15 +155,11 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
     protected void updateSingle() {
         this.setEnabled(true);
 
-        ProfileType type = profileCollectionTypeSettingsPanel.getSelected();
-
         pointList.setModel(createEmptyListModel());
         pointList.setCellRenderer(new ModalityListCellRenderer());
         pointList.setSelectedIndex(0);
 
         updateModalityProfileChart();
-        // updatePositionChart(0);
-
     }
 
     @Override
@@ -299,7 +295,7 @@ public class ModalityDisplayPanel extends DetailPanel implements ActionListener,
 
         DecimalFormat df = new DecimalFormat("#0.00");
 
-        public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                 boolean cellHasFocus) {
 
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

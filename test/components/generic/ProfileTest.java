@@ -18,9 +18,8 @@
  *******************************************************************************/
 package components.generic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,12 +47,10 @@ public class ProfileTest {
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float[])}.
 	 */
 	@Test
-	public void testFloatProfileFloatArray() {
+	public void testFloatProfileFloatArrayWithNullData() {
 		float[] data = null;
 		exception.expect(IllegalArgumentException.class);
 		IProfile tester = new FloatProfile(data);
-		
-		tester = new FloatProfile(this.data);
 	}
 
 	/**
@@ -526,13 +523,6 @@ public class ProfileTest {
 		fail("Not yet implemented");
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getWindow(int, int)}.
-	 */
-	@Test
-	public void testGetWindow() {
-		fail("Not yet implemented");
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSubregion(int, int)}.
@@ -682,42 +672,90 @@ public class ProfileTest {
 		// there is no assertArrayEquals for float[]
 		for( int i =0;i<data.length; i++){
 			assertEquals(data[i]+"/"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
-		}
-		
-		
-		// Check NaN inputs
-		
-		tester = new FloatProfile(data);
-		exception.expect(IllegalArgumentException.class);
-		tester.divide(Double.NaN);
-		
-		exception.expect(IllegalArgumentException.class);
-		tester.divide(Double.POSITIVE_INFINITY);
-		
-		exception.expect(IllegalArgumentException.class);
-		tester.divide(Double.NEGATIVE_INFINITY);
-		
-		// Check negative inputs
-		
-		tester = new FloatProfile(data);
-		constant   = -2;
-		float[] negatives   = {0f, -0.5f, -1f, -1.5f, -2f, -2.5f};
-		result = tester.divide(constant);
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"/"+constant+" should be "+negatives[i], negatives[i], result.toFloatArray()[i],0);
-		}
-		
-		
+		}		
 	}
+	
+	@Test
+    public void testDivideDoubleNegative() {
+        float[] data       = {0, 1, 2, 3,  4,  5 };
+        double   constant   = 2;
+        float[] expected   = {0f, 0.5f, 1f, 1.5f, 2f, 2.5f};
 
+        IProfile tester = new FloatProfile(data);
+        IProfile result = tester.divide(constant);
+        
+        tester = new FloatProfile(data);
+        constant   = -2;
+        float[] negatives   = {0f, -0.5f, -1f, -1.5f, -2f, -2.5f};
+        result = tester.divide(constant);
+
+        for( int i =0;i<data.length; i++){
+            assertEquals(data[i]+"/"+constant+" should be "+negatives[i], negatives[i], result.toFloatArray()[i],0);
+        }
+        
+        
+    }
+	
+	@Test
+    public void testDivideDoubleNanInputFails() {
+        float[] data       = {0, 1, 2, 3,  4,  5 };
+        IProfile tester = new FloatProfile(data);
+        
+        tester = new FloatProfile(data);
+        exception.expect(IllegalArgumentException.class);
+        tester.divide(Double.NaN);
+    }
+
+	
+	@Test
+    public void testDivideDoublePositiveInfinityInputFails() {
+        float[] data       = {0, 1, 2, 3,  4,  5 };
+        IProfile tester = new FloatProfile(data);
+        
+        tester = new FloatProfile(data);
+        exception.expect(IllegalArgumentException.class);
+        tester.divide(Double.POSITIVE_INFINITY);
+    }
+	
+	@Test
+    public void testDivideDoubleNegativeInfinityInputFails() {
+        float[] data       = {0, 1, 2, 3,  4,  5 };
+        IProfile tester = new FloatProfile(data);
+        
+        tester = new FloatProfile(data);
+        exception.expect(IllegalArgumentException.class);
+        tester.divide(Double.NEGATIVE_INFINITY);
+    }
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#divide(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
 	public void testDivideIProfile() {
-		fail("Not yet implemented");
+	    float[] data  = {0, 1, 2,   3,  4,  5 };
+	    float[] div   = {1, 2, 0.5f, 3,  0.25f,     2 };
+        float[] exp   = {0f, 0.5f, 4f, 1f, 16f, 2.5f};
+
+        IProfile tester  = new FloatProfile(data);
+        IProfile divider = new FloatProfile(div);
+        IProfile result = tester.divide(divider);
+
+        for( int i =0;i<data.length; i++){
+            assertEquals(data[i]+"/"+div[i], exp[i], result.toFloatArray()[i],0);
+        }   
 	}
+	
+	@Test
+    public void testDivideIProfileFailsOnSizeMismatch() {
+        float[] data  = {0, 1, 2,   3,  4,  5 };
+        float[] div   = {1, 2, 0.5f, 3,  0.25f };
+
+        IProfile tester = new FloatProfile(data);
+        IProfile divider = new FloatProfile(div);
+
+        exception.expect(IllegalArgumentException.class);
+        tester.divide(divider);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#add(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
@@ -804,14 +842,6 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetSortedIndexes() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#toString()}.
-	 */
-	@Test
-	public void testToString() {
 		fail("Not yet implemented");
 	}
 
@@ -912,6 +942,54 @@ public class ProfileTest {
 		assertEquals(value+" should be "+expectedDiff, expectedDiff, value,0);
 		
 	}
+	
+	@Test
+	public void testGetWindowWithinCentreOfProfile(){
+	    float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+	    IProfile p = new FloatProfile(test);
+	    
+	    IProfile r = p.getWindow(5, 2);
+	    float[] exp = { 6, 4, 10, 5, 1 };
+	    
+	    assertThat(r.size(), is(exp.length));
+	    
+	    for(int i=0; i<exp.length; i++){
+	        assertThat(r.get(i), is((double)exp[i]));
+	    }
+	    
+	}
+	
+	@Test
+    public void testGetWindowAtStartOfProfile(){
+        float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+        IProfile p = new FloatProfile(test);
+        
+        IProfile r = p.getWindow(1, 2);
+        float[] exp = { 3, 9, 20, 13, 6 };
+        
+        assertThat(r.size(), is(exp.length));
+        
+        for(int i=0; i<exp.length; i++){
+            assertThat(r.get(i), is((double)exp[i]));
+        }
+        
+    }
+	
+	@Test
+    public void testGetWindowAtEndOfProfile(){
+        float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
+        IProfile p = new FloatProfile(test);
+        
+        IProfile r = p.getWindow(11, 2);
+        float[] exp = { 7, 19, 12, 3, 9 };
+        
+        assertThat(r.size(), is(exp.length));
+        
+        for(int i=0; i<exp.length; i++){
+            assertThat(r.get(i), is((double)exp[i]));
+        }
+        
+    }
 
 
 }

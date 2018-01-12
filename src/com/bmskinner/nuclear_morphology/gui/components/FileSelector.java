@@ -19,8 +19,6 @@
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -33,8 +31,6 @@ import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-
-import ij.io.SaveDialog;
 
 
 /**

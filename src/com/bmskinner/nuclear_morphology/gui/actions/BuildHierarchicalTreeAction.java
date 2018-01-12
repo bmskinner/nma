@@ -59,7 +59,7 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
                                                          // TreeBuildingMethod(dataset,
                                                          // options);
 
-            int maxProgress = dataset.getCollection().size() * 2;
+//            int maxProgress = dataset.getCollection().size() * 2;
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);

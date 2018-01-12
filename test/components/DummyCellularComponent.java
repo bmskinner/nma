@@ -73,73 +73,73 @@ public class DummyCellularComponent implements CellularComponent {
      */
     private transient List<IBorderPoint> borderList = new ArrayList<>(0);                                                                                         // while
                                                                                                         // memory                                                                                                    // is
-	public DummyCellularComponent(List<IPoint> border, IPoint centreOfMass){
-		
-		
-		if (centreOfMass == null) {
-            throw new IllegalArgumentException("Centre of mass cannot be null");
-        }
-
-        if (roi == null) {
-            throw new IllegalArgumentException("Roi cannot be null");
-        }
-
-        this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
-        this.centreOfMass = IMutablePoint.makeNew(centreOfMass);
-        this.id = java.util.UUID.randomUUID();
-
-        // Store the original points. From these, the smooth polygon can be
-        // reconstructed.
-        double epsilon = 1;
-        Polygon polygon = roi.getPolygon();
-        Rectangle2D bounds = polygon.getBounds().getFrame();
-
-        // // since small signals can have imprecision on the CoM that puts them
-        // on the border of the
-        // // object, add a small border to consider OK
-
-        double minX = bounds.getX();
-        double maxX = minX + bounds.getWidth();
-
-        minX -= epsilon;
-        maxX += epsilon;
-
-        if (centreOfMass.getX() < minX || centreOfMass.getX() > maxX) {
-            throw new IllegalArgumentException("The centre of mass X (" + centreOfMass.getX() + ")"
-                    + ") must be within the roi bounds (x = " + minX + "-" + maxX + ")");
-        }
-
-        double minY = bounds.getY();
-        double maxY = minY + bounds.getHeight();
-        minY -= epsilon;
-        maxY += epsilon;
-
-        if (centreOfMass.getY() < minY || centreOfMass.getY() > maxY) {
-            throw new IllegalArgumentException("The centre of mass Y (" + centreOfMass.getY() + ")"
-                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
-        }
-
-        if (!polygon.contains(centreOfMass.getX(), centreOfMass.getY())) {
-            fine("Centre of mass is not inside the object. You may have a doughnut.");
-        }
-
-        this.xpoints = new int[polygon.npoints];
-        this.ypoints = new int[polygon.npoints];
-
-        // Discard empty indices left in polygon array
-        for (int i = 0; i < polygon.npoints; i++) {
-            this.xpoints[i] = polygon.xpoints[i];
-            this.ypoints[i] = polygon.ypoints[i];
-            // log("\tPoint at "+i+": "+this.xpoints[i]+", "+this.ypoints[i]);
-        }
-
-        // convert the roi positions to a list of nucleus border points
-        // Only smooth the points for large objects like nuclei
-        // log("Int array in constructor : "+this.xpoints[0]+",
-        // "+this.ypoints[0]);
-        makeBorderList();
-
-    }
+//	public DummyCellularComponent(List<IPoint> border, IPoint centreOfMass){
+//		
+//		
+//		if (centreOfMass == null) {
+//            throw new IllegalArgumentException("Centre of mass cannot be null");
+//        }
+//
+//        if (roi == null) {
+//            throw new IllegalArgumentException("Roi cannot be null");
+//        }
+//
+//        this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
+//        this.centreOfMass = IMutablePoint.makeNew(centreOfMass);
+//        this.id = java.util.UUID.randomUUID();
+//
+//        // Store the original points. From these, the smooth polygon can be
+//        // reconstructed.
+//        double epsilon = 1;
+//        Polygon polygon = roi.getPolygon();
+//        Rectangle2D bounds = polygon.getBounds().getFrame();
+//
+//        // // since small signals can have imprecision on the CoM that puts them
+//        // on the border of the
+//        // // object, add a small border to consider OK
+//
+//        double minX = bounds.getX();
+//        double maxX = minX + bounds.getWidth();
+//
+//        minX -= epsilon;
+//        maxX += epsilon;
+//
+//        if (centreOfMass.getX() < minX || centreOfMass.getX() > maxX) {
+//            throw new IllegalArgumentException("The centre of mass X (" + centreOfMass.getX() + ")"
+//                    + ") must be within the roi bounds (x = " + minX + "-" + maxX + ")");
+//        }
+//
+//        double minY = bounds.getY();
+//        double maxY = minY + bounds.getHeight();
+//        minY -= epsilon;
+//        maxY += epsilon;
+//
+//        if (centreOfMass.getY() < minY || centreOfMass.getY() > maxY) {
+//            throw new IllegalArgumentException("The centre of mass Y (" + centreOfMass.getY() + ")"
+//                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
+//        }
+//
+//        if (!polygon.contains(centreOfMass.getX(), centreOfMass.getY())) {
+//            fine("Centre of mass is not inside the object. You may have a doughnut.");
+//        }
+//
+//        this.xpoints = new int[polygon.npoints];
+//        this.ypoints = new int[polygon.npoints];
+//
+//        // Discard empty indices left in polygon array
+//        for (int i = 0; i < polygon.npoints; i++) {
+//            this.xpoints[i] = polygon.xpoints[i];
+//            this.ypoints[i] = polygon.ypoints[i];
+//            // log("\tPoint at "+i+": "+this.xpoints[i]+", "+this.ypoints[i]);
+//        }
+//
+//        // convert the roi positions to a list of nucleus border points
+//        // Only smooth the points for large objects like nuclei
+//        // log("Int array in constructor : "+this.xpoints[0]+",
+//        // "+this.ypoints[0]);
+//        makeBorderList();
+//
+//    }
 
     /**
      * Create the border list from the stored int[] points. Move the centre of

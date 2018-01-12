@@ -19,15 +19,12 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.Paint;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,8 +35,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.swing.JColorChooser;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -47,14 +42,12 @@ import javax.swing.tree.TreeSelectionModel;
 
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;

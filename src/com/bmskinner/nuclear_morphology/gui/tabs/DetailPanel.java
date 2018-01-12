@@ -348,6 +348,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
         } catch (Exception e) {
             warn("Error updating panel " + this.getClass().getName());
+            e.printStackTrace();
             fine("Error updating panel", e); // save detail for fine logging
 
             try {

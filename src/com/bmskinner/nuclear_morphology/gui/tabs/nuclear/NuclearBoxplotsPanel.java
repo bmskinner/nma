@@ -34,8 +34,6 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ViolinChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;

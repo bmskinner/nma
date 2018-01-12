@@ -1431,7 +1431,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             } catch (UnavailableBorderPointException e) {
                 throw new ChartDatasetCreationException("Unable to get border point", e);
-            } catch(NullPointerException e){
+            } catch(IllegalArgumentException e){
                 throw new ChartDatasetCreationException("Problem with line equation", e);
             }
 

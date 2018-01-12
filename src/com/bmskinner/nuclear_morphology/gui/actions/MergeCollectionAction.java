@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import ij.io.SaveDialog;
-
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +36,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
+
+import ij.io.SaveDialog;
 
 /**
  * Carry out a merge of datasets

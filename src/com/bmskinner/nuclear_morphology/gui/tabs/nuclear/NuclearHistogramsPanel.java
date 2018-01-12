@@ -20,7 +20,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.Dimension;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
 
 import org.jfree.chart.JFreeChart;
 
@@ -34,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
