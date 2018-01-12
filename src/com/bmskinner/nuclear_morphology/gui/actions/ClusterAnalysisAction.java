@@ -54,7 +54,7 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
 
             IAnalysisMethod m = clusterSetup.getMethod();
 
-            int maxProgress = dataset.getCollection().size() * 2;
+//            int maxProgress = dataset.getCollection().size() * 2;
             worker = new DefaultAnalysisWorker(m);
 
             worker.addPropertyChangeListener(this);

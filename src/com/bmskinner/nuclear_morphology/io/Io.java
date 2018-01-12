@@ -142,21 +142,18 @@ public interface Io {
          */
         static boolean isSuitableImportFile(final File f) {
 
-            if (f == null) {
+            if (f == null)
                 return false;
-            }
 
-            if (!f.exists()) {
+            if (!f.exists())
                 return false;
-            }
 
-            if (f.isDirectory()) {
+            if (f.isDirectory())
                 return false;
-            }
 
-            if (!f.isFile()) {
+            if (!f.isFile())
                 return false;
-            }
+            
             return true;
         }
     }

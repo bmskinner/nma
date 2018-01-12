@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import ij.io.SaveDialog;
-
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
@@ -29,6 +27,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
+
+import ij.io.SaveDialog;
 
 public class SaveDatasetAction extends SingleDatasetResultAction {
 

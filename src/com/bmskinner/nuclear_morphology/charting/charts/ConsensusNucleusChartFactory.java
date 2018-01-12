@@ -277,9 +277,9 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
-            warn("Cannot make consensus chart");
+            warn("Error making segmented outline");
             fine("Error making segmented outline", e);
-            return makeErrorChart();
+            return makeNucleusOutlineChart();
         }
 
         JFreeChart chart = makeConsensusChart(ds);

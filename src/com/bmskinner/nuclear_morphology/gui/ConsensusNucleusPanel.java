@@ -346,10 +346,15 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
         straightenMeshBox.setEnabled(showMeshBox.isSelected());
 
         ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setScale(GlobalOptions.getInstance().getScale()).setSwatch(GlobalOptions.getInstance().getSwatch())
-                .setShowMesh(showMeshBox.isSelected()).setShowMeshEdges(showMeshEdgesBox.isSelected())
-                .setShowMeshFaces(showMeshFacesBox.isSelected()).setStraightenMesh(straightenMeshBox.isSelected())
-                .setShowAnnotations(false).setShowXAxis(false).setShowYAxis(false).setTarget(consensusChartPanel)
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setShowMesh(showMeshBox.isSelected())
+                .setShowMeshEdges(showMeshEdgesBox.isSelected())
+                .setShowMeshFaces(showMeshFacesBox.isSelected())
+                .setStraightenMesh(straightenMeshBox.isSelected())
+                .setShowAnnotations(false)
+                .setShowXAxis(false).setShowYAxis(false)
+                .setTarget(consensusChartPanel)
                 .build();
 
         setChart(options);

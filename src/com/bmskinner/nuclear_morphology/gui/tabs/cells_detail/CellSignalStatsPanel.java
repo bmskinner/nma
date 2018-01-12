@@ -20,8 +20,6 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.text.NumberFormat;
-import java.text.ParseException;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,9 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatase
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
-import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {

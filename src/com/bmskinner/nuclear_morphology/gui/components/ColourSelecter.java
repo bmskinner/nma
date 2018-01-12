@@ -20,7 +20,6 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
 
-import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 public class ColourSelecter {
