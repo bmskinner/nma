@@ -404,8 +404,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         } finally {
 
             try {
-                ois.close();
-                fis.close();
+            	if(ois!=null)
+            		ois.close();
+            	
+            	if(fis!=null)
+            		fis.close();
             } catch (Exception e) {
                 stack("Error closing file stream", e);
                 throw new UnloadableDatasetException(

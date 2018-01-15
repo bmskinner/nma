@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.text.DecimalFormat;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -29,10 +31,7 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 
     protected static final String EMPTY_STRING = "";
 
-    public AbstractDatasetCreator(final E options) {
-        if (options == null) {
-            throw new IllegalArgumentException("Options cannot be null");
-        }
+    public AbstractDatasetCreator(@NonNull final E options) {
         this.options = options;
     }
 

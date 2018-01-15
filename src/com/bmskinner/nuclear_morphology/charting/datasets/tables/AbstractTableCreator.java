@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -37,7 +39,7 @@ public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableO
     /**
      * Create with a set of table options
      */
-    public AbstractTableCreator(final TableOptions o) {
+    public AbstractTableCreator(@NonNull final TableOptions o) {
         super(o);
     }
 
@@ -46,7 +48,7 @@ public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableO
      * 
      * @return
      */
-    public static TableModel createBlankTable() {
+    @NonNull public static TableModel createBlankTable() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn(Labels.NO_DATA_LOADED);
         return model;
@@ -57,7 +59,7 @@ public abstract class AbstractTableCreator extends AbstractDatasetCreator<TableO
      * 
      * @return
      */
-    public static TableModel createLoadingTable() {
+    @NonNull public static TableModel createLoadingTable() {
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn(Labels.LOADING_DATA);
         return model;

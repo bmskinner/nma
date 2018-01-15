@@ -856,19 +856,12 @@ public class ProfileTest {
 		
 		
 	@Test
-	public void interpolationShouldLinearExtend(){
+	public void interpolationShouldLinearExtend() throws Exception{
 		float[] data       = { 10, 11, 12, 13, 14, 15 };
 		float[] expected   = { 10, 10.5f, 11, 11.5f, 12, 12.5f, 13, 13.5f, 14, 14.5f, 15, 12.5f };
 		
 		IProfile tester = new FloatProfile(data);
-		IProfile result = null;
-		try {
-			result = tester.interpolate(12);
-		} catch (Exception e) {
-			System.out.println("Error interpolating: "+e.getMessage());
-			fail("Interpolation failed");
-		}
-		
+		IProfile result = tester.interpolate(12);
 		float[] output = result.toFloatArray();	
 		
 		for( int i =0;i<expected.length; i++){
@@ -878,24 +871,16 @@ public class ProfileTest {
 	}
 	
 	@Test
-	public void interpolationShouldShrinkWhenGivenLowerLength(){
+	public void interpolationShouldShrinkWhenGivenLowerLength() throws Exception{
 		float[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
 		float[] expected   = { 10, 12, 14, 16, 18, 20 };
 		
 		IProfile tester = new FloatProfile(data);
-		
-		IProfile result = null;
-		try{
-			result = tester.interpolate(6);
-		} catch(ProfileException e){
-			System.out.println("Error interpolating: "+e.getMessage());
-			fail("Interpolation failed");
-		}
+		IProfile result =  tester.interpolate(6);
 		
 		float[] output = result.toFloatArray();	
 		
 		for( int i =0;i<expected.length; i++){
-//			System.out.println(output[i]+" should be "+expected[i]);
 			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
 		}
 

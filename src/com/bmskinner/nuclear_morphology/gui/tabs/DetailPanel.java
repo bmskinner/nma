@@ -34,6 +34,7 @@ import javax.swing.SwingWorker;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.Cache;
@@ -502,7 +503,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return null unless overridden
      * @throws Exception
      */
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return null;
     }
 

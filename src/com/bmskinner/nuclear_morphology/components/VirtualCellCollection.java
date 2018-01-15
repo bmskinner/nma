@@ -232,17 +232,12 @@ public class VirtualCellCollection implements ICellCollection {
 
         if (parentCollection == null) {
             warn("Parent collection not restored!");
+            return result;
         }
 
-        result = cellIDs.stream().map(id -> parentCollection.getCell(id)).flatMap(c -> c.getNuclei().stream())
+        result = cellIDs.stream().map(id -> parentCollection.getCell(id))
+        		.flatMap(c -> c.getNuclei().stream())
                 .collect(Collectors.toSet());
-
-        // for(UUID id : cellIDs){
-        // ICell c = parentCollection.getCell(id);
-        // for(Nucleus n : c.getNuclei()){
-        // result.add(n);
-        // }
-        // }
 
         return result;
     }
@@ -254,25 +249,17 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public synchronized Set<Nucleus> getNuclei(File imageFile) {
-        // Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
-        // for(UUID id : cellIDs){
-        // Nucleus n = parent.getCollection().getCell(id).getNucleus();
-        //
-        // if(n.getSourceFile().equals(imageFile)){
-        // result.add(n);
-        // }
-        // }
 
         ICellCollection parentCollection = parent.getCollection();
         if (parentCollection == null) {
             warn("Parent collection not restored!");
+            return new HashSet<Nucleus>();
         }
 
-        Set<Nucleus> result = cellIDs.stream().map(id -> parentCollection.getCell(id))
-                .flatMap(c -> c.getNuclei().stream()).filter(n -> n.getSourceFile().equals(imageFile))
+        return cellIDs.stream().map(id -> parentCollection.getCell(id))
+                .flatMap(c -> c.getNuclei().stream())
+                .filter(n -> n.getSourceFile().equals(imageFile))
                 .collect(Collectors.toSet());
-
-        return result;
     }
 
     @Override

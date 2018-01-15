@@ -240,7 +240,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
             }
         }
 
-        if (options.isIncludeMesh() && collection.hasConsensus()) {
+        if (options.isIncludeMesh() && collection.hasConsensus() && mesh!=null ){
 
             for (MeshFace face : mesh.getFaces()) {
                 finer("Including face " + face.toString());

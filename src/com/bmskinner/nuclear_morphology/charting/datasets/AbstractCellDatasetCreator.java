@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
 import com.bmskinner.nuclear_morphology.components.ICell;
 
@@ -31,11 +33,8 @@ public class AbstractCellDatasetCreator extends AbstractDatasetCreator<DisplayOp
 
     protected final ICell cell;
 
-    public AbstractCellDatasetCreator(final DisplayOptions options, final ICell c) {
+    public AbstractCellDatasetCreator(@NonNull final DisplayOptions options, @NonNull final ICell c) {
         super(options);
-        if (c == null) {
-            throw new IllegalArgumentException("Cell cannot be null");
-        }
         cell = c;
     }
 

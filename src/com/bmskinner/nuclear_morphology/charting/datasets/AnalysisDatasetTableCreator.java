@@ -31,7 +31,8 @@ import java.util.stream.DoubleStream;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
@@ -84,7 +85,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     /**
      * Create with a set of table options
      */
-    public AnalysisDatasetTableCreator(final TableOptions o) {
+    public AnalysisDatasetTableCreator(@NonNull final TableOptions o) {
         super(o);
     }
 
@@ -149,7 +150,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @return a table model
      * @throws Exception
      */
-    private TableModel createMedianProfileSegmentStatsTable(IAnalysisDataset dataset, MeasurementScale scale) {
+    private TableModel createMedianProfileSegmentStatsTable(@Nullable IAnalysisDataset dataset, MeasurementScale scale) {
 
         DefaultTableModel model = new DefaultTableModel();
 
@@ -380,7 +381,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @param dataset
      * @return
      */
-    private Object[] createAnalysisParametersMergeColumn(IAnalysisDataset dataset) {
+    private Object[] createAnalysisParametersMergeColumn(@NonNull IAnalysisDataset dataset) {
 
         Object[] data = new Object[ANALYSIS_PARAMETERS_ROWS.length];
 
@@ -427,12 +428,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      *            null.
      * @return
      */
-    private Object[] createAnalysisParametersColumn(IAnalysisDataset dataset, IAnalysisOptions options) {
+    private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         try {
             options = options == null ? dataset.getAnalysisOptions() : options;
         } catch (MissingOptionException e1) {
             warn("Could not get analysis options");
             stack(e1.getMessage(), e1);
+            Object[] err = new Object[23];
+            Arrays.fill(err, 0, 22, "Error");
+            return err;
         }
 
         String refoldMode = "Fast";
@@ -560,7 +564,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         return model;
     }
 
-    private List<Object> createDatasetStatsTableColumn(IAnalysisDataset dataset, MeasurementScale scale) {
+    private List<Object> createDatasetStatsTableColumn(@NonNull IAnalysisDataset dataset, MeasurementScale scale) {
 
         // format the numbers and make into a tablemodel
         DecimalFormat pf = new DecimalFormat("#0.000");
@@ -753,7 +757,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @param list
      * @return
      */
-    private DefaultTableModel makeEmptyWilcoxonTable(List<IAnalysisDataset> list) {
+    private DefaultTableModel makeEmptyWilcoxonTable(@Nullable List<IAnalysisDataset> list) {
         DefaultTableModel model = new DefaultTableModel();
 
         if (list == null) {
@@ -782,7 +786,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      *            the table options
      * @return a tablemodel for display
      */
-    public TableModel createWilcoxonStatisticTable(String component) {
+    public TableModel createWilcoxonStatisticTable(@Nullable String component) {
 
         if (!options.hasDatasets()) {
             return makeEmptyWilcoxonTable(null);
@@ -934,7 +938,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      *            the table options
      * @return a tablemodel for display
      */
-    public TableModel createMagnitudeStatisticTable(String component) {
+    public TableModel createMagnitudeStatisticTable(@Nullable String component) {
 
         if (!options.hasDatasets()) {
             return makeEmptyWilcoxonTable(null);

@@ -941,18 +941,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
         boolean hasConsensus = options.firstDataset().getCollection().hasConsensus();
         Mask reference = null;
         BooleanAligner aligner = null;
-
+        
+        int i = 0;
+        
         if (options.isNormalised()) {
             if (hasConsensus) {
 
                 reference = options.firstDataset().getCollection().getConsensus().getBooleanMask(200, 200);
                 aligner = new BooleanAligner(reference);
             }
-        }
-
-        int i = 0;
-
-        if (options.isNormalised()) {
 
             if (hasConsensus) {
 
@@ -992,7 +989,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
              * Find the best offset for the CoM to fit the consensus nucleus if
              * present
              */
-            if (options.isNormalised()) {
+            if (options.isNormalised() && aligner!=null){
                 if (hasConsensus) {
                     Mask test = verticalNucleus.getBooleanMask(200, 200);
                     int[] offsets = aligner.align(test);

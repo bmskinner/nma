@@ -900,22 +900,23 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
         IProfileCollection pc = cellCollection.getProfileCollection();
         if (pc == null) {
             warn("Missing profile collection");
+        } else {
+        	 int length = pc.length();
+             // Update all children to have the same profile lengths and offsets
+
+             if (!childDatasets.isEmpty()) {
+                 for (IAnalysisDataset child : getAllChildDatasets()) {
+                     child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);
+                 }
+             }
+
+             if (!otherDatasets.isEmpty()) {
+                 for (IAnalysisDataset child : otherDatasets) {
+                     child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
+                 }
+             }
         }
 
-        int length = pc.length();
-        // Update all children to have the same profile lengths and offsets
-
-        if (!childDatasets.isEmpty()) {
-            for (IAnalysisDataset child : getAllChildDatasets()) {
-                child.getCollection().getProfileCollection().createProfileAggregate(child.getCollection(), length);
-            }
-        }
-
-        if (!otherDatasets.isEmpty()) {
-            for (IAnalysisDataset child : otherDatasets) {
-                child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
-            }
-        }
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
