@@ -27,6 +27,7 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 import analysis.SegmentFitterTest;
+import samples.dummy.DummyRodentSpermNucleus;
 
 public class SegmentedProfileTest {
 
@@ -40,7 +41,7 @@ public class SegmentedProfileTest {
 	
 	public static ISegmentedProfile createNucleusProfile() throws Exception{
 		
-		Nucleus n = NucleusTest.createTestRodentSpermNucleus();
+	    Nucleus n = new DummyRodentSpermNucleus();
 		ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE);	
 		return profile;
 	}

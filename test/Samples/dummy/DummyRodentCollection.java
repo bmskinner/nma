@@ -17,7 +17,7 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package components;
+package samples.dummy;
 
 import java.io.File;
 import java.util.concurrent.ExecutionException;

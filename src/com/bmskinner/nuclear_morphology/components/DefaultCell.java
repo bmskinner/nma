@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 

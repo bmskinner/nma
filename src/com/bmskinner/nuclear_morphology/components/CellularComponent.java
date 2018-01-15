@@ -91,7 +91,7 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     boolean isSmoothByDefault();
 
     /**
-     * If any stats are listed as uncalcualted, attempt to calculate them
+     * If any stats are listed as uncalculated, attempt to calculate them
      */
     void updateDependentStats();
 
