@@ -19,14 +19,19 @@
 
 package components;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.UUID;
 
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
+import com.bmskinner.nuclear_morphology.components.DefaultMitochondrion;
+import com.bmskinner.nuclear_morphology.components.IMitochondrion;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+
+import samples.dummy.DummyRodentSpermNucleus;
 
 public class DefaultCellTest {
 
@@ -40,7 +45,7 @@ public class DefaultCellTest {
 
     @Test
     public void testDefaultCellNucleus() {
-        Nucleus n = NucleusTest.createTestRodentSpermNucleus();
+        Nucleus n = new DummyRodentSpermNucleus();
         
         DefaultCell c = new DefaultCell(n);
         assertEquals(n, c.getNuclei().get(0));
@@ -124,6 +129,8 @@ public class DefaultCellTest {
     @Test
     public void testAddMitochondrion() {
         fail("Not yet implemented");
+        
+//        IMitochondrion m = new DefaultMitochondrion();
     }
 
     @Test

@@ -1,4 +1,4 @@
-package components;
+package samples.dummy;
 
 import java.awt.Polygon;
 import java.awt.Shape;

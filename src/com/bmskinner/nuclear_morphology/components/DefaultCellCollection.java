@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
@@ -142,7 +143,7 @@ public class DefaultCellCollection implements ICellCollection {
      * @param nucleusClass
      *            the class of nucleus to be held
      */
-    public DefaultCellCollection(File folder, String outputFolder, String name, NucleusType nucleusType) {
+    public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType) {
         this(folder, outputFolder, name, nucleusType, java.util.UUID.randomUUID());
     }
 
@@ -163,7 +164,7 @@ public class DefaultCellCollection implements ICellCollection {
      *            specify an id for the collection, rather than generating
      *            randomly.
      */
-    public DefaultCellCollection(File folder, String outputFolder, String name, NucleusType nucleusType, UUID id) {
+    public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType, UUID id) {
 
         this.uuid = id;
         this.folder = folder;
