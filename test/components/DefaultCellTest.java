@@ -26,6 +26,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultMitochondrion;
 import com.bmskinner.nuclear_morphology.components.IMitochondrion;
@@ -44,7 +45,7 @@ public class DefaultCellTest {
     }
 
     @Test
-    public void testDefaultCellNucleus() {
+    public void testDefaultCellNucleus() throws ComponentCreationException {
         Nucleus n = new DummyRodentSpermNucleus();
         
         DefaultCell c = new DefaultCell(n);

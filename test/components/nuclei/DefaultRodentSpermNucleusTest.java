@@ -528,24 +528,25 @@ public class DefaultRodentSpermNucleusTest {
     public void testGetStatisticPlottableStatisticMeasurementScale() {
         double scale = 5;
         
+        // Get and save the values with default scale 1
         Map<PlottableStatistic, Double> map = new HashMap<>();
         for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
             map.put(stat, testNucleus.getStatistic(stat));
         }
+        
+        // Update scale
         testNucleus.setScale(scale);
         
+        // Get the actual values for microns and pixels
         for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
-            double d = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
+            double m = testNucleus.getStatistic(stat, MeasurementScale.MICRONS);
             
-            double expected = PlottableStatistic.convert(d, scale, MeasurementScale.MICRONS, stat.getDimension());
-            assertEquals(stat.toString(), expected, d, 0);
-        }
-        
-        for(PlottableStatistic stat : PlottableStatistic.getNucleusStats(NucleusType.RODENT_SPERM)){
+            double expected = PlottableStatistic.convert(map.get(stat), scale, MeasurementScale.MICRONS, stat.getDimension());
+            assertEquals(stat.toString(), expected, m, 0);
+            
             double d = testNucleus.getStatistic(stat, MeasurementScale.PIXELS);
             assertEquals(stat.toString(), map.get(stat), d, 0);
-        }
-        
+        }        
     }
 
     @Test

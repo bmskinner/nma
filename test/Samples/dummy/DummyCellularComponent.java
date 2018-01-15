@@ -1,20 +1,13 @@
 package samples.dummy;
 
-import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
-import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
-import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
@@ -22,576 +15,365 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
-import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
+/**
+ * Provide methods for a dummy component
+ * @author ben
+ *
+ */
+@SuppressWarnings("serial")
 public class DummyCellularComponent implements CellularComponent {
 	
-	private final UUID        id;
-
-    /**
-     * The original position in the source image of the component. Values are
-     * stored at the indexes in {@link CellularComponent.X_BASE},
-     * {@link CellularComponent.Y_BASE}, {@link CellularComponent.WIDTH} and
-     * {@link CellularComponent.HEIGHT}
-     * 
-     * @see AbstractCellularComponent#getPosition()
-     */
-    private final int[] position;
-
-    /**
-     * The current centre of the object.
-     */
-    private IMutablePoint centreOfMass;
-
-    /**
-     * The original centre of the object in its source image.
-     */
-    private final IPoint originalCentreOfMass;
-
-    /**
-     * The statistical values stored for this object
-     */
-    private Map<PlottableStatistic, Double> statistics = new HashMap<PlottableStatistic, Double>();
-
-    /**
-     * The RGB channel in which this component was detected
-     */
-    private int channel = 0;
-    private double scale = 1;
-
-    /**
-     * The points within the Roi from which the object was detected.
-     */
-    private int[] xpoints, ypoints;
-
-    /**
-     * The complete border list, offset to an appropriate position for the
-     * object
-     */
-    private transient List<IBorderPoint> borderList = new ArrayList<>(0);                                                                                         // while
-                                                                                                        // memory                                                                                                    // is
-//	public DummyCellularComponent(List<IPoint> border, IPoint centreOfMass){
-//		
-//		
-//		if (centreOfMass == null) {
-//            throw new IllegalArgumentException("Centre of mass cannot be null");
-//        }
-//
-//        if (roi == null) {
-//            throw new IllegalArgumentException("Roi cannot be null");
-//        }
-//
-//        this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
-//        this.centreOfMass = IMutablePoint.makeNew(centreOfMass);
-//        this.id = java.util.UUID.randomUUID();
-//
-//        // Store the original points. From these, the smooth polygon can be
-//        // reconstructed.
-//        double epsilon = 1;
-//        Polygon polygon = roi.getPolygon();
-//        Rectangle2D bounds = polygon.getBounds().getFrame();
-//
-//        // // since small signals can have imprecision on the CoM that puts them
-//        // on the border of the
-//        // // object, add a small border to consider OK
-//
-//        double minX = bounds.getX();
-//        double maxX = minX + bounds.getWidth();
-//
-//        minX -= epsilon;
-//        maxX += epsilon;
-//
-//        if (centreOfMass.getX() < minX || centreOfMass.getX() > maxX) {
-//            throw new IllegalArgumentException("The centre of mass X (" + centreOfMass.getX() + ")"
-//                    + ") must be within the roi bounds (x = " + minX + "-" + maxX + ")");
-//        }
-//
-//        double minY = bounds.getY();
-//        double maxY = minY + bounds.getHeight();
-//        minY -= epsilon;
-//        maxY += epsilon;
-//
-//        if (centreOfMass.getY() < minY || centreOfMass.getY() > maxY) {
-//            throw new IllegalArgumentException("The centre of mass Y (" + centreOfMass.getY() + ")"
-//                    + ") must be within the roi bounds (y = " + minY + "-" + maxY + ")");
-//        }
-//
-//        if (!polygon.contains(centreOfMass.getX(), centreOfMass.getY())) {
-//            fine("Centre of mass is not inside the object. You may have a doughnut.");
-//        }
-//
-//        this.xpoints = new int[polygon.npoints];
-//        this.ypoints = new int[polygon.npoints];
-//
-//        // Discard empty indices left in polygon array
-//        for (int i = 0; i < polygon.npoints; i++) {
-//            this.xpoints[i] = polygon.xpoints[i];
-//            this.ypoints[i] = polygon.ypoints[i];
-//            // log("\tPoint at "+i+": "+this.xpoints[i]+", "+this.ypoints[i]);
-//        }
-//
-//        // convert the roi positions to a list of nucleus border points
-//        // Only smooth the points for large objects like nuclei
-//        // log("Int array in constructor : "+this.xpoints[0]+",
-//        // "+this.ypoints[0]);
-//        makeBorderList();
-//
-//    }
-
-    /**
-     * Create the border list from the stored int[] points. Move the centre of
-     * mass to any stored position.
-     * 
-     * @param roi
-     */
-    private void makeBorderList() {
-
-        // Make a copy of the int[] points otherwise creating a polygon roi
-        // will reset them to 0,0 coordinates
-        int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
-        int[] ycopy = Arrays.copyOf(ypoints, ypoints.length);
-        PolygonRoi roi = new PolygonRoi(xcopy, ycopy, xpoints.length, Roi.TRACED_ROI);
-
-        // Creating the border list will set everything to the original image
-        // position.
-        // Move the border list back over the CoM if needed.
-        IPoint oldCoM = IPoint.makeNew(centreOfMass);
-        centreOfMass = IMutablePoint.makeNew(originalCentreOfMass);
-
-        borderList = new ArrayList<>(0);
-
-        // convert the roi positions to a list of border points
-        // Each object decides whether it should be smoothed.
-        boolean isSmooth = isSmoothByDefault();
-        FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
-
-        for (int i = 0; i < smoothed.npoints; i++) {
-            IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
-
-            if (i > 0) {
-                point.setPrevPoint(borderList.get(i - 1));
-                point.prevPoint().setNextPoint(point);
-            }
-            borderList.add(point);
-        }
-        // link endpoints
-        borderList.get(borderList.size() - 1).setNextPoint(borderList.get(0));
-        borderList.get(0).setPrevPoint(borderList.get(borderList.size() - 1));
-
-        moveCentreOfMass(oldCoM);
-
-    }
-    
-
-	@Override
-	public int[] getPosition() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IPoint getOriginalBase() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IPoint getBase() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int getChannel() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public ImageProcessor getImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ImageProcessor getRGBImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ImageProcessor getComponentImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ImageProcessor getComponentRGBImage() throws UnloadableImageException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Rectangle2D getBounds() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public File getSourceFolder() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public File getSourceFile() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getSourceFileName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getSourceFileNameWithoutExtension() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateSourceFolder(File newFolder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setSourceFile(File sourceFile) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setChannel(int channel) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setSourceFolder(File sourceFolder) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void alignVertically() {
-		// TODO Auto-generated method stub
-
-	}
+	protected CellularComponent component;
 
 	@Override
 	public void rotatePointToBottom(IPoint bottomPoint) {
-		// TODO Auto-generated method stub
-
+		component.rotatePointToBottom(bottomPoint);
 	}
 
 	@Override
 	public void rotate(double angle) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean hasStatistic(PlottableStatistic stat) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getStatistic(PlottableStatistic stat) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setStatistic(PlottableStatistic stat, double d) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public PlottableStatistic[] getStatistics() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public UUID getID() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean equals(CellularComponent c) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public CellularComponent duplicate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isSmoothByDefault() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void updateDependentStats() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public double getScale() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void setScale(double scale) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public IPoint getCentreOfMass() {
-		// TODO Auto-generated method stub
-		return null;
+		component.rotate(angle);
 	}
 
 	@Override
 	public IPoint getOriginalCentreOfMass() {
-		// TODO Auto-generated method stub
-		return null;
+		return component.getOriginalCentreOfMass();
+	}
+	
+	@Override
+	public boolean isSmoothByDefault() {
+		return component.isSmoothByDefault();
 	}
 
 	@Override
-	public IBorderPoint getBorderPoint(int i) throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
+	public String getSourceFileNameWithoutExtension() {
+		return component.getSourceFileNameWithoutExtension();
+	}
+	
+	@Override
+	public ImageProcessor getRGBImage() throws UnloadableImageException {
+		return component.getRGBImage();
 	}
 
 	@Override
-	public IBorderPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
+	public IPoint getOriginalBase() {
+		return component.getOriginalBase();
 	}
 
 	@Override
-	public int getBorderIndex(IBorderPoint p) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void updateBorderPoint(int i, double x, double y) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateBorderPoint(int i, IPoint p) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public int getBorderLength() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public List<IBorderPoint> getBorderList() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean containsPoint(IPoint p) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean containsPoint(int x, int y) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean containsOriginalPoint(IPoint p) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public double getMaxX() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getMinX() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getMaxY() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double getMinY() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void flipXAroundPoint(IPoint p) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public double getMedianDistanceBetweenPoints() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public void moveCentreOfMass(IPoint point) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void offset(double xOffset, double yOffset) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public int wrapIndex(int i) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public FloatPolygon toPolygon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public FloatPolygon toOriginalPolygon() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Shape toShape() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Shape toShape(MeasurementScale scale) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Shape toOriginalShape() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Roi toRoi() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Roi toOriginalRoi() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Mask getBooleanMask(int height, int width) {
-		// TODO Auto-generated method stub
-		return null;
+	public ImageProcessor getComponentRGBImage()
+			throws UnloadableImageException {
+		return component.getComponentRGBImage();
 	}
 
 	@Override
 	public Mask getSourceBooleanMask() {
-		// TODO Auto-generated method stub
-		return null;
+		return component.getSourceBooleanMask();
+	}
+	
+	@Override
+	public Shape toShape(MeasurementScale scale) {
+		return component.toShape(scale);
+	}
+
+	@Override
+	public Roi toRoi() {
+		return component.toRoi();
+	}
+
+	@Override
+	public Roi toOriginalRoi() {
+		return component.toOriginalRoi();
+	}
+
+	@Override
+	public IPoint getBase() {
+		return component.getBase();
+	}
+
+	@Override
+	public UUID getID() {
+		return component.getID();
+	}
+	
+	@Override
+	public double getStatistic(PlottableStatistic stat, MeasurementScale scale) {
+		return component.getStatistic(stat, scale);
+	}
+
+	@Override
+	public double getStatistic(PlottableStatistic stat) {
+	    return component.getStatistic(stat);
+	}
+
+	@Override
+	public void setStatistic(PlottableStatistic stat, double d) {
+		component.setStatistic(stat, d);
+	}
+
+	@Override
+	public PlottableStatistic[] getStatistics() {
+		return component.getStatistics();
+	}
+
+	@Override
+	public double getScale() {
+		return component.getScale();
+	}
+
+	@Override
+	public void setScale(double scale) {
+	    component.setScale(scale);
+	}
+
+	@Override
+	public IPoint getCentreOfMass() {
+		return component.getCentreOfMass();
+	}
+
+	@Override
+	public IBorderPoint getBorderPoint(int i) throws UnavailableBorderPointException {
+		return component.getBorderPoint(i);
+	}
+
+	@Override
+	public IBorderPoint getOriginalBorderPoint(int i) throws UnavailableBorderPointException {
+		return component.getOriginalBorderPoint(i);
+	}
+
+	@Override
+	public int getBorderIndex(IBorderPoint p) {
+		return component.getBorderIndex(p);
+	}
+
+	@Override
+	public void updateBorderPoint(int i, double x, double y) {
+		component.updateBorderPoint(i, x, y);		
+	}
+
+	@Override
+	public void updateBorderPoint(int i, IPoint p) {
+		component.updateBorderPoint(i, p);
+	}
+
+	@Override
+	public int getBorderLength() {
+		return component.getBorderLength();
+	}
+
+	@Override
+	public List<IBorderPoint> getBorderList() {
+		return component.getBorderList();
+	}
+
+	@Override
+	public List<IBorderPoint> getOriginalBorderList() throws UnavailableBorderPointException {
+		return component.getOriginalBorderList();
+	}
+
+	@Override
+	public boolean containsPoint(IPoint p) {
+		return component.containsPoint(p);
+	}
+
+	@Override
+	public boolean containsPoint(int x, int y) {
+		return component.containsPoint(x, y);
+	}
+
+	@Override
+	public boolean containsOriginalPoint(IPoint p) {
+		return component.containsOriginalPoint(p);
+	}
+
+	@Override
+	public double getMaxX() {
+		return component.getMaxX();
+	}
+
+	@Override
+	public double getMinX() {
+		return component.getMinX();
+	}
+
+	@Override
+	public double getMaxY() {
+		return component.getMaxY();
+	}
+
+	@Override
+	public double getMinY() {
+		return component.getMinY();
+	}
+
+	@Override
+	public void flipXAroundPoint(IPoint p) {
+		component.flipXAroundPoint(p);		
+	}
+	
+	@Override
+	public void moveCentreOfMass(IPoint point) {
+		component.moveCentreOfMass(point);
+	}
+
+	@Override
+	public void offset(double xOffset, double yOffset) {
+		component.offset(xOffset, yOffset);
+	}
+
+	@Override
+	public int wrapIndex(int i) {
+		return component.wrapIndex(i);
+	}
+	
+	@Override
+	public FloatPolygon toPolygon() {
+		return component.toPolygon();
+	}
+
+	@Override
+	public FloatPolygon toOriginalPolygon() {
+		return component.toOriginalPolygon();
+	}
+
+	@Override
+	public Shape toShape() {
+		return component.toShape();
+	}
+
+	@Override
+	public Shape toOriginalShape() {
+		return component.toOriginalShape();
+	}
+
+	@Override
+	public Mask getBooleanMask(int height, int width) {
+		return component.getBooleanMask(height, width);
 	}
 
 	@Override
 	public int getPositionBetween(IBorderPoint pointA, IBorderPoint pointB) {
-		// TODO Auto-generated method stub
-		return 0;
+		return component.getPositionBetween(pointA, pointB);
 	}
 
 	@Override
 	public IBorderPoint findOppositeBorder(IBorderPoint p) throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
+		return component.findOppositeBorder(p);
 	}
 
 	@Override
 	public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
+		return component.findOrthogonalBorderPoint(a);
 	}
 
 	@Override
 	public IBorderPoint findClosestBorderPoint(IPoint p) throws UnavailableBorderPointException {
-		// TODO Auto-generated method stub
-		return null;
+		return component.findClosestBorderPoint(p);
 	}
 
 	@Override
-	public void reverse() {
-		// TODO Auto-generated method stub
+	public int[] getPosition() {
+		return component.getPosition();
+	}
 
+	@Override
+	public File getSourceFile() {
+		return component.getSourceFile();
+	}
+
+	@Override
+	public int getChannel() {
+		return component.getChannel();
+	}
+
+	@Override
+	public ImageProcessor getImage() throws UnloadableImageException {
+		return component.getImage();
+	}
+
+	@Override
+	public ImageProcessor getComponentImage() throws UnloadableImageException {
+		return component.getComponentImage();
+	}
+
+	@Override
+	public Rectangle getBounds() {
+		return component.getBounds().getBounds();
+	}
+
+	@Override
+	public File getSourceFolder() {
+		return component.getSourceFolder();
+	}
+
+	@Override
+	public String getSourceFileName() {
+		return component.getSourceFileName();
+	}
+
+	@Override
+	public void setSourceFile(File sourceFile) {
+		component.setSourceFile(sourceFile);		
+	}
+
+	@Override
+	public void setChannel(int channel) {
+		component.setChannel(channel);
+	}
+
+	@Override
+	public void setSourceFolder(File sourceFolder) {
+		component.setSourceFolder(sourceFolder);
+	}
+
+	@Override
+	public void updateSourceFolder(File newFolder) {
+	    component.updateSourceFolder(newFolder);
+	}
+
+	@Override
+	public void alignVertically() {
+		component.alignVertically();
+	}
+
+	@Override
+	public boolean equals(CellularComponent c) {
+		return component.equals(c);
+	}
+
+	@Override
+	public CellularComponent duplicate() {
+		return component.duplicate();
+	}
+
+	@Override
+	public void updateDependentStats() {
+	    component.updateDependentStats();
+	}
+
+	
+	@Override
+	public boolean hasStatistic(PlottableStatistic stat) {
+		return component.hasStatistic(stat);
+	}
+
+	@Override
+	public double getMedianDistanceBetweenPoints() {
+		return component.getMedianDistanceBetweenPoints();
+	}
+
+
+	@Override
+	public void reverse() {
+	    component.reverse();
+	}
+	
+	public String toString(){
+	    return component.toString();
 	}
 
 }

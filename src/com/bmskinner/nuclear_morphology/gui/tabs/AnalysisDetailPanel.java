@@ -66,11 +66,6 @@ public class AnalysisDetailPanel extends DetailPanel {
     }
 
     @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return null;
-    }
-
-    @Override
     public synchronized void setChartsAndTablesLoading() {
         super.setChartsAndTablesLoading();
         tableAnalysisParameters.setModel(AbstractTableCreator.createLoadingTable());
@@ -117,27 +112,24 @@ public class AnalysisDetailPanel extends DetailPanel {
     private JScrollPane createAnalysisParametersPanel() {
         JScrollPane scrollPane = new JScrollPane();
 
-        try {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(0, 0));
 
-            JPanel panel = new JPanel();
-            panel.setLayout(new BorderLayout(0, 0));
+        tableAnalysisParameters = new ExportableTable();
+        panel.add(tableAnalysisParameters, BorderLayout.CENTER);
+        tableAnalysisParameters.setEnabled(false);
 
-            tableAnalysisParameters = new ExportableTable();
-            panel.add(tableAnalysisParameters, BorderLayout.CENTER);
-            tableAnalysisParameters.setEnabled(false);
+        scrollPane.setViewportView(panel);
+        scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
 
-            scrollPane.setViewportView(panel);
-            scrollPane.setColumnHeaderView(tableAnalysisParameters.getTableHeader());
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(null)
+        		.setType(TableType.ANALYSIS_PARAMETERS)
+        		.build();
 
-            TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_PARAMETERS)
-                    .build();
+        TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
+        tableAnalysisParameters.setModel(model);
 
-            TableModel model = new AnalysisDatasetTableCreator(options).createAnalysisTable();
-            tableAnalysisParameters.setModel(model);
-
-        } catch (Exception e) {
-            log(Level.SEVERE, "Error creating stats panel", e);
-        }
         return scrollPane;
     }
 }

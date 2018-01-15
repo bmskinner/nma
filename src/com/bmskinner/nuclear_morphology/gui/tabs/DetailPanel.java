@@ -515,7 +515,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return null unless overridden
      * @throws Exception
      */
-    protected JFreeChart createPanelChartType(ChartOptions options) {
+    protected JFreeChart createPanelChartType(@NonNull ChartOptions options) {
         return null;
     }
 
@@ -525,7 +525,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearChartCache() {
-//        finest("Clearing chart cache");
         this.getChartCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearChartCache();
@@ -539,16 +538,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-//        finest("Clearing chart cache for specific datasets");
-        this.getChartCache().clear(list);
-//        finest("Panel chart cache cleared");
-        if (this.hasSubPanels()) {
-//            finest("Clearing sub-panel chart caches");
+        getChartCache().clear(list);
+        if (hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
                 panel.clearChartCache(list);
             }
         }
-//        finest("Chart cache cleared");
     }
 
     /**
@@ -558,8 +553,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     public synchronized void refreshChartCache() {
         clearChartCache();
-//        finest("Updating charts after clear");
-        this.update(getDatasets());
+        update(getDatasets());
     }
 
     /**
@@ -570,10 +564,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void refreshChartCache(final List<IAnalysisDataset> list) {
-//        finest("Refreshing chart cache for specific datasets");
         clearChartCache(list);
-//        finest("Updating panel for specific datasets");
-        this.update(getDatasets());
+        update(getDatasets());
     }
 
     public synchronized Cache getTableCache() {
@@ -586,12 +578,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearTableCache() {
-//        finest("Clearing table cache");
-        this.getTableCache().clear();
+        getTableCache().clear();
         for (TabPanel panel : this.subPanels) {
             panel.clearTableCache();
         }
-//        finest("Table cache cleared");
     }
 
     /**
@@ -601,14 +591,12 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @param list
      */
     public synchronized void clearTableCache(final List<IAnalysisDataset> list) {
-//        finest("Clearing table cache for specific datasets");
-        this.getTableCache().clear(list);
+        getTableCache().clear(list);
         if (this.hasSubPanels()) {
             for (TabPanel panel : this.subPanels) {
                 panel.clearTableCache(list);
             }
         }
-//        finest("Table cache cleared for specific datasets");
     }
 
     /**
@@ -618,8 +606,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      */
     public synchronized void refreshTableCache() {
         clearTableCache();
-//        finest("Updating tables after clear");
-        this.update(getDatasets());
+        update(getDatasets());
     }
 
     /**
@@ -639,7 +626,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param table
      */
-    protected synchronized void setRenderer(JTable table, TableCellRenderer renderer) {
+    protected synchronized void setRenderer(@NonNull JTable table, @NonNull TableCellRenderer renderer) {
         int columns = table.getColumnModel().getColumnCount();
         if (columns > 1) {
             for (int i = 1; i < columns; i++) {
@@ -648,7 +635,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         }
     }
 
-    private synchronized void setRenderers(TableOptions options) {
+    private synchronized void setRenderers(@NonNull TableOptions options) {
         JTable table = options.getTarget();
         int columns = table.getColumnModel().getColumnCount();
 

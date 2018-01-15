@@ -24,6 +24,8 @@ import java.util.UUID;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -47,7 +49,7 @@ public class TableOptionsBuilder {
         options = new DefaultTableOptions(null);
     }
 
-    public TableOptionsBuilder setDatasets(List<IAnalysisDataset> list) {
+    public TableOptionsBuilder setDatasets(@Nullable List<IAnalysisDataset> list) {
         options.setDatasets(list);
         return this;
     }
