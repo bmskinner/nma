@@ -57,11 +57,12 @@ public class RuleSet implements Serializable {
         return type;
     }
 
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(type + "\n");
+        b.append(type + System.getProperty("line.separator"));
         for (Rule r : rules) {
-            b.append(r.toString() + "\n");
+            b.append(r.toString() + System.getProperty("line.separator"));
         }
         return b.toString();
     }
@@ -77,10 +78,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet mouseSpermRPRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.isMinimum().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).isMinimum().build();
     }
 
     /**
@@ -90,15 +88,12 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet mouseSpermOPRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.isLocalMinimum().indexIsMoreThan(0.2) // assumes the
-                                                             // profile is
-                                                             // indexes on the
-                                                             // RP
-                .indexIsLessThan(0.6).isMinimum().build();
-
+        return new RuleSetBuilder(ProfileType.ANGLE)
+                .isLocalMinimum()
+                .indexIsMoreThan(0.2) // assumes the profile is indexed on the RP
+                .indexIsLessThan(0.6)
+                .isMinimum()
+                .build();
     }
 
     /**
@@ -108,10 +103,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet mouseSpermTVRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.isConstantRegionAtValue(180, 10, 2).isFirstIndexInRegion().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 2).isFirstIndexInRegion().build();
     }
 
     /**
@@ -121,10 +113,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet mouseSpermBVRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.isConstantRegionAtValue(180, 10, 2).isLastIndexInRegion().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).isConstantRegionAtValue(180, 10, 2).isLastIndexInRegion().build();
     }
 
     /**
@@ -134,10 +123,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet pigSpermRPBackupRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.valueIsMoreThan(180).isMaximum().build();
+        return new RuleSetBuilder(ProfileType.ANGLE).valueIsMoreThan(180).isMaximum().build();
     }
 
     /**
@@ -147,14 +133,10 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet pigSpermRPRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.ANGLE);
-
-        return builder.isMinimum() // This will find one of the tail dimples
-                .indexIsWithinFractionOf(0.07) // Expand to include indexes
-                                               // around the dimple
-                .isLocalMaximum() // Select the first local max point to avoid
-                                  // shoulders
+        return new RuleSetBuilder(ProfileType.ANGLE)
+                .isMinimum() // This will find one of the tail dimples
+                .indexIsWithinFractionOf(0.07) // Expand to include indexes around the dimple
+                .isLocalMaximum() // Select the first local max point to avoid shoulders
                 .build();
     }
 
@@ -165,10 +147,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet roundRPRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.DIAMETER);
-
-        return builder.isMaximum().build();
+        return new RuleSetBuilder(ProfileType.DIAMETER).isMaximum().build();
     }
 
     /**
@@ -178,10 +157,7 @@ public class RuleSet implements Serializable {
      * @return
      */
     public static RuleSet roundOPRuleSet() {
-
-        RuleSetBuilder builder = new RuleSetBuilder(ProfileType.DIAMETER);
-
-        return builder.isMinimum().build();
+        return new RuleSetBuilder(ProfileType.DIAMETER).isMinimum().build();
     }
 
 }

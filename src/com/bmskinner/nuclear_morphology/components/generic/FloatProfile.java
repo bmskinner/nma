@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -1580,7 +1582,7 @@ public class FloatProfile implements IProfile {
 
         return new FloatProfile(combinedArray);
     }
-
+    
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }

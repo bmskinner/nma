@@ -61,26 +61,16 @@ public class ProfileOffsetterTest {
     }
 
     @Test
-    public void testAssignBorderTagToNucleiViaFrankenProfile() {
+    public void testAssignBorderTagToNucleiViaFrankenProfile() throws ProfileOffsetException {
         ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        try {
-            p.assignBorderTagToNucleiViaFrankenProfile(Tag.ORIENTATION_POINT);
-        } catch (ProfileOffsetException e) {
-            e.printStackTrace();
-            fail();
-        }
+        p.assignBorderTagToNucleiViaFrankenProfile(Tag.ORIENTATION_POINT);
     }
 
     @Test
-    public void testReCalculateVerticals() {
+    public void testReCalculateVerticals() throws ProfileOffsetException {
         ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        try {
-            p.reCalculateVerticals();
-        } catch (ProfileOffsetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            fail();
-        }
+        p.reCalculateVerticals();
+
     }
 
 }

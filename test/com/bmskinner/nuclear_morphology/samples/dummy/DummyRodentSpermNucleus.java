@@ -38,6 +38,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
+import com.bmskinner.nuclear_morphology.samples.dummy.*; //samples.dummy.DummyCellularComponent;
+
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 
@@ -58,8 +60,14 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	private static final int component_NUMBER = 0;
 	private static final int IMAGE_CHANNEL = 0;
 	private static final int[] POSITION = {105, 34};
-	private static final File IMAGE_FILE = new File("samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
+	private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
 	private static final IPoint COM = IPoint.makeNew(74, 46);
+	
+	
+	public static final double AREA         = 4827.00;
+	public static final double MAX_FERET    = 134.27;
+	public static final double PERIMETER    = 347.02;
+	public static final double MIN_DIAMETER = 53.14;
 		
 	Nucleus nucleus = (Nucleus) component;
 	
@@ -72,10 +80,10 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		component = new DefaultRodentSpermNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
 	            POSITION , component_NUMBER);
         initialise(PROFILE_WINDOW);	    
-        setStatistic(PlottableStatistic.AREA,     4827.00);
-        setStatistic(PlottableStatistic.MAX_FERET, 134.27);
-        setStatistic(PlottableStatistic.PERIMETER, 347.02);
-        setStatistic(PlottableStatistic.MIN_DIAMETER, 53.14);
+        setStatistic(PlottableStatistic.AREA,     AREA);
+        setStatistic(PlottableStatistic.MAX_FERET, MAX_FERET);
+        setStatistic(PlottableStatistic.PERIMETER, PERIMETER);
+        setStatistic(PlottableStatistic.MIN_DIAMETER, MIN_DIAMETER);
 		this.name = name;		
 	}
 	
