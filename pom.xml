@@ -2,9 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.bmskinner</groupId>
   <artifactId>nuclear_morphology</artifactId>
-  <version>1.13.8-SNAPSHOT</version>
+  <version>1.13.8a3</version>
   <properties>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
+    <jar.finalName>Nuclear_Morphology_${version}</jar.finalName>
   </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -86,30 +87,30 @@
 		
 		<!-- Create a jar with the dependencies included -->
 		<plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-2</version>
-                <executions>
-                    <execution>
-                        <id>create-executable-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>
-                                    jar-with-dependencies
-                                </descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
-                                </manifest>
-                            </archive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+         <artifactId>maven-assembly-plugin</artifactId>
+         <version>2.2-beta-2</version>
+         <executions>
+             <execution>
+                 <id>create-executable-jar</id>
+                 <phase>package</phase>
+                 <goals>
+                     <goal>single</goal>
+                 </goals>
+                 <configuration>
+                     <finalName>Nuclear_Morphology_${version}_standalone</finalName>
+                     <descriptorRefs>
+                         <descriptorRef>jar-with-dependencies</descriptorRef>
+                     </descriptorRefs>
+                     <appendAssemblyId>false</appendAssemblyId>
+                     <archive>
+                         <manifest>
+                             <mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
+                         </manifest>
+                     </archive>
+                 </configuration>
+             </execution>
+         </executions>
+     </plugin>
 		
     </plugins>
   </build>
