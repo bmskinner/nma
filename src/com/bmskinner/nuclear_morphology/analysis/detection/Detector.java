@@ -91,7 +91,7 @@ public abstract class Detector implements Loggable {
     private boolean excludeEdges = true;
 
     private int threshold = 128;
-    
+        
     /**
      * Set the minimum and maximum size ROIs to detect
      * 
@@ -118,20 +118,20 @@ public abstract class Detector implements Loggable {
         maxCirc = max;
     }
 
-    public void setMinSize(double d) {
+    protected double getMinSize() {
+		return minSize;
+	}
+
+    protected double getMaxSize() {
+		return maxSize;
+	}
+
+	public void setMinSize(double d) {
         this.minSize = d;
-    }
-    
-    protected double getMinSize(){
-        return minSize;
     }
 
     public void setMaxSize(double d) {
         this.maxSize = d;
-    }
-    
-    protected double getMaxSize(){
-        return maxSize;
     }
 
     public void setMinCirc(double d) {
@@ -157,9 +157,13 @@ public abstract class Detector implements Loggable {
     }
     
     /**
+<<<<<<< HEAD
      * Set whether the ROIs should include holes - i.e. should holes be flood
      * filled before detection
      * 
+=======
+     * Set false to ignore any particles touching the edge of the image
+>>>>>>> dev_1.13.8
      * @param b
      */
     public void setExcludeEdges(boolean b) {
@@ -172,10 +176,6 @@ public abstract class Detector implements Loggable {
      * @return
      */
     protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
-        if (image == null) {
-            throw new IllegalArgumentException(NO_IMG_ERR);
-        }
-
         if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
                 || Double.isNaN(this.maxCirc)) {
             throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
