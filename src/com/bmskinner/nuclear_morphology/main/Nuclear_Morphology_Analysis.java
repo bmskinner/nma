@@ -245,7 +245,7 @@ public class Nuclear_Morphology_Analysis
 	 */
 	private URL getSplashURL(){
 		
-		String path = "res/splash.gif";
+		String path = "icons/splash.gif";
 		ClassLoader cl = this.getClass().getClassLoader();
 		URL urlToGif = cl.getResource(path);
 		if(urlToGif!=null){

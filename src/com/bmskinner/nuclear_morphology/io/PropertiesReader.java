@@ -58,7 +58,7 @@ public class PropertiesReader implements Loggable {
             File dir = Importer.getProgramDir();
 
             File ini = new File(dir, INI_FILE);
-            System.out.println("ini: " + ini.getAbsolutePath());
+            fine("ini: " + ini.getAbsolutePath());
 
             if (ini.exists()) {
                 // Read the properties

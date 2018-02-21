@@ -40,7 +40,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public abstract class LoadingIconDialog extends MessagingDialog implements Loggable {
-
+    
+    private static final String RESOURCE_FOLDER  = "icons/";
     private static final String LOADING_GIF_NAME = "ajax-loader.gif";
     private static final String BLANK_GIF_NAME   = "blank.gif";
 
@@ -52,18 +53,13 @@ public abstract class LoadingIconDialog extends MessagingDialog implements Logga
 
     public LoadingIconDialog() {
         super((Dialog) null); // provides a taskbar icon
-        // Load the gif (may be in a res folder depending on Eclipse version)
-        // String pathToGif = "res/ajax-loader.gif";
-        // String pathToBlank = "res/blank.gif";
-        String path = "res/";
-        boolean ok = loadResources(path);
+
+        boolean ok = loadResources(RESOURCE_FOLDER);
         if (!ok) {
-            path = "";
-            // path = "ajax-loader.gif";
-            ok = loadResources(path);
+            ok = loadResources("");
         }
         if (!ok) {
-            fine("Resource loading failed (gif): " + path);
+            fine("Resource loading failed (gif)");
         }
 
         this.loadingLabel.setIcon(blankGif);

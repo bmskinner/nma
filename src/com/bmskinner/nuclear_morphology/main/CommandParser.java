@@ -25,7 +25,7 @@ public class CommandParser {
 	    
 	    boolean headless = false;
 	    for(String s : arr){
-	        System.out.println(s);
+//	        System.out.println(s);
 	        
 	        if(s.equals("-headless")){
 	            headless = true;
@@ -51,7 +51,7 @@ public class CommandParser {
      */
     private void runStandalone(){
         try {
-            System.out.println("Launching with gui");
+//            System.out.println("Launching with gui");
             // load the config file properties
             new PropertiesReader();
             loadMainWindow(true);
