@@ -83,6 +83,8 @@ public abstract class Detector implements Loggable {
 
     private int threshold = 128;
     
+    private boolean excludeEdges = true;
+    
     /**
      * Set the minimum and maximum size ROIs to detect
      * 
@@ -109,7 +111,15 @@ public abstract class Detector implements Loggable {
         maxCirc = max;
     }
 
-    public void setMinSize(double d) {
+    protected double getMinSize() {
+		return minSize;
+	}
+
+    protected double getMaxSize() {
+		return maxSize;
+	}
+
+	public void setMinSize(double d) {
         this.minSize = d;
     }
 
@@ -137,6 +147,14 @@ public abstract class Detector implements Loggable {
      */
     public void setIncludeHoles(boolean b) {
         includeHoles = b;
+    }
+    
+    /**
+     * Set false to ignore any particles touching the edge of the image
+     * @param b
+     */
+    public void setExcludeEdges(boolean b) {
+        excludeEdges = b;
     }
     
     protected synchronized Map<Roi, StatsMap> detectRois(ImageProcessor image){
@@ -252,7 +270,12 @@ public abstract class Detector implements Loggable {
         // run the particle analyser
         // By default, add all particles to the ROI manager, and do not count
         // anything touching the edge
-        int options = ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+        int options = 0;
+        
+        if(excludeEdges){
+        	options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+        }
+        
         if (includeHoles) {
             options = options | ParticleAnalyzer.INCLUDE_HOLES;
         }
