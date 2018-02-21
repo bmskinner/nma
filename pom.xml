@@ -55,15 +55,15 @@
 			<configuration>
 			  <archive>
 			    <manifest>
-				<addClasspath>true</addClasspath>
-				<mainClass>com.bmskinner.nuclear_morphology.Nuclear_Morphology_Analysis</mainClass>
-				<classpathPrefix>dependency-jars/</classpathPrefix>
+					<addClasspath>true</addClasspath>
+					<mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
+					<classpathPrefix>dependency-jars/</classpathPrefix>
 			    </manifest>
 			  </archive>
 			</configuration>
 		</plugin>
 
-		<!-- Copy project dependency -->
+		<!-- Copy project dependencies to new folder -->
 		<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-dependency-plugin</artifactId>
@@ -83,6 +83,33 @@
 			  </execution>
 			</executions>
 		</plugin>
+		
+		<!-- Create a jar with the dependencies included -->
+		<plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2-beta-2</version>
+                <executions>
+                    <execution>
+                        <id>create-executable-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>
+                                    jar-with-dependencies
+                                </descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		
     </plugins>
   </build>
