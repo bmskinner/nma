@@ -32,6 +32,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -73,6 +75,12 @@ public abstract class Detector implements Loggable {
     public static final String COM_Y = "YM";
 
     public static final String RESULT_TABLE_PERIM = "Perim.";
+    
+    private static final String NO_IMG_ERR = "No image to analyse";
+    private static final String NO_DETECTION_PARAMS_ERR ="Detection parameters not set";
+    private static final String SIZE_MISMATCH_ERR = "Minimum size >= maximum size";
+    private static final String CIRC_MISMATCH_ERR = "Minimum circularity >= maximum circularity";
+    
 
     private double minSize;
     private double maxSize;
@@ -80,6 +88,7 @@ public abstract class Detector implements Loggable {
     private double maxCirc;
 
     private boolean includeHoles = true;
+    private boolean excludeEdges = true;
 
     private int threshold = 128;
     
@@ -112,9 +121,17 @@ public abstract class Detector implements Loggable {
     public void setMinSize(double d) {
         this.minSize = d;
     }
+    
+    protected double getMinSize(){
+        return minSize;
+    }
 
     public void setMaxSize(double d) {
         this.maxSize = d;
+    }
+    
+    protected double getMaxSize(){
+        return maxSize;
     }
 
     public void setMinCirc(double d) {
@@ -139,21 +156,36 @@ public abstract class Detector implements Loggable {
         includeHoles = b;
     }
     
-    protected synchronized Map<Roi, StatsMap> detectRois(ImageProcessor image){
+    /**
+     * Set whether the ROIs should include holes - i.e. should holes be flood
+     * filled before detection
+     * 
+     * @param b
+     */
+    public void setExcludeEdges(boolean b) {
+        excludeEdges = b;
+    }
+    
+    /**
+     * Detect and measure ROIs in this image
+     * @param image
+     * @return
+     */
+    protected synchronized Map<Roi, StatsMap> detectRois(@NonNull ImageProcessor image){
         if (image == null) {
-            throw new IllegalArgumentException("No image to analyse");
+            throw new IllegalArgumentException(NO_IMG_ERR);
         }
 
         if (Double.isNaN(this.minSize) || Double.isNaN(this.maxSize) || Double.isNaN(this.minCirc)
                 || Double.isNaN(this.maxCirc)) {
-            throw new IllegalArgumentException("Detection parameters not set");
+            throw new IllegalArgumentException(NO_DETECTION_PARAMS_ERR);
         }
 
         if (this.minSize >= this.maxSize) {
-            throw new IllegalArgumentException("Minimum size >= maximum size");
+            throw new IllegalArgumentException(SIZE_MISMATCH_ERR);
         }
         if (this.minCirc >= this.maxCirc) {
-            throw new IllegalArgumentException("Minimum circularity >= maximum circularity");
+            throw new IllegalArgumentException(CIRC_MISMATCH_ERR);
         }
                 
         return findInImage(image);
@@ -167,11 +199,7 @@ public abstract class Detector implements Loggable {
      *            the region to measure
      * @return
      */
-    private synchronized StatsMap measure(Roi roi, ImageProcessor image) {
-
-        if (image == null || roi == null) {
-            throw new IllegalArgumentException("Image or roi is null");
-        }
+    private synchronized StatsMap measure(@NonNull Roi roi, @NonNull ImageProcessor image) {
 
         ImageProcessor searchProcessor = image.duplicate();
         ImagePlus imp = new ImagePlus(null, searchProcessor);
@@ -195,7 +223,7 @@ public abstract class Detector implements Loggable {
      * 
      */
 
-    private synchronized Map<Roi, StatsMap> findInImage(ImageProcessor image) {
+    private synchronized Map<Roi, StatsMap> findInImage(@NonNull ImageProcessor image) {
 
         if (!(image instanceof ByteProcessor || image instanceof ShortProcessor)) {
             throw new IllegalArgumentException("Processor must be byte or short");
@@ -247,12 +275,17 @@ public abstract class Detector implements Loggable {
 //    }
 
     private synchronized Map<Roi, StatsMap> runAnalyser(ImageProcessor processor) {
-        Map<Roi, StatsMap> list = new HashMap<>();
+        Map<Roi, StatsMap> result = new HashMap<>();
 
         // run the particle analyser
         // By default, add all particles to the ROI manager, and do not count
         // anything touching the edge
-        int options = ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+        int options = 0;
+        
+        if(excludeEdges){
+            options = options | ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+        }
+        
         if (includeHoles) {
             options = options | ParticleAnalyzer.INCLUDE_HOLES;
         }
@@ -267,17 +300,18 @@ public abstract class Detector implements Loggable {
 
         for(Roi r : pa.getRois()){
             StatsMap m = measure(r, processor);
-            list.put(r, m);
+            result.put(r, m);
         }
 
-        return list;
+        return result;
     }
     
 
     
     /**
      * This recapitulates the basic function of the ImageJ particle
-     * analyzer without static roi management 
+     * analyzer without using the static roi manager. It works better for
+     * multithreading.
      * @author bms41
      * @since 1.13.8
      *
