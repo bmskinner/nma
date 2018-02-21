@@ -97,7 +97,7 @@
                      <goal>single</goal>
                  </goals>
                  <configuration>
-                     <finalName>Nuclear_Morphology_${version}_standalone</finalName>
+                     <finalName>${jar.finalName}_standalone</finalName>
                      <descriptorRefs>
                          <descriptorRef>jar-with-dependencies</descriptorRef>
                      </descriptorRefs>
