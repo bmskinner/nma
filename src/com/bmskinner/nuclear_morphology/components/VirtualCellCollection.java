@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
@@ -193,6 +194,11 @@ public class VirtualCellCollection implements ICellCollection {
             }
         }
         return result;
+    }
+    
+    @Override
+    public synchronized Stream<ICell> streamCells() {
+        return getCells().stream();
     }
 
     @Override

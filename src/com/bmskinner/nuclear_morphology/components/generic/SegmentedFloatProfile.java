@@ -353,6 +353,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public IBorderSegment getSegmentAt(int position) {
 
+        if(position < 0 || position > segments.length-1){
+            throw new IllegalArgumentException("Segment position is out of bounds");
+        }
         IBorderSegment result = null;
         for (IBorderSegment seg : this.segments) {
             if (seg.getPosition() == position) {

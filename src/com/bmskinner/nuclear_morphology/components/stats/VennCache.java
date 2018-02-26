@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 
@@ -98,7 +100,7 @@ public class VennCache {
      * @param i
      *            the number of shared nuclei
      */
-    public void addCount(IAnalysisDataset d, int i) {
+    public void addCount(@NonNull IAnalysisDataset d, int i) {
         Key k = new Key(d.getUUID());
         map.put(k, i);
     }
@@ -111,7 +113,7 @@ public class VennCache {
      * @param i
      *            the number of shared nuclei
      */
-    public void addCount(ICellCollection d, int i) {
+    public void addCount(@NonNull ICellCollection d, int i) {
         Key k = new Key(d.getID());
         map.put(k, i);
     }
@@ -123,7 +125,7 @@ public class VennCache {
      *            the dataset
      * @return the shared count
      */
-    public int getCount(IAnalysisDataset d) {
+    public int getCount(@NonNull IAnalysisDataset d) {
         Key k = new Key(d.getUUID());
         return map.get(k);
     }
@@ -135,7 +137,7 @@ public class VennCache {
      *            the collection
      * @return the shared count
      */
-    public int getCount(ICellCollection d) {
+    public int getCount(@NonNull ICellCollection d) {
         Key k = new Key(d.getID());
         return map.get(k);
     }
@@ -146,7 +148,7 @@ public class VennCache {
      * @param d
      *            the dataset
      */
-    public boolean hasCount(IAnalysisDataset d) {
+    public boolean hasCount(@NonNull IAnalysisDataset d) {
         Key k = new Key(d.getUUID());
         return map.containsKey(k);
     }
@@ -157,7 +159,7 @@ public class VennCache {
      * @param d
      *            the collection
      */
-    public boolean hasCount(ICellCollection d) {
+    public boolean hasCount(@NonNull ICellCollection d) {
         Key k = new Key(d.getID());
         return map.containsKey(k);
     }

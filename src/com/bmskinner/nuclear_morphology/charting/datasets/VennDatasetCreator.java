@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.Cell;
@@ -116,13 +117,7 @@ public class VennDatasetCreator implements Loggable {
          * @return
          */
         public boolean addDataset(IAnalysisDataset dataset) {
-            boolean overlap = false;
-            for (ICell cell : dataset.getCollection().getCells()) {
-
-                if (this.cells.contains(cell)) {
-                    overlap = true;
-                }
-            }
+            boolean overlap = dataset.getCollection().streamCells().anyMatch(c->cells.contains(c));
 
             if (overlap) {
                 this.list.add(dataset);

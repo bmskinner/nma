@@ -29,6 +29,7 @@ import java.io.ObjectInputStream;
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1189,54 +1190,67 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     public IBorderPoint findOppositeBorder(IBorderPoint p) {
+//
+//        int minDeltaYIndex = 0;
+//        double minAngle = 180;
+//        
+        // Find the point that is closest to 180 degrees across the CoM
+        return borderList.stream()
+            .min(Comparator.comparing(point->180-centreOfMass.findAngle(p, point) ))
+            .get();
 
-        int minDeltaYIndex = 0;
-        double minAngle = 180;
-
-        for (int i = 0; i < this.getBorderLength(); i++) {
-
-            double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
-
-            if (Math.abs(180 - angle) < minAngle) {
-                minDeltaYIndex = i;
-                minAngle = 180 - angle;
-            }
-        }
-        return this.getBorderPoint(minDeltaYIndex);
+//        for (int i = 0; i < this.getBorderLength(); i++) {
+//
+//            double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
+//
+//            if (Math.abs(180 - angle) < minAngle) {
+//                minDeltaYIndex = i;
+//                minAngle = 180 - angle;
+//            }
+//        }
+//        return this.getBorderPoint(minDeltaYIndex);
     }
 
     @Override
     public IBorderPoint findOrthogonalBorderPoint(IBorderPoint a) {
+        
+        return borderList.stream()
+                .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findAngle(a, point)) ))
+                .get();
 
-        IBorderPoint orthgonalPoint = a;
-        double bestAngle = 0;
-
-        for (int i = 0; i < this.getBorderLength(); i++) {
-
-            IBorderPoint p = this.getBorderPoint(i);
-            double angle = this.getCentreOfMass().findAngle(a, p);
-            if (Math.abs(90 - angle) < Math.abs(90 - bestAngle)) {
-                bestAngle = angle;
-                orthgonalPoint = p;
-            }
-        }
-        return orthgonalPoint;
+//        IBorderPoint orthgonalPoint = a;
+//        double bestAngle = 0;
+//
+//        for (int i = 0; i < this.getBorderLength(); i++) {
+//
+//            IBorderPoint p = this.getBorderPoint(i);
+//            double angle = this.getCentreOfMass().findAngle(a, p);
+//            if (Math.abs(90 - angle) < Math.abs(90 - bestAngle)) {
+//                bestAngle = angle;
+//                orthgonalPoint = p;
+//            }
+//        }
+//        return orthgonalPoint;
     }
 
     @Override
     public IBorderPoint findClosestBorderPoint(IPoint p) {
+        
+        return borderList.stream()
+                .min(Comparator.comparing(point->point.getLengthTo(p) ))
+                .get();
 
-        double minDist = Double.MAX_VALUE;
-        IBorderPoint result = null;
-
-        for (IBorderPoint bp : borderList) {
-            double d = bp.getLengthTo(p);
-            if (d < minDist) {
-                minDist = d;
-                result = bp;
-            }
-        }
-        return result;
+//        double minDist = Double.MAX_VALUE;
+//        IBorderPoint result = null;
+//
+//        for (IBorderPoint bp : borderList) {
+//            double d = bp.getLengthTo(p);
+//            if (d < minDist) {
+//                minDist = d;
+//                result = bp;
+//            }
+//        }
+//        return result;
     }
 
     /*

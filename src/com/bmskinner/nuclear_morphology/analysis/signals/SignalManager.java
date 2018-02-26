@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -69,30 +70,26 @@ public class SignalManager implements Loggable {
     }
 
     /**
-     * Return the nuclei with or without signals in the given group.
+     * Find cells with or without signals in the given group.
      * 
-     * @param signalGroup
-     *            the group number
-     * @param hasSignal
-     * @return a list of cells
+     * @param signalGroup the group id
+     * @param hasSignal true to retrive cells with signals. False to retrieve cells without signals
+     * @return the cells
      */
     public Set<ICell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal) {
-        Set<ICell> result = new HashSet<ICell>(collection.size());
-
-        for (ICell c : collection.getCells()) {
-            Nucleus n = c.getNucleus();
-
-            if (hasSignal) {
-                if (n.getSignalCollection().hasSignal(signalGroup)) {
-                    result.add(c);
-                }
-            } else {
-                if (!n.getSignalCollection().hasSignal(signalGroup)) {
-                    result.add(c);
-                }
-            }
-        }
-        return result;
+        return collection.streamCells()
+                .filter( c->hasSignal==hasSignals(c, signalGroup))
+                .collect(Collectors.toSet());
+    }
+    
+    /**
+     * Test if the given cell has signals in the given signal group 
+     * @param c
+     * @param signalGroup
+     * @return
+     */
+    public static boolean hasSignals(ICell c, UUID signalGroup){
+        return c.getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal(signalGroup));
     }
 
     public int getNumberOfCellsWithNuclearSignals(UUID signalGroup) {

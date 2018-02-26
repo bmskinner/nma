@@ -269,9 +269,11 @@ public class DatasetConverter implements Loggable, Importer {
             // make a virtual collection for the cells
             ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getUUID());
 
-            for (ICell c : child.getCollection().getCells()) {
-                newCollection.addCell(c);
-            }
+            
+            child.getCollection().getCells().forEach(c->newCollection.addCell(c));
+//            for (ICell c : child.getCollection().getCells()) {
+//                newCollection.addCell(c);
+//            }
 
             newCollection.createProfileCollection();
 
@@ -315,11 +317,9 @@ public class DatasetConverter implements Loggable, Importer {
         ICellCollection newCollection = new DefaultCellCollection(oldCollection.getFolder(),
                 oldCollection.getOutputFolderName(), oldCollection.getName(), oldCollection.getNucleusType());
 
+                
         for (ICell c : oldCollection.getCells()) {
-
-            ICell newCell = createNewCell(c);
-
-            newCollection.addCell(newCell);
+            newCollection.addCell(createNewCell(c));
         }
 
         try {

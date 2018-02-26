@@ -33,12 +33,18 @@ import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -167,7 +173,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 if (topTree.isExternal(n)) { // choose the taxon nodes
 
                     Taxon t = topTree.getTaxon(n);
-                    ICell c = getCell(t);
+                    ICell c = getCell(t).get();
                     t.setAttribute("Cell", c);
                     n.setAttribute("ShortName",
                             c.getNucleus().getSourceFolder().getName() + "/" + c.getNucleus().getNameAndNumber());
@@ -213,7 +219,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param t
      * @return
      */
-    private ICell getCell(Taxon t) {
+    private Optional<ICell> getCell(Taxon t) {
 
         // Check if the taxon name is a UUID, as the tree format is changing for
         // 1.13.2
@@ -232,19 +238,30 @@ public class ClusterTreeDialog extends LoadingIconDialog {
         }
 
         if (isUUID) {
-            return dataset.getCollection().getCell(id);
+            return Optional.of(dataset.getCollection().getCell(id));
 
         } else {
-            for (ICell c : dataset.getCollection().getCells()) {
+            
+            return dataset.getCollection().streamCells()
+                .filter(c->hasMatchingNucleusName(t.getName(), c))
+                .findFirst();
 
-                if (taxonNamesMatch(t.getName(), c.getNucleus())) {
-                    return c;
-                }
-            }
+
+                
+//            for (ICell c : dataset.getCollection().getCells()) {
+//
+//                if (taxonNamesMatch(t.getName(), c.getNucleus())) {
+//                    return c;
+//                }
+//            }
         }
 
-        return null;
+//        return Optional.empty();
 
+    }
+    
+    private boolean hasMatchingNucleusName(String name, ICell c){
+        return c.getNuclei().stream().anyMatch(n->taxonNamesMatch(name, n));
     }
 
     private JPanel createButtonPanel() {
@@ -354,7 +371,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 }
 
                 Paint colour = ColourSelecter.getColor(clusterNumber++);
-                setNodeColour(cluster.getCollection().getCells(), colour);
+                setNodeColour(cluster.getCollection().streamCells(), colour);
 
                 finer("Node colours assigned");
 
@@ -374,7 +391,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param cells
      * @param colour
      */
-    private void setNodeColour(final Set<ICell> cells, final Paint colour) {
+    private void setNodeColour(final Stream<ICell> cells, final Paint colour) {
 
         RootedTree tree = viewer.getTreePane().getTree();
 
@@ -385,12 +402,17 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 Taxon t = tree.getTaxon(n);
 
                 ICell c = (ICell) t.getAttribute("Cell");
+                
+                cells.filter(cell->cell.equals(c))
+                    .forEach(cell->n.setAttribute("Color", colour));
+                
 
-                for (ICell cell : cells) {
-                    if (cell.equals(c)) {
-                        n.setAttribute("Color", colour);
-                    }
-                }
+
+//                for (ICell cell : cells) {
+//                    if (cell.equals(c)) {
+//                        n.setAttribute("Color", colour);
+//                    }
+//                }
             }
         }
     }
@@ -406,7 +428,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      */
     private void setNodeColour(ICellCollection cluster, Color colour) {
 
-        setNodeColour(cluster.getCells(), colour);
+        setNodeColour(cluster.streamCells(), colour);
     }
 
     /**
@@ -598,16 +620,16 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      */
     private boolean checkCellPresentOnlyOnce(List<IAnalysisDataset> list) {
         boolean ok = true;
-        // Check that a cell is not present in more than one cluster
-        List<UUID> cellIDsFound = new ArrayList<UUID>();
+        Set<UUID> cellIDsFound = new HashSet<>();
+                
         for (IAnalysisDataset d : list) {
+            
             for (ICell c : d.getCollection().getCells()) {
-                if (cellIDsFound.contains(c.getId())) {
-                    ok = false;
-                }
+                ok &= !cellIDsFound.contains(c.getId());
                 cellIDsFound.add(c.getId());
             }
         }
+
         return ok;
     }
 
@@ -615,25 +637,18 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * Check that a cell is not present in more than one cluster
      * 
      * @param list
-     * @return
+     * @return true if all cells in the list are present in a cluster
      */
-    private boolean checkAllCellsPresent(List<IAnalysisDataset> list) {
+    private boolean checkAllCellsPresent(List<IAnalysisDataset> clusters) {
         boolean ok = true;
 
         List<UUID> cellIDsFound = new ArrayList<UUID>();
-        for (IAnalysisDataset d : list) {
-            for (ICell c : d.getCollection().getCells()) {
-                cellIDsFound.add(c.getId());
-            }
+        for (IAnalysisDataset d : clusters) {
+            d.getCollection().getCells().forEach(c->cellIDsFound.add(c.getId()));
         }
-
-        for (ICell c : dataset.getCollection().getCells()) {
-            if (!cellIDsFound.contains(c.getId())) {
-                ok = false;
-            }
-        }
-
-        return ok;
+        
+        return dataset.getCollection().streamCells()
+                .allMatch(c-> cellIDsFound.contains(c.getId()));
     }
 
     /*

@@ -170,17 +170,21 @@ public class DatasetMergeMethod extends MultipleDatasetAnalysisMethod {
         fine("Merging datasets");
 
         for (IAnalysisDataset d : datasets) {
+            
+            d.getCollection().streamCells()
+                .filter(c->!newCollection.contains(c))
+                .forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-            for (ICell cell : d.getCollection().getCells()) {
-
-                if (!newCollection.getCells().contains(cell)) {
-
-                    ICell newCell = new DefaultCell(cell);
-
-                    newCollection.addCell(newCell); // make a copy of the cell
-                                                    // so segments can be merged
-                }
-            }
+//            for (ICell cell : d.getCollection().getCells()) {
+//
+//                if (!newCollection.getCells().contains(cell)) {
+//
+//                    ICell newCell = new DefaultCell(cell);
+//
+//                    newCollection.addCell(newCell); // make a copy of the cell
+//                                                    // so segments can be merged
+//                }
+//            }
 
             // All the existing signal groups before merging
             for (UUID signalGroupID : d.getCollection().getSignalGroupIDs()) {

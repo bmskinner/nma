@@ -234,18 +234,27 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         try {
         	for (double i = windowSizeMin; i <= windowSizeMax; i += stepSize) {
 
+        	    final double j = i;
         		// make a duplicate collection
-        		ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
+        		final ICellCollection duplicateCollection = new DefaultCellCollection(dataset.getCollection(), "test");
 
         		// put each cell into the new collection
-        		for (ICell c : dataset.getCollection().getCells()) {
-
-        			ICell newCell = new DefaultCell(c);
-        			for(Nucleus n : newCell.getNuclei()){
-        				n.setWindowProportion(ProfileType.ANGLE, i);
-        			}
-        			duplicateCollection.addCell(newCell);
-        		}
+        		dataset.getCollection().getCells().forEach(c->{
+        		    ICell newCell = new DefaultCell(c);
+                    for(Nucleus n : newCell.getNuclei()){
+                        n.setWindowProportion(ProfileType.ANGLE, j);
+                    }
+                    duplicateCollection.addCell(newCell);
+        		});
+        		
+//        		for (ICell c : dataset.getCollection().getCells()) {
+//
+//        			ICell newCell = new DefaultCell(c);
+//        			for(Nucleus n : newCell.getNuclei()){
+//        				n.setWindowProportion(ProfileType.ANGLE, i);
+//        			}
+//        			duplicateCollection.addCell(newCell);
+//        		}
 
         		// recalc the aggregate
         		IProfileCollection pc = duplicateCollection.getProfileCollection();
@@ -261,8 +270,6 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         		// add to the chart
         		updateChart(median, i);
-
-        		duplicateCollection = null;
         	}
         } catch(UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e){
         	warn("Error making profile collections");

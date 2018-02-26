@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
@@ -93,6 +94,13 @@ public interface ICellCollection
      * @return
      */
     Set<ICell> getCells();
+    
+    /**
+     * Stream the cells in the collection
+     * 
+     * @return
+     */
+    Stream<ICell> streamCells();
 
     /**
      * Get the cells in the collection within the given file

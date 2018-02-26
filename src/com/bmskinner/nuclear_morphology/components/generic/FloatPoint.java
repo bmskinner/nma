@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * An extension to the Point2D.Float providing methods for calculating distances
  * between points implementing the {@link IPoint} interface.
@@ -194,12 +196,7 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * components.generic.IPoint#overlapsPerfectly(components.generic.IPoint)
      */
     @Override
-    public boolean overlapsPerfectly(final IPoint a) {
-
-        if (a == null) {
-            throw new IllegalArgumentException("Destination point is null");
-        }
-
+    public boolean overlapsPerfectly(@NonNull final IPoint a) {
         if (this.getX() == a.getX() && this.getY() == a.getY()) {
             return true;
         } else {
@@ -214,7 +211,7 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      */
     @Override
     public String toString() {
-        return this.getXAsInt() + "-" + this.getYAsInt();
+        return String.format("%d - %d", getXAsInt(), getYAsInt());
     }
 
     @Override

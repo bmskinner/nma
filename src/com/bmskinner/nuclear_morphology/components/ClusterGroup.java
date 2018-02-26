@@ -220,15 +220,11 @@ public class ClusterGroup implements IClusterGroup {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading cluster group");
         in.defaultReadObject();
-        // finest("\tRead cluster group");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting cluster group");
         out.defaultWriteObject();
-        // finest("\tWrote cluster group");
     }
 
 }

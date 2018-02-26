@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.tail;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;

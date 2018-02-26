@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -67,6 +68,8 @@ public class BloodCellClassifier implements CellClassifier, Loggable {
         Set<ICell> lympho = new HashSet<>();
 
         // Go through the difference blood cell types we can look for
+        
+        
 
         for (ICell c : dataset.getCollection().getCells()) {
 

@@ -33,6 +33,8 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
@@ -98,71 +100,75 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
             int originalMinThreshold = options.getThreshold();
 
             SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
-            // SignalDetector finder = new SignalDetector(options, channel);
 
-            for (ICell c : dataset.getCollection().getCells()) {
-
-                // reset the min threshold for each cell
-                options.setThreshold(originalMinThreshold);
-
-                Nucleus n = c.getNucleus();
-                finer("Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
-                        + n.getNucleusNumber());
-
-                // get the image in the folder with the same name as the
-                // nucleus source image
-                File imageFile = new File(folder + File.separator + n.getSourceFileName());
-                finer("Source file: " + imageFile.getAbsolutePath());
-
-                try {
-
-                    // ImageStack stack = new
-                    // ImageImporter(imageFile).importToStack();
-
-                    List<INuclearSignal> signals = finder.findInImage(imageFile, n);
-                    // List<INuclearSignal> signals =
-                    // finder.detectSignal(imageFile, stack, n);
-
-                    finer("Creating signal collection");
-
-                    ISignalCollection signalCollection = n.getSignalCollection();
-                    signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
-
-                    SignalAnalyser s = new SignalAnalyser();
-                    s.calculateSignalDistancesFromCoM(n);
-                    s.calculateFractionalSignalDistancesFromCoM(n);
-
-                    fine("Calculating signal angles");
-
-                    // If the nucleus is asymmetric, calculate angles
-                    if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
-
-                        finer("Nucleus type is asymmetric: " + n.getClass().getSimpleName());
-
-                        if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
-                            finest("Calculating angle from orientation point");
-                            n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
-                        } else {
-                            finest("No orientation point in nucleus");
-                        }
-
-                    } else {
-                        finer("Nucleus type is round: " + n.getClass().getSimpleName());
-                    }
-
-                } catch (ImageImportException e) {
-                    warn("Cannot open " + imageFile.getAbsolutePath());
-                    stack("Cannot load image", e);
-                }
-
-                fireProgressEvent();
-            }
+            dataset.getCollection().getCells().forEach(c->{
+                detectInCell(c, finder, originalMinThreshold);
+            });
 
         } catch (Exception e) {
             stack("Error in signal detection", e);
         }
     }
+    
+    
+    private void detectInCell(ICell c, SignalFinder finder, int originalMinThreshold){
+        // reset the min threshold for each cell
+        options.setThreshold(originalMinThreshold);
 
+        c.getNuclei().stream().forEach(n->{
+            detectInNucleus(n, finder);
+        });
+
+        fireProgressEvent();
+    }
+
+    
+    private void detectInNucleus(Nucleus n, SignalFinder finder){
+
+        finer("Looking for signals associated with nucleus " + n.getSourceFileName() + "-"
+                + n.getNucleusNumber());
+
+        // get the image in the folder with the same name as the
+        // nucleus source image
+        File imageFile = new File(folder + File.separator + n.getSourceFileName());
+        finer("Source file: " + imageFile.getAbsolutePath());
+
+        try {
+
+            List<INuclearSignal> signals = finder.findInImage(imageFile, n);
+            finer("Creating signal collection");
+
+            ISignalCollection signalCollection = n.getSignalCollection();
+            signalCollection.addSignalGroup(signals, signalGroup, imageFile, channel);
+
+            SignalAnalyser s = new SignalAnalyser();
+            s.calculateSignalDistancesFromCoM(n);
+            s.calculateFractionalSignalDistancesFromCoM(n);
+
+            fine("Calculating signal angles");
+
+            // If the nucleus is asymmetric, calculate angles
+            if (!dataset.getCollection().getNucleusType().equals(NucleusType.ROUND)) {
+
+                finer("Nucleus type is asymmetric: " + n.getClass().getSimpleName());
+
+                if (n.hasBorderTag(Tag.ORIENTATION_POINT)) {
+                    finest("Calculating angle from orientation point");
+                    n.calculateSignalAnglesFromPoint(n.getBorderPoint(Tag.ORIENTATION_POINT));
+                } else {
+                    finest("No orientation point in nucleus");
+                }
+
+            } else {
+                finer("Nucleus type is round: " + n.getClass().getSimpleName());
+            }
+
+        } catch (ImageImportException | UnavailableBorderPointException | UnavailableBorderTagException e) {
+            warn("Cannot open " + imageFile.getAbsolutePath());
+            stack("Cannot load image", e);
+        }
+    }
+    
     private void postDetectionFilter() {
 
         List<ICellCollection> signalPopulations = dividePopulationBySignals(dataset.getCollection(), signalGroup);

@@ -111,10 +111,15 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
         // Remove existing cached stats
         dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.NUCLEUS);
         dataset.getCollection().clear(PlottableStatistic.LOBE_COUNT, CellularComponent.WHOLE_CELL);
-        for (ICell cell : dataset.getCollection().getCells()) {
-            detectLobes(cell);
+        
+        dataset.getCollection().getCells().forEach(c->{
+            detectLobes(c);
             fireProgressEvent();
-        }
+        });
+//        for (ICell cell : dataset.getCollection().getCells()) {
+//            detectLobes(cell);
+//            fireProgressEvent();
+//        }
 
     }
 

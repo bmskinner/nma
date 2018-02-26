@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -134,7 +135,7 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
         for (ICell cell : cells) {
 
-            String name = cell.getNucleus().getNameAndNumber();
+            String name = cell.getNuclei().get(0).getNameAndNumber();
             UUID id = cell.getId();
 
             root.add(new DefaultMutableTreeNode(new NodeData(name, id)));

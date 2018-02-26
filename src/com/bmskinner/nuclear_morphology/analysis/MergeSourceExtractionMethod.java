@@ -66,10 +66,8 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
             ICellCollection newCollection = new DefaultCellCollection(templateCollection.getFolder(), null,
                     templateCollection.getName(), templateCollection.getNucleusType());
 
-            for (ICell c : templateCollection.getCells()) {
+            templateCollection.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-                newCollection.addCell(new DefaultCell(c));
-            }
 
             IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
             newDataset.setRoot(true);

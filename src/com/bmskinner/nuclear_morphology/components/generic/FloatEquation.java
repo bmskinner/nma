@@ -361,7 +361,7 @@ public class FloatEquation implements LineEquation {
      * @return The Equation of the line
      */
     public String toString() {
-        return "y=" + m + ".x+" + c;
+        return String.format("%d = %d.x+%d", m, c);
     }
 
 }

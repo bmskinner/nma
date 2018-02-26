@@ -262,16 +262,6 @@ public interface ISegmentedProfile extends IProfile {
     ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws ProfileException;
 
     /**
-     * Test if the given profile values are the same as in this profile.
-     * 
-     * @param profile
-     * @return
-     */
-    // boolean equals(ISegmentedProfile profile);
-
-    void reverse();
-
-    /**
      * Attempt to merge the given segments into one segment. The segments must
      * belong to the profile, and be adjacent
      * 

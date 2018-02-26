@@ -55,21 +55,12 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                     ICellCollection collection = dataset.getCollection();
 
                     ICellCollection newCollection = new DefaultCellCollection(dataset, "Subtraction");
+                    
+                    
+                    collection.streamCells()
+                        .filter(c->!negative.getCollection().contains(c))
+                        .forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-                    for (ICell cell : collection.getCells()) {
-
-                        boolean ok = true;
-                        for (ICell negCell : negative.getCollection().getCells()) {
-                            if (negCell.getId().equals(cell.getId())) {
-                                ok = false;
-                            }
-                        }
-
-                        if (ok) {
-                            newCollection.addCell(new DefaultCell(cell));
-                        }
-
-                    }
                     newCollection.setName("Not_in_" + negative.getName());
 
                     dataset.addChildCollection(newCollection);

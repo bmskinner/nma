@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.io.IOException;
 import java.io.Serializable;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * Hold version information, and parsing methods
  * 
@@ -77,11 +79,7 @@ public class Version implements Serializable {
      * @param s
      * @return
      */
-    public static Version parseString(final String s) {
-        if (s == null) {
-            throw new IllegalArgumentException("Input string is null");
-        }
-
+    public static Version parseString(@NonNull final String s) {
         String[] parts = s.split("\\" + SEPARATOR);
         if (parts.length == 3) {
             return new Version(Integer.valueOf(parts[0]), Integer.valueOf(parts[1]), Integer.valueOf(parts[2]));
@@ -96,7 +94,7 @@ public class Version implements Serializable {
      * @param v
      * @return
      */
-    public boolean isOlderThan(final Version v) {
+    public boolean isOlderThan(@NonNull final Version v) {
         if (this.major < v.getMajor()) {
             return true;
         }
@@ -111,7 +109,7 @@ public class Version implements Serializable {
         return false;
     }
 
-    public boolean isNewerThan(final Version v) {
+    public boolean isNewerThan(@NonNull final Version v) {
         return v.isOlderThan(this);
     }
 
@@ -167,7 +165,7 @@ public class Version implements Serializable {
      * @param version
      * @return a pass or fail
      */
-    public static boolean versionIsSupported(Version version) {
+    public static boolean versionIsSupported(@NonNull Version version) {
 
         if (version == null) {
             return false;

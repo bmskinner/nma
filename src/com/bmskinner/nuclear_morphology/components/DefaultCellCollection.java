@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -428,7 +429,10 @@ public class DefaultCellCollection implements ICellCollection {
         int[] result = new int[this.getNuclei().size()];
 
         int i = 0;
-        for (ICell cell : getCells()) {
+        
+        
+        
+        for (ICell cell : cells) {
 
             for (Nucleus n : cell.getNuclei()) {
                 // Nucleus n = cell.getNucleus();
@@ -462,9 +466,18 @@ public class DefaultCellCollection implements ICellCollection {
      * 
      * @return
      */
-    public Set<ICell> getCells() {
+      public Set<ICell> getCells() {
         return cells;
     }
+      
+      /**
+       * Get the cells in this collection
+       * 
+       * @return
+       */
+      public Stream<ICell> streamCells() {
+          return cells.stream();
+      }
 
     /**
      * Get the cells within the given image file
@@ -1100,9 +1113,8 @@ public class DefaultCellCollection implements ICellCollection {
 
         ICellCollection subCollection = new DefaultCellCollection(this, name);
 
-        List<ICell> list = getCells().parallelStream().filter(predicate).collect(Collectors.toList());
+        List<ICell> list = cells.parallelStream().filter(predicate).collect(Collectors.toList());
 
-        finest("Adding cells to new collection");
         for (ICell cell : list) {
             subCollection.addCell(new DefaultCell(cell));
         }
@@ -1168,12 +1180,16 @@ public class DefaultCellCollection implements ICellCollection {
 
         ICellCollection newCollection = new DefaultCellCollection(this, "AND operation");
 
-        for (ICell c : other.getCells()) {
-
-            if (this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
+        other.streamCells()
+            .filter(c->contains(c))
+            .forEach(c->newCollection.addCell(new DefaultCell(c)));
+            
+//        for (ICell c : other.getCells()) {
+//
+//            if (this.contains(c)) {
+//                newCollection.addCell(new DefaultCell(c));
+//            }
+//        }
 
         return newCollection;
     }
@@ -1182,13 +1198,17 @@ public class DefaultCellCollection implements ICellCollection {
     public ICellCollection not(ICellCollection other) {
 
         ICellCollection newCollection = new DefaultCellCollection(this, "NOT operation");
+        
+        streamCells()
+            .filter(c->!other.contains(c))
+            .forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-        for (ICell c : getCells()) {
-
-            if (!other.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
+//        for (ICell c : getCells()) {
+//
+//            if (!other.contains(c)) {
+//                newCollection.addCell(new DefaultCell(c));
+//            }
+//        }
 
         return newCollection;
     }
@@ -1197,20 +1217,28 @@ public class DefaultCellCollection implements ICellCollection {
     public ICellCollection xor(ICellCollection other) {
 
         ICellCollection newCollection = new DefaultCellCollection(this, "XOR operation");
+        
+        streamCells()
+            .filter(c->!other.contains(c))
+            .forEach(c->newCollection.addCell(new DefaultCell(c)));
+        
+        other.streamCells()
+            .filter(c->!contains(c))
+            .forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-        for (ICell c : getCells()) {
-
-            if (!other.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
-
-        for (ICell c : other.getCells()) {
-
-            if (!this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
+//        for (ICell c : getCells()) {
+//
+//            if (!other.contains(c)) {
+//                newCollection.addCell(new DefaultCell(c));
+//            }
+//        }
+//
+//        for (ICell c : other.getCells()) {
+//
+//            if (!this.contains(c)) {
+//                newCollection.addCell(new DefaultCell(c));
+//            }
+//        }
 
         return newCollection;
     }
@@ -1219,19 +1247,24 @@ public class DefaultCellCollection implements ICellCollection {
     public ICellCollection or(ICellCollection other) {
 
         ICellCollection newCollection = new DefaultCellCollection(this, "OR operation");
+        
+        getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+        
+        other.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
+        
 
-        for (ICell c : getCells()) {
-
-            newCollection.addCell(new DefaultCell(c));
-
-        }
-
-        for (ICell c : other.getCells()) {
-
-            if (!this.contains(c)) {
-                newCollection.addCell(new DefaultCell(c));
-            }
-        }
+//        for (ICell c : getCells()) {
+//
+//            newCollection.addCell(new DefaultCell(c));
+//
+//        }
+//
+//        for (ICell c : other.getCells()) {
+//
+//            if (!this.contains(c)) {
+//                newCollection.addCell(new DefaultCell(c));
+//            }
+//        }
 
         return newCollection;
     }

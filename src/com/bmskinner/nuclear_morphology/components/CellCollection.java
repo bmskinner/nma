@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
@@ -596,6 +597,15 @@ public class CellCollection implements ICellCollection {
             }
         }
         return result;
+    }
+    
+    /**
+     * Get the cells in this collection
+     * 
+     * @return
+     */
+    public Stream<ICell> streamCells() {
+        return getCells().stream();
     }
 
     /**

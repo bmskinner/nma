@@ -293,18 +293,33 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
             template = new NucleusMesh(collection.getConsensus());
         }
 
-        try {
+        final Mesh<Nucleus> t = template;
+        final double w = windowProportion;
+//        try {
+                        
+            collection.getCells()
+                .forEach( c->c.getNuclei().stream()
+                    .forEach( n-> {
+                        try {
+                            addNucleus(c, n, attributes, instances, t, w);
+                        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException
+                                | MeshCreationException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                }));
 
-            for (ICell c : collection.getCells()) {
 
-                for (Nucleus n : c.getNuclei()) {
-                    addNucleus(c, n, attributes, instances, template, windowProportion);
-                }
-            }
+//            for (ICell c : collection.getCells()) {
+//
+//                for (Nucleus n : c.getNuclei()) {
+//                    addNucleus(c, n, attributes, instances, template, windowProportion);
+//                }
+//            }
 
-        } catch (Exception e) {
-            error("Error making instances", e);
-        }
+//        } catch (Exception e) {
+//            error("Error making instances", e);
+//        }
         return instances;
 
     }

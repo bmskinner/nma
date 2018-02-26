@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -49,9 +51,9 @@ public class FloatProfile implements IProfile {
      * @param values
      *            the array to use
      */
-    public FloatProfile(final float[] values) {
+    public FloatProfile(@NonNull final float[] values) {
 
-        if (values == null || values.length == 0) {
+        if (values.length == 0) {
             throw new IllegalArgumentException("Input array has zero length in profile constructor");
         }
         this.array = values;
@@ -64,11 +66,7 @@ public class FloatProfile implements IProfile {
      * @param p
      *            the profile to copy
      */
-    public FloatProfile(final IProfile p) {
-        if (p == null) {
-            throw new IllegalArgumentException("Input profile is null in profile constructor");
-        }
-
+    public FloatProfile(@NonNull final IProfile p) {
         this.array = new float[p.size()];
 
         for (int i = 0; i < p.size(); i++) {
@@ -190,10 +188,10 @@ public class FloatProfile implements IProfile {
      * BooleanProfile)
      */
     @Override
-    public int getIndexOfMax(BooleanProfile limits) throws ProfileException {
+    public int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException {
 
-        if (limits == null || limits.size() != array.length) {
-            throw new IllegalArgumentException("Limits are null or wrong size for this profile");
+        if ( limits.size() != array.length) {
+            throw new IllegalArgumentException("Limits are wrong size for this profile");
         }
 
         double max = Double.MIN_VALUE;
@@ -218,9 +216,7 @@ public class FloatProfile implements IProfile {
      */
     @Override
     public int getIndexOfMax() throws ProfileException {
-
-        BooleanProfile b = new BooleanProfile(this, true);
-        return getIndexOfMax(b);
+        return getIndexOfMax( new BooleanProfile(this, true) );
     }
 
     /*
@@ -278,10 +274,10 @@ public class FloatProfile implements IProfile {
      * BooleanProfile)
      */
     @Override
-    public int getIndexOfMin(BooleanProfile limits) throws ProfileException {
+    public int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException {
 
-        if (limits == null || limits.size() != array.length) {
-            throw new IllegalArgumentException("Limits are null or wrong size for this profile");
+        if (limits.size() != array.length) {
+            throw new IllegalArgumentException("Limits are wrong size for this profile");
         }
 
         double min = Double.MAX_VALUE;
@@ -307,9 +303,7 @@ public class FloatProfile implements IProfile {
      */
     @Override
     public int getIndexOfMin() throws ProfileException {
-
-        BooleanProfile b = new BooleanProfile(this, true);
-        return getIndexOfMin(b);
+        return getIndexOfMin(new BooleanProfile(this, true));
     }
 
     @Override
@@ -363,10 +357,8 @@ public class FloatProfile implements IProfile {
      * @return a new profile with the length of the longest input profile
      * @throws ProfileException
      */
-    private IProfile equaliseLengths(IProfile profile1, IProfile profile2) throws ProfileException {
-        if (profile1 == null || profile2 == null) {
-            throw new IllegalArgumentException("Input profile is null when equilising lengths");
-        }
+    private IProfile equaliseLengths(@NonNull IProfile profile1, @NonNull IProfile profile2) throws ProfileException {
+
         // profile 2 is smaller
         // return profile 1 unchanged
         if (profile2.size() < profile1.size()) {
@@ -379,33 +371,6 @@ public class FloatProfile implements IProfile {
         return profile1;
     }
 
-    /**
-     * Return an array in which the first array has been interpolated
-     * (lengthened) to match the second array. If the first array is shorter of
-     * equal in length to the second array, this has no effect
-     * 
-     * @param profile1
-     * @param profile2
-     * @return
-     * @throws ProfileException
-     */
-    // private float[] equaliseLengths(float[] profile1, float[] profile2)
-    // throws ProfileException {
-    // if(profile1==null || profile2==null){
-    // throw new IllegalArgumentException("Input profile is null when equilising
-    // lengths");
-    // }
-    //
-    // // profile 2 is smaller or the same length
-    // // return profile 1 unchanged
-    // if(profile2.length <= profile1.length ){
-    // return profile1;
-    // } else {
-    // // profile 1 is smaller; interpolate to profile 2 length
-    //// return interpolate(profile1, profile2.length);
-    //// profile1.interpolate(profile2.size());
-    // }
-    // }
 
     /*
      * (non-Javadoc)
@@ -415,15 +380,7 @@ public class FloatProfile implements IProfile {
      * IProfile)
      */
     @Override
-    public double absoluteSquareDifference(IProfile testProfile) throws ProfileException {
-
-        /*
-         * NEW CODE VERSION - WORKING
-         */
-
-        if (testProfile == null) {
-            throw new IllegalArgumentException("Test profile is null");
-        }
+    public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
 
         float[] arr2 = testProfile.toFloatArray();
 
@@ -439,30 +396,6 @@ public class FloatProfile implements IProfile {
             arr1 = interpolate(arr1, arr2.length);
             return squareDifference(arr1, arr2);
         }
-
-        /*
-         * OLD CODE VERSION
-         */
-
-        // if(testProfile==null){
-        // throw new IllegalArgumentException("Test profile is null");
-        // }
-        // // the test profile needs to be matched to this profile
-        // // whichever is smaller must be interpolated
-        // IProfile profile1 = equaliseLengths(this.copy(), testProfile);
-        // IProfile profile2 = equaliseLengths(testProfile, this.copy());
-        //
-        // double difference = 0;
-        //
-        // for(int j=0; j<profile1.size(); j++){ // for each point round the
-        // array
-        //
-        // double thisValue = profile1.get(j);
-        // double testValue = profile2.get(j);
-        // difference += Math.pow(thisValue - testValue, 2); // square
-        // difference - highlights extremes
-        // }
-        // return difference;
     }
 
     /**
@@ -474,11 +407,10 @@ public class FloatProfile implements IProfile {
      * @param arr2
      * @return
      */
-    private static double squareDifference(float[] arr1, float[] arr2) {
+    private static double squareDifference(@NonNull float[] arr1, @NonNull float[] arr2) {
         double difference = 0;
 
         for (int j = 0; j < arr1.length; j++) { // for each point round the
-                                                // array
 
             difference += Math.pow(arr1[j] - arr2[j], 2); // square difference -
                                                           // highlights extremes
@@ -901,7 +833,8 @@ public class FloatProfile implements IProfile {
     }
 
     /*
-     * -------------------- Detect minima within the profiles
+     * --------------------
+     *  Detect minima within profiles
      * --------------------
      */
 

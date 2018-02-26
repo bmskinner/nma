@@ -121,7 +121,6 @@ public class ChartCache implements Cache {
                 if (op.hasDatasets()) {
                     if (op.getDatasets().contains(d)) {
                         toRemove.add(op);
-                        finest("Need to remove options with dataset " + d.getName());
                     }
                 }
             }
