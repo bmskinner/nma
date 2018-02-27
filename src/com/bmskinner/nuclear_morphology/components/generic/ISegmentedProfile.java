@@ -120,13 +120,12 @@ public interface ISegmentedProfile extends IProfile {
     List<IBorderSegment> getOrderedSegments();
 
     /**
-     * Get the segment with the given name. Returns null if no segment is found.
-     * Gets the actual segment, not a copy
-     * 
-     * @param name
-     * @return
+     * Get the segment with the given name.     * 
+     * @param name the segment name to find
+     * @return the segment
+     * @throws UnavailableComponentException if there is no segment with the given name
      */
-    IBorderSegment getSegment(String name);
+    IBorderSegment getSegment(String name) throws UnavailableComponentException;
 
     /**
      * Get the given segment. Returns null if no segment is found. Gets the
@@ -246,6 +245,11 @@ public interface ISegmentedProfile extends IProfile {
      */
     boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException;
 
+    /**
+     * Move the positions of all segments by the given amount
+     * @param amount
+     * @throws ProfileException
+     */
     void nudgeSegments(int amount) throws ProfileException;
 
     /*
@@ -311,17 +315,17 @@ public interface ISegmentedProfile extends IProfile {
      */
     boolean isSplittable(UUID id, int splitIndex);
 
-    String toString();
-
     /**
      * Restore the toString from Profile
      * 
      * @return
      */
     String valueString();
-
-    int hashCode();
-
-    boolean equals(Object obj);
-
+    
+    /**
+     * Create a copy of this profile
+     * @return
+     */
+    @Override
+    ISegmentedProfile copy();
 }

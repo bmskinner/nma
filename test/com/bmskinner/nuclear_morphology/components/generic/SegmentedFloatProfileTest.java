@@ -41,6 +41,11 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentE
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
+/**
+ * Tests for the profile methods
+ * @author bms41
+ *
+ */
 public class SegmentedFloatProfileTest {
     
     private static final String SEG_0 = "00000000-0000-0000-0000-000000000000";
@@ -120,24 +125,76 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testSegmentedFloatProfileIProfileListOfIBorderSegment() {
-		fail("Not yet implemented");
+	public void testSegmentedFloatProfileIProfileListOfIBorderSegment() throws ProfileException {
+	    List<IBorderSegment> list = makeTestSegments();
+	    assertEquals(list.size(), sp.getSegmentCount());
 	}
+	
+	@Test
+    public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnNullProfile() throws ProfileException {
+	    List<IBorderSegment> list = makeTestSegments();
+        exception.expect(IllegalArgumentException.class);
+        new SegmentedFloatProfile(null, list);
+    }
+	
+	@Test
+	public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnNullSegmentList() throws ProfileException {
+	    IProfile profile = new FloatProfile(10, 100);
+	    exception.expect(IllegalArgumentException.class);
+	    new SegmentedFloatProfile(profile, null);
+	}
+	
+	@Test
+    public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnMismatchedProfileAndList() throws ProfileException {
+        List<IBorderSegment> list = makeTestSegments();
+        IProfile profile = new FloatProfile(10, 110);
+        exception.expect(IllegalArgumentException.class);
+        new SegmentedFloatProfile(profile, list);
+    }
 
 	@Test
-	public void testSegmentedFloatProfileISegmentedProfile() {
-		fail("Not yet implemented");
+	public void testSegmentedFloatProfileISegmentedProfile() throws IndexOutOfBoundsException, ProfileException {
+	    ISegmentedProfile result = new SegmentedFloatProfile(sp);
+	    assertEquals(sp, result);
 	}
+	
+	@Test
+    public void testSegmentedFloatProfileISegmentedProfileExceptsOnNullProfile() throws IndexOutOfBoundsException, ProfileException {
+	    exception.expect(IllegalArgumentException.class);
+        new SegmentedFloatProfile( (ISegmentedProfile)null);
+    }
 
 	@Test
 	public void testSegmentedFloatProfileIProfile() {
-		fail("Not yet implemented");
+	    IProfile profile = new FloatProfile(10, 100);
+	    ISegmentedProfile p = new SegmentedFloatProfile(profile);
+	    assertEquals(2, p.getSegmentCount());
+	}
+	
+	@Test
+	public void testSegmentedFloatProfileIProfileExceptsOnNullProfile() {
+	    exception.expect(IllegalArgumentException.class);
+	    new SegmentedFloatProfile((IProfile)null);
 	}
 
 	@Test
 	public void testSegmentedFloatProfileFloatArray() {
-		fail("Not yet implemented");
+	    float[] array = new float[100];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = 10;
+        }
+        ISegmentedProfile p = new SegmentedFloatProfile(array);
+        
+        for (int i = 0; i < array.length; i++) {
+            assertEquals(array[i], p.get(i), 0.000001);
+        }  
 	}
+	
+	@Test
+    public void testSegmentedFloatProfileFloatArrayExceptsOnNullArray() {
+	    exception.expect(IllegalArgumentException.class);
+        new SegmentedFloatProfile( (float[]) null);
+    }
 
 	@Test
 	public void testHasSegments() {
@@ -235,7 +292,7 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentString() {
+	public void testGetSegmentString() throws UnavailableComponentException {
 	    IBorderSegment test = makeSeg1();
 	    String name = "Seg_1";
 	    IBorderSegment result = sp.getSegment(name);
@@ -245,9 +302,15 @@ public class SegmentedFloatProfileTest {
 	}
 	
 	@Test
-    public void testGetSegmentStringExceptsWithNullInput(){
+    public void testGetSegmentStringExceptsWithNullInput() throws UnavailableComponentException{
         exception.expect(IllegalArgumentException.class);
         sp.getSegment( (String)null);
+    }
+	
+	@Test
+    public void testGetSegmentStringExceptsWithInvalidInput() throws UnavailableComponentException{
+        exception.expect(UnavailableComponentException.class);
+        sp.getSegment("Not present");
     }
 
 	@Test
@@ -336,6 +399,19 @@ public class SegmentedFloatProfileTest {
 	    exception.expect(IllegalArgumentException.class);
 	    sp.setSegments(null);
 	}
+	
+	@Test
+    public void testSetSegmentsExceptsOnListWithDifferentProfileLength() throws ProfileException {
+	    List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, 110, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(10, 20, 110, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(20, 60, 110, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(60, 90, 110, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(90, 5,  110, UUID.randomUUID()));
+        IBorderSegment.linkSegments(list);
+        exception.expect(IllegalArgumentException.class);
+        sp.setSegments(list);
+    }
 
 	@Test
 	public void testClearSegments() {
@@ -348,15 +424,14 @@ public class SegmentedFloatProfileTest {
 	public void testGetSegmentNames() {
 	    
 	    List<String> test = new ArrayList<>();
-	    for(int i=0; i<sp.size(); i++){
+	    for(int i=0; i<sp.getSegmentCount(); i++){
 	        test.add("Seg_"+i);
 	    }
 	    
 	    List<String> result = sp.getSegmentNames();
 	    
-	    assertEquals(test.size(), result.size());
-	    
-	    for(int i=0; i<sp.size(); i++){
+	    assertEquals(test.size(), result.size()); 
+	    for(int i=0; i<test.size(); i++){
 	        assertEquals(test.get(i), result.get(i));
 	    }
 	}
@@ -369,9 +444,21 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentIDs() {
-		fail("Not yet implemented");
+	public void testGetSegmentIDs() throws ProfileException {
+	    List<IBorderSegment> test = makeTestSegments();
+	    List<UUID> result = sp.getSegmentIDs();
+	    assertEquals(test.size(), result.size());
+	    for(int i=0; i<result.size(); i++){
+            assertEquals(test.get(i).getID(), result.get(i));
+        }
 	}
+	
+	@Test
+    public void testGetSegmentIDsReturnsEmptyListWhenNoSegments() throws ProfileException {
+        sp.clearSegments();
+        List<UUID> result = sp.getSegmentIDs();
+        assertTrue(result.isEmpty());
+    }
 
 	@Test
 	public void testGetSegmentCount() throws ProfileException {   
@@ -387,13 +474,40 @@ public class SegmentedFloatProfileTest {
 
 	@Test
 	public void testGetDisplacement() {
-		fail("Not yet implemented");
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    double d = sp.getDisplacement(s1);
+	    assertEquals(0, d, 0.000001);
 	}
+	
+	@Test
+    public void testGetDisplacementExceptsOnNullSegment() {
+        exception.expect(IllegalArgumentException.class);
+        sp.getDisplacement(null);
+    }
+	
+	@Test
+    public void testGetDisplacementExceptsOnInvalidSegment() {
+	    IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
+        exception.expect(IllegalArgumentException.class);
+        sp.getDisplacement(s1);
+    }
 
 	@Test
 	public void testContains() {
-		fail("Not yet implemented");
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+		assertTrue(sp.contains(s1));
 	}
+	
+	@Test
+    public void testContainsReturnsFalseWhenSegmentNotPresent() {
+	    IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
+        assertFalse(sp.contains(s1));
+    }
+	
+	@Test
+    public void testContainsReturnsFalseWhenSegmentNull() {
+        assertFalse(sp.contains(null));
+    }
 
 	@Test
 	public void testUpdate() {
@@ -463,48 +577,273 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testMergeSegments() {
-		fail("Not yet implemented");
+	public void testMergeSegments() throws ProfileException, UnavailableComponentException {
+	    
+	    int expCount = sp.getSegmentCount()-1;
+	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    IBorderSegment s2 = sp.getSegmentAt(2);
+	    
+	    sp.mergeSegments(s1, s2, mergedId);
+	    
+	    assertEquals(expCount, sp.getSegmentCount());
+	    
+	    IBorderSegment m = sp.getSegment(mergedId);
+	    assertEquals(s1.getStartIndex(), m.getStartIndex());
+	    assertEquals(s2.getEndIndex(), m.getEndIndex());
+	}
+	
+	@Test
+    public void testMergeSegmentsExceptsOnNullSeg1() throws ProfileException, UnavailableComponentException {
+        
+        UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        IBorderSegment s2 = sp.getSegmentAt(2);
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.mergeSegments(null, s2, mergedId);
+    }
+	
+	@Test
+	public void testMergeSegmentsExceptsOnNullSeg2() throws ProfileException, UnavailableComponentException {
+
+	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    IBorderSegment s2 = sp.getSegmentAt(2);
+
+	    exception.expect(IllegalArgumentException.class);
+	    sp.mergeSegments(s1, null, mergedId);
+	}
+	
+	@Test
+	public void testMergeSegmentsExceptsOnNullId() throws ProfileException, UnavailableComponentException {
+
+	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    IBorderSegment s2 = sp.getSegmentAt(2);
+
+	    exception.expect(IllegalArgumentException.class);
+	    sp.mergeSegments(s1, s2, null);
+	}
+	
+	@Test
+    public void testMergeSegmentsExceptsWhenSegmentsNotLinked() throws ProfileException, UnavailableComponentException {
+
+        UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        IBorderSegment s1 = makeSeg1();
+        IBorderSegment s2 = makeSeg2();
+
+        exception.expect(IllegalArgumentException.class);
+        sp.mergeSegments(s1, s2, mergedId);
+    }
+	
+	@Test
+    public void testMergeSegmentsExceptsWhenSegment1NotInProfile() throws ProfileException, UnavailableComponentException {
+
+        UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
+        IBorderSegment s2 = sp.getSegmentAt(2);
+
+        exception.expect(IllegalArgumentException.class);
+        sp.mergeSegments(s1, s2, mergedId);
+    }
+	
+	@Test
+    public void testMergeSegmentsExceptsWhenSegment2NotInProfile() throws ProfileException, UnavailableComponentException {
+
+        UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        IBorderSegment s2 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
+
+        exception.expect(IllegalArgumentException.class);
+        sp.mergeSegments(s1, s2, mergedId);
+    }
+
+	@Test
+	public void testUnmergeSegment() throws ProfileException, UnavailableComponentException {
+	    
+	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        IBorderSegment s2 = sp.getSegmentAt(2);
+        
+        int expCount = sp.getSegmentCount();
+        
+        sp.mergeSegments(s1, s2, mergedId);
+        IBorderSegment m = sp.getSegment(mergedId);
+		sp.unmergeSegment(m);
+		
+		assertEquals(expCount, sp.getSegmentCount());
+		
+		assertEquals(s1, sp.getSegmentAt(1));
+		assertEquals(s2, sp.getSegmentAt(2));
 	}
 
 	@Test
-	public void testUnmergeSegment() {
-		fail("Not yet implemented");
+	public void testUnmergeSegmentDoesNothingWhenNoMergedSegments() throws UnavailableComponentException, ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);   
+        sp.unmergeSegment(s1);
+	}
+	
+	@Test
+	public void testUnmergeSegmentExceptsOnNullSegment() throws ProfileException {
+	    exception.expect(IllegalArgumentException.class);
+	    sp.unmergeSegment(null);
+	}
+	
+	@Test
+    public void testIsSplittable() {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+        assertTrue(sp.isSplittable(s1.getID(), s1.getMidpointIndex()));
+    }
+	
+	@Test
+	public void testIsSplittableReturnsFalseWhenTooCloseToStart() {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    assertFalse(sp.isSplittable(s1.getID(), s1.getStartIndex()+1));
 	}
 
 	@Test
-	public void testSplitSegment() {
-		fail("Not yet implemented");
+	public void testIsSplittableReturnsFalseWhenTooCloseToEnd() {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    assertFalse(sp.isSplittable(s1.getID(), s1.getEndIndex()-1));
 	}
 
 	@Test
-	public void testValueString() {
-		fail("Not yet implemented");
+	public void testIsSplittableReturnsFalseOnOutOfBoundsIndex() {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    exception.expect(IllegalArgumentException.class);
+	    assertFalse(sp.isSplittable(s1.getID(), s1.getEndIndex()+1));
 	}
 
 	@Test
-	public void testFloatProfileFloatArray() {
-		fail("Not yet implemented");
+	public void testIsSplittableExceptsOnNullId() {
+	    exception.expect(IllegalArgumentException.class);
+	    sp.isSplittable(null, 30);
 	}
 
 	@Test
-	public void testFloatProfileIProfile() {
-		fail("Not yet implemented");
+	public void testIsSplittableExceptsOnOutOfBoundsProfileIndex() {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    exception.expect(IllegalArgumentException.class);
+	    sp.isSplittable(s1.getID(), sp.size()+1);
 	}
 
 	@Test
-	public void testFloatProfileFloatInt() {
-		fail("Not yet implemented");
+	public void testSplitSegment() throws ProfileException {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    
+	    int start = s1.getStartIndex();
+	    int mid = s1.getMidpointIndex();
+	    int end = s1.getEndIndex();
+	    
+	    UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+	    UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+	    
+	    sp.splitSegment(s1, mid, id1, id2);
+	    
+	    IBorderSegment r1 = sp.getSegmentAt(1);
+	    IBorderSegment r2 = sp.getSegmentAt(2);
+	    
+	    assertEquals(id1, r1.getID());
+	    assertEquals(id2, r2.getID());
+	    
+	    assertEquals("r1 start",start, r1.getStartIndex());
+	    assertEquals("r1 end", mid, r1.getEndIndex());
+	    assertEquals("r2 start", mid, r2.getStartIndex());
+	    assertEquals("r2 end", end, r2.getEndIndex());
+	}
+	
+	@Test
+    public void testSplitSegmentExceptsOnNullSegment() throws ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        
+        int mid = s1.getMidpointIndex();
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(null, mid, id1, id2);
+    }
+	
+	@Test
+    public void testSplitSegmentExceptsOnNullId1() throws ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        
+        int mid = s1.getMidpointIndex();
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(s1, mid, null, id2);
+    }
+	
+	@Test
+    public void testSplitSegmentExceptsOnNullId2() throws ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        
+        int mid = s1.getMidpointIndex();
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(s1, mid, id1, null);
+    }
+	
+	@Test
+    public void testSplitSegmentExceptsOnInvalidIndex() throws ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        
+        int mid = s1.getStartIndex()+1;
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(s1, mid, id1, id2);
+    }
+	
+	@Test
+    public void testSplitSegmentExceptsOnIndexOutOfSegmentBounds() throws ProfileException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        
+        int mid = sp.size()+1;
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(s1, mid, id1, id2);
+    }
+	
+	@Test
+    public void testSplitSegmentExceptsOnInvalidSegment() throws ProfileException {
+
+	    IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
+        int mid = s1.getStartIndex()+1;
+        
+        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
+        
+        exception.expect(IllegalArgumentException.class);
+        sp.splitSegment(s1, mid, id1, id2);
+    }
+
+	@Test
+	public void testValueString() { 
+	    StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < sp.size(); i++) {
+            builder.append("Index " + i + "\t" + sp.get(i) + "\r\n");
+        }
+        assertEquals(builder.toString(), sp.valueString());
 	}
 
 	@Test
 	public void testCopy() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testOffsetInt1() {
-		fail("Not yet implemented");
+	    ISegmentedProfile copy = sp.copy();
+		assertEquals(sp, copy);
 	}
 
 	@Test

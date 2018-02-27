@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -55,9 +56,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      *            the list of segments to use
      * @throws ProfileException
      */
-    public SegmentedFloatProfile(final IProfile p, final List<IBorderSegment> segments) throws ProfileException {
+    public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> segments) throws ProfileException {
         super(p);
-
         if (segments == null || segments.isEmpty()) {
             throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
         }
@@ -84,7 +84,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @throws ProfileException
      * @throws IndexOutOfBoundsException
      */
-    public SegmentedFloatProfile(final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
+    public SegmentedFloatProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
         this(profile, profile.getSegments());
     }
 
@@ -94,7 +94,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * 
      * @param profile
      */
-    public SegmentedFloatProfile(IProfile profile) {
+    public SegmentedFloatProfile(@NonNull IProfile profile) {
         super(profile);
 
         int midpoint = profile.size() / 2;
@@ -127,7 +127,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @param values
      * @throws Exception
      */
-    public SegmentedFloatProfile(float[] values) {
+    public SegmentedFloatProfile(@NonNull float[] values) {
         this(new FloatProfile(values));
     }
 
@@ -313,7 +313,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
      */
     @Override
-    public IBorderSegment getSegment(String name) {
+    public IBorderSegment getSegment(String name) throws UnavailableComponentException {
         if (name == null) {
             throw new IllegalArgumentException("Requested segment name is null");
         }
@@ -323,7 +323,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 return seg;
             }
         }
-        return null;
+        throw new UnavailableComponentException("Requested segment name is not present");
     }
 
     /*
@@ -473,19 +473,17 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     @Override
     public double getDisplacement(IBorderSegment segment) {
-        if (this.contains(segment)) {
-
-            double start = this.get(segment.getStartIndex());
-            double end = this.get(segment.getEndIndex());
-
-            double min = Math.min(start, end);
-            double max = Math.max(start, end);
-
-            return max - min;
-
-        } else {
-            return 0;
+        
+        if (!contains(segment)) {
+            throw new IllegalArgumentException("Segment is not in profile");
         }
+        double start = this.get(segment.getStartIndex());
+        double end = this.get(segment.getEndIndex());
+
+        double min = Math.min(start, end);
+        double max = Math.max(start, end);
+
+        return max - min;
     }
 
     /*
@@ -497,20 +495,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public boolean contains(IBorderSegment segment) {
         if (segment == null) {
-            throw new IllegalArgumentException("Segment cannot be null");
+            return false;
         }
 
         for (IBorderSegment seg : this.segments) {
             if (seg.equals(segment)) {
                 return true;
             }
-            // if( seg.getStartIndex() ==segment.getStartIndex()
-            // && seg.getEndIndex() ==segment.getEndIndex()
-            // && seg.getTotalLength()==this.size()
-            //
-            // ){
-            // return true;
-            // }
         }
         return false;
     }
@@ -937,6 +928,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             throw new IllegalArgumentException("An input segment is not part of this profile");
         }
 
+        if(!segment1.hasNextSegment() || !segment2.hasPrevSegment()){
+            throw new IllegalArgumentException("Input segments are not linked");
+        }
         // Check the segments are linked
         if (!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2)) {
             throw new IllegalArgumentException("Input segments are not linked");
@@ -995,7 +989,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         }
 
         if (!segment.hasMergeSources()) {
-            throw new IllegalArgumentException("Segment does not have merge sources");
+            return;
+//            throw new IllegalArgumentException("Segment does not have merge sources");
         }
 
         // Replace the two segments in this profile
@@ -1137,6 +1132,16 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public String valueString() {
         return super.toString();
+    }
+    
+    @Override
+    public ISegmentedProfile copy() {
+        try {
+            return new SegmentedFloatProfile(this);
+        } catch (IndexOutOfBoundsException | ProfileException e) {
+            stack(e);
+        }
+        return null;
     }
 
     /*

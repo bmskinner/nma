@@ -53,7 +53,7 @@ public class FloatProfile implements IProfile {
      */
     public FloatProfile(@NonNull final float[] values) {
 
-        if (values.length == 0) {
+        if (values==null || values.length == 0) {
             throw new IllegalArgumentException("Input array has zero length in profile constructor");
         }
         this.array = values;
@@ -67,6 +67,9 @@ public class FloatProfile implements IProfile {
      *            the profile to copy
      */
     public FloatProfile(@NonNull final IProfile p) {
+        if (p==null) {
+            throw new IllegalArgumentException("Profile is null");
+        }
         this.array = new float[p.size()];
 
         for (int i = 0; i < p.size(); i++) {

@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.statistics.HistogramDataset;
 //import org.jfree.data.xy.DefaultXYDataset;
@@ -1137,7 +1138,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(List<IAnalysisDataset> datasets)
+    public BoxAndWhiskerCategoryDataset createSegmentVariabillityDataset(@NonNull List<IAnalysisDataset> datasets)
             throws ChartDatasetCreationException {
 
         if (datasets == null || datasets.isEmpty()) {
@@ -1176,8 +1177,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                     dataset.add(list, medianSeg.getName(), collection.getName());
                 }
 
-            } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                    | UnsegmentedProfileException e) {
+            } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
                 fine("Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
@@ -1191,7 +1191,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param dataset
      * @return
      */
-    public XYDataset createBareNucleusOutline(Nucleus n) throws ChartDatasetCreationException {
+    public XYDataset createBareNucleusOutline(@NonNull Nucleus n) throws ChartDatasetCreationException {
         ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
         double[] xpoints = new double[n.getBorderLength() + 1];
@@ -1222,7 +1222,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param dataset
      * @return
      */
-    public XYDataset createBareNucleusOutline(IAnalysisDataset dataset) throws ChartDatasetCreationException {
+    public XYDataset createBareNucleusOutline(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
 
         return createBareNucleusOutline(dataset.getCollection().getConsensus());
 
@@ -1234,7 +1234,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param n
      * @return
      */
-    private double getScaleForIQRRange(Nucleus n) {
+    private double getScaleForIQRRange(@NonNull Nucleus n) {
         // get the maximum values from nuclear diameters
         // get the limits for the plot
         double min = Math.min(n.getMinX(), n.getMinY());
@@ -1251,7 +1251,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public XYDataset createSegmentedNucleusOutline(ICellCollection collection) throws ChartDatasetCreationException {
+    public XYDataset createSegmentedNucleusOutline(@NonNull ICellCollection collection) throws ChartDatasetCreationException {
         FloatXYDataset ds = new FloatXYDataset();
 
         // get the consensus nucleus for the population
@@ -1360,8 +1360,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param scaledRange
      *            the IQR scale profile
      */
-    private void addSegmentIQRToConsensus(IBorderSegment segment, FloatXYDataset ds, Nucleus n, IProfile scaledRange,
-            Tag pointType) throws ChartDatasetCreationException {
+    private void addSegmentIQRToConsensus(@NonNull IBorderSegment segment, @NonNull FloatXYDataset ds, @NonNull Nucleus n, @NonNull IProfile scaledRange,
+            @NonNull Tag pointType) throws ChartDatasetCreationException {
 
         // what we need to do is match the profile positions to the borderpoints
         // Add lines to show the IQR of the angle profile at each point
@@ -1450,7 +1450,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param seg
      * @return
      */
-    public int getSegmentPosition(Nucleus n, IBorderSegment seg) {
+    public int getSegmentPosition(@NonNull Nucleus n, @NonNull IBorderSegment seg) {
         int result = 0;
         if (seg.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
             return result;
@@ -1469,7 +1469,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public XYDataset createNucleusIndexTags(Nucleus nucleus) throws ChartDatasetCreationException {
+    public XYDataset createNucleusIndexTags(@NonNull Nucleus nucleus) throws ChartDatasetCreationException {
 
         FloatXYDataset ds = new FloatXYDataset();
         try {
@@ -1499,7 +1499,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws Exception
      */
-    public ComponentOutlineDataset createNucleusLobeDataset(LobedNucleus nucleus) throws ChartDatasetCreationException {
+    public ComponentOutlineDataset createNucleusLobeDataset(@NonNull LobedNucleus nucleus) throws ChartDatasetCreationException {
 
         ComponentOutlineDataset<CellularComponent> ds = new ComponentOutlineDataset<CellularComponent>();
 
@@ -1524,7 +1524,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      *            the cell to get signals from
      * @return a dataset for charting
      */
-    public List<ComponentOutlineDataset> createSignalOutlines(ICell cell, IAnalysisDataset dataset)
+    public List<ComponentOutlineDataset> createSignalOutlines(@NonNull ICell cell, @NonNull IAnalysisDataset dataset)
             throws ChartDatasetCreationException {
 
         List<ComponentOutlineDataset> result = new ArrayList<ComponentOutlineDataset>(0);

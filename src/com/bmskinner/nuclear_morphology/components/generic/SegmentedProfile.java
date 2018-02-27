@@ -1051,4 +1051,14 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         // TODO Auto-generated method stub
         return false;
     }
+    
+    @Override
+    public ISegmentedProfile copy() {
+        try {
+            return new SegmentedProfile(this);
+        } catch (IndexOutOfBoundsException e) {
+            stack(e);
+        }
+        return null;
+    }
 }
