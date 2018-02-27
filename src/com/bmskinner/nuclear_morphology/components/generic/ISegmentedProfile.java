@@ -77,9 +77,17 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @param id
      * @return
+     * @throws UnavailableComponentException if there is no segment with the given id
+     * @throws IllegalArgumentException if the id is null
      */
     IBorderSegment getSegment(UUID id) throws UnavailableComponentException;
 
+    /**
+     * Test if a segment with the given id is present
+     * @param id the id
+     * @return true if a segment is present with the id, false otherwise
+     * @throws IllegalArgumentException if the id is null
+     */
     boolean hasSegment(UUID id);
 
     /**

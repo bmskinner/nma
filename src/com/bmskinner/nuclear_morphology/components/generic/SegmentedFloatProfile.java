@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -136,11 +138,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     @Override
     public boolean hasSegments() {
-        if (this.segments == null || this.segments.length == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        return segments!=null && segments.length>0;
     }
 
     /*
@@ -158,8 +156,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
         try {
             result = IBorderSegment.copy(temp);
-        } catch (ProfileException e) {
+        } catch (ProfileException | IllegalArgumentException e) {
             error("Error copying segments", e);
+            return new ArrayList<IBorderSegment>();
         }
         return result;
     }
@@ -194,6 +193,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     @Override
     public IBorderSegment getSegment(UUID id) throws UnavailableComponentException {
+        if (id == null) {
+            throw new IllegalArgumentException("Id is null");
+        }
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return seg;
@@ -391,7 +393,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#setSegments(java.util.List)
      */
     @Override
-    public void setSegments(List<IBorderSegment> segments) {
+    public void setSegments(@NonNull List<IBorderSegment> segments) {
         if (segments == null || segments.isEmpty()) {
             throw new IllegalArgumentException("Segment list is null or empty");
         }
@@ -432,7 +434,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public List<String> getSegmentNames() {
         List<String> result = new ArrayList<String>();
-        for (IBorderSegment seg : this.segments) {
+        for (IBorderSegment seg : segments) {
             result.add(seg.getName());
         }
         return result;

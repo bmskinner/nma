@@ -22,6 +22,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,23 +62,33 @@ public class SegmentedFloatProfileTest {
 	 * @throws ProfileException 
 	 */
 	private List<IBorderSegment> makeTestSegments() throws ProfileException{
-		List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-		
-		
-		DefaultBorderSegment p1 = new DefaultBorderSegment(10, 20, 100, UUID.fromString(SEG_0));
-		DefaultBorderSegment p2 = new DefaultBorderSegment(20, 45, 100, UUID.fromString(SEG_1));
-		DefaultBorderSegment p3 = new DefaultBorderSegment(45, 89, 100, UUID.fromString(SEG_2));
-		DefaultBorderSegment p4 = new DefaultBorderSegment(89, 10, 100, UUID.fromString(SEG_3));
-
-		list.add(p1);
-		list.add(p2);
-		list.add(p3);
-		list.add(p4);
+		List<IBorderSegment> list = new ArrayList<>();
+		list.add(makeSeg0());
+		list.add(makeSeg1());
+		list.add(makeSeg2());
+		list.add(makeSeg3());
 
 		IBorderSegment.linkSegments(list);
 
 		return list;
 	}
+	
+	private IBorderSegment makeSeg0(){
+	    return new DefaultBorderSegment(10, 20, 100, UUID.fromString(SEG_0));
+	}
+	
+	private IBorderSegment makeSeg1(){
+        return new DefaultBorderSegment(20, 45, 100, UUID.fromString(SEG_1));
+    }
+	
+	private IBorderSegment makeSeg2(){
+        return new DefaultBorderSegment(45, 89, 100, UUID.fromString(SEG_2));
+    }
+	
+	private IBorderSegment makeSeg3(){
+        return new DefaultBorderSegment(89, 10, 100, UUID.fromString(SEG_3));
+    }
+	
 	
 	/**
 	 * Creata a test profile with segments as in {@link #makeTestSegments()}
@@ -130,33 +141,93 @@ public class SegmentedFloatProfileTest {
 
 	@Test
 	public void testHasSegments() {
-		fail("Not yet implemented");
+		assertTrue(sp.hasSegments());
+		sp.clearSegments();
+		assertFalse(sp.hasSegments());
+	}
+	
+	@Test
+	public void testGetSegments() throws ProfileException {
+	    List<IBorderSegment> test = makeTestSegments();
+	    List<IBorderSegment> result = sp.getSegments();
+	    
+	    assertEquals(test.size(), result.size());
+	    for(int i=0; i<test.size(); i++){
+	        assertEquals(test.get(i), result.get(i));
+	    }
+
+	}
+	
+	@Test
+    public void testGetSegmentsReturnsEmptyListAfterClearing() throws ProfileException {
+        sp.clearSegments();
+        List<IBorderSegment> result = sp.getSegments();
+        assertTrue(result.isEmpty());
+    }
+
+	@Test
+	public void testSegmentIterator() throws Exception {
+        List<IBorderSegment> result = sp.getSegments(); 
+        Iterator<IBorderSegment> it = sp.segmentIterator();
+        int i=0;
+        while(it.hasNext()){
+            assertEquals(result.get(i++), it.next());
+        }
 	}
 
 	@Test
-	public void testGetSegments() {
-		fail("Not yet implemented");
+	public void testGetSegmentUUID() throws ProfileException, UnavailableComponentException {
+	    List<IBorderSegment> test = makeTestSegments();
+	    
+	    for(IBorderSegment s : test){
+	        IBorderSegment seg = sp.getSegment(s.getID());
+	        assertEquals(s, seg);
+	    }
+	}
+	
+	@Test
+    public void testGetSegmentUUIDExceptsOnNullId() throws ProfileException, UnavailableComponentException {
+	    exception.expect(IllegalArgumentException.class);
+	    IBorderSegment seg = sp.getSegment( (UUID) null);
+    }
+	
+	@Test
+    public void testGetSegmentUUIDExceptsOnInvalidId() throws ProfileException, UnavailableComponentException {
+	    UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        exception.expect(UnavailableComponentException.class);
+        IBorderSegment seg = sp.getSegment( notPresent);
+    }
+
+	@Test
+	public void testHasSegment() throws ProfileException, UnavailableComponentException {
+	    List<IBorderSegment> test = makeTestSegments();
+        
+        for(IBorderSegment s : test){
+            IBorderSegment seg = sp.getSegment(s.getID());
+            assertEquals(s, seg);
+        }
 	}
 
 	@Test
-	public void testSegmentIterator() {
-		fail("Not yet implemented");
+	public void testGetSegmentsFrom() throws Exception {
+	    
+	    List<IBorderSegment> test = makeTestSegments();
+	    List<IBorderSegment> result = sp.getSegmentsFrom(UUID.fromString(SEG_1));
+	    assertEquals(test.get(1), result.get(0));
 	}
-
+	
 	@Test
-	public void testGetSegmentUUID() {
-		fail("Not yet implemented");
-	}
-
+    public void testGetSegmentsFromExceptsOnNullId() throws Exception {
+	    exception.expect(IllegalArgumentException.class);
+        List<IBorderSegment> result = sp.getSegmentsFrom((UUID) null);
+    }
+	
 	@Test
-	public void testHasSegment() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetSegmentsFrom() {
-		fail("Not yet implemented");
-	}
+    public void testGetSegmentsFromExceptsOnInvalidId() throws Exception {
+	    UUID notPresent = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        exception.expect(UnavailableComponentException.class);
+        List<IBorderSegment> result = sp.getSegmentsFrom(notPresent);
+    }
 
 	@Test
 	public void testGetOrderedSegments() {
@@ -165,7 +236,7 @@ public class SegmentedFloatProfileTest {
 
 	@Test
 	public void testGetSegmentString() {
-	    IBorderSegment test = new DefaultBorderSegment(20, 45, 100, UUID.fromString(SEG_1));
+	    IBorderSegment test = makeSeg1();
 	    String name = "Seg_1";
 	    IBorderSegment result = sp.getSegment(name);
 	    assertEquals(test.getID(), result.getID());
@@ -181,7 +252,7 @@ public class SegmentedFloatProfileTest {
 
 	@Test
 	public void testGetSegmentIBorderSegment() {
-	    IBorderSegment test = new DefaultBorderSegment(20, 45, 100, UUID.fromString(SEG_1));
+	    IBorderSegment test = makeSeg1();
 	    IBorderSegment result = sp.getSegment(test);
 	    assertEquals(test.getID(), result.getID());
 	    assertEquals(test.getStartIndex(), result.getStartIndex());
@@ -235,20 +306,66 @@ public class SegmentedFloatProfileTest {
 		exception.expect(IllegalArgumentException.class);
 		sp.getSegmentContaining(100);
 	}
+	
+	@Test
+	public void testSetSegments() throws ProfileException {
+	    
+	    List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(10, 20, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(20, 60, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(60, 90, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(90, 5,  100, UUID.randomUUID()));
+        IBorderSegment.linkSegments(list);
+        
+        sp.setSegments(list);
+        
+        for(int i=0; i<list.size(); i++){
+            assertEquals(list.get(i), sp.getSegmentAt(i));
+        }
+	}
 
 	@Test
-	public void testSetSegments() {
-		fail("Not yet implemented");
+	public void testSetSegmentsExceptsOnEmptyList() {
+	    exception.expect(IllegalArgumentException.class);
+	    sp.setSegments(new ArrayList<IBorderSegment>(0));
+	}
+	
+	@Test
+	public void testSetSegmentsExceptsOnNullList() {
+	    exception.expect(IllegalArgumentException.class);
+	    sp.setSegments(null);
 	}
 
 	@Test
 	public void testClearSegments() {
-		fail("Not yet implemented");
+	    assertTrue(sp.hasSegments());
+	    sp.clearSegments();
+        assertFalse(sp.hasSegments());
 	}
 
 	@Test
 	public void testGetSegmentNames() {
-		fail("Not yet implemented");
+	    
+	    List<String> test = new ArrayList<>();
+	    for(int i=0; i<sp.size(); i++){
+	        test.add("Seg_"+i);
+	    }
+	    
+	    List<String> result = sp.getSegmentNames();
+	    
+	    assertEquals(test.size(), result.size());
+	    
+	    for(int i=0; i<sp.size(); i++){
+	        assertEquals(test.get(i), result.get(i));
+	    }
+	}
+
+	@Test
+	public void testGetSegmentNamesReturnsEmptyListWhenNoSegments() {
+	    sp.clearSegments();
+	    List<String> result = sp.getSegmentNames();
+	    assertTrue(result.isEmpty());
 	}
 
 	@Test
@@ -257,9 +374,16 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentCount() {
-		fail("Not yet implemented");
+	public void testGetSegmentCount() throws ProfileException {   
+	    List<IBorderSegment> list = makeTestSegments();
+	    assertEquals(list.size(), sp.getSegmentCount());  
 	}
+	
+	@Test
+    public void testGetSegmentCountZeroWhenEmpty() throws ProfileException {   
+        sp.clearSegments();
+        assertEquals(0, sp.getSegmentCount());  
+    }
 
 	@Test
 	public void testGetDisplacement() {
