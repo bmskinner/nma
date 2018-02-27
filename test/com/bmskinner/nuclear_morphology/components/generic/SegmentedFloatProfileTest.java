@@ -48,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
  */
 public class SegmentedFloatProfileTest {
     
+    // Ids for the test profile segments
     private static final String SEG_0 = "00000000-0000-0000-0000-000000000000";
     private static final String SEG_1 = "11111111-1111-1111-1111-111111111111";
     private static final String SEG_2 = "22222222-2222-2222-2222-222222222222";
@@ -287,8 +288,13 @@ public class SegmentedFloatProfileTest {
     }
 
 	@Test
-	public void testGetOrderedSegments() {
-		fail("Not yet implemented");
+	public void testGetOrderedSegments() throws ProfileException {
+	    List<IBorderSegment> test = makeTestSegments();
+	    List<IBorderSegment> result = sp.getOrderedSegments();
+
+	    for(int i=0; i<test.size(); i++){
+            assertEquals(test.get(i), result.get(i));
+        }
 	}
 
 	@Test
@@ -510,19 +516,100 @@ public class SegmentedFloatProfileTest {
     }
 
 	@Test
-	public void testUpdate() {
-		fail("Not yet implemented");
+	public void testAdjustSegmentStartPositive() throws SegmentUpdateException {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
+	    int expStart = s1.getStartIndex()+5;
+	    assertTrue(sp.adjustSegmentStart(s1.getID(), 5));  
+	    assertEquals(expStart, s1.getStartIndex());   
 	}
-
+	
 	@Test
-	public void testAdjustSegmentStart() {
-		fail("Not yet implemented");
-	}
+	public void testAdjustSegmentStartNegative() throws SegmentUpdateException {
+	    IBorderSegment s1 = sp.getSegmentAt(1);
 
-	@Test
-	public void testAdjustSegmentEnd() {
-		fail("Not yet implemented");
+	    int expStart = s1.getStartIndex()-5;
+	    assertTrue(sp.adjustSegmentStart(s1.getID(), -5));
+	    assertEquals(expStart, s1.getStartIndex()); 
 	}
+	
+	@Test
+    public void testAdjustSegmentStartPositiveDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        int length = s1.length();
+        int expStart = s1.getStartIndex();
+        assertFalse(sp.adjustSegmentStart(s1.getID(), length-1));
+        assertEquals(expStart, s1.getStartIndex()); 
+    }
+	
+	@Test
+    public void testAdjustSegmentStartNegativeDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        int length = s1.prevSegment().length();
+        int expStart = s1.getStartIndex();
+        assertFalse(sp.adjustSegmentStart(s1.getID(), -(length-1)));
+        assertEquals(expStart, s1.getStartIndex()); 
+    }
+	
+	@Test
+    public void testAdjustSegmentStartExceptsWhenIdIsNull() throws SegmentUpdateException {
+	    exception.expect(IllegalArgumentException.class);
+        sp.adjustSegmentStart(null, 5);
+    }
+	
+	@Test
+    public void testAdjustSegmentStartExceptsWhenIdIsInvalid() throws SegmentUpdateException {
+	    UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        exception.expect(IllegalArgumentException.class);
+        sp.adjustSegmentStart(id, 5);
+    }
+	
+	@Test
+    public void testAdjustSegmentEndPositive() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        int exp = s1.getEndIndex()+5;
+        assertTrue(sp.adjustSegmentEnd(s1.getID(), 5));  
+        assertEquals(exp, s1.getEndIndex());   
+    }
+    
+    @Test
+    public void testAdjustSegmentEndNegative() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+
+        int expStart = s1.getEndIndex()-5;
+        assertTrue(sp.adjustSegmentEnd(s1.getID(), -5));
+        assertEquals(expStart, s1.getEndIndex()); 
+    }
+    
+    @Test
+    public void testAdjustSegmentEndPositiveDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        int length = s1.nextSegment().length();
+        int expStart = s1.getEndIndex();
+        assertFalse(sp.adjustSegmentEnd(s1.getID(), length-1));
+        assertEquals(expStart, s1.getEndIndex()); 
+    }
+    
+    @Test
+    public void testAdjustSegmentEndNegativeDoesNothingWhenSegmentWillBecomeTooSmall() throws SegmentUpdateException {
+        IBorderSegment s1 = sp.getSegmentAt(1);
+        int length = s1.length();
+        int expStart = s1.getEndIndex();
+        assertFalse(sp.adjustSegmentEnd(s1.getID(), -(length-1)));
+        assertEquals(expStart, s1.getEndIndex()); 
+    }
+    
+    @Test
+    public void testAdjustSegmentEndExceptsWhenIdIsNull() throws SegmentUpdateException {
+        exception.expect(IllegalArgumentException.class);
+        sp.adjustSegmentEnd(null, 5);
+    }
+    
+    @Test
+    public void testAdjustSegmentEndExceptsWhenIdIsInvalid() throws SegmentUpdateException {
+        UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
+        exception.expect(IllegalArgumentException.class);
+        sp.adjustSegmentEnd(id, 5);
+    }
 
 	@Test
 	public void testNudgeSegments() {
@@ -564,11 +651,6 @@ public class SegmentedFloatProfileTest {
 	    assertEquals(39, sp.getSegment(p2.getID()).getStartIndex());
 	    assertEquals(64, sp.getSegment(p3.getID()).getStartIndex());
 	    assertEquals(8, sp.getSegment(p4.getID()).getStartIndex());
-	}
-
-	@Test
-	public void testInterpolateSegments() {
-		fail("Not yet implemented");
 	}
 
 	@Test
@@ -847,8 +929,29 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testInterpolate() {
-		fail("Not yet implemented");
+	public void testInterpolate() throws ProfileException {
+	    
+	    ISegmentedProfile result = sp.interpolate(sp.size()*2);
+	    
+	    assertEquals(sp.getSegmentCount(), result.getSegmentCount());
+	    for (int i=0; i < sp.getSegmentCount(); i++) {
+	        assertEquals(sp.getSegmentAt(i).getStartIndex()*2, result.getSegmentAt(i).getStartIndex());
+	    }  
 	}
+	
+	@Test
+    public void testInterpolateExceptsWhenLessThanZero() throws ProfileException {
+	    exception.expect(IllegalArgumentException.class);
+        sp.interpolate(-1);
+    }
+	
+	@Test
+    public void testToString() {
+	    StringBuilder builder = new StringBuilder();
+        for (IBorderSegment seg : sp.getSegments()) {
+            builder.append(seg.toString() + System.getProperty("line.separator"));
+        }
 
+       assertEquals(builder.toString(), sp.toString());
+    }
 }

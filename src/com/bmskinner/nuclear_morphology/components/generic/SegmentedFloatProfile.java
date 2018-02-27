@@ -288,7 +288,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
              */
             fine("Cannot get ordered segments");
             fine("Profile is " + this.toString());
-            // log(Level.WARNING, this.toString());
             fine("Using the first segment in the profile");
             firstSeg = this.getSegments().get(0); // default to the first
                                                   // segment in the profile
@@ -299,7 +298,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             result = getSegmentsFrom(firstSeg);
         } catch (ProfileException e) {
             warn("Profile error getting segments");
-            log(Level.FINE, "Profile error getting segments", e);
+            fine("Profile error getting segments", e);
             result = new ArrayList<IBorderSegment>();
         }
 
@@ -555,7 +554,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     @Override
     public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException {
-        if (!this.getSegmentIDs().contains(id)) {
+        if (!hasSegment(id)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
         }
 
@@ -582,8 +581,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     @Override
     public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException {
-
-        if (!this.getSegmentIDs().contains(id)) {
+        if (!hasSegment(id)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
         }
 
@@ -666,11 +664,10 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     @Override
-    public ISegmentedProfile interpolateSegments(int length) throws ProfileException {
+    public ISegmentedProfile interpolate(int length) throws ProfileException {
+        
 
         // get the proportions of the existing segments
-        // log("Segment interpolation begun: "+segments.length);
-
         double[] props = new double[segments.length];
 
         for (int i = 0; i < segments.length; i++) {
@@ -835,34 +832,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         IProfile revisedProfile = testSegProfile.interpolate(newLength);
         return revisedProfile;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#equals(components.generic.
-     * ISegmentedProfile)
-     */
-    // @Override
-    // public boolean equals(ISegmentedProfile profile){
-    // if(this==profile){
-    // return true;
-    // }
-    //
-    // if(!(profile instanceof ISegmentedProfile)){
-    // return false;
-    // }
-    //
-    // if(!super.equals(profile)){
-    // return false;
-    // }
-    // // check the segments
-    // for(String name : this.getSegmentNames()){
-    // if(!this.getSegment(name).equals(profile.getSegment(name))){
-    // return false;
-    // }
-    // }
-    // return true;
-    // }
 
     /*
      * (non-Javadoc)

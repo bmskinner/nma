@@ -732,7 +732,7 @@ public class DatasetConverter implements Loggable, Importer {
                         // fine("\tNew nucleus profile length of
                         // "+target.size()+" : original nucleus was
                         // "+profile.size());
-                        newProfile = profile.interpolateSegments(target.size());
+                        newProfile = profile.interpolate(target.size());
                         // fine("\tInterpolated profile has length
                         // "+target.size()+" with segment total length
                         // "+target.getSegments().get(0).getTotalLength());

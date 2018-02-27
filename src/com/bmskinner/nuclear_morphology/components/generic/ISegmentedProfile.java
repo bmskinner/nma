@@ -99,7 +99,8 @@ public interface ISegmentedProfile extends IProfile {
      * @return an interpolated profile
      * @throws ProfileException
      */
-    ISegmentedProfile interpolateSegments(int newLength) throws ProfileException;
+    @Override
+    ISegmentedProfile interpolate(int newLength) throws ProfileException;
 
     /**
      * Fetch the segment list ordered to start from the segment with the given
