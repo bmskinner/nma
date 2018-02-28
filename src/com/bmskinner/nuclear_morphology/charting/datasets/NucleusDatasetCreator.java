@@ -1289,7 +1289,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         try {
             angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Error getting nucleus angle profile from " + pointType);
+            warn("Error getting nucleus angle profile from " + pointType);
             throw new ChartDatasetCreationException("Cannot make segmented nucleus outline", e);
         }
 

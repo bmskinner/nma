@@ -100,16 +100,9 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
     private void processNuclei() throws Exception {
 
         for (int i = low; i < high; i++) {
-            try {
-                processNucleus(nuclei[i]);
-            } catch (Exception e) {
-                // On error, dump the nucleus logs
-                // log(Level.SEVERE, nuclei[i].printLog());
-                throw e;
-            }
+            processNucleus(nuclei[i]);
             fireProgressEvent();
         }
-
     }
 
     private void processNucleus(Nucleus n) throws Exception {
@@ -117,8 +110,6 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
         if (n.isLocked()) {
             finest(n.getNameAndNumber() + " is locked, skipping");
             return;
-        } else {
-            finest("Recombining segments for nucleus " + n.getNameAndNumber());
         }
 
         fitter.fit(n, pc);
@@ -133,8 +124,8 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
         // n.log("Recombined segments:");
         // n.log(segmented.toString());
 
-        log(Level.FINEST, "Recombined segments for nucleus " + n.getNameAndNumber());
-        log(Level.FINEST, segmented.toString());
+//        log(Level.FINEST, "Recombined segments for nucleus " + n.getNameAndNumber());
+//        log(Level.FINEST, segmented.toString());
     }
 
 }

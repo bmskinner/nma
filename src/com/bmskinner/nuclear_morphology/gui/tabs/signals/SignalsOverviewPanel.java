@@ -257,8 +257,10 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     private void updateSignalStatsPanel() {
 
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setType(TableType.SIGNAL_STATS_TABLE).setTarget(statsTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer()).build();
+                .setType(TableType.SIGNAL_STATS_TABLE)
+                .setTarget(statsTable)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new SignalTableCellRenderer())
+                .build();
 
         setTable(options);
 

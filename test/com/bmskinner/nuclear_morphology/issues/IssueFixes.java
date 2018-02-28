@@ -23,22 +23,30 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
 import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
+import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 
@@ -52,7 +60,7 @@ import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
  */
 public class IssueFixes {
     
-    private static final String DATASET_FOLDER = "test/samples/datasets/";
+    private static final String DATASET_FOLDER = "test/com/bmskinner/nuclear_morphology/samples/datasets/";
     private static final String MERGE_DATASET  = "Merge_of_merge.nmd";
     
     /**
@@ -136,6 +144,55 @@ public class IssueFixes {
     
     
     
-    
+    @Test
+    public void testPigSpermSegmentationIssueFixed() throws Exception{
+                
+        File okFile = new File(DATASET_FOLDER, "IssuePigOk.nmd");
+        File failFile = new File(DATASET_FOLDER, "IssuePigFail.nmd");
+        
+        assertTrue(okFile.exists());
+        assertTrue(failFile.exists());
+        
+        UUID signalID = UUID.fromString("6738cc78-1b48-4fe8-8d72-15b31b305d7c");
+        Map<UUID, File> signalMap = new HashMap<>();
+        signalMap.put(signalID, new File(DATASET_FOLDER));
+
+        IAnalysisDataset okDataset = SampleDatasetReader.openDataset(okFile, signalMap);
+        
+        DatasetValidator v = new DatasetValidator();
+        assertFalse(v.validate(okDataset));
+        
+        
+        okDataset.getCollection().setConsensus(null);
+        // Try rerunning the analysis            
+        IAnalysisMethod p = new DatasetProfilingMethod(okDataset);
+        p.call();
+        
+        System.out.println("Completed profiling");
+
+        IAnalysisMethod seg = new DatasetSegmentationMethod(okDataset, MorphologyAnalysisMode.NEW);
+        seg.call();
+        
+
+        for(IAnalysisDataset d : okDataset.getAllChildDatasets()){
+            okDataset.getCollection().getProfileManager().copyCollectionOffsets(d.getCollection());
+            d.getCollection().setConsensus(null);
+        }
+
+        // Refold the consensus
+        new ConsensusAveragingMethod(okDataset).call();
+
+        
+        boolean ok = v.validate(okDataset);
+        for(String s : v.getErrors()){
+            System.out.println(s);
+        }
+
+        assertTrue(ok);
+        
+        // Save the fixed file back out
+        File saveFile = new File(DATASET_FOLDER, "IssuePigOk_Fixed.nmd");
+        new DatasetExportMethod(okDataset, saveFile).call();
+    }
 
 }

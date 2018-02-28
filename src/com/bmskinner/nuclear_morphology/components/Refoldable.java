@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Provides methods relating to the abillity to refold consensus shapes for a
  * component
@@ -42,7 +44,7 @@ public interface Refoldable<E extends CellularComponent> {
      * 
      * @param n
      */
-    void setConsensus(E component);
+    void setConsensus(@Nullable E component);
 
     /**
      * Get the consensus nucleus if set

@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -30,10 +32,16 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * This class handles fitting of segments between profiles
+ * @author bms41
+ *
+ */
 public class SegmentFitter implements Loggable {
 
     /**
@@ -55,19 +63,14 @@ public class SegmentFitter implements Loggable {
      * Construct with a median profile containing segments. The originals will
      * not be modified
      * 
-     * @param medianProfile
-     *            the profile
-     * @param logFile
-     *            the file for logging status
+     * @param profile the median profile of the collection
      * @throws Exception
      */
-    public SegmentFitter(final ISegmentedProfile medianProfile) throws Exception {
-        if (medianProfile == null) {
-            // log(Level.SEVERE, "Segmented profile is null");
+    public SegmentFitter(@NonNull final ISegmentedProfile profile) {
+        if (profile == null)
             throw new IllegalArgumentException("Median profile is null");
-        }
 
-        this.medianProfile = new SegmentedFloatProfile(medianProfile);
+        medianProfile = profile.copy();
     }
 
     /**
@@ -81,12 +84,11 @@ public class SegmentFitter implements Loggable {
      *            the ProfileCollection from the CellCollection the nucleus
      *            belongs to
      */
-    public void fit(final Nucleus n, final IProfileCollection pc) throws Exception {
+    public void fit(@NonNull final Nucleus n, @NonNull final IProfileCollection pc) throws Exception {
 
         // Input checks
-        if (n == null) {
+        if (n == null)
             throw new IllegalArgumentException("Test nucleus is null");
-        }
 
         if (n.getProfile(ProfileType.ANGLE).getSegments() == null
                 || n.getProfile(ProfileType.ANGLE).getSegments().isEmpty()) {
@@ -97,23 +99,10 @@ public class SegmentFitter implements Loggable {
         // get the best fit of segments to the median
         ISegmentedProfile newProfile = this.runFitter(n.getProfile(ProfileType.ANGLE));
 
-        log(Level.FINEST, "Fitted profile against median for nucleus " + n.getNameAndNumber());
-        log(Level.FINEST, newProfile.toString());
-
-        finest("Fitted profile against median:");
-        finest(newProfile.toString());
-
         n.setProfile(ProfileType.ANGLE, newProfile);
 
         // modify tail and head/tip point to nearest segment end
         remapBorderPoints(n, pc);
-
-        log(Level.FINEST, "Remapped border points for nucleus " + n.getNameAndNumber());
-        log(Level.FINEST, n.getProfile(ProfileType.ANGLE).toString());
-
-        finest("Remapped border points:");
-        finest(n.getProfile(ProfileType.ANGLE).toString());
-
     }
 
     /**
@@ -126,18 +115,16 @@ public class SegmentFitter implements Loggable {
      * @return a profile
      * @throws Exception
      */
-    public ISegmentedProfile recombine(Nucleus n, Tag tag) throws Exception {
-        if (n == null) {
+    public ISegmentedProfile recombine(@NonNull final Nucleus n, Tag tag) throws Exception {
+        if (n == null)
             throw new IllegalArgumentException("Test nucleus is null");
-        }
 
-        if (!n.getProfile(ProfileType.ANGLE).hasSegments()) {
+        if (!n.getProfile(ProfileType.ANGLE).hasSegments())
             throw new IllegalArgumentException("Test nucleus has no segments");
-        }
 
-        finest("Recombining profile");
-        finest("Template profile:");
-        finest(medianProfile.toString());
+//        finest("Recombining profile");
+//        finest("Template profile:");
+//        finest(medianProfile.toString());
 
         /*
          * Generate a segmented profile from the angle profile of the point
@@ -147,8 +134,8 @@ public class SegmentFitter implements Loggable {
 
         ISegmentedProfile nucleusProfile = new SegmentedFloatProfile(n.getProfile(ProfileType.ANGLE, tag));
 
-        finest("Initial profile starting at " + tag + ":");
-        finest(nucleusProfile.toString());
+//        finest("Initial profile starting at " + tag + ":");
+//        finest(nucleusProfile.toString());
 
         // stretch or squeeze the segments to match the length of the median
         // profile of the collection
@@ -156,8 +143,8 @@ public class SegmentFitter implements Loggable {
 
         try {
             frankenProfile = nucleusProfile.frankenNormaliseToProfile(medianProfile);
-            finest("Complete frankenprofile:");
-            finest(frankenProfile.toString());
+//            finest("Complete frankenprofile:");
+//            finest(frankenProfile.toString());
         } catch (ProfileException e) {
             error("Malformed profile in frankenprofiling", e);
             finest("Median profile:");
@@ -179,16 +166,15 @@ public class SegmentFitter implements Loggable {
      * @param pc
      *            the profile collection from the CellCollection
      */
-    private void remapBorderPoints(Nucleus n, IProfileCollection pc) throws Exception {
+    private void remapBorderPoints(@NonNull final Nucleus n, IProfileCollection pc) throws Exception {
 
         if (pc == null) {
-            log(Level.WARNING, "No profile collection found, skipping remapping");
-            return; // this allows the unit tests to skip this section if a
-                    // profile collection has not been created
+            warn("No profile collection found, skipping remapping");
+            return;
         }
 
-        finest("Remapping border points");
         /*
+         * RP not at segment start
          * Not all the tags will be associated with endpoints; e.g. the
          * intersection point. The orientation and reference points should be
          * updated though - members of the core border tag population
@@ -216,10 +202,6 @@ public class SegmentFitter implements Loggable {
                 // segment start point
                 IBorderSegment nSeg = n.getProfile(ProfileType.ANGLE).getSegment(seg.getName());
                 n.setBorderTag(tag, nSeg.getStartIndex());
-                finest("Remapped border point '" + tag + "' to " + nSeg.getStartIndex() + " in "
-                        + n.getNameAndNumber());
-                // finest("Remapped border point '"+tag+"' to
-                // "+nSeg.getStartIndex());
             } else {
 
                 // A segment was not found with a start index at zero; segName
@@ -251,12 +233,10 @@ public class SegmentFitter implements Loggable {
      * @return a profile with best-fit segmentation to the median
      * @throws Exception
      */
-    private ISegmentedProfile runFitter(ISegmentedProfile profile) throws Exception {
+    private ISegmentedProfile runFitter(@NonNull ISegmentedProfile profile) throws Exception {
         // Input check
-        if (profile == null) {
-            // log(Level.SEVERE, "Profile is null");
+        if (profile == null)
             throw new IllegalArgumentException("Input profile is null");
-        }
 
         // By default, return the input profile
         ISegmentedProfile result = new SegmentedFloatProfile(profile);
@@ -362,12 +342,9 @@ public class SegmentFitter implements Loggable {
      * certain amount. If the change is a better fit to the median profile than
      * before, it is kept.
      * 
-     * @param profile
-     *            the profile to test
-     * @param id
-     *            the segment to alter
-     * @param changeValue
-     *            the amount to alter the segment by
+     * @param profile the profile to test
+     * @param id the segment to alter
+     * @param changeValue the amount to alter the segment by
      * @return the original profile, or a better fit to the median
      * @throws Exception
      */
@@ -395,11 +372,8 @@ public class SegmentFitter implements Loggable {
             if (score < bestScore) {
                 bestScore = score;
                 result = new SegmentedFloatProfile(testProfile);
-
             }
-
             return result;
-
         }
 
         return profile;
@@ -416,10 +390,10 @@ public class SegmentFitter implements Loggable {
      * @param testProfile
      *            the profile to measure
      * @return the sum of square differences between the segments
+     * @throws UnavailableComponentException 
      * @throws Exception
      */
-    private double compareSegments(UUID id, ISegmentedProfile referenceProfile, ISegmentedProfile testProfile)
-            throws Exception {
+    private double compareSegments(UUID id, ISegmentedProfile referenceProfile, ISegmentedProfile testProfile) throws UnavailableComponentException {
         if (id == null) {
             throw new IllegalArgumentException("Segment id is null");
         }
@@ -461,22 +435,17 @@ public class SegmentFitter implements Loggable {
     private double compareSegmentationPatterns(ISegmentedProfile referenceProfile, ISegmentedProfile testProfile)
             throws Exception {
 
-        if (referenceProfile == null || testProfile == null) {
+        if (referenceProfile == null || testProfile == null)
             throw new IllegalArgumentException("An input profile is null");
-        }
 
-        if (referenceProfile.getSegmentCount() != testProfile.getSegmentCount()) {
+        if (referenceProfile.getSegmentCount() != testProfile.getSegmentCount())
             throw new IllegalArgumentException("Segment counts are different for profiles");
-        }
 
         double result = 0;
 
         for (UUID id : referenceProfile.getSegmentIDs()) {
             result += compareSegments(id, referenceProfile, testProfile);
         }
-        // for(String name : referenceProfile.getSegmentNames()){
-        // result += compareSegments(name, referenceProfile, testProfile);
-        // }
         return result;
     }
 }

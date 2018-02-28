@@ -40,7 +40,7 @@ public class ProfileAggregateTest {
 	public void profileShouldNotBeCreatedWithNullData(){
 
 		exception.expect(IllegalArgumentException.class);
-		IProfileAggregate tester = new DefaultProfileAggregate(100, 0); 
+		new DefaultProfileAggregate(100, 0); 
 	}
 	
 	@Test

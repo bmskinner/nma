@@ -148,7 +148,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             throw new ChartDatasetCreationException("Component is not segmentable");
         }
 
-        finest("Creating segmented outline");
+        fine("Creating segmented outline");
 
         Taggable t = (Taggable) component;
 
@@ -161,11 +161,9 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
 
         if (!segmentList.isEmpty()) { // only draw if there are segments
-            finest("Component has " + segmentList.size() + " segments");
+//            finest("Component has " + segmentList.size() + " segments");
 
             for (IBorderSegment seg : segmentList) {
-
-                finest("Drawing segment " + seg.getID());
 
                 // If we make the array the length of the segment,
                 // there will be a gap between the segment end and the
@@ -206,7 +204,7 @@ public class OutlineDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 finest("Added segment data to chart dataset");
             }
         } else {
-            finest("Component does not have segments; falling back to bare outline");
+            fine("Component does not have segments; falling back to bare outline");
             addNonSegmentedOutline(ds, chooseSeriesKey());
         }
 

@@ -77,7 +77,7 @@ public class DatasetValidator implements Loggable {
             errorList.add("Error in segmentation between cells");
             errors++;
         }
-
+        
         if (errors == 0) {
             errorList.add("Dataset OK");
             return true;
@@ -137,6 +137,7 @@ public class DatasetValidator implements Loggable {
 
         List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
+        int errorCount = 0;
         for (Nucleus n : d.getCollection().getNuclei()) {
 
             ISegmentedProfile p;
@@ -147,9 +148,8 @@ public class DatasetValidator implements Loggable {
                 // Check all nucleus segments are in root dataset
                 for (UUID id : childList) {
                     if (!idList.contains(id)) {
-                        errorList
-                                .add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
-                        return false;
+                        errorList.add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
+                        errorCount++;
                     }
                 }
 
@@ -157,18 +157,46 @@ public class DatasetValidator implements Loggable {
                 for (UUID id : idList) {
                     if (!childList.contains(id)) {
                         errorList.add("Segment " + id + " not found in child " + n.getNameAndNumber());
-                        return false;
+                        errorCount++;
                     }
                 }
             } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
                 errorList.add("Error getting segments");
                 stack(e);
-                return false;
+                errorCount++;
             }
 
         }
+        
+        if(d.getCollection().hasConsensus()){
+            try {
+                ISegmentedProfile p = d.getCollection().getConsensus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                
+                if(idList.size()!=p.getSegmentCount())
+                    errorList.add("Consensus does not have the same number of segments as the root dataset");
+                
+                for (UUID id : idList) {
+                    if (!p.hasSegment(id)) {
+                        errorList.add("Segment " + id + " not found in consensus");
+                        errorCount++;
+                    }
+                }
+                
+                for(UUID id : p.getSegmentIDs()){
+                    if (!idList.contains(id)) {
+                        errorList.add("Segment " + id + " in consensus not found in root");
+                        errorCount++;
+                    }
+                }
+                
+            } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
+                errorList.add("Error getting segments");
+                stack(e);
+                errorCount++;
+            }
+        }
 
-        return true;
+        return errorCount==0;
     }
 
 }

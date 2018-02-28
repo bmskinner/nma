@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -44,11 +46,10 @@ public class ProfileOffsetter implements Loggable {
 
     final private ICellCollection collection;
 
-    public ProfileOffsetter(final ICellCollection collection) {
+    public ProfileOffsetter(@NonNull final ICellCollection collection) {
 
-        if (collection == null) {
+        if (collection == null)
             throw new IllegalArgumentException("Collection cannot be null");
-        }
 
         this.collection = collection;
     }
@@ -86,19 +87,17 @@ public class ProfileOffsetter implements Loggable {
          * Get the proportion of the index through the segment
          */
         double proportion = segFromRef.getIndexProportion(index);
-        finest("Found " + tag + " at " + proportion + " through median segment " + segFromRef.getID());
+//        finest("Found " + tag + " at " + proportion + " through median segment " + segFromRef.getID());
 
         /*
          * Go through each nucleus and apply the position
          */
-        finer("Updating tag location in nuclei");
+//        finer("Updating tag location in nuclei");
         for (Nucleus nucleus : collection.getNuclei()) {
 
             int oldNIndex = nucleus.getBorderIndex(tag);
             if (oldNIndex == -1) {
                 finer("Border tag does not exist and will be created");
-            } else {
-                finer("Previous " + tag + " index at " + oldNIndex);
             }
 
             try {
@@ -107,20 +106,10 @@ public class ProfileOffsetter implements Loggable {
                 if (nucleusSegment == null) {
                     warn("Error updating nucleus, segment " + segID + " not found");
                     throw new UnavailableComponentException("Segment " + segID + " not found");
-                } else {
-                    finest("Using nucleus segment " + nucleusSegment.getID());
                 }
 
-                int newIndex = nucleusSegment.getProportionalIndex(proportion); // find
-                                                                                // the
-                                                                                // index
-                                                                                // in
-                                                                                // the
-                                                                                // segment
-                                                                                // closest
-                                                                                // to
-                                                                                // the
-                                                                                // proportion
+                // find the index in the segment closest to the proportion 
+                int newIndex = nucleusSegment.getProportionalIndex(proportion);
 
                 if (newIndex == -1) {
                     warn("Cannot find " + tag + " index in nucleus profile at proportion " + proportion);
@@ -128,7 +117,6 @@ public class ProfileOffsetter implements Loggable {
                 }
 
                 nucleus.setBorderTag(tag, newIndex);
-                finest("Set border tag in nucleus to " + newIndex + " from " + oldNIndex);
             } catch (IndexOutOfBoundsException | UnavailableComponentException e) {
                 stack("Cannot set " + tag + " index in nucleus profile", e);
             }

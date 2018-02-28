@@ -235,9 +235,6 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
                 ICellCollection virt = new VirtualCellCollection(d, stat2.getName());
                 
                 stat2.getCells().forEach(c->virt.addCell(c));
-//                for (ICell c : stat2.getCells()) {
-//                    virt.addCell(c);
-//                }
 
                 virt.setName("Filtered_" + statA + "_" + statB);
 

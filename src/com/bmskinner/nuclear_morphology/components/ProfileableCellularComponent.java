@@ -231,34 +231,32 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * 
      * @param p
      * @param pointType
-     * @throws Exception
+     * @throws UnavailableBorderTagException 
+     * @throws UnavailableProfileTypeException 
      */
-    public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException {
+    public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
-        if (!this.hasBorderTag(tag)) {
-            throw new UnavailableBorderTagException("Tag " + tag + " is not present");
-        }
-
-        if (segsLocked) {
+        if (segsLocked)
             return;
-        }
 
-        if (this.getBorderLength() != p.size()) {
+        if (!this.hasBorderTag(tag))
+            throw new UnavailableBorderTagException("Tag " + tag + " is not present");
+
+        if (this.getBorderLength() != p.size())
             throw new IllegalArgumentException("Input profile does not match border length of object");
-        }
 
         // fetch the index of the pointType (the zero of the input profile)
         int pointIndex = this.borderTags.get(tag);
 
-        fine("Setting profile " + type + " at " + tag + " offsetting given profile by -" + pointIndex);
-
-        // remove the offset from the profile, by setting the profile to start
-        // from the pointIndex
+        // remove the offset from the profile, by setting the profile to start from the pointIndex
+        ISegmentedProfile oldProfile = getProfile(type);
+        
         try {
+            
             this.setProfile(type, new SegmentedFloatProfile(p).offset(-pointIndex));
         } catch (ProfileException e) {
             stack("Error setting profile " + type + " at " + tag, e);
-            return;
+            setProfile(type, oldProfile);
         }
 
     }

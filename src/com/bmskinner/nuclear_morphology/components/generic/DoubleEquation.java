@@ -47,12 +47,14 @@ public class DoubleEquation implements LineEquation {
      * @return An Equation describing the line
      */
     public DoubleEquation(final double m, final double c) {
-        if (Double.valueOf(m) == null || Double.valueOf(c) == null) {
-            throw new IllegalArgumentException("m or c is null");
+        if (Double.isNaN(m)|| Double.isNaN(c)) {
+            throw new IllegalArgumentException("m or c is NaN");
         }
-        if (Double.isInfinite(m) || Double.isInfinite(c)) {
-            throw new IllegalArgumentException("m or c is infinite");
-        }
+        if (Double.isInfinite(m))
+            throw new IllegalArgumentException("m is infinite, c is "+c);
+       
+        if(Double.isInfinite(c))
+            throw new IllegalArgumentException("c is infinite, m is "+m);
         
         this.m = m;
         this.c = c;
@@ -100,7 +102,7 @@ public class DoubleEquation implements LineEquation {
         double aX = a.getX();
         double bX = b.getX();
         
-        if(aX==Double.NaN || bX==Double.NaN){
+        if(Double.isNaN(aX) || Double.isNaN(bX)){
             throw new IllegalArgumentException("Point a or b have NaN x: "+a.toString()+", "+b.toString());
         }
                 
@@ -221,6 +223,9 @@ public class DoubleEquation implements LineEquation {
             return new DoubleEquation(0, 0);
         }
         double pM = 0 - (1 / m); // invert and flip sign
+        
+        if(Double.isInfinite(pM))
+            return new DoubleEquation(p.getX());
 
         // find new c
         // y = pM.x + c

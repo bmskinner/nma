@@ -23,6 +23,9 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.ObjectInputStream;
 import java.io.OptionalDataException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,12 +69,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public static final int WAS_CONVERTED_BOOL = 0; // the IAnalysisResult
                                                     // boolean index for
                                                     // conversion state
+    
+    
+    /**
+     * Store a map of signal image locations if necessary 
+     */
+    private Optional<Map<UUID, File>> signalFileMap = Optional.empty();
 
     /**
      * Construct with a file to be read
      * 
-     * @param f
-     *            the saved dataset file
+     * @param f the saved dataset file
      */
     public DatasetImportMethod(final File f) {
         super();
@@ -85,6 +93,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         }
 
         this.file = f;
+    }
+    
+    /**
+     * Call with an existing map of signal ids to directories of images. Designed for unit
+     * testing.
+     * @param f
+     * @param signalFiles
+     */
+    public DatasetImportMethod(final File f, final Map<UUID, File> signalFiles) {
+        this(f);
+        signalFileMap = Optional.of(signalFiles);
     }
 
     @Override
@@ -206,10 +225,10 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                     warn("Curated cells saved");
                     warn("Redetect cells and import the ." + Importer.LOC_FILE_EXTENSION + " file");
 
-                    JOptionPane.showMessageDialog(null,
-                            "Corruption in dataset " + dataset.getName() + ".\n"
-                                    + "Curated and remapped cell locations have been saved.\n"
-                                    + "Please redetect nuclei and apply the saved .cell file.");
+//                    JOptionPane.showMessageDialog(null,
+//                            "Corruption in dataset " + dataset.getName() + ".\n"
+//                                    + "Curated and remapped cell locations have been saved.\n"
+//                                    + "Please redetect nuclei and apply the saved .cell file.");
                 }
 
             } else {
@@ -461,10 +480,9 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * directories If so, update the CellCollection image paths should be
      * /ImageDir/AnalysisDir/dataset.nmd
      * 
-     * @param inputFile
-     *            the file being opened
-     * @param dataset
-     *            the dataset being opened
+     * @param inputFile the file being opened
+     * @param dataset the dataset being opened
+     * @param signalFileMap an optional parameter with the mapping of signal groups to files
      */
     private void updateSavePath(File inputFile, IAnalysisDataset dataset) {
 
@@ -499,7 +517,15 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             }
 
             fine("Checking if signal folders need updating");
-            updateSignalFolders(dataset);
+            if(!signalFileMap.isPresent()){
+                Map<UUID, File> map = new HashMap<>();
+                for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
+                    map.put(id, getSignalDirectory(dataset, id));
+                }
+                signalFileMap = Optional.of(map);
+            }
+            
+            updateSignalFolders(dataset, signalFileMap.get());
 
         } else {
             warn("Dataset is a merge");
@@ -507,7 +533,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         }
     }
 
-    private void updateSignalFolders(IAnalysisDataset dataset) {
+    private void updateSignalFolders(IAnalysisDataset dataset, Map<UUID, File> newsignalMap) {
         if (dataset.getCollection().getSignalManager().hasSignals()) {
             fine("Updating signal locations");
 
@@ -516,7 +542,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             for (UUID signalID : signalGroups) {
 
                 // Get the new folder of images
-                File newsignalDir = getSignalDirectory(dataset, signalID);
+                File newsignalDir = newsignalMap.get(signalID);
+//                File newsignalDir = getSignalDirectory(dataset, signalID);
 
                 if (newsignalDir != null) {
 

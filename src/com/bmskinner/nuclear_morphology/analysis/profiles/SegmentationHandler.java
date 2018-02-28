@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -56,15 +58,13 @@ public class SegmentationHandler implements Loggable {
      * @param segID
      *            the segment ID to be unmerged
      */
-    public void mergeSegments(UUID segID1, UUID segID2) {
+    public void mergeSegments(@NonNull UUID segID1, @NonNull UUID segID2) {
 
-        if (segID1 == null || segID2 == null) {
+        if (segID1 == null || segID2 == null)
             throw new IllegalArgumentException("Segment IDs cannot be null");
-        }
 
-        if (dataset.getCollection().isVirtual()) {
+        if (dataset.getCollection().isVirtual())
             return;
-        }
 
         // Give the new merged segment a new ID
         UUID newID = java.util.UUID.randomUUID();
@@ -111,16 +111,15 @@ public class SegmentationHandler implements Loggable {
 
     /**
      * Unmerge segments with the given ID in this collection and its children,
-     * as long as the collection is real.
+     * as long as the collection is real. Restore the original state on error.
      * 
      * @param segID
      *            the segment ID to be unmerged
      */
-    public void unmergeSegments(UUID segID) {
+    public void unmergeSegments(@NonNull final UUID segID) {
 
-        if (dataset.getCollection().isVirtual()) {
+        if (dataset.getCollection().isVirtual())
             return;
-        }
 
         try {
 
@@ -130,11 +129,14 @@ public class SegmentationHandler implements Loggable {
             IBorderSegment seg = medianProfile.getSegment(segID);
 
             if (!seg.hasMergeSources()) {
+                warn("Segment is not a merge; cannot unmerge");
                 return;
             }
 
+            // Unmerge in the dataset
             dataset.getCollection().getProfileManager().unmergeSegments(seg);
 
+            // Unmerge children
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
                 ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
@@ -145,9 +147,7 @@ public class SegmentationHandler implements Loggable {
                 child.getCollection().getProfileManager().unmergeSegments(childSeg);
             }
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e) {
-            warn("Error unmerging segments");
-            stack(e.getMessage(), e);
-
+            stack("Error unmerging segments", e);
         }
     }
 
@@ -182,7 +182,7 @@ public class SegmentationHandler implements Loggable {
 
                     child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
                 }
-                log("Segment split sucessful");
+//                log("Segment split sucessful");
             } else {
                 warn("Splitting segment cancelled");
             }

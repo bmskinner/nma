@@ -364,6 +364,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         rowNames.add(Labels.SIGNAL_GROUP_LABEL);
         rowNames.add(Labels.SIGNALS_LABEL);
         rowNames.add(Labels.SIGNALS_PER_NUCLEUS);
+        rowNames.add("ID");
 
         for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
             rowNames.add(stat.label(scale));
@@ -451,6 +452,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                 temp.add(collection.getSignalManager().getSignalCount(signalGroup));
                 double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
                 temp.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
+                temp.add(signalGroup.toString());
 
                 for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
                     double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);

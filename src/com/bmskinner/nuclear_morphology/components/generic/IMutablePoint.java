@@ -52,9 +52,9 @@ public interface IMutablePoint extends IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IMutablePoint makeNew(double x, double y) {
-        return makeNew((float) x, (float) y);
-    }
+//    static IMutablePoint makeNew(double x, double y) {
+//        return makeNew((float) x, (float) y);
+//    }
 
     /**
      * Create a new point of the default type based on the given point
@@ -65,9 +65,9 @@ public interface IMutablePoint extends IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IMutablePoint makeNew(IPoint a) {
-        return makeNew(a.getX(), a.getY());
-    }
+//    static IMutablePoint makeNew(IPoint a) {
+//        return makeNew(a.getX(), a.getY());
+//    }
 
     /**
      * Set the x-value

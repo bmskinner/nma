@@ -20,6 +20,9 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.io.File;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -79,15 +82,36 @@ public class SampleDatasetReader {
      */
     public static IAnalysisDataset openDataset(File f) throws Exception {
         
-        if(f==null){
+        if(f==null)
             throw new Exception("Null file argument");
-        }
         
-        if(!f.exists()){
+        if(!f.exists())
             throw new Exception("File does not exist: "+f.getAbsolutePath());
-        }
         
         IAnalysisMethod m = new DatasetImportMethod(f);
+
+        System.out.println("Importing "+f.toString());
+        IAnalysisResult r = m.call();
+
+        IAnalysisDataset d = r.getFirstDataset();
+        return d;
+    }
+    
+    /**
+     * Open the dataset in the given file. Also provide a map of signal images.
+     * @param f
+     * @param signalMap
+     * @return
+     * @throws Exception
+     */
+    public static IAnalysisDataset openDataset(File f, Map<UUID, File> signalMap) throws Exception {
+        if(f==null)
+            throw new Exception("Null file argument");
+        
+        if(!f.exists())
+            throw new Exception("File does not exist: "+f.getAbsolutePath());
+        
+        IAnalysisMethod m = new DatasetImportMethod(f, signalMap);
 
         System.out.println("Importing "+f.toString());
         IAnalysisResult r = m.call();

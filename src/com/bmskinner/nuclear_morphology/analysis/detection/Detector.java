@@ -373,8 +373,7 @@ public abstract class Detector implements Loggable {
         /** Constructs a ParticleAnalyzer.
             @param options  a flag word created by Oring SHOW_RESULTS, EXCLUDE_EDGE_PARTICLES, etc.
         */
-        public ParticleAnalyzer(int options) {
-            this.options = options;
+        public ParticleAnalyzer(int options) { 
             this.measurements = Measurements.FERET;
 
             slice = 1;
@@ -383,6 +382,7 @@ public abstract class Detector implements Loggable {
                 wandMode = Wand.FOUR_CONNECTED;
                 options |= INCLUDE_HOLES;
             }
+            this.options = options;
         }
         
         /**

@@ -50,7 +50,7 @@ public class ProfileTest {
 	public void testFloatProfileFloatArrayWithNullData() {
 		float[] data = null;
 		exception.expect(IllegalArgumentException.class);
-		IProfile tester = new FloatProfile(data);
+		new FloatProfile(data);
 	}
 
 	/**
@@ -69,9 +69,8 @@ public class ProfileTest {
 		
 		
 		// Check null
-		IProfile nullP = null;
 		exception.expect(IllegalArgumentException.class);
-		tester = new FloatProfile(nullP);
+		new FloatProfile( (IProfile)null);
 		
 	}
 

@@ -277,8 +277,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createSegmentedNucleusOutline(collection);
         } catch (ChartDatasetCreationException e) {
-            warn("Error making segmented outline");
-            fine("Error making segmented outline", e);
+            stack("Error making segmented outline", e);
+//            fine("Error making segmented outline", e);
             return makeNucleusOutlineChart();
         }
 

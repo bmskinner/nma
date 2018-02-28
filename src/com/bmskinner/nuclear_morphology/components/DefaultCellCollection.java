@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -1078,13 +1079,15 @@ public class DefaultCellCollection implements ICellCollection {
 
         double[] result = null;
 
+        AtomicInteger errorCount= new AtomicInteger(0);
         result = getNuclei().parallelStream().mapToDouble(n -> {
             IBorderSegment segment;
             try {
                 
                 segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
             } catch (ProfileException | UnavailableComponentException e) {
-                warn("Unable to get segment statistic for segment "+id.toString());
+                fine("Unable to get segment statistic for segment");
+                errorCount.incrementAndGet();
                 return 0;
             }
             double perimeterLength = 0;
@@ -1097,6 +1100,10 @@ public class DefaultCellCollection implements ICellCollection {
 
         }).toArray();
         Arrays.sort(result);
+        
+        if(errorCount.get()>0){
+            warn(String.format("%d nuclei had errors getting segments", errorCount.get()));
+        }
         return result;
     }
 
