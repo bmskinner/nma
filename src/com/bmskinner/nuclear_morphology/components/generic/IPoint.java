@@ -211,5 +211,39 @@ public interface IPoint {
      * @return
      */
     IPoint minus(final double value);
+    
+    /**
+     * Set the x-value
+     *
+     * @param x
+     *            the new x-value
+     */
+    void setX(double x);
+
+    /**
+     * Set the y-value
+     *
+     * @param y
+     *            the new x-value
+     */
+    void setY(double y);
+
+    /**
+     * Set the point to the position in the given point
+     * 
+     * @param p
+     *            the position to move this point to
+     */
+    void set(IPoint p);
+
+    /**
+     * Offset the point by the given amounts
+     * 
+     * @param x
+     *            the x offset
+     * @param y
+     *            the y offset
+     */
+    void offset(double x, double y);
 
 }

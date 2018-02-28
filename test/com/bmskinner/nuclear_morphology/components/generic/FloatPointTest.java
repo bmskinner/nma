@@ -5,6 +5,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
 
+import java.awt.geom.Point2D;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -17,6 +19,11 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  *
  */
 public class FloatPointTest {
+    
+    private static final IPoint CENTRE_POINT = new FloatPoint(0, 0);
+    private static final IPoint POINT_10x_10y = new FloatPoint(10, 10);
+    private static final IPoint POINT_n10x_n10y = new FloatPoint(-10, -10);
+    private static final IPoint POINT_0x_10y = new FloatPoint(0, 10);
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -26,7 +33,8 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testFloatPointFloatFloat() {
-		fail("Not yet implemented");
+		FloatPoint p = new FloatPoint(10f, 10f);
+		assertEquals(POINT_10x_10y, p);
 	}
 
 	/**
@@ -34,7 +42,9 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testFloatPointDoubleDouble() {
-		fail("Not yet implemented");
+	    
+	    IPoint test = new FloatPoint(10d, 10d);
+	    assertEquals(POINT_10x_10y, test);
 	}
 
 	/**
@@ -42,31 +52,65 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testFloatPointIPoint() {
-		fail("Not yet implemented");
+	    IPoint test = new FloatPoint(POINT_10x_10y);
+	    assertEquals(POINT_10x_10y, test);
 	}
-
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#getXAsInt()}.
 	 */
 	@Test
-	public void testGetXAsInt() {
-		fail("Not yet implemented");
+	public void testGetXAsIntWhenBelowHalf() {
+	    IPoint test = new FloatPoint(10.1, 10.1);
+		assertEquals(10, test.getXAsInt());
+	}
+	
+	@Test
+    public void testGetXAsIntWhenEqualHalf() {
+        IPoint test = new FloatPoint(10.5, 10.5);
+        assertEquals(11, test.getXAsInt());
+    }
+
+	@Test
+	public void testGetXAsIntWhenAboveHalf() {
+	    IPoint test = new FloatPoint(10.7, 10.7);
+	    assertEquals(11, test.getXAsInt());
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#getYAsInt()}.
-	 */
 	@Test
-	public void testGetYAsInt() {
-		fail("Not yet implemented");
+	public void testGetYAsIntWhenBelowHalf() {
+	    IPoint test = new FloatPoint(10.1, 10.1);
+	    assertEquals(10, test.getYAsInt());
 	}
+
+	@Test
+	public void testGetYAsIntWhenEqualHalf() {
+	    IPoint test = new FloatPoint(10.5, 10.5);
+	    assertEquals(11, test.getYAsInt());
+	}
+
+	@Test
+	public void testGetYAsIntWhenAboveHalf() {
+	    IPoint test = new FloatPoint(10.7, 10.7);
+	    assertEquals(11, test.getYAsInt());
+	}
+	
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#set(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
 	@Test
 	public void testSet() {
-		fail("Not yet implemented");
+	    FloatPoint f = new FloatPoint(CENTRE_POINT);
+	    f.set(POINT_10x_10y);
+		assertEquals(POINT_10x_10y, f);
+	}
+
+	@Test
+	public void testSetExceptsOnNull() {
+	    FloatPoint f = new FloatPoint(CENTRE_POINT);
+	    exception.expect(IllegalArgumentException.class);
+	    f.set(null);
 	}
 
 	/**
@@ -74,7 +118,14 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testGetLengthTo() {
-		fail("Not yet implemented");
+	    FloatPoint f = new FloatPoint(0, 10);
+	    assertEquals(10, CENTRE_POINT.getLengthTo(f), 0.000001);
+	}
+	
+	@Test
+	public void testGetLengthToExceptsOnNull() {
+	    exception.expect(IllegalArgumentException.class);
+	    CENTRE_POINT.getLengthTo(null);
 	}
 
 	/**
@@ -82,47 +133,133 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testOverlaps() {
-		fail("Not yet implemented");
+	    FloatPoint f1 = new FloatPoint(10.77777, 11.888888);
+	    FloatPoint f2 = new FloatPoint(10.77777, 11.888888);
+	    assertTrue(f1.overlaps(f2));
 	}
+	
+	@Test
+	public void testOverlapsExceptsOnNull() {
+	    exception.expect(IllegalArgumentException.class);
+	    CENTRE_POINT.overlaps(null);
+	}
+	
+	@Test
+    public void testOverlapsReturnsTrueOnIntX() {
+        FloatPoint f1 = new FloatPoint(11.33333, 11.888888);
+        FloatPoint f2 = new FloatPoint(10.77776, 11.888888);
+        assertTrue(f1.overlaps(f2));
+    }
+	    
+	@Test
+	public void testOverlapsReturnsFalseOnDifferentX() {
+	    FloatPoint f1 = new FloatPoint(10.77777, 11.888888);
+	    FloatPoint f2 = new FloatPoint(11.77777, 11.888888);
+	    assertFalse(f1.overlaps(f2));
+	}
+	    
+	@Test
+	public void testOverlapsReturnsTrueOnIntY() {
+	    FloatPoint f1 = new FloatPoint(11.888888, 11.33333);
+	    FloatPoint f2 = new FloatPoint(11.888888, 10.77776);
+	    assertTrue(f1.overlaps(f2));
+	}
+	
+	@Test
+    public void testOverlapsReturnsFalseOnDifferentY() {
+        FloatPoint f1 = new FloatPoint(11.888888, 10.77777);
+        FloatPoint f2 = new FloatPoint(11.888888, 11.77777);
+        assertFalse(f1.overlaps(f2));
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isAbove(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
 	@Test
 	public void testIsAbove() {
-		fail("Not yet implemented");
+	    FloatPoint f = new FloatPoint(0, 10);
+        assertTrue(f.isAbove(CENTRE_POINT));
+	}
+	
+	@Test
+	public void testIsAboveReturnsFalseOnSelf() {
+	    assertFalse(CENTRE_POINT.isAbove(CENTRE_POINT));
+	}
+
+	@Test
+	public void testIsAboveExceptsOnNull() {
+	    exception.expect(IllegalArgumentException.class);
+	    CENTRE_POINT.isAbove(null);
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isBelow(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
-	@Test
-	public void testIsBelow() {
-		fail("Not yet implemented");
-	}
+    @Test
+    public void testIsBelow() {
+        FloatPoint f = new FloatPoint(0, -10);
+        assertTrue(f.isBelow(CENTRE_POINT));
+    }
+    
+    @Test
+    public void testIsBelowReturnsFalseOnSelf() {
+        assertFalse(CENTRE_POINT.isBelow(CENTRE_POINT));
+    }
+
+    @Test
+    public void testIsBelowExceptsOnNull() {
+        exception.expect(IllegalArgumentException.class);
+        CENTRE_POINT.isBelow(null);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isLeftOf(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
-	@Test
-	public void testIsLeftOf() {
-		fail("Not yet implemented");
-	}
+    @Test
+    public void testIsLeftOf() {
+        FloatPoint f = new FloatPoint(-10, 0);
+        assertTrue(f.isLeftOf(CENTRE_POINT));
+    }
+    
+    @Test
+    public void testIsLeftOfReturnsFalseOnSelf() {
+        assertFalse(CENTRE_POINT.isLeftOf(CENTRE_POINT));
+    }
+
+    @Test
+    public void testIsLeftOfExceptsOnNull() {
+        exception.expect(IllegalArgumentException.class);
+        CENTRE_POINT.isLeftOf(null);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isRightOf(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
-	@Test
-	public void testIsRightOf() {
-		fail("Not yet implemented");
-	}
+    @Test
+    public void testIsRightOf() {
+        FloatPoint f = new FloatPoint(10, 0);
+        assertTrue(f.isRightOf(CENTRE_POINT));
+    }
+    
+    @Test
+    public void testIsRightOfReturnsFalseOnSelf() {
+        assertFalse(CENTRE_POINT.isRightOf(CENTRE_POINT));
+    }
+
+    @Test
+    public void testIsRightOfExceptsOnNull() {
+        exception.expect(IllegalArgumentException.class);
+        CENTRE_POINT.isRightOf(null);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#offset(double, double)}.
 	 */
 	@Test
 	public void testOffset() {
-		fail("Not yet implemented");
+	    FloatPoint f = new FloatPoint(0, 0);
+	    f.offset(10, 10);
+	    assertEquals(POINT_10x_10y, f);
 	}
 
 	/**
@@ -130,7 +267,29 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testOverlapsPerfectly() {
-		fail("Not yet implemented");
+	    FloatPoint f1 = new FloatPoint(10.77777, 11.888888);
+	    FloatPoint f2 = new FloatPoint(10.77777, 11.888888);
+	    assertTrue(f1.overlapsPerfectly(f2));
+	}
+	
+	@Test
+	public void testOverlapsPerfectlyReturnsFalseOnDifferentX() {
+	    FloatPoint f1 = new FloatPoint(10.77777, 11.888888);
+	    FloatPoint f2 = new FloatPoint(10.77776, 11.888888);
+	    assertFalse(f1.overlapsPerfectly(f2));
+	}
+	
+	@Test
+    public void testOverlapsPerfectlyReturnsFalseOnDifferentY() {
+        FloatPoint f1 = new FloatPoint(10.77777, 11.888888);
+        FloatPoint f2 = new FloatPoint(10.77777, 11.888887);
+        assertFalse(f1.overlapsPerfectly(f2));
+    }
+	
+	@Test
+	public void testOverlapsPerfectlyExceptsOnNull() {
+	    exception.expect(IllegalArgumentException.class);
+	    CENTRE_POINT.overlapsPerfectly(null);
 	}
 
 	/**
@@ -138,7 +297,8 @@ public class FloatPointTest {
 	 */
 	@Test
 	public void testToPoint2D() {
-		fail("Not yet implemented");
+	    Point2D exp = new Point2D.Float(10, 10);  
+	    assertEquals(exp, POINT_10x_10y.toPoint2D());
 	}
 
 	/**
@@ -163,10 +323,6 @@ public class FloatPointTest {
 		 * 
 		 */
 		
-		
-		IPoint a = new FloatPoint(0, 0);
-		IPoint b = new FloatPoint(0, 10);
-		IPoint c = new FloatPoint(10, 10);
 		IPoint d = new FloatPoint(-10, 0);
 		IPoint e = new FloatPoint(10, 0);
 		IPoint f = new FloatPoint(10, -10);
@@ -175,48 +331,93 @@ public class FloatPointTest {
 		
 		double exp = 90;
 		
-		double angle = b.findAngle(a, c);
+		double angle = POINT_0x_10y.findAngle(CENTRE_POINT, POINT_10x_10y);
 		
 		assertEquals(exp, angle, 0);
 		
 		// 90 degrees
 		
 		exp = 90;
-		angle = a.findAngle(c, f);
+		angle = CENTRE_POINT.findAngle(POINT_10x_10y, f);
 		assertEquals(exp, angle, 0);
 		
 		// 0 degrees
 		
 		exp=0;
-		angle = b.findAngle(a, a);
+		angle = POINT_0x_10y.findAngle(CENTRE_POINT, CENTRE_POINT);
 		assertEquals(exp, angle, 0);
 		
 		// 180 degrees horiz
 		exp=180;
 		
-		angle = a.findAngle(d, e);
+		angle = CENTRE_POINT.findAngle(d, e);
 		assertEquals(exp, angle, 0);
 		
 		// 180 degrees vert
 		exp=180;
 		
-		angle = e.findAngle(c, f);
+		angle = e.findAngle(POINT_10x_10y, f);
 		assertEquals(exp, angle, 0);
 		
 		// 135 degrees in -y axis
 		exp=135;
 		
-		angle = a.findAngle(d, f);
+		angle = CENTRE_POINT.findAngle(d, f);
 		assertEquals(exp, angle, 0);
-		
-		// Null input
-		exception.expect(IllegalArgumentException.class);
-		angle = a.findAngle(null, f);
-		angle = a.findAngle(null, null);
-		angle = a.findAngle(f, null);
-		
-				
-		
 	}
+	
+	@Test
+	public void testFindAngleExceptsOnNullPoint1(){
+	    IPoint f = new FloatPoint(10, -10);
+	    exception.expect(IllegalArgumentException.class);
+	    CENTRE_POINT.findAngle(null, f);
+	}
+	
+	@Test
+    public void testFindAngleExceptsOnNullPoint2(){
+        IPoint f = new FloatPoint(10, -10);
+        exception.expect(IllegalArgumentException.class);
+        CENTRE_POINT.findAngle(f, null);
+    }
+	
+	@Test
+	public void testMinusIPoint(){
+	    IPoint test = POINT_10x_10y.minus(new FloatPoint(5, 5));
+	    IPoint exp = new FloatPoint(5, 5);
+	    assertEquals(exp, test);
+	}
+	
+	@Test
+    public void testMinusIPointExceptsOnNull(){
+	    exception.expect(IllegalArgumentException.class);
+        POINT_10x_10y.minus(null);
+    }
+	
+	@Test
+    public void testPlusIPoint(){
+        IPoint test = POINT_10x_10y.plus(new FloatPoint(5, 5));
+        IPoint exp = new FloatPoint(15, 15);
+        assertEquals(exp, test);
+    }
+    
+    @Test
+    public void testPlusIPointExceptsOnNull(){
+        exception.expect(IllegalArgumentException.class);
+        POINT_10x_10y.plus(null);
+    }
+    
+    @Test
+    public void testMinusDouble(){
+        IPoint test = POINT_10x_10y.minus(5);
+        IPoint exp = new FloatPoint(5, 5);
+        assertEquals(exp, test);
+    }
+    
+    @Test
+    public void testPlusDouble(){
+        IPoint test = POINT_10x_10y.plus(5);
+        IPoint exp = new FloatPoint(15, 15);
+        assertEquals(exp, test);
+    }
 
 }

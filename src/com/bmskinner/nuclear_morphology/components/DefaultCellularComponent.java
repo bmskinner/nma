@@ -41,11 +41,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
-import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
@@ -88,7 +86,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /**
      * The current centre of the object.
      */
-    private IMutablePoint centreOfMass;
+    private IPoint centreOfMass;
 
     /**
      * The original centre of the object in its source image.
@@ -175,7 +173,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         }
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
-        this.centreOfMass = IMutablePoint.makeNew(centreOfMass);
+        this.centreOfMass = IPoint.makeNew(centreOfMass);
         this.id = java.util.UUID.randomUUID();
         this.sourceFile = source;
         this.channel = channel;
@@ -252,7 +250,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         // position.
         // Move the border list back over the CoM if needed.
         IPoint oldCoM = IPoint.makeNew(centreOfMass);
-        centreOfMass = IMutablePoint.makeNew(originalCentreOfMass);
+        centreOfMass = IPoint.makeNew(originalCentreOfMass);
 
         borderList = new ArrayList<IBorderPoint>(0);
 
@@ -313,7 +311,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.id = a.getID();
         this.position = a.getPosition();
         this.originalCentreOfMass = a.getOriginalCentreOfMass();
-        this.centreOfMass = IMutablePoint.makeNew(a.getCentreOfMass());
+        this.centreOfMass = IPoint.makeNew(a.getCentreOfMass());
         this.sourceFile = a.getSourceFile();
         this.channel = a.getChannel();
         this.scale = a.getScale();
@@ -1386,7 +1384,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public void rotate(double angle) {
         if (angle != 0) {
 
-            for (IMutablePoint p : borderList) {
+            for (IPoint p : borderList) {
 
                 IPoint newPoint = AngleTools.rotateAboutPoint(p, centreOfMass, angle);
                 // IPoint newPoint = getPositionAfterRotation(p, angle);

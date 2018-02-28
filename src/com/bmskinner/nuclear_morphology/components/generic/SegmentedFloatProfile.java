@@ -58,9 +58,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      */
     public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> segments) throws ProfileException {
         super(p);
-        if (segments == null || segments.isEmpty()) {
+        if (segments == null || segments.isEmpty())
             throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
-        }
 
         if (p.size() != segments.get(0).getTotalLength()) {
             throw new IllegalArgumentException("Segments total length (" + segments.get(0).getTotalLength()
@@ -73,7 +72,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         for (int i = 0; i < segments.size(); i++) {
             this.segments[i] = segments.get(i);
         }
-
     }
 
     /**
@@ -94,7 +92,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * 
      * @param profile
      */
-    public SegmentedFloatProfile(@NonNull IProfile profile) {
+    public SegmentedFloatProfile(@NonNull final IProfile profile) {
         super(profile);
 
         int midpoint = profile.size() / 2;
@@ -761,17 +759,24 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * .generic.ISegmentedProfile)
      */
     @Override
-    public ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws ProfileException {
+    public ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException {
+        
+        if (template==null)
+            throw new IllegalArgumentException("Template segment is null");
 
-        if (this.getSegmentCount() != template.getSegmentCount()) {
+        if (this.getSegmentCount() != template.getSegmentCount())
             throw new IllegalArgumentException("Segment counts are different in profile and template");
+        
+        for(UUID id : template.getSegmentIDs()){
+            if(!hasSegment(id))
+                throw new IllegalArgumentException("Segment ids do not match between profile and template");
         }
 
         /*
          * The final frankenprofile is made of stitched together profiles from
          * each segment
          */
-        List<IProfile> finalSegmentProfiles = new ArrayList<IProfile>(segments.length);
+        List<IProfile> finalSegmentProfiles = new ArrayList<>(segments.length);
 
         try {
 
@@ -781,13 +786,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                 IBorderSegment testSeg = this.getSegment(segID);
                 IBorderSegment templateSeg = template.getSegment(segID);
 
-                if (testSeg == null) {
-                    throw new ProfileException("Cannot find segment " + segID + " in test profile");
-                }
-
-                if (templateSeg == null) {
-                    throw new ProfileException("Cannot find segment " + segID + " in template profile");
-                }
 
                 // Interpolate the segment region to the new length
                 IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());

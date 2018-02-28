@@ -19,7 +19,7 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * Border points are 2D points that also track the previous and next points in
@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IMutablePoint;
  * @since 1.13.3
  *
  */
-public interface IBorderPoint extends IMutablePoint {
+public interface IBorderPoint extends IPoint {
 
     /**
      * Create a new point of the default type

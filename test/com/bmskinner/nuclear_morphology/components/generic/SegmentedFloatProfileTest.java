@@ -32,6 +32,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
@@ -159,12 +160,6 @@ public class SegmentedFloatProfileTest {
 	    assertEquals(sp, result);
 	}
 	
-	@Test
-    public void testSegmentedFloatProfileISegmentedProfileExceptsOnNullProfile() throws IndexOutOfBoundsException, ProfileException {
-	    exception.expect(IllegalArgumentException.class);
-        new SegmentedFloatProfile( (ISegmentedProfile)null);
-    }
-
 	@Test
 	public void testSegmentedFloatProfileIProfile() {
 	    IProfile profile = new FloatProfile(10, 100);
@@ -610,12 +605,76 @@ public class SegmentedFloatProfileTest {
         exception.expect(IllegalArgumentException.class);
         sp.adjustSegmentEnd(id, 5);
     }
+    
+    @Test
+    public void testNudgeSegmentsWithZeroOffset() throws ProfileException, UnavailableComponentException {
+        testSegmentOffset(0);
+    }
 
 	@Test
-	public void testNudgeSegments() {
-		fail("Not yet implemented");
+	public void testNudgeSegmentsWithPositiveOffset() throws ProfileException, UnavailableComponentException {
+	    testSegmentOffset(10);
 	}
+	
+	@Test
+    public void testNudgeSegmentsWithNegativeOffset() throws ProfileException, UnavailableComponentException {
+	    testSegmentOffset(-10);
+    }
+	
+	@Test
+    public void testNudgeSegmentsWithPositiveOffsetLargerThanProfile() throws ProfileException, UnavailableComponentException {
+        testSegmentOffset(sp.size()+1);
+    }
+	
+	@Test
+    public void testNudgeSegmentsWithNegativeOffsetLargerThanProfile() throws ProfileException, UnavailableComponentException {
+        testSegmentOffset(-(sp.size()+1));
+    }
+	
+	/**
+	 * Test if the given offset is successfully applied during a nudge
+	 * @param offset
+	 * @throws ProfileException
+	 * @throws UnavailableComponentException
+	 */
+	private void testSegmentOffset(int offset) throws ProfileException, UnavailableComponentException{
+        List<IBorderSegment> test = makeTestSegments();
+        sp.nudgeSegments(offset); 
+         for(IBorderSegment s : test){
+             assertTrue(segmentHasOffset(s, sp.getSegment(s.getID()), offset));
+         }
+    }
+	
+	/**
+	 * Test if the result segment is the input segment offset by the given amount 
+	 * @param input the initial segment 
+	 * @param result the segment after of setting
+	 * @param offset the expected offset
+	 * @return true if the result segment is the input segment offset by the given amount
+	 */
+	private boolean segmentHasOffset(IBorderSegment input, IBorderSegment result, int offset){
+	    
+	    if(input.getTotalLength()!=result.getTotalLength())
+	        return false;
+	    
+	    if(input.length()!=result.length())
+	        return false;
 
+	    int start = input.getStartIndex();
+	    int end   = input.getEndIndex();
+	    
+	    int startOffset = CellularComponent.wrapIndex(start+offset, input.getTotalLength());
+	    int endOffset   = CellularComponent.wrapIndex(end+offset, input.getTotalLength());
+	    
+	    if(startOffset!=result.getStartIndex())
+	        return false;
+	    
+	    if(endOffset!=result.getEndIndex())
+	        return false;
+	    
+	    return true;
+	}
+	
 	@Test
 	public void testOffsetInt() throws SegmentUpdateException, ProfileException, UnavailableComponentException {
 	    /*
@@ -654,9 +713,59 @@ public class SegmentedFloatProfileTest {
 	}
 
 	@Test
-	public void testFrankenNormaliseToProfile() {
-		fail("Not yet implemented");
+	public void testFrankenNormaliseToProfile() throws ProfileException, UnavailableComponentException {
+	    
+	    ISegmentedProfile test = createTemplateProfile(sp.size());
+        ISegmentedProfile result = sp.frankenNormaliseToProfile(test);
+        System.out.println(test.toString());
+        System.out.println(result.toString());
+        
+        assertEquals(result.size(), sp.size());
+        
+        for(IBorderSegment s : test.getSegments()){
+            assertEquals(s, result.getSegment(s.getID()));
+        }
 	}
+	
+	/**
+	 * Create a template profile for franken-normalising
+	 * @return
+	 * @throws ProfileException
+	 */
+	private ISegmentedProfile createTemplateProfile(int length) throws ProfileException{
+        List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, length, UUID.fromString(SEG_0)));
+        list.add(new DefaultBorderSegment(10, 20, length, UUID.fromString(SEG_1)));
+        list.add(new DefaultBorderSegment(20, 60, length, UUID.fromString(SEG_2)));
+        list.add(new DefaultBorderSegment(60, 5, length,  UUID.fromString(SEG_3)));
+        IBorderSegment.linkSegments(list);
+        return new SegmentedFloatProfile(new FloatProfile(10, length), list);
+	}
+	
+	
+	@Test
+    public void testFrankenNormaliseToProfileExceptsOnDifferentSegmentCountTemplate() throws ProfileException {
+        exception.expect(IllegalArgumentException.class);
+        sp.frankenNormaliseToProfile( new SegmentedFloatProfile(new FloatProfile(10, 100)));
+    }
+	
+	@Test
+    public void testFrankenNormaliseToProfileExceptsOnDifferentSegmentIdTemplate() throws ProfileException {  
+	    List<IBorderSegment> list = new ArrayList<>();
+        list.add(new DefaultBorderSegment(5,  10, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(10, 20, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(20, 60, 100, UUID.randomUUID()));
+        list.add(new DefaultBorderSegment(60, 5, 100,  UUID.randomUUID()));
+        IBorderSegment.linkSegments(list);
+        exception.expect(IllegalArgumentException.class);
+        sp.frankenNormaliseToProfile( new SegmentedFloatProfile(new FloatProfile(10, 100), list));
+    }
+	
+	@Test
+    public void testFrankenNormaliseToProfileExceptsOnNullTemplate() throws ProfileException {
+	    exception.expect(IllegalArgumentException.class);
+	    sp.frankenNormaliseToProfile(null);
+    }
 
 	@Test
 	public void testMergeSegments() throws ProfileException, UnavailableComponentException {

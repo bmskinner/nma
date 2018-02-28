@@ -54,12 +54,8 @@ public class DefaultAnalysisDatasetTest {
     public final ExpectedException exception = ExpectedException.none();
     
     @Before
-    public void loadDataset() {
-        try {
-            d = SampleDatasetReader.openTestRodentDataset();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void loadDataset() throws Exception {
+        d = SampleDatasetReader.openTestRodentDataset();
     }
 
     @Test

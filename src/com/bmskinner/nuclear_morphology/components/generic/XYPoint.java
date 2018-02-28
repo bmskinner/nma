@@ -26,16 +26,16 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+
 @Deprecated
-public class XYPoint implements Serializable, Loggable, IMutablePoint {
+public class XYPoint implements Serializable, Loggable, IPoint {
 
     private static final long serialVersionUID = 1L;
     protected double          x;

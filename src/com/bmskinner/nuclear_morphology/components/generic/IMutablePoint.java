@@ -24,8 +24,10 @@ package com.bmskinner.nuclear_morphology.components.generic;
  * 
  * @author ben
  * @since 1.13.3
+ * @deprecated since 1.13.8 because methods moved into IPoint
  *
  */
+@Deprecated
 public interface IMutablePoint extends IPoint {
 
     /**
@@ -37,9 +39,9 @@ public interface IMutablePoint extends IPoint {
      *            the y position
      * @return a point at the specified position
      */
-    static IMutablePoint makeNew(float x, float y) {
-        return new FloatPoint(x, y);
-    }
+//    static IMutablePoint makeNew(float x, float y) {
+//        return new FloatPoint(x, y);
+//    }
 
     /**
      * Create a new point of the default type

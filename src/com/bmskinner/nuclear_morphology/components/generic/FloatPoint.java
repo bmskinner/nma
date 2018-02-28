@@ -30,21 +30,35 @@ import org.eclipse.jdt.annotation.NonNull;
  * @since 1.13.3
  *
  */
-public class FloatPoint extends Point2D.Float implements IMutablePoint {
+public class FloatPoint extends Point2D.Float implements IPoint {
 
     private static final long serialVersionUID = 1L;
     private static final double EPSILON = 0.000001;
 
+    /**
+     * Construct from float values
+     * @param x
+     * @param y
+     */
     public FloatPoint(float x, float y) {
         super(x, y);
     }
 
+    /**
+     * Construct from double values. These will be converted to floats.
+     * @param x
+     * @param y
+     */
     public FloatPoint(double x, double y) {
         super((float) x, (float) y);
     }
 
-    public FloatPoint(IPoint p) {
-        super((float) p.getX(), (float) p.getY());
+    /**
+     * Create from an existing point
+     * @param p
+     */
+    public FloatPoint(@NonNull IPoint p) {
+        this(p.getX(), p.getY());
     }
 
     /*
@@ -93,7 +107,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#set(components.generic.XYPoint)
      */
     @Override
-    public void set(IPoint p) {
+    public void set(@NonNull IPoint p) {
+        if (p==null)
+            throw new IllegalArgumentException("Destination point is null");
         this.x = (float) p.getX();
         this.y = (float) p.getY();
     }
@@ -104,11 +120,10 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#getLengthTo(components.generic.IPoint)
      */
     @Override
-    public double getLengthTo(final IPoint a) {
+    public double getLengthTo(@NonNull final IPoint a) {
 
-        if (a == null) {
+        if (a == null)
             throw new IllegalArgumentException("Destination point is null");
-        }
 
         // a2 = b2 + c2
         double dx = Math.abs(this.getX() - a.getX());
@@ -125,11 +140,10 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#overlaps(components.generic.IPoint)
      */
     @Override
-    public boolean overlaps(final IPoint a) {
+    public boolean overlaps(@NonNull final IPoint a) {
 
-        if (a == null) {
+        if (a == null)
             throw new IllegalArgumentException("Destination point is null");
-        }
 
         if (this.getXAsInt() == a.getXAsInt() && this.getYAsInt() == a.getYAsInt()) {
             return true;
@@ -144,7 +158,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#isAbove(components.generic.XYPoint)
      */
     @Override
-    public boolean isAbove(IPoint p) {
+    public boolean isAbove(@NonNull IPoint p) {
+        if (p==null)
+            throw new IllegalArgumentException("Point is null");
         return y > p.getY();
     }
 
@@ -154,7 +170,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#isBelow(components.generic.XYPoint)
      */
     @Override
-    public boolean isBelow(IPoint p) {
+    public boolean isBelow(@NonNull IPoint p) {
+        if (p==null)
+            throw new IllegalArgumentException("Point is null");
         return y < p.getY();
     }
 
@@ -164,7 +182,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#isLeftOf(components.generic.XYPoint)
      */
     @Override
-    public boolean isLeftOf(IPoint p) {
+    public boolean isLeftOf(@NonNull IPoint p) {
+        if (p==null)
+            throw new IllegalArgumentException("Point is null");
         return x < p.getX();
     }
 
@@ -174,7 +194,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * @see components.generic.IPoint#isRightOf(components.generic.XYPoint)
      */
     @Override
-    public boolean isRightOf(IPoint p) {
+    public boolean isRightOf(@NonNull IPoint p) {
+        if (p==null)
+            throw new IllegalArgumentException("Point is null");
         return x > p.getX();
     }
 
@@ -197,11 +219,9 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      */
     @Override
     public boolean overlapsPerfectly(@NonNull final IPoint a) {
-        if (this.getX() == a.getX() && this.getY() == a.getY()) {
-            return true;
-        } else {
-            return false;
-        }
+        if (a==null)
+            throw new IllegalArgumentException("Point is null");
+        return (this.getX() == a.getX() && this.getY() == a.getY());
     }
 
     /*
@@ -226,7 +246,7 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
      * components.generic.IPoint)
      */
     @Override
-    public double findAngle(IPoint a, IPoint c) {
+    public double findAngle(@NonNull IPoint a, @NonNull IPoint c) {
 
         if (a == null || c == null) {
             throw new IllegalArgumentException("An input point is null in angle finding");
@@ -317,38 +337,7 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
         double dy = y1 - y2;
         return (180.0 / Math.PI) * Math.atan2(dy, dx);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
     
-//    
-//    /**
-//     * An equality check that uses the values of the point, 
-//     * not the class
-//     * @param obj
-//     * @return
-//     */
-//    public boolean equals(IPoint obj) {
-//        if (this == obj)
-//            return true;
-//        if (obj == null)
-//            return false;
-//        
-//        if (java.lang.Double.valueOf(x) - obj.getX() < -EPSILON || java.lang.Double.valueOf(x) - obj.getX() > EPSILON)
-//            return false;
-//        
-//        if (java.lang.Double.valueOf(y) - obj.getY() < -EPSILON || java.lang.Double.valueOf(y) - obj.getY() > EPSILON)
-//            return false;
-//        return true;
-//    }
-
     /*
      * (non-Javadoc)
      * 
@@ -361,9 +350,6 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
         if (obj == null)
             return false;
         
-//        if(obj instanceof IPoint)
-//            return equals((IPoint) obj);
-        
         if (getClass() != obj.getClass())
             return false;
         FloatPoint other = (FloatPoint) obj;
@@ -375,12 +361,16 @@ public class FloatPoint extends Point2D.Float implements IMutablePoint {
     }
 
 	@Override
-	public IPoint minus(IPoint p) {
+	public IPoint minus(@NonNull IPoint p) {
+	    if (p == null)
+            throw new IllegalArgumentException("Point is null");
 		return new FloatPoint(x-p.getX(), y-p.getY());
 	}
 
 	@Override
-	public IPoint plus(IPoint p) {
+	public IPoint plus(@NonNull IPoint p) {
+	    if (p == null)
+            throw new IllegalArgumentException("Point is null");
 		return new FloatPoint(x+p.getX(), y+p.getY());
 	}
 	
