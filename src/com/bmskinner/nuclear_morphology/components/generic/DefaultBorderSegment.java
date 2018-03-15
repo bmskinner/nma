@@ -35,6 +35,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
@@ -81,20 +83,26 @@ public class DefaultBorderSegment implements IBorderSegment {
      */
     public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id) {
 
-        if (id == null) {
+        if (id == null)
             throw new IllegalArgumentException("Segment ID cannot be null");
-        }
+        
+        if(startIndex<0 || endIndex <0)
+            throw new IllegalArgumentException("Segment start and end indexes cannot be negative");
+        
+        if(startIndex>total || endIndex >total)
+            throw new IllegalArgumentException("Segment start and end indexes cannot be above total length");
 
         // ensure that the segment meets minimum length requirements
         if (!IBorderSegment.isLongEnough(startIndex, endIndex, total)) {
             throw new IllegalArgumentException("Cannot create segment from " + startIndex + " to " + endIndex
                     + ": shorter than " + MINIMUM_SEGMENT_LENGTH);
         }
-
-        // if(testLength == total){
-        // throw new IllegalArgumentException("Profiles must have more than one
-        // segment");
-        // }
+        
+        if (!IBorderSegment.isShortEnough(startIndex, endIndex, total))
+            throw new IllegalArgumentException("Segment is too long for the profile");
+        
+        if(IBorderSegment.calculateSegmentLength(startIndex, endIndex, total)==total)
+            throw new IllegalArgumentException("Segment cannot occupy entire profile");
 
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -192,7 +200,7 @@ public class DefaultBorderSegment implements IBorderSegment {
         }
 
         if (!this.contains(seg.getEndIndex())) {
-            throw new IllegalArgumentException("End index of source is not in this segment");
+            throw new IllegalArgumentException(String.format("End index of source (%d) from segment %s is not in this segment: %s", seg.getEndIndex(), seg.getDetail(), this.getDetail()));
         }
 
         mergeSources = Arrays.copyOf(mergeSources, mergeSources.length + 1);
@@ -830,17 +838,39 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         return indexes.iterator();
     }
+    
+    @Override
+    public boolean overlaps(@NonNull IBorderSegment seg){
+        if(seg==null)
+            throw new IllegalArgumentException("Segment is null");
+        
+        if(startIndex==seg.getStartIndex())
+            return true;
+        
+        if(endIndex==seg.getEndIndex())
+            return true;
+                
+        Iterator<Integer> it = seg.iterator();
+        while(it.hasNext()){
+            Integer i = it.next();
+            if(i==seg.getStartIndex() && i==getEndIndex())
+                continue;
+            
+            if(i==getStartIndex() && i==seg.getEndIndex())
+                continue;
+            
+            if(contains(i))
+                return true;
+        }
+        return false;
+    }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\t\tReading nucleus border segment");
         in.defaultReadObject();
-        // finest("\t\tRead nucleus border segment");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\t\tWriting nucleus border segment");
         out.defaultWriteObject();
-        // finest("\t\tWrote nucleus border segment");
     }
 
 }

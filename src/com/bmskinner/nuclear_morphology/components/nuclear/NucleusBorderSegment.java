@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 
 @Deprecated
@@ -849,7 +851,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#toString()
      */
     @Override
-    public String toString() {
+    public String getDetail() {
 
         StringBuilder builder = new StringBuilder();
 
@@ -902,17 +904,42 @@ public class NucleusBorderSegment implements IBorderSegment {
 
         return indexes.iterator();
     }
+    
+    @Override
+    public boolean overlaps(@NonNull IBorderSegment seg){
+        if(seg==null)
+            throw new IllegalArgumentException("Segment is null");
+        
+        if(startIndex==seg.getStartIndex())
+            return true;
+        
+        if(endIndex==seg.getEndIndex())
+            return true;
+        
+        if(startIndex==seg.getEndIndex())
+            return false;
+        
+        if(endIndex==seg.getStartIndex())
+            return false;
+        
+        Iterator<Integer> it = seg.iterator();
+        while(it.hasNext()){
+            Integer i = it.next();
+            if(i==seg.getStartIndex() || i==seg.getEndIndex())
+                continue;
+            
+            if(seg.contains(i))
+                return true;
+        }
+        return false;
+    }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\t\tReading nucleus border segment");
         in.defaultReadObject();
-        // finest("\t\tRead nucleus border segment");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\t\tWriting nucleus border segment");
         out.defaultWriteObject();
-        // finest("\t\tWrote nucleus border segment");
     }
 
     @Override

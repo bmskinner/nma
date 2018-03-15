@@ -26,10 +26,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 /**
- * A border segmnet without the length restrictions of the DefaultBorderSegment
+ * A border segment without the length restrictions of the DefaultBorderSegment.
+ * This allows 
  * @author bms41
  * @since 1.13.8
  *
@@ -808,6 +811,35 @@ public class OpenBorderSegment implements IBorderSegment {
         }
 
         return indexes.iterator();
+    }
+    
+    @Override
+    public boolean overlaps(@NonNull IBorderSegment seg){
+        if(seg==null)
+            throw new IllegalArgumentException("Segment is null");
+        
+        if(startIndex==seg.getStartIndex())
+            return true;
+        
+        if(endIndex==seg.getEndIndex())
+            return true;
+        
+        if(startIndex==seg.getEndIndex())
+            return false;
+        
+        if(endIndex==seg.getStartIndex())
+            return false;
+        
+        Iterator<Integer> it = seg.iterator();
+        while(it.hasNext()){
+            Integer i = it.next();
+            if(i==seg.getStartIndex() || i==seg.getEndIndex())
+                continue;
+            
+            if(seg.contains(i))
+                return true;
+        }
+        return false;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

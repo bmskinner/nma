@@ -876,32 +876,27 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment, components.nuclear.IBorderSegment, java.util.UUID)
      */
     @Override
-    public void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws ProfileException {
+    public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
 
-        if (segment1 == null) {
+        if (segment1 == null)
             throw new IllegalArgumentException("Segment 1 cannot be null");
-        }
 
-        if (segment2 == null) {
+        if (segment2 == null)
             throw new IllegalArgumentException("Segment 2 cannot be null");
-        }
 
-        if (id == null) {
+        if (id == null)
             throw new IllegalArgumentException("New segment UUID cannot be null");
-        }
 
         // Check the segments belong to the profile
-        if (!this.contains(segment1) || !this.contains(segment2)) {
+        if (!this.contains(segment1) || !this.contains(segment2))
             throw new IllegalArgumentException("An input segment is not part of this profile");
-        }
 
-        if(!segment1.hasNextSegment() || !segment2.hasPrevSegment()){
+        if(!segment1.hasNextSegment() || !segment2.hasPrevSegment())
             throw new IllegalArgumentException("Input segments are not linked");
-        }
+        
         // Check the segments are linked
-        if (!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2)) {
+        if (!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2))
             throw new IllegalArgumentException("Input segments are not linked");
-        }
 
         // Ensure we have the segments in the correct order
         IBorderSegment firstSegment = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
@@ -909,7 +904,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
         // Create the new segment
         int startIndex = firstSegment.getStartIndex();
-        int endIndex = secondSegment.getEndIndex();
+        int endIndex   = secondSegment.getEndIndex();
         IBorderSegment mergedSegment = IBorderSegment.newSegment(startIndex, endIndex, this.size(), id);
 
         mergedSegment.addMergeSource(firstSegment);
@@ -1147,9 +1142,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting segmented profile");
         out.defaultWriteObject();
-        // finest("\tWrote segmented profile");
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -1161,4 +1154,5 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
                     + " different to profile " + size());
         }
     }
+
 }

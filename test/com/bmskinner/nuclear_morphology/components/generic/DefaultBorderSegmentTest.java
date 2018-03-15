@@ -45,16 +45,33 @@ public class DefaultBorderSegmentTest {
 	 */
 	@Test
 	public void testDefaultBorderSegmentIntIntIntUUID() {
-		UUID id = UUID.randomUUID();
-		test = new DefaultBorderSegment(0, 20, 100, id);
-		
-		exception.expect(IllegalArgumentException.class);
-		test = new DefaultBorderSegment(0, 20, 100, null);
-		test = new DefaultBorderSegment(-1, 20, 100, id);
-		test = new DefaultBorderSegment(0, 100, 100, id);
-		test = new DefaultBorderSegment(0, 99, 100, id);
+		new DefaultBorderSegment(0, 20, 100, UUID.randomUUID());
 	}
 
+	@Test
+    public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNullId() {
+        exception.expect(IllegalArgumentException.class);
+        new DefaultBorderSegment(0, 20, 100, null);
+    }
+	
+	@Test
+    public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnNegativeStart() {
+        exception.expect(IllegalArgumentException.class);
+        new DefaultBorderSegment(-1, 20, 100, UUID.randomUUID());
+    }
+	
+	@Test
+    public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnLengthEqualsProfile() {
+        exception.expect(IllegalArgumentException.class);
+        new DefaultBorderSegment(0, 100, 100, UUID.randomUUID());
+    }
+	
+	@Test
+    public void testDefaultBorderSegmentIntIntIntUUIDExceptsOnLengthTooLong() {
+        exception.expect(IllegalArgumentException.class);
+        new DefaultBorderSegment(0, 99, 100, UUID.randomUUID());
+    }
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#DefaultBorderSegment(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
 	 */
@@ -121,7 +138,7 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	@Test
-	public void testAddMergeSourceOutOfRangeArg1() {	
+	public void testAddMergeSourceExceptsOnOutOfRangeArg1() {	
 		// invalid merge source - out of range
 		DefaultBorderSegment s4 = new DefaultBorderSegment(-1, 20, 100);
 		exception.expect(IllegalArgumentException.class);
@@ -667,16 +684,9 @@ public class DefaultBorderSegmentTest {
 			i++;
 		}
 	}
-	
-	@Test
-	public void testNudgeUnlinked(){
 		
-		testNudgeUnlinkedWithoutMergeSources();
-		testNudgeUnlinkedWithMergeSources();
-	}
-	
-
-	private void testNudgeUnlinkedWithoutMergeSources(){
+	@Test
+	public void testNudgeUnlinkedWithoutMergeSources(){
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
 		
@@ -714,16 +724,17 @@ public class DefaultBorderSegmentTest {
 			assertEquals(expStart_2[i], s.getStartIndex());
 			assertEquals(  expEnd_2[i], s.getEndIndex());			
 		}
-		
-		/*
-		 * Invalid input
-		 */
-		exception.expect(IllegalArgumentException.class);
-		IBorderSegment.nudgeUnlinked(null, -2);
+	}
+	
+	@Test
+	public void testNudgeUnlinkedWithoutMergeSourcesExceptsOnNullList(){
+	    exception.expect(IllegalArgumentException.class);
+        IBorderSegment.nudgeUnlinked(null, -2);
 	}
 	
 	
-	private void testNudgeUnlinkedWithMergeSources(){
+	@Test
+    public void testNudgeUnlinkedWithMergeSources(){
 		
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
@@ -768,7 +779,7 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	@Test
-	public void testCopy(){
+	public void testCopy() throws ProfileException{
 		
 		int[] start = { 0,  10, 30, 88 };
 		int[] end   = { 10, 30, 88, 0  };
@@ -787,24 +798,40 @@ public class DefaultBorderSegmentTest {
 			fail("Error linking segments");
 			
 		}
-		
-		try {
-			List<IBorderSegment> result = IBorderSegment.copy(list);
-			
-			for(int i=0; i<start.length; i++){
-				IBorderSegment t = list.get(i);
-				IBorderSegment r = result.get(i);
-				
-				assertEquals(t, r);
-				
-			}
-			
-		} catch (ProfileException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-			fail("Error copying segments");
-			
+
+		List<IBorderSegment> result = IBorderSegment.copy(list);
+
+		for(int i=0; i<start.length; i++){
+		    IBorderSegment t = list.get(i);
+		    IBorderSegment r = result.get(i);
+
+		    assertEquals(t, r);
+
 		}
+
 	}
 
+	@Test
+    public void testOverlaps(){
+	    
+	    DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+	    DefaultBorderSegment s2 = new DefaultBorderSegment(20,  0, 100);
+        DefaultBorderSegment s3 = new DefaultBorderSegment(10, 50, 100);
+	    
+        assertFalse(s1.overlaps(s2));
+        assertFalse(s2.overlaps(s1));
+        
+        assertTrue(s1.overlaps(s3));
+        assertTrue(s3.overlaps(s1));
+        
+        assertTrue(s2.overlaps(s3));
+        assertTrue(s3.overlaps(s2));
+	}
+	
+	@Test
+    public void testOverlapsExceptsOnNullInput(){
+	    DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+	    exception.expect(IllegalArgumentException.class);
+	    s1.overlaps(null);
+	}
 }

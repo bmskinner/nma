@@ -376,7 +376,22 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     int getPosition();
 
-    String toString();
+    Iterator<Integer> iterator();
+  
+    /**
+     * Get the full description of the segment
+     * @return
+     */
+    String getDetail();
+    
+    /**
+     * Test if the given segment overlaps this segment.
+     * Formally, returns true if any indexes are shared in the
+     * segments except for the start and end indexes
+     * @param seg
+     * @return true if an index other than the start and end index is shared
+     */
+    boolean overlaps(IBorderSegment seg);
 
     /**
      * Given a list of segments, link them together into a circle.
@@ -699,6 +714,16 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         }
         return builder.toString();
     }
+    
+    static int calculateSegmentLength(int start, int end, int total){
+        int testLength = 0;
+        if (start < end) { // no wrap
+            testLength = end - start;
+        } else { // wrap
+            testLength = end + (total - start);
+        }
+        return testLength;
+    }
 
     /**
      * Test the length for new segments
@@ -708,22 +733,23 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param total
      * @return
      */
-    public static boolean isLongEnough(int start, int end, int total) {
-
-        int testLength = 0;
-        if (start < end) { // no wrap
-            testLength = end - start;
-        } else { // wrap
-            testLength = end + (total - start);
-        }
-
-        if (testLength < MINIMUM_SEGMENT_LENGTH) {
-            return false;
-        }
-        return true;
+    static boolean isLongEnough(int start, int end, int total) {
+        int testLength = calculateSegmentLength(start, end, total);
+        return testLength >= MINIMUM_SEGMENT_LENGTH;
     }
-
-    Iterator<Integer> iterator();
+    
+    /**
+     * Test the length for new segments. Can a second segment be added to the profile?
+     * 
+     * @param start
+     * @param end
+     * @param total
+     * @return
+     */
+    static boolean isShortEnough(int start, int end, int total) {
+        int testLength = calculateSegmentLength(start, end, total);
+        return total-testLength >= MINIMUM_SEGMENT_LENGTH;
+    }
 
     /**
      * Thrown when a segment update attempt fails
@@ -752,5 +778,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         }
 
     }
+
 
 }
