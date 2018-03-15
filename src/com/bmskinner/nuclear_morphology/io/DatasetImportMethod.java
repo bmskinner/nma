@@ -99,7 +99,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
      * Call with an existing map of signal ids to directories of images. Designed for unit
      * testing.
      * @param f
-     * @param signalFiles
+     * @param signalFiles a map of signal group to folder of signals
      */
     public DatasetImportMethod(final File f, final Map<UUID, File> signalFiles) {
         this(f);
@@ -164,11 +164,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 }
 
                 File logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
-                // update the log file to the same folder as the dataset
-                // File logFile = new File(file.getParent()
-                // +File.separator
-                // +file.getName().replace(SAVE_FILE_EXTENSION,
-                // LOG_FILE_EXTENSION));
 
                 dataset.setDebugFile(logFile);
                 fine("Updated log file location");
@@ -543,7 +538,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
                 // Get the new folder of images
                 File newsignalDir = newsignalMap.get(signalID);
-//                File newsignalDir = getSignalDirectory(dataset, signalID);
 
                 if (newsignalDir != null) {
 

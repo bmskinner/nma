@@ -19,16 +19,21 @@
 package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -43,6 +48,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class DatasetValidator implements Loggable {
 
     public static final List<String> errorList = new ArrayList<>();
+    public static final Set<ICell> errorCells  = new HashSet<>();
 
     public DatasetValidator() {
 
@@ -50,6 +56,10 @@ public class DatasetValidator implements Loggable {
 
     public List<String> getErrors() {
         return errorList;
+    }
+    
+    public Set<ICell> getErrorCells(){
+        return errorCells;
     }
 
     /**
@@ -60,6 +70,7 @@ public class DatasetValidator implements Loggable {
     public boolean validate(final IAnalysisDataset d) {
 
         errorList.clear();
+        errorCells.clear();
 
         if (!d.isRoot()) {
             errorList.add(d.getName() + ": Dataset not checked - not root");
@@ -138,34 +149,58 @@ public class DatasetValidator implements Loggable {
         List<UUID> idList = d.getCollection().getProfileCollection().getSegmentIDs();
 
         int errorCount = 0;
-        for (Nucleus n : d.getCollection().getNuclei()) {
+        
+        for(ICell c : d.getCollection().getCells()){
+            int cellErrors = 0;
+            for (Nucleus n :c.getNuclei()) {
 
-            ISegmentedProfile p;
-            try {
-                p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-                List<UUID> childList = p.getSegmentIDs();
+                ISegmentedProfile p;
+                try {
+                    p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+                    List<UUID> childList = p.getSegmentIDs();
 
-                // Check all nucleus segments are in root dataset
-                for (UUID id : childList) {
-                    if (!idList.contains(id)) {
-                        errorList.add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
-                        errorCount++;
+                    // Check all nucleus segments are in root dataset
+                    for (UUID id : childList) {
+                        if (!idList.contains(id)) {
+                            errorList.add("Nucleus " + n.getNameAndNumber() + " has segment " + id + " not found in parent");
+                            cellErrors++;
+                        }
                     }
+
+                    // Check all root dataset segments are in nucleus
+                    for (UUID id : idList) {
+                        if (!childList.contains(id)) {
+                            errorList.add("Segment " + id + " not found in child " + n.getNameAndNumber());
+                            cellErrors++;
+                        }
+                    }
+
+                    // Check each profile index in only covered once by a segment
+                    for (UUID id1 : idList) {
+                        IBorderSegment s1 = p.getSegment(id1);
+                        for (UUID id2 : idList) {
+                            if(id1==id2)
+                                continue;
+
+                            IBorderSegment s2 = p.getSegment(id2);
+                            if(s1.overlaps(s2)){
+                                errorList.add("Segment " + id1 + " overlaps segment " + id2 + " in "+n.getNameAndNumber());
+                                cellErrors++;
+                            }
+
+                        }
+                    }
+
+                } catch (ProfileException | UnavailableComponentException e) {
+                    errorList.add("Error getting segments");
+                    stack(e);
+                    cellErrors++;
                 }
 
-                // Check all root dataset segments are in nucleus
-                for (UUID id : idList) {
-                    if (!childList.contains(id)) {
-                        errorList.add("Segment " + id + " not found in child " + n.getNameAndNumber());
-                        errorCount++;
-                    }
-                }
-            } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-                errorList.add("Error getting segments");
-                stack(e);
-                errorCount++;
             }
-
+            if(cellErrors>0)
+                errorCells.add(c);
+            errorCount+=cellErrors;
         }
         
         if(d.getCollection().hasConsensus()){
