@@ -162,5 +162,19 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      * @param scale
      */
     void setScale(double scale);
+    
+    /**
+     * Test if any nuclei of the cell have signals
+     * @return
+     */
+    boolean hasNuclearSignals();
+    
+    /**
+     * Test if any nuclei of the cell have signals in the given group
+     * @param signalGroupId the signal group to test
+     * @return
+     */
+    boolean hasNuclearSignals(UUID signalGroupId);
+    
 
 }

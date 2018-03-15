@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -65,35 +67,30 @@ public class SignalManager implements Loggable {
 
     private ICellCollection collection;
 
-    public SignalManager(ICellCollection collection) {
+    public SignalManager(@NonNull final ICellCollection collection) {
         this.collection = collection;
     }
 
     /**
      * Find cells with or without signals in the given group.
      * 
-     * @param signalGroup the group id
+     * @param signalGroupId the group id
      * @param hasSignal true to retrive cells with signals. False to retrieve cells without signals
      * @return the cells
      */
-    public Set<ICell> getCellsWithNuclearSignals(UUID signalGroup, boolean hasSignal) {
+    public Set<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
         return collection.streamCells()
-                .filter( c->hasSignal==hasSignals(c, signalGroup))
+                .filter( c->c.hasNuclearSignals(signalGroupId))
                 .collect(Collectors.toSet());
     }
     
     /**
-     * Test if the given cell has signals in the given signal group 
-     * @param c
-     * @param signalGroup
-     * @return
+     * Find the number of cells with signals in the given group
+     * @param signalGroupId the signal group
+     * @return the number of cells in the collection with a signal in the group
      */
-    public static boolean hasSignals(ICell c, UUID signalGroup){
-        return c.getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal(signalGroup));
-    }
-
-    public int getNumberOfCellsWithNuclearSignals(UUID signalGroup) {
-        return getCellsWithNuclearSignals(signalGroup, true).size();
+    public int getNumberOfCellsWithNuclearSignals(@NonNull final UUID signalGroupId) {
+        return (int) collection.streamCells().filter(c->c.hasNuclearSignals(signalGroupId)).count();
     }
 
     /**
@@ -117,7 +114,7 @@ public class SignalManager implements Loggable {
      */
     public Set<UUID> getSignalGroupIDs() {
 
-        Set<UUID> ids = new HashSet<UUID>(collection.getSignalGroupIDs());
+        Set<UUID> ids = new HashSet<>(collection.getSignalGroupIDs());
         ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
         return ids;
     }
@@ -125,10 +122,10 @@ public class SignalManager implements Loggable {
     /**
      * Remove the given signal group
      * 
-     * @param id
+     * @param signalGroupId the signal group
      */
-    public void removeSignalGroup(UUID id) {
-        collection.removeSignalGroup(id);
+    public void removeSignalGroup(@NonNull final UUID signalGroupId) {
+        collection.removeSignalGroup(signalGroupId);
     }
 
     
@@ -151,60 +148,71 @@ public class SignalManager implements Loggable {
         return collection.getSignalGroups();
     }
 
-    public String getSignalGroupName(UUID signalGroup) throws UnavailableSignalGroupException {
-
-        return collection.getSignalGroup(signalGroup).getGroupName();
-
+    /**
+     * Get the name of the signal group
+     * @param signalGroupId the signal group
+     * @return the signal group name, if set
+     * @throws UnavailableSignalGroupException if the group is not present
+     */
+    public String getSignalGroupName(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
+        return collection.getSignalGroup(signalGroupId).getGroupName();
     }
 
-    public int getSignalGroupNumber(UUID signalGroup) {
+    /**
+     * Get the signal group number
+     * @param signalGroupId the signal group
+     * @return
+     */
+    public int getSignalGroupNumber(@NonNull final UUID signalGroupId) {
         int result = 0;
         for (Nucleus n : collection.getNuclei()) {
-            if (n.getSignalCollection().hasSignal(signalGroup)) {
-                result = n.getSignalCollection().getSignalGroupNumber(signalGroup);
+            if (n.getSignalCollection().hasSignal(signalGroupId)) {
+                result = n.getSignalCollection().getSignalGroupNumber(signalGroupId);
             }
         }
         return result;
     }
 
-    public int getSignalChannel(UUID signalGroup) throws UnavailableSignalGroupException {
-        return collection.getSignalGroup(signalGroup).getChannel();
+    public int getSignalChannel(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
+        return collection.getSignalGroup(signalGroupId).getChannel();
     }
 
     /**
      * Get the name of the folder containing the images for the given signal
      * group
      * 
-     * @param signalGroup
+     * @param signalGroupId the signal group
      * @return
      * @throws UnavailableSignalGroupException
      */
-    public String getSignalSourceFolder(UUID signalGroup) throws UnavailableSignalGroupException {
-        return collection.getSignalGroup(signalGroup).getFolder().getAbsolutePath();
+    public String getSignalSourceFolder(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
+        return collection.getSignalGroup(signalGroupId).getFolder().getAbsolutePath();
     }
 
     /**
      * Update the source image folder for the given signal group
      * 
-     * @param signalGroup
-     * @param f
+     * @param signalGroupId the signal group
+     * @param folder the folder containing the images
      */
-    public void updateSignalSourceFolder(UUID signalGroup, File f) {
+    public void updateSignalSourceFolder(@NonNull final UUID signalGroupId, @NonNull final File folder) {
 
-        if (!collection.hasSignalGroup(signalGroup)) {
+        if (!collection.hasSignalGroup(signalGroupId))
             return;
-        }
+        
+        if(!folder.isDirectory())
+            return;
 
         collection.getNuclei().parallelStream().forEach(n -> {
-            if (n.getSignalCollection().hasSignal(signalGroup)) {
-                String fileName = n.getSignalCollection().getSourceFile(signalGroup).getName();
-                File newFile = new File(f.getAbsolutePath() + File.separator + fileName);
-                n.getSignalCollection().updateSourceFile(signalGroup, newFile);
+            if (n.getSignalCollection().hasSignal(signalGroupId)) {
+                String fileName = n.getSignalCollection().getSourceFile(signalGroupId).getName();
+                File newFile = new File(folder.getAbsolutePath(), fileName);
+                n.getSignalCollection().updateSourceFile(signalGroupId, newFile);
             }
         });
 
         try {
-            collection.getSignalGroup(signalGroup).setFolder(f);
+            collection.getSignalGroup(signalGroupId).setFolder(folder);
         } catch (UnavailableSignalGroupException e) {
             fine("Error getting signal group", e);
         }
@@ -214,12 +222,10 @@ public class SignalManager implements Loggable {
     /**
      * Update the signal group id
      * 
-     * @param oldID
-     *            the id to replace
-     * @param newID
-     *            the new id
+     * @param oldID the id to replace
+     * @param newID the new id
      */
-    public void updateSignalGroupID(UUID oldID, UUID newID) {
+    public void updateSignalGroupID(@NonNull final UUID oldID, @NonNull final UUID newID) {
 
         if (!collection.hasSignalGroup(oldID)) {
             fine("Signal group is not present");
@@ -298,17 +304,16 @@ public class SignalManager implements Loggable {
     /**
      * Get the number of signals in the given group
      * 
-     * @param signalGroup
-     *            the group to search
+     * @param signalGroupId the signal group
      * @return the count or -1 if the signal group is not present
      */
-    public int getSignalCount(UUID signalGroup) {
+    public int getSignalCount(@NonNull final UUID signalGroupId) {
         int count = 0;
 
-        if (collection.getSignalGroupIDs().contains(signalGroup)) {
+        if (collection.getSignalGroupIDs().contains(signalGroupId)) {
             count = 0;
             for (Nucleus n : collection.getNuclei()) {
-                count += n.getSignalCollection().numberOfSignals(signalGroup);
+                count += n.getSignalCollection().numberOfSignals(signalGroupId);
 
             } // end nucleus iterations
         }
@@ -318,15 +323,15 @@ public class SignalManager implements Loggable {
     /**
      * Get the mean number of signals in each nucleus
      * 
-     * @param signalGroup
+     * @param signalGroupId the signal group
      * @return
      */
-    public double getSignalCountPerNucleus(UUID signalGroup) {
-        if (getSignalCount(signalGroup) == 0) {
+    public double getSignalCountPerNucleus(@NonNull final UUID signalGroupId) {
+        if (getSignalCount(signalGroupId) == 0) {
             return 0;
         }
 
-        return (double) getSignalCount(signalGroup) / (double) getNumberOfCellsWithNuclearSignals(signalGroup);
+        return (double) getSignalCount(signalGroupId) / (double) getNumberOfCellsWithNuclearSignals(signalGroupId);
     }
 
     /**
@@ -345,11 +350,11 @@ public class SignalManager implements Loggable {
 
     /**
      * Test whether the current population has signals in the given group
-     * 
+     * @param signalGroupId the signal group
      * @return
      */
-    public boolean hasSignals(UUID signalGroup) {
-        if (this.getSignalCount(signalGroup) > 0) {
+    public boolean hasSignals(@NonNull final UUID signalGroupId) {
+        if (this.getSignalCount(signalGroupId) > 0) {
             return true;
         } else {
             return false;
@@ -379,15 +384,14 @@ public class SignalManager implements Loggable {
     /**
      * Get all the signals from all nuclei in the given channel
      * 
-     * @param channel
-     *            the channel to search
-     * @return a list of signals
+     * @param signalGroupId the signal group
+     * @return the signals in the group
      */
-    public List<INuclearSignal> getSignals(UUID signalGroup) {
+    public List<INuclearSignal> getSignals(@NonNull final UUID signalGroupId) {
 
         List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
         for (Nucleus n : collection.getNuclei()) {
-            result.addAll(n.getSignalCollection().getSignals(signalGroup));
+            result.addAll(n.getSignalCollection().getSignals(signalGroupId));
         }
         return result;
     }
@@ -395,11 +399,12 @@ public class SignalManager implements Loggable {
     /**
      * Get the median of the signal statistic in the given signal group
      * 
-     * @param signalGroup
-     * @return the median
-     * @throws Exception
+     * @param stat the statistic to fetch
+     * @param scale the scale to fetch
+     * @param signalGroupId the signal group
+     * @return the median value
      */
-    public double getMedianSignalStatistic(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+    public double getMedianSignalStatistic(@NonNull final PlottableStatistic stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
 
         double[] values = null;
         double median;
@@ -407,7 +412,7 @@ public class SignalManager implements Loggable {
          * Angles must be wrapped
          */
         if (stat.getDimension().equals(StatisticDimension.ANGLE)) {
-            values = getOffsetSignalAngles(signalGroup);
+            values = getOffsetSignalAngles(signalGroupId);
 
             if (values.length == 0) {
                 fine("No signals detected in group for " + stat);
@@ -415,9 +420,9 @@ public class SignalManager implements Loggable {
             }
 
             median = new Quartile(values, Quartile.MEDIAN).doubleValue();
-            median += getMeanSignalAngle(signalGroup);
+            median += getMeanSignalAngle(signalGroupId);
         } else {
-            values = this.getSignalStatistics(stat, scale, signalGroup);
+            values = this.getSignalStatistics(stat, scale, signalGroupId);
 
             if (values.length == 0) {
                 fine("No signals detected in group for " + stat);
@@ -434,22 +439,22 @@ public class SignalManager implements Loggable {
     /**
      * Get the signal statistics for the given group
      * 
-     * @param stat
-     * @param scale
-     * @param signalGroup
-     * @return
+     * @param stat the statistic to fetch
+     * @param scale the scale to fetch
+     * @param signalGroupId the signal group
+     * @return the values
      */
-    public double[] getSignalStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+    public double[] getSignalStatistics(@NonNull final PlottableStatistic stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
 
-        if (!this.hasSignals(signalGroup)) {
+        if (!this.hasSignals(signalGroupId)) {
             return new double[0];
         }
 
-        Set<ICell> cells = getCellsWithNuclearSignals(signalGroup, true);
+        Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
         List<Double> a = new ArrayList<Double>(0);
         for (ICell c : cells) {
             for (Nucleus n : c.getNuclei()) {
-                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroup));
+                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroupId));
             }
 
         }
@@ -471,12 +476,12 @@ public class SignalManager implements Loggable {
      * sum_i_from_1_to_N sin(a[i]) a = arctangent ---------------------------
      * sum_i_from_1_to_N cos(a[i])
      * 
-     * @param signalGroup
-     * @return
+     * @param signalGroupId the signal group
+     * @return the mean angle
      */
-    public double getMeanSignalAngle(UUID signalGroup) {
+    public double getMeanSignalAngle(@NonNull final UUID signalGroupId) {
 
-        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup);
+        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroupId);
 
         double sumSin = 0;
         double sumCos = 0;
@@ -499,13 +504,12 @@ public class SignalManager implements Loggable {
      * point. The returned values should be in the range -180 - +180 from the
      * new zero
      * 
-     * @param signalGroup
-     * @return
-     * @throws Exception
+     * @param signalGroupId the signal group
+     * @return the offset angles
      */
-    public double[] getOffsetSignalAngles(UUID signalGroup) {
+    public double[] getOffsetSignalAngles(@NonNull final UUID signalGroupId) {
 
-        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroup);
+        double[] values = getSignalStatistics(PlottableStatistic.ANGLE, MeasurementScale.PIXELS, signalGroupId);
 
         if (values.length == 0) {
             return new double[0];
@@ -516,7 +520,7 @@ public class SignalManager implements Loggable {
          * correction for wrapping.
          */
 
-        double meanAngle = getMeanSignalAngle(signalGroup);
+        double meanAngle = getMeanSignalAngle(signalGroupId);
 
         /*
          * This is the distance from the mean angle to the zero angle, so values
@@ -549,9 +553,9 @@ public class SignalManager implements Loggable {
      * Copy the signal groups in this cell collection to the target collection,
      * preserving the signal group IDs
      * 
-     * @param target
+     * @param target the collection to add signals to
      */
-    public void copySignalGroups(ICellCollection target) {
+    public void copySignalGroups(@NonNull final ICellCollection target) {
 
         for (UUID id : collection.getSignalGroupIDs()) {
             ISignalGroup newGroup;
@@ -581,8 +585,9 @@ public class SignalManager implements Loggable {
     }
 
     /**
-     * If the OP has moved, signal angles need to be recalculated
-     * 
+     * Force signal angles from the OP to be recalculated. For
+     * example, if the OP has moved, signal angles need to be
+     *  recalculated.
      */
     public void recalculateSignalAngles() {
         finer("Recalcalculating signal angles");
@@ -636,15 +641,12 @@ public class SignalManager implements Loggable {
     /**
      * Calculate the best colocalising signal pairs in the collection
      * 
-     * @param signalGroup1
-     *            the first signal group id
-     * @param signalGroup2
-     *            the second signal group id
+     * @param signalGroup1 the first signal group id
+     * @param signalGroup2 the second signal group id
      * @return a list of colocalising signals
-     * @throws IllegalArgumentException
-     *             if the UUIDs are the same
+     * @throws IllegalArgumentException if the UUIDs are the same
      */
-    public List<Colocalisation<INuclearSignal>> getColocalisingSignals(UUID signalGroup1, UUID signalGroup2) {
+    public List<Colocalisation<INuclearSignal>> getColocalisingSignals(@NonNull final UUID signalGroup1, @NonNull final UUID signalGroup2) {
 
         if (signalGroup1.equals(signalGroup2)) {
             throw new IllegalArgumentException("Signal IDs are the same");

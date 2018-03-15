@@ -123,6 +123,16 @@ public class Cell implements IMutableCell {
     public List<IMitochondrion> getMitochondria() {
         return mitochondria;
     }
+    
+    @Override
+    public boolean hasNuclearSignals(){
+        return getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal());
+    }
+    
+    @Override
+    public boolean hasNuclearSignals(UUID signalGroupId){
+        return getNuclei().stream().anyMatch(n->n.getSignalCollection().hasSignal(signalGroupId));
+    }
 
     /*
      * (non-Javadoc)
