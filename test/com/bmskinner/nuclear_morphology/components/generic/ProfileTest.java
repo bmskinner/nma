@@ -19,6 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
+
+import org.junit.Before;
+
 import static org.hamcrest.CoreMatchers.*;
 
 import org.junit.Rule;
@@ -34,9 +37,12 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 public class ProfileTest {
 	
 	float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
+	private IProfile profile;
 	
-	public ProfileTest(){
-		
+
+	@Before
+	public void setUp(){
+	    profile = new FloatProfile(data);
 	}
 	
 	@Rule
@@ -48,9 +54,8 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testFloatProfileFloatArrayWithNullData() {
-		float[] data = null;
 		exception.expect(IllegalArgumentException.class);
-		new FloatProfile(data);
+		new FloatProfile( (float[]) null);
 	}
 
 	/**
@@ -58,21 +63,20 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testFloatProfileIProfile() {
-		float[] data   = {0, 1, 2, 3,  4,  5 };
 
 		IProfile tester = new FloatProfile(data);
 		float[] result = new FloatProfile(tester).toFloatArray();
 		
 		for( int i =0;i<data.length; i++){
 			assertEquals(data[i], result[i],0);
-		}
-		
-		
-		// Check null
-		exception.expect(IllegalArgumentException.class);
-		new FloatProfile( (IProfile)null);
-		
+		}		
 	}
+	
+	@Test
+    public void testFloatProfileIProfileExceptsOnNullProfile() {
+        exception.expect(IllegalArgumentException.class);
+        new FloatProfile( (IProfile)null);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float, int)}.
@@ -99,9 +103,7 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testSize() {
-		IProfile p1 = new FloatProfile(data);
-		int i = p1.size();
-		assertEquals(i, data.length);
+		assertEquals(profile.size(), data.length);
 	}
 
 	/**
@@ -109,9 +111,8 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testEqualsObject() {
-		IProfile p1 = new FloatProfile(data);
 		IProfile p2 = new FloatProfile(data);
-		assertTrue(p1.equals(p2));
+		assertTrue(profile.equals(p2));
 		
 	}
 
@@ -123,20 +124,27 @@ public class ProfileTest {
 		IProfile p1 = new FloatProfile(data);
 		double d = p1.get(4);
 		assertEquals( 7d , d, 0);
-		
-		exception.expect(IndexOutOfBoundsException.class);
-		p1.get(-1);
-
-		exception.expect(IndexOutOfBoundsException.class);
-		p1.get(14);		
 	}
+	
+	@Test
+	public void testGetIntExceptsOnNegativeIndex() {
+	    exception.expect(IndexOutOfBoundsException.class);
+        profile.get(-1);
+	}
+	
+	@Test
+    public void testGetIntExceptsOnOutOfBoundsIndex() {
+        exception.expect(IndexOutOfBoundsException.class);
+        profile.get(100);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#get(double)}.
 	 */
 	@Test
 	public void testGetDouble() {
-		fail("Not yet implemented");
+		double d = profile.get(0.5);
+		assertEquals(12, d, 0.001);
 	}
 
 	/**
@@ -144,8 +152,7 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetMax() {
-		IProfile p1 = new FloatProfile(data);
-		assertEquals( 20d , p1.getMax(), 0);
+		assertEquals( 19d , profile.getMax(), 0);
 	}
 
 	/**
@@ -189,16 +196,12 @@ public class ProfileTest {
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMax()}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetIndexOfMax() {
+	public void testGetIndexOfMax() throws ProfileException {
 		IProfile p1 = new FloatProfile(data);
-		try {
-			assertEquals( 9 , p1.getIndexOfMax());
-		} catch(ProfileException e){
-			System.out.println("Error getting index: "+e.getMessage());
-			fail("Index fetch failed");
-		}
+		assertEquals( 9 , p1.getIndexOfMax());
 	}
 
 	/**
@@ -544,6 +547,9 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testCalculateDeltas() {
+	    
+	    IProfile res = profile.calculateDeltas(2);
+//	    { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
 		fail("Not yet implemented");
 	}
 
@@ -697,33 +703,21 @@ public class ProfileTest {
 	
 	@Test
     public void testDivideDoubleNanInputFails() {
-        float[] data       = {0, 1, 2, 3,  4,  5 };
-        IProfile tester = new FloatProfile(data);
-        
-        tester = new FloatProfile(data);
         exception.expect(IllegalArgumentException.class);
-        tester.divide(Double.NaN);
+        profile.divide(Double.NaN);
     }
 
 	
 	@Test
     public void testDivideDoublePositiveInfinityInputFails() {
-        float[] data       = {0, 1, 2, 3,  4,  5 };
-        IProfile tester = new FloatProfile(data);
-        
-        tester = new FloatProfile(data);
         exception.expect(IllegalArgumentException.class);
-        tester.divide(Double.POSITIVE_INFINITY);
+        profile.divide(Double.POSITIVE_INFINITY);
     }
 	
 	@Test
     public void testDivideDoubleNegativeInfinityInputFails() {
-        float[] data       = {0, 1, 2, 3,  4,  5 };
-        IProfile tester = new FloatProfile(data);
-        
-        tester = new FloatProfile(data);
         exception.expect(IllegalArgumentException.class);
-        tester.divide(Double.NEGATIVE_INFINITY);
+        profile.divide(Double.NEGATIVE_INFINITY);
     }
 	
 	/**
@@ -746,14 +740,11 @@ public class ProfileTest {
 	
 	@Test
     public void testDivideIProfileFailsOnSizeMismatch() {
-        float[] data  = {0, 1, 2,   3,  4,  5 };
+
         float[] div   = {1, 2, 0.5f, 3,  0.25f };
-
-        IProfile tester = new FloatProfile(data);
         IProfile divider = new FloatProfile(div);
-
         exception.expect(IllegalArgumentException.class);
-        tester.divide(divider);
+        profile.divide(divider);
     }
 
 	/**
@@ -791,22 +782,25 @@ public class ProfileTest {
 		for( int i =0;i<data.length; i++){
 			assertEquals(data[i]+"x"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
 		}
-		
-		
-		// Check odd inputs
-		
-		tester = new FloatProfile(data);
-		exception.expect(IllegalArgumentException.class);
-		tester.add(Double.NaN);
-		
-		exception.expect(IllegalArgumentException.class);
-		tester.add(Double.POSITIVE_INFINITY);
-		
-		exception.expect(IllegalArgumentException.class);
-		tester.add(Double.NEGATIVE_INFINITY);
-		
-				
 	}
+	
+	@Test
+    public void testAddDoubleExceptsOnNan() {
+	    exception.expect(IllegalArgumentException.class);
+        profile.add(Double.NaN);
+	}
+	
+	@Test
+    public void testAddDoubleExceptsOnPositiveInfinity() {
+        exception.expect(IllegalArgumentException.class);
+        profile.add(Double.POSITIVE_INFINITY);
+    }
+	
+	@Test
+    public void testAddDoubleExceptsOnNegativeInfinity() {
+        exception.expect(IllegalArgumentException.class);
+        profile.add(Double.NEGATIVE_INFINITY);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#subtract(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
@@ -827,6 +821,42 @@ public class ProfileTest {
 		}
 		
 	}
+	
+	@Test
+    public void testSubtractDouble() {
+
+        float[] f    = { 0, 10, 5, 100 };
+        IProfile p = new FloatProfile(f);
+        double sub = 1;
+        float[] exp  = { -1, 9, 4, 99 };
+
+        IProfile r = p.subtract(sub);
+        
+        float[] result = r.toFloatArray();
+        
+        for( int i =0;i<exp.length; i++){
+            assertEquals(exp[i], result[i], 0);
+        }
+        
+    }
+	
+	@Test
+    public void testSubtractDoubleExceptsOnNan() {
+        exception.expect(IllegalArgumentException.class);
+        profile.subtract(Double.NaN);
+    }
+    
+    @Test
+    public void testSubtractDoubleExceptsOnPositiveInfinity() {
+        exception.expect(IllegalArgumentException.class);
+        profile.subtract(Double.POSITIVE_INFINITY);
+    }
+    
+    @Test
+    public void testSubtractDoubleExceptsOnNegativeInfinity() {
+        exception.expect(IllegalArgumentException.class);
+        profile.subtract(Double.NEGATIVE_INFINITY);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getRanks()}.
