@@ -110,6 +110,10 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
         return 0;
 
     }
+    
+    private static double getRescaledIndex(IBorderSegment seg, int newLength) {
+        return (float) seg.getStartIndex() / (float) (seg.getTotalLength()) * (float) newLength;
+    }
 
     private synchronized void updateOverlays() {
         /*
@@ -134,7 +138,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
                             ChartComponents.MARKER_STROKE, seg);
                     xCrosshair.setLabelVisible(false);
 
-                    double value = isChartNormalised ? profile.getRescaledIndex(seg.getStartIndex(), 100)
+                    double value = isChartNormalised ? getRescaledIndex(seg, 100)
                             : seg.getStartIndex();
 
                     xCrosshair.setValue(value);

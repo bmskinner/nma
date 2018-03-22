@@ -798,7 +798,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         }
 
         // Recombine the segment profiles
-        IProfile mergedProfile = new FloatProfile(FloatProfile.merge(finalSegmentProfiles));
+        IProfile mergedProfile = IProfile.merge(finalSegmentProfiles);
 
         ISegmentedProfile result = new SegmentedFloatProfile(mergedProfile, template.getSegments());
         return result;

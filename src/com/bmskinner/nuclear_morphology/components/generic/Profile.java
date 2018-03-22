@@ -300,40 +300,8 @@ public class Profile implements IProfile {
 
         BooleanProfile b = new BooleanProfile(this, true);
         return getIndexOfMin(b);
-        // double min = this.getMax();
-        // int minIndex = 0;
-        // for(int i=0; i<array.length;i++){
-        // if(array[i]<min){
-        // min = array[i];
-        // minIndex = i;
-        // }
-        // }
-        // return minIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getPositions(int)
-     */
-    @Override
-    public IProfile getPositions(int length) {
-        double[] result = new double[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = getRescaledIndex(i, length);
-        }
-        return new Profile(result);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getRescaledIndex(int, int)
-     */
-    @Override
-    public double getRescaledIndex(int index, int newLength) {
-        return (double) index / (double) array.length * (double) newLength;
-    }
 
     /**
      * Check the lengths of the two profiles. Return the first profile
@@ -1024,48 +992,6 @@ public class Profile implements IProfile {
     /*
      * (non-Javadoc)
      * 
-     * @see components.generic.IProfile#differentiate()
-     */
-    @Override
-    public IProfile differentiate() {
-
-        double[] deltas = new double[this.size()];
-
-        for (int i = 0; i < array.length; i++) { // for each position in sperm
-
-            int prev_i = AbstractCellularComponent.wrapIndex(i - 1, this.size()); // the
-                                                                                  // index
-                                                                                  // before
-            int next_i = AbstractCellularComponent.wrapIndex(i + 1, this.size()); // the
-                                                                                  // index
-                                                                                  // after
-
-            double delta = array[i] - array[prev_i] + array[next_i] - array[i];
-
-            deltas[i] = delta;
-        }
-        IProfile result = new Profile(deltas);
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#log(double)
-     */
-    @Override
-    public IProfile log(double base) {
-        double[] values = new double[this.size()];
-
-        for (int i = 0; i < array.length; i++) {
-            values[i] = Math.log(array[i]) / Math.log(base);
-        }
-        return new Profile(values);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.generic.IProfile#power(double)
      */
     @Override
@@ -1227,72 +1153,19 @@ public class Profile implements IProfile {
         }
         return new Profile(result);
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getRanks()
-     */
+    
     @Override
-    public IProfile getRanks() {
+    public IProfile subtract(double value) {
 
-        int rank = 0;
+        if (Double.isNaN(value) || Double.isInfinite(value))
+            throw new IllegalArgumentException("Cannot subtract NaN or infinity");
 
-        double[] sorted = new double[array.length];
-        System.arraycopy(array, 0, sorted, 0, array.length);
-        Arrays.sort(sorted);
+        double[] result = new double[array.length];
 
-        double[] ranks = new double[this.size()];
-
-        for (double sort : sorted) {
-
-            for (int i = 0; i < this.size(); i++) {
-                double value = array[i];
-                if (value == sort) {
-                    ranks[i] = rank;
-                    break;
-                }
-            }
-            rank++;
+        for (int i = 0; i < array.length; i++) { // for each position in sperm
+            result[i] = (double) (array[i] - value);
         }
-        IProfile result = new Profile(ranks);
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getSortedIndexes()
-     */
-    @Override
-    public IProfile getSortedIndexes() {
-
-        double[] sorted = new double[array.length];
-        System.arraycopy(array, 0, sorted, 0, array.length);
-        Arrays.sort(sorted);
-
-        double[] indexes = new double[sorted.length];
-
-        // Go through each index in the sorted list
-        for (int index = 0; index < sorted.length; index++) {
-
-            double value = sorted[index];
-            // Go through each index in the original array
-            for (int originalIndex = 0; originalIndex < sorted.length; originalIndex++) {
-
-                // If the value in the profile is the value at the original
-                // index,
-                // save the original index
-                if (value == this.get(originalIndex)) {
-                    System.out.println("Found value " + value + " at original index " + originalIndex);
-                    indexes[index] = (double) originalIndex;
-                    break;
-                }
-            }
-
-        }
-        IProfile result = new Profile(indexes);
-        return result;
+        return new DoubleProfile(result);
     }
 
     /*

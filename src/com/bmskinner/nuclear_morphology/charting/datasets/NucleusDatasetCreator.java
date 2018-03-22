@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
@@ -82,6 +83,14 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public NucleusDatasetCreator(ChartOptions options) {
         super(options);
     }
+    
+    private static IProfile createXPositions(IProfile profile, int newLength){
+        float[] result = new float[profile.size()];
+        for (int i = 0; i < profile.size(); i++) {
+            result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
+        }
+        return new FloatProfile(result);
+    }
 
     /**
      * Add individual segments from a profile to a dataset. Offset them to the
@@ -106,7 +115,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     private XYDataset addSegmentsFromProfile(List<IBorderSegment> segments, IProfile profile, FloatXYDataset ds,
             int length, double offset) throws ProfileException {
 
-        IProfile xpoints = profile.getPositions(length);
+        IProfile xpoints = createXPositions(profile, length);
         xpoints = xpoints.add(offset);
         for (IBorderSegment seg : segments) {
 
@@ -220,7 +229,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
                         Quartile.MEDIAN);
 
-                IProfile xpoints = profile.getPositions(100);
+                IProfile xpoints = createXPositions(profile, 100);
                 float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
                 ds.addSeries("Profile_" + i, data);
 
@@ -304,7 +313,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
                         Quartile.MEDIAN);
 
-                IProfile xpoints = profile.getPositions((int) collection.getMedianArrayLength());
+                IProfile xpoints = createXPositions(profile, (int) collection.getMedianArrayLength());
 
                 double offset = 0;
                 if (alignment.equals(ProfileAlignment.RIGHT)) {
@@ -366,9 +375,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
         IProfile xpoints = null;
         if (normalised) {
-            xpoints = profile.getPositions(100);
+            xpoints = createXPositions(profile, 100);
         } else {
-            xpoints = profile.getPositions(medianProfileLength);
+            xpoints = createXPositions(profile, medianProfileLength);
 
             if (alignment.equals(ProfileAlignment.RIGHT)) {
                 double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
@@ -415,9 +424,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile xpoints = null;
         if (options.isNormalised()) {
-            xpoints = profile.getPositions(100);
+            xpoints = createXPositions(profile, 100);
         } else {
-            xpoints = profile.getPositions(profile.size());
+            xpoints = createXPositions(profile, profile.size());
 
             if (options.getAlignment().equals(ProfileAlignment.RIGHT)) {
                 double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
@@ -478,9 +487,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         }
         IProfile xpoints = null;
         if (normalised) {
-            xpoints = profile.getPositions(100);
+            xpoints = createXPositions(profile, 100);
         } else {
-            xpoints = profile.getPositions(medianProfileLength);
+            xpoints = createXPositions(profile, medianProfileLength);
 
             if (alignment.equals(ProfileAlignment.RIGHT)) {
                 double differenceToMaxLength = maxLength - collection.getMedianArrayLength();
@@ -540,7 +549,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 } else {
                     angles = n.getProfile(type, borderTag);
 
-                    x = angles.getPositions(n.getBorderLength());
+                    x = createXPositions(angles, n.getBorderLength());
                     if (alignment.equals(ProfileAlignment.RIGHT)) {
                         double differenceToMaxLength = maxLength - n.getBorderLength();
                         x = x.add(differenceToMaxLength);
@@ -596,9 +605,9 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfile xpoints = null;
 
             if (normalised) {
-                xpoints = profile.getPositions(100);
+                xpoints = createXPositions(profile, 100);
             } else {
-                xpoints = profile.getPositions((int) collection.getMedianArrayLength());
+                xpoints = createXPositions(profile, (int) collection.getMedianArrayLength());
             }
 
             if (alignment.equals(ProfileAlignment.RIGHT)) {
@@ -642,7 +651,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 fine("Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
-            IProfile xpoints = profile.getPositions(100);
+            IProfile xpoints = createXPositions(profile, 100);
 
             float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
             ds.addSeries("Profile_" + i, data);
@@ -689,10 +698,10 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile xpoints = null;
         if (normalised) {
-            xpoints = profile.getPositions(100);
+            xpoints = createXPositions(profile, 100);
 
         } else {
-            xpoints = profile.getPositions((int) medianLength);
+            xpoints = createXPositions(profile, (int) medianLength);
         }
 
         if (aln.equals(ProfileAlignment.RIGHT)) {
@@ -831,7 +840,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 fine("Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
             }
-            IProfile xpoints = profile.getPositions(100);
+            IProfile xpoints = createXPositions(profile, 100);
             float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
             ds.addSeries("Profile_" + i + "_" + collection.getName(), data);
             i++;
@@ -863,7 +872,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             fine("Error getting profile from tag", e1);
             throw new ChartDatasetCreationException("Unable to get median profile", e1);
         }
-        IProfile xpoints = profile.getPositions(100);
+        IProfile xpoints = createXPositions(profile, 100);
 
         // rendering order will be first on top
 
@@ -1723,7 +1732,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfile pvalues = new DipTester(collection).testCollectionGetPValues(options.getTag(), options.getType());
 
             float[] yvalues = pvalues.toFloatArray();
-            float[] xvalues = pvalues.getPositions(100).toFloatArray();
+            float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
 
             float[][] data = { xvalues, yvalues };
             ds.addSeries(collection.getName(), data);
@@ -1898,7 +1907,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 options.getType());
 
         float[] yvalues = pvalues.toFloatArray();
-        float[] xvalues = pvalues.getPositions(100).toFloatArray();
+        float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
 
         float[][] data = { xvalues, yvalues };
         ds.addSeries(setOne.getCollection().getName(), data);
@@ -1920,7 +1929,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile pvalues = new KruskalTester().testCollectionGetFrankenPValues(options);
 
         float[] yvalues = pvalues.toFloatArray();
-        float[] xvalues = pvalues.getPositions(100).toFloatArray();
+        float[] xvalues = createXPositions(pvalues, 100).toFloatArray();
 
         float[][] data = { xvalues, yvalues };
         ds.addSeries(options.firstDataset().getCollection().getName(), data);

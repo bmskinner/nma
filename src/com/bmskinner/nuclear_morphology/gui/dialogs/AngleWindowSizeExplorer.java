@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -286,7 +287,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         DefaultXYDataset ds = new DefaultXYDataset();
 
-        IProfile xpoints = profile.getPositions(100);
+        IProfile xpoints = createXPositions(profile, 100);
         double[][] data = { xpoints.toDoubleArray(), profile.toDoubleArray() };
 
         DecimalFormat df = new DecimalFormat("#0.000");
@@ -306,6 +307,14 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
 
         plot.setDataset(datasetCount, ds);
 
+    }
+    
+    private static IProfile createXPositions(IProfile profile, int newLength){
+        float[] result = new float[profile.size()];
+        for (int i = 0; i < profile.size(); i++) {
+            result[i] = (float) (profile.getFractionOfIndex(i) * newLength);
+        }
+        return new FloatProfile(result);
     }
 
     private Color chooseGradientColour(int index) {

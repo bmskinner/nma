@@ -20,6 +20,10 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Before;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -32,16 +36,18 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 
 public class ProfileTest {
 	
-	float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
+	private float[] data;
 	private IProfile profile;
 	
 
 	@Before
 	public void setUp(){
+	    data       = new float[] { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
 	    profile = new FloatProfile(data);
 	}
 	
@@ -57,6 +63,26 @@ public class ProfileTest {
 		exception.expect(IllegalArgumentException.class);
 		new FloatProfile( (float[]) null);
 	}
+	
+	@Test
+    public void testFloatProfileFloatIntExceptsWithLengthBelowZero() {
+        exception.expect(IllegalArgumentException.class);
+        new FloatProfile(5, -1);
+    }
+	
+	@Test
+    public void testFloatProfileFloatIntExceptsWithLengthZero() {
+	    exception.expect(IllegalArgumentException.class);
+        new FloatProfile(5, 0);
+	}
+		
+	@Test
+    public void testFloatProfileFloatIntSucceedsWithLengthTwo() {
+        IProfile p = new FloatProfile(5, 2);       
+        for( int i =0;i<p.size(); i++){
+            assertEquals(5, p.get(i), 0);
+        }   
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
@@ -144,7 +170,19 @@ public class ProfileTest {
 	@Test
 	public void testGetDouble() {
 		double d = profile.get(0.5);
-		assertEquals(12, d, 0.001);
+		assertEquals(12, d, 0);
+	}
+	
+	@Test
+    public void testGetDoubleExceptsWhenProportionOutOfLowerBounds() {
+	    exception.expect(IndexOutOfBoundsException.class);
+        profile.get(-0.1);
+    }
+	
+	@Test
+	public void testGetDoubleExceptsWhenProportionOutOfUpperBounds() {
+	    exception.expect(IndexOutOfBoundsException.class);
+	    profile.get(1.1);
 	}
 
 	/**
@@ -152,47 +190,49 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetMax() {
-		assertEquals( 19d , profile.getMax(), 0);
+		assertEquals( 20d , profile.getMax(), 0);
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMax(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetIndexOfMaxBooleanProfile() {
-		
-		// Restrict to first half of array
-		BooleanProfile b = new BooleanProfile(data.length, false);
-		for(int i=0; i<data.length/2; i++){
-			b.set(i, true);
-		}
-		
-		int expected = 5;
-		
-		try {
-			
-			IProfile p1 = new FloatProfile(data);
-			int index = p1.getIndexOfMax(b);
-			assertEquals( expected , index);
-			
-			// Test null
-			exception.expect(IllegalArgumentException.class);
-			index = p1.getIndexOfMax(null);
-			
-			// Test all false
-			b = new BooleanProfile(data.length, false);
-			exception.expect(ProfileException.class);
-			index = p1.getIndexOfMax(b);
-		
-		
-		} catch(ProfileException e){
-			System.out.println("Error getting index: "+e.getMessage());
-			fail("Index fetch failed");
-		}
-		
-		
-		
+	public void testGetIndexOfMaxBooleanProfile() throws ProfileException {
+
+	    // Restrict to first half of array
+	    BooleanProfile b = new BooleanProfile(data.length, false);
+	    for(int i=0; i<data.length/2; i++){
+	        b.set(i, true);
+	    }
+
+	    int expected = 5;
+
+
+	    IProfile p1 = new FloatProfile(data);
+	    int index = p1.getIndexOfMax(b);
+	    assertEquals( expected , index);
 	}
+	
+	@Test
+    public void testGetIndexOfMaxBooleanProfileExceptsOnNullProfile() throws ProfileException{
+	    exception.expect(IllegalArgumentException.class);
+	    profile.getIndexOfMax(null);
+	}
+	
+	@Test
+    public void testGetIndexOfMaxBooleanProfileExceptsOnAllFalseProfile() throws ProfileException{
+	    BooleanProfile b = new BooleanProfile(data.length, false);
+        exception.expect(ProfileException.class);
+        profile.getIndexOfMax(b);
+    }
+	
+	@Test
+    public void testGetIndexOfMaxBooleanProfileExceptsOnDifferentLength() throws ProfileException{
+        BooleanProfile b = new BooleanProfile(data.length/2, false);
+        exception.expect(IllegalArgumentException.class);
+        profile.getIndexOfMax(b);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMax()}.
@@ -218,6 +258,18 @@ public class ProfileTest {
 		assertEquals( 6, i);
 		
 	}
+	
+	@Test
+    public void testGetIndexOfFractionExceptsOnLessThanZero() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.getIndexOfFraction(-0.1);
+	}
+	
+	@Test
+    public void testGetIndexOfFractionExceptsOnGreaterThanOne() {
+        exception.expect(IllegalArgumentException.class);
+        profile.getIndexOfFraction(1.1);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getFractionOfIndex(int)}.
@@ -238,53 +290,52 @@ public class ProfileTest {
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMin(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetIndexOfMinBooleanProfile() {
-		// Restrict to second half of array
-		BooleanProfile b = new BooleanProfile(data.length, true);
-		for(int i=0; i<data.length/2; i++){
-			b.set(i, false);
-		}
+	public void testGetIndexOfMinBooleanProfile() throws ProfileException {
+	    // Restrict to second half of array
+	    BooleanProfile b = new BooleanProfile(data.length, true);
+	    for(int i=0; i<data.length/2; i++){
+	        b.set(i, false);
+	    }
 
-		int expected = 7; // index
-		
-		try {
-			
-			IProfile p1 = new FloatProfile(data);
-			int index = p1.getIndexOfMin(b);
-			assertEquals( expected , index);
-			
-			// Test null
-			exception.expect(IllegalArgumentException.class);
-			index = p1.getIndexOfMin(null);
-			
-			// Test all false
-			b = new BooleanProfile(data.length, false);
-			exception.expect(ProfileException.class);
-			index = p1.getIndexOfMin(b);
-		
-		
-		} catch(ProfileException e){
-			System.out.println("Error getting index: "+e.getMessage());
-			fail("Index fetch failed");
-		}
+	    int expected = 7; // index
+
+	    IProfile p1 = new FloatProfile(data);
+	    int index = p1.getIndexOfMin(b);
+	    assertEquals( expected , index);
+
 	}
+	
+	@Test
+    public void testGetIndexOfMinBooleanProfileExceptsOnNullProfile() throws ProfileException{
+        exception.expect(IllegalArgumentException.class);
+        profile.getIndexOfMin(null);
+    }
+    
+    @Test
+    public void testGetIndexOfMinBooleanProfileExceptsOnAllFalseProfile() throws ProfileException{
+        BooleanProfile b = new BooleanProfile(data.length, false);
+        exception.expect(ProfileException.class);
+        profile.getIndexOfMin(b);
+    }
+	
+	@Test
+    public void testGetIndexOfMinBooleanProfileExceptsOnDifferentLength() throws ProfileException{
+        BooleanProfile b = new BooleanProfile(data.length/2, false);
+        exception.expect(IllegalArgumentException.class);
+        profile.getIndexOfMin(b);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getIndexOfMin()}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetIndexOfMin() {
-		
+	public void testGetIndexOfMin() throws ProfileException {
 		IProfile p1 = new FloatProfile(data);
-
-		try {
-			assertEquals( 2 , p1.getIndexOfMin());
-		} catch(ProfileException e){
-			System.out.println("Error getting index: "+e.getMessage());
-			fail("Index fetch failed");
-		}
+		assertEquals( 2 , p1.getIndexOfMin());
 	}
 
 	/**
@@ -306,32 +357,72 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testToDoubleArray() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getPositions(int)}.
-	 */
-	@Test
-	public void testGetPositions() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getRescaledIndex(int, int)}.
-	 */
-	@Test
-	public void testGetRescaledIndex() {
-		fail("Not yet implemented");
+	    
+	    double[] d = new double[data.length];
+	    for(int i=0; i<data.length; i++){
+	        d[i] = data[i];
+	    }
+	    
+	    double[] res = profile.toDoubleArray();
+	    
+	    assertTrue(Arrays.equals(d, res));
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#absoluteSquareDifference(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
-	public void testAbsoluteSquareDifference() {
-		fail("Not yet implemented");
+	public void testAbsoluteSquareDifferenceIsZeroWhenSameProfile() throws ProfileException {
+		assertEquals(0, profile.absoluteSquareDifference(profile), 0);
 	}
+	
+	private void testAbsoluteSquareDifferenceOnSameLengthProfiles(IProfile template, float diff) throws ProfileException{
+	    float[] test =  Arrays.copyOf(template.toFloatArray(), template.size());
+        
+        test[0] = test[0]+diff;
+        
+        IProfile p = new FloatProfile(test);
+        
+        double expDiff = diff*diff;
+        
+        assertEquals(expDiff, template.absoluteSquareDifference(p), 0);
+	}
+	
+	@Test
+    public void testAbsoluteSquareDifferenceOnSameLengthProfilesPositive() throws ProfileException {
+	    testAbsoluteSquareDifferenceOnSameLengthProfiles(profile, 2);
+    }
+	
+	@Test
+    public void testAbsoluteSquareDifferenceOnSameLengthProfilesNegative() throws ProfileException {
+	    testAbsoluteSquareDifferenceOnSameLengthProfiles(profile, -2);
+    }
+	
+	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template, int newLength, float diff) throws ProfileException{
+
+	    IProfile t = template.interpolate(newLength);
+	    
+	    float[] arr = t.toFloatArray();
+	    arr[0] = arr[0]+diff;
+        
+	    IProfile p = new FloatProfile(arr);
+	    System.out.println(template.toString());
+	    System.out.println(p.toString());
+        
+        double expDiff = diff*diff;
+        
+        assertEquals(expDiff, template.absoluteSquareDifference(p), 0);
+	}
+	
+	@Test
+    public void testAbsoluteSquareDifferenceOnLongerProfilesPositive() throws ProfileException {
+	    testAbsoluteSquareDifferenceOnDifferentLengthProfiles(profile, profile.size()*2, 2);
+    }
+	
+	@Test
+    public void testAbsoluteSquareDifferenceOnShorterProfilesPositive() throws ProfileException {
+        testAbsoluteSquareDifferenceOnDifferentLengthProfiles(profile, profile.size()/2, 2);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#copy()}.
@@ -340,49 +431,39 @@ public class ProfileTest {
 	public void testCopy() {
 		IProfile p = new FloatProfile(data);
 		float[] result = p.copy().toFloatArray();
-		
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i], result[i],0);
-		}
-		
+
+		assertTrue(Arrays.equals(data, result));
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#offset(int)}.
 	 */
 	@Test
-	public void testOffset() {
-		
-		float[] exp1       = { 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4, 10 };
-		float[] exp5       = { 19, 12, 3, 9, 20, 13, 6, 4, 10, 5, 1, 2, 7 };
-		float[] exp_1      = { 4, 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6 }; // negative 1
-		
-		try {
-			
-			IProfile p = new FloatProfile(data);
-			float[] result = p.offset(1).toFloatArray();
-			
-			for( int i =0;i<data.length; i++){
-				assertEquals(exp1[i], result[i],0);
-			}
-			
-			
-			result = p.offset(5).toFloatArray();
-			for( int i =0;i<data.length; i++){
-				assertEquals(exp5[i], result[i],0);
-			}
-			
-			result = p.offset(-1).toFloatArray();
-			for( int i =0;i<data.length; i++){
-				assertEquals(exp_1[i], result[i],0);
-			}
-			
-			
-		} catch (ProfileException e) {
-			System.out.println(e.getMessage());
-			fail("Offset failed");
-		}
-		
+	public void testOffset() throws ProfileException {
+
+	    float[] exp1       = { 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4, 10 };
+	    float[] exp5       = { 19, 12, 3, 9, 20, 13, 6, 4, 10, 5, 1, 2, 7 };
+	    float[] exp_1      = { 4, 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6 }; // negative 1
+
+
+	    IProfile p = new FloatProfile(data);
+	    float[] result = p.offset(1).toFloatArray();
+
+	    for( int i =0;i<data.length; i++){
+	        assertEquals(exp1[i], result[i],0);
+	    }
+
+
+	    result = p.offset(5).toFloatArray();
+	    for( int i =0;i<data.length; i++){
+	        assertEquals(exp5[i], result[i],0);
+	    }
+
+	    result = p.offset(-1).toFloatArray();
+	    for( int i =0;i<data.length; i++){
+	        assertEquals(exp_1[i], result[i],0);
+	    }
+
 	}
 
 	/**
@@ -398,22 +479,32 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testReverse() {
-		fail("Not yet implemented");
-	}
+	    
+	    float[] arr = Arrays.copyOf(data, data.length);
+	    
+	    for(int i = 0; i < arr.length / 2; i++) {
+	        float temp = arr[i];
+	        arr[i] = arr[arr.length - i - 1];
+	        arr[arr.length - i - 1] = temp;
+	    }
+	    	    
+	    profile.reverse();
+	    
+	    float[] res = profile.toFloatArray();
+	    
+	    for( int i =0;i<arr.length; i++){
+            assertEquals(arr[i], res[i],0);
+        }
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#interpolate(int)}.
-	 */
-	@Test
-	public void testInterpolate() {
-		fail("Not yet implemented");
+		
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSlidingWindowOffset() {
+	public void testGetSlidingWindowOffset() throws ProfileException {
 		
 		/*
 		 * Testing with equal array lengths
@@ -427,13 +518,8 @@ public class ProfileTest {
 		IProfile templateProfile = new FloatProfile(test);
 
 		
-		int offset = 0;
-		try {
-			offset = dataProfile.getSlidingWindowOffset(templateProfile);
-		} catch (ProfileException e) {
-			System.out.println("Error offsetting profile: "+e.getMessage());
-			fail("Offsetting failed");
-		}
+		int offset = dataProfile.getSlidingWindowOffset(templateProfile);
+
 
 		assertEquals(expectedOffset, offset,0);
 		
@@ -444,14 +530,7 @@ public class ProfileTest {
 		float[] smallTest  = { 9, 16, 5, 7, 1.5f, 13, 7 };
 		IProfile pTest = new FloatProfile(smallTest);
 		
-		offset = 0;
-		try {
-			offset = dataProfile.getSlidingWindowOffset(pTest);
-		} catch (ProfileException e) {
-			System.out.println("Error offsetting profile: "+e.getMessage());
-			fail("Offsetting failed");
-		}
-
+		offset =  dataProfile.getSlidingWindowOffset(pTest);
 		assertEquals(expectedOffset, offset,0);
 		
 		/*
@@ -459,13 +538,7 @@ public class ProfileTest {
 		 */
 		float[] longTest  = { 9, 14, 20, 16, 13, 9, 6, 5, 4, 7, 10, 7, 5, 2, 1, 1.5f, 2, 4, 7, 13, 19, 15, 12, 7, 3 };
 		pTest = new FloatProfile(longTest);
-		offset = 0;
-		try {
-			offset = dataProfile.getSlidingWindowOffset(pTest);
-		} catch (ProfileException e) {
-			System.out.println("Error offsetting profile: "+e.getMessage());
-			fail("Offsetting failed");
-		}
+		offset = dataProfile.getSlidingWindowOffset(pTest);
 		assertEquals(expectedOffset, offset,0);
 	}
 
@@ -482,16 +555,55 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetLocalMinimaInt() {
-		fail("Not yet implemented");
+	    
+	    float[] arr  = { 10, 9, 8, 7, 6, 5, 6, 7, 8, 9, 10 };
+	    
+	    IProfile p = new FloatProfile(arr);
+	    
+	    BooleanProfile b = p.getLocalMinima(3);
+	    
+	    assertTrue(b.get(5));
+	    assertFalse(b.get(4));
+	    assertFalse(b.get(6));
+	}
+	
+	@Test
+    public void testGetLocalMinimaIntExceptsOnZeroWindowSize() {
+        exception.expect(IllegalArgumentException.class);
+        profile.getLocalMinima(0);
+    }
+	
+	private BooleanProfile testGetLocalMinima(int window, double threshold){
+	    float[] arr  = { 10, 9, 8, 7, 6, 5, 6, 7, 8, 9, 10, 9, 8, 7, 8, 9, 10 };
+        IProfile p = new FloatProfile(arr);
+        return p.getLocalMinima(window, threshold);
 	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int, double)}.
 	 */
 	@Test
-	public void testGetLocalMinimaIntDouble() {
-		fail("Not yet implemented");
+	public void testGetLocalMinimaIntDoubleWithBothPassingThreshold() {
+	    BooleanProfile b = testGetLocalMinima(3, 8);
+	    assertTrue(b.get(5));
+	    assertTrue(b.get(13));
+	    assertFalse(b.get(4));
+	    assertFalse(b.get(6));
+	    assertFalse(b.get(12));
+	    assertFalse(b.get(14));
 	}
+	
+	@Test
+    public void testGetLocalMinimaIntDoubleWithOnePassingThreshold() {
+	    BooleanProfile b = testGetLocalMinima(3, 6);
+
+        assertTrue(b.get(5));
+        assertFalse(b.get(13));
+        assertFalse(b.get(4));
+        assertFalse(b.get(6));
+        assertFalse(b.get(12));
+        assertFalse(b.get(14));
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int, double, double)}.
@@ -505,17 +617,54 @@ public class ProfileTest {
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int)}.
 	 */
 	@Test
-	public void testGetLocalMaximaInt() {
-		fail("Not yet implemented");
-	}
+    public void testGetLocalMaximaInt() {
+        
+        float[] arr  = { 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5 };
+        
+        IProfile p = new FloatProfile(arr);
+        
+        BooleanProfile b = p.getLocalMaxima(3);
+        
+        assertTrue(b.get(5));
+        assertFalse(b.get(4));
+        assertFalse(b.get(6));
+    }
+    
+    @Test
+    public void testGetLocalMaximaIntExceptsOnZeroWindowSize() {
+        exception.expect(IllegalArgumentException.class);
+        profile.getLocalMaxima(0);
+    }
+    
+    private BooleanProfile testGetLocalMaxima(int window, double threshold){
+        float[] arr  = { 5, 6, 7, 8, 9, 10, 9, 8, 7, 6, 5, 6, 7, 8, 7, 6 };
+        IProfile p = new FloatProfile(arr);
+        return p.getLocalMaxima(window, threshold);
+    }
+    
+    @Test
+    public void testGetLocalMaximaIntDoubleWithBothPassingThreshold() {
+        BooleanProfile b = testGetLocalMaxima(3, 4);
+        assertTrue(b.get(5));
+        assertTrue(b.get(13));
+        assertFalse(b.get(4));
+        assertFalse(b.get(6));
+        assertFalse(b.get(12));
+        assertFalse(b.get(14));
+    }
+    
+    @Test
+    public void testGetLocalMaximaIntDoubleWithOnePassingThreshold() {
+        BooleanProfile b = testGetLocalMaxima(3, 9);
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int, double)}.
-	 */
-	@Test
-	public void testGetLocalMaximaIntDouble() {
-		fail("Not yet implemented");
-	}
+        assertTrue(b.get(5));
+        assertFalse(b.get(13));
+        assertFalse(b.get(4));
+        assertFalse(b.get(6));
+        assertFalse(b.get(12));
+        assertFalse(b.get(14));
+    }
+
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int, double, double)}.
@@ -530,17 +679,81 @@ public class ProfileTest {
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSubregion(int, int)}.
 	 */
 	@Test
-	public void testGetSubregionIntInt() {
-		fail("Not yet implemented");
+	public void testGetSubregionIntInt() {		
+		int start = 0;
+		int stop  = 3;
+		IProfile p = profile.getSubregion(start, stop);
+		
+		for(int i=start; i<stop; i++){
+		    assertEquals(data[i], p.get(i), 0);
+		}
 	}
+	
+	@Test
+    public void testGetSubregionIntIntWraps() {      
+        int start = 8;
+        int stop  = 2;
+        IProfile p = profile.getSubregion(start, stop);
+        
+        System.out.println(p);
+        
+        for(int i=start; i<profile.size(); i++){
+            System.out.println(i+" : "+data[i]);
+            assertEquals(data[i], p.get(i-start), 0);
+        }
+        for(int i=0; i<stop; i++){
+            System.out.println(i+" : "+data[i]);
+            assertEquals(data[i], p.get(p.size()-stop+i), 0);
+        }
+
+    }
+	
+	@Test
+    public void testGetSubregionIntIntExceptsOnLowerIndexOutOfBounds() {  
+	    exception.expect(IllegalArgumentException.class);
+	    profile.getSubregion(-1, 3);
+	}
+	
+	@Test
+    public void testGetSubregionIntIntExceptsOnUpperIndexOutOfBounds() {  
+        exception.expect(IllegalArgumentException.class);
+        profile.getSubregion(-1, profile.size()+1);
+    }
+	
+	@Test
+    public void testGetSubregionIntIntExceptsOnWrappingLowerIndexOutOfBounds() {  
+        exception.expect(IllegalArgumentException.class);
+        profile.getSubregion(profile.size()+1, 3);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSubregion(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSubregionIBorderSegment() {
-		fail("Not yet implemented");
+	public void testGetSubregionIBorderSegment() throws ProfileException {
+	    int start = 0;
+        int stop  = 3;
+        IBorderSegment s = new DefaultBorderSegment(start, stop, data.length);
+        IProfile p = profile.getSubregion(s);
+        
+        for(int i=start; i<stop; i++){
+            assertEquals(data[i], p.get(i), 0);
+        }
 	}
+	
+	@Test
+    public void testGetSubregionIBorderSegmentExceptsOnNullSegment() throws ProfileException{
+	    exception.expect(IllegalArgumentException.class);
+	    profile.getSubregion(null);
+	}
+		
+	@Test
+    public void testGetSubregionIBorderSegmentExceptsOnSegmentOutOfUpperBounds() throws ProfileException{
+        IBorderSegment s = new DefaultBorderSegment(0, 100, 200);
+        exception.expect(IllegalArgumentException.class);
+        profile.getSubregion(s);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#calculateDeltas(int)}.
@@ -553,21 +766,6 @@ public class ProfileTest {
 		fail("Not yet implemented");
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#differentiate()}.
-	 */
-	@Test
-	public void testDifferentiate() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#log(double)}.
-	 */
-	@Test
-	public void testLog() {
-		fail("Not yet implemented");
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#power(double)}.
@@ -641,6 +839,25 @@ public class ProfileTest {
 			assertEquals("1x2 should be 2", expected[i], result.toFloatArray()[i],0);
 		}
 	}
+	
+	@Test
+	public void testMultiplyDoubleNanInputFails() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.multiply(Double.NaN);
+	}
+
+
+	@Test
+	public void testMultiplyDoublePositiveInfinityInputFails() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.multiply(Double.POSITIVE_INFINITY);
+	}
+
+	@Test
+	public void testMultiplyDoubleNegativeInfinityInputFails() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.multiply(Double.NEGATIVE_INFINITY);
+	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#multiply(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
@@ -661,6 +878,14 @@ public class ProfileTest {
 			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.toFloatArray()[i],0);
 		}
 	}
+	
+	@Test
+    public void testMultiplyProfileExceptsOnDifferentLength() {
+        float[] f    = { 10, 10 };
+        IProfile p2 = new FloatProfile(f);
+        exception.expect(IllegalArgumentException.class);
+        IProfile p3 = profile.multiply(p2);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#divide(double)}.
@@ -739,6 +964,14 @@ public class ProfileTest {
 	}
 	
 	@Test
+    public void testDivideProfileExceptsOnDifferentLength() {
+        float[] f    = { 10, 10 };
+        IProfile p2 = new FloatProfile(f);
+        exception.expect(IllegalArgumentException.class);
+        IProfile p3 = profile.divide(p2);
+    }
+	
+	@Test
     public void testDivideIProfileFailsOnSizeMismatch() {
 
         float[] div   = {1, 2, 0.5f, 3,  0.25f };
@@ -763,6 +996,14 @@ public class ProfileTest {
 		for( int i =0;i<exp.length; i++){
 			assertEquals(exp[i], result[i], 0);
 		}
+	}
+
+	@Test
+	public void testAddProfileExceptsOnDifferentLength() {
+	    float[] f    = { 10, 10 };
+	    IProfile p2 = new FloatProfile(f);
+	    exception.expect(IllegalArgumentException.class);
+	    IProfile p3 = profile.add(p2);
 	}
 
 	/**
@@ -823,6 +1064,14 @@ public class ProfileTest {
 	}
 	
 	@Test
+    public void testSubtractProfileExceptsOnDifferentLength() {
+        float[] f    = { 10, 10 };
+        IProfile p2 = new FloatProfile(f);
+        exception.expect(IllegalArgumentException.class);
+        IProfile p3 = profile.subtract(p2);
+    }
+	
+	@Test
     public void testSubtractDouble() {
 
         float[] f    = { 0, 10, 5, 100 };
@@ -858,31 +1107,42 @@ public class ProfileTest {
         profile.subtract(Double.NEGATIVE_INFINITY);
     }
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getRanks()}.
-	 */
-	@Test
-	public void testGetRanks() {
-		fail("Not yet implemented");
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getSortedIndexes()}.
-	 */
-	@Test
-	public void testGetSortedIndexes() {
-		fail("Not yet implemented");
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#merge(java.util.List)}.
 	 */
 	@Test
 	public void testMerge() {
-		fail("Not yet implemented");
+		
+		float[] a1 = { 1, 2, 3, 4, 5 };
+		float[] a2 = { 6, 7, 8 };
+		float[] a3 = { 9, 10 };
+		
+		IProfile p1 = new FloatProfile(a1);
+		IProfile p2 = new FloatProfile(a2);
+		IProfile p3 = new FloatProfile(a3);
+		
+		List<IProfile> l = new ArrayList<>();
+		l.add(p1);
+		l.add(p2);
+		l.add(p3);
+		
+		IProfile m = IProfile.merge(l);
+		
+		int expLength = a1.length+a2.length+a3.length;
+		assertEquals(expLength, m.size());
+		
+		for(int i=0; i<10; i++){
+		    assertEquals(i+1, m.get(i), 0);
+		}
+		
 	}
 	
-		
+	@Test
+    public void testMergeExceptsOnNullList() {
+	    exception.expect(IllegalArgumentException.class);
+	    IProfile.merge(null);
+	}
 		
 	@Test
 	public void interpolationShouldLinearExtend() throws Exception{
@@ -916,27 +1176,7 @@ public class ProfileTest {
 	}
 	
 	@Test
-	public void sortedValuesShouldReturnCorrectOrder(){
-		float[] data       = { 10, 5, 1, 2, 7, 19, 12, 3 };
-		float[] expected   = {  2, 3, 7, 1, 4,  0,  6, 5 };
-		
-		IProfile tester = new FloatProfile(data);
-		System.out.println(tester.toString());
-		
-		IProfile result = tester.getSortedIndexes();
-
-		float[] output = result.toFloatArray();	
-		
-		for( int i =0;i<expected.length; i++){
-//			System.out.println(output[i]+" should be "+expected[i]);
-			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
-		}
-		
-	}
-	
-	
-	@Test
-	public void squareDiffsAreCalculatedCorrectly(){
+	public void squareDiffsAreCalculatedCorrectly() throws ProfileException{
 
 		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
 		
@@ -945,14 +1185,7 @@ public class ProfileTest {
 				
 		// 1+15+12+4+3+9+7+2+7+13+6+6+1 
 		double expectedDiff = 820;
-		double value = Double.NaN;
-		try {
-			value = dataProfile.absoluteSquareDifference(templateProfile);
-		} catch (ProfileException e) {
-			System.out.println("Error calculating difference: "+e.getMessage());
-			fail("Difference failed");
-		}
-		
+		double value = dataProfile.absoluteSquareDifference(templateProfile);		
 		assertEquals(value+" should be "+expectedDiff, expectedDiff, value,0);
 		
 	}
@@ -1004,6 +1237,47 @@ public class ProfileTest {
         }
         
     }
-
-
+	
+	@Test
+    public void testEqualsWithSameObjectRef(){
+        assertTrue(profile.equals(profile));
+    }
+	
+	@Test
+    public void testEqualsWithSameData(){
+	    IProfile p = new FloatProfile(data);
+        assertTrue(profile.equals(p));
+    }
+	
+	@Test
+    public void testEqualsFalseWithNull(){
+        assertFalse(profile.equals(null));
+    }
+	
+	@Test
+    public void testEqualsFalseWithNonProfile(){
+	    Object o = new Object();
+        assertFalse(profile.equals(o));
+    }
+	
+	@Test
+    public void testEqualsFalseWithDifferentData(){
+        float[] d = new float[data.length];
+        for(int i=0; i<data.length; i++){
+            d[i] = data[i]+1;
+        }
+        IProfile p = new FloatProfile(d);
+        assertFalse(profile.equals(p));
+    }
+	
+	@Test
+    public void testEqualsFalseWithSameDataInDifferentProfileType(){
+	    double[] d = new double[data.length];
+	    for(int i=0; i<data.length; i++){
+	        d[i] = data[i];
+	    }
+	    IProfile p = new DoubleProfile(d);
+        assertFalse(profile.equals(p));
+    }
+	
 }

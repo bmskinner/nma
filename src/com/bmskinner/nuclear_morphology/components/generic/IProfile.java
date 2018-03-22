@@ -19,6 +19,9 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.Serializable;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -40,16 +43,49 @@ public interface IProfile extends Serializable, Loggable {
     static final int ARRAY_AFTER  = 1;
     static final int ZERO_INDEX   = 0;
 
-    static IProfile makeNew(float[] array) {
+    /**
+     * Create a new profile of the default type
+     * @param array the array of values
+     * @return a profile
+     */
+    static IProfile makeNew(@NonNull float[] array) {
         return new FloatProfile(array);
     }
 
-    static IProfile makeNew(double[] array) {
+    /**
+     * Create a new profile of the default type
+     * @param array the array of values
+     * @return a profile
+     */
+    static IProfile makeNew(@NonNull double[] array) {
         try {
             return new FloatProfile(new ArrayConverter(array).toFloatArray());
         } catch (ArrayConversionException e) {
             return null;
         }
+    }
+    
+    static IProfile merge(@NonNull List<IProfile> list){
+        if (list == null || list.size() == 0)
+            throw new IllegalArgumentException("Profile list is null or empty");
+
+        int totalLength = 0;
+        for (IProfile p : list) {
+            totalLength += p.size();
+        }
+
+        float[] combinedArray = new float[totalLength];
+
+        int i = 0;
+
+        for (IProfile p : list) {
+
+            for (int j = 0; j < p.size(); j++) {
+                combinedArray[i++] = (float) p.get(j);
+            }
+        }
+
+        return new FloatProfile(combinedArray);
     }
 
     /**
@@ -62,19 +98,17 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Get the value at the given index
      * 
-     * @param index
-     *            the index
+     * @param index the index
      * @return the value at the index
-     * @throws Exception
+     * @throws IndexOutOfBoundsException if the index is not in the profile
      */
     double get(int index) throws IndexOutOfBoundsException;
 
     /**
      * Get the value at the given proportion along the profile
      * 
-     * @param proportion
-     *            the proportion from 0-1
-     * @return
+     * @param proportion the proportion from 0-1
+     * @return the value at the index closest to the given proportion
      */
     double get(double proportion);
 
@@ -89,9 +123,8 @@ public interface IProfile extends Serializable, Loggable {
      * Get the index of the maximum value in the profile If there are multiple
      * values at maximum, this returns the first only
      * 
-     * @param limits
-     *            indexes that should be included or excluded from the search
-     * @return the index
+     * @param limits indexes that should be included or excluded from the search
+     * @return the index of the first maximum value
      * @throws ProfileException
      */
     int getIndexOfMax(BooleanProfile limits) throws ProfileException;
@@ -100,7 +133,7 @@ public interface IProfile extends Serializable, Loggable {
      * Get the index of the maximum value in the profile If there are multiple
      * values at maximum, this returns the first only
      * 
-     * @return the index
+     * @return the index of the first maximum value
      * @throws ProfileException
      */
     int getIndexOfMax() throws ProfileException;
@@ -108,8 +141,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Get the index closest to the fraction of the way through the profile
      * 
-     * @param d
-     *            a fraction between 0 (start) and 1 (end)
+     * @param d a fraction between 0 (start) and 1 (end)
      * @return the nearest index
      */
     int getIndexOfFraction(double d);
@@ -118,9 +150,8 @@ public interface IProfile extends Serializable, Loggable {
      * Get the fractional distance of the given index along the profile from
      * zero to one.
      * 
-     * @param index
-     *            the index to test
-     * @return
+     * @param index the index to test
+     * @return the proportional position of the index in the profile
      */
     double getFractionOfIndex(int index);
 
@@ -128,15 +159,14 @@ public interface IProfile extends Serializable, Loggable {
      * Get the minimum value in the profile.If there are multiple values at
      * minimum, this returns the first only
      * 
-     * @return the minimum value
+     * @return the minimum value in the profile
      */
     double getMin();
 
     /**
      * Get the index of the minimum value in the profile
      * 
-     * @param limits
-     *            indexes that should be included or excluded from the search
+     * @param limits indexes that should be included or excluded from the search
      * @return the index
      * @throws ProfileException
      */
@@ -149,31 +179,6 @@ public interface IProfile extends Serializable, Loggable {
      * @throws ProfileException
      */
     int getIndexOfMin() throws ProfileException;
-
-    /**
-     * Get the array from the profile
-     * 
-     * @return an array of values
-     */
-    // double[] asArray();
-
-    /**
-     * Get an X-axis; get a position for each point on the scale 0-length
-     * 
-     * @param length
-     *            the length to scale to
-     * @return a profile with the positions as values
-     */
-    IProfile getPositions(int length);
-
-    /**
-     * Get the position of an index on an X-axis, rescaled to the new length
-     * 
-     * @param index
-     * @param newLength
-     * @return
-     */
-    double getRescaledIndex(int index, int newLength);
 
     /**
      * Calculate the square differences between this profile and a given
@@ -247,10 +252,8 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Detect regions with a consistent value in a profile
      * 
-     * @param value
-     *            the profile value that is to be maintained
-     * @param tolerance
-     *            the variation allow plus or minus
+     * @param value the profile value that is to be maintained
+     * @param tolerance the variation allow plus or minus
      * @points the number of points the value must be sustained over
      * @return the first and last index in the profile covering the detected
      *         region
@@ -263,34 +266,29 @@ public interface IProfile extends Serializable, Loggable {
      * greater than the value before. One exception is allowed, to account for
      * noisy data.
      * 
-     * @param windowSize
+     * @param windowSize the number of indices ahead and behind to check
      * @return a boolean profile with the indexes of local minima as true and
      *         all other indexes false
      */
     BooleanProfile getLocalMinima(int windowSize);
 
     /**
-     * Get the local maxima that are above a threshold value
+     * Get the local minima that are beloe a threshold value
      * 
-     * @param windowSize
-     *            the maxima window size
-     * @param threshold
-     *            the threshold
-     * @return
+     * @param windowSize the minima window size
+     * @param threshold the threshold value which minima must be below
+     * @return a profile describing the locations of minima
      */
     BooleanProfile getLocalMinima(int windowSize, double threshold);
 
     /**
-     * Get the local minima that are above a threshold value and have an
+     * Get the local minima that are below a threshold value and have an
      * absolute value greater than the given fraction of the total value range
      * in the profile
      * 
-     * @param windowSize
-     *            the maxima window size
-     * @param threshold
-     *            the threshold
-     * @param fraction
-     *            the fraction threshold
+     * @param windowSize the maxima window size
+     * @param threshold the threshold value which minima must be below
+     * @param fraction the fraction threshold (0-1)
      * @return
      */
     BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction);
@@ -345,11 +343,9 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Fetch a sub-region of the profile as a new profile
      * 
-     * @param indexStart
-     *            the index to begin
-     * @param indexEnd
-     *            the index to end
-     * @return a Profile
+     * @param indexStart the index to begin (inclusive)
+     * @param indexEnd the index to end (inclusive)
+     * @return a profile with the selected region
      */
     IProfile getSubregion(int indexStart, int indexEnd);
 
@@ -358,9 +354,8 @@ public interface IProfile extends Serializable, Loggable {
      * segment must originate from an equivalent profile (i.e. have the same
      * totalLength as the profile)
      * 
-     * @param segment
-     *            the segment to find
-     * @return a Profile
+     * @param segment the segment to find
+     * @return a profile with the selected region
      * @throws ProfileException
      */
     IProfile getSubregion(IBorderSegment segment) throws ProfileException;
@@ -374,22 +369,6 @@ public interface IProfile extends Serializable, Loggable {
      */
     IProfile calculateDeltas(int windowSize);
 
-    /**
-     * Calculate the difference between each value and the previous value, and
-     * the difference between each value and the next value, and returns the
-     * sums as a newP rofile
-     * 
-     * @return
-     */
-    IProfile differentiate();
-
-    /**
-     * Log transform the profile to the given base
-     * 
-     * @param base
-     * @return
-     */
-    IProfile log(double base);
 
     /**
      * Raise the values in the profile to the given exponent
@@ -413,14 +392,6 @@ public interface IProfile extends Serializable, Loggable {
      */
     IProfile cumulativeSum();
 
-    /**
-     * Multiply all values within the profile by a given value
-     * 
-     * @param multiplier
-     *            the value to multiply by
-     * @return the new profile
-     */
-    IProfile multiply(double multiplier);
 
     /**
      * Multiply all values within the profile by the value within the given
@@ -432,26 +403,33 @@ public interface IProfile extends Serializable, Loggable {
      * @return the new profile
      */
     IProfile multiply(IProfile multiplier);
-
+    
     /**
-     * Divide all values within the profile by a given value
+     * Multiply all values within the profile by a given value
      * 
-     * @param divider
-     *            the value to divide by
+     * @param multiplier
+     *            the value to multiply by
      * @return the new profile
      */
-    IProfile divide(double divider);
-
+    IProfile multiply(double multiplier);
+    
     /**
      * Divide all values within the profile by the values within the given
      * Profile
      * 
-     * @param divider
-     *            the profile to divide by. Must be the same length as this
-     *            profile
+     * @param divider the profile to divide by. Must be the same length as this profile
      * @return the new profile
      */
     IProfile divide(IProfile divider);
+
+    /**
+     * Divide all values within the profile by a given value
+     * 
+     * @param divider the value to divide by
+     * @return the new profile
+     */
+    IProfile divide(double divider);
+
 
     /**
      * Add all values within the profile by the value within the given Profile
@@ -465,8 +443,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Add the given value to all points within the profile
      * 
-     * @param adder
-     *            the value to add.
+     * @param adder the value to add.
      * @return the new profile
      */
     IProfile add(double value);
@@ -475,32 +452,21 @@ public interface IProfile extends Serializable, Loggable {
      * Subtract all values within the profile by the value within the given
      * Profile
      * 
-     * @param adder
-     *            the profile to subtract. Must be the same length as this
+     * @param adder the profile to subtract. Must be the same length as this
      *            profile
      * @return the new profile
      */
     IProfile subtract(IProfile sub);
-
+    
     /**
-     * Get the rank of each value in the profile after sorting ascending
+     * Subtract all values within the profile by the given constant
      * 
-     * @return a profile of rank values
+     * @param value the value to subtract
+     * @return the new profile
      */
-    IProfile getRanks();
+    IProfile subtract(double value);
 
-    /**
-     * Get the indexes of sorted values in the profile. Example: A 4 element
-     * profile has the values { 10, 5, 1, 2 } This function will return the
-     * indexes { 3, 2, 0, 1 }, corresponding to the order of the values after
-     * sorting.
-     * 
-     * @return a profile containing index values
-     */
-    IProfile getSortedIndexes();
-
-    String toString();
-
+    
     /**
      * Get the underlying array as a float array. This may involve loss of
      * precision.
