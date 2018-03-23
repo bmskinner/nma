@@ -500,56 +500,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getConsistentRegionBounds(double,
-     * double, int)
-     */
-    @Override
-    public int[] getConsistentRegionBounds(double value, double tolerance, int points) {
-
-        int counter = 0;
-        int start = -1;
-        int end = -1;
-        int[] result = { start, end };
-
-        for (int index = 0; index < array.length; index++) { // go through each
-                                                             // point TODO
-                                                             // wrapping
-            double d = array[index];
-            if (d > value - tolerance && d < value + tolerance) { // if the
-                                                                  // point meets
-                                                                  // criteria
-
-                if (start == -1) { // start a new region if needed
-                    counter = 0;
-                    start = index;
-                }
-                counter++; // start counting a new region or increase an
-                           // existing region
-
-            } else { // does not meet criteria
-
-                end = index;
-
-                if (counter >= points) { // if the region is large enough
-                    // return points
-                    result[0] = start; // use the saved start and end indexes
-                    result[1] = end;
-                    return result;
-
-                } else { // otherwise, reset the counter
-
-                    start = -1;
-                    end = -1;
-                }
-
-            }
-        }
-        return result;
-    }
-
-    /*
      * -------------------- Detect minima within the profiles
      * --------------------
      */
@@ -662,30 +612,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
     /*
      * (non-Javadoc)
      * 
-     * @see components.generic.IProfile#getLocalMinima(int, double, double)
-     */
-    @Override
-    public BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction) {
-        BooleanProfile minima = getLocalMinima(windowSize, threshold);
-
-        boolean[] values = new boolean[this.size()];
-
-        double fractionThreshold = (this.getMax() - this.getMin()) * fraction;
-
-        for (int i = 0; i < array.length; i++) {
-
-            if (minima.get(i) == true && (this.get(i) > fractionThreshold || this.get(i) < -fractionThreshold)) {
-                values[i] = true;
-            } else {
-                values[i] = false;
-            }
-        }
-        return new BooleanProfile(values);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.generic.IProfile#getLocalMaxima(int)
      */
     @Override
@@ -743,30 +669,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         for (int i = 0; i < array.length; i++) {
 
             if (maxima.get(i) == true && this.get(i) > threshold) {
-                values[i] = true;
-            } else {
-                values[i] = false;
-            }
-        }
-        return new BooleanProfile(values);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMaxima(int, double, double)
-     */
-    @Override
-    public BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction) {
-        BooleanProfile minima = getLocalMaxima(windowSize, threshold);
-
-        boolean[] values = new boolean[this.size()];
-
-        double fractionThreshold = this.getMax() - this.getMin() * fraction;
-
-        for (int i = 0; i < array.length; i++) {
-
-            if (minima.get(i) == true && (this.get(i) > fractionThreshold || this.get(i) < -fractionThreshold)) {
                 values[i] = true;
             } else {
                 values[i] = false;

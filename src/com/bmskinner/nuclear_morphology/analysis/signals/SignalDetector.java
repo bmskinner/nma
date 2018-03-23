@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -317,7 +319,7 @@ public class SignalDetector extends Detector {
      * 
      * @throws Exception
      */
-    private List<INuclearSignal> detectHistogramThresholdSignal(File sourceFile, ImageStack stack, Nucleus n)
+    private List<INuclearSignal> detectHistogramThresholdSignal(@NonNull final File sourceFile, @NonNull final ImageStack stack, @NonNull final Nucleus n)
             throws Exception {
         fine("Beginning histogram detection for nucleus");
 
@@ -358,7 +360,7 @@ public class SignalDetector extends Detector {
          * find minima and maxima above or below zero, with a total displacement
          * more than 0.1 of the range of values in the delta profile
          */
-        BooleanProfile minimaD = trimDS.getLocalMinima(3, 0, 0.1);
+        BooleanProfile minimaD = getLocalMinimaWithRangeThreshold(trimDS, 3, 0, 0.1);
 
         /*
          * Set the threshold for this nucleus to the drop-off This is the
@@ -381,5 +383,19 @@ public class SignalDetector extends Detector {
 
         updateThreshold(maxIndex);
         return detectForwardThresholdSignal(sourceFile, stack, n);
+    }
+    
+    private BooleanProfile getLocalMinimaWithRangeThreshold(IProfile p, int window, double threshold, double range){
+        
+        BooleanProfile minima = p.getLocalMinima(window, threshold);
+
+        boolean[] values = new boolean[p.size()];
+
+        double fractionThreshold = (p.getMax() - p.getMin()) * range;
+
+        for (int i = 0; i < p.size(); i++) {
+                values[i] = minima.get(i) && (p.get(i) > fractionThreshold || p.get(i) < -fractionThreshold);
+        }
+        return new BooleanProfile(values);
     }
 }

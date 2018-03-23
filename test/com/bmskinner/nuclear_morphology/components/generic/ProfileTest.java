@@ -276,8 +276,23 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testGetFractionOfIndex() {
-		fail("Not yet implemented");
+		assertEquals( 0, profile.getFractionOfIndex(0), 0 );
+		
+		double f =  (double)(profile.size()-1)/ (double)profile.size();
+		assertEquals( f, profile.getFractionOfIndex(profile.size()-1), 0 );
 	}
+	
+	@Test
+    public void testGetFractionOfIndexExceptsOnIndexBelowZero() {
+        exception.expect(IllegalArgumentException.class);
+        profile.getFractionOfIndex(-1);
+    }
+	
+	@Test
+    public void testGetFractionOfIndexExceptsOnIndexAboveBounds() {
+        exception.expect(IllegalArgumentException.class);
+        profile.getFractionOfIndex(profile.size()+1);
+    }
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getMin()}.
@@ -448,22 +463,15 @@ public class ProfileTest {
 
 	    IProfile p = new FloatProfile(data);
 	    float[] result = p.offset(1).toFloatArray();
-
-	    for( int i =0;i<data.length; i++){
-	        assertEquals(exp1[i], result[i],0);
-	    }
-
+	    
+	    assertTrue( equals(exp1, result));
 
 	    result = p.offset(5).toFloatArray();
-	    for( int i =0;i<data.length; i++){
-	        assertEquals(exp5[i], result[i],0);
-	    }
+	    assertTrue( equals(exp5, result));
+
 
 	    result = p.offset(-1).toFloatArray();
-	    for( int i =0;i<data.length; i++){
-	        assertEquals(exp_1[i], result[i],0);
-	    }
-
+	    assertTrue( equals(exp_1, result));
 	}
 
 	/**
@@ -471,7 +479,23 @@ public class ProfileTest {
 	 */
 	@Test
 	public void testSmooth() {
-		fail("Not yet implemented");
+	    //10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4
+	    IProfile p = profile.smooth(2);
+	    
+	    float[] exp = { 5.2f, 4.4f, 5.0f, 6.8f, 8.2f, 8.6f, 10f, 12.6f, 11.4f, 10.2f, 10.4f, 10.6f, 7.6f  };
+	    assertTrue( equals(exp, p.toFloatArray()));
+	}
+	
+	@Test
+    public void testSmoothExceptsOnZeroWindowSize() {
+        exception.expect(IllegalArgumentException.class);
+        profile.smooth(0);
+    }
+	
+	@Test
+    public void testSmoothExceptsOnNegativeWindowSize() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.smooth(-1);
 	}
 
 	/**
@@ -492,11 +516,7 @@ public class ProfileTest {
 	    
 	    float[] res = profile.toFloatArray();
 	    
-	    for( int i =0;i<arr.length; i++){
-            assertEquals(arr[i], res[i],0);
-        }
-
-		
+	    assertTrue( equals(arr, res));		
 	}
 
 	/**
@@ -542,14 +562,7 @@ public class ProfileTest {
 		assertEquals(expectedOffset, offset,0);
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getConsistentRegionBounds(double, double, int)}.
-	 */
-	@Test
-	public void testGetConsistentRegionBounds() {
-		fail("Not yet implemented");
-	}
-
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int)}.
 	 */
@@ -606,14 +619,6 @@ public class ProfileTest {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMinima(int, double, double)}.
-	 */
-	@Test
-	public void testGetLocalMinimaIntDoubleDouble() {
-		fail("Not yet implemented");
-	}
-
-	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int)}.
 	 */
 	@Test
@@ -664,15 +669,6 @@ public class ProfileTest {
         assertFalse(b.get(12));
         assertFalse(b.get(14));
     }
-
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getLocalMaxima(int, double, double)}.
-	 */
-	@Test
-	public void testGetLocalMaximaIntDoubleDouble() {
-		fail("Not yet implemented");
-	}
 
 
 	/**
@@ -759,11 +755,29 @@ public class ProfileTest {
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#calculateDeltas(int)}.
 	 */
 	@Test
-	public void testCalculateDeltas() {
+	public void testCalculateDeltasSucceedsWithWindowSizeOne() {
 	    
-	    IProfile res = profile.calculateDeltas(2);
+	    IProfile res = profile.calculateDeltas(1);
 //	    { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
-		fail("Not yet implemented");
+	    float[] exp = { 1f, -9f, -3f,  6f, 17f, 5f, -16f, -3f, 17f, 4f, -14f, -9f, 4f };	    
+		assertTrue( equals(exp, res.toFloatArray()));
+	}
+	
+	@Test
+	public void testCalculateDeltasSucceedsWithWindowSizeTwo() {
+
+	    IProfile res = profile.calculateDeltas(2);
+	    //	      { 10, 5, 1, 2, 7, 19, 12, 3, 9, 20, 13, 6, 4 }; // template data for a profile
+	    float[] exp = { -5f, -2f, -3f,  14f, 11f, 1f, 2f, 1f, 1f, 3f, -5f, -10f, -8f };
+
+	    System.out.println(res.toString());
+	    assertTrue( equals(exp, res.toFloatArray()));
+	}
+	
+	@Test
+    public void testCalculateDeltasExceptsWithWindowSizeZero() {
+	    exception.expect(IllegalArgumentException.class);
+	    profile.calculateDeltas(0);
 	}
 
 
@@ -780,9 +794,7 @@ public class ProfileTest {
 		
 		float[] result = p1.power(d).toFloatArray();
 		
-		for( int i =0;i<data.length; i++){
-			assertEquals(exp[i], result[i],0);
-		}
+		assertTrue( equals(exp, result) );
 	}
 
 	/**
@@ -797,9 +809,7 @@ public class ProfileTest {
 		
 		float[] result = p1.absolute().toFloatArray();
 		
-		for( int i =0;i<data.length; i++){
-			assertEquals(exp[i], result[i],0);
-		}
+		assertTrue( equals(exp, result) );
 	}
 
 	/**
@@ -814,9 +824,7 @@ public class ProfileTest {
 		
 		float[] result = p1.cumulativeSum().toFloatArray();
 		
-		for( int i =0;i<data.length; i++){
-			assertEquals(exp[i], result[i],0);
-		}
+		assertTrue( equals(exp, result) );
 	}
 
 	/**
@@ -873,10 +881,7 @@ public class ProfileTest {
 		IProfile multiply = new FloatProfile(multiplier);
 		IProfile result = tester.multiply(multiply);
 
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"x"+multiplier[i]+"should be "+expected[i], expected[i], result.toFloatArray()[i],0);
-		}
+		assertTrue( equals(expected, result.toFloatArray()) );
 	}
 	
 	@Test
@@ -898,11 +903,7 @@ public class ProfileTest {
 
 		IProfile tester = new FloatProfile(data);
 		IProfile result = tester.divide(constant);
-
-		// there is no assertArrayEquals for float[]
-		for( int i =0;i<data.length; i++){
-			assertEquals(data[i]+"/"+constant+" should be "+expected[i], expected[i], result.toFloatArray()[i],0);
-		}		
+		assertTrue( equals(expected, result.toFloatArray()) );	
 	}
 	
 	@Test
@@ -918,11 +919,7 @@ public class ProfileTest {
         constant   = -2;
         float[] negatives   = {0f, -0.5f, -1f, -1.5f, -2f, -2.5f};
         result = tester.divide(constant);
-
-        for( int i =0;i<data.length; i++){
-            assertEquals(data[i]+"/"+constant+" should be "+negatives[i], negatives[i], result.toFloatArray()[i],0);
-        }
-        
+        assertTrue( equals(negatives, result.toFloatArray()) );        
         
     }
 	
@@ -1056,11 +1053,7 @@ public class ProfileTest {
 		IProfile p3 = p1.subtract(p2);
 		
 		float[] result = p3.toFloatArray();
-		
-		for( int i =0;i<exp.length; i++){
-			assertEquals(exp[i], result[i], 0);
-		}
-		
+		assertTrue( equals(exp, result) );    		
 	}
 	
 	@Test
@@ -1083,9 +1076,7 @@ public class ProfileTest {
         
         float[] result = r.toFloatArray();
         
-        for( int i =0;i<exp.length; i++){
-            assertEquals(exp[i], result[i], 0);
-        }
+        assertTrue( equals(exp, result) );
         
     }
 	
@@ -1153,14 +1144,12 @@ public class ProfileTest {
 		IProfile result = tester.interpolate(12);
 		float[] output = result.toFloatArray();	
 		
-		for( int i =0;i<expected.length; i++){
-			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
-		}
+		assertTrue( equals(expected, output) );
 		
 	}
 	
 	@Test
-	public void interpolationShouldShrinkWhenGivenLowerLength() throws Exception{
+	public void interpolationShouldShrinkWhenGivenLowerLength() throws ProfileException {
 		float[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
 		float[] expected   = { 10, 12, 14, 16, 18, 20 };
 		
@@ -1169,11 +1158,22 @@ public class ProfileTest {
 		
 		float[] output = result.toFloatArray();	
 		
-		for( int i =0;i<expected.length; i++){
-			assertEquals(output[i]+" should be "+expected[i], expected[i], output[i],0);
-		}
+		assertTrue( equals(expected, output) );
 
 	}
+	
+	@Test
+    public void interpolateExceptsOnLengthZero() throws ProfileException {
+	    exception.expect(IllegalArgumentException.class);
+        profile.interpolate(0);
+	}
+	
+	@Test
+    public void interpolateExceptsOnLengthNegative() throws ProfileException {
+        exception.expect(IllegalArgumentException.class);
+        profile.interpolate(-1);
+    }
+	
 	
 	@Test
 	public void squareDiffsAreCalculatedCorrectly() throws ProfileException{
@@ -1279,5 +1279,24 @@ public class ProfileTest {
 	    IProfile p = new DoubleProfile(d);
         assertFalse(profile.equals(p));
     }
+	
+	
+	/**
+	 * Test float array equality. Not in junit.
+	 * @param exp
+	 * @param obs
+	 */
+	public static boolean equals(float[] exp, float[] obs){
+	    
+	    boolean equal = true;
+	    equal &= obs.length==exp.length;
+	    assertEquals(exp.length, obs.length);
+        
+        for(int i=0; i<exp.length; i++){
+            equal &= exp[i] == obs[i];
+            assertEquals(exp[i], obs[i], 0);
+        }
+        return equal;
+	}
 	
 }

@@ -212,11 +212,11 @@ public interface IProfile extends Serializable, Loggable {
 
     /**
      * Perform a window-averaging smooth of the profile with the given window
-     * size
+     * size. E.g. smoothing with window size 2 will average across 5 points:
+     * 2 behind, the index being smoothed, and 2 ahead.
      * 
-     * @param windowSize
-     *            the size of the window
-     * @return
+     * @param windowSize the size of the window
+     * @return a new smoothed profile
      */
     IProfile smooth(int windowSize);
 
@@ -250,17 +250,6 @@ public interface IProfile extends Serializable, Loggable {
     int getSlidingWindowOffset(IProfile testProfile) throws ProfileException;
 
     /**
-     * Detect regions with a consistent value in a profile
-     * 
-     * @param value the profile value that is to be maintained
-     * @param tolerance the variation allow plus or minus
-     * @points the number of points the value must be sustained over
-     * @return the first and last index in the profile covering the detected
-     *         region
-     */
-    int[] getConsistentRegionBounds(double value, double tolerance, int points);
-
-    /**
      * For each point in the array, test for a local minimum. The values of the
      * points <i>windowSize</i> ahead and behind are checked. Each should be
      * greater than the value before. One exception is allowed, to account for
@@ -282,23 +271,9 @@ public interface IProfile extends Serializable, Loggable {
     BooleanProfile getLocalMinima(int windowSize, double threshold);
 
     /**
-     * Get the local minima that are below a threshold value and have an
-     * absolute value greater than the given fraction of the total value range
-     * in the profile
+     * Get the points considered local maxima for the given window size.
      * 
-     * @param windowSize the maxima window size
-     * @param threshold the threshold value which minima must be below
-     * @param fraction the fraction threshold (0-1)
-     * @return
-     */
-    BooleanProfile getLocalMinima(int windowSize, double threshold, double fraction);
-
-    /**
-     * Get the points considered local maxima for the given window size as a
-     * Profile. Maxima are 1, other points are 0
-     * 
-     * @param windowSize
-     *            the window size to use
+     * @param windowSize the window size to use
      * @return
      */
     BooleanProfile getLocalMaxima(int windowSize);
@@ -306,28 +281,11 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Get the local maxima that are above a threshold value
      * 
-     * @param windowSize
-     *            the maxima window size
-     * @param threshold
-     *            the threshold
+     * @param windowSize the maxima window size
+     * @param threshold the threshold
      * @return
      */
     BooleanProfile getLocalMaxima(int windowSize, double threshold);
-
-    /**
-     * Get the local maxima that are above a threshold value and have an
-     * absolute value greater than the given fraction of the total value range
-     * in the profile
-     * 
-     * @param windowSize
-     *            the maxima window size
-     * @param threshold
-     *            the threshold
-     * @param fraction
-     *            the fraction threshold
-     * @return
-     */
-    BooleanProfile getLocalMaxima(int windowSize, double threshold, double fraction);
 
     /**
      * Get the windowSize points around a point of interest
@@ -361,11 +319,12 @@ public interface IProfile extends Serializable, Loggable {
     IProfile getSubregion(IBorderSegment segment) throws ProfileException;
 
     /**
-     * Calculate the differences between the previous and next indexes across a
-     * given window size around this point
+     * Sum the difference between between each pair of values across a
+     * given window size around each point. E.g. the profile 1-2-3-4-5 with 
+     * a window size of 1 will give (1-5=-4) + (2-1=1) = -3 for index 0
      * 
-     * @param windowSize
-     * @return
+     * @param windowSize the window size
+     * @return a profile with the delta values
      */
     IProfile calculateDeltas(int windowSize);
 

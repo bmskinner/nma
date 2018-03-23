@@ -425,7 +425,7 @@ public class ProfileIndexFinder implements Loggable {
                                                        // smoothing window size
                                                        // for now
 
-        int[] verticalPoints = p.getConsistentRegionBounds(value, epsilon, (int) window);
+        int[] verticalPoints = findConsistentRegionBounds(p, value, epsilon, (int) window);
         if (verticalPoints[0] != -1 && verticalPoints[1] != -1) {
 
             for (int i = verticalPoints[0]; i <= verticalPoints[1]; i++) {
@@ -437,6 +437,57 @@ public class ProfileIndexFinder implements Loggable {
         return result;
     }
 
+    /**
+     * Detect regions with a consistent value in a profile
+     * 
+     * @param value the profile value that is to be maintained
+     * @param tolerance the variation allow plus or minus
+     * @points the number of points the value must be sustained over
+     * @return the first and last index in the profile covering the detected
+     *         region
+     */
+    private int[] findConsistentRegionBounds(IProfile p, double value, double tolerance, int points){
+        int counter = 0;
+        int start = -1;
+        int end = -1;
+        int[] result = { start, end };
+        
+        double[] array = p.toDoubleArray();
+
+        for (int i = 0; i < array.length; i++) {
+            double d = array[i];
+            if (d > value - tolerance && d < value + tolerance) { // if the
+                                                                  // point meets
+                                                                  // criteria
+
+                if (start == -1) { // start a new region if needed
+                    counter = 0;
+                    start = i;
+                }
+                counter++; // start counting a new region or increase an
+                           // existing region
+
+            } else { // does not meet criteria
+
+                end = i;
+
+                if (counter >= points) { // if the region is large enough
+                    // return points
+                    result[0] = start; // use the saved start and end indexes
+                    result[1] = end;
+                    return result;
+
+                } else { // otherwise, reset the counter
+
+                    start = -1;
+                    end = -1;
+                }
+
+            }
+        }
+        return result;
+    }
+    
     /**
      * Find the first true value in a BooleanProfile
      * 
