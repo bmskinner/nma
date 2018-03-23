@@ -285,7 +285,6 @@ public class DefaultCellCollection implements ICellCollection {
      */
     public void removeCell(ICell c) {
         cells.remove(c);
-
     }
 
     public int size() {

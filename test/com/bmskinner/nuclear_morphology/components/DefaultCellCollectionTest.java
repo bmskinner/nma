@@ -21,7 +21,12 @@ package com.bmskinner.nuclear_morphology.components;
 
 import static org.junit.Assert.*;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
 
 /**
  * @author bms41
@@ -29,6 +34,17 @@ import org.junit.Test;
  *
  */
 public class DefaultCellCollectionTest {
+    
+    private ICellCollection c;
+    
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+    
+    @Before
+    public void loadDataset() throws Exception {
+        IAnalysisDataset d = SampleDatasetReader.openTestRodentDataset();
+        c = d.getCollection();
+    }
     
     @Test
     public void testDefaultCellCollectionFileStringStringNucleusType() {
@@ -52,27 +68,19 @@ public class DefaultCellCollectionTest {
 
     @Test
     public void testSetName() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetName() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testGetID() {
-        fail("Not yet implemented");
+        String name = "Test name";
+        c.setName(name);
+        assertEquals(name, c.getName());
     }
 
     @Test
     public void testIsReal() {
-        fail("Not yet implemented");
+        assertTrue(c.isReal());
     }
 
     @Test
     public void testIsVirtual() {
-        fail("Not yet implemented");
+        assertFalse(c.isVirtual());
     }
 
     @Test
@@ -187,7 +195,7 @@ public class DefaultCellCollectionTest {
 
     @Test
     public void testGetNucleusCount() {
-        fail("Not yet implemented");
+       assertEquals(47, c.getNucleusCount());
     }
 
     @Test

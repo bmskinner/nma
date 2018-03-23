@@ -179,39 +179,9 @@ public class DatasetConverter implements Loggable, Importer {
                 newDataset.setAnalysisOptions(null);
             }
 
-            // if(oldOptions instanceof AnalysisOptions ){
-            //
-            // AnalysisOptions oldAOptions = (AnalysisOptions) oldOptions;
-            //
-            // for(UUID id : oldOptions.getNuclearSignalGroups()){
-            // INuclearSignalOptions oldSignalOptions =
-            // oldOptions.getNuclearSignalOptions(id);
-            // File folder =
-            // oldDataset.getCollection().getSignalGroup(id).getFolder();
-            // int channel =
-            // oldDataset.getCollection().getSignalGroup(id).getChannel();
-            //
-            //
-            // IMutableNuclearSignalOptions newSignalOptions = new
-            // DefaultNuclearSignalOptions(oldSignalOptions);
-            // newSignalOptions.setFolder(folder);
-            // newSignalOptions.setChannel(channel);
-            //
-            // newOptions.setDetectionOptions(id.toString(), newSignalOptions);
-            // }
-            //
-            //
-            // newDataset.setAnalysisOptions(newOptions);
-            //
-            // } else {
-            // newDataset.setAnalysisOptions(new
-            // DefaultAnalysisOptions(oldOptions));
-            // }
-
             newDataset.setDatasetColour(oldDataset.getDatasetColour());
 
             // arrange root cluster groups
-            // log("Creating cluster groups");
             for (IClusterGroup oldGroup : oldDataset.getClusterGroups()) {
 
                 IClusterGroup newGroup = new ClusterGroup(oldGroup);
@@ -219,8 +189,6 @@ public class DatasetConverter implements Loggable, Importer {
                 newDataset.addClusterGroup(newGroup);
 
             }
-
-            // log("Creating child collections");
 
             // add the child datasets
             makeVirtualCollections(oldDataset, newDataset);

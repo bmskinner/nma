@@ -206,7 +206,7 @@ public class SignalManager implements Loggable {
         collection.getNuclei().parallelStream().forEach(n -> {
             if (n.getSignalCollection().hasSignal(signalGroupId)) {
                 String fileName = n.getSignalCollection().getSourceFile(signalGroupId).getName();
-                File newFile = new File(folder.getAbsolutePath(), fileName);
+                File newFile = new File(folder, fileName);
                 n.getSignalCollection().updateSourceFile(signalGroupId, newFile);
             }
         });

@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -162,7 +163,6 @@ public class IssueFixes {
         DatasetValidator v = new DatasetValidator();
         assertFalse(v.validate(okDataset));
         
-        
         okDataset.getCollection().setConsensus(null);
         // Try rerunning the analysis            
         IAnalysisMethod p = new DatasetProfilingMethod(okDataset);
@@ -193,6 +193,67 @@ public class IssueFixes {
         // Save the fixed file back out
         File saveFile = new File(DATASET_FOLDER, "IssuePigOk_Fixed.nmd");
         new DatasetExportMethod(okDataset, saveFile).call();
+        
+        
+        
     }
+    
+    @Test
+    public void testPigSpermFailSegmentationIssueFixed() throws Exception{
 
+        File failFile = new File(DATASET_FOLDER, "IssuePigFail.nmd");
+        UUID signalID = UUID.fromString("e66ae80b-e2bf-480a-ab61-2e0daf0478c7");
+        Map<UUID, File> signalMap = new HashMap<>();
+        signalMap.put(signalID, new File(DATASET_FOLDER));
+        
+        IAnalysisDataset failDataset = SampleDatasetReader.openDataset(failFile, signalMap);
+        
+        DatasetValidator v = new DatasetValidator();
+        assertFalse(v.validate(failDataset));
+        
+        failDataset.getCollection().setConsensus(null);
+        // Try rerunning the analysis            
+        IAnalysisMethod p = new DatasetProfilingMethod(failDataset);
+        p.call();
+        
+        System.out.println("Completed profiling");
+
+        IAnalysisMethod seg = new DatasetSegmentationMethod(failDataset, MorphologyAnalysisMode.NEW);
+        seg.call();
+        
+
+        for(IAnalysisDataset d : failDataset.getAllChildDatasets()){
+            failDataset.getCollection().getProfileManager().copyCollectionOffsets(d.getCollection());
+            d.getCollection().setConsensus(null);
+        }
+
+        // Refold the consensus
+        new ConsensusAveragingMethod(failDataset).call();
+
+        
+        boolean ok = v.validate(failDataset);
+        assertFalse(ok);
+        for(String s : v.getErrors()){
+            System.out.println(s);
+        }
+        
+        for(ICell c : v.getErrorCells()){
+            failDataset.getCollection().removeCell(c);
+            for(IAnalysisDataset d : failDataset.getAllChildDatasets()){
+                d.getCollection().removeCell(c);
+            }
+        }
+        
+        ok = v.validate(failDataset);
+        assertTrue(ok);
+        
+        // Save the fixed file back out
+        File saveFile = new File(DATASET_FOLDER, "IssuePigFail_Fixed.nmd");
+        new DatasetExportMethod(failDataset, saveFile).call();
+    }
+    
+    @Test
+    public void testAvianSignalFolderIssueFixed() throws Exception{
+
+    }
 }

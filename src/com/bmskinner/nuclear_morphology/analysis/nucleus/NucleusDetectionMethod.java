@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -324,12 +326,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param folder
      *            the folder of images to be analysed
      */
-    protected void processFolder(final File folder) {
+    protected void processFolder(@NonNull final File folder) {
 
         if (folder == null) {
             throw new IllegalArgumentException("Folder cannot be null");
         }
-
+        
         File[] arr = folder.listFiles();
         if (arr == null) {
             return;

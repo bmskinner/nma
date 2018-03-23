@@ -20,11 +20,16 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.Exporter;
@@ -274,6 +279,36 @@ public class FileSelector {
         }
         
         return chooseFolder(defaultDir);
+    }
+    
+    /**
+     * Get the signal image directory for the given signal group in a dataset
+     * @param dataset the dataset
+     * @param signalGroupId the signal group
+     * @return the new file
+     */
+    public static File getSignalDirectory(@NonNull final IAnalysisDataset dataset, @NonNull final UUID signalGroupId) {
+
+        try {
+            String signalName = dataset.getCollection().getSignalGroup(signalGroupId).getGroupName();
+            
+            JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group " + signalName);
+
+            // We expect the signal images to be in the folder above the nmd file
+            File defaultFolder = dataset.getSavePath().getParentFile();
+            JFileChooser fc = new JFileChooser(defaultFolder);
+            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            int returnVal = fc.showOpenDialog(fc);
+            if (returnVal != 0) {
+                return null;
+            }
+
+            File file = fc.getSelectedFile();
+            return file;
+        } catch (UnavailableSignalGroupException e) {
+            return null;
+        }
     }
 
     /**

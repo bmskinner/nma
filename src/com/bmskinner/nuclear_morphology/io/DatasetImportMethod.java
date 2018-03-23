@@ -32,6 +32,8 @@ import java.util.UUID;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
@@ -44,6 +46,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
@@ -374,6 +377,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         	throw(e1);
 
         } catch (NullPointerException e1) {
+            // holdover from deserialisation woes when migrating packages
             stack("NPE Error reading '" + file.getAbsolutePath() + "': ", e1);
             throw new UnloadableDatasetException("Cannot load dataset due to " + e1.getClass().getSimpleName(), e1);
 
@@ -407,12 +411,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                     "Cannot load '" + file.getAbsolutePath() + "' due to unexpected end of file", e1);
 
         } catch (Exception e1) {
+            // Is there anything else left that could go wrong? Probably.
             stack("Error reading '" + file.getAbsolutePath() + "'", e1);
             throw new UnloadableDatasetException(
                     "Cannot load '" + file.getAbsolutePath() + "' due to " + e1.getClass().getSimpleName(), e1);
 
         } catch (StackOverflowError e) {
-
+            // From when a recursive loop was entered building segments.
             throw new UnloadableDatasetException("Stack overflow loading '" + file.getAbsolutePath() + "'", e);
 
         } finally {
@@ -472,14 +477,14 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
     /**
      * Check if the image folders are present in the correct relative
-     * directories If so, update the CellCollection image paths should be
+     * directories If so, update the ICellCollection image paths should be
      * /ImageDir/AnalysisDir/dataset.nmd
      * 
      * @param inputFile the file being opened
      * @param dataset the dataset being opened
      * @param signalFileMap an optional parameter with the mapping of signal groups to files
      */
-    private void updateSavePath(File inputFile, IAnalysisDataset dataset) {
+    private void updateSavePath(@NonNull final File inputFile, @NonNull final IAnalysisDataset dataset) {
 
         fine("File path has changed: attempting to relocate images");
 
@@ -489,8 +494,12 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         /*
          * The expected folder structure for an analysis is as follows:
          * 
-         * -- ImageDir/ | -- DateTimeDir/ | | -- dataset.nmd | | -- dataset.log
-         * | -- Image1.tiff | -- ImageN.tiff
+         * -- ImageDir/ 
+         * | -- DateTimeDir/ 
+         * | | -- dataset.nmd | 
+         * | -- dataset.log
+         * | -- Image1.tiff 
+         * | -- ImageN.tiff
          * 
          */
 
@@ -515,7 +524,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             if(!signalFileMap.isPresent()){
                 Map<UUID, File> map = new HashMap<>();
                 for (UUID id : dataset.getCollection().getSignalGroupIDs()) {
-                    map.put(id, getSignalDirectory(dataset, id));
+                    map.put(id, FileSelector.getSignalDirectory(dataset, id));
                 }
                 signalFileMap = Optional.of(map);
             }
@@ -558,32 +567,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         }
     }
 
-    private File getSignalDirectory(IAnalysisDataset dataset, UUID signalID) {
-
-        String signalName;
-        try {
-            signalName = dataset.getCollection().getSignalGroup(signalID).getGroupName();
-        } catch (UnavailableSignalGroupException e) {
-            warn("Missing signal group, cannot continue");
-            fine("Error getting signal group", e);
-            return null;
-        }
-
-        JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group " + signalName);
-
-        JFileChooser fc = new JFileChooser(dataset.getSavePath().getParentFile());
-        fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
-            return null;
-        }
-
-        File file = fc.getSelectedFile();
-
-        fine("Selected folder: " + file.getAbsolutePath());
-        return file;
-    }
 
     public class UnloadableDatasetException extends Exception {
         private static final long serialVersionUID = 1L;

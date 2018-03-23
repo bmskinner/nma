@@ -153,6 +153,8 @@ public class ProfileSegmenter implements Loggable {
          * cannot be called within MIN_SIZE of the profile end, there is enough
          * space to make a segment running from the current segment start back
          * to index 0
+         * TODO: Sometimes this fails because there is not enough space left in the profile.
+         * See IssuePigFail.nmd
          */
         IBorderSegment seg = IBorderSegment.newSegment(segmentStart, 0, profile.size());
         segments.add(seg);

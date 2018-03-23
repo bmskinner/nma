@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
@@ -78,11 +80,10 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
      * @return
      */
     @Override
-    public IPoint getCartesianCoordinate(final MeshFace face) {
+    public IPoint getCartesianCoordinate(@NonNull final MeshFace face) {
 
-        if (face == null) {
+        if (face == null)
             throw new IllegalArgumentException("Face is null when getting cartesian coordinate");
-        }
 
         // Identify the vertices
         boolean usePeripheral = face.getPeripheralVertexCount() == 2;
@@ -103,12 +104,11 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
 
         // Draw lines
         IPoint i1_p1_prop = i1_p1.getProportionalPosition(this.p2);
-        // finest("Point along I1-P1: "+i1_p1_prop.toString());
 
         LineEquation eq1 = new DoubleEquation(p2.getPosition(), i1_p1_prop);
 
         IPoint i1_p2_prop = i1_p2.getProportionalPosition(this.p1);
-        // finest("Point along I1-P2: "+i1_p2_prop.toString());
+
         LineEquation eq2 = new DoubleEquation(p1.getPosition(), i1_p2_prop);
 
         // Find intersection

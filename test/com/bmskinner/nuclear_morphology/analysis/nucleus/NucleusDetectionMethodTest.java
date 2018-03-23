@@ -60,7 +60,7 @@ import ij.plugin.frame.RoiManager;
  */
 public class NucleusDetectionMethodTest {
     
-	private static final String IMAGE_FOLDER = "test/samples/images/";
+	private static final String IMAGE_FOLDER = "test/com/bmskinner/nuclear_morphology/samples/images/";
 	
     private static final String TESTING_RODENT_FOLDER = IMAGE_FOLDER +"Testing";
     
@@ -140,6 +140,10 @@ public class NucleusDetectionMethodTest {
      * @throws Exception
      */
     private IAnalysisDataset runNewAnalysis(String folder, IMutableAnalysisOptions op, File saveFile) throws Exception {
+        
+        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).getFolder().exists()){
+            throw new IllegalArgumentException("Detection folder does not exist");
+        }
         IAnalysisMethod m = new NucleusDetectionMethod(folder, null, op);
         IAnalysisResult r = m.call();
         
