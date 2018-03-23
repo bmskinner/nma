@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -1402,30 +1403,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
               return temp;
           }
-        
-          /*
-           * (non-Javadoc)
-           * 
-           * @see components.generic.ISegmentedProfile#segmentIterator()
-           */
-          @Override
-          public Iterator<IBorderSegment> segmentIterator() throws Exception {
-        
-              List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-        
-              // find the first segment
-              IBorderSegment first = null;
-        
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.getPosition() == ZERO_INDEX) {
-                      first = seg;
-                  }
-              }
-        
-              list = getSegmentsFrom(first);
-              return list.iterator();
-          }
-        
+                
           /*
            * (non-Javadoc)
            * 
@@ -1433,20 +1411,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            */
           @Override
           public IBorderSegment getSegment(@NonNull final UUID id) throws UnavailableComponentException {
-              if (id == null) {
+              if (id == null)
                   throw new IllegalArgumentException("Id is null");
-              }
               
               for(int i=0; i<ids.length; i++){
-                  if(ids[i].equals(id)){
+                  if(ids[i].equals(id))
                       return new DefaultBorderSegment(segmentBounds[i], segmentBounds[wrapSegmentIndex(i+1)], ids[i]);
-                  }
               }
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.getID().equals(id)) {
-                      return seg;
-                  }
-              }
+
               throw new UnavailableComponentException("Segment with id " + id.toString() + " not found");
         
           }
@@ -1457,11 +1429,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * @see components.generic.ISegmentedProfile#hasSegment(java.util.UUID)
            */
           @Override
-          public boolean hasSegment(UUID id) {
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.getID().equals(id)) {
+          public boolean hasSegment(@NonNull final UUID id) {
+              for (UUID u : ids) {
+                  if (u.equals(id))
                       return true;
-                  }
               }
               return false;
           }
@@ -1472,39 +1443,49 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
            */
           @Override
-          public List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+          public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception {
               return getSegmentsFrom(getSegment(id));
+          }
+          
+          /**
+           * Get the index of the segment with the given id
+           * @param id
+           * @return
+           */
+          private int getIndexOfSegment(final UUID id){
+              for(int i=0; i<ids.length; i++){
+                  if(ids[i].equals(id))
+                      return i;
+              }
+              return -1;
           }
         
           /**
            * Get the segments in order from the given segment
            * 
-           * @param firstSeg
+           * @param firstSeg the first segment in the profile
            * @return
-           * @throws Exception
+           * @throws UnavailableComponentException 
            */
-          private List<IBorderSegment> getSegmentsFrom(IBorderSegment firstSeg) throws ProfileException {
-        
-              if (firstSeg == null) {
+          private List<IBorderSegment> getSegmentsFrom(IBorderSegment firstSeg) throws UnavailableComponentException {
+
+              if (firstSeg == null)
                   throw new IllegalArgumentException("Requested first segment is null");
-              }
-        
+
+              int index = getIndexOfSegment(firstSeg.getID());
+
+              if(index==-1)
+                  throw new UnavailableComponentException("No segment with first segment id ");
+
               List<IBorderSegment> result = new ArrayList<>();
-              int i = segments.length - 1; // the number of segments
-              result.add(firstSeg);
-              while (i > 0) {
-        
-                  if (firstSeg.hasNextSegment()) {
-                      firstSeg = firstSeg.nextSegment();
-                      result.add(firstSeg);
-                      i--;
-                  } else {
-                      throw new ProfileException(i + ": No next segment in " + firstSeg.toString());
-                  }
+              for(int j=0; j<ids.length; j++){
+                  int k = wrapSegmentIndex(index+j); 
+                  result.add(getSegment(ids[k]));
               }
-              return IBorderSegment.copy(result);
+
+              return result;
           }
-        
+
           /*
            * (non-Javadoc)
            * 
@@ -1520,7 +1501,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                * Choose the first segment of the profile to be the segment starting at
                * the zero index
                */
-              for (IBorderSegment seg : segments) {
+              for (IBorderSegment seg : getSegments()) {
         
                   if (seg.getStartIndex() == ZERO_INDEX) {
                       firstSeg = seg;
@@ -1542,7 +1523,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               List<IBorderSegment> result;
               try {
                   result = getSegmentsFrom(firstSeg);
-              } catch (ProfileException e) {
+              } catch (UnavailableComponentException e) {
                   warn("Profile error getting segments");
                   fine("Profile error getting segments", e);
                   result = new ArrayList<IBorderSegment>();
@@ -1563,7 +1544,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                   throw new IllegalArgumentException("Requested segment name is null");
               }
         
-              for (IBorderSegment seg : this.segments) {
+              for (IBorderSegment seg : this.getSegments()) {
                   if (seg.getName().equals(name)) {
                       return seg;
                   }
@@ -1578,18 +1559,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment)
            */
           @Override
-          public IBorderSegment getSegment(IBorderSegment segment) {
-              if (!this.contains(segment)) {
-                  throw new IllegalArgumentException("Requested segment name is not present");
+          public IBorderSegment getSegment(@NonNull IBorderSegment segment) {
+              if (!this.contains(segment))
+                  throw new IllegalArgumentException("Requested segment is not present");
+              
+              try {
+                  return getSegment(segment.getID());
+              } catch(UnavailableComponentException e){
+                  return null;
               }
-        
-              IBorderSegment result = null;
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.equals(segment)) {
-                      result = seg;
-                  }
-              }
-              return result;
+              
           }
         
           /*
@@ -1600,16 +1579,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public IBorderSegment getSegmentAt(int position) {
         
-              if(position < 0 || position > segments.length-1){
+              if(position < 0 || position > ids.length-1)
                   throw new IllegalArgumentException("Segment position is out of bounds");
-              }
-              IBorderSegment result = null;
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.getPosition() == position) {
-                      result = seg;
-                  }
-              }
-              return result;
+              
+              try {
+                return getSegment(ids[position]);
+            } catch (UnavailableComponentException e) {
+                return null;
+            }
           }
         
           /*
@@ -1620,11 +1597,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public IBorderSegment getSegmentContaining(int index) {
         
-              if (index < 0 || index >= this.size()) {
+              if (index < 0 || index >= this.size())
                   throw new IllegalArgumentException("Index is out of profile bounds");
-              }
         
-              for (IBorderSegment seg : segments) {
+              for (IBorderSegment seg : getSegments()) {
                   if (seg.contains(index)) {
                       return seg;
                   }
@@ -1646,17 +1622,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               if (segments.get(0).getTotalLength() != this.size()) {
                   throw new IllegalArgumentException("Segment list is from a different total length");
               }
+              
+              segmentBounds = new int[segments.size()];
+              ids = new UUID[segments.size()];
+              
         
-              try {
-                  segments = IBorderSegment.copy(segments);
-        
-                  this.segments = new IBorderSegment[segments.size()];
-                  for (int i = 0; i < segments.size(); i++) {
-                      this.segments[i] = segments.get(i);
-                  }
-        
-              } catch (ProfileException e) {
-                  warn("Cannot copy segments");
+              for (int i=0; i<ids.length; i++) {
+                  segmentBounds[i] = segments.get(i).getStartIndex();
+                  ids[i] = segments.get(i).getID();
               }
           }
         
@@ -1667,7 +1640,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            */
           @Override
           public void clearSegments() {
-              segments = new IBorderSegment[0];
+              segmentBounds = new int[0];
+              ids = new UUID[0];
         
           }
         
@@ -1678,9 +1652,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            */
           @Override
           public List<String> getSegmentNames() {
-              List<String> result = new ArrayList<String>();
-              for (IBorderSegment seg : segments) {
-                  result.add(seg.getName());
+              List<String> result = new ArrayList<>();
+              for (int i=0; i<ids.length; i++) {
+                  result.add("Seg_"+i);
               }
               return result;
           }
@@ -1693,8 +1667,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public List<UUID> getSegmentIDs() {
               List<UUID> result = new ArrayList<UUID>();
-              for (IBorderSegment seg : this.segments) {
-                  result.add(seg.getID());
+              for (UUID id : ids) {
+                  result.add(id);
               }
               return result;
           }
@@ -1706,7 +1680,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            */
           @Override
           public int getSegmentCount() {
-              return this.segments.length;
+              return ids.length;
           }
         
           /*
@@ -1717,7 +1691,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment)
            */
           @Override
-          public double getDisplacement(IBorderSegment segment) {
+          public double getDisplacement(@NonNull final IBorderSegment segment) {
               
               if (!contains(segment)) {
                   throw new IllegalArgumentException("Segment is not in profile");
@@ -1738,17 +1712,27 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment)
            */
           @Override
-          public boolean contains(IBorderSegment segment) {
-              if (segment == null) {
+          public boolean contains(@NonNull final IBorderSegment segment) {
+              if (segment == null)
                   return false;
-              }
-        
-              for (IBorderSegment seg : this.segments) {
-                  if (seg.equals(segment)) {
+              
+              for(int i=0; i<ids.length; i++){
+                  if(equals(i, segment))
                       return true;
-                  }
               }
+
               return false;
+          }
+
+          /**
+           * Test if the given segment is at the given segment index
+           * @param i
+           * @param seg
+           * @return
+           */
+          private boolean equals(int i, @NonNull IBorderSegment seg){
+              int j = wrapSegmentIndex(i);
+              return segmentBounds[i]==seg.getStartIndex() && segmentBounds[j]==seg.getEndIndex() && ids[i].equals(seg.getID());
           }
         
           /*
@@ -1760,9 +1744,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
         
-              if (!this.contains(segment)) {
+              if (!this.contains(segment))
                   throw new IllegalArgumentException("Segment is not part of this profile");
-              }
         
               // test effect on all segments in list: the update should
               // not allow the endpoints to move within a segment other than
@@ -1770,7 +1753,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               IBorderSegment nextSegment = segment.nextSegment();
               IBorderSegment prevSegment = segment.prevSegment();
         
-              for (IBorderSegment testSeg : this.segments) {
+              for (IBorderSegment testSeg : this.getSegments()) {
         
                   // if the proposed start or end index is found in another segment
                   // that is not next or prev, do not proceed
@@ -1778,12 +1761,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
                       if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
                               && !testSeg.getName().equals(prevSegment.getName())) {
-                          // segment.setLastFailReason("Index out of bounds of next
-                          // and prev");
                           return false;
                       }
                   }
               }
+              
+              //TODO: check this works with the new indexing 
         
               // the basic checks have been passed; the update will not damage linkage
               // Allow the segment to determine if the update is valid and apply it
@@ -1799,7 +1782,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * int)
            */
           @Override
-          public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException {
+          public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
               if (!hasSegment(id)) {
                   throw new IllegalArgumentException("Segment is not part of this profile");
               }
@@ -1813,8 +1796,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                   throw new SegmentUpdateException("Error getting segment", e);
               }
         
-              int newValue = CellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
-                      segmentToUpdate.getTotalLength());
+              int newValue = wrapIndex(segmentToUpdate.getStartIndex() + amount);
               return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
           }
         
@@ -1826,7 +1808,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * int)
            */
           @Override
-          public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException {
+          public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
               if (!hasSegment(id)) {
                   throw new IllegalArgumentException("Segment is not part of this profile");
               }
@@ -1840,8 +1822,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                   throw new SegmentUpdateException("Error getting segment");
               }
         
-              int newValue = CellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-                      segmentToUpdate.getTotalLength());
+              int newValue = wrapIndex(segmentToUpdate.getEndIndex() + amount);
               return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
           }
         
@@ -1852,19 +1833,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            */
           @Override
           public void nudgeSegments(int amount) {
-        
-              List<IBorderSegment> result;
-              try {
-                  result = IBorderSegment.nudge(getSegments(), amount);
-              } catch (ProfileException e) {
-                  fine("Error offsetting segments", e);
-                  return;
-              }
-              this.segments = new IBorderSegment[segments.length];
-              for (int i = 0; i < segments.length; i++) {
-                  this.segments[i] = result.get(i);
-              }
-        
+              for(int i=0; i<ids.length; i++){
+                  segmentBounds[i] = wrapIndex(segmentBounds[i]+amount);
+              }    
           }
         
           /*
@@ -1996,7 +1967,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               // log("Segment interpolation complete "+newSegs.size());
         
-              return new SegmentedFloatProfile(newProfile, newSegs);
+              return new DefaultSegmentedProfile(newProfile, newSegs);
           }
         
           /*
@@ -2024,7 +1995,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                * The final frankenprofile is made of stitched together profiles from
                * each segment
                */
-              List<IProfile> finalSegmentProfiles = new ArrayList<>(segments.length);
+              List<IProfile> finalSegmentProfiles = new ArrayList<>(ids.length);
         
               try {
         
@@ -2233,7 +2204,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           }
         
           @Override
-          public boolean isSplittable(UUID id, int splitIndex) {
+          public boolean isSplittable(@NonNull UUID id, int splitIndex) {
               if (!this.hasSegment(id)) {
                   throw new IllegalArgumentException("No segment with the given id");
               }
@@ -2250,8 +2221,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                   throw new IllegalArgumentException("Splitting index is not within the segment");
               }
         
-              return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, segment.getTotalLength())
-                      && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), segment.getTotalLength());
+              return IBorderSegment.isLongEnough(segment.getStartIndex(), splitIndex, this.size())
+                      && IBorderSegment.isLongEnough(splitIndex, segment.getEndIndex(), this.size());
           }
         
           /*
@@ -2262,7 +2233,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment, int, java.util.UUID, java.util.UUID)
            */
           @Override
-          public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException {
+          public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
               // Check the segments belong to the profile
               if (!this.contains(segment)) {
                   throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -2328,7 +2299,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public String toString() {
               StringBuilder builder = new StringBuilder();
-              for (IBorderSegment seg : this.segments) {
+              builder.append(super.toString()+System.getProperty("line.separator"));
+              for (IBorderSegment seg : this.getSegments()) {
                   builder.append(seg.toString() + System.getProperty("line.separator"));
               }
               return builder.toString();
@@ -2381,25 +2353,32 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               if (getClass() != obj.getClass())
                   return false;
               DefaultSegmentedProfile other = (DefaultSegmentedProfile) obj;
-              if (segments == null) {
-                  if (other.segments != null)
+              if (ids == null) {
+                  if (other.ids != null)
                       return false;
-              } else if (!Arrays.equals(segments, other.segments))
+              } else if (!Arrays.equals(ids, other.ids))
+                  return false;
+              if (segmentBounds == null) {
+                  if (other.segmentBounds != null)
+                      return false;
+              } else if (!Arrays.equals(segmentBounds, other.segmentBounds))
                   return false;
               return true;
           }
           
+          /**
+           * Wrap the segment index to allow incrementing of segment indices in loops
+           * @param i the index to wrap
+           * @return the wrapped index
+           */
           protected int wrapSegmentIndex(int i){
-              
               if (i < 0)
                   return wrapSegmentIndex(segmentBounds.length + i);
-
               if (i < segmentBounds.length)
                   return i;
-
               return i % segmentBounds.length;
           }
-          
+
           
           public class DefaultBorderSegment implements IBorderSegment {
               

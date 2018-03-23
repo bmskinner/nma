@@ -164,29 +164,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     /*
      * (non-Javadoc)
      * 
-     * @see components.generic.ISegmentedProfile#segmentIterator()
-     */
-    @Override
-    public Iterator<IBorderSegment> segmentIterator() throws Exception {
-
-        List<IBorderSegment> list = new ArrayList<IBorderSegment>();
-
-        // find the first segment
-        IBorderSegment first = null;
-
-        for (IBorderSegment seg : this.segments) {
-            if (seg.getPosition() == ZERO_INDEX) {
-                first = seg;
-            }
-        }
-
-        list = getSegmentsFrom(first);
-        return list.iterator();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
      */
     @Override

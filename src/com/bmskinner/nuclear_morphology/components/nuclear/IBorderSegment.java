@@ -44,25 +44,27 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggable {
 
-    // the smallest number of values in a segment
-    // Set to 3 (a start, midpoint and an end) so that the minimum length
-    // in the ProfileSegmenter can be interpolated downwards without
-    // causing errors when fitting segments to individual nuclei
+    /**
+     * The smallest number of indexes in a segment. 
+     */
     static final int    MINIMUM_SEGMENT_LENGTH       = 3;
+    /**
+     * The minimum length that a segment can be interpolated to.
+     */
     static final int    INTERPOLATION_MINIMUM_LENGTH = 2;
+    
+    /**
+     * The name segments are prefixed with for display
+     */
     static final String SEGMENT_PREFIX               = "Seg_";
 
     /**
      * Create the preferred segment type for this interface
      * 
-     * @param startIndex
-     *            the starting index of the segment in a profile, inclusive
-     * @param endIndex
-     *            the end index of the segment in a profile, inclusive
-     * @param total
-     *            the total length of the profile
-     * @param id
-     *            the id of the segment
+     * @param startIndex the starting index of the segment in a profile, inclusive
+     * @param endIndex the end index of the segment in a profile, inclusive
+     * @param total the total length of the profile
+     * @param id  the id of the segment
      * @return a new segment of the default type
      */
     static IBorderSegment newSegment(int startIndex, int endIndex, int total, UUID id) {
@@ -72,11 +74,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Create the preferred segment type based on the given template
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
-     * @param id
-     * @return
+     * @param seg the template segment
+     * @return a new segment
      */
     static IBorderSegment newSegment(IBorderSegment seg) {
         return new DefaultBorderSegment(seg);
@@ -85,16 +84,19 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Create the preferred segment type for this interface
      * 
-     * @param startIndex
-     * @param endIndex
-     * @param total
-     * @param id
-     * @return
+     * @param startIndex the starting index of the segment in a profile, inclusive
+     * @param endIndex the end index of the segment in a profile, inclusive
+     * @param total the total length of the profile
+     * @return a new segment
      */
     static IBorderSegment newSegment(int startIndex, int endIndex, int total) {
         return IBorderSegment.newSegment(startIndex, endIndex, total, java.util.UUID.randomUUID());
     }
 
+    /**
+     * Get the segment ID
+     * @return the id
+     */
     UUID getID();
 
     /**
@@ -693,7 +695,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param list
      * @return
      */
-    public static boolean segmentCountsMatch(List<IAnalysisDataset> list) {
+    static boolean segmentCountsMatch(List<IAnalysisDataset> list) {
 
         int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         for (IAnalysisDataset d : list) {
@@ -705,7 +707,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         return true;
     }
 
-    public static String toString(List<IBorderSegment> list) {
+    static String toString(List<IBorderSegment> list) {
         StringBuilder builder = new StringBuilder();
         builder.append("List of segments:\n");
         for (IBorderSegment segment : list) {
@@ -716,22 +718,16 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     }
     
     static int calculateSegmentLength(int start, int end, int total){
-        int testLength = 0;
-        if (start < end) { // no wrap
-            testLength = end - start;
-        } else { // wrap
-            testLength = end + (total - start);
-        }
-        return testLength;
+        return start < end ? end - start : end + (total - start);
     }
 
     /**
      * Test the length for new segments
      * 
-     * @param start
-     * @param end
-     * @param total
-     * @return
+     * @param start the segment start index
+     * @param end the segment end index
+     * @param total the profile length
+     * @return true if the distance between start and end indexes is longer than {@link IBorderSegment.MINIMUM_SEGMENT_LENGTH}
      */
     static boolean isLongEnough(int start, int end, int total) {
         int testLength = calculateSegmentLength(start, end, total);
@@ -741,10 +737,10 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Test the length for new segments. Can a second segment be added to the profile?
      * 
-     * @param start
-     * @param end
-     * @param total
-     * @return
+     * @param start the segment start index
+     * @param end the segment end index
+     * @param total the profile length
+     * @return true if the total distance minus the distance between start and end indexes is longer than {@link IBorderSegment.MINIMUM_SEGMENT_LENGTH}
      */
     static boolean isShortEnough(int start, int end, int total) {
         int testLength = calculateSegmentLength(start, end, total);

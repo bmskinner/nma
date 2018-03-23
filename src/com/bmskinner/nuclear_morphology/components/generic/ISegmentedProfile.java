@@ -55,21 +55,12 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Get a copy of the segments in this profile. The order will be the same as
-     * the original segment list. No point type sepecifiers are available; if
+     * the original segment list. No point type specifiers are available; if
      * you need to offset a profile, do it by a profile offset
      * 
      * @return
      */
     List<IBorderSegment> getSegments();
-
-    /**
-     * Get an iterator that begins with the segment at position zero in the
-     * profile
-     * 
-     * @return
-     * @throws Exception
-     */
-    Iterator<IBorderSegment> segmentIterator() throws Exception;
 
     /**
      * Fetch the segment with the given id, or null if not present. Fetches the
