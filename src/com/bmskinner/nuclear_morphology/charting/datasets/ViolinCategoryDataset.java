@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.jfree.data.KeyedObjects2D;
 import org.jfree.data.Range;
-import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -75,22 +74,17 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     public boolean hasProbabilities(Comparable<?> r, Comparable<?> c) {
 
         List<Number> values = (List<Number>) pdfData.getObject((Comparable) r, (Comparable) c);
-        if (values != null) {
-            return values.size() > 0;
-        } else {
-            return false;
-        }
+        return values!=null && values.size()>0;
     }
 
     public boolean hasProbabilities(int r, int c) {
+    	
+    	if(pdfData==null)
+    		return false;
 
         @SuppressWarnings("unchecked")
         List<Number> values = (List<Number>) pdfData.getObject(r, c);
-        if (values != null) {
-            return values.size() > 0;
-        } else {
-            return false;
-        }
+        return values!=null && values.size()>0;
     }
 
     public boolean hasProbabilities() {
@@ -153,7 +147,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
                                                                   // for space
     }
 
-    public void addProbabilities(List<Number> values, Comparable<?> rowKey, Comparable<?> columnKey) {
+    public void addProbabilities(List<? extends Number> values, Comparable<?> rowKey, Comparable<?> columnKey) {
         if (values == null) {
             throw new IllegalArgumentException("Null 'values' argument.");
         }
@@ -218,6 +212,21 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     public List<?> getOutliers(int row, int column) {
         return new ArrayList<Object>(); // don't display outliers on violin
                                         // plots
-
+    }
+    
+    @Override
+    public double getRangeLowerBound(boolean includeInterval){
+    	return getRangeBounds(includeInterval).getLowerBound();
+    }
+    
+    @Override
+    public double getRangeUpperBound(boolean includeInterval){
+    	return getRangeBounds(includeInterval).getUpperBound();
+    }
+    
+    @Override
+    public Range getRangeBounds(boolean includeInterval){
+    	Range r = super.getRangeBounds(includeInterval);
+    	return Range.combine(r, getProbabiltyRange());
     }
 }

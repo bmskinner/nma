@@ -107,10 +107,8 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         // log("Getting min and max y values");
         try {
             double ymax = dataset.getMax(row, column);
-            // log("Got ymax: "+ymax);
             double ymin = dataset.getMin(row, column);
 
-            // log("Got ymin: "+ymin);
 
             List<Number> values = dataset.getPdfValues(row, column);
 
@@ -138,12 +136,6 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         double xx = categoryStart; //
         int seriesCount = getRowCount();
         int categoryCount = getColumnCount();
-
-        // log("Plot has "+seriesCount+" series and "+categoryCount+"
-        // categories");
-        //
-        // log("Series is"+dataset.getRowKey(row)+" -
-        // "+dataset.getColumnKey(column));
 
         if (seriesCount > 1) {
 
@@ -176,96 +168,73 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         Path2D leftShape = new Path2D.Double();
 
         double yValPos = yValMin;
+        
+        double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
 
-        leftShape.moveTo(xxmid, rangeAxis.valueToJava2D(yValPos, dataArea, location)); // start
+        leftShape.moveTo(xxmid, yy); // start
                                                                                        // with
                                                                                        // the
                                                                                        // lowest
                                                                                        // value
 
-        double maxProbability = new Max(dataset.getPdfValues(row, column)).doubleValue(); // Stats.max().doubleValue();
+        double maxProbability = new Max(dataset.getPdfValues(row, column)).doubleValue();
 
         List<Number> values = dataset.getPdfValues(row, column);
-        for (Number v : values) {
+        for (int i=0; i<values.size(); i++) {
 
-            // Get the y position on the chart
+        	Number v = values.get(i);
+
+         // Express the probability as a fraction of the bar width
+            double xValPos = (v.doubleValue() / maxProbability);
+
+         // multiply the fraction by the bar width to get x position
+            double xxPosR = xxmid + ((xxrange / 2) * xValPos);
+            
+            // Connect the lowest value to the midpoint
+            if(i==0)
+        		leftShape.lineTo(xxPosR, yy);
+            
+         // Get the y position on the chart
             yValPos += stepSize;
-
-            double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location); // convert
-                                                                              // y
-                                                                              // values
-                                                                              // to
-                                                                              // to
-                                                                              // java
-                                                                              // coordinates
-
-            // Get the x position on the chart
-            double xValPos = (v.doubleValue() / maxProbability); // Express the
-                                                                 // proability
-                                                                 // as a
-                                                                 // fraction of
-                                                                 // the bar
-                                                                 // width
-
-            double xxPosL = xxmid + ((xxrange / 2) * xValPos); // multiply the
-                                                               // fraction by
-                                                               // the bar width
-                                                               // to get x
-                                                               // position
+            
+         // convert y values to to java coordinates
+            yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
 
             // Add to the line
-            leftShape.lineTo(xxPosL, yy);
+            leftShape.lineTo(xxPosR, yy);
 
         }
 
         // Move back to the x-midpoint at the highest value in the y-axis
-        leftShape.lineTo(xxmid, rangeAxis.valueToJava2D(yValMax, dataArea, location)); // start
-                                                                                       // with
-                                                                                       // the
-                                                                                       // lowest
-                                                                                       // value
+        leftShape.lineTo(xxmid, yy);
 
         // Now do the same on the other side of the midpoint
         Collections.reverse(values);
-        leftShape.lineTo(xxmid, rangeAxis.valueToJava2D(yValMax, dataArea, location)); // start
-                                                                                       // with
-                                                                                       // the
-                                                                                       // lowest
-                                                                                       // value
+//        leftShape.lineTo(xxmid, yy);
 
-        for (Number v : values) {
+        for (int i=0; i<values.size(); i++) {
 
-            double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location); // convert
-                                                                              // y
-                                                                              // values
-                                                                              // to
-                                                                              // to
-                                                                              // java
-                                                                              // coordinates
+        	Number v = values.get(i);
 
-            // Get the x position on the chart
+            // Express the probability as a fraction of the bar width
+            double xValPos = (v.doubleValue() / maxProbability); 
 
-            double xValPos = (v.doubleValue() / maxProbability); // Express the
-                                                                 // proability
-                                                                 // as a
-                                                                 // fraction of
-                                                                 // the bar
-                                                                 // width
-
-            double xxPosL = xxmid - ((xxrange / 2) * xValPos); // multiply the
-                                                               // fraction by
-                                                               // the bar width
-                                                               // to get x
-                                                               // position
-
+            // multiply the fraction by the bar width to get x position
+            double xxPosL = xxmid - ((xxrange / 2) * xValPos);
+            
             // Add to the line
             leftShape.lineTo(xxPosL, yy);
+            
+            
+            // convert y values to to java coordinates
+            yy = rangeAxis.valueToJava2D(yValPos, dataArea, location); //
 
             // Get the y position on the chart
             yValPos -= stepSize;
-
-            // log("Drawing to "+xxPosL+" - "+yy);
-
+            
+            // Bring the shape down to the y-min beforfe closing
+            if(i==values.size()-1)
+            	leftShape.lineTo(xxPosL, rangeAxis.valueToJava2D(yValPos, dataArea, location));
         }
 
         leftShape.closePath();
