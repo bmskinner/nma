@@ -101,5 +101,20 @@ public class Labels {
     
     public static final String NUCLEI = "nuclei";
     
+    public static class Clusters {
+    	
+    	public static final String CLUSTER_GROUP = "Cluster group";
+    	public static final String CLUSTER_FOUND = "Clusters found";
+    	public static final String CLUSTER_METHOD = "Method";
+    	public static final String HC_ITERATIONS = "Iterations";
+    	public static final String HC_METHOD = "Hierarchical method";
+    	public static final String TARGET_CLUSTERS = "Target cluster number";
+    	public static final String INCLUDE_PROFILE = "Include profile";
+    	public static final String PROFILE_TYPE = "Profile type";
+    	public static final String INCLUDE_MESH = "Include mesh";
+    	public static final String INCLUDE_SEGMENTS = "Include segments";
+    	public static final String TREE = "Tree";
+    }
+    
 
 }

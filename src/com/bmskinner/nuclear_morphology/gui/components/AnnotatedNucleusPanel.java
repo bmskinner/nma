@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.gui.components;
 
-import ij.process.ImageProcessor;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 
@@ -29,14 +27,14 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.process.ImageProcessor;
 
 /**
  * Display the original image for a cell, with the nucleus outlines drawn on it.
@@ -86,11 +84,8 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
             if (c.hasCytoplasm()) {
                 ip = c.getCytoplasm().getComponentRGBImage();
             } else {
-                ip = c.getNucleus().getComponentImage();
+                ip = c.getNuclei().get(0).getComponentImage();
             }
-
-            // Nucleus n = c.getNucleus();
-            // ip = n.getComponentImage();
 
         } catch (UnloadableImageException e) {
             stack("Cannot load image for component", e);
@@ -123,21 +118,8 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
         	}
         	ip = an.toProcessor();
         }
-
-        ImageIcon icon = null;
-        if (imageLabel.getIcon() != null) {
-            icon = (ImageIcon) imageLabel.getIcon();
-            icon.getImage().flush();
-        }
-        icon = makeIcon(ip);
-
-//        this.setSize(icon.getIconWidth(), icon.getIconHeight());
-        imageLabel.setIcon(icon);
-        imageLabel.revalidate();
-        imageLabel.repaint();
-
-        this.repaint();
-
+        
+        drawIcon(ip);
     }
     
 
@@ -161,14 +143,20 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
             an.annotateBorder(n, Color.ORANGE);
         }
 
-        openProcessor = an.toProcessor();
-
-        ImageIcon icon = null;
+        drawIcon(an.toProcessor());
+    }
+    
+    /**
+     * Draw the given processor to the image icon
+     * @param ip
+     */
+    private void drawIcon(ImageProcessor ip){
+    	ImageIcon icon = null;
         if (imageLabel.getIcon() != null) {
             icon = (ImageIcon) imageLabel.getIcon();
             icon.getImage().flush();
         }
-        icon = makeIcon(openProcessor);
+        icon = makeIcon(ip);
 //        this.setSize(icon.getIconWidth(), icon.getIconHeight());
         imageLabel.setIcon(icon);
         imageLabel.revalidate();

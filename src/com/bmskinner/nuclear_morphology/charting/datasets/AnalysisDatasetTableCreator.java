@@ -1123,16 +1123,16 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         DefaultTableModel model = new DefaultTableModel();
 
-        List<Object> columnList = new ArrayList<Object>();
-        columnList.add("Cluster group");
-        columnList.add("Clusters found");
-        columnList.add("Method");
-        columnList.add("Iterations");
-        columnList.add("Hierarchical method");
-        columnList.add("Target cluster number");
-        columnList.add("Include profile");
-        columnList.add("Profile type");
-        columnList.add("Include mesh");
+        List<Object> columnList = new ArrayList<>();
+        columnList.add(Labels.Clusters.CLUSTER_GROUP);
+        columnList.add(Labels.Clusters.CLUSTER_FOUND);
+        columnList.add(Labels.Clusters.CLUSTER_METHOD);
+        columnList.add(Labels.Clusters.HC_ITERATIONS);
+        columnList.add(Labels.Clusters.HC_METHOD);
+        columnList.add(Labels.Clusters.TARGET_CLUSTERS);
+        columnList.add(Labels.Clusters.INCLUDE_PROFILE);
+        columnList.add(Labels.Clusters.PROFILE_TYPE);
+        columnList.add(Labels.Clusters.INCLUDE_MESH);
 
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
 
@@ -1140,8 +1140,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             columnList.add("Include " + stat.toString());
         }
 
-        columnList.add("Include segments");
-        columnList.add("Tree");
+        columnList.add(Labels.Clusters.INCLUDE_SEGMENTS);
+        columnList.add(Labels.Clusters.TREE);
 
         model.addColumn(EMPTY_STRING, columnList.toArray());
 
@@ -1216,18 +1216,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 }
 
                 boolean seg = false;
-//                try {
-                	for (UUID id : op.getSegments()) {
-                		seg |= op.isIncludeSegment(id);
-                	}
-                	dataList.add(seg);
-//                } catch (NullPointerException e) {
-//                	dataList.add(Labels.NA);
-//                }
+
+                for (UUID id : op.getSegments()) {
+                	seg |= op.isIncludeSegment(id);
+                }
+                dataList.add(seg);
+
                 
                 dataList.add(tree);
 
-                //
                 model.addColumn(dataset.getName(), dataList.toArray());
             }
         }

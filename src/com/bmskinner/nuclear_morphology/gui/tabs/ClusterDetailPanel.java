@@ -194,11 +194,13 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     					groupNames.add(JOptionPane.showInputDialog("Name for group "+i)); 
     				}
 
-    				if (groups > 1) { // don't allow a scale to cause divide by zero errors
+    				if (groups > 1) {
     					ManualClusteringDialog mc = new ManualClusteringDialog(getDatasets().get(0), groupNames);
     					mc.addInterfaceEventListener(this);
     					mc.run();
     					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+    				} else {
+    					warn("Must have at least two groups");
     				}
     			}
     		}catch(Exception ex){

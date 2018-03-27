@@ -428,7 +428,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      */
     private void setNodeColour(ICellCollection cluster, Color colour) {
 
-        setNodeColour(cluster.streamCells(), colour);
+        setNodeColour(cluster, colour);
     }
 
     /**

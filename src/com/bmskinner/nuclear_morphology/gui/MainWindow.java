@@ -19,7 +19,6 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -81,7 +80,7 @@ public class MainWindow extends JFrame implements Loggable {
                                                          // if present
 
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
-            + Version.currentVersion().toString()+"a3";
+            + Version.currentVersion().toString()+"a4";
 
     private JTabbedPane tabbedPane; // bottom panel tabs
 
