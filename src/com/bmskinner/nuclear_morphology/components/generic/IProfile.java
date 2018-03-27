@@ -48,7 +48,7 @@ public interface IProfile extends Serializable, Loggable {
      * @param array the array of values
      * @return a profile
      */
-    static IProfile makeNew(@NonNull float[] array) {
+    static IProfile makeNew(float[] array) {
         return new FloatProfile(array);
     }
 
@@ -57,7 +57,7 @@ public interface IProfile extends Serializable, Loggable {
      * @param array the array of values
      * @return a profile
      */
-    static IProfile makeNew(@NonNull double[] array) {
+    static IProfile makeNew(double[] array) {
         try {
             return new FloatProfile(new ArrayConverter(array).toFloatArray());
         } catch (ArrayConversionException e) {
@@ -127,7 +127,7 @@ public interface IProfile extends Serializable, Loggable {
      * @return the index of the first maximum value
      * @throws ProfileException
      */
-    int getIndexOfMax(BooleanProfile limits) throws ProfileException;
+    int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException;
 
     /**
      * Get the index of the maximum value in the profile If there are multiple
@@ -170,7 +170,7 @@ public interface IProfile extends Serializable, Loggable {
      * @return the index
      * @throws ProfileException
      */
-    int getIndexOfMin(BooleanProfile limits) throws ProfileException;
+    int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException;
 
     /**
      * Get the index of the minimum value in the profile
@@ -190,7 +190,7 @@ public interface IProfile extends Serializable, Loggable {
      * @return the sum-of-squares difference
      * @throws ProfileException
      */
-    double absoluteSquareDifference(IProfile testProfile) throws ProfileException;
+    double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException;
 
     /**
      * Alternative to the constructor from profile
@@ -247,7 +247,7 @@ public interface IProfile extends Serializable, Loggable {
      *         profile
      * @throws ProfileException
      */
-    int getSlidingWindowOffset(IProfile testProfile) throws ProfileException;
+    int getSlidingWindowOffset(@NonNull IProfile testProfile) throws ProfileException;
 
     /**
      * For each point in the array, test for a local minimum. The values of the
@@ -316,7 +316,7 @@ public interface IProfile extends Serializable, Loggable {
      * @return a profile with the selected region
      * @throws ProfileException
      */
-    IProfile getSubregion(IBorderSegment segment) throws ProfileException;
+    IProfile getSubregion(@NonNull IBorderSegment segment) throws ProfileException;
 
     /**
      * Sum the difference between between each pair of values across a
@@ -361,7 +361,7 @@ public interface IProfile extends Serializable, Loggable {
      *            profile
      * @return the new profile
      */
-    IProfile multiply(IProfile multiplier);
+    IProfile multiply(@NonNull IProfile multiplier);
     
     /**
      * Multiply all values within the profile by a given value
@@ -379,7 +379,7 @@ public interface IProfile extends Serializable, Loggable {
      * @param divider the profile to divide by. Must be the same length as this profile
      * @return the new profile
      */
-    IProfile divide(IProfile divider);
+    IProfile divide(@NonNull IProfile divider);
 
     /**
      * Divide all values within the profile by a given value
@@ -397,7 +397,7 @@ public interface IProfile extends Serializable, Loggable {
      *            the profile to add. Must be the same length as this profile
      * @return the new profile
      */
-    IProfile add(IProfile adder);
+    IProfile add(@NonNull IProfile adder);
 
     /**
      * Add the given value to all points within the profile
@@ -415,7 +415,7 @@ public interface IProfile extends Serializable, Loggable {
      *            profile
      * @return the new profile
      */
-    IProfile subtract(IProfile sub);
+    IProfile subtract(@NonNull IProfile sub);
     
     /**
      * Subtract all values within the profile by the given constant

@@ -21,7 +21,10 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
@@ -43,7 +46,7 @@ public class ClusterGroup implements IClusterGroup {
                                                                           // in
                                                                           // a
                                                                           // cluster
-    private IClusteringOptions options;                                   // store
+    private IClusteringOptions options = null;                              // store
                                                                           // the
                                                                           // options
                                                                           // that
@@ -64,7 +67,7 @@ public class ClusterGroup implements IClusterGroup {
      * @param options
      *            the options used to create the cluster
      */
-    public ClusterGroup(String name, IClusteringOptions options) {
+    public ClusterGroup(@NonNull String name, @NonNull IClusteringOptions options) {
         this.name = name;
         this.options = options;
     }
@@ -79,13 +82,18 @@ public class ClusterGroup implements IClusterGroup {
      * @param tree
      *            the Newick tree for the cluster as a String
      */
-    public ClusterGroup(String name, IClusteringOptions options, String tree) {
+    public ClusterGroup(@NonNull String name, @NonNull IClusteringOptions options, @NonNull String tree) {
         this(name, options);
         this.newickTree = tree;
     }
 
-    public ClusterGroup(IClusterGroup template) {
-        this.options = OptionsFactory.makeClusteringOptions(template.getOptions());
+    public ClusterGroup(@NonNull IClusterGroup template) {
+    	if(template.getOptions().isPresent()){
+    		options = OptionsFactory.makeClusteringOptions(template.getOptions().get());
+    	} else {
+    		options = null;
+    	}
+
         this.name = template.getName();
         this.newickTree = template.getTree();
         this.ids = template.getUUIDs();
@@ -177,8 +185,8 @@ public class ClusterGroup implements IClusterGroup {
      * @see components.IClusterGroup#getOptions()
      */
     @Override
-    public IClusteringOptions getOptions() {
-        return this.options;
+    public Optional<IClusteringOptions> getOptions() {
+        return Optional.ofNullable(options);
     }
 
     /*
@@ -188,11 +196,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public boolean hasDataset(UUID id) {
-        if (this.ids.contains(id)) {
-            return true;
-        } else {
-            return false;
-        }
+        return ids.contains(id);
     }
 
     /*
@@ -202,11 +206,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public boolean hasTree() {
-        if (this.newickTree == null) {
-            return false;
-        } else {
-            return true;
-        }
+        return newickTree != null;
     }
 
     /*

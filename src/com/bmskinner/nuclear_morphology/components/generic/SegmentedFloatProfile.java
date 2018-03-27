@@ -125,7 +125,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @param values
      * @throws Exception
      */
-    public SegmentedFloatProfile(@NonNull float[] values) {
+    public SegmentedFloatProfile(float[] values) {
         this(new FloatProfile(values));
     }
 

@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
@@ -42,7 +44,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      * @throws ProfileException
      */
-    static ISegmentedProfile makeNew(ISegmentedProfile profile) throws ProfileException {
+    static ISegmentedProfile makeNew(@NonNull ISegmentedProfile profile) throws ProfileException {
         return new SegmentedFloatProfile(profile);
     }
 
@@ -71,7 +73,7 @@ public interface ISegmentedProfile extends IProfile {
      * @throws UnavailableComponentException if there is no segment with the given id
      * @throws IllegalArgumentException if the id is null
      */
-    IBorderSegment getSegment(UUID id) throws UnavailableComponentException;
+    IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
      * Test if a segment with the given id is present
@@ -79,7 +81,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return true if a segment is present with the id, false otherwise
      * @throws IllegalArgumentException if the id is null
      */
-    boolean hasSegment(UUID id);
+    boolean hasSegment(@NonNull UUID id);
 
     /**
      * Make this profile the length specified. Segments will be adjusted to the
@@ -101,7 +103,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      * @throws Exception
      */
-    List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception;
+    List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception;
 
     /**
      * Get a copy of the segments in this profile, ordered from the zero index
@@ -117,7 +119,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return the segment
      * @throws UnavailableComponentException if there is no segment with the given name
      */
-    IBorderSegment getSegment(String name) throws UnavailableComponentException;
+    IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException;
 
     /**
      * Get the given segment. Returns null if no segment is found. Gets the
@@ -126,7 +128,7 @@ public interface ISegmentedProfile extends IProfile {
      * @param name
      * @return
      */
-    IBorderSegment getSegment(IBorderSegment segment);
+    IBorderSegment getSegment(@NonNull IBorderSegment segment);
 
     /**
      * Get the segment at the given position in the profile. is found. Gets the
@@ -150,7 +152,7 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @param segments
      */
-    void setSegments(List<IBorderSegment> segments);
+    void setSegments(@NonNull List<IBorderSegment> segments);
 
     /**
      * Remove the segments from this profile
@@ -186,7 +188,7 @@ public interface ISegmentedProfile extends IProfile {
      *            the segment to measure
      * @return the displacement, or 0 if the segment was not found
      */
-    double getDisplacement(IBorderSegment segment);
+    double getDisplacement(@NonNull IBorderSegment segment);
 
     /**
      * Test if the profile contains the given segment. Copies are ok, it checks
@@ -195,7 +197,7 @@ public interface ISegmentedProfile extends IProfile {
      * @param segment
      * @return
      */
-    boolean contains(IBorderSegment segment);
+    boolean contains(@NonNull IBorderSegment segment);
 
     /**
      * Update the selected segment of the profile with the new start and end
@@ -211,7 +213,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return did the update succeed
      * @throws SegmentUpdateException
      */
-    boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
+    boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
 
     /**
      * Adjust the start position of the given segment by the given amount.
@@ -223,7 +225,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return did the update succeed
      * @throws SegmentUpdateException
      */
-    boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException;
+    boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException;
 
     /**
      * Adjust the end position of the given segment by the given amount.
@@ -235,7 +237,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return did the update succeed
      * @throws SegmentUpdateException
      */
-    boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException;
+    boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException;
 
     /**
      * Move the positions of all segments by the given amount
@@ -263,7 +265,7 @@ public interface ISegmentedProfile extends IProfile {
      * @return a new profile with normalised segments
      * @throws Exception
      */
-    ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws ProfileException;
+    ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException;
 
     /**
      * Attempt to merge the given segments into one segment. The segments must
@@ -275,27 +277,26 @@ public interface ISegmentedProfile extends IProfile {
      *            the new id to give the segment
      * @return
      */
-    void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws ProfileException;
+    void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException;
 
     /**
      * Reverse a merge operation on a segment
      * 
      * @param segment
      */
-    void unmergeSegment(IBorderSegment segment) throws ProfileException;
+    void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException;
 
     /**
      * Split a segment at the given index into two new segments. Splits the
-     * segmnets, adds the split as merge sources to the old segmnet, then
+     * segments, adds the split as merge sources to the old segment, then
      * unmerges
      * 
-     * @param segment
-     *            the segment to split
-     * @param splitIndex
-     *            the index to split at
-     * @throws Exception
+     * @param segment the segment to split
+     * @param splitIndex the index to split at
+     * @param id1 the id for the first new segment
+     * @param id2 the id for the second new segment
      */
-    void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException;
+    void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException;
 
     /**
      * Test if the given segment can be split at the given index and produce two
@@ -305,7 +306,7 @@ public interface ISegmentedProfile extends IProfile {
      * @param splitIndex
      * @return
      */
-    boolean isSplittable(UUID id, int splitIndex);
+    boolean isSplittable(@NonNull UUID id, int splitIndex);
 
     /**
      * Restore the toString from Profile

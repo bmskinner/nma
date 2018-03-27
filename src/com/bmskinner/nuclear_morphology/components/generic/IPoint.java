@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.awt.geom.Point2D;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 /**
  * The interface for 2D points. It provides some extra methods beyond what
  * is in the Point2D classes.
@@ -115,7 +117,7 @@ public interface IPoint {
      *            the point to measure to
      * @return the distance between the points
      */
-    double getLengthTo(IPoint a);
+    double getLengthTo(@NonNull IPoint a);
 
     /**
      * Tests if the two points overlap with integer precision
@@ -124,15 +126,15 @@ public interface IPoint {
      *            the point to test against
      * @return boolean whether they overlap as integers
      */
-    boolean overlaps(final IPoint a);
+    boolean overlaps(final @NonNull IPoint a);
 
-    boolean isAbove(final IPoint p);
+    boolean isAbove(final @NonNull IPoint p);
 
-    boolean isBelow(final IPoint p);
+    boolean isBelow(final @NonNull IPoint p);
 
-    boolean isLeftOf(final IPoint p);
+    boolean isLeftOf(final @NonNull IPoint p);
 
-    boolean isRightOf(final IPoint p);
+    boolean isRightOf(final @NonNull IPoint p);
 
     /**
      * Tests if the two points overlap with double precision
@@ -141,7 +143,7 @@ public interface IPoint {
      *            the point to test against
      * @return boolean whether they overlap as doubles
      */
-    boolean overlapsPerfectly(final IPoint a);
+    boolean overlapsPerfectly(final @NonNull IPoint a);
 
     /**
      * Fetch the point as Point2D
@@ -160,7 +162,7 @@ public interface IPoint {
      *            the second line endpoint
      * @return
      */
-    double findAngle(final IPoint a, final IPoint b);
+    double findAngle(final @NonNull IPoint a, final @NonNull IPoint b);
 
     /**
      * Get the midpoint of the two points
@@ -186,7 +188,7 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint minus(final IPoint p);
+    IPoint minus(final @NonNull IPoint p);
     
     /**
      * Add the given point to this point. Creates
@@ -194,7 +196,7 @@ public interface IPoint {
      * @param p
      * @return
      */
-    IPoint plus(final IPoint p);
+    IPoint plus(final @NonNull IPoint p);
     
     /**
      * Add the given value to this point. Creates
@@ -234,7 +236,7 @@ public interface IPoint {
      * @param p
      *            the position to move this point to
      */
-    void set(IPoint p);
+    void set(@NonNull IPoint p);
 
     /**
      * Offset the point by the given amounts

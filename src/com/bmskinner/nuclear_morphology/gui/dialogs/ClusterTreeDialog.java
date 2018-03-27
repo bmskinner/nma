@@ -371,7 +371,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 }
 
                 Paint colour = ColourSelecter.getColor(clusterNumber++);
-                setNodeColour(cluster.getCollection().streamCells(), colour);
+                setNodeColour(cluster.getCollection(), colour);
 
                 finer("Node colours assigned");
 
@@ -391,7 +391,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param cells
      * @param colour
      */
-    private void setNodeColour(final Stream<ICell> cells, final Paint colour) {
+    private void setNodeColour(final ICellCollection collection, final Paint colour) {
 
         RootedTree tree = viewer.getTreePane().getTree();
 
@@ -402,8 +402,8 @@ public class ClusterTreeDialog extends LoadingIconDialog {
                 Taxon t = tree.getTaxon(n);
 
                 ICell c = (ICell) t.getAttribute("Cell");
-                
-                cells.filter(cell->cell.equals(c))
+
+                collection.streamCells().filter(cell->cell.equals(c))
                     .forEach(cell->n.setAttribute("Color", colour));
                 
 
@@ -603,7 +603,7 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @return
      */
     private ClusterGroup makeNewClusterGroup(List<IAnalysisDataset> list) {
-        ClusteringOptions newOptions = new ClusteringOptions(group.getOptions());
+        ClusteringOptions newOptions = new ClusteringOptions(group.getOptions().get());
         newOptions.setClusterNumber(list.size());
 
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;

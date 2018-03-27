@@ -53,8 +53,6 @@ public class ClusterAnalysisAction extends SingleDatasetResultAction {
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
 
             IAnalysisMethod m = clusterSetup.getMethod();
-
-//            int maxProgress = dataset.getCollection().size() * 2;
             worker = new DefaultAnalysisWorker(m);
 
             worker.addPropertyChangeListener(this);

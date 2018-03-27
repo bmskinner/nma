@@ -45,6 +45,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
@@ -331,7 +333,7 @@ public class CellCollection implements ICellCollection {
         }
     }
 
-    public void setConsensus(Nucleus n) {
+    public void setConsensus(@Nullable Nucleus n) {
         this.consensusNucleus = n;
     }
 

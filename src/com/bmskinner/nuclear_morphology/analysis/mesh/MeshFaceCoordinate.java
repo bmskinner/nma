@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.analysis.mesh;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
@@ -36,6 +38,6 @@ public interface MeshFaceCoordinate {
      *            the face enclosing pixel values
      * @return the pixel at this face coordinate
      */
-    IPoint getCartesianCoordinate(MeshFace face);
+    IPoint getCartesianCoordinate(@NonNull MeshFace face);
 
 }

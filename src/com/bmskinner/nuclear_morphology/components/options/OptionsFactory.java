@@ -193,10 +193,20 @@ public class OptionsFactory {
         return op;
     }
 
+    /**
+     * Create an instance of the default clustering options using
+     * {@link IClusteringOptions.DEFAULT_CLUSTER_METHOD}
+     * @return
+     */
     public static IMutableClusteringOptions makeClusteringOptions() {
         return new ClusteringOptions(IClusteringOptions.DEFAULT_CLUSTER_METHOD);
     }
 
+    /**
+     * Create an instance of clustering options based on the given template
+     * @param template the tamplate options
+     * @return
+     */
     public static IMutableClusteringOptions makeClusteringOptions(IClusteringOptions template) {
         return new ClusteringOptions(template);
     }

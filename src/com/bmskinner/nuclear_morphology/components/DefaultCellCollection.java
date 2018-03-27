@@ -347,7 +347,7 @@ public class DefaultCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setConsensus(Nucleus n) {
+    public void setConsensus(@Nullable Nucleus n) {
         this.consensusNucleus = n;
     }
 

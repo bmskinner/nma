@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.stream.DoubleStream;
@@ -1151,32 +1152,60 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             List<IClusterGroup> clusterGroups = dataset.getClusterGroups();
 
             for (IClusterGroup g : clusterGroups) {
-                IClusteringOptions op = g.getOptions();
-
-                Object iterationString = op.getType().equals(ClusteringMethod.EM) ? op.getIterations() : Labels.NA;
-
-                Object hierarchicalMethodString = op.getType().equals(ClusteringMethod.HIERARCHICAL)
-                        ? op.getHierarchicalMethod().toString() : Labels.NA;
-
-                Object hierarchicalClusterString = op.getType().equals(ClusteringMethod.HIERARCHICAL)
-                        ? op.getClusterNumber() : Labels.NA;
-
-                String tree = g.hasTree() ? g.getTree() : Labels.NA;
-
+                Optional<IClusteringOptions> opn = g.getOptions();
                 List<Object> dataList = new ArrayList<Object>();
+                if(!opn.isPresent()){
+                	dataList.add(g.getName());
+                    dataList.add(g.size());
+                	for(int i=0; i<26; i++){
+                		dataList.add(Labels.NA);
+                	}
+                	model.addColumn(dataset.getName(), dataList.toArray());
+                	continue;
+                }
+                IClusteringOptions op = opn.get();
+
                 dataList.add(g.getName());
                 dataList.add(g.size());
-                dataList.add(op.getType().toString());
-                dataList.add(iterationString);
+                String tree = g.hasTree() ? g.getTree() : Labels.NA;
+                try {
 
-                dataList.add(hierarchicalMethodString);
-                dataList.add(hierarchicalClusterString);
-                dataList.add(op.isIncludeProfile());
+                	Object iterationString = ClusteringMethod.EM.equals(op.getType()) ? op.getIterations() : Labels.NA;
 
-                String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
-                dataList.add(profileTypeString);
+                	Object hierarchicalMethodString = ClusteringMethod.HIERARCHICAL.equals(op.getType())
+                			? op.getHierarchicalMethod().toString() : Labels.NA;
 
-                dataList.add(op.isIncludeMesh());
+                			Object hierarchicalClusterString = ClusteringMethod.HIERARCHICAL.equals(op.getType())
+                					? op.getClusterNumber() : Labels.NA;
+
+                        
+
+                        
+                        dataList.add(op.getType().toString());
+                        dataList.add(iterationString);
+
+                        dataList.add(hierarchicalMethodString);
+                        dataList.add(hierarchicalClusterString);
+                        
+                } catch (NullPointerException e) {
+                    dataList.add(Labels.NA);
+                    dataList.add(Labels.NA);
+                    dataList.add(Labels.NA);
+                    dataList.add(Labels.NA);
+                }  
+
+                try {
+                
+                	dataList.add(op.isIncludeProfile());
+
+                	String profileTypeString = op.isIncludeProfile() ? op.getProfileType().toString() : "N/A";
+                	dataList.add(profileTypeString);
+
+                	dataList.add(op.isIncludeMesh());
+                } catch (NullPointerException e) {
+                    dataList.add(Labels.NA);
+                }
+                
 
                 for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
                     try {
@@ -1187,12 +1216,15 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 }
 
                 boolean seg = false;
-                for (UUID id : op.getSegments()) {
-                    if (op.isIncludeSegment(id)) {
-                        seg = true;
-                    }
-                }
-                dataList.add(seg);
+//                try {
+                	for (UUID id : op.getSegments()) {
+                		seg |= op.isIncludeSegment(id);
+                	}
+                	dataList.add(seg);
+//                } catch (NullPointerException e) {
+//                	dataList.add(Labels.NA);
+//                }
+                
                 dataList.add(tree);
 
                 //

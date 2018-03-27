@@ -412,7 +412,9 @@ public class ClusteringOptions implements IMutableClusteringOptions {
      * The available types of clustering for the Weka clusterer
      */
     public enum ClusteringMethod {
-        EM("Expectation maximisation", 0), HIERARCHICAL("Hierarchical", 1);
+        EM("Expectation maximisation", 0),
+        HIERARCHICAL("Hierarchical", 1),
+        MANUAL("Manual", 2);
 
         private final String name;
         private final int    code;

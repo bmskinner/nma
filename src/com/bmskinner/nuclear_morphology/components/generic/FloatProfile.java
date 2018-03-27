@@ -50,7 +50,7 @@ public class FloatProfile implements IProfile {
      * @param values
      *            the array to use
      */
-    public FloatProfile(@NonNull final float[] values) {
+    public FloatProfile(final float[] values) {
 
         if (values==null || values.length == 0) {
             throw new IllegalArgumentException("Input array has zero length in profile constructor");
@@ -363,7 +363,7 @@ public class FloatProfile implements IProfile {
      * @param arr2
      * @return
      */
-    private static double squareDifference(@NonNull float[] arr1, @NonNull float[] arr2) {
+    private static double squareDifference(float[] arr1, float[] arr2) {
         double difference = 0;
 
         for (int j = 0; j < arr1.length; j++) { // for each point round the

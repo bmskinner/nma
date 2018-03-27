@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
@@ -312,7 +313,7 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public void setConsensus(Nucleus n) {
+    public void setConsensus(@Nullable Nucleus n) {
         consensusNucleus = n;
     }
 

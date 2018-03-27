@@ -31,7 +31,11 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
+import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -58,11 +62,84 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
 
     }
 
-    public void updateCell(ICell c) throws Exception {
+    /**
+     * Display the given cell annotated on its source image
+     * @param c the cell to draw
+     * @throws Exception
+     */
+    public void showCell(ICell c) throws Exception {
         this.cell = c;
         importCellImage();
 
     }
+    
+    /**
+     * Display the given cell cropped
+     * @param c
+     * @throws Exception
+     */
+    public void showOnlyCell(ICell c, boolean annotated) throws Exception {
+        this.cell = c;
+        ImageProcessor ip;
+
+        try {
+            if (c.hasCytoplasm()) {
+                ip = c.getCytoplasm().getComponentRGBImage();
+            } else {
+                ip = c.getNucleus().getComponentImage();
+            }
+
+            // Nucleus n = c.getNucleus();
+            // ip = n.getComponentImage();
+
+        } catch (UnloadableImageException e) {
+            stack("Cannot load image for component", e);
+            return;
+        }
+        
+        if(annotated){
+
+        	ImageAnnotator an = new ImageAnnotator(ip);
+        	if (c.hasCytoplasm()) {
+
+        		an = an.annotateBorder(c.getCytoplasm(), c.getCytoplasm(), Color.CYAN);
+        		for (Nucleus n : c.getNuclei()) {
+        			an.annotateBorder(n, c.getCytoplasm(), Color.ORANGE);
+
+        			if (n instanceof LobedNucleus) {
+
+        				for (Lobe l : ((LobedNucleus) n).getLobes()) {
+        					an.annotateBorder(l, c.getCytoplasm(), Color.RED);
+        					an.annotatePoint(l.getCentreOfMass(), c.getCytoplasm(), Color.GREEN);
+        				}
+        			}
+        		}
+
+        	} else {
+
+        		for (Nucleus n : c.getNuclei()) {
+        			an = an.annotateSegments(n, n);
+        		}
+        	}
+        	ip = an.toProcessor();
+        }
+
+        ImageIcon icon = null;
+        if (imageLabel.getIcon() != null) {
+            icon = (ImageIcon) imageLabel.getIcon();
+            icon.getImage().flush();
+        }
+        icon = makeIcon(ip);
+
+//        this.setSize(icon.getIconWidth(), icon.getIconHeight());
+        imageLabel.setIcon(icon);
+        imageLabel.revalidate();
+        imageLabel.repaint();
+
+        this.repaint();
+
+    }
+    
 
     private void importCellImage() throws Exception {
 
@@ -92,7 +169,7 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
             icon.getImage().flush();
         }
         icon = makeIcon(openProcessor);
-        this.setSize(icon.getIconWidth(), icon.getIconHeight());
+//        this.setSize(icon.getIconWidth(), icon.getIconHeight());
         imageLabel.setIcon(icon);
         imageLabel.revalidate();
         imageLabel.repaint();
@@ -105,9 +182,9 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
      */
     private ImageIcon makeIcon(ImageProcessor processor) {
 
-        ImageProcessor resized = new ImageFilterer(processor).fitToScreen(0.6).toProcessor();
+//        ImageProcessor resized = new ImageFilterer(processor).fitToScreen(0.6).toProcessor();
 
-        ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
+        ImageIcon smallImageIcon = new ImageIcon(processor.getBufferedImage());
 
         return smallImageIcon;
 

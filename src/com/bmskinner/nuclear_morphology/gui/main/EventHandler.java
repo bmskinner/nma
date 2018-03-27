@@ -322,6 +322,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return r;
 
             }
+            
+//            if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
+//                return new MergeSourceExtractionAction(event.getDatasets(), mw);
+//            }
 
             return null;
         }

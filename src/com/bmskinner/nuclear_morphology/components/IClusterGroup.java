@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
@@ -97,7 +98,7 @@ public interface IClusterGroup extends Serializable, Loggable {
      * 
      * @return
      */
-    IClusteringOptions getOptions();
+    Optional<IClusteringOptions> getOptions();
 
     /**
      * Test if this group contains the given dataset id

@@ -25,6 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -393,7 +395,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param seg
      * @return true if an index other than the start and end index is shared
      */
-    boolean overlaps(IBorderSegment seg);
+    boolean overlaps(@NonNull IBorderSegment seg);
 
     /**
      * Given a list of segments, link them together into a circle.

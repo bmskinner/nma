@@ -63,7 +63,7 @@ public class CellImageDialog extends LoadingIconDialog {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         try {
-            panel.updateCell(cell);
+            panel.showCell(cell);
 
         } catch (Exception e) {
             warn("Cannot make cell image dialog");

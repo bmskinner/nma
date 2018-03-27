@@ -51,7 +51,10 @@ import ij.gui.Roi;
  */
 public abstract class SegmentedCellularComponent extends ProfileableCellularComponent {
 
-    /**
+	private static final long serialVersionUID = 1L;
+
+
+	/**
      * Construct with an ROI, a source image and channel, and the original
      * position in the source image
      * 
@@ -394,7 +397,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * @param arr2
          * @return
          */
-        private double squareDifference(@NonNull float[] arr1, @NonNull float[] arr2) {
+        private double squareDifference(float[] arr1, float[] arr2) {
             double difference = 0;
 
             for (int j = 0; j < arr1.length; j++) { // for each point round the
@@ -1372,7 +1375,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * @param values
            * @throws Exception
            */
-          public DefaultSegmentedProfile(@NonNull float[] values) {
+          public DefaultSegmentedProfile(float[] values) {
               super(values);
               segmentBounds[0] = 0;
               ids[0] = UUID.randomUUID();

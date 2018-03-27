@@ -32,8 +32,11 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
@@ -51,8 +54,10 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
+import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -71,10 +76,12 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     private static final String NEW_CLASS_LBL   = "Create classifier";
     private static final String SHOW_TREE_LBL   = "Show tree";
     private static final String NO_CLUSTERS_LBL = "No clusters present";
+    private static final String MAN_CLUSTER_LBL = "Manual cluster";
 
     private JButton clusterButton        = new JButton(NEW_CLUSTER_LBL);
     private JButton buildTreeButton      = new JButton(NEW_TREE_LBL);
     private JButton saveClassifierButton = new JButton(NEW_CLASS_LBL);
+    private JButton manualClusterBtn     = new JButton(MAN_CLUSTER_LBL);
 
     private JLabel statusLabel = new JLabel(NO_CLUSTERS_LBL, SwingConstants.CENTER);
     private JPanel statusPanel = new JPanel(new BorderLayout());
@@ -163,11 +170,52 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         saveClassifierButton.addActionListener(e -> {
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.TRAIN_CLASSIFIER, getDatasets());
         });
+        
+        manualClusterBtn.addActionListener(e -> {
+        	
+        	try {
+    			final String chooseLbl  = "Number of groups";
+
+    			SpinnerNumberModel sModel = new SpinnerNumberModel(2,2,5,1);
+
+    			JSpinner spinner = new JSpinner(sModel);
+
+    			int option = JOptionPane.showOptionDialog(null, spinner, chooseLbl, 
+    					JOptionPane.OK_CANCEL_OPTION,
+    					JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+    			if (option == JOptionPane.OK_OPTION) {
+
+    				int groups = (int) spinner.getModel().getValue();
+    				
+    				List<String> groupNames = new ArrayList<>();
+    				
+    				for(int i=0; i<groups; i++){
+    					groupNames.add(JOptionPane.showInputDialog("Name for group "+i)); 
+    				}
+
+    				if (groups > 1) { // don't allow a scale to cause divide by zero errors
+    					ManualClusteringDialog mc = new ManualClusteringDialog(getDatasets().get(0), groupNames);
+    					mc.addInterfaceEventListener(this);
+    					mc.run();
+    					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+    				}
+    			}
+    		}catch(Exception ex){
+    			warn("Error getting manual cluster count");
+    			stack("Error getting manual cluster count", ex);
+    		}
+        	
+            
+        });
 
         saveClassifierButton.setEnabled(false);
         buildTreeButton.setEnabled(true);
+        manualClusterBtn.setEnabled(true);
+        buttonPanel.add(manualClusterBtn);
         buttonPanel.add(buildTreeButton);
         buttonPanel.add(clusterButton);
+        
         // buttonPanel.add(saveClassifierButton);
 
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -258,6 +306,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         super.setEnabled(b);
         clusterButton.setEnabled(b);
         buildTreeButton.setEnabled(b);
+        manualClusterBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 
@@ -345,7 +394,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
     public void interfaceEventReceived(InterfaceEvent event) {
         super.interfaceEventReceived(event);
-        if (event.getSource() instanceof ClusterTreeDialog) {
+        if (event.getSource() instanceof ClusterTreeDialog || event.getSource() instanceof ManualClusteringDialog) {
             getInterfaceEventHandler().fireInterfaceEvent(event);
         }
     }
