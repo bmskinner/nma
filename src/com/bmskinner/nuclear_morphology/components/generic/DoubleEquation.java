@@ -388,6 +388,10 @@ public class DoubleEquation implements LineEquation {
         double c = yMean - (m * xMean);
 
         // Return the equation
+        
+        if(Double.isInfinite(m) || Double.isNaN(m))
+            return new DoubleEquation(xMean);
+
         LineEquation eq = new DoubleEquation(m, c);
         return eq;
     }
