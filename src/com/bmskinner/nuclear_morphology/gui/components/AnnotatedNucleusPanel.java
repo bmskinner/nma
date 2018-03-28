@@ -27,6 +27,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
@@ -170,9 +171,9 @@ public class AnnotatedNucleusPanel extends JPanel implements Loggable {
      */
     private ImageIcon makeIcon(ImageProcessor processor) {
 
-//        ImageProcessor resized = new ImageFilterer(processor).fitToScreen(0.6).toProcessor();
+        ImageProcessor resized = new ImageFilterer(processor).resize(2).toProcessor();
 
-        ImageIcon smallImageIcon = new ImageIcon(processor.getBufferedImage());
+        ImageIcon smallImageIcon = new ImageIcon(resized.getBufferedImage());
 
         return smallImageIcon;
 

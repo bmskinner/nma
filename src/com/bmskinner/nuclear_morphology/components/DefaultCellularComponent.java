@@ -482,7 +482,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             }
 
         } else {
-            throw new UnloadableImageException("Source image is not available");
+            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
         }
     }
 

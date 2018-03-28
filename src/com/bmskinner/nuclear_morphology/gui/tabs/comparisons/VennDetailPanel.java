@@ -89,8 +89,6 @@ public class VennDetailPanel extends DetailPanel {
 
     @Override
     protected void updateMultiple() {
-        // log("Updating venn panel with multiple");
-        // vennTable.setModel(AnalysisDatasetTableCreator.createLoadingTable());
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).setType(TableType.VENN)
                 .setTarget(vennTable).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new VennTableCellRenderer())
                 .build();

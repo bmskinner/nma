@@ -284,7 +284,26 @@ public class ImageFilterer extends AbstractImageFilterer {
 
         ip = result;
         return this;
-        // return new ImageFilterer(result);
+    }
+    
+    /**
+     * Resize the image by the given fraction, preserving aspect ratio
+     * 
+     * @param fraction the amount to rescale
+     * @return
+     */
+    public ImageFilterer resize(double fraction) {
+
+        if (ip == null)
+            throw new IllegalArgumentException("Image processor is null");
+
+        int originalWidth = ip.getWidth();
+
+        double finalWidth = originalWidth * fraction; // fix height
+
+        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+        ip = result;
+        return this;
     }
 
     /**

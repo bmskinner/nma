@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
@@ -184,22 +185,23 @@ public class FileSelector {
      * @param defaultFolder the default folder for the file chooser
      * @return the selected folder, or null if cancelled or error
      */
-    private static File chooseFolder(File defaultFolder){
+    public static File chooseFolder(@Nullable File defaultFolder){
         
+    	if(defaultFolder!=null && !defaultFolder.exists())
+    		defaultFolder=null;
+    	
         JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
 
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
+        if (returnVal != 0)
             return null; // user cancelled
-        }
 
         File file = fc.getSelectedFile();
 
-        if (!file.isDirectory()) {
+        if (!file.isDirectory())
             return null;
-        }
         return file;
         
     }
@@ -243,7 +245,7 @@ public class FileSelector {
 
         return file;
     }
-    
+        
     /**
      * Choose the directory containing the FISH images
      * 

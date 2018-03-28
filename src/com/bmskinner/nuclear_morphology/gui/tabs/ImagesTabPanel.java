@@ -20,13 +20,19 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,12 +43,16 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -111,6 +121,7 @@ public class ImagesTabPanel extends DetailPanel {
 
         tree = new JTree(treeModel);
         tree.addTreeSelectionListener(makeListener());
+        tree.addMouseListener(makeDoubleClickListener());
         tree.setEnabled(false);
 
         imagePanel = new JPanel(new BorderLayout());
@@ -177,14 +188,18 @@ public class ImagesTabPanel extends DetailPanel {
     /**
      * Create the nodes in the tree
      * 
-     * @param root
-     *            the root node
-     * @param dataset
-     *            the dataset to use
+     * @param root the root node
+     * @param datase the dataset to use
      */
     private void createNodes(DefaultMutableTreeNode root, IAnalysisDataset dataset) {
         
     	List<File> files = new ArrayList<>(dataset.getCollection().getImageFiles());
+    	
+    	// Each folder of images should be a node. Find the unique folders
+    	List<File> parents = files.stream()
+    			.map(f->f.getParentFile())
+    			.distinct()
+    			.collect(Collectors.toList());
     	
     	ImageNode r = new ImageNode(dataset.getName()+" ("+files.size()+")", null);
         DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(r);
@@ -217,13 +232,22 @@ public class ImagesTabPanel extends DetailPanel {
             }
         };
         
-        files.sort(comp);
+//        files.sort(comp);
 
-        for (File f : files) {
+        for (File parent : parents) {
+        	List<File> inParent = files.stream().filter(f->f.getParentFile().equals(parent))
+        	.collect(Collectors.toList());
+        	inParent.sort(comp);
+        	DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(new ImageNode(parent.getAbsolutePath(), parent));
+        	
+        	for (File f : inParent) {
 
-            String name = f.getName();
-            datasetRoot.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
+                String name = f.getName();
+                parentNode.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
+            }
+            datasetRoot.add(parentNode);
         }
+        
         
         root.add(datasetRoot);
 
@@ -256,8 +280,9 @@ public class ImagesTabPanel extends DetailPanel {
     		DefaultMutableTreeNode node = (DefaultMutableTreeNode) e.getPath().getLastPathComponent();
 
     		ImageNode data = (ImageNode) node.getUserObject();
+    		
 
-    		if (data.getFile() == null) {
+    		if (data.getFile() == null || data.getFile().isDirectory()) {
     			label.setIcon(null);
     			return;
     		}
@@ -292,4 +317,65 @@ public class ImagesTabPanel extends DetailPanel {
     	return l;
     }
 
+    /**
+     * Make a listener to allow image folder updating
+     * @return
+     */
+    private MouseListener makeDoubleClickListener(){
+    	MouseListener l = new MouseAdapter(){
+    		@Override
+    		public void mouseClicked(MouseEvent e) {
+
+    			if(e.getClickCount()!=2){
+    				return;
+    			}
+    			int row = tree.getRowForLocation(e.getX(), e.getY());
+    	        if(row==-1){
+    	        	return;
+    	        }
+
+    	        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+    	        DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+    	        if(node==null){
+    	        	return;
+    	        }
+
+    	        ImageNode data = (ImageNode) node.getUserObject();
+
+    	        if(data==null){
+    	        	return;
+    	        }
+    	        
+    	        File oldFolder = data.getFile();
+    	        
+    	        if(oldFolder==null || oldFolder.getName().endsWith(".tiff"))
+    	        	return;
+
+    	        File newFolder = FileSelector.chooseFolder(oldFolder);
+    	        if(newFolder==null || !newFolder.exists())
+    	        	return;
+
+    	        Enumeration<DefaultMutableTreeNode> children = node.children();
+    	        while(children.hasMoreElements()){
+    	        	DefaultMutableTreeNode imageNode = children.nextElement(); 	        
+    	        	ImageNode imageData = (ImageNode) imageNode.getUserObject();
+    	        	File imageFile = imageData.getFile();
+    	        	for(IAnalysisDataset d : getDatasets()){
+    	        		Set<ICell> cells = d.getCollection().getCells(imageFile);
+    	        		cells.parallelStream().forEach(c->{
+    	        			c.getNuclei().stream().forEach(n->{
+    	        				n.setSourceFolder(newFolder);
+    	        			});
+    	        		});
+    	        	}
+    	        }
+    	        
+    	        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+    	        
+    			
+    		}
+
+    	};
+    	return l;
+    }
 }

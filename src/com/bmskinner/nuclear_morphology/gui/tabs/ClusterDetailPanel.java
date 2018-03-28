@@ -174,6 +174,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         manualClusterBtn.addActionListener(e -> {
         	
         	try {
+        		        		
+        		String user = JOptionPane.showInputDialog("User name"); //TODO: Temp for cluster testing only
     			final String chooseLbl  = "Number of groups";
 
     			SpinnerNumberModel sModel = new SpinnerNumberModel(2,2,5,1);
@@ -195,7 +197,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
     				}
 
     				if (groups > 1) {
-    					ManualClusteringDialog mc = new ManualClusteringDialog(getDatasets().get(0), groupNames);
+    					ManualClusteringDialog mc = new ManualClusteringDialog(user, getDatasets().get(0), groupNames);
     					mc.addInterfaceEventListener(this);
     					mc.run();
     					getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);

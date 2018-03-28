@@ -611,7 +611,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        finer("Creating venn table model");
         DefaultTableModel model = new DefaultTableModel();
 
         List<IAnalysisDataset> list = options.getDatasets();
@@ -620,8 +619,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         Object[] columnData = new Object[list.size()];
         int row = 0;
         for (IAnalysisDataset dataset : list) {
-            columnData[row] = dataset.getName();
-            row++;
+            columnData[row++] = dataset.getName();
         }
         model.addColumn(Labels.DATASET, columnData);
 
@@ -638,8 +636,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         for (IAnalysisDataset dataset : list) {
-
-            finest("Fetching comparisons for " + dataset.getName());
 
             Object[] popData = new Object[list.size()];
 
@@ -666,7 +662,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             }
             model.addColumn(dataset.getName(), popData);
         }
-        finer("Created venn table model");
         return model;
     }
 
@@ -679,15 +674,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     public TableModel createPairwiseVennTable() {
 
         if (!options.hasDatasets()) {
-            finest("No datasets, creating blank pairwise venn table");
             return createBlankTable();
         }
 
         if (options.isSingleDataset()) {
-            finest("Single dataset, creating blank pairwise venn table");
             return createBlankTable();
         }
-        finer("Creating venn pairwise table model");
+        
         DefaultTableModel model = new DefaultTableModel();
 
         Object[] columnNames = new Object[] { "Dataset 1", "Unique %", "Unique", "Shared %", "Shared", "Shared %",

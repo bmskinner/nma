@@ -2,8 +2,8 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -17,47 +17,90 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
-import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
+import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions.IMutableClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
-import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
 
 /**
  * This dialog allows for manual clustering of nuclei based on appearance
  * @author ben
  * @since 1.13.8
- *
  */
 public class ManualClusteringDialog extends LoadingIconDialog {
 	
 	protected static final String LOADING_LBL = "Loading";
 
-    protected IAnalysisDataset dataset;
-    protected ImageImportWorker worker;
-    
+    protected IAnalysisDataset dataset;    
     private AnnotatedNucleusPanel panel;
         
+    public class ManualGroup {
+    	
+    	private List<ICell> selectedCells  = new ArrayList<>(96);
+    	public final String groupName;
+    	private List<Long> timePerCell = new ArrayList<>(96);
+    	
+    	public ManualGroup(String name){
+    		groupName = name;
+    	}
+    	
+    	/**
+    	 * Add a new cell to the group
+    	 * @param c
+    	 * @param time
+    	 */
+    	public void addCell(ICell c, long time){
+    		selectedCells.add(c);
+    		timePerCell.add(time);
+    	}
+    	
+    	/**
+    	 * Create a new virtual collection from the cells in the group
+    	 * @param name
+    	 * @return
+    	 */
+    	public ICellCollection toCollection(String name){
+    		ICellCollection coll = new VirtualCellCollection(dataset, name);
+    		
+    		for(ICell c : selectedCells){
+    			coll.addCell(c);
+    		}
+    		return coll;
+    	}
+    	
+    	public String getTimes(){
+    		StringBuilder b = new StringBuilder(groupName+System.getProperty("line.separator"));
+    		for(int i=0; i<selectedCells.size(); i++){
+    			b.append("Cell "+i+"\t"+selectedCells.get(i).getNucleus().getNameAndNumber()
+    					+"\t"+timePerCell.get(i)
+    					+"\t"+groupName
+    					+"\t"+user
+    					+System.getProperty("line.separator"));
+    		}
+    		return b.toString();
+    	}
+    	
+    }
+    
     /**
      * Nuclei assigned to groups
      */
-    private List<List<ICell>> selectedCells  = new ArrayList<>(96);
+    private List<ManualGroup> groups = new ArrayList<>();
     private List<JButton> buttons = new ArrayList<>();
     private int cellNumber = 0;
     
     private final List<ICell> cells;
-    private final List<String> groupNames;
-
-    public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset, List<String> groupNames) {
+    private long startTime = System.currentTimeMillis();
+    private final String user;
+    
+    public ManualClusteringDialog(String user, @NonNull final IAnalysisDataset dataset, List<String> groupNames) {
         super();
         this.dataset = dataset;
+        this.user = user;
         cells = new ArrayList<>(dataset.getCollection().getCells());
-        this.groupNames = groupNames;
-        for(int i=0; i<groupNames.size(); i++){
-        	selectedCells.add(new ArrayList<ICell>());
-        }
+        Collections.shuffle(cells); // random ordering
+        createGroups(groupNames);
 
         this.panel = new AnnotatedNucleusPanel();
         openCell(0);
@@ -67,34 +110,37 @@ public class ManualClusteringDialog extends LoadingIconDialog {
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         this.setModal(false);
-        this.pack();
+        this.setSize(400, 400);
         this.centerOnScreen();
         
     } 
     
     public void run(){
+    	startTime = System.currentTimeMillis();
     	this.setVisible(true);
     }
     
-    public void addCollections(){
+    protected void createGroups(List<String> groupNames){
+    	for(int i=0; i<groupNames.size(); i++){
+    		groups.add(new ManualGroup(groupNames.get(i)));
+        }
+    }
+    
+    protected void addCollections(){
     	
     	// Save the clusters to the dataset
-        List<IAnalysisDataset> list = new ArrayList<>();
         int clusterNumber = dataset.getMaxClusterGroupNumber() + 1;
         
         IMutableClusteringOptions op = OptionsFactory.makeClusteringOptions();
         op.setType(ClusteringMethod.MANUAL);
         
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
+        log("Dataset: "+dataset.getName()+" Group: "+group.getName());
+        for(int i=0; i<groups.size(); i++){
 
-        for(int i=0; i<selectedCells.size(); i++){
+        	ICellCollection coll = groups.get(i).toCollection("Manual_cluster_" + i+"_"+groups.get(i).groupName);
 
-        	ICellCollection coll = new VirtualCellCollection(dataset, "Manual_cluster_" + i+"_"+groupNames.get(i));
-    		
-    		for(ICell c : selectedCells.get(i)){
-    			coll.addCell(c);
-    		}
-
+        	log(groups.get(i).getTimes());
             if (coll.hasCells()) {
 
                 try {
@@ -110,22 +156,19 @@ public class ManualClusteringDialog extends LoadingIconDialog {
                 dataset.addChildCollection(coll);
 
                 // attach the clusters to their parent collection
-//                log("Cluster " + cluster + ": " + c.size() + " nuclei");
                 IAnalysisDataset clusterDataset = dataset.getChildDataset(coll.getID());
                 clusterDataset.setRoot(false);
 
                 // set shared counts
                 coll.setSharedCount(dataset.getCollection(), coll.size());
                 dataset.getCollection().setSharedCount(coll, coll.size());
-
-                list.add(clusterDataset);
             }
 
         }
-//        fine("Profiles copied to all clusters");
         dataset.addClusterGroup(group);
     	
     }
+    
     private void openCell(int i){
     	
     	if(i==cells.size()){
@@ -142,7 +185,6 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     		boolean annotateCellImage = false; 
 			panel.showOnlyCell(c, annotateCellImage);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	
@@ -157,12 +199,16 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     		JButton b = new JButton(groupNames.get(i));
         	buttons.add(b);
         	b.addActionListener( e -> {
-        		selectedCells.get(index).add(cells.get(cellNumber));
+        		long endTime = System.currentTimeMillis();
+        		groups.get(index).addCell(cells.get(cellNumber), endTime-startTime);
+        		startTime = endTime;
         		openCell(++cellNumber);
         	});
         	p.add(b);
         }
     	return p;
     }
+    
+    //TODO - show each nucleus twice.
 
 }
