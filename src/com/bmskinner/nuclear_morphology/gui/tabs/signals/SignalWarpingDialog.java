@@ -491,10 +491,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         Color colour = Color.WHITE;
         try {
             colour = datasetBoxOne.getSelectedDataset().getCollection().getSignalGroup(signalBox.getSelectedID())
-                    .getGroupColour();
-            if (colour == null) {
-                colour = Color.WHITE;
-            }
+                    .getGroupColour().orElse(Color.WHITE);
+
         } catch (UnavailableSignalGroupException e) {
             stack(e);
             colour = Color.WHITE;

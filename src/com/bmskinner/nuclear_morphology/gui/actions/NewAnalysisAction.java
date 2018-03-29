@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
@@ -52,6 +53,7 @@ public class NewAnalysisAction extends VoidResultAction {
     private IMutableAnalysisOptions options;
     private Date                    startTime;
     private String                  outputFolderName;
+    IMutableDetectionOptions nucleusOptions;
 
     private File folder = null;
 
@@ -82,7 +84,7 @@ public class NewAnalysisAction extends VoidResultAction {
         super(PROGRESS_LABEL, mw);
         this.folder = folder;
         options = OptionsFactory.makeAnalysisOptions();
-        IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
+        nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);
         options.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
     }
 
@@ -105,15 +107,13 @@ public class NewAnalysisAction extends VoidResultAction {
 
         if (analysisSetup.isOk()) {
 
-            // options = analysisSetup.getOptions();
-            File directory = null;
-            try {
-                directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-            } catch (MissingOptionException e) {
-                warn("Missing nucleus options");
-                this.cancel();
+        	Optional<IMutableDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            if(!op.isPresent()){
+            	cancel();
+            	return;
             }
 
+            File directory = op.get().getFolder();
             if (directory == null) {
                 this.cancel();
                 return;
@@ -131,9 +131,9 @@ public class NewAnalysisAction extends VoidResultAction {
                 analysisFolder.mkdir();
             }
             //
-            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
+//            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
 
-            IAnalysisMethod m = new NucleusDetectionMethod(this.outputFolderName, logFile, options);
+            IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
             // Calculate the number of files to process
 
             worker = new DefaultAnalysisWorker(m);
@@ -196,18 +196,9 @@ public class NewAnalysisAction extends VoidResultAction {
         if (!file.isDirectory()) {
             return false;
         }
-        fine("Selected directory: " + file.getAbsolutePath());
+
         folder = file;
-        fine("Set directory");
-        try {
-            options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder(file);
-            fine("Set analysis options");
-        } catch (Exception e) {
-            warn("Missing nucleus options");
-            stack(e.getMessage(), e);
-            return false;
-        }
-        fine("Returning");
+        nucleusOptions.setFolder(file);
         return true;
     }
 

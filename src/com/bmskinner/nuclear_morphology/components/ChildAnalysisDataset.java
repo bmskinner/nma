@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -229,7 +230,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
+    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
         return parent.getAnalysisOptions();
     }
 

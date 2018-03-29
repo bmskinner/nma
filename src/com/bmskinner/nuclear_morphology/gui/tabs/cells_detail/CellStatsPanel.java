@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
@@ -43,6 +44,8 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -154,7 +157,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
         try {
 
-            Color oldColour = activeDataset().getCollection().getSignalGroup(id).getGroupColour();
+            Color oldColour = activeDataset().getCollection().getSignalGroup(id).getGroupColour().orElse(Color.YELLOW);
 
             Color newColor = JColorChooser.showDialog(CellStatsPanel.this, "Choose signal Color", oldColour);
 
@@ -194,14 +197,13 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                 if (applyAllOption == 0) { // button at index 1
 
                 	activeDataset().getCollection().setScale(scale);
+                	Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+                	if(op.isPresent()){
+                		Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+                		if(nOp.isPresent())
+                			nOp.get().setScale(scale);
+                	}
 
-                	try {
-                        activeDataset().getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS)
-                                .setScale(scale);
-                    } catch (MissingOptionException e) {
-                        warn("Unable to update scale");
-                        stack(e.getMessage(), e);
-                    }
 
                 } else {
                     finest("Updating scale for single cell");

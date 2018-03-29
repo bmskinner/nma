@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.ImageIcon;
@@ -178,9 +179,10 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         	 
         	 ISignalCollection signalCollection = n.getSignalCollection();
              for (UUID id : signalCollection.getSignalGroupIDs()) {
-             	     
-				try {
-					Color colour = dataset.getCollection().getSignalGroup(id).getGroupColour();
+            	 
+            	 try {
+            		 Optional<Color> col = dataset.getCollection().getSignalGroup(id).getGroupColour();
+            		 Color colour = col.orElse(Color.YELLOW);  
 					an = an.annotateSignal(n, id, colour);
 				} catch (UnavailableSignalGroupException e) {
 					stack("No signal group", e);

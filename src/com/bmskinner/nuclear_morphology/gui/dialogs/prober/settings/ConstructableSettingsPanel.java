@@ -18,6 +18,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
+import java.util.Optional;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -116,8 +117,11 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new EdgeThresholdSwitchPanel(subOptions);
+        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        
+        SettingsPanel panel = new EdgeThresholdSwitchPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -150,8 +154,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addThresholdPanel(String optionsKey, String label) throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ThresholdSettingsPanel(subOptions);
+        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ThresholdSettingsPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -182,8 +188,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ColourThresholdWatershedSwitchPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ColourThresholdWatershedSwitchPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -213,8 +221,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addTopHatPanel(String optionsKey, String label) throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new TophatPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new TophatPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -247,8 +257,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColorThresholdPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ColourThresholdingSettingsPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ColourThresholdingSettingsPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -281,8 +293,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageProcessingPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ImagePreprocessingSettingsPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ImagePreprocessingSettingsPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -314,8 +328,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addSizePanel(String optionsKey, String label) throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ComponentSizeSettingsPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ComponentSizeSettingsPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -404,8 +420,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageChannelPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new ImageChannelSettingsPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new ImageChannelSettingsPanel(subOptions.get());
         panel.setBorder(BorderFactory.createTitledBorder(label));
         this.addSubPanel(panel);
         mainPanel.add(panel);
@@ -438,8 +456,10 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addCopyFromOpenPanel(String optionsKey, String label)
             throws MissingOptionException {
-        IMutableDetectionOptions subOptions = options.getDetectionOptions(optionsKey);
-        SettingsPanel panel = new CopyFromOpenDatasetPanel(subOptions);
+    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        if(!subOptions.isPresent())
+        	return this;
+        SettingsPanel panel = new CopyFromOpenDatasetPanel(subOptions.get());
         if (label != null) {
             panel.setBorder(BorderFactory.createTitledBorder(label));
         }

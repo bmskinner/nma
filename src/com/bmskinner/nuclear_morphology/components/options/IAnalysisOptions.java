@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -52,7 +53,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      *            the component to detect
      * @return the detection options for the component
      */
-    IMutableDetectionOptions getDetectionOptions(String key) throws MissingOptionException;
+    Optional<IMutableDetectionOptions> getDetectionOptions(String key);
 
     /**
      * Get the type of detection options stored

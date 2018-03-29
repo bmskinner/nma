@@ -35,6 +35,7 @@ public class SignalChangeEvent extends EventObject {
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
     public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
     public static final String MERGE_COLLECTION_ACTION     ="MergeCollectionAction";
+    public static final String EXTRACT_SUBSET              = "Extract subset";
 
 
     private static final long serialVersionUID = 1L;

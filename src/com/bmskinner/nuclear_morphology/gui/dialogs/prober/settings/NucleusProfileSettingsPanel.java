@@ -23,6 +23,7 @@ import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -74,33 +75,31 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         typeBox.addActionListener(e -> {
 
-            IMutableDetectionOptions nucleusOptions;
-            try {
-                nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IMutableDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	if(!nOptions.isPresent())
+        		return;
+        	IMutableDetectionOptions nucleusOptions = nOptions.get();
 
-                NucleusType type = (NucleusType) typeBox.getSelectedItem();
-                options.setNucleusType(type);
+        	NucleusType type = (NucleusType) typeBox.getSelectedItem();
+        	options.setNucleusType(type);
 
-                if (type.equals(NucleusType.ROUND)) {
-                    nucleusOptions.setMinCirc(0.0);
-                    nucleusOptions.setMaxCirc(1.0);
-                }
+        	if (type.equals(NucleusType.ROUND)) {
+        		nucleusOptions.setMinCirc(0.0);
+        		nucleusOptions.setMaxCirc(1.0);
+        	}
 
-                if (type.equals(NucleusType.RODENT_SPERM)) {
-                    nucleusOptions.setMinCirc(0.2);
-                    nucleusOptions.setMaxCirc(0.8);
-                }
+        	if (type.equals(NucleusType.RODENT_SPERM)) {
+        		nucleusOptions.setMinCirc(0.2);
+        		nucleusOptions.setMaxCirc(0.8);
+        	}
 
-                if (type.equals(NucleusType.PIG_SPERM)) {
-                    nucleusOptions.setMinCirc(0.1);
-                    nucleusOptions.setMaxCirc(0.9);
-                }
+        	if (type.equals(NucleusType.PIG_SPERM)) {
+        		nucleusOptions.setMinCirc(0.1);
+        		nucleusOptions.setMaxCirc(0.9);
+        	}
 
-                fireOptionsChangeEvent();
-            } catch (Exception e1) {
-                warn("Error getting options");
-                stack(e1.getMessage(), e1);
-            }
+        	fireOptionsChangeEvent();
+
         });
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,

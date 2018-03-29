@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -57,6 +58,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
 import com.bmskinner.nuclear_morphology.gui.actions.MergeCollectionAction;
@@ -134,6 +136,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC)) {
                 return new DatasetArithmeticAction(selectedDatasets, mw);
+            }
+            
+            if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET)) {
+                return new ExtractRandomCellsAction(selectedDataset, mw);
             }
 
             if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER)) {
@@ -251,15 +257,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
                 flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
 
-                try {
-                    if (event.firstDataset().getAnalysisOptions().refoldNucleus()) {
-                        flag |= SingleDatasetResultAction.CURVE_REFOLD;
-                    }
-                } catch (MissingOptionException e) {
-                    warn("Missing analysis options");
-                    stack(e.getMessage(), e);
-                    return null;
-                }
+                Optional<IMutableAnalysisOptions> op = event.firstDataset().getAnalysisOptions();
+                if(op.isPresent() && op.get().refoldNucleus())
+                	flag |= SingleDatasetResultAction.CURVE_REFOLD;
+
                 // begin a recursive morphology analysis
                 return new RunProfilingAction(selectedDatasets, flag, mw);
             }
@@ -323,9 +324,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             }
             
-//            if (event.method().equals(DatasetEvent.MANUAL_CLUSTER)) {
-//                return new MergeSourceExtractionAction(event.getDatasets(), mw);
-//            }
+            
 
             return null;
         }
@@ -577,24 +576,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             try {
 
-                latch.await();
-
-                if (dataset.hasAnalysisOptions()) {
-
-                    IMutableAnalysisOptions op;
-                    try {
-                        op = (IMutableAnalysisOptions) dataset.getAnalysisOptions();
-                        op.setRefoldNucleus(true);
-                        fine("Set refold status in options");
-                    } catch (MissingOptionException e) {
-                        warn("Missing analysis options");
-                        stack(e.getMessage(), e);
-
-                    }
-
-                } else {
-                    fine("Dataset has no analysis options, cannot set refold state");
-                }
+            	latch.await();
+            	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+            	if(op.isPresent())
+            		op.get().setRefoldNucleus(true);
 
                 mw.getPopulationsPanel().selectDataset(dataset);
 

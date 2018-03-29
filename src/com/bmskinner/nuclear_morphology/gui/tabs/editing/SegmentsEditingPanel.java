@@ -27,6 +27,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
@@ -54,6 +55,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -308,7 +310,10 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     private void updateCollectionWindowSize() throws Exception {
         double windowSizeMin = 0.01;
         double windowSizeMax = 0.1;
-        double windowSizeActual = activeDataset().getAnalysisOptions().getProfileWindowProportion();
+        double windowSizeActual = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
+        Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+        if(op.isPresent())
+        	windowSizeActual = op.get().getProfileWindowProportion();
 
         SpinnerNumberModel spinnerModel = new SpinnerNumberModel(windowSizeActual, windowSizeMin, windowSizeMax, 0.01);
         JSpinner windowSizeSpinner = new JSpinner(spinnerModel);
@@ -367,8 +372,9 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         fitter = null; // clean up
 
-        IMutableAnalysisOptions options = activeDataset().getAnalysisOptions();
-        options.setAngleWindowProportion(windowSize);
+        Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+        if(op.isPresent())
+        	op.get().setAngleWindowProportion(windowSize);
 
     }
 

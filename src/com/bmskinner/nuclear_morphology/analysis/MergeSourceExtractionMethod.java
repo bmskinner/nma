@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.analysis;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -35,6 +36,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
@@ -100,12 +102,9 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
             // Copy over the signal collections where appropriate
             copySignalGroups(templateCollection, newDataset);
 
-            try {
-                newDataset.setAnalysisOptions(virtualMergeSource.getAnalysisOptions());
-            } catch (MissingOptionException e) {
-                warn("Missing analysis options");
-                stack(e.getMessage(), e);
-            }
+            Optional<IMutableAnalysisOptions> op = virtualMergeSource.getAnalysisOptions();
+            if(op.isPresent())
+                newDataset.setAnalysisOptions(op.get());
 
             result.add(newDataset);
 

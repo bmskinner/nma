@@ -23,6 +23,7 @@ import java.awt.Paint;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -141,9 +142,9 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour()
-                                : colour;
+                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
+                    	if(c.isPresent())
+                    		colour = c.get();
 
                         colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) ? Color.LIGHT_GRAY
                                 : colour;
@@ -276,10 +277,10 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
                 String name = (String) signalCoMs.getSeriesKey(series);
                 // int seriesGroup = getIndexFromLabel(name);
                 UUID seriesGroup = getSignalGroupFromLabel(name);
-                Paint colour = options.firstDataset().getCollection().getSignalGroup(seriesGroup).hasColour()
-                        ? options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour()
-                        : ColourSelecter.getColor(series);
-
+                
+                Optional<Color> c = options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour();
+                Paint colour = c.isPresent() ? c.get() : ColourSelecter.getColor(series);
+            	
                 rend.setSeriesPaint(series, colour);
                 rend.setBaseLinesVisible(false);
                 rend.setBaseShapesVisible(true);
@@ -296,10 +297,8 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
                 int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
                 alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-
-                Paint colour = options.firstDataset().getCollection().getSignalGroup(signalGroup).hasColour()
-                        ? options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour()
-                        : ColourSelecter.getColor(j++);
+                Optional<Color> c = options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
+                Paint colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j++);
 
                 for (Shape s : shapes) {
                     XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,

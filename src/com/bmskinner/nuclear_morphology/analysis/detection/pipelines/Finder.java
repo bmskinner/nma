@@ -22,6 +22,8 @@ import java.io.File;
 import java.util.EventObject;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -58,7 +60,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInFolder(File folder) throws ImageImportException, ComponentCreationException;
+    public E findInFolder(@NonNull File folder) throws ImageImportException, ComponentCreationException;
 
     /**
      * Find cells using the options given in the setup in the given image
@@ -68,7 +70,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInImage(File imageFile) throws ImageImportException, ComponentCreationException;
+    public E findInImage(@NonNull File imageFile) throws ImageImportException, ComponentCreationException;
 
     /**
      * Add a listener for progress through the detection.

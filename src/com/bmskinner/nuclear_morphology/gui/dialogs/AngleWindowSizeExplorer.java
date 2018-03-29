@@ -28,6 +28,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import javax.swing.JButton;
@@ -59,6 +60,8 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
@@ -106,16 +109,9 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         double windowSizeMin = 0.001;
         double windowSizeMax = 0.50d;
 
-        double windowSizeActual = 0.05d; // default if analysis options are not
-                                         // present - e.g. a merge
-        if (dataset.hasAnalysisOptions()) {
-            try {
-                windowSizeActual = dataset.getAnalysisOptions().getProfileWindowProportion();
-            } catch (MissingOptionException e) {
-                warn("Error getting analyis options");
-                stack(e.getMessage(), e);
-            }
-        }
+        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+     // default if analysis options are not present - e.g. a merge
+        double windowSizeActual = op.isPresent() ? op.get().getProfileWindowProportion() : IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
         Dimension dim = new Dimension(80, 20);
 

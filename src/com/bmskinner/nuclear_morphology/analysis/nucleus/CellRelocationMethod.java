@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -178,13 +179,10 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
 
-                try {
-                    IMutableAnalysisOptions op = dataset.getAnalysisOptions();
-                    d.setAnalysisOptions(op);
-                } catch (MissingOptionException e) {
-                    warn("Error copying options");
-                    stack(e.getMessage(), e);
-                }
+
+                Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+                if(op.isPresent())
+                	d.setAnalysisOptions(op.get());
 
                 map.put(activeID, d);
                 continue;

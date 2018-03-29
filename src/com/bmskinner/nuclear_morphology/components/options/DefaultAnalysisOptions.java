@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -70,14 +71,9 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         for (String key : template.getDetectionOptionTypes()) {
 
-            IMutableDetectionOptions op;
-            try {
-                op = template.getDetectionOptions(key);
-                this.setDetectionOptions(key, op.duplicate());
-            } catch (MissingOptionException e) {
-                stack("Missing expected option type", e);
-            }
-
+            Optional<IMutableDetectionOptions> op  = template.getDetectionOptions(key);
+            if(op.isPresent())
+	            setDetectionOptions(key, op.get().duplicate());
         }
 
         this.profileWindowProportion = template.getProfileWindowProportion();
@@ -88,11 +84,11 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public IMutableDetectionOptions getDetectionOptions(String key) throws MissingOptionException {
+    public Optional<IMutableDetectionOptions> getDetectionOptions(String key){
         if (detectionOptions.containsKey(key)) {
-            return detectionOptions.get(key);
+            return Optional.of(detectionOptions.get(key));
         } else {
-            throw new MissingOptionException(key + " not present in options");
+        	return Optional.empty();
         }
 
     }
@@ -172,11 +168,10 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     @Override
     public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup) {
 
-        try {
-            return (INuclearSignalOptions) getDetectionOptions(signalGroup.toString());
-        } catch (MissingOptionException e) {
-            stack(e.getMessage(), e);
-        }
+    	Optional<IMutableDetectionOptions> op = getDetectionOptions(signalGroup.toString());
+    	
+    	if(op.isPresent())
+    		return (INuclearSignalOptions) op.get();
 
         return null;
     }
@@ -214,19 +209,13 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         for (String s : detectionOptions.keySet()) {
             IDetectionOptions d = detectionOptions.get(s);
-            try {
-                if (!d.equals(other.getDetectionOptions(s))){
-                    
-                    System.out.println("Inequality in suboptions:");
-                    System.out.println(d.getClass().getName());
-                    System.out.println(other.getDetectionOptions(s).getClass().getName());
-                    return false;
-                }
-                   
-            } catch (MissingOptionException e) {
-                return false;
-            }
+            if (!d.equals(other.getDetectionOptions(s))){
 
+            	System.out.println("Inequality in suboptions:");
+            	System.out.println(d.getClass().getName());
+            	System.out.println(other.getDetectionOptions(s).getClass().getName());
+            	return false;
+            }
         }
 
         if (Double.doubleToLongBits(profileWindowProportion) != Double

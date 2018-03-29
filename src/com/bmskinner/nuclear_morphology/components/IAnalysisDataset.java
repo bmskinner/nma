@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -272,7 +273,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @return
      */
-    IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException;
+    Optional<IMutableAnalysisOptions> getAnalysisOptions();
 
     /**
      * Test if the dataset has analysis options set. This is not the case for
@@ -520,22 +521,17 @@ public interface IAnalysisDataset extends Serializable, Loggable {
                         continue;
                     }
 
-                    try {
-                        IAnalysisOptions a1 = d1.getAnalysisOptions();
-                        IAnalysisOptions a2 = d2.getAnalysisOptions();
-
-                        if (a1 == null || a2 == null) {
-                            ok = false;
-                            continue;
-                        }
-
-                        if (!a1.equals(a2)) {
-                            ok = false;
-                        }
-                    } catch (MissingOptionException e) {
-                        ok = false;
+                    if(!d1.hasAnalysisOptions() || !d2.hasAnalysisOptions()){
+                    	ok = false;
+                    	continue;
                     }
 
+                    IAnalysisOptions a1 = d1.getAnalysisOptions().get();
+                    IAnalysisOptions a2 = d2.getAnalysisOptions().get();
+
+                    if (!a1.equals(a2)) {
+                    	ok = false;
+                    }
                 }
 
             }

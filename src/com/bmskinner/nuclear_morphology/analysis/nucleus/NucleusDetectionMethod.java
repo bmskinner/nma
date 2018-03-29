@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
@@ -73,15 +75,11 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * Construct a detector on the given folder, and output the results to the
      * given output folder
      * 
-     * @param outputFolder
-     *            the name of the folder for results
-     * @param debugFile
-     *            the dataset log file
-     * @param options
-     *            the options to detect with
+     * @param outputFolder the name of the folder for results
+     * @param debugFile the dataset log file
+     * @param options the options to detect with
      */
-    public NucleusDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options) {
-
+    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IMutableAnalysisOptions options) {
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
     }
@@ -102,14 +100,17 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if(i==0) return;
 
             log("Running nucleus detector");
-
+            
+            Optional<? extends IDetectionOptions> op = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            if(!op.isPresent()){
+            	warn("No nucleus detection options present");
+            	return;
+            }
+            
             // Detect the nuclei in the folders selected
-            processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
+            processFolder(op.get().getFolder());
 
-            fine("Detected nuclei in "
-                    + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
-
-            fine("Creating cell collections");
+            fine("Detected nuclei in "+ op.get().getFolder().getAbsolutePath());
             
             if(Thread.interrupted()){
                 return;
@@ -128,7 +129,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             fine("Analysis complete; return collections");
 
         } catch (Exception e) {
-            stack("Error in processing folder", e);
+            stack("Error processing folder", e);
         }
 
     }
@@ -136,20 +137,15 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
     private int getTotalImagesToAnalyse() {
 
         log("Counting images to analyse");
-        try {
-
-            File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-            int totalImages = countSuitableImages(folder);
-            fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-            log("Analysing " + totalImages + " images");
-            return totalImages;
-
-        } catch (MissingOptionException e) {
-            warn("No folder to analyse");
-            stack(e.getMessage(), e);
-            return 0;
-        }
-
+        Optional<? extends IDetectionOptions> op = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        if(!op.isPresent())
+        	return 0;
+        
+        File folder = op.get().getFolder();
+        int totalImages = countSuitableImages(folder);
+        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
+        log("Analysing " + totalImages + " images");
+        return totalImages;
     }
 
     /**
@@ -226,19 +222,6 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
         }
         return result;
     }
-
-    /**
-     * Add a NucleusCollection to the group, using the source folder name as a
-     * key.
-     *
-     * @param file
-     *            a folder to be analysed
-     * @param collection
-     *            the collection of nuclei found
-     */
-    // private void addNucleusCollection(File file, ICellCollection collection){
-    // this.collectionGroup.put(file, collection);
-    // }
 
     /**
      * Get the Map of NucleusCollections to the folder from which they came. Any

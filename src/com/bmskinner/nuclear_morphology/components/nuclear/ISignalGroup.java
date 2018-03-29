@@ -21,6 +21,9 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.awt.Color;
 import java.io.File;
 import java.io.Serializable;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 /**
  * Signal groups are used to store common metadata about nuclear signals within
@@ -38,14 +41,14 @@ public interface ISignalGroup extends Serializable {
      * 
      * @return
      */
-    IShellResult getShellResult();
+    Optional<IShellResult> getShellResult();
 
     /**
      * Set the group shell result
      * 
      * @param result
      */
-    void setShellResult(IShellResult result);
+    void setShellResult(@NonNull IShellResult result);
 
     /**
      * Test if a shell result is available
@@ -66,7 +69,7 @@ public interface ISignalGroup extends Serializable {
      * 
      * @param groupName
      */
-    void setGroupName(String groupName);
+    void setGroupName(@NonNull String groupName);
 
     /**
      * Test if the signals in this group are visible in charts
@@ -94,14 +97,14 @@ public interface ISignalGroup extends Serializable {
      * 
      * @return the colour, or null if not present
      */
-    Color getGroupColour();
+    Optional<Color> getGroupColour();
 
     /**
      * Set the signal colour for this group
      * 
      * @param groupColour
      */
-    void setGroupColour(Color groupColour);
+    void setGroupColour(@NonNull Color groupColour);
 
     /**
      * Get the RGB channel this signal was detected in
@@ -129,7 +132,7 @@ public interface ISignalGroup extends Serializable {
      * 
      * @param folder
      */
-    void setFolder(File folder);
+    void setFolder(@NonNull File folder);
 
     String toString();
 

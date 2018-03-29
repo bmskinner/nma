@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMeth
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -91,29 +93,19 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 
         fine("Making analysis options");
 
-        // try {
-        //
-        // DemoProber demo = new DemoProber(folder);
-        //
-        // cancel();
-        // return;
-        // } catch (Exception e1) {
-        // error("Error in test", e1);
-        // }
-
         NeutrophilImageProber analysisSetup = new NeutrophilImageProber(folder);
 
         if (analysisSetup.isOk()) {
 
             options = analysisSetup.getOptions();
-
-            File directory = null;
-            try {
-                directory = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-            } catch (MissingOptionException e) {
-                warn("Missing nucleus options");
-                this.cancel();
+            
+            Optional<IMutableDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            if(!op.isPresent()){
+            	cancel();
+            	return;
             }
+
+            File directory = op.get().getFolder();
 
             if (directory == null) {
                 this.cancel();
@@ -196,8 +188,6 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
         }
         fine("Selected directory: " + file.getAbsolutePath());
         folder = file;
-        // options.getDetectionOptions(IAnalysisOptions.NUCLEUS).setFolder(
-        // file);
 
         return true;
     }

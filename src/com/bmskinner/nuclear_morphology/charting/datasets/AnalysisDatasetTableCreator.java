@@ -57,6 +57,8 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -398,13 +400,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
 
-                try {
-                    IAnalysisOptions op = l.get(0).getAnalysisOptions();
-                    data = createAnalysisParametersColumn(dataset, op);
-                } catch (MissingOptionException e) {
-                    fine("No option present for " + l.get(0).getName());
-                }
-
+                Optional<IMutableAnalysisOptions> o = l.get(0).getAnalysisOptions();
+                if(o.isPresent())
+                	data = createAnalysisParametersColumn(dataset, o.get());
+                	
             } else {
                 // Merge sources have different options
                 Arrays.fill(data, NA_MERGE);
@@ -422,24 +421,23 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     /**
      * Get an array of formatted info from a dataset analysis options
      * 
-     * @param dataset
-     *            the dataset to format options for
-     * @param options
-     *            an options to use instead of the dataset's own options. Can be
+     * @param dataset the dataset to format options for
+     * @param options an options to use instead of the dataset's own options. Can be
      *            null.
      * @return
      */
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
-        try {
-            options = options == null ? dataset.getAnalysisOptions() : options;
-        } catch (MissingOptionException e1) {
-            warn("Could not get analysis options");
-            stack(e1.getMessage(), e1);
+        
+    	Optional<IMutableAnalysisOptions> o = dataset.getAnalysisOptions();
+    	if(options == null && !o.isPresent()){
+    		fine("No analysis options");
             Object[] err = new Object[23];
             Arrays.fill(err, 0, 22, "Error");
             return err;
-        }
-
+    	}
+    	
+    	options = options == null ? o.get() : options;
+    	
         String refoldMode = "Fast";
 
         String date;
@@ -447,6 +445,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String folder;
         String logFile;
 
+        Optional<IMutableDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        
         if (dataset.hasMergeSources()) {
             date = NA_MERGE;
             time = NA_MERGE;
@@ -462,32 +462,32 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 date = times[0];
                 time = times[1];
             }
-            try {
-                folder = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath();
-            } catch (MissingOptionException e) {
-                folder = "Missing data";
-            }
+
+            folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
+
             logFile = dataset.getDebugFile().getAbsolutePath();
         }
 
-        ICannyOptions nucleusCannyOptions = null;
-        IDetectionOptions nucleusOptions = null;
-        try {
-            nucleusOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
-
-            nucleusCannyOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions();
-        } catch (MissingOptionException e) {
-            warn("Missing options");
-            stack(e.getMessage(), e);
+        
+        if(!nO.isPresent()){
             Object[] err = new Object[23];
             Arrays.fill(err, 0, 22, "Error");
             return err;
         }
-                       
+        	
+        ICannyOptions nucleusCannyOptions;
+		try {
+			nucleusCannyOptions = nO.get().getCannyOptions();
+		} catch (MissingOptionException e) {
+			Object[] err = new Object[23];
+            Arrays.fill(err, 0, 22, "Error");
+            return err;
+		}
+          
 
         String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 
-        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? NA : String.valueOf(nucleusOptions.getThreshold());
+        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? NA : String.valueOf(nO.get().getThreshold());
 
         String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara()
                 ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : NA;
@@ -510,9 +510,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         Object[] collectionData = { options.getProfileWindowProportion(), detectionMethod, nucleusThreshold,
                 kuwaharaRadius, chromocentreThreshold, cannyAutoThreshold, cannyLowThreshold, cannyHighThreshold,
-                cannyKernelRadius, cannyKernelWidth, cannyClosingRadius, nucleusOptions.getMinSize(),
-                nucleusOptions.getMaxSize(), DEFAULT_DECIMAL_FORMAT.format(nucleusOptions.getMinCirc()),
-                DEFAULT_DECIMAL_FORMAT.format(nucleusOptions.getMaxCirc()), options.refoldNucleus(), refoldMode, date,
+                cannyKernelRadius, cannyKernelWidth, cannyClosingRadius, nO.get().getMinSize(),
+                nO.get().getMaxSize(), DEFAULT_DECIMAL_FORMAT.format(nO.get().getMinCirc()),
+                DEFAULT_DECIMAL_FORMAT.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
                 time, folder, logFile, options.getNucleusType().toString(), dataset.getVersion().toString() };
         return collectionData;
     }

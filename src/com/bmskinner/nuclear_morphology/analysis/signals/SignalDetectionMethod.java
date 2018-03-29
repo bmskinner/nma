@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -56,22 +58,18 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
     /**
      * For use when running on an existing dataset
      * 
-     * @param d
-     *            the dataset to add signals to
-     * @param folder
-     *            the folder of images
-     * @param channel
-     *            the RGB channel to search
-     * @param options
-     *            the analysis options
-     * @param group
-     *            the signal group to add signals to
+     * @param d the dataset to add signals to
+     * @param options the analysis options
+     * @param group the signal group to add signals to
      * @throws UnavailableSignalGroupException
      */
 
-    public SignalDetectionMethod(IAnalysisDataset d, INuclearSignalOptions options, UUID group)
+    public SignalDetectionMethod(@NonNull IAnalysisDataset d, @NonNull INuclearSignalOptions options, @NonNull UUID group)
             throws UnavailableSignalGroupException {
         super(d);
+        
+        if(!d.getAnalysisOptions().isPresent())
+        	throw new IllegalArgumentException("No analysis options in dataset");
 
         this.options = (IMutableNuclearSignalOptions) options.duplicate();
         this.folder = options.getFolder();
@@ -99,7 +97,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
             int originalMinThreshold = options.getThreshold();
 
-            SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
+            SignalFinder finder = new SignalFinder(dataset.getAnalysisOptions().get(), options, dataset.getCollection());
 
             dataset.getCollection().getCells().forEach(c->{
                 detectInCell(c, finder, originalMinThreshold);

@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -243,8 +244,9 @@ public class HistogramChartFactory extends AbstractChartFactory {
                     Paint colour = ColourSelecter.getColor(j);
                     try {
 
-                        colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour() : colour;
+                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
+                    	if(c.isPresent())
+                    		colour = c.get();
 
                         rend.setSeriesPaint(j, colour);
 
@@ -321,8 +323,9 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        colour = d.getCollection().getSignalGroup(signalGroup).hasColour()
-                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour() : colour;
+                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
+                    	if(c.isPresent())
+                    		colour = c.get();
 
                     } catch (UnavailableSignalGroupException e) {
                         fine("Signal group " + signalGroup + " is not present in collection", e);

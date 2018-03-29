@@ -23,6 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jfree.data.category.CategoryDataset;
@@ -341,25 +342,27 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
             boolean isNormalised = options.isNormalised();
 
-            if (collection.getSignalGroup(signalGroup).hasShellResult()) {
-                IShellResult r = collection.getSignalGroup(signalGroup).getShellResult();
+            Optional<IShellResult> r = collection.getSignalGroup(signalGroup).getShellResult();
 
-                for (int shell = 0; shell < r.getNumberOfShells(); shell++) {
-                    Double d = isNormalised ? r.getNormalisedMeans(type).get(shell) * 100
-                            : r.getRawMeans(type).get(shell) * 100;
+            if(!r.isPresent())
+            	return;
 
-                    Double std = isNormalised ? r.getNormalisedStandardErrors(type).get(shell) * 100
-                            : r.getRawStandardErrors(type).get(shell) * 100;
+            for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
+            	Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell) * 100
+            			: r.get().getRawMeans(type).get(shell) * 100;
 
-                    ds.add(signalGroup, -d.doubleValue(), std.doubleValue(),
-                            "Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
-                    // we need the string value for shell otherwise we get error
-                    // "the method addValue(Number, Comparable, Comparable) is
-                    // ambiguous for the type DefaultCategoryDataset"
-                    // ditto the doublevalue for std
+            	Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
+            			: r.get().getRawStandardErrors(type).get(shell) * 100;
 
-                }
+            	ds.add(signalGroup, -d.doubleValue(), std.doubleValue(),
+            			"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
+            	// we need the string value for shell otherwise we get error
+            	// "the method addValue(Number, Comparable, Comparable) is
+            	// ambiguous for the type DefaultCategoryDataset"
+            	// ditto the doublevalue for std
+
             }
+            
         } catch (UnavailableSignalGroupException e) {
             stack("Error getting random signal group", e);
         }
@@ -391,7 +394,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             if (collection.getSignalManager().hasSignals(signalGroup)) {
             	ISignalGroup group = collection.getSignalGroup(signalGroup);
                 if (group.hasShellResult()) {
-                    IShellResult r = group.getShellResult();
+                    IShellResult r = group.getShellResult().get();
 
                     for (int shell = 0; shell < r.getNumberOfShells(); shell++) {
 

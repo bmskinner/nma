@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 
 import javax.swing.table.DefaultTableModel;
@@ -67,10 +68,11 @@ public class NucleusTableCreator extends AbstractTableCreator {
         IDetectionSubOptions op = null;
         try {
 
-            if (options.firstDataset().hasAnalysisOptions()) {
-                IAnalysisOptions an = options.firstDataset().getAnalysisOptions();
+        	Optional<? extends IAnalysisOptions> o = options.firstDataset().getAnalysisOptions();
+        	if(o.isPresent()){
+                
 
-                IDetectionOptions ido = an.getDetectionOptions(CellularComponent.NUCLEUS);
+                IDetectionOptions ido = o.get().getDetectionOptions(CellularComponent.NUCLEUS).get();
 
                 if (ido.hasSubOptions(IDetectionSubOptions.HOUGH_OPTIONS)) {
                     op = ido.getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
@@ -96,8 +98,8 @@ public class NucleusTableCreator extends AbstractTableCreator {
                     return createBlankTable();
                 }
 
-                IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions()
-                        .getDetectionOptions(CellularComponent.NUCLEUS)
+                IHoughDetectionOptions hough = (IHoughDetectionOptions) d.getAnalysisOptions().get()
+                        .getDetectionOptions(CellularComponent.NUCLEUS).get()
                         .getSubOptions(IDetectionSubOptions.HOUGH_OPTIONS);
 
                 if (hough == null) {

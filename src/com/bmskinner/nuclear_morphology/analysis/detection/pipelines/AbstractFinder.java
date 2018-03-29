@@ -21,11 +21,16 @@ package com.bmskinner.nuclear_morphology.analysis.detection.pipelines;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.ProgressListener;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.Prefs;
@@ -57,7 +62,7 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
      * @param op
      *            the analysis options
      */
-    public AbstractFinder(final IAnalysisOptions op) {
+    public AbstractFinder(@NonNull final IAnalysisOptions op) {
         options = op;
         Prefs.blackBackground = true;
     }
@@ -70,9 +75,11 @@ public abstract class AbstractFinder<E> implements Finder<E>, Loggable {
     @Override
     public E find() throws Exception {
 
-        E list = findInFolder(options.getDetectionOptions(IAnalysisOptions.CYTOPLASM).getFolder());
-        return list;
-
+    	Optional<? extends IDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.CYTOPLASM);
+    	if(!op.isPresent())
+    		throw new MissingOptionException("No cytoplasm options");
+    	
+    	return findInFolder(op.get().getFolder());
     }
 
     /*

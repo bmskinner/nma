@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.io.File;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
@@ -28,6 +29,7 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
@@ -71,17 +73,17 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
             if (sourceDataset != null) {
 
-                fine("Copying options from dataset: " + sourceDataset.getName());
-                try {
-                    // Ensure the folder is not overwritten by the new options
-                    File folder = options.getFolder();
-                    IDetectionOptions srcOptions = sourceDataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-                    options.set(srcOptions);
-                    options.setFolder(folder);
-                } catch (Exception e1) {
-                    warn("Cannot get options");
-                    stack(e1.getMessage(), e1);
-                }
+            	fine("Copying options from dataset: " + sourceDataset.getName());
+
+            	// Ensure the folder is not overwritten by the new options
+            	File folder = options.getFolder();
+            	Optional<IMutableAnalysisOptions> op = sourceDataset.getAnalysisOptions();
+            	if(op.isPresent()){
+            		Optional<IMutableDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            		options.set(srcOptions.get());
+            		options.setFolder(folder);
+            	}
+
                 fireOptionsChangeEvent();
             }
         });

@@ -75,6 +75,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     private static final String IMAGES_LBL = "Images in dataset";
     private static final String PANEL_TITLE_LBL = "Images";
+    private static final String HEADER_LBL = "Double click a folder to update image paths";
 
     private class ImageNode {
         private String name;
@@ -122,6 +123,7 @@ public class ImagesTabPanel extends DetailPanel {
         tree = new JTree(treeModel);
         tree.addTreeSelectionListener(makeListener());
         tree.addMouseListener(makeDoubleClickListener());
+        tree.setToggleClickCount(0); // disable double clicking to expand nodes
         tree.setEnabled(false);
 
         imagePanel = new JPanel(new BorderLayout());
@@ -131,6 +133,10 @@ public class ImagesTabPanel extends DetailPanel {
         label.setHorizontalTextPosition(JLabel.CENTER);
         label.setVerticalTextPosition(JLabel.CENTER);
         imagePanel.add(label, BorderLayout.CENTER);
+        JPanel headerPanel = new JPanel();
+        headerPanel.add(new JLabel(HEADER_LBL));
+        imagePanel.add(headerPanel, BorderLayout.NORTH);
+        
 
         JScrollPane scrollPane = new JScrollPane(tree);
         Dimension size = new Dimension(200, 200);
@@ -232,8 +238,6 @@ public class ImagesTabPanel extends DetailPanel {
             }
         };
         
-//        files.sort(comp);
-
         for (File parent : parents) {
         	List<File> inParent = files.stream().filter(f->f.getParentFile().equals(parent))
         	.collect(Collectors.toList());

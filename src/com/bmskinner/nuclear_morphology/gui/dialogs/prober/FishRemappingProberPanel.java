@@ -41,6 +41,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -86,10 +88,10 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
     private Set<ICell> openCells = new HashSet<ICell>();
 
-    public FishRemappingProberPanel(IAnalysisDataset dataset, Finder<?> finder, Window parent)
+    public FishRemappingProberPanel(@NonNull IAnalysisDataset dataset, @NonNull Finder<?> finder, Window parent)
             throws MissingOptionException {
 
-        super(dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder(), finder, parent);
+        super(dataset.getAnalysisOptions().get().getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder(), finder, parent);
 
         this.setHeaderLabelText(HEADER_LBL);
         this.dataset = dataset;
@@ -100,8 +102,6 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth()
                 * PANEL_SCREEN_WIDTH_PROP);
         setPreferredSize(minPanelSize);
-
-        // createFileList(options.getFolder());
     }
 
     @Override

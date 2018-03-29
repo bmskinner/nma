@@ -25,6 +25,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -679,8 +680,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     try {
 
                         IAnalysisDataset dataset = options.firstDataset();
-                        colour = dataset.getCollection().getSignalGroup(seriesGroup).hasColour()
-                                ? dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour() : colour;
+                        Optional<Color> c = dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour();
+                    	if(c.isPresent())
+                    		colour = c.get();
 
                     } catch (UnavailableSignalGroupException e) {
                         fine("Signal group " + seriesGroup + " is not present in collection", e);

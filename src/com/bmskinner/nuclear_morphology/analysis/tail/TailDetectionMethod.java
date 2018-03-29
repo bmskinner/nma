@@ -72,7 +72,7 @@ public class TailDetectionMethod extends SingleDatasetAnalysisMethod {
                 // SpermTail tail = null;
 
                 TailDetector finder = new TailDetector(
-                        dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions(),
+                        dataset.getAnalysisOptions().get().getDetectionOptions(IAnalysisOptions.SPERM_TAIL).get().getCannyOptions(),
                         channel);
 
                 // attempt to detect the tails in the image

@@ -590,11 +590,15 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      */
     static List<IBorderSegment> scaleSegments(List<IBorderSegment> list, int newLength) throws ProfileException {
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> result = new ArrayList<>();
 
         int segStart = list.get(0).getStartIndex();
+        double segStartProportion = (double) segStart / (double) list.get(0).getTotalLength();
+        
+        segStart = (int) (((double) segStart) * segStartProportion);
+        
         for (IBorderSegment segment : list) {
-
+        	
             double proportion = (double) segment.length() / (double) segment.getTotalLength();
 
             int newSegLength = (int) ((double) newLength * proportion);

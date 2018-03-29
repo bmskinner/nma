@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.table.DefaultTableModel;
@@ -381,7 +382,8 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
                 fieldNames.add("");
                 rowData.add("");
-                Color colour = g.hasColour() ? g.getGroupColour() : ColourSelecter.getColor(j);
+                Optional<Color> c = g.getGroupColour();
+                Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
 
                 SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName(), colour);
 

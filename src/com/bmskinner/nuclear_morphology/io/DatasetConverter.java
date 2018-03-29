@@ -150,28 +150,28 @@ public class DatasetConverter implements Loggable, Importer {
 
             IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection, oldDataset.getSavePath());
 
-            IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions();
-
-            if (oldOptions != null) {
-
+            if (oldDataset.getAnalysisOptions().isPresent()) {
+            	IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions().get();
                 IMutableAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
 
-                IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+                IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
 
                 IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
                 newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
                     INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
-                    File folder = oldDataset.getCollection().getSignalGroup(id).getFolder();
-                    int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
+                    if(oldDataset.getCollection().hasSignalGroup(id)){
+                    	File folder = oldDataset.getCollection().getSignalGroup(id).getFolder();
+                    	int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
 
-                    IMutableNuclearSignalOptions newSignalOptions = OptionsFactory
-                            .makeNuclearSignalOptions(oldSignalOptions);
-                    newSignalOptions.setFolder(folder);
-                    newSignalOptions.setChannel(channel);
+                    	IMutableNuclearSignalOptions newSignalOptions = OptionsFactory
+                    			.makeNuclearSignalOptions(oldSignalOptions);
+                    	newSignalOptions.setFolder(folder);
+                    	newSignalOptions.setChannel(channel);
 
-                    newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+                    	newOptions.setDetectionOptions(id.toString(), newSignalOptions);
+                    }
                 }
 
                 newDataset.setAnalysisOptions(newOptions);

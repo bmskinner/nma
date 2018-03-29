@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -101,17 +102,23 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      */
     public AnalysisOptions(IAnalysisOptions template) {
         try {
-            nucleusThreshold = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getThreshold();
+        	Optional<IMutableDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	if(!op.isPresent())
+        		throw new IllegalArgumentException("No nucleus options");
+        	
+        	IDetectionOptions n = op.get();
+        	
+            nucleusThreshold = n.getThreshold();
 
-            minNucleusSize = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinSize();
-            maxNucleusSize = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxSize();
-            minNucleusCirc = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMinCirc();
-            maxNucleusCirc = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getMaxCirc();
+            minNucleusSize = n.getMinSize();
+            maxNucleusSize = n.getMaxSize();
+            minNucleusCirc = n.getMinCirc();
+            maxNucleusCirc = n.getMaxCirc();
 
             edgeDetection = new HashMap<String, ICannyOptions>(0);
 
             edgeDetection.put(IAnalysisOptions.NUCLEUS,
-                    template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getCannyOptions());
+                    n.getCannyOptions());
 
             signalDetection = new HashMap<UUID, INuclearSignalOptions>(0);
 
@@ -119,16 +126,16 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
                 signalDetection.put(s, template.getNuclearSignalOptions(s));
             }
 
-            normaliseContrast = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).isNormaliseContrast();
+            normaliseContrast = n.isNormaliseContrast();
             angleWindowProportion = template.getProfileWindowProportion();
-            scale = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale();
+            scale = n.getScale();
             nucleusType = template.getNucleusType();
 
             refoldNucleus = template.refoldNucleus();
-            folder = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
+            folder = n.getFolder();
 
             keepFailedCollections = template.isKeepFailedCollections();
-            channel = template.getDetectionOptions(IAnalysisOptions.NUCLEUS).getChannel();
+            channel = n.getChannel();
         } catch (MissingOptionException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -1104,7 +1111,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public IMutableDetectionOptions getDetectionOptions(String key) {
+    public Optional<IMutableDetectionOptions> getDetectionOptions(String key) {
         if (key.equals(IAnalysisOptions.NUCLEUS)) {
 
             IMutableDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
@@ -1118,10 +1125,9 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
             op.setMaxCirc(maxNucleusCirc);
             op.setMinSize(minNucleusSize);
             op.setMaxSize(maxNucleusSize);
-            return op;
-
+            return Optional.ofNullable(op);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override

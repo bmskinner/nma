@@ -21,16 +21,21 @@ package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.io.File;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -64,26 +69,28 @@ public class SignalImageProber extends IntegratedImageProber {
      * @param folder
      *            the folder of images
      */
-    public SignalImageProber(final IAnalysisDataset dataset, final File folder) {
+    public SignalImageProber(@NonNull final IAnalysisDataset dataset, @NonNull final File folder) {
         this.dataset = dataset;
         options = OptionsFactory.makeNuclearSignalOptions(folder);
+        
+        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        if(!op.isPresent())
+        	throw new IllegalArgumentException("Dataset has no options");
+        
+        Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        
+        if(!nOp.isPresent())
+        	throw new IllegalArgumentException("Dataset has no nucles options");
 
-        double scale;
-        try {
-            scale = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getScale();
+        options.setScale(nOp.get().getScale());
 
-            options.setScale(scale);
-        } catch (MissingOptionException e1) {
-            warn("Cannot set scale");
-            stack(e1.getMessage(), e1);
-        }
 
         try {
 
             // make the panel
             optionsSettingsPanel = new SignalDetectionSettingsPanel(options);
 
-            Finder<?> finder = new SignalFinder(dataset.getAnalysisOptions(), options, dataset.getCollection());
+            Finder<?> finder = new SignalFinder(op.get(), options, dataset.getCollection());
             imageProberPanel = new GenericImageProberPanel(folder, finder, this);
             JPanel footerPanel = createFooter();
 
@@ -144,13 +151,7 @@ public class SignalImageProber extends IntegratedImageProber {
         Color colour = (Color) ColourSelecter.getColor(totalGroups);
         group.setGroupColour(colour);
 
-        try {
-            dataset.getAnalysisOptions().setDetectionOptions(signalGroup.toString(), options);
-        } catch (MissingOptionException e) {
-            warn("Error getting dataset options");
-            stack(e.getMessage(), e);
-        }
-
+        dataset.getAnalysisOptions().get().setDetectionOptions(signalGroup.toString(), options);
     }
 
     /**
@@ -159,11 +160,7 @@ public class SignalImageProber extends IntegratedImageProber {
      * @return a valid name
      */
     private String getGroupName() {
-
-        String name = (String) JOptionPane.showInputDialog(NEW_NAME_LBL);
-
-        return name;
-
+    	return (String) JOptionPane.showInputDialog(NEW_NAME_LBL);
     }
 
 }

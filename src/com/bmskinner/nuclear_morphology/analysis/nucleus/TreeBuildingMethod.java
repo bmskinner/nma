@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
@@ -71,7 +73,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
      * @param dataset
      * @param options
      */
-    public TreeBuildingMethod(IAnalysisDataset dataset, IClusteringOptions options) {
+    public TreeBuildingMethod(@NonNull IAnalysisDataset dataset, @NonNull IClusteringOptions options) {
         super(dataset);
         this.options = options;
         this.collection = dataset.getCollection();
@@ -93,10 +95,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
         boolean ok = makeTree(collection);
     }
 
-    // public IClusteringOptions getOptions(){
-    // return this.options;
-    // }
-    //
+
     /**
      * If a tree is present (i.e clustering was hierarchical), return the string
      * of the tree, otherwise return null
@@ -108,15 +107,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
     }
 
     protected Instances makeInstances() throws Exception {
-
-        Instances instances = null;
-
-        finer("Making profile instances");
-        instances = makeProfileInstances(collection);
-
-        finer(instances.toSummaryString());
-        return instances;
-
+        return makeProfileInstances(collection);
     }
 
     /**
@@ -126,8 +117,6 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
      * @return success or fail
      */
     protected boolean makeTree(ICellCollection collection) {
-
-        fine("Beginning tree building");
 
         try {
 
@@ -172,7 +161,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
         return true;
     }
 
-    private FastVector makeAttributes(ICellCollection collection, int windowSize) throws Exception {
+    private FastVector makeAttributes(@NonNull ICellCollection collection, int windowSize) throws Exception {
 
         // Determine the number of attributes required
 
@@ -185,9 +174,11 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
                                           // median profile, spaced <windowSize>
                                           // apart
             finest("Including profile");
+            
+            
 
             if (dataset.hasAnalysisOptions()) {
-                profileWindow = dataset.getAnalysisOptions().getProfileWindowProportion();
+                profileWindow = dataset.getAnalysisOptions().get().getProfileWindowProportion();
             }
 
             profileAttributeCount = (int) Math.floor(1d / profileWindow);
@@ -268,7 +259,7 @@ public class TreeBuildingMethod extends SingleDatasetAnalysisMethod {
         double windowProportion = Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION;
         if (dataset.hasAnalysisOptions()) { // Merged datasets may not have
                                             // options of their own
-            windowProportion = dataset.getAnalysisOptions().getProfileWindowProportion();
+            windowProportion = dataset.getAnalysisOptions().get().getProfileWindowProportion();
         }
 
         // // Get the size of the median profile. All profiles will be

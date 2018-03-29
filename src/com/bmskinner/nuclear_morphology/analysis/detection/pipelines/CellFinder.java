@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -49,11 +51,8 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
     }
 
     @Override
-    public List<ICell> findInFolder(final File folder) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInFolder(@NonNull final File folder) throws ImageImportException, ComponentCreationException {
 
-        if (folder == null) {
-            throw new IllegalArgumentException("Folder cannot be null");
-        }
         List<ICell> list = new ArrayList<>();
         File[] arr = folder.listFiles();
         if (arr == null) {

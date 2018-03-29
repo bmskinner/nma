@@ -30,6 +30,7 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.io.DirectoryChooser;
 
+@Deprecated
 public class AddTailStainAction extends SingleDatasetResultAction {
 
     public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
@@ -39,43 +40,43 @@ public class AddTailStainAction extends SingleDatasetResultAction {
 
     @Override
     public void run() {
-        try {
-
-            TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
-
-            final int channel = analysisSetup.getChannel();
-
-            DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
-            String folderName = openDialog.getDirectory();
-
-            if (folderName == null) {
-                this.cancel();
-                return; // user cancelled
-            }
-
-            final File folder = new File(folderName);
-
-            if (!folder.isDirectory()) {
-                this.cancel();
-                return;
-            }
-            if (!folder.exists()) {
-                this.cancel();
-                return; // check folder is ok
-            }
-
-            IAnalysisMethod m = new TailDetectionMethod(dataset, folder, channel);
-
-            worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
-
-            // worker = new TubulinTailDetector(dataset, folder, channel);
-            worker.addPropertyChangeListener(this);
-            this.setProgressMessage("Tail detection:" + dataset.getName());
-            ThreadManager.getInstance().submit(worker);
-        } catch (Exception e) {
-            this.cancel();
-            error("Error in tail analysis", e);
-
-        }
+//        try {
+//
+//            TailDetectionSettingsDialog analysisSetup = new TailDetectionSettingsDialog(dataset.getAnalysisOptions());
+//
+//            final int channel = analysisSetup.getChannel();
+//
+//            DirectoryChooser openDialog = new DirectoryChooser("Select directory of tubulin images...");
+//            String folderName = openDialog.getDirectory();
+//
+//            if (folderName == null) {
+//                this.cancel();
+//                return; // user cancelled
+//            }
+//
+//            final File folder = new File(folderName);
+//
+//            if (!folder.isDirectory()) {
+//                this.cancel();
+//                return;
+//            }
+//            if (!folder.exists()) {
+//                this.cancel();
+//                return; // check folder is ok
+//            }
+//
+//            IAnalysisMethod m = new TailDetectionMethod(dataset, folder, channel);
+//
+//            worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
+//
+//            // worker = new TubulinTailDetector(dataset, folder, channel);
+//            worker.addPropertyChangeListener(this);
+//            this.setProgressMessage("Tail detection:" + dataset.getName());
+//            ThreadManager.getInstance().submit(worker);
+//        } catch (Exception e) {
+//            this.cancel();
+//            error("Error in tail analysis", e);
+//
+//        }
     }
 }

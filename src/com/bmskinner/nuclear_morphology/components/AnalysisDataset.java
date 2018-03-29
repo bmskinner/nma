@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -180,7 +181,8 @@ public class AnalysisDataset implements IAnalysisDataset {
         UUID id = collection.getID();
         IAnalysisDataset childDataset = new AnalysisDataset(collection, this.savePath);
         childDataset.setRoot(false);
-        childDataset.setAnalysisOptions(this.getAnalysisOptions());
+        if(analysisOptions!=null)
+        	childDataset.setAnalysisOptions(analysisOptions);
         this.childCollections.put(id, (AnalysisDataset) childDataset);
 
     }
@@ -595,8 +597,8 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getAnalysisOptions()
      */
     @Override
-    public IMutableAnalysisOptions getAnalysisOptions() {
-        return analysisOptions;
+    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+        return Optional.ofNullable(analysisOptions);
     }
 
     /*

@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -162,12 +163,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             childDataset = new DefaultAnalysisDataset(collection, this.savePath);
             childDataset.setRoot(false);
 
-            try {
-                childDataset.setAnalysisOptions(this.getAnalysisOptions());
-            } catch (MissingOptionException e) {
-                warn("Missing analysis options");
-                stack(e.getMessage(), e);
-            }
+            if(analysisOptions!=null)
+                childDataset.setAnalysisOptions(analysisOptions);
         }
 
         this.childDatasets.add(childDataset);
@@ -584,8 +581,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * @see analysis.IAnalysisDataset#getAnalysisOptions()
      */
     @Override
-    public IMutableAnalysisOptions getAnalysisOptions() throws MissingOptionException {
-        return analysisOptions;
+    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+        return Optional.ofNullable(analysisOptions);
     }
 
     /*

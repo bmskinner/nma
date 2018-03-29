@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 
@@ -28,6 +29,8 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -67,15 +70,13 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
     @Override
     public IAnalysisMethod getMethod() {
 
-        // Assign the options to the dataset
-        try {
-            dataset.getAnalysisOptions().getDetectionOptions(CellularComponent.NUCLEUS)
-                    .setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
-        } catch (MissingOptionException e) {
-            warn("Unable to create method");
-            stack(e.getMessage(), e);
-        }
-
+    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	if(op.isPresent()){
+    		Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(CellularComponent.NUCLEUS);
+    		
+    		if(nOp.isPresent())
+    			nOp.get().setSubOptions(IDetectionSubOptions.HOUGH_OPTIONS, options);
+    	}
         return new LobeDetectionMethod(dataset, options);
     }
 

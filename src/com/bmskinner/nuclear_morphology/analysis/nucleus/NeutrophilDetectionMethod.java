@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
@@ -73,29 +75,24 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
      * Construct a detector on the given folder, and output the results to the
      * given output folder
      * 
-     * @param outputFolder
-     *            the name of the folder for results
-     * @param programLogger
-     *            the logger to the log panel
-     * @param debugFile
-     *            the dataset log file
-     * @param options
-     *            the options to detect with
+     * @param outputFolder the name of the folder for results
+     * @param programLogger the logger to the log panel
+     * @param debugFile the dataset log file
+     * @param options the options to detect with
      */
-    public NeutrophilDetectionMethod(String outputFolder, File debugFile, IMutableAnalysisOptions options) {
+    public NeutrophilDetectionMethod(@NonNull String outputFolder, @NonNull File debugFile, @NonNull IMutableAnalysisOptions options) {
         super(null);
 
-        if (outputFolder == null || options == null) {
+        if (outputFolder == null || options == null)
             throw new IllegalArgumentException("Must have output folder name and input options");
-        }
 
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
-        try {
-            folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            throw new IllegalArgumentException("Input options does not have a folder", e);
-        }
+        
+        if(!options.getDetectionOptions(IAnalysisOptions.NUCLEUS).isPresent())
+        	throw new IllegalArgumentException("Input options does not have nucleus options");
+        
+        folder = options.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder();
         finder = new NeutrophilFinder(options);
 
     }
@@ -115,10 +112,10 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
             countTotalImagesToAnalyse();
 
             log("Running neutrophil detector");
-            processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder());
+            processFolder(analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder());
 
             fine("Detected nuclei in "
-                    + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder().getAbsolutePath());
+                    + analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder().getAbsolutePath());
 
             fine("Creating cell collections");
 
@@ -139,19 +136,11 @@ public class NeutrophilDetectionMethod extends SingleDatasetAnalysisMethod {
     }
 
     private void countTotalImagesToAnalyse() {
-        log("Calculating number of images to analyse");
-        try {
-
-            File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-            int totalImages = countSuitableImages(folder);
-            fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
-            log("Analysing " + totalImages + " images");
-
-        } catch (MissingOptionException e) {
-            warn("No folder to analyse");
-            stack(e.getMessage(), e);
-        }
-
+    	log("Calculating number of images to analyse");
+    	File folder = analysisOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get().getFolder();
+    	int totalImages = countSuitableImages(folder);
+    	fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_TOTAL_PROGRESS, totalImages));
+    	log("Analysing " + totalImages + " images");
     }
 
     public List<IAnalysisDataset> getDatasets() {

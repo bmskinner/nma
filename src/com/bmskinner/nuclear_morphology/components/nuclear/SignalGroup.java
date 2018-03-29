@@ -20,6 +20,9 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 
@@ -52,15 +55,15 @@ public class SignalGroup implements ISignalGroup {
      * 
      * @param s
      */
-    public SignalGroup(ISignalGroup s) {
+    public SignalGroup(@NonNull ISignalGroup s) {
         if (!s.hasShellResult()) {
             shellResult = null;
         } else {
-            shellResult = new DefaultShellResult(s.getShellResult());
+            shellResult = new DefaultShellResult(s.getShellResult().get());
         }
         groupName = s.getGroupName();
         isVisible = s.isVisible();
-        groupColour = s.getGroupColour();
+        groupColour = s.getGroupColour().isPresent() ? s.getGroupColour().get() : null;
         channel = s.getChannel();
         folder = new File(s.getFolder().getAbsolutePath());
     }
@@ -71,8 +74,8 @@ public class SignalGroup implements ISignalGroup {
      * @see components.nuclear.ISignalGroup#getShellResult()
      */
     @Override
-    public IShellResult getShellResult() {
-        return shellResult;
+    public Optional<IShellResult> getShellResult() {
+        return Optional.ofNullable(shellResult);
     }
 
     /*
@@ -82,7 +85,7 @@ public class SignalGroup implements ISignalGroup {
      * ShellResult)
      */
     @Override
-    public void setShellResult(IShellResult shellResult) {
+    public void setShellResult(@NonNull IShellResult shellResult) {
         this.shellResult = shellResult;
     }
 
@@ -93,10 +96,7 @@ public class SignalGroup implements ISignalGroup {
      */
     @Override
     public boolean hasShellResult() {
-        if (shellResult == null) {
-            return false;
-        }
-        return true;
+        return(shellResult != null);
     }
 
     /*
@@ -115,7 +115,7 @@ public class SignalGroup implements ISignalGroup {
      * @see components.nuclear.ISignalGroup#setGroupName(java.lang.String)
      */
     @Override
-    public void setGroupName(String groupName) {
+    public void setGroupName(@NonNull String groupName) {
         this.groupName = groupName;
     }
 
@@ -146,10 +146,7 @@ public class SignalGroup implements ISignalGroup {
      */
     @Override
     public boolean hasColour() {
-        if (this.groupColour == null) {
-            return false;
-        }
-        return true;
+        return groupColour != null;
     }
 
     /*
@@ -158,8 +155,8 @@ public class SignalGroup implements ISignalGroup {
      * @see components.nuclear.ISignalGroup#getGroupColour()
      */
     @Override
-    public Color getGroupColour() {
-        return groupColour;
+    public Optional<Color> getGroupColour() {
+        return Optional.ofNullable(groupColour);
     }
 
     /*
@@ -168,7 +165,7 @@ public class SignalGroup implements ISignalGroup {
      * @see components.nuclear.ISignalGroup#setGroupColour(java.awt.Color)
      */
     @Override
-    public void setGroupColour(Color groupColour) {
+    public void setGroupColour(@NonNull Color groupColour) {
         this.groupColour = groupColour;
     }
 
@@ -208,7 +205,7 @@ public class SignalGroup implements ISignalGroup {
      * @see components.nuclear.ISignalGroup#setFolder(java.io.File)
      */
     @Override
-    public void setFolder(File folder) {
+    public void setFolder(@NonNull File folder) {
         this.folder = folder;
     }
 

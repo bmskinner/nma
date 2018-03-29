@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
@@ -65,11 +66,10 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         );
 
         this.parent = merged;
-        try {
-            this.analysisOptions = mergeSource.getAnalysisOptions();
-        } catch (MissingOptionException e1) {
-            stack(e1.getMessage(), e1);
-        }
+        
+        if(mergeSource.getAnalysisOptions().isPresent())
+        	analysisOptions = mergeSource.getAnalysisOptions().get();
+
         this.datasetColour = mergeSource.getDatasetColour();
 
         this.getCollection().createProfileCollection();
@@ -259,8 +259,8 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public IMutableAnalysisOptions getAnalysisOptions() {
-        return analysisOptions;
+    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+        return Optional.ofNullable(analysisOptions);
     }
 
     @Override

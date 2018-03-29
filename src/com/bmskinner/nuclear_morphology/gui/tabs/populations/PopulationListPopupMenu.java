@@ -28,6 +28,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 
@@ -51,6 +52,8 @@ public class PopulationListPopupMenu extends JPopupMenu {
     JMenuItem deleteMenuItem;
 
     JMenuItem booleanMenuItem;
+    
+    JMenuItem extractMenuItem;
 
     JMenuItem saveMenuItem = new JMenuItem(new AbstractAction(SAVE_AS_LBL) {
         @Override
@@ -112,6 +115,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
         this.add(mergeMenuItem);
         this.add(deleteMenuItem);
         this.add(booleanMenuItem);
+        this.add(extractMenuItem);
         this.add(curateMenuItem);
 
         this.addSeparator();
@@ -172,6 +176,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
         booleanMenuItem.addActionListener(e -> {
             fireSignalChangeEvent("DatasetArithmeticAction");
         });
+        
+        extractMenuItem = new JMenuItem("Extract cells");
+        extractMenuItem.addActionListener(e->fireSignalChangeEvent(SignalChangeEvent.EXTRACT_SUBSET));
         
 
         changeScaleItem = new JMenuItem(CHANGE_SCALE_LBL);
@@ -288,6 +295,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
     
     public void setChangeScaleEnabled(boolean b){
     	this.changeScaleItem.setEnabled(b);
+    }
+    
+    public void setExtractCellsEnabled(boolean b){
+    	this.extractMenuItem.setEnabled(b);
     }
 
     public synchronized void addSignalChangeListener(SignalChangeListener l) {

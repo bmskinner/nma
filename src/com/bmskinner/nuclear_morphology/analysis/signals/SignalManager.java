@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceValue;
@@ -611,9 +613,9 @@ public class SignalManager implements Loggable {
     public int getShellCount() {
 
         for (ISignalGroup group : this.getSignalGroups()) {
-            if (group.hasShellResult()) {
-                return group.getShellResult().getNumberOfShells();
-            }
+        	Optional<IShellResult> r = group.getShellResult();
+        	if(r.isPresent())
+                return r.get().getNumberOfShells();
         }
         return 0;
     }

@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JFileChooser;
@@ -32,6 +33,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -46,14 +49,7 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
  *
  */
 public class FileSelector {
-    
-    //    private static final String SELECT_FOLDER_LBL      = "Select directory of post-FISH images...";
-    //    private static final String CANNOT_USE_FOLDER      = "Cannot use folder";
-    //    private static final String NOT_A_FOLDER_ERROR     = "The selected item is not a folder";
-    //    private static final String FOLDER_NOT_FOUND_ERROR = "The folder does not exist";
-    //    private static final String FILES_NOT_FOUND_ERROR  = "The folder contains no files";
-    
-    
+
     public static File chooseTableExportFile(){
         
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", Exporter.TAB_FILE_EXTENSION);
@@ -103,18 +99,21 @@ public class FileSelector {
      * 
      * @return the file
      */
-    public static File chooseRemappingFile(IAnalysisDataset dataset) {
+    public static File chooseRemappingFile(@NonNull IAnalysisDataset dataset) {
 
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
         File defaultDir = null;
-        try {
-            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            return null;
-        }
         
-        return chooseOpenFile(defaultDir, filter);
+        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        if(!op.isPresent())
+        	return null;
+        
+        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        if(!im.isPresent())
+        	return null;
 
+        defaultDir = im.get().getFolder();
+        return chooseOpenFile(defaultDir, filter);
     }
     
     /**
@@ -254,13 +253,15 @@ public class FileSelector {
      */
     public static File chooseFISHDirectory(IAnalysisDataset dataset) {
 
-        File defaultDir = null;
-        try {
-            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            return null;
-        }
+    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        if(!op.isPresent())
+        	return null;
+        
+        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        if(!im.isPresent())
+        	return null;
 
+        File defaultDir = im.get().getFolder();
         return chooseFolder(defaultDir);
     }
     
@@ -272,14 +273,15 @@ public class FileSelector {
      * @return the selected folder, or null if user cancelled or invalid choice
      */
     public static File choosePostFISHDirectory(IAnalysisDataset dataset) {
-
-        File defaultDir = null;
-        try {
-            defaultDir = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS).getFolder();
-        } catch (MissingOptionException e) {
-            return null;
-        }
+    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        if(!op.isPresent())
+        	return null;
         
+        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        if(!im.isPresent())
+        	return null;
+        
+        File defaultDir =  im.get().getFolder();
         return chooseFolder(defaultDir);
     }
     

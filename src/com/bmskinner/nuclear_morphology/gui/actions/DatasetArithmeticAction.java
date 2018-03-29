@@ -126,14 +126,15 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
             } else {
                 newDataset = new DefaultAnalysisDataset(newCollection);
                 newDataset.setRoot(true);
+                int flag = SingleDatasetResultAction.ADD_POPULATION;
+                flag |= SingleDatasetResultAction.SAVE_DATASET;
+                flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
+                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
+
+                ThreadManager.getInstance().execute(pr);
             }
 
-            int flag = SingleDatasetResultAction.ADD_POPULATION;
-            flag |= SingleDatasetResultAction.SAVE_DATASET;
-            flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-            RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
-
-            ThreadManager.getInstance().execute(pr);
+            
 
         } else {
             log("No populations returned");

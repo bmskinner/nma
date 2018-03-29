@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.analysis.nucleus;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -47,6 +48,8 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -88,7 +91,8 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
 
         fine("Running lobe detection method");
 
-        if (NucleusType.NEUTROPHIL.equals(dataset.getAnalysisOptions().getNucleusType())) {
+        
+        if (NucleusType.NEUTROPHIL.equals(dataset.getAnalysisOptions().get().getNucleusType())) {
             run();
         } else {
             throw new IncorrectNucleusTypeException("Not a lobed nucleus type");
@@ -116,11 +120,6 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
             detectLobes(c);
             fireProgressEvent();
         });
-//        for (ICell cell : dataset.getCollection().getCells()) {
-//            detectLobes(cell);
-//            fireProgressEvent();
-//        }
-
     }
 
     /**
@@ -138,9 +137,6 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
         } catch (UnloadableImageException e) {
             warn("Unable to load cell image");
             stack(e);
-            // } catch (MissingOptionException e) {
-            // warn("Missing nucleus detection options for thresholding");
-            // stack(e);
         } catch (Exception e) {
             warn("Error in lobe detection");
             stack(e.getMessage(), e);
@@ -156,7 +152,17 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
      */
     private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
 
-        IDetectionOptions nucleusOptions = dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+    	Optional<IMutableAnalysisOptions> an = dataset.getAnalysisOptions();
+        if(!an.isPresent())
+        	throw new MissingOptionException("Options not present in dataset "+dataset.getName());
+
+        Optional<IMutableDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        
+        if(!no.isPresent())
+        	throw new MissingOptionException("Nucleus options not present in dataset "+dataset.getName());
+        
+        IDetectionOptions nucleusOptions = no.get();
+        
         IPreprocessingOptions op = (IPreprocessingOptions) nucleusOptions
                 .getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);
 

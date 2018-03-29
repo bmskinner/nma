@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -199,10 +200,7 @@ public class BoxplotChartFactory extends AbstractChartFactory {
             IAnalysisDataset d = options.getDatasets().get(column);
 
             for (int row = 0; row < ds.getRowCount(); row++) {
-
-                // log("Series "+series);
                 String name = (String) ds.getRowKey(row);
-                // log("Looking at row "+name);
 
                 UUID signalGroup = getSignalGroupFromLabel(name);
 
@@ -210,9 +208,10 @@ public class BoxplotChartFactory extends AbstractChartFactory {
                 if (d.getCollection().hasSignalGroup(signalGroup)) {
                     Paint color = ColourSelecter.getColor(row);
                     try {
-
-                        color = d.getCollection().getSignalGroup(signalGroup).hasColour()
-                                ? d.getCollection().getSignalGroup(signalGroup).getGroupColour() : color;
+                    	
+                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
+                    	if(c.isPresent())
+                    		color = c.get();
 
                     } catch (UnavailableSignalGroupException e) {
                         fine("Signal group " + signalGroup + " is not present in collection", e);

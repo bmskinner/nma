@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.jfree.chart.ChartFactory;
@@ -175,8 +176,9 @@ public class ScatterChartFactory extends AbstractChartFactory {
             try {
 
                 if (d.getCollection().hasSignalGroup(id)) {
-                    colour = d.getCollection().getSignalGroup(id).hasColour()
-                            ? d.getCollection().getSignalGroup(id).getGroupColour() : colour;
+                	Optional<Color> c = d.getCollection().getSignalGroup(id).getGroupColour();
+                	if(c.isPresent())
+                		colour = c.get();
                 }
             } catch (UnavailableSignalGroupException e) {
                 stack("Signal group " + id + " is not present in collection", e);

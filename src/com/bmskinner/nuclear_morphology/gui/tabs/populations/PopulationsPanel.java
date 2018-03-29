@@ -608,6 +608,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         populationPopup.enableDelete();
         populationPopup.disableMerge();
         populationPopup.enableBoolean();
+        populationPopup.setExtractCellsEnabled(true);
         populationPopup.enableSave();
         populationPopup.enableCurate();
         populationPopup.setRelocateCellsEnabled(true);

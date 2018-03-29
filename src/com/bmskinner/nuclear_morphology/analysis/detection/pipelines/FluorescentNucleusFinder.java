@@ -24,6 +24,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.GenericDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
@@ -51,21 +54,24 @@ import ij.process.ImageProcessor;
 public class FluorescentNucleusFinder extends CellFinder {
 
     final private ComponentFactory<Nucleus> nuclFactory;
-
+    private final IDetectionOptions nuclOptions;
+    
     public FluorescentNucleusFinder(final IAnalysisOptions op) {
         super(op);
         nuclFactory = new NucleusFactory(op.getNucleusType());
+        Optional<? extends IDetectionOptions> n = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        if(!n.isPresent())
+        	throw new IllegalArgumentException("No nucleus options");
+        nuclOptions = n.get();
     }
 
     @Override
-    public List<ICell> findInImage(final File imageFile) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException, ComponentCreationException {
         List<ICell> list = new ArrayList<>();
 
         try {
             // Get all objects that could be nuclei
             List<Nucleus> nuclei = detectNucleus(imageFile);
-
-            IDetectionOptions nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
 
             // Display passing and failing size nuclei
             if (hasDetectionListeners()) {
@@ -100,11 +106,10 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     }
 
-    private List<Nucleus> detectNucleus(File imageFile)
+    private List<Nucleus> detectNucleus(@NonNull File imageFile)
             throws ImageImportException, ComponentCreationException, MissingOptionException {
 
         List<Nucleus> list = new ArrayList<>();
-        IDetectionOptions nuclOptions = options.getDetectionOptions(CellularComponent.NUCLEUS);
 
         ICannyOptions cannyOptions = nuclOptions.getCannyOptions();
 

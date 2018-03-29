@@ -23,6 +23,8 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -450,11 +452,10 @@ public abstract class AbstractImageFilterer implements Loggable {
      * 
      * @return
      */
-    public static ImageProcessor averageByteImages(List<ImageProcessor> list) {
+    public static ImageProcessor averageByteImages(@NonNull List<ImageProcessor> list) {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException("List null or empty");
-        }
 
         // Check images are same dimensions
         int w = list.get(0).getWidth();

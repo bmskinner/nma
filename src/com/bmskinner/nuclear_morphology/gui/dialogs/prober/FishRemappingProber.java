@@ -25,6 +25,8 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -44,26 +46,18 @@ public class FishRemappingProber extends IntegratedImageProber {
      * Create with a dataset (from which nuclei will be drawn) and a folder of
      * images to be analysed
      * 
-     * @param dataset
-     *            the analysis dataset
-     * @param folder
-     *            the folder of images
+     * @param dataset the analysis dataset
+     * @param folder the folder of images
      */
-    public FishRemappingProber(final IAnalysisDataset dataset, final File fishImageDir) {
+    public FishRemappingProber(@NonNull final IAnalysisDataset dataset, @NonNull final File fishImageDir) {
         this.dataset = dataset;
 
         try {
 
             // make the panel
-            Finder finder = new FishRemappingFinder(dataset.getAnalysisOptions(), fishImageDir);
+            Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
 
             imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
-
-            // imageProberPanel = new FishRemappingProberPanel(this,
-            // dataset.getAnalysisOptions().getDetectionOptions(IAnalysisOptions.NUCLEUS),
-            // ImageSet.FISH_REMAPPING_IMAGE_SET,
-            // dataset,
-            // fishImageDir);
 
             JPanel footerPanel = createFooter();
             this.setOkButtonText(PROCEED_LBL);
@@ -72,8 +66,6 @@ public class FishRemappingProber extends IntegratedImageProber {
             this.add(footerPanel, BorderLayout.SOUTH);
 
             this.setTitle(DIALOG_TITLE_BAR_LBL);
-
-            // optionsSettingsPanel.addProberReloadEventListener(imageProberPanel);
 
         } catch (Exception e) {
             warn("Error launching FISH remapping window");

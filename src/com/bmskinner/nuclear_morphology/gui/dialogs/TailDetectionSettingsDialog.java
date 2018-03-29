@@ -81,7 +81,7 @@ public class TailDetectionSettingsDialog extends SettingsDialog implements Actio
 
         IMutableCannyOptions canny = null;
         try {
-            canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).getCannyOptions().unlock();
+            canny = options.getDetectionOptions(IAnalysisOptions.SPERM_TAIL).get().getCannyOptions().unlock();
         } catch (MissingOptionException e) {
             warn("Missing canny options");
         }
