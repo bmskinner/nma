@@ -141,10 +141,10 @@ public class NucleusDetectionMethodTest {
      */
     private IAnalysisDataset runNewAnalysis(String folder, IMutableAnalysisOptions op, File saveFile) throws Exception {
         
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).getFolder().exists()){
+        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
             throw new IllegalArgumentException("Detection folder does not exist");
         }
-        IAnalysisMethod m = new NucleusDetectionMethod(folder, null, op);
+        IAnalysisMethod m = new NucleusDetectionMethod(folder, op);
         IAnalysisResult r = m.call();
         
         IAnalysisDataset obs = r.getFirstDataset();

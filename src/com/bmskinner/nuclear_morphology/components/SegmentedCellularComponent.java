@@ -22,8 +22,10 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
+import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -78,6 +81,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         super(c);
     }
 
+    /**
+     * An implementation of a profile tied to an object
+     * @author ben
+     * @since 1.13.8
+     */
     public class DefaultProfile implements IProfile {
 
         private static final long serialVersionUID = 1L;
@@ -89,8 +97,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * 
          * @param values the array to use
          */
-        public DefaultProfile(@NonNull final float[] values) {
+        public DefaultProfile(final float[] values) {
 
+        	if(values==null)
+        		throw new IllegalArgumentException("Array is null");
             if (values.length!=SegmentedCellularComponent.this.getBorderLength())
                 throw new IllegalArgumentException("Input array does not match object border length");
             this.array = values;
@@ -548,7 +558,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                 // position
                 newArray[i] = interpolateValue(oldIndex);
             }
-            return new DefaultProfile(newArray);
+            return new FloatProfile(newArray);
         }
 
         /**
@@ -690,7 +700,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * IProfile)
          */
         @Override
-        public int getSlidingWindowOffset(IProfile testProfile) throws ProfileException {
+        public int getSlidingWindowOffset(@NonNull IProfile testProfile) throws ProfileException {
 
             /*
              * NEW CODE VERSION - FAIL. GIVES ERROR IN getSubRegion() during segment
@@ -978,7 +988,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                 result[windowSize + i + 1] = nextValues[i];
             }
 
-            return new DefaultProfile(result);
+            return new FloatProfile(result);
         }
 
         /*
@@ -1002,7 +1012,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
             if (indexStart < indexEnd) {
 
                 float[] result = Arrays.copyOfRange(array, indexStart, indexEnd);
-                return new DefaultProfile(result);
+                return new FloatProfile(result);
 
             } else { // case when array wraps
 
@@ -1022,7 +1032,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
                 if (result.length == 0) {
                     warn("Subregion length zero: " + indexStart + " - " + indexEnd);
                 }
-                return new DefaultProfile(result);
+                return new FloatProfile(result);
             }
         }
 
@@ -1033,11 +1043,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * NucleusBorderSegment)
          */
         @Override
-        public IProfile getSubregion(IBorderSegment segment) throws ProfileException {
+        public IProfile getSubregion(@NonNull IBorderSegment segment) throws ProfileException {
 
-            if (segment == null) {
+            if (segment == null)
                 throw new IllegalArgumentException("Segment is null");
-            }
 
             if (segment.getTotalLength() != array.length) {
                 throw new ProfileException("Segment comes from a different length profile");
@@ -1117,7 +1126,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          */
         @Override
         public IProfile cumulativeSum() {
-            float[] values = new float[this.size()];
+            float[] values = new float[array.length];
 
             float total = 0;
             for (int i = 0; i < array.length; i++) {
@@ -1153,7 +1162,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * @see components.generic.IProfile#multiply(components.generic.IProfile)
          */
         @Override
-        public IProfile multiply(IProfile multiplier) {
+        public IProfile multiply(@NonNull IProfile multiplier) {
             if (this.size() != multiplier.size()) {
                 throw new IllegalArgumentException("Profile sizes do not match");
             }
@@ -1191,7 +1200,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * @see components.generic.IProfile#divide(components.generic.IProfile)
          */
         @Override
-        public IProfile divide(IProfile divider) {
+        public IProfile divide(@NonNull IProfile divider) {
             if (this.size() != divider.size()) {
                 throw new IllegalArgumentException("Profile sizes do not match");
             }
@@ -1209,7 +1218,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * @see components.generic.IProfile#add(components.generic.IProfile)
          */
         @Override
-        public IProfile add(IProfile adder) {
+        public IProfile add(@NonNull IProfile adder) {
             if (this.size() != adder.size()) {
                 throw new IllegalArgumentException("Profile sizes do not match");
             }
@@ -1247,7 +1256,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
          * @see components.generic.IProfile#subtract(components.generic.IProfile)
          */
         @Override
-        public IProfile subtract(IProfile sub) {
+        public IProfile subtract(@NonNull IProfile sub) {
             if (this.size() != sub.size()) {
                 throw new IllegalArgumentException("Profile sizes do not match");
             }
@@ -1320,10 +1329,18 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
     }
 
 
+    /**
+     * An implementation of a segmented profile tied to an object
+     * @author ben
+     * @since 1.13.8
+     *
+     */
     public class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
 
-        int[] segmentBounds = new int[1];
-        UUID[] ids = new UUID[1];
+		private static final long serialVersionUID = 1L;
+		private int[] segmentBounds = new int[1];
+        private UUID[] ids = new UUID[1];
+        private Map<UUID, List<IBorderSegment>> mergeSources = new HashMap<>();
 
         /**
          * Construct using a regular profile and a list of border segments
@@ -1542,7 +1559,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
            */
           @Override
-          public IBorderSegment getSegment(String name) throws UnavailableComponentException {
+          public IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException {
               if (name == null) {
                   throw new IllegalArgumentException("Requested segment name is null");
               }
@@ -1745,7 +1762,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment, int, int)
            */
           @Override
-          public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
+          public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
         
               if (!this.contains(segment))
                   throw new IllegalArgumentException("Segment is not part of this profile");
@@ -2166,7 +2183,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * IBorderSegment)
            */
           @Override
-          public void unmergeSegment(IBorderSegment segment) throws ProfileException {
+          public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
               // Check the segments belong to the profile
               if (!this.contains(segment)) {
                   throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -2238,13 +2255,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
           @Override
           public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
               // Check the segments belong to the profile
-              if (!this.contains(segment)) {
+              if (!this.contains(segment))
                   throw new IllegalArgumentException("Input segment is not part of this profile");
-              }
         
-              if (!segment.contains(splitIndex)) {
+              if (!segment.contains(splitIndex))
                   throw new IllegalArgumentException("Splitting index is not within the segment");
-              }
         
               // Remove old merge sources from this segment
               segment.clearMergeSources();
@@ -2348,7 +2363,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
            * @see components.generic.ISegmentedProfile#equals(java.lang.Object)
            */
           @Override
-          public boolean equals(Object obj) {
+          public boolean equals(Object obj) {        	  
               if (this == obj)
                   return true;
               if (!super.equals(obj))
@@ -2382,20 +2397,21 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               return i % segmentBounds.length;
           }
 
-          
-          public class DefaultBorderSegment implements IBorderSegment {
+
+      /**
+       * An implementation of border segments that relies on the segment
+       * being contained within a profile.
+       * @author ben
+       * @since 1.13.8
+       *
+       */
+        public class DefaultBorderSegment implements IBorderSegment {
               
               private UUID id;
-              private int start;
-              private int end;
-              private DefaultBorderSegment[] mergeSources;
               boolean isLocked = false;
               
-              public DefaultBorderSegment(int start, int end, UUID id){
+              public DefaultBorderSegment(@NonNull UUID id){
                   this.id = id;
-                  this.start = start;
-                  this.end = end;
-                  mergeSources = new DefaultBorderSegment[0];
               }
         
               @Override
@@ -2404,37 +2420,35 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
               }
         
               @Override
-              public List<IBorderSegment> getMergeSources() {
-                  // TODO Auto-generated method stub
-                  return null;
+              public List<IBorderSegment> getMergeSources() {  
+                  return mergeSources.get(id);
               }
         
               @Override
               public void addMergeSource(IBorderSegment seg) {
-                  // TODO Auto-generated method stub
-                  
+            	  mergeSources.get(id).add(seg);
               }
         
               @Override
               public void clearMergeSources() {
-                  // TODO Auto-generated method stub
-                  
+            	  mergeSources.put(id, new ArrayList<IBorderSegment>());
               }
         
               @Override
               public boolean hasMergeSources() {
-                  // TODO Auto-generated method stub
-                  return false;
+                  return mergeSources[getIndexOfSegment(id)].length>0;
               }
         
               @Override
               public int getStartIndex() {
-                  return start;
+            	  int index = getIndexOfSegment(id);
+                  return DefaultSegmentedProfile.this.segmentBounds[index];
               }
         
               @Override
               public int getEndIndex() {
-                  return end;
+            	  int index = DefaultSegmentedProfile.this.getIndexOfSegment(id);
+                  return segmentBounds[wrapSegmentIndex(index+1)];
               }
         
               @Override
@@ -2475,14 +2489,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public boolean isLocked() {
-                  // TODO Auto-generated method stub
-                  return false;
+                  return isLocked;
               }
         
               @Override
               public void setLocked(boolean b) {
-                  // TODO Auto-generated method stub
-                  
+                  isLocked=b;
               }
         
               @Override
@@ -2493,20 +2505,20 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public IBorderSegment nextSegment() {
-                  // TODO Auto-generated method stub
-                  return null;
+                  int i = getIndexOfSegment(id);
+                  return new DefaultBorderSegment(ids[wrapSegmentIndex(i+1)]);
               }
         
               @Override
               public IBorderSegment prevSegment() {
-                  // TODO Auto-generated method stub
-                  return null;
+            	  int i = getIndexOfSegment(id);
+                  return new DefaultBorderSegment(ids[wrapSegmentIndex(i-1)]);
               }
         
               @Override
               public int length() {
-                  // TODO Auto-generated method stub
-                  return 0;
+                  return wraps() ? getEndIndex() + (DefaultSegmentedProfile.this.size()-getStartIndex()) 
+                		  : getEndIndex()-getStartIndex();
               }
         
               @Override
@@ -2517,20 +2529,18 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public boolean wraps(int start, int end) {
-                  // TODO Auto-generated method stub
-                  return false;
+                  return end<start;
               }
         
               @Override
               public boolean wraps() {
-                  // TODO Auto-generated method stub
-                  return false;
+                  return getEndIndex()<getStartIndex();
               }
         
               @Override
               public boolean contains(int index) {
-                  // TODO Auto-generated method stub
-                  return false;
+            	  return wraps() ? index<=getEndIndex() || index>=getStartIndex() 
+            			  : index>=getStartIndex() && index <=getEndIndex();
               }
         
               @Override
@@ -2547,26 +2557,24 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public void setNextSegment(IBorderSegment s) {
-                  // TODO Auto-generated method stub
-                  
+                  // Does nothing in this implementation
               }
         
               @Override
               public void setPrevSegment(IBorderSegment s) {
-                  // TODO Auto-generated method stub
-                  
+            	// Does nothing in this implementation
               }
         
               @Override
               public boolean hasNextSegment() {
-                  // TODO Auto-generated method stub
-                  return false;
+            	// By default in this implementation
+                  return true;
               }
         
               @Override
               public boolean hasPrevSegment() {
-                  // TODO Auto-generated method stub
-                  return false;
+            	// By default in this implementation
+                  return true;
               }
         
               @Override
@@ -2577,8 +2585,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public int getPosition() {
-                  // TODO Auto-generated method stub
-                  return 0;
+            	  return getIndexOfSegment(id);
               }
         
               @Override
@@ -2589,12 +2596,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
               @Override
               public String getDetail() {
-                  // TODO Auto-generated method stub
-                  return null;
+                  return getStartIndex()+"-"+getEndIndex();
               }
         
               @Override
-              public boolean overlaps(IBorderSegment seg) {
+              public boolean overlaps(@NonNull IBorderSegment seg) {
                   // TODO Auto-generated method stub
                   return false;
               }
