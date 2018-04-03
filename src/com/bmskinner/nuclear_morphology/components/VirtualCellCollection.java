@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -442,7 +444,7 @@ public class VirtualCellCollection implements ICellCollection {
         ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup)) {
 
             @Override
-            public void setShellResult(IShellResult result) {
+            public void setShellResult(@NonNull IShellResult result) {
                 shellResults.put(signalGroup, result);
             }
 
@@ -452,12 +454,12 @@ public class VirtualCellCollection implements ICellCollection {
             }
 
             @Override
-            public IShellResult getShellResult() {
-                return shellResults.get(signalGroup);
+            public Optional<IShellResult> getShellResult() {
+                return Optional.ofNullable(shellResults.get(signalGroup));
             }
 
             @Override
-            public void setGroupColour(Color newColor) {
+            public void setGroupColour(@NonNull Color newColor) {
                 try {
                     parent.getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);
                 } catch (UnavailableSignalGroupException e) {

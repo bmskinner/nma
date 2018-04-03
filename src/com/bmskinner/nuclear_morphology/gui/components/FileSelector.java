@@ -150,19 +150,14 @@ public class FileSelector {
         }
         return file;
     }
-    
-    
-    private static File chooseSaveFile(File defaultFolder){
-        return chooseSaveFile(defaultFolder, null);
-    }
-    
+        
     /**
      * Choose a file from a default folder with a file extension filter.
      * @param defaultFolder the default folder
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    private static File chooseSaveFile(File defaultFolder, FileNameExtensionFilter filter){
+    public static File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
         if(filter!=null){

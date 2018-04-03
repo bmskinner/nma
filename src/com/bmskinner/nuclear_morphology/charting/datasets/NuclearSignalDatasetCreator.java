@@ -80,8 +80,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
         // adjust X and Y because we are now counting angles from the vertical
         // axis
-        double signalX = new AngleTools().getXComponentOfAngle(signalDistance, angle - 90);
-        double signalY = new AngleTools().getYComponentOfAngle(signalDistance, angle - 90);
+        double signalX = AngleTools.getXComponentOfAngle(signalDistance, angle - 90);
+        double signalY = AngleTools.getYComponentOfAngle(signalDistance, angle - 90);
         return IPoint.makeNew(signalX, signalY);
     }
 

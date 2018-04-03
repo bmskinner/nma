@@ -1430,8 +1430,8 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         }
 
         double newAngle = oldAngle + angle;
-        double newX = new AngleTools().getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
-        double newY = new AngleTools().getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
+        double newX = AngleTools.getXComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getX();
+        double newY = AngleTools.getYComponentOfAngle(distance, newAngle) + this.getCentreOfMass().getY();
         return IPoint.makeNew(newX, newY);
     }
 

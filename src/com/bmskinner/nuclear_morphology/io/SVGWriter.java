@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -53,11 +54,7 @@ public class SVGWriter implements Exporter, Loggable {
      * 
      * @param f
      */
-    public SVGWriter(File f) {
-
-        if (f == null) {
-            throw new IllegalArgumentException("File cannot be null");
-        }
+    public SVGWriter(@NonNull File f) {
         file = f;
     }
     
@@ -66,7 +63,7 @@ public class SVGWriter implements Exporter, Loggable {
      * 
      * @param c
      */
-    public void exportConsensusOutlines(List<IAnalysisDataset> datasets) {
+    public void exportConsensusOutlines(@NonNull List<IAnalysisDataset> datasets) {
         List<Nucleus> consensi = datasets.stream()
                 .map(d -> d.getCollection().getConsensus())
                 .filter(n -> n!=null)
@@ -104,7 +101,7 @@ public class SVGWriter implements Exporter, Loggable {
      * 
      * @param c
      */
-    public void export(List<? extends CellularComponent> list) {
+    public void export(@NonNull List<? extends CellularComponent> list) {
     	
     	double w = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
     	double h = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);
@@ -132,13 +129,9 @@ public class SVGWriter implements Exporter, Loggable {
     	write(file, g2);
     }
     
-    public void export(CellularComponent c, String name) {
-    	if (c == null) {
-            throw new IllegalArgumentException("Component cannot be null");
-        }
-
+    public void export(@NonNull CellularComponent c, @NonNull String name) {
     	Shape s = c.toShape();
-    	//
+
     	//     // Make a canvas of the correct size
     	Rectangle2D r = s.getBounds();
 
@@ -159,7 +152,7 @@ public class SVGWriter implements Exporter, Loggable {
      * @param x the x coordinate in the graphics context
      * @param y the y coordinate in the graphics context
      */
-    private void export(final Shape s, final SVGGraphics2D g, double x, double y) {
+    private void export(@NonNull final Shape s, @NonNull final SVGGraphics2D g, double x, double y) {
         
         SVGGraphics2D g2 = (SVGGraphics2D) g.create();
         

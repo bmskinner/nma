@@ -28,9 +28,6 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public class AngleTools {
 
-    public AngleTools() {
-    }
-
     /**
      * Find the length on the x-axis of a line at a given angle
      * 

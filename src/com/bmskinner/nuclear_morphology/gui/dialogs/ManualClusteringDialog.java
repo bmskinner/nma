@@ -24,7 +24,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 
 /**
- * This dialog allows for manual clustering of nuclei based on appearance
+ * This dialog allows for manual clustering of nuclei
  * @author ben
  * @since 1.13.8
  */
@@ -75,7 +75,6 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     			b.append("Cell "+i+"\t"+selectedCells.get(i).getNucleus().getNameAndNumber()
     					+"\t"+timePerCell.get(i)
     					+"\t"+groupName
-    					+"\t"+user
     					+System.getProperty("line.separator"));
     		}
     		return b.toString();
@@ -92,12 +91,10 @@ public class ManualClusteringDialog extends LoadingIconDialog {
     
     private final List<ICell> cells;
     private long startTime = System.currentTimeMillis();
-    private final String user;
     
-    public ManualClusteringDialog(String user, @NonNull final IAnalysisDataset dataset, List<String> groupNames) {
+    public ManualClusteringDialog(@NonNull final IAnalysisDataset dataset, List<String> groupNames) {
         super();
         this.dataset = dataset;
-        this.user = user;
         cells = new ArrayList<>(dataset.getCollection().getCells());
         Collections.shuffle(cells); // random ordering
         createGroups(groupNames);
@@ -135,12 +132,11 @@ public class ManualClusteringDialog extends LoadingIconDialog {
         op.setType(ClusteringMethod.MANUAL);
         
         IClusterGroup group = new ClusterGroup(IClusterGroup.CLUSTER_GROUP_PREFIX + "_" + clusterNumber, op);
-        log("Dataset: "+dataset.getName()+" Group: "+group.getName());
+
         for(int i=0; i<groups.size(); i++){
 
         	ICellCollection coll = groups.get(i).toCollection("Manual_cluster_" + i+"_"+groups.get(i).groupName);
 
-        	log(groups.get(i).getTimes());
             if (coll.hasCells()) {
 
                 try {
@@ -208,7 +204,4 @@ public class ManualClusteringDialog extends LoadingIconDialog {
         }
     	return p;
     }
-    
-    //TODO - show each nucleus twice.
-
 }

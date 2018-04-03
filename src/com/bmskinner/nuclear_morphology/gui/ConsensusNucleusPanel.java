@@ -33,6 +33,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.jfree.chart.JFreeChart;
 
@@ -47,6 +48,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
@@ -537,21 +539,15 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
     private void exportConsensusNuclei() {
     	
-    	File exportFile = new File(activeDataset().getCollection().getOutputFolder(),
-                activeDataset().getName() + Exporter.SVG_FILE_EXTENSION);
+    	File exportFile = FileSelector.chooseSaveFile(null, new FileNameExtensionFilter("SVG file", "svg"));
     	
-        
-    	SVGWriter wr = new SVGWriter(exportFile);
-    	
-    	wr.exportConsensusOutlines(getDatasets());
-//    	
-//    	List<Nucleus> consensi = getDatasets().stream()
-//    			.map(d -> d.getCollection().getConsensus())
-//    			.filter(n -> n!=null)
-//    			.collect(Collectors.toList());
-//    	
-//    	wr.export(consensi);
-  
+    	if(!exportFile.getName().endsWith(Exporter.SVG_FILE_EXTENSION))
+    		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Exporter.SVG_FILE_EXTENSION);
+
+    	if(exportFile!=null){
+    		SVGWriter wr = new SVGWriter(exportFile);
+    		wr.exportConsensusOutlines(getDatasets()); 
+    	}
     }
 
     @Override
