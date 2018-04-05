@@ -307,20 +307,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeCellOutlineChart() {
 
-        if (options.getCell() == null || !options.hasDatasets()) {
-            fine("No datasets or active cell");
+        if (options.getCell() == null || !options.hasDatasets())
             return makeEmptyChart();
-        }
 
         try {
 
             if (!options.isShowAnnotations()) {
-                finest("Annotations not shown, creating bare outline chart");
                 return makeBareCellOutlineChart();
             }
 
             if (options.isShowMesh()) {
-                finest("Making mesh chart");
                 if (options.firstDataset().getCollection().hasConsensus()) {
 
                     try {
@@ -348,7 +344,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
             }
 
             if (options.isShowWarp()) {
-                finest("Making warp chart");
                 if (options.firstDataset().getCollection().hasConsensus()) {
 
                     try {
@@ -391,7 +386,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     return makeEmptyChart();
                 }
             }
-            finest("Making standard cell outline chart");
             return makeStandardCellOutlineChart();
         } catch (ChartCreationException e) {
             warn("Error creating cell outline chart");

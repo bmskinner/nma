@@ -744,11 +744,13 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                     options.getType());
 
             // add any regions with bimodal distribution to the chart
-
-            IProfile xPositions = modes.getPositions(100);
+            float[] xPositions = new float[modes.size()];
+            for (int i = 0; i < xPositions.length; i++) {
+            	xPositions[i] = (float) i / (float) xPositions.length * 100f;
+            }
 
             for (int i = 0; i < modes.size(); i++) {
-                double x = xPositions.get(i);
+                double x = xPositions[i];
                 if (modes.get(i) == true) {
                     ValueMarker marker = new ValueMarker(x, Color.black, new BasicStroke(2f));
                     plot.addDomainMarker(marker);

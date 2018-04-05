@@ -198,7 +198,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
     @Override
     public void valueChanged(TreeSelectionEvent arg0) {
-        finest("Cell list selection changed");
 
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) arg0.getPath().getLastPathComponent();
         NodeData data = (NodeData) node.getUserObject();
@@ -210,20 +209,15 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
                 if (cellID != null) { // only null for root
                     this.getCellModel().setCell(activeDataset().getCollection().getCell(cellID));
-                    finer("Updating selected cell to " + this.getCellModel().getCell().getNucleus().getNameAndNumber());
 
                 } else {
                     this.getCellModel().setCell(null);
-                    finer("Null cell selected");
-
                 }
 
             } catch (Exception e1) {
                 warn("Error fetching cell");
                 log(Level.FINE, "Error fetching cell", e1);
             }
-        } else {
-            finer("Not a single dataset");
         }
 
     }
@@ -240,8 +234,6 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
-
     }
 
 }

@@ -108,10 +108,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeConsensusChart() {
 
-        if (!options.hasDatasets()) {
-            finest("No datasets: creating empty consensus chart");
+        if (!options.hasDatasets())
             return makeEmptyChart();
-        }
 
         if (options.isMultipleDatasets()) {
 
@@ -123,17 +121,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             }
 
             if (oneHasConsensus) {
-                finest("Creating multiple consensus chart");
                 return makeMultipleConsensusChart();
             } else {
-                finest("No dataset with consensus: creating empty consensus chart");
                 return makeEmptyChart();
             }
         }
 
         if (options.isSingleDataset()) {
-            finest("Creating single consensus chart");
-
             if (options.isShowMesh()) {
                 try {
                     Mesh<Nucleus> mesh = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
@@ -157,7 +151,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
             }
 
         }
-        finest("Options failed to match: creating empty consensus chart");
         return makeEmptyChart();
     }
 
@@ -387,7 +380,6 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
                 // make the IQR distinct from the median
                 plot.getRenderer().setSeriesPaint(i, ((Color) color).darker());
             }
-
         }
         return chart;
     }

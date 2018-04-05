@@ -261,9 +261,9 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             /*
              * A subset of nuclei do not produce segment boundaries
              */
-            fine("Cannot get ordered segments");
-            fine("Profile is " + this.toString());
-            fine("Using the first segment in the profile");
+//            fine("Cannot get ordered segments");
+//            fine("Profile is " + this.toString());
+//            fine("Using the first segment in the profile");
             firstSeg = this.getSegments().get(0); // default to the first
                                                   // segment in the profile
         }

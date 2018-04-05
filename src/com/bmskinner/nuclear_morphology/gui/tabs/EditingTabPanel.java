@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 
 /**
@@ -40,7 +42,7 @@ public interface EditingTabPanel extends TabPanel {
      * @param tag
      * @param newTagIndex
      */
-    void setBorderTagAction(Tag tag, int newTagIndex);
+    void setBorderTagAction(@NonNull Tag tag, int newTagIndex);
 
     /**
      * Update the start index of the given segment to the given index in the
@@ -50,5 +52,5 @@ public interface EditingTabPanel extends TabPanel {
      * @param index
      * @throws Exception
      */
-    void updateSegmentStartIndexAction(UUID id, int index) throws Exception;
+    void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception;
 }

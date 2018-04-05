@@ -183,7 +183,6 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         // get the profile array
         IProfile p = getProfile(type, tag, quartile);
-        fine("Making segmented profile of type " + type + " from " + tag + " with q" + quartile);
 
         try {
             if (segments[0] == null) {

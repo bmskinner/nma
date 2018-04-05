@@ -235,20 +235,17 @@ public class VirtualCellCollection implements ICellCollection {
 
     @Override
     public synchronized Set<Nucleus> getNuclei() {
-        Set<Nucleus> result = new HashSet<Nucleus>(cellIDs.size());
 
         ICellCollection parentCollection = parent.getCollection();
 
         if (parentCollection == null) {
             warn("Parent collection not restored!");
-            return result;
+            return new HashSet<Nucleus>(cellIDs.size());
         }
 
-        result = cellIDs.stream().map(id -> parentCollection.getCell(id))
+        return cellIDs.stream().map(id -> parentCollection.getCell(id))
         		.flatMap(c -> c.getNuclei().stream())
                 .collect(Collectors.toSet());
-
-        return result;
     }
 
     @Override
@@ -699,69 +696,6 @@ public class VirtualCellCollection implements ICellCollection {
         return newCollection;
     }
 
-    /**
-     * Create a new CellCollection based on this as a template. Filter the
-     * nuclei by the given statistic between a lower and upper bound.
-     * 
-     * @param stat
-     *            the statistic to filter on
-     * @param scale
-     *            the scale the values are in
-     * @param lower
-     *            include values above this
-     * @param upper
-     *            include values below this
-     * @return a new collection
-     * @throws Exception
-     */
-    // @Override
-    // public ICellCollection filterCollection(PlottableStatistic stat,
-    // MeasurementScale scale, double lower, double upper) {
-    //
-    // DecimalFormat df = new DecimalFormat("#.##");
-    // ICellCollection subCollection = new DefaultCellCollection(this,
-    // "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
-    //
-    // List<ICell> filteredCells;
-    //
-    // if(stat.equals(PlottableStatistic.VARIABILITY)){
-    // filteredCells = new ArrayList<ICell>();
-    // for(ICell c : this.getCells()){
-    // // Nucleus n = c.getNucleus();
-    //
-    // double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, c);
-    //
-    // if(value>= lower && value<= upper){
-    // filteredCells.add(c);
-    // }
-    // }
-    //
-    // } else {
-    //
-    // // TODO: multiple nuclei
-    // filteredCells = getCells()
-    // .parallelStream()
-    // .filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
-    // .filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
-    // .collect(Collectors.toList());
-    // }
-    //
-    // for(ICell cell : filteredCells){
-    // subCollection.addCell(new DefaultCell(cell));
-    // }
-    //
-    // try {
-    // this.getProfileManager().copyCollectionOffsets(subCollection);
-    // } catch (ProfileException e) {
-    // warn("Error copying collection offsets");
-    // fine("Error in offsetting", e);
-    // }
-    //
-    // this.getSignalManager().copySignalGroups(subCollection);
-    //
-    // return subCollection;
-    // }
-
     @Override
     public ICellCollection filter(Predicate<ICell> predicate) {
 
@@ -831,64 +765,6 @@ public class VirtualCellCollection implements ICellCollection {
         return filter(pred);
     }
 
-    // @Override
-    // public ICellCollection filterCollection(PlottableStatistic stat,
-    // MeasurementScale scale, double lower, double upper) {
-    // DecimalFormat df = new DecimalFormat("#.##");
-    // ICellCollection subCollection = new DefaultCellCollection(this,
-    // "Filtered_"+stat.toString()+"_"+df.format(lower)+"-"+df.format(upper));
-    //
-    // List<ICell> filteredCells;
-    //
-    // finest("Filtering collection on "+stat);
-    //
-    // if(stat.equals(PlottableStatistic.VARIABILITY)){
-    // filteredCells = new ArrayList<ICell>();
-    // for(ICell c : this.getCells()){
-    //
-    // boolean include = true;
-    // for(Nucleus n : c.getNuclei()){
-    // double value = getNormalisedDifferenceToMedian(Tag.REFERENCE_POINT, n);
-    // if(value< lower || value> upper){
-    // include = false;
-    // }
-    //
-    // }
-    //
-    // if(include){
-    // filteredCells.add(c);
-    // }
-    // }
-    //
-    // } else {
-    //
-    // filteredCells = getCells()
-    // .parallelStream()
-    // .filter(p -> p.getNucleus().getStatistic(stat, scale) >= lower)
-    // .filter(p -> p.getNucleus().getStatistic(stat, scale) <= upper)
-    // .collect(Collectors.toList());
-    // }
-    //
-    // finest("Adding cells to new collection");
-    // for(ICell cell : filteredCells){
-    // subCollection.addCell(new DefaultCell(cell));
-    // }
-    //
-    // try {
-    //
-    // this.getProfileManager().copyCollectionOffsets(subCollection);
-    // this.getSignalManager().copySignalGroups(subCollection);
-    //
-    // } catch (ProfileException e) {
-    // warn("Error copying collection offsets");
-    // stack("Error in offsetting", e);
-    // }
-    //
-    //
-    //
-    // return subCollection;
-    // }
-
     @Override
     public int countShared(IAnalysisDataset d2) {
         return countShared(d2.getCollection());
@@ -935,10 +811,6 @@ public class VirtualCellCollection implements ICellCollection {
         Set<UUID> toSearch1 = this.getCellIDs();
         Set<UUID> toSearch2 = d2.getCellIDs();
 
-        finest("Beginning search for shared cells");
-        // toSearch1.retainAll(toSearch2);
-        // int shared = toSearch1.size();
-
         // choose the smaller to search within
 
         int shared = 0;
@@ -957,7 +829,6 @@ public class VirtualCellCollection implements ICellCollection {
             }
 
         }
-        finest("Completed search for shared cells");
         return shared;
     }
 
@@ -1130,39 +1001,35 @@ public class VirtualCellCollection implements ICellCollection {
      * @throws Exception
      */
     private synchronized double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id)
-            throws Exception {
+    		throws Exception {
 
-        double[] result = null;
-        //
-        // if(statsCache.hasValues(stat,
-        // CellularComponent.NUCLEAR_BORDER_SEGMENT, scale)){
-        // return statsCache.getValues(stat,
-        // CellularComponent.NUCLEAR_BORDER_SEGMENT, scale);
-        //
-        // } else {
+    	double[] result = null;
 
-        result = getNuclei().parallelStream().mapToDouble(n -> {
-            IBorderSegment segment;
-            try {
-                segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-            } catch (ProfileException | UnavailableComponentException e) {
-                return 0;
-            }
-            double perimeterLength = 0;
-            if (segment != null) {
-                int indexLength = segment.length();
-                double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
-                perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
-            }
-            return perimeterLength;
+    	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
+    		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 
-        }).toArray();
-        Arrays.sort(result);
-        // statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT,
-        // scale, result);
-        // }
+    	} else {
 
-        return result;
+    		result = getNuclei().parallelStream().mapToDouble(n -> {
+    			IBorderSegment segment;
+    			try {
+    				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+    			} catch (ProfileException | UnavailableComponentException e) {
+    				return 0;
+    			}
+    			double perimeterLength = 0;
+    			if (segment != null) {
+    				int indexLength = segment.length();
+    				double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+    				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+    			}
+    			return perimeterLength;
+
+    		}).toArray();
+    		Arrays.sort(result);
+    		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
+    	}
+    	return result;
     }
 
     /**
@@ -1188,13 +1055,11 @@ public class VirtualCellCollection implements ICellCollection {
             if (PlottableStatistic.VARIABILITY.equals(stat)) {
                 result = this.getNormalisedDifferencesToMedianFromPoint(Tag.REFERENCE_POINT);
             } else {
-
                 result = this.getNuclei().parallelStream().mapToDouble(n -> n.getStatistic(stat, scale)).toArray();
             }
             Arrays.sort(result);
             statsCache.setValues(stat, CellularComponent.NUCLEUS, scale, null, result);
         }
-
         return result;
     }
 
@@ -1217,9 +1082,7 @@ public class VirtualCellCollection implements ICellCollection {
             return statsCache.getValues(stat, CellularComponent.NUCLEUS, scale, null);
 
         } else {
-
             result = getCells().parallelStream().mapToDouble(n -> n.getStatistic(stat)).toArray();
-
             Arrays.sort(result);
             statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
         }

@@ -94,7 +94,6 @@ public class SegmentStatsPanel extends DetailPanel {
             table.setToolTipText("Mean and range for 95% confidence interval");
 
         } else {
-            finest("Segment counts don't match");
             table.setToolTipText(null);
         }
     }
@@ -102,10 +101,6 @@ public class SegmentStatsPanel extends DetailPanel {
     @Override
     protected void updateNull() {
         table.setModel(AbstractTableCreator.createBlankTable());
-        // TableModel model = getTable(makeOptions());
-        //
-        // table.setModel(model);
-
         table.setToolTipText(null);
 
     }
@@ -157,13 +152,10 @@ public class SegmentStatsPanel extends DetailPanel {
                 try {
                     segment = Integer.valueOf(colName.replace("Seg_", ""));
                 } catch (Exception e) {
-                    log(Level.FINEST, "Error getting segment name: " + colName);
                     segment = 0;
                 }
 
                 colour = (Color) ColourSelecter.getColor(segment);
-                log(Level.FINEST, "SegmentTableCellRenderer for segment " + segment + " uses color " + colour);
-
             }
 
             String rowName = table.getModel().getValueAt(row, 0).toString();
@@ -177,7 +169,6 @@ public class SegmentStatsPanel extends DetailPanel {
                     NumberFormat nf = NumberFormat.getInstance();
                     pval = nf.parse(cellContents).doubleValue();
                 } catch (Exception e) {
-                    log(Level.FINEST, "Error getting value: " + cellContents + " in column " + colName, e);
                     pval = 0;
                 }
 
@@ -191,8 +182,6 @@ public class SegmentStatsPanel extends DetailPanel {
             }
 
             l.setBackground(colour);
-
-            // Return the JLabel which renders the cell.
             return l;
         }
     }

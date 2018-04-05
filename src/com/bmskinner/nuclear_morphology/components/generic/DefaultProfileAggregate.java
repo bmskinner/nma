@@ -206,11 +206,6 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      */
     private IProfile calculateQuartile(int quartile) {
 
-        // if(cache.hasProfile(quartile)){
-        //// log("Aggregate cache used");
-        // return cache.getProfile(quartile);
-        // }
-
         float[] medians = new float[length];
 
         for (int i = 0; i < length; i++) {
@@ -218,14 +213,9 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
             float[] values = getValuesAtIndex(i);
 
             medians[i] = Quartile.quartile(values, quartile);
-
-            // medians[i] = new Quartile(values, quartile).floatValue();
-
         }
 
         IProfile profile = new FloatProfile(medians);
-        // cache.setProfile(quartile, profile);
-        // log("Aggregate cache set");
         return profile;
 
     }
@@ -239,54 +229,4 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
     public IProfile getQuartile(double quartile) throws ProfileException {
         return getQuartile((float) quartile);
     }
-
-    /**
-     * Cache the profiles from an aggregate at various quartiles.
-     * 
-     * @author bms41
-     *
-     */
-    // private class AggregateCache {
-    //
-    // private Map<Float, IProfile> cache = new HashMap<Float, IProfile>(5);
-    //
-    // public AggregateCache(){}
-    //
-    // /**
-    // * Set the stored profile
-    // * @param tag
-    // * @param profile
-    // */
-    // public void setProfile(Float tag, IProfile profile){
-    // cache.put(tag, profile);
-    // }
-    //
-    // /**
-    // * Get the given profile from the cache, or null if not present
-    // * @param tag
-    // * @param quartile
-    // * @return
-    // */
-    // public IProfile getProfile(Float tag){
-    // return cache.get(tag);
-    // }
-    //
-    // /**
-    // * Check if the given profile is in the cache
-    // * @param tag
-    // * @param quartile
-    // * @return
-    // */
-    // public boolean hasProfile(Float tag){
-    // return cache.containsKey(tag);
-    // }
-    //
-    // /**
-    // * Empty the cache - all values must be recalculated
-    // */
-    // public void clear(){
-    // cache = new HashMap<Float, IProfile>(5);
-    // }
-    // }
-
 }

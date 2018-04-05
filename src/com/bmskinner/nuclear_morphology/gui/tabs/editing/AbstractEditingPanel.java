@@ -24,6 +24,8 @@ import java.util.UUID;
 
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -79,15 +81,10 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param tag
      * @param newTagIndex
      */
-    public void setBorderTagAction(Tag tag, int newTagIndex) {
+    public void setBorderTagAction(@NonNull Tag tag, int newTagIndex) {
 
         if (activeDataset().getCollection().isVirtual()) {
             warn("Cannot update core border tag for a child dataset");
-            return;
-        }
-
-        if (tag == null) {
-            fine("Tag is null");
             return;
         }
 
@@ -106,7 +103,6 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
             this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
         } else {
-            fine("Firing refresh cache request for loaded datasets");
             getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
         }
 
@@ -120,7 +116,6 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * showed at once
      */
     protected void refreshEditingPanelCharts() {
-        finest("Refreshing chart cache for editing panel");
         this.refreshChartCache();
 
         List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
@@ -139,7 +134,7 @@ public abstract class AbstractEditingPanel extends DetailPanel
      * @param index
      * @throws Exception
      */
-    public void updateSegmentStartIndexAction(UUID id, int index) throws Exception {
+    public void updateSegmentStartIndexAction(@NonNull UUID id, int index) throws Exception {
 
         checkCellLock();
 
@@ -148,20 +143,16 @@ public abstract class AbstractEditingPanel extends DetailPanel
 
         refreshEditingPanelCharts();
 
-        // Update each nucleus profile
-        finest("Firing refresh morphology action");
         this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_MORPHOLOGY, getDatasets());
 
     }
 
     @Override
     public void borderTagEventReceived(BorderTagEvent event) {
-        fine("Border tag event heard, not responding: " + this.getClass().getSimpleName());
     }
 
     @Override
     public void segmentEventReceived(SegmentEvent event) {
-        fine("Segment event heard, not responding: " + this.getClass().getSimpleName());
     }
 
 }

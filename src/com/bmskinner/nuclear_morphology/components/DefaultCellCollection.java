@@ -322,13 +322,9 @@ public class DefaultCellCollection implements ICellCollection {
      * @return
      */
     public ICell getCell(UUID id) {
-
-        for (ICell c : cells) {
-            if (c.getId().equals(id)) {
-                return c;
-            }
-        }
-        return null;
+    	return cells.parallelStream()
+    			.filter(c->c.getId().equals(id))
+    			.findFirst().orElse(null);
     }
 
     public NucleusType getNucleusType() {

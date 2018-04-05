@@ -88,7 +88,6 @@ public class ThreadManager implements Loggable {
                                                // done.
             }
         });
-//        fine("Submitted runnable. Queue is " + queueLength.get());
         return f;
     }
 
@@ -110,22 +109,10 @@ public class ThreadManager implements Loggable {
 
         // Cancel previous updates
         for (CancellableRunnable c : cancellableFutures.keySet()) {
-
             c.cancel();
-
-            fine("Removing future");
-            // Future<?> future = cancellableFutures.get(c);
-            // if( ! future.isDone()){
-            //// log("Cancelling runnable");
-            // c.cancel();
-            // future.cancel(true);
-            // }
-
             cancellableFutures.remove(c);
         }
-
         Future<?> future = executorService.submit(r);
-        // log("Submitting runnable");
         cancellableFutures.put(r, future);
         return future;
 
@@ -139,23 +126,10 @@ public class ThreadManager implements Loggable {
 
         // Cancel previous updates
         for (CancellableRunnable c : cancellableFutures.keySet()) {
-
             c.cancel();
-
-            fine("Removing future");
-            // Future<?> future = cancellableFutures.get(c);
-            // if( ! future.isDone()){
-            //// log("Cancelling runnable");
-            // c.cancel();
-            // future.cancel(true);
-            // }
-
             cancellableFutures.remove(c);
         }
-
         Future<?> future = executorService.submit(r);
-        // log("Submitting runnable");
         cancellableFutures.put(r, future);
-
     }
 }

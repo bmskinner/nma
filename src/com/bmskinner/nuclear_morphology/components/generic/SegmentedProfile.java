@@ -249,10 +249,10 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
             /*
              * A subset of nuclei do not produce segment boundaries
              */
-            fine("Cannot get ordered segments");
-            fine("Profile is " + this.toString());
-            // log(Level.WARNING, this.toString());
-            fine("Using the first segment in the profile");
+//            fine("Cannot get ordered segments");
+//            fine("Profile is " + this.toString());
+//            // log(Level.WARNING, this.toString());
+//            fine("Using the first segment in the profile");
             firstSeg = this.getSegments().get(0); // default to the first
                                                   // segment in the profile
         }

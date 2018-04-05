@@ -20,6 +20,9 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Arrays;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -154,21 +157,6 @@ public class BooleanProfile implements Serializable, Loggable {
     }
 
     /**
-     * Get an X-axis; get a position for each point on the scale 0-<i>length</i>
-     * 
-     * @param length
-     *            the length to scale to
-     * @return a profile with the positions as values
-     */
-    public IProfile getPositions(int length) {
-        float[] result = new float[array.length];
-        for (int i = 0; i < array.length; i++) {
-            result[i] = (float) i / (float) array.length * (float) length;
-        }
-        return new FloatProfile(result);
-    }
-
-    /**
      * Copy the profile and offset it to start from the given index.
      * 
      * @param j
@@ -179,7 +167,7 @@ public class BooleanProfile implements Serializable, Loggable {
     public BooleanProfile offset(int j) throws Exception {
         boolean[] newArray = new boolean[this.size()];
         for (int i = 0; i < this.size(); i++) {
-            newArray[i] = this.array[CellularComponent.wrapIndex(i + j, this.size())];
+            newArray[i] = this.array[CellularComponent.wrapIndex(i + j, array.length)];
         }
         return new BooleanProfile(newArray);
     }
@@ -187,15 +175,14 @@ public class BooleanProfile implements Serializable, Loggable {
     /**
      * Returns true at each position if either profile is true at that position.
      * 
-     * @param profile
-     *            the profile to compare. Must be the same length as this
+     * @param profile the profile to compare. Must be the same length as this
      *            profile
      * @return the new profile
      */
-    public BooleanProfile or(BooleanProfile profile) {
-        if (this.size() != profile.size()) {
+    public BooleanProfile or(@NonNull BooleanProfile profile) {
+        if (this.size() != profile.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
+
         boolean[] result = new boolean[this.size()];
 
         for (int i = 0; i < array.length; i++) {
@@ -207,16 +194,15 @@ public class BooleanProfile implements Serializable, Loggable {
     /**
      * Returns true at each position if both profiles are true at that position
      * 
-     * @param profile
-     *            the profile to compare. Must be the same length as this
+     * @param profile the profile to compare. Must be the same length as this
      *            profile
      * @return the new profile
      */
-    public BooleanProfile and(BooleanProfile profile) {
-        if (this.size() != profile.size()) {
+    public BooleanProfile and(@NonNull BooleanProfile profile) {
+        if (array.length != profile.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
-        boolean[] result = new boolean[this.size()];
+        
+        boolean[] result = new boolean[array.length];
 
         for (int i = 0; i < array.length; i++) {
             result[i] = array[i] && profile.get(i);
@@ -236,6 +222,11 @@ public class BooleanProfile implements Serializable, Loggable {
             result[i] = !array[i];
         }
         return new BooleanProfile(result);
+    }
+    
+    @Override
+    public String toString(){
+    	return Arrays.toString(array);
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

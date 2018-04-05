@@ -251,7 +251,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
                 case PopulationTreeTable.COLUMN_NAME: {
                     cosmeticHandler.renameDataset(d);
-//                    renameCollection(d);
                     break;
                 }
 

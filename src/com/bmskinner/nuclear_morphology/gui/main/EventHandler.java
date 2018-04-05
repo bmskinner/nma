@@ -356,9 +356,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
     @Override
     public void signalChangeReceived(final SignalChangeEvent event) {
-
-        finer("Heard signal change event: " + event.type());
-
         final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
         final IAnalysisDataset selectedDataset = selected.isEmpty() ? null
                 : selected.get(0);
@@ -718,7 +715,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * @param list
      */
     public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
-        fine("Heard dataset update event fire");
         PanelUpdater r = new PanelUpdater(list);
         ThreadManager.getInstance().executeAndCancelUpdate(r);
     }
@@ -785,7 +781,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         @Override
         public void cancel() {
-            fine("Cancelling thread");
             isCancelled.set(true);
         }
 

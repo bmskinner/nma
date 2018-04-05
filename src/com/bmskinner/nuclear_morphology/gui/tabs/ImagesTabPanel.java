@@ -243,10 +243,20 @@ public class ImagesTabPanel extends DetailPanel {
             }
         };
         
+        Comparator<File> defaultComp = (f1, f2) -> {
+        	return f1.compareTo(f2);
+        };
+        
+        
         for (File parent : parents) {
         	List<File> inParent = files.stream().filter(f->f.getParentFile().equals(parent))
         	.collect(Collectors.toList());
-        	inParent.sort(comp);
+        	
+        	try{
+        		inParent.sort(comp);
+        	} catch(IllegalArgumentException e){
+        		inParent.sort(defaultComp);
+        	}
         	DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(new ImageNode(parent.getAbsolutePath(), parent));
         	
         	for (File f : inParent) {

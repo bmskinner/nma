@@ -94,33 +94,17 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
         if (consensusOverlay != null) {
             consensusOverlay.clearShapes();
 
-            fine("Cleared consensus overlays");
-
-            if (!GlobalOptions.getInstance().isFillConsensus()) {
-                fine("Consenus not set in global options");
+            if (!GlobalOptions.getInstance().isFillConsensus())
                 return;
 
-            }
-
-            if (!fillConsensus) {
-                fine("Consenus not set in panel options");
+            if (!fillConsensus)
                 return;
-            }
 
-            fine("Attempting to make overlay");
-
-            if (!(chart.getPlot() instanceof XYPlot)) {
-
-                fine("Not an XYPlot");
+            if (!(chart.getPlot() instanceof XYPlot))
                 return;
-            }
 
-            if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset)) {
-                fine("Not a component outline dataset");
+            if (!(chart.getXYPlot().getDataset() instanceof ComponentOutlineDataset))
                 return;
-            }
-
-            fine("Found outline dataset");
 
             ComponentOutlineDataset ds = (ComponentOutlineDataset) chart.getXYPlot().getDataset();
 
@@ -132,17 +116,10 @@ public class ConsensusNucleusChartPanel extends ExportableChartPanel {
 
                 Paint c = chart.getXYPlot().getRenderer().getSeriesPaint(series);
 
-                fine("Adding component overlay for " + seriesKey);
-
                 if (n != null) {
-
-                    fine("Component is not null, making shape");
-                    // Color c = ColourSelecter.getColor(series);
                     c = ColourSelecter.getTransparentColour((Color) c, true, 128);
                     ShapeOverlayObject o = new ShapeOverlayObject(n.toShape(scale), null, null, c);
                     consensusOverlay.addShape(o, n);
-                } else {
-                    fine("Component is null for " + seriesKey);
                 }
             }
 
