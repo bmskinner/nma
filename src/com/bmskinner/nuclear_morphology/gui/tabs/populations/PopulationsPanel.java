@@ -168,26 +168,18 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         finest("Storing collapsed rows");
         List<Object> collapsedRows = treeTable.getCollapsedRows();
 
-        // PopulationTreeTableModel oldModel = (PopulationTreeTableModel)
-        // treeTable.getTreeTableModel();
-
         // Need to modify the model, not replace it to keep ordering
         // PopulationTreeTableModel newModel = createTableModel();
         PopulationTreeTableModel newModel = new PopulationTreeTableModel();
         treeTable.setTreeTableModel(newModel);
-
-        finer("Set the tree table model");
 
         /*
          * Collapse the same ids as saved earlier
          */
         treeTable.setCollapsedRows(collapsedRows);
 
-        finer("Restoring column widths");
         treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setWidth(nameColWidth);
         treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setWidth(colourColWidth);
-
-        finer("Update complete");
     }
 
     @Override
@@ -278,7 +270,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         TreeSelectionModel tableSelectionModel = table.getTreeSelectionModel();
         tableSelectionModel.addTreeSelectionListener(treeListener);
         table.setTreeSelectionListener(treeListener);
-
         return table;
     }
 
@@ -663,5 +654,4 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         }
 
     }
-
 }

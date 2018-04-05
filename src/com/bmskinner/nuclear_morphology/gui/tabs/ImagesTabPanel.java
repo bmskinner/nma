@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -38,9 +39,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -125,6 +128,8 @@ public class ImagesTabPanel extends DetailPanel {
         tree.addMouseListener(makeDoubleClickListener());
         tree.setToggleClickCount(0); // disable double clicking to expand nodes
         tree.setEnabled(false);
+        tree.setCellRenderer(new ImageNodeRenderer());
+        ToolTipManager.sharedInstance().registerComponent(tree);
 
         imagePanel = new JPanel(new BorderLayout());
         label = new JLabel();
@@ -381,5 +386,22 @@ public class ImagesTabPanel extends DetailPanel {
 
     	};
     	return l;
+    }
+    
+    /**
+     * Allow the string value of a node to be displayed as a tooltip
+     * @author ben
+     * @since 1.13.8
+     *
+     */
+    private static class ImageNodeRenderer extends DefaultTreeCellRenderer {
+        @Override
+        public Component getTreeCellRendererComponent(JTree tree, Object value,
+                boolean sel, boolean expanded, boolean leaf, int row,
+                boolean hasFocus) {
+            setToolTipText(value.toString());
+            return super.getTreeCellRendererComponent(tree, value, sel,
+                    expanded, leaf, row, hasFocus);
+        }
     }
 }

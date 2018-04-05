@@ -63,7 +63,7 @@ class PopulationTableCellRenderer extends javax.swing.table.DefaultTableCellRend
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         Component l = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
+        
         l.setBackground(Color.WHITE); // only colour the selected rows
 
         if (indexList.containsKey(row)) {

@@ -146,19 +146,14 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
             TreeSelectionModel treeSelectionModel = getTreeSelectionModel();
 
          // if we don't remove the listener, the clearing will trigger an update
-            finest("Removing tree selection listener");
             treeSelectionModel.removeTreeSelectionListener(treeListener); 
-            finest("Clearing tree selection");
             
          // if the new selection is the same
          // as the old, the charts will not recache
             selectionModel.clearSelection(); 
-                                             
 
-            finest("Restoring tree selection listener");
             treeSelectionModel.addTreeSelectionListener(treeListener);
 
-            finest("Adding index at " + index);
             selectionModel.addSelectionInterval(index, index); // this will
                                                                // trigger a
                                                                // chart update
@@ -313,5 +308,4 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
         }
         return null;
     }
-
 }
