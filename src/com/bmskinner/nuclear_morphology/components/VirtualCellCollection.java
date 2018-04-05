@@ -1004,7 +1004,6 @@ public class VirtualCellCollection implements ICellCollection {
     		throws Exception {
 
     	double[] result = null;
-
     	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
     		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 

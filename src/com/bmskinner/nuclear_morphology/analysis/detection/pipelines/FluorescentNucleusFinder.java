@@ -98,7 +98,7 @@ public class FluorescentNucleusFinder extends CellFinder {
                 }
             }
         } catch (Exception e) {
-            error("Error searching in image " + imageFile.getAbsolutePath(), e);
+            warn("Error searching in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
         }
 
         fireProgressEvent();

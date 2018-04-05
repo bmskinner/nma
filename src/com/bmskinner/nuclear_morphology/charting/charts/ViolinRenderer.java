@@ -171,11 +171,7 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         
         double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
 
-        leftShape.moveTo(xxmid, yy); // start
-                                                                                       // with
-                                                                                       // the
-                                                                                       // lowest
-                                                                                       // value
+        leftShape.moveTo(xxmid, yy); // start with the lowest value
 
         double maxProbability = new Max(dataset.getPdfValues(row, column)).doubleValue();
 
@@ -207,10 +203,9 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
 
         // Move back to the x-midpoint at the highest value in the y-axis
         leftShape.lineTo(xxmid, yy);
-
+        yValPos -= stepSize;
         // Now do the same on the other side of the midpoint
         Collections.reverse(values);
-//        leftShape.lineTo(xxmid, yy);
 
         for (int i=0; i<values.size(); i++) {
 
