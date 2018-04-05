@@ -31,8 +31,11 @@ import java.util.UUID;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -605,8 +608,13 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                         columnData.add(Labels.NA);
                         continue;
                     }
+                    
+                    DescriptiveStatistics ds = new DescriptiveStatistics();
+                    for(double d : values){
+                    	ds.addValue(d);
+                    }
+                    double median = ds.getPercentile(Quartile.MEDIAN);
 
-                    double median = new Quartile(values, Quartile.MEDIAN).doubleValue();
                     columnData.add(DEFAULT_DECIMAL_FORMAT.format(median));
 
                 }

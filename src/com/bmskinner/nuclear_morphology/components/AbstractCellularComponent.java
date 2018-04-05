@@ -771,7 +771,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             IBorderPoint next = this.getBorderPoint(wrapIndex(i + 1, this.borderList.size()));
             distances[i] = p.getLengthTo(next);
         }
-        return new Quartile(distances, Quartile.MEDIAN).doubleValue();
+        return Quartile.quartile(distances, Quartile.MEDIAN);
     }
 
     /**

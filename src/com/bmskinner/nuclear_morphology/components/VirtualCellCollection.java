@@ -191,12 +191,15 @@ public class VirtualCellCollection implements ICellCollection {
             warn("Cannot access parent collection");
             return result;
         }
-        for (ICell cell : parentCollection.getCells()) {
-            if (cellIDs.contains(cell.getId())) {
-                result.add(cell);
-            }
-        }
-        return result;
+        return parentCollection.getCells().parallelStream()
+	        .filter(c->cellIDs.contains(c.getId()))
+	        .collect(Collectors.toSet());
+//        for (ICell cell : parentCollection.getCells()) {
+//            if (cellIDs.contains(cell.getId())) {
+//                result.add(cell);
+//            }
+//        }
+//        return result;
     }
     
     @Override
@@ -242,10 +245,11 @@ public class VirtualCellCollection implements ICellCollection {
             warn("Parent collection not restored!");
             return new HashSet<Nucleus>(cellIDs.size());
         }
-
-        return cellIDs.stream().map(id -> parentCollection.getCell(id))
-        		.flatMap(c -> c.getNuclei().stream())
-                .collect(Collectors.toSet());
+        
+        return parentCollection.getCells().parallelStream()
+	        .filter(c->cellIDs.contains(c.getId()))
+	        .flatMap(c -> c.getNuclei().stream())
+	        .collect(Collectors.toSet());
     }
 
     @Override
@@ -839,8 +843,7 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-        return (int) median;
+        return Quartile.quartile(p, Quartile.MEDIAN);
     }
 
     /**

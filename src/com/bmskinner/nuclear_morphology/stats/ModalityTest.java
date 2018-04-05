@@ -104,8 +104,8 @@ public class ModalityTest implements SignificanceTest {
      */
     private double[] trimOutliers(double[] data) {
 
-        double q1 = new Quartile(data, Quartile.LOWER_QUARTILE).doubleValue();
-        double q3 = new Quartile(data, Quartile.UPPER_QUARTILE).doubleValue();
+        double q1 = Quartile.quartile(data, Quartile.LOWER_QUARTILE);
+        double q3 = Quartile.quartile(data, Quartile.UPPER_QUARTILE);
         double iqr = q3 - q1;
         double minValue = q1 - (1.5 * iqr);
         double maxValue = q3 + (1.5 * iqr);

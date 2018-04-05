@@ -253,7 +253,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
                         d[j++] = val;
                     }
 
-                    double median = new Quartile(d, quartile).doubleValue();
+                    double median = Quartile.quartile(d, (int) quartile);
 
                     medians[i] = median;
                 } else {

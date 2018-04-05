@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import mmorpho.MorphoProcessor;
 import mmorpho.StructureElement;
 
@@ -745,7 +747,11 @@ public class ImageFilterer extends AbstractImageFilterer {
                 i++;
             }
         }
-
-        return new Quartile(values, Quartile.MEDIAN).doubleValue();
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(double d : values){
+        	ds.addValue(d);
+        }
+        return ds.getPercentile(Quartile.MEDIAN);
+//        return new Quartile(values, Quartile.MEDIAN).doubleValue();
     }
 }

@@ -867,7 +867,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             IBorderPoint next = borderList.get(wrapIndex(i + 1));
             distances[i] = p.getLengthTo(next);
         }
-        return new Quartile(distances, Quartile.MEDIAN).doubleValue();
+        return Quartile.quartile(distances, Quartile.MEDIAN);
     }
 
     /**

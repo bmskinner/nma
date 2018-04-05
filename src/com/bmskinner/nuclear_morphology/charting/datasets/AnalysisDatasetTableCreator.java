@@ -32,6 +32,8 @@ import java.util.stream.DoubleStream;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -1026,9 +1028,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      * @return a tablemodel for display
      */
     private TableModel createMagnitudeSegmentStatTable() {
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return makeEmptyWilcoxonTable(null);
-        }
 
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
@@ -1047,10 +1048,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 return createBlankTable();
             }
 
-            double value1 = new Quartile(
+//            double value1 = new Quartile(
+//                    dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
+//                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()),
+//                    Quartile.MEDIAN).doubleValue();
+            
+            DescriptiveStatistics ds = new DescriptiveStatistics(
                     dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
-                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()),
-                    Quartile.MEDIAN).doubleValue();
+                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()));
+                    double value1 = ds.getPercentile(Quartile.MEDIAN);
+            
+            
 
             Object[] popData = new Object[options.datasetCount()];
 
@@ -1074,9 +1082,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         return createBlankTable();
                     }
 
-                    double value2 = new Quartile(dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
-                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),
-                            Quartile.MEDIAN).doubleValue();
+                    DescriptiveStatistics ss = new DescriptiveStatistics(
+                    dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
+                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()));
+                    double value2 = ss.getPercentile(Quartile.MEDIAN);
+                    
+//                    double value2 = new Quartile(dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
+//                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),
+//                            Quartile.MEDIAN).doubleValue();
 
                     double magnitude = value2 / value1;
                     popData[i] = df.format(magnitude);

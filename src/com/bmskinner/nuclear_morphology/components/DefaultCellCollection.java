@@ -553,8 +553,7 @@ public class DefaultCellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-        return (int) median;
+        return Quartile.quartile(p, Quartile.MEDIAN);
     }
 
     public int getMaxProfileLength() {

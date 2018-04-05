@@ -421,7 +421,7 @@ public class SignalManager implements Loggable {
                 return 0;
             }
 
-            median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+            median = Quartile.quartile(values, Quartile.MEDIAN);
             median += getMeanSignalAngle(signalGroupId);
         } else {
             values = this.getSignalStatistics(stat, scale, signalGroupId);
@@ -431,7 +431,7 @@ public class SignalManager implements Loggable {
                 return 0;
             }
 
-            median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+            median = Quartile.quartile(values, Quartile.MEDIAN);
         }
 
         return median;

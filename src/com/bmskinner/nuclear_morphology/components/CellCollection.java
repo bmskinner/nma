@@ -691,8 +691,7 @@ public class CellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        double median = new Quartile(p, Quartile.MEDIAN).doubleValue();
-        return (int) median;
+        return Quartile.quartile(p, Quartile.MEDIAN);
     }
 
     public int getMaxProfileLength() {
@@ -1036,7 +1035,7 @@ public class CellCollection implements ICellCollection {
             double median = 0;
             if (this.getNucleusCount() > 0) {
                 double[] values = this.getNuclearStatistics(stat, scale);
-                median = new Quartile(values, Quartile.MEDIAN).doubleValue();
+                median =  Quartile.quartile(values, Quartile.MEDIAN);
             }
 
             statsCache.setStatistic(stat, scale, median);
@@ -1181,7 +1180,7 @@ public class CellCollection implements ICellCollection {
         }
 
         double[] values = this.getSegmentStatistics(stat, scale, id);
-        return new Quartile(values, Quartile.MEDIAN).doubleValue();
+        return Quartile.quartile(values, Quartile.MEDIAN);
     }
 
     /**

@@ -25,6 +25,8 @@ import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -113,8 +115,14 @@ public class ColourMeasurometer implements Loggable {
             }
         }
 
-        Quartile q = new Quartile(grey, quartile);
-        return q.intValue();
+        DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(int d : grey){
+        	ds.addValue(d);
+        }
+        return (int) ds.getPercentile(quartile);
+
+//        Quartile q = Quartile.quartile(grey, quartile);
+//        return q.intValue();
     }
 
     /**
@@ -274,8 +282,13 @@ public class ColourMeasurometer implements Loggable {
     }
 
     private static int calculateAverage(List<Integer> list) {
-        Quartile q = new Quartile(list, Quartile.MEDIAN);
-        return q.intValue();
+    	DescriptiveStatistics ds = new DescriptiveStatistics();
+        for(int d : list){
+        	ds.addValue(d);
+        }
+        return (int) ds.getPercentile(Quartile.MEDIAN);
+//        Quartile q = new Quartile(list, Quartile.MEDIAN);
+//        return q.intValue();
     }
 
 }
