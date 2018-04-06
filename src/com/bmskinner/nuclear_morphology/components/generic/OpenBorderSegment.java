@@ -480,7 +480,7 @@ public class OpenBorderSegment implements IBorderSegment {
      */
     @Override
     public boolean contains(int index) {
-        return testContains(startIndex, endIndex, index);
+        return IBorderSegment.contains(startIndex, endIndex, index, totalLength);
     }
 
     /*
@@ -488,19 +488,19 @@ public class OpenBorderSegment implements IBorderSegment {
      * 
      * @see components.nuclear.IBorderSegment#testContains(int, int, int)
      */
-    @Override
-    public boolean testContains(int start, int end, int index) {
-        if (index < 0 || index > totalLength) {
-            return false;
-        }
-
-        if (wraps(start, end)) { // wrapped
-            return (index <= end || index >= start);
-        } else { // regular
-            return (index >= start && index <= end);
-        }
-
-    }
+//    @Override
+//    public boolean testContains(int start, int end, int index) {
+//        if (index < 0 || index > totalLength) {
+//            return false;
+//        }
+//
+//        if (wraps(start, end)) { // wrapped
+//            return (index <= end || index >= start);
+//        } else { // regular
+//            return (index >= start && index <= end);
+//        }
+//
+//    }
 
     /**
      * Test if a proposed update affects this segment
@@ -556,7 +556,7 @@ public class OpenBorderSegment implements IBorderSegment {
         // an array wrap
         if (startIndex > endIndex) {
 
-            if (!this.testContains(startIndex, endIndex, 0)) {
+            if (!IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                 return false;
             }
 
@@ -572,7 +572,7 @@ public class OpenBorderSegment implements IBorderSegment {
 
                 // another wrapping test - if the new positions induce a wrap,
                 // the segment should contain 0
-                if (prevSegment.wraps(startIndex, endIndex) && !prevSegment.testContains(startIndex, endIndex, 0)) {
+                if (prevSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                     return false;
                 }
             }
@@ -590,7 +590,7 @@ public class OpenBorderSegment implements IBorderSegment {
 
                 // another wrapping test - if the new positions induce a wrap,
                 // the segment should contain 0
-                if (nextSegment.wraps(startIndex, endIndex) && !nextSegment.testContains(startIndex, endIndex, 0)) {
+                if (nextSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                     return false;
                 }
             }

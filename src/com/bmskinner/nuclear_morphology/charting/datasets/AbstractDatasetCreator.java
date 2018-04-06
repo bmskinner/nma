@@ -30,6 +30,8 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
     protected final E options;
 
     protected static final String EMPTY_STRING = "";
+    protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
+    protected static final int MAX_PROFILE_CHART_ITEMS = 200;
 
     public AbstractDatasetCreator(@NonNull final E options) {
         this.options = options;

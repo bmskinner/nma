@@ -69,7 +69,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param id  the id of the segment
      * @return a new segment of the default type
      */
-    static IBorderSegment newSegment(int startIndex, int endIndex, int total, UUID id) {
+    static IBorderSegment newSegment(int startIndex, int endIndex, int total, @NonNull UUID id) {
         return new DefaultBorderSegment(startIndex, endIndex, total, id);
     }
 
@@ -79,7 +79,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param seg the template segment
      * @return a new segment
      */
-    static IBorderSegment newSegment(IBorderSegment seg) {
+    static IBorderSegment newSegment(@NonNull IBorderSegment seg) {
         return new DefaultBorderSegment(seg);
     }
 
@@ -113,7 +113,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * 
      * @param seg
      */
-    void addMergeSource(IBorderSegment seg);
+    void addMergeSource(@NonNull IBorderSegment seg);
 
     /**
      * Remove all merge sources from the segment
@@ -126,10 +126,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      */
     boolean hasMergeSources();
-
-    // String getLastFailReason();
-
-    // void setLastFailReason(String reason);
 
     /**
      * Get the index at the start of the segment
@@ -228,38 +224,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     IBorderSegment prevSegment();
 
-    // /**
-    // * Make this segment shorter by the given amount.
-    // * The start index is moved forward. The previous segment
-    // * is adjusted to keep the segments in sync
-    // * @param value the amount to shorten
-    // */
-    // boolean shortenStart(int value);
-    //
-    // /**
-    // * Make this segment shorter by the given amount.
-    // * The end index is moved back. The next segment
-    // * is adjusted to keep the segments in sync
-    // * @param value the amount to shorten
-    // */
-    // boolean shortenEnd(int value);
-
-    // /**
-    // * Make this segment longer by the given amount.
-    // * The start index is moved back. The previous segment
-    // * is adjusted to keep the segments in sync
-    // * @param value the amount to shorten
-    // */
-    // boolean lengthenStart(int value);
-    //
-    // /**
-    // * Make this segment longer by the given amount.
-    // * The end index is moved forward. The previous segment
-    // * is adjusted to keep the segments in sync
-    // * @param value the amount to shorten
-    // */
-    // boolean lengthenEnd(int value);
-
     /**
      * Get the length of this segment. Accounts for array wrapping
      * 
@@ -267,9 +231,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     int length();
 
-    int hashCode();
-
-    boolean equals(Object obj);
 
     /**
      * Test the effect of new start and end indexes on the length of the
@@ -324,7 +285,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      *            the index to test
      * @return
      */
-    boolean testContains(int start, int end, int index);
+//    boolean testContains(int start, int end, int index);
 
     /**
      * Update the segment to the given position. Also updates the previous and
@@ -343,14 +304,14 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * 
      * @param s
      */
-    void setNextSegment(IBorderSegment s);
+    void setNextSegment(@NonNull IBorderSegment s);
 
     /**
      * Set the previous segment in the profile from this
      * 
      * @param s
      */
-    void setPrevSegment(IBorderSegment s);
+    void setPrevSegment(@NonNull IBorderSegment s);
 
     /**
      * Check if a next segment has been added
@@ -405,7 +366,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @throws ProfileException
      *             if updating the first segment indexes fails
      */
-    static void linkSegments(IBorderSegment[] list) throws ProfileException {
+    static void linkSegments(@NonNull IBorderSegment[] list) throws ProfileException {
         if (list == null) {
             throw new IllegalArgumentException("List of segments is null");
         }
@@ -448,7 +409,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param list
      * @throws Exception
      */
-    static void linkSegments(List<IBorderSegment> list) throws ProfileException {
+    static void linkSegments(@NonNull List<IBorderSegment> list) throws ProfileException {
         if (list == null) {
             throw new IllegalArgumentException("List of segments is null");
         }
@@ -493,7 +454,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      * @throws Exception
      */
-    static List<IBorderSegment> nudgeUnlinked(List<IBorderSegment> list, int value) {
+    static List<IBorderSegment> nudgeUnlinked(@NonNull List<IBorderSegment> list, int value) {
 
         if (list == null) {
             throw new IllegalArgumentException("Input list cannot be null");
@@ -523,7 +484,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         return result;
     }
 
-    static List<IBorderSegment> nudge(IBorderSegment[] list, int value) throws ProfileException {
+    static List<IBorderSegment> nudge(@NonNull IBorderSegment[] list, int value) throws ProfileException {
         return nudge(Arrays.asList(list), value);
     }
 
@@ -538,7 +499,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return a new list of segments
      * @throws ProfileException
      */
-    static List<IBorderSegment> nudge(List<IBorderSegment> list, int value) throws ProfileException {
+    static List<IBorderSegment> nudge(@NonNull List<IBorderSegment> list, int value) throws ProfileException {
 
         List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
 
@@ -589,7 +550,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      *            the new length
      * @return
      */
-    static List<IBorderSegment> scaleSegments(List<IBorderSegment> list, int newLength) throws ProfileException {
+    static List<IBorderSegment> scaleSegments(@NonNull List<IBorderSegment> list, int newLength) throws ProfileException {
         List<IBorderSegment> result = new ArrayList<>();
 
         int segStart = list.get(0).getStartIndex();
@@ -625,7 +586,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return a new list
      * @throws Exception
      */
-    static List<IBorderSegment> copy(List<IBorderSegment> list) throws ProfileException {
+    static List<IBorderSegment> copy(@NonNull List<IBorderSegment> list) throws ProfileException {
 
         List<IBorderSegment> result = copyWithoutLinking(list);
 
@@ -642,7 +603,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return a new list
      * @throws Exception
      */
-    static List<IBorderSegment> copyWithoutLinking(List<IBorderSegment> list) throws ProfileException {
+    static List<IBorderSegment> copyWithoutLinking(@NonNull List<IBorderSegment> list) throws ProfileException {
 
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
@@ -664,7 +625,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      * @throws ProfileException
      */
-    static IBorderSegment[] copyWithoutLinking(IBorderSegment[] list) throws ProfileException {
+    static IBorderSegment[] copyWithoutLinking(@NonNull IBorderSegment[] list) throws ProfileException {
         if (list == null || list.length == 0) {
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         }
@@ -683,7 +644,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return the segment or null
      * @throws Exception
      */
-    static IBorderSegment getSegment(List<IBorderSegment> list, String segName) {
+    static IBorderSegment getSegment(@NonNull List<IBorderSegment> list, String segName) {
 
         for (IBorderSegment segment : list) {
 
@@ -701,7 +662,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @param list
      * @return
      */
-    static boolean segmentCountsMatch(List<IAnalysisDataset> list) {
+    static boolean segmentCountsMatch(@NonNull List<IAnalysisDataset> list) {
 
         int segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         for (IAnalysisDataset d : list) {
@@ -713,7 +674,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         return true;
     }
 
-    static String toString(List<IBorderSegment> list) {
+    static String toString(@NonNull List<IBorderSegment> list) {
         StringBuilder builder = new StringBuilder();
         builder.append("List of segments:\n");
         for (IBorderSegment segment : list) {
@@ -751,6 +712,29 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     static boolean isShortEnough(int start, int end, int total) {
         int testLength = calculateSegmentLength(start, end, total);
         return total-testLength >= MINIMUM_SEGMENT_LENGTH;
+    }
+    
+    /**
+     * Test if the segment would contain the given index if it had the specified
+     * start and end indexes. Acts as a wrapper for the real contains()
+     * 
+     * @param start
+     *            the start to test
+     * @param end
+     *            the end to test
+     * @param index
+     *            the index to test
+     * @return
+     */
+    static boolean contains(int start, int end, int index, int total){
+        if (index < 0 || index > total)
+            return false;
+
+        if (end<start) { // wrapped
+            return (index <= end || index >= start);
+        } else { // regular
+            return (index >= start && index <= end);
+        }
     }
 
     /**

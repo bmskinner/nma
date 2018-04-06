@@ -534,8 +534,13 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         float[][] data75 = { xpoints.toFloatArray(), profile75.toFloatArray() };
         ds.addSeries("Q75", data75);
 
-        // add the individual nuclei
+        // add the first 200 individual nuclei - avoid slowing the UI
+        
+        int i=0;
         for (Nucleus n : collection.getNuclei()) {
+            if(i==MAX_PROFILE_CHART_ITEMS)
+                break;
+            i++;
             try {
                 IProfile angles = null;
                 IProfile x = null;

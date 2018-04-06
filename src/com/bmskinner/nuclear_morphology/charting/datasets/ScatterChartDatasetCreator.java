@@ -113,14 +113,16 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
         for (int i = 0; i < datasets.size(); i++) {
 
             ICellCollection c = datasets.get(i).getCollection();
-
-            // draw the segment itself
-            double[] xpoints = new double[c.getNucleusCount()];
-            double[] ypoints = new double[c.getNucleusCount()];
+            
+            // to make charts more responsive, only take the first 2000 nuclei
+            int count = c.getNucleusCount()>2000?2000:c.getNucleusCount();
+            double[] xpoints = new double[count];
+            double[] ypoints = new double[count];
 
             int j = 0;
-
             for (Nucleus n : c.getNuclei()) {
+                if(j==MAX_SCATTER_CHART_ITEMS)
+                    break;
 
                 double statAValue;
                 double statBValue;

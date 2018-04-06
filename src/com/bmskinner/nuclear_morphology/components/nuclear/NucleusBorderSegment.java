@@ -566,7 +566,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      */
     @Override
     public boolean contains(int index) {
-        return testContains(this.getStartIndex(), this.getEndIndex(), index);
+        return IBorderSegment.contains(startIndex, endIndex, index, totalLength);
     }
 
     /*
@@ -574,23 +574,23 @@ public class NucleusBorderSegment implements IBorderSegment {
      * 
      * @see components.nuclear.IBorderSegment#testContains(int, int, int)
      */
-    @Override
-    public boolean testContains(int start, int end, int index) {
-        if (index < 0 || index > this.getTotalLength()) {
-            throw new IllegalArgumentException("Index is outside the total profile length: " + index);
-        }
-
-        if (wraps(start, end)) { // wrapped
-            if (index <= end || index > start) {
-                return true;
-            }
-        } else { // regular
-            if (index >= start && index < end) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    @Override
+//    public boolean testContains(int start, int end, int index) {
+//        if (index < 0 || index > this.getTotalLength()) {
+//            throw new IllegalArgumentException("Index is outside the total profile length: " + index);
+//        }
+//
+//        if (wraps(start, end)) { // wrapped
+//            if (index <= end || index > start) {
+//                return true;
+//            }
+//        } else { // regular
+//            if (index >= start && index < end) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     /**
      * Test if a proposed update affects this segment
@@ -676,7 +676,7 @@ public class NucleusBorderSegment implements IBorderSegment {
             // an array wrap
             if (startIndex > endIndex) {
 
-                if (!this.testContains(startIndex, endIndex, 0)) {
+                if (!IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                     this.lastFailReason = startIndex + "-" + endIndex
                             + ": Operation would cause this segment to invert";
                     return false;
@@ -697,7 +697,7 @@ public class NucleusBorderSegment implements IBorderSegment {
                     // another wrapping test - if the new positions induce a
                     // wrap, the segment should contain 0
                     if (this.prevSegment().wraps(startIndex, endIndex)
-                            && !this.prevSegment().testContains(startIndex, endIndex, 0)) {
+                            && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                         this.lastFailReason = startIndex + "-" + endIndex
                                 + ": Operation would cause prev segment to invert";
                         return false;
@@ -720,7 +720,7 @@ public class NucleusBorderSegment implements IBorderSegment {
                     // another wrapping test - if the new positions induce a
                     // wrap, the segment should contain 0
                     if (this.nextSegment().wraps(startIndex, endIndex)
-                            && !this.nextSegment().testContains(startIndex, endIndex, 0)) {
+                            && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
                         this.lastFailReason = startIndex + "-" + endIndex
                                 + ": Operation would cause next segment to invert";
                         return false;
