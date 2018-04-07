@@ -30,10 +30,10 @@ import javax.swing.SwingWorker;
  * @since 1.13.4
  *
  */
-public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer> implements IAnalysisWorker {
+public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> implements IAnalysisWorker {
 
-    private int progressTotal;     // the maximum value for the progress bar
-    private int progressCount = 0; // the current value for the progress bar
+    private long progressTotal;     // the maximum value for the progress bar
+    private long progressCount = 0; // the current value for the progress bar
 
     protected IAnalysisMethod method;
 
@@ -56,7 +56,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
      * @param progress
      *            the length of the progress bar
      */
-    public DefaultAnalysisWorker(IAnalysisMethod m, int progress) {
+    public DefaultAnalysisWorker(IAnalysisMethod m, long progress) {
         method = m;
         method.addProgressListener(this);
         progressTotal = progress;
@@ -82,36 +82,41 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Integer>
             method.cancel();
         }
         
-        if (event.hasMessage()) {
-            if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
-                progressTotal = event.getValue();
-            }
-
-            if (event.getMessage() == ProgressEvent.SET_INDETERMINATE) {
-                fireIndeterminate();
-            }
-
-        } else {
-
-            if (progressTotal >= 0) {
-                publish(++progressCount);
-            }
+        if (event.getMessage() == ProgressEvent.SET_TOTAL_PROGRESS) {
+        	progressTotal = event.getValue();
+        	return;
         }
+
+        if (event.getMessage() == ProgressEvent.SET_INDETERMINATE) {
+        	fireIndeterminate();
+        	return;
+        }
+
+        if(event.getMessage()==ProgressEvent.INCREASE_BY_VALUE){
+        	progressCount=event.getValue();
+        } else {
+        	progressCount++;
+        }
+
+        if (progressTotal >= 0) {
+        	publish(progressCount);
+        }
+
 
     }
 
     @Override
-    protected void process(List<Integer> integers) {
-        int amount = integers.get(integers.size() - 1);
+    protected void process(List<Long> integers) {
+        long amount = integers.get(integers.size() - 1);
         int percent = (int) ((double) amount / (double) progressTotal * 100);
-
+        System.out.println("Amount= "+amount+"; total="+progressTotal+"; Percent "+percent);
         if (percent >= 0 && percent <= 100) {
             setProgress(percent); // the integer representation of the percent
         }
     }
 
     private void fireIndeterminate() {
-        firePropertyChange("Cooldown", getProgress(), IAnalysisWorker.INDETERMINATE);
+        firePropertyChange(IAnalysisWorker.INDETERMINATE_MSG, getProgress(), IAnalysisWorker.INDETERMINATE);
     }
 
     @Override

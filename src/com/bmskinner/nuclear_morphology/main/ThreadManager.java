@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,7 +44,7 @@ public class ThreadManager implements Loggable {
     public static final int keepAliveTime   = 10000;
 
     private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 
@@ -79,26 +80,47 @@ public class ThreadManager implements Loggable {
     }
 
     public synchronized Future<?> submit(Runnable r) {
-        // executorService.submit(r);
         queueLength.incrementAndGet(); // Increment queue when submitting task.
-        Future<?> f = executorService.submit(new Runnable() {
-            public void run() {
-                r.run();
-                queueLength.decrementAndGet(); // Decrement queue when task
-                                               // done.
-            }
-        });
-        return f;
+        return executorService.submit(makeSubmitableRunnable(r));
     }
 
     public synchronized Future<?> submit(Callable r) {
-
-        return executorService.submit(r);
+    	queueLength.incrementAndGet();
+        return executorService.submit(makeSubmitableCallable(r));
     }
-
+    
     public synchronized void execute(Runnable r) {
-        executorService.execute(r);
+        queueLength.incrementAndGet();
+        executorService.execute(makeSubmitableRunnable(r));
     }
+    
+    private synchronized Callable makeSubmitableCallable(Callable r){
+    	return () -> {
+    		try {
+				Object o = r.call();
+				if(queueLength.decrementAndGet()==0){
+//	    			log("Queue is empty");
+	    		}
+	    		return o;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return null;
+			}
+    		
+    	};
+    }
+    
+    private synchronized Runnable makeSubmitableRunnable(Runnable r){
+    	return () -> {
+    		r.run();
+    		if(queueLength.decrementAndGet()==0){
+//    			log("Queue is empty");
+    		}
+    		
+    	};
+    }
+    
 
     /**
      * Request an update of a cencellable process. If an update is already in

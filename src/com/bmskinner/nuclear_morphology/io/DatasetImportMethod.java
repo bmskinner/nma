@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.io;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -47,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVe
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.CountedInputStream.CountListener;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
@@ -97,7 +100,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
         this.file = f;
     }
-    
+        
     /**
      * Call with an existing map of signal ids to directories of images. Designed for unit
      * testing.
@@ -359,18 +362,19 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
         ObjectInputStream ois = null;
 
         try {
-
-            finest("Attempting to read file");
-
             fis = new FileInputStream(inputFile.getAbsolutePath());
-            finest("Created file stream");
+            
+            CountedInputStream cis = new CountedInputStream(fis);
+            BufferedInputStream bis = new BufferedInputStream(cis);
+            
+            cis.addCountListener( (l) ->{
+            	fireProgressEvent(l);
+            });
             
             // This was needed when classes changed packages between versions
-            ois = new PackageReplacementObjectInputStream(fis);
-            finest("Created object stream");
-
+            ois = new PackageReplacementObjectInputStream(bis);
             dataset = (IAnalysisDataset) ois.readObject();
-            finest("Read object as analysis dataset");
+
 
         } catch (UnsupportedVersionException e1) {
                 
@@ -435,6 +439,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             }
         }
 
+        fireProgressEvent(new ProgressEvent(this, ProgressEvent.SET_INDETERMINATE, 0));
         // Replace existing save file path with the path to the file that has
         // been opened
         if (!dataset.getSavePath().equals(inputFile)) {
@@ -449,8 +454,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                 dataset = upgradeDatasetVersion(dataset);
             }
         }
-
-        finest("Returning opened dataset");
         return dataset;
     }
 

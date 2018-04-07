@@ -75,11 +75,9 @@ public class MergesDetailPanel extends DetailPanel {
         super();
 
         try {
-
             createUI();
-
         } catch (Exception e) {
-            log(Level.SEVERE, "Error creating merge panel", e);
+            error("Error creating merge panel", e);
         }
     }
     

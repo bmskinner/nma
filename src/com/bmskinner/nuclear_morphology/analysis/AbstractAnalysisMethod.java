@@ -51,6 +51,11 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
         ProgressEvent e = new ProgressEvent(this);
         fireProgressEvent(e);
     }
+    
+    protected void fireProgressEvent(long l) {
+        ProgressEvent e = new ProgressEvent(this, ProgressEvent.INCREASE_BY_VALUE, l);
+        fireProgressEvent(e);
+    }
 
     protected void fireProgressEvent(ProgressEvent e) {
         Iterator<Object> iterator = listeners.iterator();

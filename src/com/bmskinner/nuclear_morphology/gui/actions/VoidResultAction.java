@@ -149,7 +149,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    public synchronized void propertyChange(PropertyChangeEvent evt) {
 
         int value = 0;
 
@@ -159,8 +159,6 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
             value = (int) newValue;
         }
 
-//        finer("Property change event heard: " + value);
-
         if (value >= 0 && value <= 100) {
 
             if (this.progressBar.isIndeterminate()) {
@@ -169,18 +167,15 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
             this.progressBar.setValue(value);
         }
 
-        if (evt.getPropertyName().equals("Finished")) {
-            finer("Worker signaled finished");
+        if (evt.getPropertyName().equals(IAnalysisWorker.FINISHED_MSG)) {
             finished();
         }
 
-        if (evt.getPropertyName().equals("Error")) {
-            warn("Cancelling action due to error");
+        if (evt.getPropertyName().equals(IAnalysisWorker.ERROR_MSG)) {
             removeProgressBar();
         }
 
-        if (evt.getPropertyName().equals("Cooldown")) {
-            finer("Worker signaled cooldown");
+        if (evt.getPropertyName().equals(IAnalysisWorker.INDETERMINATE_MSG)) {
             setProgressBarIndeterminate();
         }
 
@@ -191,13 +186,10 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      */
     public void finished() {
         this.worker.removePropertyChangeListener(this);
-//        finer("Removed property change listener from worker");
         removeProgressBar();
-
         ih.removeInterfaceEventListener(mw.getEventHandler());
         dh.removeDatasetEventListener(mw.getEventHandler());
-//        this.removeDatasetEventListener(mw.getEventHandler());
-//        finer("Removed event listeners from action");
+
     }
 
     /**

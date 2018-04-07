@@ -35,9 +35,10 @@ public class ProgressEvent extends EventObject {
     public static final int NO_MESSAGE         = 0;
     public static final int SET_TOTAL_PROGRESS = 1;
     public static final int SET_INDETERMINATE  = 2;
-
+    public static final int INCREASE_BY_VALUE  = 3;
+    
     private int message = NO_MESSAGE;
-    private int value;
+    private long value = 0;
 
     /**
      * Create an event from a source
@@ -58,7 +59,7 @@ public class ProgressEvent extends EventObject {
      * @param v
      *            the value in the message
      */
-    public ProgressEvent(Object source, int m, int v) {
+    public ProgressEvent(Object source, int m, long v) {
         super(source);
         message = m;
         value = v;
@@ -68,7 +69,7 @@ public class ProgressEvent extends EventObject {
         return message;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 

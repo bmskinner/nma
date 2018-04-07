@@ -38,6 +38,7 @@ public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, Progre
 
 	String FINISHED_MSG = "Finished";
 	String ERROR_MSG    = "Error";
+	String INDETERMINATE_MSG    = "Cooldown";
 	
     int FINISHED = -1; // signal cleanup of progress bar
 
