@@ -1071,35 +1071,37 @@ public class DefaultCellCollection implements ICellCollection {
      * @throws Exception
      */
     private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id){
+    	
+    	double[] result = null;
+    	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
+    		return statsCache.getValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id);
 
-        double[] result = null;
+    	} else {
+    		AtomicInteger errorCount= new AtomicInteger(0);
+    		result = getNuclei().parallelStream().mapToDouble(n -> {
+    			IBorderSegment segment;
+    			try {
+    				segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
+    			} catch (ProfileException | UnavailableComponentException e) {
+    				errorCount.incrementAndGet();
+    				return 0;
+    			}
+    			double perimeterLength = 0;
+    			if (segment != null) {
+    				int indexLength = segment.length();
+    				double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+    				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
+    			}
+    			return perimeterLength;
 
-        AtomicInteger errorCount= new AtomicInteger(0);
-        result = getNuclei().parallelStream().mapToDouble(n -> {
-            IBorderSegment segment;
-            try {
-                
-                segment = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegment(id);
-            } catch (ProfileException | UnavailableComponentException e) {
-                fine("Unable to get segment statistic for segment");
-                errorCount.incrementAndGet();
-                return 0;
-            }
-            double perimeterLength = 0;
-            if (segment != null) {
-                int indexLength = segment.length();
-                double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
-                perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
-            }
-            return perimeterLength;
-
-        }).toArray();
-        Arrays.sort(result);
-        
-        if(errorCount.get()>0){
-            warn(String.format("%d nuclei had errors getting segments", errorCount.get()));
-        }
-        return result;
+    		}).toArray();
+    		Arrays.sort(result);
+    		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
+    		if(errorCount.get()>0){
+              warn(String.format("%d nuclei had errors getting segments", errorCount.get()));
+          }
+    	}
+    	return result;
     }
 
     /*

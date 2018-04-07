@@ -426,10 +426,10 @@ public class ClusterTreeDialog extends LoadingIconDialog {
      * @param clusterNumber
      * @return
      */
-    private void setNodeColour(ICellCollection cluster, Color colour) {
-
-        setNodeColour(cluster, colour);
-    }
+//    private void setNodeColour(ICellCollection cluster, Color colour) {
+//
+//        setNodeColour(cluster, colour);
+//    }
 
     /**
      * Check that a taxon name matches a nucleus name
