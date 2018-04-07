@@ -288,26 +288,25 @@ public class FileSelector {
      */
     public static File getSignalDirectory(@NonNull final IAnalysisDataset dataset, @NonNull final UUID signalGroupId) {
 
-        try {
-            String signalName = dataset.getCollection().getSignalGroup(signalGroupId).getGroupName();
-            
-            JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group " + signalName);
+    	if(!dataset.getCollection().hasSignalGroup(signalGroupId))
+    		return null;
+    	
+        String signalName = dataset.getCollection().getSignalGroup(signalGroupId).get().getGroupName();
+		
+		JOptionPane.showMessageDialog(null, "Choose the folder with images for signal group " + signalName);
 
-            // We expect the signal images to be in the folder above the nmd file
-            File defaultFolder = dataset.getSavePath().getParentFile();
-            JFileChooser fc = new JFileChooser(defaultFolder);
-            fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		// We expect the signal images to be in the folder above the nmd file
+		File defaultFolder = dataset.getSavePath().getParentFile();
+		JFileChooser fc = new JFileChooser(defaultFolder);
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-            int returnVal = fc.showOpenDialog(fc);
-            if (returnVal != 0) {
-                return null;
-            }
+		int returnVal = fc.showOpenDialog(fc);
+		if (returnVal != 0) {
+		    return null;
+		}
 
-            File file = fc.getSelectedFile();
-            return file;
-        } catch (UnavailableSignalGroupException e) {
-            return null;
-        }
+		File file = fc.getSelectedFile();
+		return file;
     }
 
     /**

@@ -48,9 +48,9 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      *
      */
     public enum SignalDetectionMode {
-        FORWARD("Forward", Labels.FORWARD_THRESHOLDING_RADIO_LABEL), REVERSE("Reverse",
-                Labels.REVERSE_THRESHOLDING_RADIO_LABEL), ADAPTIVE("Adaptive",
-                        Labels.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
+        FORWARD("Forward", Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL), REVERSE("Reverse",
+                Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL), ADAPTIVE("Adaptive",
+                        Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL);
 
         private String name;
         private String desc;

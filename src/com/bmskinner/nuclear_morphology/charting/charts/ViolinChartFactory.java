@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.ViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
@@ -285,42 +286,24 @@ public class ViolinChartFactory extends AbstractChartFactory {
         int series = 0;
         for (int column = 0; column < ds.getColumnCount(); column++) {
 
-            // The column is the dataset
-            // String datasetName = ds.getColumnKey(column).toString();
-            // log("Looking at dataset "+datasetName);
             IAnalysisDataset d = options.getDatasets().get(column);
 
             for (int row = 0; row < ds.getRowCount(); row++) {
 
-                // log("Series "+series);
                 String name = (String) ds.getRowKey(row);
-                // log("Looking at row "+name);
-
                 UUID signalGroup = getSignalGroupFromLabel(name);
-
-                // Not every dataset will have every row.
-                if (d.getCollection().hasSignalGroup(signalGroup)) {
-                    Paint color = ColourSelecter.getColor(row);
-                    try {
-
-                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		color = c.get();
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + signalGroup + " is not present in collection", e);
-                    } finally {
-                        renderer.setSeriesPaint(series, color);
-                        series++;
-                    }
+                
+                Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                if(g.isPresent()){
+                	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(row));
+                	renderer.setSeriesPaint(series, colour);
                 }
-
+                series++;
             }
         }
 
-        if (ds.hasProbabilities()) {
+        if (ds.hasProbabilities())
             plot.getRangeAxis().setRange(ds.getProbabiltyRange());
-        }
 
         return chart;
     }

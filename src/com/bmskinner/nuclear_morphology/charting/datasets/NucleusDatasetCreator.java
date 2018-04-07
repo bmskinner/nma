@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -1565,45 +1566,35 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
                 continue;
             }
 
-            try {
+            Optional<ISignalGroup> group = dataset.getCollection().getSignalGroup(signalGroup);
 
-                ISignalGroup group = dataset.getCollection().getSignalGroup(signalGroup);
-                finer("Fetching signals from signal group " + group + ": ID " + signalGroup);
+			if(!group.isPresent())
+			    continue;
 
-                if (group == null) {
-                    finest("Not adding signals from " + signalGroup + ": null");
-                    continue;
-                }
+			if (group.get().isVisible()) {
 
-                if (group.isVisible()) { // only add the groups that are set to
-                                         // visible
+			    ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<CellularComponent>();
+			    int signalNumber = 0;
 
-                    ComponentOutlineDataset<CellularComponent> groupDataset = new ComponentOutlineDataset<CellularComponent>();
-                    int signalNumber = 0;
+			    for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
 
-                    for (INuclearSignal signal : nucleus.getSignalCollection().getSignals(signalGroup)) {
+			        String seriesKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_signal_"
+			                + signalNumber;
+			        finest("Adding signal to dataset: " + seriesKey);
+			        OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
+			        try {
+			            dc.addOutline(groupDataset, seriesKey, false);
 
-                        String seriesKey = CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_signal_"
-                                + signalNumber;
-                        finest("Adding signal to dataset: " + seriesKey);
-                        OutlineDatasetCreator dc = new OutlineDatasetCreator(new DefaultChartOptions(datasets), signal);
-                        try {
-                            dc.addOutline(groupDataset, seriesKey, false);
+			        } catch (ChartDatasetCreationException e) {
+			            error("Unable to add signal " + seriesKey + " to dataset", e);
+			        }
+			        signalNumber++;
+			    }
+			    result.add(groupDataset);
 
-                        } catch (ChartDatasetCreationException e) {
-                            error("Unable to add signal " + seriesKey + " to dataset", e);
-                        }
-                        signalNumber++;
-                    }
-                    result.add(groupDataset);
-
-                } else {
-                    finest("Not adding " + group + ": not set as visible");
-                }
-
-            } catch (UnavailableSignalGroupException e) {
-                fine("Signal group " + signalGroup + " is not present in collection", e);
-            }
+			} else {
+			    finest("Not adding " + group + ": not set as visible");
+			}
 
         }
 

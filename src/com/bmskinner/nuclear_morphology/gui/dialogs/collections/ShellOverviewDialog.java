@@ -178,16 +178,11 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
  			}
         	 
         	 ISignalCollection signalCollection = n.getSignalCollection();
-             for (UUID id : signalCollection.getSignalGroupIDs()) {
-            	 
-            	 try {
-            		 Optional<Color> col = dataset.getCollection().getSignalGroup(id).getGroupColour();
-            		 Color colour = col.orElse(Color.YELLOW);  
-					an = an.annotateSignal(n, id, colour);
-				} catch (UnavailableSignalGroupException e) {
-					stack("No signal group", e);
-				}	                 
-        	}
+        	 for (UUID id : signalCollection.getSignalGroupIDs()) {
+
+        		 Optional<Color> col = dataset.getCollection().getSignalGroup(id).get().getGroupColour(); 
+        		 an = an.annotateSignal(n, id, col.orElse(Color.YELLOW));	                 
+        	 }
         }
         
         ip = an.toProcessor();

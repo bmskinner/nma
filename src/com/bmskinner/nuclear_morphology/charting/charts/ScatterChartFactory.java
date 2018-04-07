@@ -39,6 +39,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.SignalXYDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -170,22 +171,11 @@ public class ScatterChartFactory extends AbstractChartFactory {
 
             IAnalysisDataset d = ds.getDataset(seriesKey);
             UUID id = ds.getSignalId(seriesKey);
-
-            Paint colour = ColourSelecter.getColor(i);
-
-            try {
-
-                if (d.getCollection().hasSignalGroup(id)) {
-                	Optional<Color> c = d.getCollection().getSignalGroup(id).getGroupColour();
-                	if(c.isPresent())
-                		colour = c.get();
-                }
-            } catch (UnavailableSignalGroupException e) {
-                stack("Signal group " + id + " is not present in collection", e);
+            Optional<ISignalGroup> g = d.getCollection().getSignalGroup(id);
+            if(g.isPresent()){
+            	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(i));
+            	renderer.setSeriesPaint(i, colour);
             }
-
-            renderer.setSeriesPaint(i, colour);
-
         }
         return chart;
     }

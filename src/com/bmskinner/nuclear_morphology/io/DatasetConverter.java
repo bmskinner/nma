@@ -162,8 +162,8 @@ public class DatasetConverter implements Loggable, Importer {
                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
                     INuclearSignalOptions oldSignalOptions = oldOptions.getNuclearSignalOptions(id);
                     if(oldDataset.getCollection().hasSignalGroup(id)){
-                    	File folder = oldDataset.getCollection().getSignalGroup(id).getFolder();
-                    	int channel = oldDataset.getCollection().getSignalGroup(id).getChannel();
+                    	File folder = oldDataset.getCollection().getSignalGroup(id).get().getFolder();
+                    	int channel = oldDataset.getCollection().getSignalGroup(id).get().getChannel();
 
                     	IMutableNuclearSignalOptions newSignalOptions = OptionsFactory
                     			.makeNuclearSignalOptions(oldSignalOptions);
@@ -305,13 +305,7 @@ public class DatasetConverter implements Loggable, Importer {
         }
 
         for (UUID id : oldCollection.getSignalGroupIDs()) {
-
-            try {
-                newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id));
-            } catch (UnavailableSignalGroupException e) {
-                warn("Cannot convert signal group");
-                fine("Error getting signal group", e);
-            }
+            newCollection.addSignalGroup(id, oldCollection.getSignalGroup(id).get());
         }
 
         return newCollection;

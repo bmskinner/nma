@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -51,7 +52,7 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
-    public NuclearSignalDatasetCreator(final ChartOptions o) {
+    public NuclearSignalDatasetCreator(@NonNull final ChartOptions o) {
         super(o);
     }
 
@@ -66,7 +67,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return the point of the signal centre of mass
      * @throws Exception
      */
-    public IPoint getXYCoordinatesForSignal(INuclearSignal n, Nucleus outline) throws ChartDatasetCreationException {
+    public IPoint getXYCoordinatesForSignal(@NonNull INuclearSignal n, @NonNull Nucleus outline) throws ChartDatasetCreationException {
 
         double angle = n.getStatistic(PlottableStatistic.ANGLE);
 
@@ -93,73 +94,57 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @return
      * @throws Exception
      */
-    public XYDataset createSignalCoMDataset(IAnalysisDataset dataset) throws ChartDatasetCreationException {
-        finer("Making signal CoM dataset");
+    public XYDataset createSignalCoMDataset(@NonNull IAnalysisDataset dataset) throws ChartDatasetCreationException {
+
         DefaultXYDataset ds = new DefaultXYDataset();
         ICellCollection collection = dataset.getCollection();
 
         if (collection.getSignalManager().hasSignals()) {
-            finer("Collection " + collection.getName() + " has signals");
-
             for (UUID uuid : collection.getSignalManager().getSignalGroupIDs()) {
 
-                try {
+                if (dataset.getCollection().getSignalGroup(uuid).get().isVisible()) {
+				    double[] xpoints = new double[collection.getSignalManager().getSignals(uuid).size()];
+				    double[] ypoints = new double[collection.getSignalManager().getSignals(uuid).size()];
 
-                    if (dataset.getCollection().getSignalGroup(uuid).isVisible()) {
-                        finest("Group " + uuid.toString() + " is visible");
-                        double[] xpoints = new double[collection.getSignalManager().getSignals(uuid).size()];
-                        double[] ypoints = new double[collection.getSignalManager().getSignals(uuid).size()];
+				    int signalCount = 0;
+				    for (INuclearSignal n : collection.getSignalManager().getSignals(uuid)) {
 
-                        int signalCount = 0;
-                        for (INuclearSignal n : collection.getSignalManager().getSignals(uuid)) {
+				        IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
-                            IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
+				        xpoints[signalCount] = p.getX();
+				        ypoints[signalCount] = p.getY();
+				        signalCount++;
 
-                            xpoints[signalCount] = p.getX();
-                            ypoints[signalCount] = p.getY();
-                            signalCount++;
-
-                        }
-                        double[][] data = { xpoints, ypoints };
-                        ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data);
-                        finest("Group " + uuid.toString() + " added " + signalCount + " signals");
-                    }
-
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group " + uuid + " is not present in collection", e);
-                }
+				    }
+				    double[][] data = { xpoints, ypoints };
+				    ds.addSeries(CellularComponent.NUCLEAR_SIGNAL + "_" + uuid, data);
+				}
             }
         }
-        finer("Finished signal CoM dataset");
         return ds;
     }
 
-    public List<Shape> createSignalRadiusDataset(IAnalysisDataset dataset, UUID signalGroup)
+    public List<Shape> createSignalRadiusDataset(@NonNull IAnalysisDataset dataset, @NonNull UUID signalGroup)
             throws ChartDatasetCreationException {
 
         ICellCollection collection = dataset.getCollection();
         List<Shape> result = new ArrayList<Shape>(0);
+        if(!collection.getSignalManager().hasSignals(signalGroup))
+        	return result;
 
-        try {
-            if (collection.getSignalGroup(signalGroup).isVisible()) {
-                if (collection.getSignalManager().hasSignals(signalGroup)) {
+        if (collection.getSignalGroup(signalGroup).get().isVisible()) {
+        	for (INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)) {
+        		IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
 
-                    for (INuclearSignal n : collection.getSignalManager().getSignals(signalGroup)) {
-                        IPoint p = getXYCoordinatesForSignal(n, collection.getConsensus());
+        		// ellipses are drawn starting from x y at upper left.
+        		// Provide an offset from the centre
+        		double offset = n.getStatistic(PlottableStatistic.RADIUS);
 
-                        // ellipses are drawn starting from x y at upper left.
-                        // Provide an offset from the centre
-                        double offset = n.getStatistic(PlottableStatistic.RADIUS);
+        		result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
+        	}
 
-                        result.add(new Ellipse2D.Double(p.getX() - offset, p.getY() - offset, offset * 2, offset * 2));
-                    }
-
-                }
-            }
-
-        } catch (UnavailableSignalGroupException e) {
-            stack("Signal group " + signalGroup + " is not present in collection", e);
-        }
+		    
+		}
         return result;
     }
 
@@ -227,7 +212,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * @throws ChartDatasetCreationException
      */
     public List<CategoryDataset> createShellBarChartDataset() throws ChartDatasetCreationException {
-        // ChartOptions op = (ChartOptions) options;
+
         List<CategoryDataset> result = new ArrayList<CategoryDataset>();
 
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -243,13 +228,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             }
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
-            	try {
-            		if(collection.getSignalGroup(signalGroup).isVisible()){
-            			addRealShellData(ds, collection, options, signalGroup);
-            		}
-            	} catch (UnavailableSignalGroupException e) {
-            		stack("Signal group not found", e);
-            	}
+            	if(collection.getSignalGroup(signalGroup).get().isVisible()){
+					addRealShellData(ds, collection, options, signalGroup);
+				}
             }
             result.add(ds);
         }
@@ -331,41 +312,38 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      *            the chart options
      */
     private void addRandomShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options) {
-        // Create the random distribution
 
-        try {
+        UUID signalGroup = ShellRandomDistributionCreator.RANDOM_SIGNAL_ID;
 
-            UUID signalGroup = ShellRandomDistributionCreator.RANDOM_SIGNAL_ID;
+		// Choose between signal or nucleus level analysis
+		CountType type = options.getCountType();
 
-            // Choose between signal or nucleus level analysis
-            CountType type = options.getCountType();
+		boolean isNormalised = options.isNormalised();
+		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
+		
+		if(!g.isPresent())
+			return;
+		
+		Optional<IShellResult> r = g.get().getShellResult();
 
-            boolean isNormalised = options.isNormalised();
+		if(!r.isPresent())
+			return;
 
-            Optional<IShellResult> r = collection.getSignalGroup(signalGroup).getShellResult();
+		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
+			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell) * 100
+					: r.get().getRawMeans(type).get(shell) * 100;
 
-            if(!r.isPresent())
-            	return;
+			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
+					: r.get().getRawStandardErrors(type).get(shell) * 100;
 
-            for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
-            	Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell) * 100
-            			: r.get().getRawMeans(type).get(shell) * 100;
+			ds.add(signalGroup, -d.doubleValue(), std.doubleValue(),
+					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
+			// we need the string value for shell otherwise we get error
+			// "the method addValue(Number, Comparable, Comparable) is
+			// ambiguous for the type DefaultCategoryDataset"
+			// ditto the doublevalue for std
 
-            	Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
-            			: r.get().getRawStandardErrors(type).get(shell) * 100;
-
-            	ds.add(signalGroup, -d.doubleValue(), std.doubleValue(),
-            			"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
-            	// we need the string value for shell otherwise we get error
-            	// "the method addValue(Number, Comparable, Comparable) is
-            	// ambiguous for the type DefaultCategoryDataset"
-            	// ditto the doublevalue for std
-
-            }
-            
-        } catch (UnavailableSignalGroupException e) {
-            stack("Error getting random signal group", e);
-        }
+		}
     }
 
     /**
@@ -381,42 +359,40 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     private void addRealShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options,
             UUID signalGroup) {
 
-        try {
+        // Choose between signal or nucleus level analysis
+		CountType type = options.getCountType();
 
-            // Choose between signal or nucleus level analysis
-            CountType type = options.getCountType();
+		// Choose whether to display signals or pixel counts
+		// boolean showSignals = options.isShowSignals();
 
-            // Choose whether to display signals or pixel counts
-            // boolean showSignals = options.isShowSignals();
+		boolean isNormalised = options.isNormalised();
+		
+		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
+		
+		if(!g.isPresent())
+			return;
+		
+		Optional<IShellResult> r = g.get().getShellResult();
 
-            boolean isNormalised = options.isNormalised();
+		if(!r.isPresent())
+			return;
 
-            if (collection.getSignalManager().hasSignals(signalGroup)) {
-            	ISignalGroup group = collection.getSignalGroup(signalGroup);
-                if (group.hasShellResult()) {
-                    IShellResult r = group.getShellResult().get();
+		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 
-                    for (int shell = 0; shell < r.getNumberOfShells(); shell++) {
+			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell)
+					: r.get().getRawMeans(type).get(shell);
 
-                        Double d = isNormalised ? r.getNormalisedMeans(type).get(shell)
-                                : r.getRawMeans(type).get(shell);
+			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell)
+					: r.get().getRawStandardErrors(type).get(shell);
+			ds.add(signalGroup, d * 100, std.doubleValue() * 100,
+					"Group_" + g.get().getGroupName() + "_" + collection.getName(), String.valueOf(shell));
+			// we need the string value for shell otherwise we get
+			// error
+			// "the method addValue(Number, Comparable, Comparable)
+			// is ambiguous for the type DefaultCategoryDataset"
+			// ditto the doublevalue for std
 
-                        Double std = isNormalised ? r.getNormalisedStandardErrors(type).get(shell)
-                                : r.getRawStandardErrors(type).get(shell);
-                        ds.add(signalGroup, d * 100, std.doubleValue() * 100,
-                                "Group_" + group.getGroupName() + "_" + collection.getName(), String.valueOf(shell));
-                        // we need the string value for shell otherwise we get
-                        // error
-                        // "the method addValue(Number, Comparable, Comparable)
-                        // is ambiguous for the type DefaultCategoryDataset"
-                        // ditto the doublevalue for std
-
-                    }
-                }
-            }
-        } catch (UnavailableSignalGroupException e) {
-            stack("Error getting random signal group", e);
-        }
+		}
     }
 
 }

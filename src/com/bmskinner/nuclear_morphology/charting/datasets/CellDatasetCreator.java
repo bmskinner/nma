@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
@@ -40,7 +41,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
-    public CellDatasetCreator(final ChartOptions options) {
+    public CellDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
     }
 

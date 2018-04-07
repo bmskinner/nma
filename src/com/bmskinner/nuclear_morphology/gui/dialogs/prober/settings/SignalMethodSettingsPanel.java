@@ -36,9 +36,9 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
 
     private static final String METHOD_LBL = "Method";
 
-    private static final String FORWARD_DESC_LABEL  = Labels.FORWARD_THRESHOLDING_RADIO_LABEL;
-    private static final String REVERSE_DESC_LABEL  = Labels.REVERSE_THRESHOLDING_RADIO_LABEL;
-    private static final String ADAPTIVE_DESC_LABEL = Labels.ADAPTIVE_THRESHOLDING_RADIO_LABEL;
+    private static final String FORWARD_DESC_LABEL  = Labels.Signals.FORWARD_THRESHOLDING_RADIO_LABEL;
+    private static final String REVERSE_DESC_LABEL  = Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL;
+    private static final String ADAPTIVE_DESC_LABEL = Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL;
 
     private IMutableNuclearSignalOptions options;
 

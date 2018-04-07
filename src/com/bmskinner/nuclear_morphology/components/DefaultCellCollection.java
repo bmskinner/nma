@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1384,11 +1385,8 @@ public class DefaultCellCollection implements ICellCollection {
      * @param id
      * @return
      */
-    public ISignalGroup getSignalGroup(UUID id) {
-        if (this.signalGroups.get(id) == null) {
-            return null; // placeholder
-        }
-        return this.signalGroups.get(id);
+    public Optional<ISignalGroup> getSignalGroup(UUID id) {
+        return Optional.ofNullable(this.signalGroups.get(id));
     }
 
     public void addSignalGroup(UUID id, ISignalGroup group) {

@@ -33,13 +33,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
+import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -58,7 +57,6 @@ import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.Clu
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
@@ -183,8 +181,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     "Mean length 95% CI (" + scale + ")", "Length std err. (" + scale + ")", "Length p(unimodal)" };
 
             model.addColumn(EMPTY_STRING, fieldNames);
-
-            DecimalFormat pf = new DecimalFormat("#.###");
+            
+            DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+            DecimalFormat pf = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
             for (IBorderSegment segment : segments) {
 
@@ -204,10 +203,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
 
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(mean));
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(ci.getLower().doubleValue()) + " - "
-                        + DEFAULT_DECIMAL_FORMAT.format(ci.getUpper().doubleValue()));
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(sem));
+                rowData.add(df.format(mean));
+                rowData.add(df.format(ci.getLower().doubleValue()) + " - "
+                        + df.format(ci.getUpper().doubleValue()));
+                rowData.add(df.format(sem));
 
                 double pval = DipTester.getDipTestPValue(meanLengths);
                 rowData.add(pf.format(pval));
@@ -294,7 +293,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             List<Object> rowData = new ArrayList<Object>(0);
             rowData.add(dataset.getName());
-
+            DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
             for (IBorderSegment segment : segs) {
 
                 double[] meanLengths = collection.getRawValues(PlottableStatistic.LENGTH,
@@ -302,8 +301,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 double mean = DoubleStream.of(meanLengths).average().orElse(0);
 
                 ConfidenceInterval ci = new ConfidenceInterval(meanLengths, 0.95);
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(mean) + " ± "
-                        + DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue()));
+                rowData.add(df.format(mean) + " ± "
+                        + df.format(ci.getSize().doubleValue()));
             }
             model.addRow(rowData.toArray(new Object[0]));
         }
@@ -510,11 +509,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String cannyClosingRadius = nucleusCannyOptions.isUseCanny()
                 ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
 
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         Object[] collectionData = { options.getProfileWindowProportion(), detectionMethod, nucleusThreshold,
                 kuwaharaRadius, chromocentreThreshold, cannyAutoThreshold, cannyLowThreshold, cannyHighThreshold,
                 cannyKernelRadius, cannyKernelWidth, cannyClosingRadius, nO.get().getMinSize(),
-                nO.get().getMaxSize(), DEFAULT_DECIMAL_FORMAT.format(nO.get().getMinCirc()),
-                DEFAULT_DECIMAL_FORMAT.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
+                nO.get().getMaxSize(), df.format(nO.get().getMinCirc()),
+                df.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
                 time, folder, logFile, options.getNucleusType().toString(), dataset.getVersion().toString() };
         return collectionData;
     }
@@ -578,7 +578,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         datasetData.add(collection.size());
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
-
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
             // log("Getting stats for "+stat);
             double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
@@ -588,13 +588,13 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             double median = Quartile.quartile(stats, Quartile.MEDIAN);
 
             ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
-            String ciString = DEFAULT_DECIMAL_FORMAT.format(mean) + " ± "
-                    + DEFAULT_DECIMAL_FORMAT.format(ci.getSize().doubleValue());
+            String ciString = df.format(mean) + " ± "
+                    + df.format(ci.getSize().doubleValue());
             double diptest = DipTester.getDipTestPValue(stats);
 
-            datasetData.add(DEFAULT_DECIMAL_FORMAT.format(median));
-            datasetData.add(DEFAULT_DECIMAL_FORMAT.format(mean));
-            datasetData.add(DEFAULT_DECIMAL_FORMAT.format(sem));
+            datasetData.add(df.format(median));
+            datasetData.add(df.format(mean));
+            datasetData.add(df.format(sem));
             datasetData.add(ciString);
             datasetData.add(pf.format(diptest));
         }
@@ -636,6 +636,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 }
             }
         }
+        
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
         for (IAnalysisDataset dataset : list) {
 
@@ -657,7 +659,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                         pct = 0;
                     }
 
-                    valueString = DEFAULT_DECIMAL_FORMAT.format(pct) + "%";
+                    valueString = df.format(pct) + "%";
                 }
 
                 popData[i++] = valueString;
@@ -694,6 +696,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         Map<UUID, ArrayList<UUID>> existingMatches = new HashMap<UUID, ArrayList<UUID>>();
 
         // add columns
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (IAnalysisDataset dataset1 : list) {
 
             ArrayList<UUID> set1List = new ArrayList<UUID>();
@@ -730,14 +733,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     double uniquePct1 = ((double) unique1 / (double) dataset1.getCollection().size()) * 100;
                     double uniquePct2 = ((double) unique2 / (double) dataset2.getCollection().size()) * 100;
 
-                    popData[1] = DEFAULT_DECIMAL_FORMAT.format(uniquePct1);
-                    popData[7] = DEFAULT_DECIMAL_FORMAT.format(uniquePct2);
+                    popData[1] = df.format(uniquePct1);
+                    popData[7] = df.format(uniquePct2);
 
                     double sharedpct1 = ((double) shared / (double) dataset1.getCollection().size()) * 100;
                     double sharedpct2 = ((double) shared / (double) dataset2.getCollection().size()) * 100;
 
-                    popData[3] = DEFAULT_DECIMAL_FORMAT.format(sharedpct1);
-                    popData[5] = DEFAULT_DECIMAL_FORMAT.format(sharedpct2);
+                    popData[3] = df.format(sharedpct1);
+                    popData[5] = df.format(sharedpct2);
 
                     model.addRow(popData);
                 }

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.charting.datasets;
 
-import java.text.DecimalFormat;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.options.DisplayOptions;
@@ -31,21 +29,17 @@ public abstract class AbstractDatasetCreator<E extends DisplayOptions> implement
 
     protected static final String EMPTY_STRING = "";
     protected static final int MAX_SCATTER_CHART_ITEMS = 2000;
-    protected static final int MAX_PROFILE_CHART_ITEMS = 200;
-
-    public AbstractDatasetCreator(@NonNull final E options) {
-        this.options = options;
-    }
-
+    protected static final int MAX_PROFILE_CHART_ITEMS = 500;
+    
     /**
      * The standard formatter for datasets. At least one integer, and 2
      * decimals: 0.00
      */
-    public static final DecimalFormat DEFAULT_DECIMAL_FORMAT = new DecimalFormat("#0.00");
+    public static final String DEFAULT_DECIMAL_FORMAT = "#0.00";
+    
+    public static final String DEFAULT_PROBABILITY_FORMAT = "#.###";
 
-    static {
-
-        DEFAULT_DECIMAL_FORMAT.setMinimumFractionDigits(2);
-        DEFAULT_DECIMAL_FORMAT.setMinimumIntegerDigits(1);
+    public AbstractDatasetCreator(@NonNull final E options) {
+        this.options = options;
     }
 }

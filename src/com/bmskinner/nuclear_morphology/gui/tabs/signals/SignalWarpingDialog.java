@@ -477,7 +477,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         }
 
         if (evt.getPropertyName().equals("Finished")) {
-            finest("Worker signaled finished");
             progressBar.setValue(0);
             progressBar.setVisible(false);
             finished();
@@ -486,17 +485,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
     }
 
     private Color assignDisplayColour(final ImageProcessor image) {
-
-        fine("Assigning display colour");
         Color colour = Color.WHITE;
-        try {
-            colour = datasetBoxOne.getSelectedDataset().getCollection().getSignalGroup(signalBox.getSelectedID())
-                    .getGroupColour().orElse(Color.WHITE);
-
-        } catch (UnavailableSignalGroupException e) {
-            stack(e);
-            colour = Color.WHITE;
-        }
+        colour = datasetBoxOne.getSelectedDataset().getCollection().getSignalGroup(signalBox.getSelectedID()).get()
+		        .getGroupColour().orElse(Color.WHITE);
 
         return colour;
     }
@@ -509,7 +500,6 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
      */
     private ImageProcessor createDisplayImage() {
 
-        fine("Making display image");
         // Recolour each of the grey images according to the stored colours
         List<ImageProcessor> recoloured = new ArrayList<>();
 
@@ -535,13 +525,9 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         // If multiple images are in the list, make an average of their RGB
         // values
         // so territories can be compared
-        fine("More than one display image");
         try {
-
-        	fine("Averaging RGB images");
             ImageProcessor averaged = ImageFilterer.averageRGBImages(recoloured);
             return averaged;
-//            return ImageFilterer.rescaleRGBImageIntensity(averaged);
 
         } catch (Exception e) {
             warn("Error averaging images");
@@ -784,12 +770,8 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
             @Override
             public String toString() {
-                try {
-                    return template.getName() + " - "
-                            + template.getCollection().getSignalManager().getSignalGroupName(signalGroupId);
-                } catch (UnavailableSignalGroupException e) {
-                    return template.getName() + " - Unknown signal group";
-                }
+                return template.getName() + " - "
+				        + template.getCollection().getSignalManager().getSignalGroupName(signalGroupId);
             }
 
         }

@@ -19,11 +19,16 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -231,12 +236,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                                     channelCounter.getNormalisedPValue(type));
                 }
 
-                try {
-                    dataset.getCollection().getSignalGroup(group).setShellResult(result);
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group is not present", e);
-                    warn("Cannot save shell result");
-                }
+                dataset.getCollection().getSignalGroup(group).get().setShellResult(result);
 
             }
         }
@@ -268,33 +268,21 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                     iterations);
 
             double[] c = sr.getProportions();
-
             double[] err = new double[c.length];
-            for (int i = 0; i < c.length; i++) {
-                err[i] = 0;
-            }
+            Arrays.fill(err, 0);
 
-            try {
+            List<Double> list = DoubleStream.of(c).boxed().collect(Collectors.toList());
+			List<Double> errList = DoubleStream.of(err).boxed().collect(Collectors.toList());
 
-                List<Double> list = new ArrayConverter(c).toDoubleList();
-                List<Double> errList = new ArrayConverter(err).toDoubleList();
+			IShellResult randomResult = new DefaultShellResult(shells).setRawMeans(CountType.SIGNAL, list)
+			        .setRawMeans(CountType.NUCLEUS, list).setNormalisedMeans(CountType.SIGNAL, list)
+			        .setNormalisedMeans(CountType.NUCLEUS, list).setRawStandardErrors(CountType.SIGNAL, errList)
+			        .setRawStandardErrors(CountType.NUCLEUS, errList)
+			        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
+			        .setNormalisedStandardErrors(CountType.NUCLEUS, errList);
 
-                IShellResult randomResult = new DefaultShellResult(shells).setRawMeans(CountType.SIGNAL, list)
-                        .setRawMeans(CountType.NUCLEUS, list).setNormalisedMeans(CountType.SIGNAL, list)
-                        .setNormalisedMeans(CountType.NUCLEUS, list).setRawStandardErrors(CountType.SIGNAL, errList)
-                        .setRawStandardErrors(CountType.NUCLEUS, errList)
-                        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
-                        .setNormalisedStandardErrors(CountType.NUCLEUS, errList);
-
-                dataset.getCollection().getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)
-                        .setShellResult(randomResult);
-
-            } catch (ArrayConversionException e) {
-                stack("Conversion error", e);
-            } catch (UnavailableSignalGroupException e) {
-                stack("Signal group is not present", e);
-                warn("Cannot add random shell result");
-            }
+			dataset.getCollection().getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID).get()
+			        .setShellResult(randomResult);
         } else {
             warn("Cannot create simulated dataset, no consensus");
         }

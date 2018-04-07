@@ -52,6 +52,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 @SuppressWarnings("serial")
@@ -65,6 +66,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
     private JButton scaleButton;
     private JButton sourceButton;
+    
+    private CosmeticHandler ch = new CosmeticHandler(this);
 
     private static final String APPLY_SCALE_ALL_MESSAGE   = "Apply this scale to all cells in the dataset?";
     private static final String APPLY_SCALE_ALL_HEADER    = "Apply to all?";
@@ -97,7 +100,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                     // Look for signal group colour
                     if (rowName.equals("")) {
                         String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-                        if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                        if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 
                             SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
 
@@ -154,23 +157,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     private void changeSignalGroupColour(SignalTableCell signalGroup) {
 
         UUID id = signalGroup.getID();
-
-        try {
-
-            Color oldColour = activeDataset().getCollection().getSignalGroup(id).getGroupColour().orElse(Color.YELLOW);
-
-            Color newColor = JColorChooser.showDialog(CellStatsPanel.this, "Choose signal Color", oldColour);
-
-            if (newColor != null) {
-                activeDataset().getCollection().getSignalGroup(id).setGroupColour(newColor);
-                this.update(getDatasets());
-                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-            }
-
-        } catch (UnavailableSignalGroupException e) {
-            warn("Cannot change signal colour");
-            stack("Error getting signal group", e);
-        }
+        Color oldColour = activeDataset().getCollection().getSignalGroup(id).get().getGroupColour().orElse(Color.YELLOW);
+        ch.changeSignalColour(activeDataset(), oldColour, id);
     }
 
     private void updateScale() {

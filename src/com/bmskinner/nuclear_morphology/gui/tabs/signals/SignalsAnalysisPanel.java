@@ -79,13 +79,13 @@ public class SignalsAnalysisPanel extends DetailPanel {
                         updateSignalSource(signalGroup);
                     }
 
-                    if (rowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                    if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row, column);
                         cosmeticHandler.renameSignalGroup(d, signalGroup.getID());
                     }
 
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-                    if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                    if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
                         cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
                         update(getDatasets());

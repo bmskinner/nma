@@ -65,7 +65,7 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
 
                 IAnalysisMethod m = new SignalDetectionMethod(dataset, options, analysisSetup.getId());
 
-                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).getGroupName();
+                String name = dataset.getCollection().getSignalGroup(analysisSetup.getId()).get().getGroupName();
 
                 worker = new DefaultAnalysisWorker(m, dataset.getCollection().size());
 

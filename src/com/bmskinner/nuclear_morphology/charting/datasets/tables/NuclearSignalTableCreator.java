@@ -32,6 +32,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
@@ -58,7 +59,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
     /**
      * Create with a set of table options
      */
-    public NuclearSignalTableCreator(final TableOptions o) {
+    public NuclearSignalTableCreator(@NonNull final TableOptions o) {
         super(o);
     }
 
@@ -90,11 +91,11 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        Object[] rowNameBlock = { "", Labels.SIGNAL_GROUP_LABEL, "Channel", "Source", "Threshold", "Min size",
+        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, "Channel", "Source", "Threshold", "Min size",
                 "Max fraction", "Min circ", "Max circ", "Detection mode" };
 
         // create the row names
-        fieldNames.add(Labels.NUMBER_OF_SIGNAL_GROUPS);
+        fieldNames.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
 
         for (int i = 0; i < maxChannels; i++) {
 
@@ -205,7 +206,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
             try {
-            	Optional<Color> c = collection.getSignalGroup(signalGroup).getGroupColour();
+            	Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
                 Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
                 
                 SignalTableCell cell = new SignalTableCell(signalGroup,
@@ -219,8 +220,6 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                     rowData.add(Labels.NA + " - merge");
                 }
 
-            } catch (UnavailableSignalGroupException e) {
-                fine("Signal group " + signalGroup + " is not present in collection", e);
             } finally {
                 j++;
             }
@@ -260,7 +259,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
             try {
 
                 signalGroupNumber++;
-                Optional<Color> c = collection.getSignalGroup(signalGroup).getGroupColour();
+                Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
                 Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
                 
                 SignalTableCell cell = new SignalTableCell(signalGroup,
@@ -286,6 +285,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                 } else {
                     Object signalThreshold = ns.getDetectionMode().equals(SignalDetectionMode.FORWARD)
                             ? ns.getThreshold() : "Variable";
+                            
+                    DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 
                     rowData.add(EMPTY_STRING);
                     rowData.add(cell);
@@ -293,14 +294,12 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                     rowData.add(ns.getFolder());
                     rowData.add(signalThreshold);
                     rowData.add(ns.getMinSize());
-                    rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxFraction()));
-                    rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMinCirc()));
-                    rowData.add(DEFAULT_DECIMAL_FORMAT.format(ns.getMaxCirc()));
+                    rowData.add(df.format(ns.getMaxFraction()));
+                    rowData.add(df.format(ns.getMinCirc()));
+                    rowData.add(df.format(ns.getMaxCirc()));
                     rowData.add(ns.getDetectionMode().toString());
                 }
 
-            } catch (UnavailableSignalGroupException e) {
-                stack("Signal group " + signalGroup + " is not present in collection", e);
             } finally {
                 j++;
             }
@@ -355,7 +354,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         if (signalGroupTotal <= 0) {
 
             finest("No signal groups to show");
-            model.addColumn(Labels.NO_SIGNAL_GROUPS);
+            model.addColumn(Labels.Signals.NO_SIGNAL_GROUPS);
             return model;
         }
 
@@ -364,9 +363,9 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         // Make an instance of row names
         List<Object> rowNames = new ArrayList<Object>();
         rowNames.add(EMPTY_STRING);
-        rowNames.add(Labels.SIGNAL_GROUP_LABEL);
-        rowNames.add(Labels.SIGNALS_LABEL);
-        rowNames.add(Labels.SIGNALS_PER_NUCLEUS);
+        rowNames.add(Labels.Signals.SIGNAL_GROUP_LABEL);
+        rowNames.add(Labels.Signals.SIGNALS_LABEL);
+        rowNames.add(Labels.Signals.SIGNALS_PER_NUCLEUS);
         rowNames.add("ID");
 
         for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
@@ -375,7 +374,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         // Make the full column of row names for each signal group
         List<Object> firstColumn = new ArrayList<Object>(0);
-        firstColumn.add(Labels.NUMBER_OF_SIGNAL_GROUPS);
+        firstColumn.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
         for (int i = 0; i < signalGroupTotal; i++) {
             firstColumn.addAll(rowNames);
         }
@@ -422,7 +421,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         List<Object> rowData = new ArrayList<Object>(0);
         rowData.add(signalGroupCount);
-
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
             List<Object> temp = new ArrayList<Object>(0);
@@ -443,7 +442,7 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                     }
                     continue;
                 }
-                Optional<Color> c = collection.getSignalGroup(signalGroup).getGroupColour();
+                Optional<Color> c = collection.getSignalGroup(signalGroup).get().getGroupColour();
                 Color colour = c.isPresent() ? c.get() : Color.WHITE;
 
 
@@ -454,24 +453,14 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
                 temp.add(cell);
                 temp.add(collection.getSignalManager().getSignalCount(signalGroup));
                 double signalPerNucleus = collection.getSignalManager().getSignalCountPerNucleus(signalGroup);
-                temp.add(DEFAULT_DECIMAL_FORMAT.format(signalPerNucleus));
+                temp.add(df.format(signalPerNucleus));
                 temp.add(signalGroup.toString());
 
                 for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
                     double pixel = collection.getSignalManager().getMedianSignalStatistic(stat, scale, signalGroup);
-                    temp.add(DEFAULT_DECIMAL_FORMAT.format(pixel));
+                    temp.add(df.format(pixel));
                 }
 
-            } catch (UnavailableSignalGroupException e) {
-                stack("Signal group " + signalGroup + " is not present in collection", e);
-                temp = new ArrayList<Object>(0);
-                for (int j = 0; j < numberOfRowsPerSignalGroup; j++) { // Make a
-                                                                       // blank
-                                                                       // block
-                                                                       // of
-                                                                       // cells
-                    temp.add(EMPTY_STRING);
-                }
             } finally {
                 rowData.addAll(temp);
             }
@@ -500,15 +489,14 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      */
     public TableModel createShellChiSquareTable() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return createBlankTable();
-        }
 
         DefaultTableModel model = new DefaultTableModel();
 
-        DecimalFormat pFormat = new DecimalFormat("#0.000");
+        DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
-        Object[] columnNames = { Labels.DATASET, Labels.SIGNAL_GROUP_LABEL, Labels.AVERAGE_POSITION, Labels.PROBABILITY, };
+        Object[] columnNames = { Labels.DATASET, Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.AVERAGE_POSITION, Labels.Stats.PROBABILITY, };
 
         model.setColumnIdentifiers(columnNames);
 
@@ -516,35 +504,29 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
             for (UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()) {
 
-                try {
+                ISignalGroup group = d.getCollection().getSignalGroup(signalGroup).get();
+				Optional<IShellResult> r = group.getShellResult();
+				if (r.isPresent()) {
 
-                    ISignalGroup group = d.getCollection().getSignalGroup(signalGroup);
-                    Optional<IShellResult> r = group.getShellResult();
-                    if (r.isPresent()) {
+				    String groupName = group.getGroupName();
 
-                        String groupName = group.getGroupName();
+				    double mean = options.isNormalised() 
+				    		? r.get().getNormalisedMeanShell(options.getCountType())
+				    		: r.get().getRawMeanShell(options.getCountType());
+				    		
+				   double pval =  options.isNormalised() 
+				   		? r.get().getNormalisedPValue(options.getCountType())
+				   		: r.get().getRawPValue(options.getCountType());
 
-                        double mean = options.isNormalised() 
-                        		? r.get().getNormalisedMeanShell(options.getCountType())
-                        		: r.get().getRawMeanShell(options.getCountType());
-                        		
-                       double pval =  options.isNormalised() 
-                       		? r.get().getNormalisedPValue(options.getCountType())
-                       		: r.get().getRawPValue(options.getCountType());
+				    Object[] rowData = {
 
-                        Object[] rowData = {
+				            d.getName(), 
+				            groupName, 
+				            pFormat.format(mean),
+				            pFormat.format(pval) };
 
-                                d.getName(), 
-                                groupName, 
-                                pFormat.format(mean),
-                                pFormat.format(pval) };
-
-                        model.addRow(rowData);
-                    }
-
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group " + signalGroup + " is not present in collection", e);
-                }
+				    model.addRow(rowData);
+				}
             }
 
         }
@@ -569,64 +551,57 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         // DecimalFormat pFormat = new DecimalFormat("#0.00");
 
-        try {
+        PairwiseSignalDistanceCollection ps = options.firstDataset().getCollection().getSignalManager()
+		        .calculateSignalColocalisation(options.getScale());
 
-            PairwiseSignalDistanceCollection ps = options.firstDataset().getCollection().getSignalManager()
-                    .calculateSignalColocalisation(options.getScale());
+		List<Object> firstColumnData = new ArrayList<Object>();
 
-            List<Object> firstColumnData = new ArrayList<Object>();
+		Set<UUID> ids = new HashSet<UUID>();
+		ids.addAll(ps.getIDs());
 
-            Set<UUID> ids = new HashSet<UUID>();
-            ids.addAll(ps.getIDs());
+		for (UUID primaryID : ps.getIDs()) {
+		    String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).get().getGroupName();
+		    firstColumnData.add(primaryName);
+		}
+		DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		model.addColumn(Labels.Signals.SIGNAL_GROUP_LABEL, firstColumnData.toArray());
 
-            for (UUID primaryID : ps.getIDs()) {
-                String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).getGroupName();
-                firstColumnData.add(primaryName);
-            }
+		for (UUID primaryID : ps.getIDs()) {
 
-            model.addColumn(Labels.SIGNAL_GROUP_LABEL, firstColumnData.toArray());
+		    List<Object> columnData = new ArrayList<Object>();
 
-            for (UUID primaryID : ps.getIDs()) {
+		    String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).get().getGroupName();
 
-                List<Object> columnData = new ArrayList<Object>();
+		    for (UUID secondaryID : ps.getIDs()) {
 
-                String primaryName = options.firstDataset().getCollection().getSignalGroup(primaryID).getGroupName();
+		        if (primaryID.equals(secondaryID)) {
+		            columnData.add(EMPTY_STRING);
+		            continue;
+		        }
 
-                for (UUID secondaryID : ps.getIDs()) {
+		        String secondaryName = options.firstDataset().getCollection().getSignalGroup(secondaryID).get()
+		                .getGroupName();
 
-                    if (primaryID.equals(secondaryID)) {
-                        columnData.add(EMPTY_STRING);
-                        continue;
-                    }
+		        List<Double> values = ps.getValues(primaryID, secondaryID);
 
-                    String secondaryName = options.firstDataset().getCollection().getSignalGroup(secondaryID)
-                            .getGroupName();
+		        if (values == null) {
+		            columnData.add(Labels.NA);
+		            continue;
+		        }
+		        
+		        DescriptiveStatistics ds = new DescriptiveStatistics();
+		        for(double d : values){
+		        	ds.addValue(d);
+		        }
+		        double median = ds.getPercentile(Quartile.MEDIAN);
 
-                    List<Double> values = ps.getValues(primaryID, secondaryID);
+		        columnData.add(df.format(median));
 
-                    if (values == null) {
-                        columnData.add(Labels.NA);
-                        continue;
-                    }
-                    
-                    DescriptiveStatistics ds = new DescriptiveStatistics();
-                    for(double d : values){
-                    	ds.addValue(d);
-                    }
-                    double median = ds.getPercentile(Quartile.MEDIAN);
+		    }
 
-                    columnData.add(DEFAULT_DECIMAL_FORMAT.format(median));
+		    model.addColumn(primaryName, columnData.toArray());
 
-                }
-
-                model.addColumn(primaryName, columnData.toArray());
-
-            }
-
-        } catch (UnavailableSignalGroupException e) {
-            stack("Cannot get signal group", e);
-            return createBlankTable();
-        }
+		}
 
         return model;
     }

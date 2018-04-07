@@ -18,7 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
-import java.util.ArrayList;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -27,13 +27,14 @@ import java.util.Vector;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -42,11 +43,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
-    public ScatterTableDatasetCreator(final TableOptions options) {
+    public ScatterTableDatasetCreator(@NonNull final TableOptions options) {
         super(options);
     }
 
@@ -116,7 +118,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         PlottableStatistic statA = stats.get(0);
         PlottableStatistic statB = stats.get(1);
-
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (int i = 0; i < datasets.size(); i++) {
 
             ICellCollection c = datasets.get(i).getCollection();
@@ -160,15 +162,11 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
             names.add(c.getName());
 
             double rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
-            rho.add(DEFAULT_DECIMAL_FORMAT.format(rhoValue));
-
-            // double p = Stats.getSpearmanPValue(rhoValue, cells.size());
-            // pValue.add( df.format( p ));
+            rho.add(df.format(rhoValue));
         }
 
-        model.addColumn("Dataset", names);
-        model.addColumn("Spearman's Rho", rho);
-        // model.addColumn("p", pValue);
+        model.addColumn(Labels.DATASET, names);
+        model.addColumn(Labels.Stats.SPEARMANS_RHO, rho);
         return model;
 
     }
@@ -188,7 +186,7 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
 
         PlottableStatistic statA = stats.get(0);
         PlottableStatistic statB = stats.get(1);
-
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (int i = 0; i < datasets.size(); i++) {
 
             ICellCollection c = datasets.get(i).getCollection();
@@ -202,41 +200,35 @@ public class ScatterTableDatasetCreator extends AbstractTableCreator {
                     continue;
                 }
 
-                try {
+                int signalCount = m.getSignalCount(id);
 
-                    int signalCount = m.getSignalCount(id);
+				double[] xpoints = new double[signalCount];
+				double[] ypoints = new double[signalCount];
 
-                    double[] xpoints = new double[signalCount];
-                    double[] ypoints = new double[signalCount];
+				List<INuclearSignal> list = m.getSignals(id);
 
-                    List<INuclearSignal> list = m.getSignals(id);
+				for (int j = 0; j < signalCount; j++) {
 
-                    for (int j = 0; j < signalCount; j++) {
+				    xpoints[j] = list.get(j).getStatistic(statA, scale);
+				    ypoints[j] = list.get(j).getStatistic(statB, scale);
 
-                        xpoints[j] = list.get(j).getStatistic(statA, scale);
-                        ypoints[j] = list.get(j).getStatistic(statB, scale);
+				}
+				names.add(c.getName() + "_" + m.getSignalGroupName(id));
 
-                    }
-                    names.add(c.getName() + "_" + m.getSignalGroupName(id));
+				double rhoValue = 0;
 
-                    double rhoValue = 0;
+				if (xpoints.length > 0) { // If a collection has signal
+				                          // group, but not signals
+				    rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
+				}
 
-                    if (xpoints.length > 0) { // If a collection has signal
-                                              // group, but not signals
-                        rhoValue = Stats.getSpearmansCorrelation(xpoints, ypoints);
-                    }
-
-                    rho.add(DEFAULT_DECIMAL_FORMAT.format(rhoValue));
-
-                } catch (UnavailableSignalGroupException e) {
-                    fine("Signal group " + id + " is not present in collection", e);
-                }
+				rho.add(df.format(rhoValue));
             }
 
         }
 
-        model.addColumn("Dataset", names);
-        model.addColumn("Spearman's Rho", rho);
+        model.addColumn(Labels.DATASET, names);
+        model.addColumn(Labels.Stats.SPEARMANS_RHO, rho);
         return model;
 
     }

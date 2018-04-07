@@ -117,26 +117,18 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
         ICellCollection newCollection = newDataset.getCollection();
         for (UUID signalGroupId : templateCollection.getSignalGroupIDs()) {
 
-            ISignalGroup newGroup;
-            try {
+            // We only want to make a signal group if a cell with
+			// the signal
+			// is present in the merge source.
+			boolean addSignalGroup = false;
+			for (Nucleus n : newCollection.getNuclei()) {
+			    addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
+			}
 
-                // We only want to make a signal group if a cell with
-                // the signal
-                // is present in the merge source.
-                boolean addSignalGroup = false;
-                for (Nucleus n : newCollection.getNuclei()) {
-                    addSignalGroup |= n.getSignalCollection().hasSignal(signalGroupId);
-                }
-
-                if (addSignalGroup) {
-                    newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId));
-                    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
-                }
-
-            } catch (UnavailableSignalGroupException e) {
-                warn("Unable to copy signal groups");
-                fine("Signal group not present", e);
-            }
+			if (addSignalGroup) {
+				ISignalGroup newGroup = new SignalGroup(templateCollection.getSignalGroup(signalGroupId).get());
+			    newDataset.getCollection().addSignalGroup(signalGroupId, newGroup);
+			}
         }
     }
 }

@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -241,19 +242,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
 
                     rend.setSeriesVisibleInLegend(j, false);
                     rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-                    Paint colour = ColourSelecter.getColor(j);
-                    try {
-
-                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		colour = c.get();
-
-                        rend.setSeriesPaint(j, colour);
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + signalGroup + " is not present in collection", e);
-                    } finally {
-                        rend.setSeriesPaint(j, colour);
+                    
+                    Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                    if(g.isPresent()){
+                    	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j));
+                    	rend.setSeriesPaint(j, colour);
                     }
                 }
                 datasetCount++;
@@ -317,22 +310,12 @@ public class HistogramChartFactory extends AbstractChartFactory {
                     String seriesKey = ds.getSeriesKey(j).toString();
                     UUID signalGroup = getSignalGroupFromLabel(seriesKey);
 
-                    Paint colour = ColourSelecter.getColor(j);
-
                     IAnalysisDataset d = options.getDatasets().get(datasetCount);
-
-                    try {
-
-                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		colour = c.get();
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + signalGroup + " is not present in collection", e);
-                    } finally {
-                        rend.setSeriesPaint(j, colour);
+                    Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                    if(g.isPresent()){
+                    	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j));
+                    	rend.setSeriesPaint(j, colour);
                     }
-
                 }
                 datasetCount++;
             }

@@ -156,8 +156,9 @@ public class SignalManager implements Loggable {
      * @return the signal group name, if set
      * @throws UnavailableSignalGroupException if the group is not present
      */
-    public String getSignalGroupName(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
-        return collection.getSignalGroup(signalGroupId).getGroupName();
+    public String getSignalGroupName(@NonNull final UUID signalGroupId) {
+    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
+        return g.isPresent() ? g.get().getGroupName() : "";
     }
 
     /**
@@ -175,8 +176,9 @@ public class SignalManager implements Loggable {
         return result;
     }
 
-    public int getSignalChannel(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
-        return collection.getSignalGroup(signalGroupId).getChannel();
+    public int getSignalChannel(@NonNull final UUID signalGroupId) {
+    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
+        return g.isPresent() ? g.get().getChannel() : -1;
     }
 
     /**
@@ -187,8 +189,9 @@ public class SignalManager implements Loggable {
      * @return
      * @throws UnavailableSignalGroupException
      */
-    public String getSignalSourceFolder(@NonNull final UUID signalGroupId) throws UnavailableSignalGroupException {
-        return collection.getSignalGroup(signalGroupId).getFolder().getAbsolutePath();
+    public String getSignalSourceFolder(@NonNull final UUID signalGroupId) {
+    	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
+        return g.isPresent() ? g.get().getFolder().getAbsolutePath() : "";
     }
 
     /**
@@ -213,11 +216,9 @@ public class SignalManager implements Loggable {
             }
         });
 
-        try {
-            collection.getSignalGroup(signalGroupId).setFolder(folder);
-        } catch (UnavailableSignalGroupException e) {
-            fine("Error getting signal group", e);
-        }
+
+        collection.getSignalGroup(signalGroupId).get().setFolder(folder);
+
 
     }
 
@@ -229,65 +230,42 @@ public class SignalManager implements Loggable {
      */
     public void updateSignalGroupID(@NonNull final UUID oldID, @NonNull final UUID newID) {
 
-        if (!collection.hasSignalGroup(oldID)) {
-            fine("Signal group is not present");
+        if (!collection.hasSignalGroup(oldID))
             return;
-        }
 
-        finer("Updating signals to new group id in nuclei");
         for (Nucleus n : collection.getNuclei()) {
             n.getSignalCollection().updateSignalGroupID(oldID, newID);
         }
 
-        finer("Updating signal group in cell collection");
+        // the group the signals are currently in
+		ISignalGroup oldGroup = collection.getSignalGroup(oldID).get();
 
-        try {
+		// Merge and rename signal groups
 
-            // the group the signals are currently in
-            ISignalGroup oldGroup = collection.getSignalGroup(oldID);
+		if (collection.hasSignalGroup(newID)) { // check if the group
+		                                        // already exists
 
-            finer("Old group: " + oldID + " | " + oldGroup.toString());
+		    ISignalGroup existingGroup = collection.getSignalGroup(newID).get();
 
-            // Merge and rename signal groups
+		    if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
+		        existingGroup
+		                .setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
+		    }
 
-            if (collection.hasSignalGroup(newID)) { // check if the group
-                                                    // already exists
+		    if (oldGroup.getChannel() != existingGroup.getChannel()) {
+		        existingGroup.setChannel(-1);
+		    }
 
-                finer("A signal group of id " + newID + " already exists");
-                ISignalGroup existingGroup = collection.getSignalGroup(newID);
+		    // Shells and colours?
 
-                if (!oldGroup.getGroupName().equals(existingGroup.getGroupName())) {
-                    finer("Setting signal group name to merge");
-                    existingGroup
-                            .setGroupName("Merged_" + oldGroup.getGroupName() + "_" + existingGroup.getGroupName());
-                }
+		} else { // the signal group does not exist, just copy the old group
 
-                if (oldGroup.getChannel() != existingGroup.getChannel()) {
-                    finer("Setting signal group name to -1");
-                    existingGroup.setChannel(-1);
-                }
+		    // the new group for the signals
+		    ISignalGroup newGroup = new SignalGroup(oldGroup);
+		    collection.addSignalGroup(newID, newGroup);
+		}
 
-                // Shells and colours?
-
-            } else { // the signal group does not exist, just copy the old group
-
-                finer("A signal group of id " + newID + " does not exist");
-
-                // the new group for the signals
-                ISignalGroup newGroup = new SignalGroup(oldGroup);
-
-                finer("New group: " + newID + " | " + newGroup.toString());
-                collection.addSignalGroup(newID, newGroup);
-                finer("Added new signal group: " + newID);
-
-            }
-
-            collection.removeSignalGroup(oldID);
-            finer("Removed old signal group");
-        } catch (UnavailableSignalGroupException e) {
-            warn("Missing expected signal group");
-            fine("Error getting signal group " + oldID, e);
-        }
+		collection.removeSignalGroup(oldID);
     }
 
     /**
@@ -371,14 +349,9 @@ public class SignalManager implements Loggable {
      */
     public boolean hasShellResult() {
         for (UUID id : collection.getSignalGroupIDs()) {
-
-            try {
-                if (collection.getSignalGroup(id).hasShellResult()) {
-                    return true;
-                }
-            } catch (UnavailableSignalGroupException e) {
-                fine("Error getting signal group", e);
-            }
+            if (collection.getSignalGroup(id).get().hasShellResult()) {
+			    return true;
+			}
         }
         return false;
     }
@@ -561,13 +534,8 @@ public class SignalManager implements Loggable {
 
         for (UUID id : collection.getSignalGroupIDs()) {
             ISignalGroup newGroup;
-            try {
-                newGroup = new SignalGroup(collection.getSignalGroup(id));
-                target.addSignalGroup(id, newGroup);
-            } catch (UnavailableSignalGroupException e) {
-                warn("Unable to copy signal group");
-                fine("Signal group not present", e);
-            }
+            newGroup = new SignalGroup(collection.getSignalGroup(id).get());
+			target.addSignalGroup(id, newGroup);
         }
     }
 

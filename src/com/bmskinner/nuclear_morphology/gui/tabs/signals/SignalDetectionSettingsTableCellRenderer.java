@@ -58,7 +58,7 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
 
                 int signalGroupCount = Integer.valueOf(table.getModel().getValueAt(0, column).toString());
 
-                if (nextRowHeader.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 
                     if (signalGroupCount > 0) {
                         // we want to colour this cell preemptively

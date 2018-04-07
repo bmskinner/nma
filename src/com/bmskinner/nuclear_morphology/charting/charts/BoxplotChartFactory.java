@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -204,21 +205,13 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
                 UUID signalGroup = getSignalGroupFromLabel(name);
 
-                // Not every dataset will have every row.
-                if (d.getCollection().hasSignalGroup(signalGroup)) {
-                    Paint color = ColourSelecter.getColor(row);
-                    try {
-                    	
-                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		color = c.get();
+                Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                if(g.isPresent()){
 
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + signalGroup + " is not present in collection", e);
-                    } finally {
-                        renderer.setSeriesPaint(series, color);
-                        series++;
-                    }
+                	Paint color = g.get().getGroupColour().orElse(ColourSelecter.getColor(row));
+                	renderer.setSeriesPaint(series, color);
+                	series++;
+
                 }
 
             }

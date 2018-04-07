@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.analysis.signals;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -70,12 +71,15 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         
         if(!d.getAnalysisOptions().isPresent())
         	throw new IllegalArgumentException("No analysis options in dataset");
+        
+        if(!d.getCollection().hasSignalGroup(group))
+        	throw new IllegalArgumentException("Signal group is not present in dataset");
 
         this.options = (IMutableNuclearSignalOptions) options.duplicate();
         this.folder = options.getFolder();
         this.channel = options.getChannel();
         this.signalGroup = group;
-        this.channelName = d.getCollection().getSignalGroup(group).getGroupName();
+        this.channelName = d.getCollection().getSignalGroup(group).get().getGroupName();
 
     }
 
@@ -218,54 +222,44 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         List<ICellCollection> signalPopulations = new ArrayList<ICellCollection>(0);
         log("Dividing population by signals...");
 
-        ISignalGroup group;
-        try {
-            group = r.getSignalGroup(signalGroup);
+        Optional<ISignalGroup> og = r.getSignalGroup(signalGroup);
+        
+        if(!og.isPresent())
+        	return signalPopulations;
+        ISignalGroup group = og.get();
+        
+        group.setVisible(true);
 
-            group.setVisible(true);
+		Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
+		if (!list.isEmpty()) {
+		    log("Signal group " + group.getGroupName() + ": found nuclei with signals");
+		    ICellCollection listCollection = new VirtualCellCollection(dataset,
+		            group.getGroupName() + "_with_signals");
 
-            Set<ICell> list = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, true);
-            if (!list.isEmpty()) {
-                log("Signal group " + group.getGroupName() + ": found nuclei with signals");
-                ICellCollection listCollection = new VirtualCellCollection(dataset,
-                        group.getGroupName() + "_with_signals");
+		    for (ICell c : list) {
+		        listCollection.addCell(c);
+		    }
+		    signalPopulations.add(listCollection);
 
-                for (ICell c : list) {
+		    // Only add a group of cells without signals if at least one
+		    // cell does havea signal
 
-                    finer("  Added cell: " + c.getNucleus().getNameAndNumber());
-                    // ICell newCell = new DefaultCell(c);
-                    listCollection.addCell(c);
-                }
-                signalPopulations.add(listCollection);
+		    Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
+		    if (!notList.isEmpty()) {
+		        log("Signal group " + group.getGroupName()
+		                + ": found nuclei without signals");
 
-                // Only add a group of cells without signals if at least one
-                // cell does havea signal
+		        ICellCollection notListCollection = new VirtualCellCollection(dataset,
+		                group.getGroupName() + "_without_signals");
 
-                Set<ICell> notList = r.getSignalManager().getCellsWithNuclearSignals(signalGroup, false);
-                if (!notList.isEmpty()) {
-                    log("Signal group " + r.getSignalGroup(signalGroup).getGroupName()
-                            + ": found nuclei without signals");
+		        for (ICell c : notList) {
+		            notListCollection.addCell(c);
+		        }
 
-                    ICellCollection notListCollection = new VirtualCellCollection(dataset,
-                            group.getGroupName() + "_without_signals");
+		        signalPopulations.add(notListCollection);
+		    }
 
-                    for (ICell c : notList) {
-                        notListCollection.addCell(c);
-                    }
-
-                    signalPopulations.add(notListCollection);
-                } else {
-                    finest("No cells without signals");
-                }
-
-            }
-
-        } catch (UnavailableSignalGroupException e) {
-            error("Cannot get signal group from collection", e);
-            return new ArrayList<ICellCollection>(0);
-        }
-
-        fine("Finished dividing populations based on signals");
+		}
         return signalPopulations;
     }
 

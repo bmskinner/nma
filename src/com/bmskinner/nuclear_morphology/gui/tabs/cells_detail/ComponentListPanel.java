@@ -113,14 +113,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
                     // collection, just take the first signal
                     INuclearSignal signal = signalCollection.getSignals(signalGroupId).get(0);
                     String signalGroupName;
-                    try {
-
-                        signalGroupName = activeDataset().getCollection().getSignalGroup(signalGroupId).getGroupName();
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group is not present in collection", e);
-                        continue;
-                    }
+                    signalGroupName = activeDataset().getCollection().getSignalGroup(signalGroupId).get().getGroupName();
 
                     ComponentListCell signalCell = new ComponentListCell(signalGroupName, signal);
                     model.addElement(signalCell);

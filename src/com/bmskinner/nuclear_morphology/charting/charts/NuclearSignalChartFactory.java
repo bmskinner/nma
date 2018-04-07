@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCr
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -138,33 +139,16 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
                     rend.setSeriesVisibleInLegend(j, false);
                     rend.setSeriesStroke(j, ChartComponents.MARKER_STROKE);
-                    Color colour = ColourSelecter.getColor(j);
-
-                    try {
-
-                    	Optional<Color> c = d.getCollection().getSignalGroup(signalGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		colour = c.get();
-
-                        colour = signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID) ? Color.LIGHT_GRAY
-                                : colour;
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + signalGroup + " is not present in collection", e);
-                    } finally {
-                        rend.setSeriesPaint(j, colour);
-                        rend.setSeriesBarWidth(j, 1);
+                    
+                    Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                    if(g.isPresent()){
+                    	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j));
+                    	rend.setSeriesPaint(j, colour);
+                    	rend.setSeriesBarWidth(j, 1);
                     }
                 }
             }
-            chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING); // ensure
-                                                                                // the
-                                                                                // narrower
-                                                                                // bars
-                                                                                // are
-                                                                                // on
-                                                                                // top
-            // chart.getCategoryPlot().setColumnRenderingOrder(SortOrder.DESCENDING);
+            chart.getCategoryPlot().setRowRenderingOrder(SortOrder.DESCENDING); // ensure the narrower bars are on top
             datasetCount++;
         }
 
@@ -278,10 +262,12 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
                 // int seriesGroup = getIndexFromLabel(name);
                 UUID seriesGroup = getSignalGroupFromLabel(name);
                 
-                Optional<Color> c = options.firstDataset().getCollection().getSignalGroup(seriesGroup).getGroupColour();
-                Paint colour = c.isPresent() ? c.get() : ColourSelecter.getColor(series);
-            	
-                rend.setSeriesPaint(series, colour);
+                Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
+                if(g.isPresent()){
+                	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(series));
+                	rend.setSeriesPaint(series, colour);
+                }
+                
                 rend.setBaseLinesVisible(false);
                 rend.setBaseShapesVisible(true);
                 rend.setBaseSeriesVisibleInLegend(false);
@@ -297,15 +283,17 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
                 int alpha = (int) Math.floor(255 / ((double) signalCount)) + 20;
                 alpha = alpha < 10 ? 10 : alpha > 156 ? 156 : alpha;
-                Optional<Color> c = options.firstDataset().getCollection().getSignalGroup(signalGroup).getGroupColour();
-                Paint colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j++);
-
-                for (Shape s : shapes) {
-                    XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
-                            ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
-                                                                                               // transparent
-                                                                                               // signals
-                    plot.addAnnotation(an);
+                
+                Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(signalGroup);
+                if(g.isPresent()){
+                	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(j++));
+                	for (Shape s : shapes) {
+                        XYShapeAnnotation an = new XYShapeAnnotation(s, null, null,
+                                ColourSelecter.getTransparentColour((Color) colour, true, alpha)); // layer
+                                                                                                   // transparent
+                                                                                                   // signals
+                        plot.addAnnotation(an);
+                    }
                 }
             }
         }

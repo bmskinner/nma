@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components;
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -312,7 +313,7 @@ public interface ICellCollection
      * @param signalGroup
      * @return the signal group, or null if not present
      */
-    ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException;
+    Optional<ISignalGroup> getSignalGroup(UUID signalGroup);
 
     /**
      * Test if the collection has a signal group with the given ID

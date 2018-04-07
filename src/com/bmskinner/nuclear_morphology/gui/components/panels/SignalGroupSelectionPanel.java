@@ -111,12 +111,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
             if (id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
                 continue;
             }
-
-            try {
-                list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id)));
-            } catch (UnavailableSignalGroupException e) {
-                fine("Cannot add signal group to panel", e);
-            }
+            list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id).get()));
         }
         return list;
     }

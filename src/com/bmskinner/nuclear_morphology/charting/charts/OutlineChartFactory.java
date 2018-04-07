@@ -73,6 +73,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -669,19 +670,11 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 if (key.startsWith(CellularComponent.NUCLEAR_SIGNAL)) {
 
                     UUID seriesGroup = getSignalGroupFromLabel(key);
-
-                    Paint colour = ColourSelecter.getColor(i);
-                    try {
-
-                        IAnalysisDataset dataset = options.firstDataset();
-                        Optional<Color> c = dataset.getCollection().getSignalGroup(seriesGroup).getGroupColour();
-                    	if(c.isPresent())
-                    		colour = c.get();
-
-                    } catch (UnavailableSignalGroupException e) {
-                        fine("Signal group " + seriesGroup + " is not present in collection", e);
-                    } finally {
-                        rend.setSeriesPaint(series, colour);
+                    
+                    Optional<ISignalGroup> g = options.firstDataset().getCollection().getSignalGroup(seriesGroup);
+                    if(g.isPresent()){
+                    	Paint colour = g.get().getGroupColour().orElse(ColourSelecter.getColor(series));
+                    	rend.setSeriesPaint(series, colour);
                     }
                 }
 

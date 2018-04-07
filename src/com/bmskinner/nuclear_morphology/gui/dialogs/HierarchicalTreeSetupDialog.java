@@ -216,7 +216,7 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
         });
 
         JLabel clusterLabel = new JLabel(CLUSTER_METHOD_LBL);
-        clusterLabel.setToolTipText(Labels.HIERARCHICAL_CLUSTER_METHOD);
+        clusterLabel.setToolTipText(Labels.Clusters.HIERARCHICAL_CLUSTER_METHOD);
         labels.add(clusterLabel);
         fields.add(clusterMethodBox);
 

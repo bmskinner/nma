@@ -55,24 +55,18 @@ import weka.estimators.KernelEstimator;
 
             for (UUID signalGroup : dataset.getCollection().getSignalManager().getSignalGroupIDs()) {
 
-                try {
+                if (collection.getSignalGroup(signalGroup).get().isVisible()) {
 
-                    if (collection.getSignalGroup(signalGroup).isVisible()) {
+				    if (collection.getSignalManager().hasSignals(signalGroup)) {
 
-                        if (collection.getSignalManager().hasSignals(signalGroup)) {
+				        double[] values = collection.getSignalManager().getSignalStatistics(stat, scale,
+				                signalGroup);
 
-                            double[] values = collection.getSignalManager().getSignalStatistics(stat, scale,
-                                    signalGroup);
-
-                            ds.addSeries(
-                                    CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_" + collection.getName(),
-                                    values, 12);
-                        }
-                    }
-
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group " + signalGroup + " is not present in collection", e);
-                }
+				        ds.addSeries(
+				                CellularComponent.NUCLEAR_SIGNAL + "_" + signalGroup + "_" + collection.getName(),
+				                values, 12);
+				    }
+				}
             }
             result.add(ds);
 

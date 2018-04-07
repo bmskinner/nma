@@ -158,7 +158,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                     IAnalysisDataset d = getDatasets().get(column - 1);
 
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
-                    if (nextRowName.equals(Labels.SIGNAL_GROUP_LABEL)) {
+                    if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
                         cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
 //                        update(getDatasets());
@@ -206,34 +206,23 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                     continue;
                 }
 
-                try {
+                // get the status within each dataset
+				boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).get().isVisible();
 
-                    // get the status within each dataset
-                    boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).isVisible();
+				String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
 
-                    String name = activeDataset().getCollection().getSignalManager().getSignalGroupName(signalGroup);
+				// make a checkbox for each signal group in the dataset
+				JCheckBox box = new JCheckBox(name, visible);
 
-                    // make a checkbox for each signal group in the dataset
-                    JCheckBox box = new JCheckBox(name, visible);
+				// Don't enable when the consensus is missing
+				box.setEnabled(activeDataset().getCollection().hasConsensus());
 
-                    // Don't enable when the consensus is missing
-                    box.setEnabled(activeDataset().getCollection().hasConsensus());
-
-                    box.addActionListener(e -> {
-                        try {
-                            activeDataset().getCollection().getSignalGroup(signalGroup).setVisible(box.isSelected());
-                        } catch (UnavailableSignalGroupException e1) {
-                            stack(e1);
-                        }
-                        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.GROUP_VISIBLE_PREFIX);
-                        this.refreshChartCache(getDatasets());
-//                        this.getParentPanel().refreshChartCache(getDatasets());
-                    });
-                    panel.add(box);
-
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Error getting signal group", e);
-                }
+				box.addActionListener(e -> {
+				    activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
+				    getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.GROUP_VISIBLE_PREFIX);
+				    this.refreshChartCache(getDatasets());
+				});
+				panel.add(box);
 
             }
 
@@ -350,16 +339,11 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().startsWith(SET_SIGNAL_GROUP_VISIBLE_ACTION)) {
 
-            try {
-
-                UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
-                JCheckBox box = (JCheckBox) e.getSource();
-                activeDataset().getCollection().getSignalGroup(signalGroup).setVisible(box.isSelected());
-                getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
-                this.refreshChartCache(getDatasets());
-            } catch (UnavailableSignalGroupException e1) {
-                fine("Error getting signal group", e1);
-            }
+            UUID signalGroup = getSignalGroupFromLabel(e.getActionCommand());
+			JCheckBox box = (JCheckBox) e.getSource();
+			activeDataset().getCollection().getSignalGroup(signalGroup).get().setVisible(box.isSelected());
+			getSignalChangeEventHandler().fireSignalChangeEvent(SET_SIGNAL_GROUP_VISIBLE_ACTION);
+			this.refreshChartCache(getDatasets());
         }
         updateSignalConsensusChart();
 

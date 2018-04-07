@@ -168,35 +168,28 @@ public class DatasetMergingDialog extends LoadingIconDialog implements ActionLis
 
         model.setColumnIdentifiers(columns);
 
-        try {
+        for (UUID id1 : pairedSignalGroups.keySet()) {
+		    String col1 = "";
+		    for (IAnalysisDataset d : datasets) {
+		        if (d.getCollection().getSignalManager().hasSignals(id1)) {
+		            col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1).get().getGroupName();
+		        }
+		    }
+		    Set<UUID> idList = pairedSignalGroups.get(id1);
+		    for (UUID id2 : idList) {
+		        String col2 = "";
+		        for (IAnalysisDataset d : datasets) {
+		            if (d.getCollection().getSignalManager().hasSignals(id2)) {
+		                col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2).get().getGroupName();
+		            }
+		        }
 
-            for (UUID id1 : pairedSignalGroups.keySet()) {
-                String col1 = "";
-                for (IAnalysisDataset d : datasets) {
-                    if (d.getCollection().getSignalManager().hasSignals(id1)) {
-                        col1 = d.getName() + " : " + d.getCollection().getSignalGroup(id1).getGroupName();
-                    }
-                }
-                Set<UUID> idList = pairedSignalGroups.get(id1);
-                for (UUID id2 : idList) {
-                    String col2 = "";
-                    for (IAnalysisDataset d : datasets) {
-                        if (d.getCollection().getSignalManager().hasSignals(id2)) {
-                            col2 = d.getName() + " : " + d.getCollection().getSignalGroup(id2).getGroupName();
-                        }
-                    }
+		        Object[] row = { col1, col2 };
+		        model.addRow(row);
+		    }
 
-                    Object[] row = { col1, col2 };
-                    model.addRow(row);
-                }
-
-            }
-            matchTable.setModel(model);
-        } catch (UnavailableSignalGroupException e) {
-            warn("Error making signal table");
-            fine("Error getting signals", e);
-            matchTable.setModel(AnalysisDatasetTableCreator.createBlankTable());
-        }
+		}
+		matchTable.setModel(model);
 
     }
 

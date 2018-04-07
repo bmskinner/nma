@@ -436,13 +436,16 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public ISignalGroup getSignalGroup(UUID signalGroup) throws UnavailableSignalGroupException {
+    public  Optional<ISignalGroup> getSignalGroup(UUID signalGroup) {
 
+    	if(!parent.getCollection().hasSignalGroup(signalGroup))
+    		return Optional.empty();
+    	    
         // Override the shell storage to point to this collection, not the shell
         // result
         // This SignalGroup is never saved to file, so does not need serialising
         @SuppressWarnings("serial")
-        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup)) {
+        ISignalGroup result = new SignalGroup(parent.getCollection().getSignalGroup(signalGroup).get()) {
 
             @Override
             public void setShellResult(@NonNull IShellResult result) {
@@ -461,30 +464,17 @@ public class VirtualCellCollection implements ICellCollection {
 
             @Override
             public void setGroupColour(@NonNull Color newColor) {
-                try {
-                    parent.getCollection().getSignalGroup(signalGroup).setGroupColour(newColor);
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group not found", e);
-                }
+                parent.getCollection().getSignalGroup(signalGroup).get().setGroupColour(newColor);
             }
 
             @Override
             public void setVisible(boolean b) {
-                try {
-                    parent.getCollection().getSignalGroup(signalGroup).setVisible(b);
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Signal group not found", e);
-                }
+                parent.getCollection().getSignalGroup(signalGroup).get().setVisible(b);
             }
 
         };
 
-        // if(shellResults.containsKey(signalGroup)){
-        // result.setShellResult(shellResults.get(signalGroup));
-        // } else {
-        // result.setShellResult(null);
-        // }
-        return result;
+        return Optional.of(result);
     }
 
     @Override

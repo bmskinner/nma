@@ -94,11 +94,9 @@ public class CosmeticHandler implements Loggable {
         boolean nameMatches =  DatasetListManager.getInstance().getAllDatasets().stream().anyMatch(d->d.getName().equals(newName));
 
         if (nameMatches) {
-//            fine("Checking duplicate name is OK");
             int result = JOptionPane.showConfirmDialog((Component) parent, "Chosen name exists. Use anyway?");
 
             if (result != JOptionPane.OK_OPTION) {
-//                log("User cancelled name change");
                 return;
             }
         }
@@ -108,9 +106,8 @@ public class CosmeticHandler implements Loggable {
 //        log("Collection renamed: " + newName);
 
         File saveFile = dataset.getSavePath();
-        if (saveFile.exists()) {
+        if (saveFile.exists())
             saveFile.delete();
-        }
 
         parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
@@ -128,10 +125,8 @@ public class CosmeticHandler implements Loggable {
                 JOptionPane.INFORMATION_MESSAGE, null, null, workspace.toString()).toString();
 
         // validate
-        if (newName == null || newName.isEmpty()) {
+        if (newName == null || newName.isEmpty())
             return;
-        }
-
 
         workspace.setName(newName);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
@@ -146,19 +141,15 @@ public class CosmeticHandler implements Loggable {
      */
     public void changeSignalColour(IAnalysisDataset d, Color oldColour, UUID signalGroupId) {
 
-        try {
+    	if(!d.getCollection().hasSignalGroup(signalGroupId))
+    		return;
+    	
+        Color newColor = JColorChooser.showDialog((Component) parent, Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
 
-            Color newColor = JColorChooser.showDialog((Component) parent, Labels.CHOOSE_SIGNAL_COLOUR, oldColour);
-
-            if (newColor != null) {
-                d.getCollection().getSignalGroup(signalGroupId).setGroupColour(newColor);
-
-                parent.update();
-            }
-        } catch (UnavailableSignalGroupException e) {
-            warn("Cannot change signal colour");
-            stack("Error getting signal group", e);
-        }
+		if (newColor != null) {
+		    d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
+		    parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+		}
     }
     
     /**
@@ -167,27 +158,16 @@ public class CosmeticHandler implements Loggable {
      * @param signalGroup
      */
     public void renameSignalGroup(IAnalysisDataset d, UUID signalGroup) {
+    	if(!d.getCollection().hasSignalGroup(signalGroup))
+    		return;
 
-        try {
-            String oldName = d.getCollection().getSignalGroup(signalGroup).getGroupName();
+		String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
 
-            String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
+		if (newName == null)
+		    return;
 
-            if (newName == null) {
-                finest("New name is null - not changing");
-                return;
-            }
-
-            d.getCollection().getSignalGroup(signalGroup).setGroupName(newName);
-
-            parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
-            finest("Updated name of signal group " + oldName + " to " + newName);
-
-        } catch (UnavailableSignalGroupException e) {
-            warn("Cannot change signal name");
-            fine("Error getting signal group", e);
-        }
-
+		d.getCollection().getSignalGroup(signalGroup).get().setGroupName(newName);
+		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
     }
 
 }

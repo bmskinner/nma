@@ -188,17 +188,9 @@ public class ScatterChartDatasetCreator extends AbstractDatasetCreator<ChartOpti
             ICellCollection c = datasets.get(i).getCollection();
             SignalManager m = c.getSignalManager();
 
-            Set<UUID> groups = m.getSignalGroupIDs();
+            for (UUID id : m.getSignalGroupIDs()) {
 
-            for (UUID id : groups) {
-
-                ISignalGroup gp;
-                try {
-                    gp = c.getSignalGroup(id);
-                } catch (UnavailableSignalGroupException e) {
-                    stack("Error getting signal group", e);
-                    throw new ChartDatasetCreationException("Cannot get signal group", e);
-                }
+                ISignalGroup gp = c.getSignalGroup(id).get();
 
                 int signalCount = m.getSignalCount(id);
 

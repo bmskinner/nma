@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.charting.datasets.tables;
 
 import java.awt.Color;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +53,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
@@ -176,56 +178,50 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         if (sc.numberOfSignals() == 0) {
             return AbstractTableCreator.createBlankTable();
         }
-        try {
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
+		// Make the first column, of names
+		for (UUID id : sc.getSignalGroupIDs()) {
 
-            // Make the first column, of names
-            for (UUID id : sc.getSignalGroupIDs()) {
+		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 
-                String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+		    List<INuclearSignal> signalsRow = sc.getSignals(id);
+		    int sigNumber = 0;
 
-                List<INuclearSignal> signalsRow = sc.getSignals(id);
-                int sigNumber = 0;
+		    for (INuclearSignal row : signalsRow) {
 
-                for (INuclearSignal row : signalsRow) {
+		        columnNames.add(signalName + "_Sig_" + sigNumber);
+		        sigNumber++;
+		    }
 
-                    columnNames.add(signalName + "_Sig_" + sigNumber);
-                    sigNumber++;
-                }
+		}
+		model.addColumn(Labels.Signals.SIGNAL_LABEL_SINGULAR, columnNames.toArray(new Object[0]));
 
-            }
-            model.addColumn("Signal", columnNames.toArray(new Object[0]));
+		// Get the matrix to draw
+		double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
 
-            // Get the matrix to draw
-            double[][] matrix = sc.calculateDistanceMatrix(options.getScale());
+		// Make the subequent columns, one per signal
+		int col = 0;
 
-            // Make the subequent columns, one per signal
-            int col = 0;
+		for (UUID id : sc.getSignalGroupIDs()) {
 
-            for (UUID id : sc.getSignalGroupIDs()) {
+		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 
-                String signalName = d.getCollection().getSignalGroup(id).getGroupName();
+		    List<INuclearSignal> signalsRow = sc.getSignals(id);
+		    int sigNumber = 0;
+		    for (INuclearSignal row : signalsRow) {
+		        String colName = signalName + "_Sig_" + sigNumber;
+		        List<Object> colData = new ArrayList<Object>(0);
 
-                List<INuclearSignal> signalsRow = sc.getSignals(id);
-                int sigNumber = 0;
-                for (INuclearSignal row : signalsRow) {
-                    String colName = signalName + "_Sig_" + sigNumber;
-                    List<Object> colData = new ArrayList<Object>(0);
+		        double[] colValues = matrix[col];
+		        for (double value : colValues) {
+		            colData.add(df.format(value));
+		        }
 
-                    double[] colValues = matrix[col];
-                    for (double value : colValues) {
-                        colData.add(DEFAULT_DECIMAL_FORMAT.format(value));
-                    }
-
-                    model.addColumn(colName, colData.toArray(new Object[0]));
-                    col++;
-                    sigNumber++;
-                }
-            }
-
-        } catch (UnavailableSignalGroupException e) {
-            stack("Error getting signal group", e);
-            return AbstractTableCreator.createBlankTable();
-        }
+		        model.addColumn(colName, colData.toArray(new Object[0]));
+		        col++;
+		        sigNumber++;
+		    }
+		}
 
         return model;
     }
@@ -243,12 +239,12 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         try {
 
             ICytoplasm cyto = c.getCytoplasm();
-
+            DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
             for (PlottableStatistic stat : PlottableStatistic.getComponentStats()) {
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
                 double value = cyto.getStatistic(stat, GlobalOptions.getInstance().getScale());
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+                rowData.add(df.format(value));
             }
 
             // ColourMeasurometer cm = new ColourMeasurometer();
@@ -340,7 +336,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
     private void addNuclearStatisticsToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n) {
 
         NucleusType type = options.firstDataset().getCollection().getNucleusType();
-
+        DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
 
             if (!stat.equals(PlottableStatistic.VARIABILITY)) {
@@ -348,7 +344,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
                 double value = n.getStatistic(stat, GlobalOptions.getInstance().getScale());
-                rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+                rowData.add(df.format(value));
             }
 
         }
@@ -378,14 +374,16 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
             try {
 
-                ISignalGroup g = d.getCollection().getSignalGroup(signalGroup);
+                Optional<ISignalGroup> g = d.getCollection().getSignalGroup(signalGroup);
+                if(!g.isPresent())
+                	continue;
 
                 fieldNames.add("");
                 rowData.add("");
-                Optional<Color> c = g.getGroupColour();
+                Optional<Color> c = g.get().getGroupColour();
                 Color colour = c.isPresent() ? c.get() : ColourSelecter.getColor(j);
 
-                SignalTableCell tableCell = new SignalTableCell(signalGroup, g.getGroupName(), colour);
+                SignalTableCell tableCell = new SignalTableCell(signalGroup, g.get().getGroupName(), colour);
 
                 fieldNames.add("Signal group");
                 rowData.add(tableCell);
@@ -394,7 +392,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 rowData.add(n.getSignalCollection().getSourceFile(signalGroup));
 
                 fieldNames.add("Source channel");
-                rowData.add(g.getChannel());
+                rowData.add(g.get().getChannel());
 
                 fieldNames.add("Number of signals");
                 rowData.add(n.getSignalCollection().numberOfSignals(signalGroup));
@@ -402,8 +400,6 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
                 for (INuclearSignal s : n.getSignalCollection().getSignals(signalGroup)) {
                     addSignalStatisticsToTable(fieldNames, rowData, s);
                 }
-            } catch (UnavailableSignalGroupException e) {
-                fine("Signal group " + signalGroup + " is not present in collection", e);
             } finally {
                 j++;
             }
@@ -420,14 +416,14 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
      * @param s
      */
     private void addSignalStatisticsToTable(List<Object> fieldNames, List<Object> rowData, INuclearSignal s) {
-
+    	DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (PlottableStatistic stat : PlottableStatistic.getSignalStats()) {
 
             fieldNames.add(stat.label(GlobalOptions.getInstance().getScale()));
 
             double value = s.getStatistic(stat, GlobalOptions.getInstance().getScale());
 
-            rowData.add(DEFAULT_DECIMAL_FORMAT.format(value));
+            rowData.add(df.format(value));
         }
 
         fieldNames.add("Signal CoM");
