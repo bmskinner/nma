@@ -431,7 +431,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         
     	Optional<IMutableAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent()){
-    		fine("No analysis options");
             Object[] err = new Object[23];
             Arrays.fill(err, 0, 22, "Error");
             return err;
@@ -499,9 +498,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String cannyAutoThreshold = nucleusCannyOptions.isUseCanny()
                 ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : NA;
         String cannyLowThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
-                ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : "N/A";
+                ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : Labels.NA;
         String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
-                ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : "N/A";
+                ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : Labels.NA;
         String cannyKernelRadius = nucleusCannyOptions.isUseCanny()
                 ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : NA;
         String cannyKernelWidth = nucleusCannyOptions.isUseCanny()
@@ -555,13 +554,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         model.addColumn(EMPTY_STRING, columnData.toArray());
 
         for (IAnalysisDataset dataset : list) {
-
-            finest("Making column for " + dataset.getName());
-
             List<Object> datasetData = createDatasetStatsTableColumn(dataset, options.getScale());
-
             model.addColumn(dataset.getName(), datasetData.toArray());
-            finest("Added column for " + dataset.getName());
         }
 
         return model;
@@ -570,7 +564,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     private List<Object> createDatasetStatsTableColumn(@NonNull IAnalysisDataset dataset, MeasurementScale scale) {
 
         // format the numbers and make into a tablemodel
-        DecimalFormat pf = new DecimalFormat("#0.000");
+        DecimalFormat pf = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
         ICellCollection collection = dataset.getCollection();
 

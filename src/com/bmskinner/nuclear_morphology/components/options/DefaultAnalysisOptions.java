@@ -209,7 +209,14 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         for (String s : detectionOptions.keySet()) {
             IDetectionOptions d = detectionOptions.get(s);
-            if (!d.equals(other.getDetectionOptions(s))){
+            Optional<IMutableDetectionOptions> otherSub = other.getDetectionOptions(s);
+            if((d!=null && !otherSub.isPresent()) || d==null && otherSub.isPresent())
+            	return false;
+            
+            if(d==null)
+            	continue;
+            
+            if (!d.equals(otherSub.get())){
 
             	System.out.println("Inequality in suboptions:");
             	System.out.println(d.getClass().getName());
