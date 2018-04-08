@@ -53,53 +53,38 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     @Override
     public void add(List list, Comparable rowKey, Comparable columnKey) {
 
-        if (list == null) {
+        if (list == null)
             throw new IllegalArgumentException("Null 'list' argument.");
-        }
-        if (rowKey == null) {
+        if (rowKey == null)
             throw new IllegalArgumentException("Null 'rowKey' argument.");
-        }
-        if (columnKey == null) {
+        if (columnKey == null)
             throw new IllegalArgumentException("Null 'columnKey' argument.");
-        }
-
-        // Number min = Stats.min(list);
-        // Number max = Stats.max(list);
-        // Range r = new Range(min.doubleValue(), max.doubleValue());
-        // ranges.addObject(r, rowKey, columnKey);
         super.add(list, rowKey, columnKey);
 
     }
 
     public boolean hasProbabilities(Comparable<?> r, Comparable<?> c) {
-
-        List<Number> values = (List<Number>) pdfData.getObject((Comparable) r, (Comparable) c);
-        return values!=null && values.size()>0;
+    	double[] values = (double[]) pdfData.getObject((Comparable) r, (Comparable) c);
+        return values!=null && values.length>0;
     }
 
     public boolean hasProbabilities(int r, int c) {
-    	
     	if(pdfData==null)
     		return false;
 
-        @SuppressWarnings("unchecked")
-        List<Number> values = (List<Number>) pdfData.getObject(r, c);
-        return values!=null && values.size()>0;
+        double[] values = (double[]) pdfData.getObject(r, c);
+        return values!=null && values.length>0;
     }
 
     public boolean hasProbabilities() {
 
         int total = 0;
         for (Object c : ranges.getColumnKeys()) {
-
             for (Object r : ranges.getRowKeys()) {
-
-                List<Number> values = (List<Number>) pdfData.getObject((Comparable) r, (Comparable) c);
-                if (values != null) {
-                    total += values.size();
-                }
+                double[] values = (double[]) pdfData.getObject((Comparable) r, (Comparable) c);
+                if (values != null)
+                    total += values.length;
             }
-
         }
         return total > 0;
     }
@@ -137,9 +122,8 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
         }
 
-        if (min == Double.MAX_VALUE || max == Double.MIN_VALUE) {
+        if (min == Double.MAX_VALUE || max == Double.MIN_VALUE)
             return null;
-        }
 
         double range = max - min;
         return new Range(min - (range / 10), max + (range / 10)); // add 10% to
@@ -147,64 +131,60 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
                                                                   // for space
     }
 
-    public void addProbabilities(List<? extends Number> values, Comparable<?> rowKey, Comparable<?> columnKey) {
-        if (values == null) {
+    public void addProbabilities(double[] values, Comparable<?> rowKey, Comparable<?> columnKey) {
+        if (values == null)
             throw new IllegalArgumentException("Null 'values' argument.");
-        }
-        if (rowKey == null) {
+        if (rowKey == null)
             throw new IllegalArgumentException("Null 'rowKey' argument.");
-        }
-        if (columnKey == null) {
+        if (columnKey == null)
             throw new IllegalArgumentException("Null 'columnKey' argument.");
-        }
 
         pdfData.addObject(values, rowKey, columnKey);
-
         fireDatasetChanged();
     }
 
-    public List<Number> getPdfValues(Comparable<?> rowKey, Comparable<?> columnKey) {
-        return (List<Number>) pdfData.getObject(rowKey, columnKey);
+    public double[] getPdfValues(Comparable<?> rowKey, Comparable<?> columnKey) {
+        return (double[]) pdfData.getObject(rowKey, columnKey);
     }
 
-    public List<Number> getPdfValues(int row, int column) {
-        return (List<Number>) pdfData.getObject(row, column);
+    public double[] getPdfValues(int row, int column) {
+        return (double[]) pdfData.getObject(row, column);
     }
 
     public double getMax(Comparable<?> rowKey, Comparable<?> columnKey) {
         Range r = (Range) ranges.getObject(rowKey, columnKey);
-        if (r == null) {
-            log("Error: range is null");
+        if (r == null)
             return 0;
-        }
         return r.getUpperBound();
     }
 
     public double getMax(int row, int column) {
+    	if(column>=ranges.getColumnCount())
+    		return 0;
+    	if(row>=ranges.getRowCount())
+    		return 0;
         Range r = (Range) ranges.getObject(row, column);
-        if (r == null) {
-            log("Error: range is null");
+        if (r == null)
             return 0;
-        }
         return r.getUpperBound();
     }
 
     public double getMin(Comparable<?> rowKey, Comparable<?> columnKey) {
 
         Range r = (Range) ranges.getObject(rowKey, columnKey);
-        if (r == null) {
-            log("Error: range is null");
+        if (r == null)
             return 0;
-        }
         return r.getLowerBound();
     }
 
     public double getMin(int row, int column) {
+    	if(column>=ranges.getColumnCount())
+    		return 0;
+    	if(row>=ranges.getRowCount())
+    		return 0;
         Range r = (Range) ranges.getObject(row, column);
-        if (r == null) {
-            log("Error: range is null");
+        if (r == null)
             return 0;
-        }
         return r.getLowerBound();
     }
 

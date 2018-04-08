@@ -97,18 +97,12 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * Add individual segments from a profile to a dataset. Offset them to the
      * given length
      * 
-     * @param segments
-     *            the list of segments to add
-     * @param profile
-     *            the profile against which to add them
-     * @param ds
-     *            the dataset the segments are to be added to
-     * @param length
-     *            the profile length
-     * @param offset
-     *            an offset to the x position. Used to align plots to the right
-     * @param binSize
-     *            the size of the ProfileAggregate bins, to adjust the offset of
+     * @param segments the list of segments to add
+     * @param profile the profile against which to add them
+     * @param ds the dataset the segments are to be added to
+     * @param length the profile length
+     * @param offset an offset to the x position. Used to align plots to the right
+     * @param binSize the size of the ProfileAggregate bins, to adjust the offset of
      *            the median
      * @return the updated dataset
      * @throws ProfileException

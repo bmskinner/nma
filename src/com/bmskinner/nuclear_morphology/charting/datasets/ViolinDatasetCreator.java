@@ -51,6 +51,8 @@ import weka.estimators.KernelEstimator;
  *
  */
 public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
+	
+	private static final int STEP_COUNT = 100;
 
     /**
      * Create with options
@@ -372,10 +374,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         return dataset;
     }
 
-    protected void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
+    protected synchronized void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
             Comparable<?> colKey) {
 
-        List<Number> pdfValues = new ArrayList<Number>();
+        double[] pdfValues = new double[STEP_COUNT+1];
 
         if (list.isEmpty()) {
             Range r = new Range(0, 0);
@@ -390,34 +392,18 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
         // If all values are the same, min==max, and there will be a step error
         // calculating values between them for pdf
-        if (list.size() > 2 && total > 0 && min != max) { // don't
-                                                                        // bother
-                                                                        // with
-                                                                        // a
-                                                                        // dataset
-                                                                        // of a
-                                                                        // single
-                                                                        // cell,
-                                                                        // or if
-                                                                        // the
-                                                                        // stat
-                                                                        // is
-                                                                        // not
-                                                                        // present
+        if (list.size() > 2 && total > 0 && min < max) { // don't bother with  a dataset of a single cell, or if the  stat  is not present
 
-            double stepSize = (max - min) / 100;
+            double stepSize = (max - min) / STEP_COUNT;
 
             KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
 
-            for (double v = min; v <= max; v += stepSize) {
-
-                pdfValues.add(est.getProbability(v));
+            for(int i=0; i<=STEP_COUNT; i++){
+            	double v = min+(stepSize*i);
+            	pdfValues[i] = est.getProbability(v);
             }
 
             Range r = new Range(min, max);
-            dataset.addProbabilityRange(r, rowKey, colKey);
-        } else {
-            Range r = new Range(list.get(0).doubleValue(), list.get(0).doubleValue());
             dataset.addProbabilityRange(r, rowKey, colKey);
         }
         dataset.addProbabilities(pdfValues, rowKey, colKey);

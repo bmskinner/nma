@@ -354,9 +354,6 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     }
 
     private IAnalysisDataset readDataset(File inputFile) throws UnloadableDatasetException, UnsupportedVersionException {
-
-        finest("Checking input file");
-
         IAnalysisDataset dataset = null;
         FileInputStream fis = null;
         ObjectInputStream ois = null;

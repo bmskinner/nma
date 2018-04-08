@@ -109,7 +109,6 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     protected void process(List<Long> integers) {
         long amount = integers.get(integers.size() - 1);
         int percent = (int) ((double) amount / (double) progressTotal * 100);
-        System.out.println("Amount= "+amount+"; total="+progressTotal+"; Percent "+percent);
         if (percent >= 0 && percent <= 100) {
             setProgress(percent); // the integer representation of the percent
         }

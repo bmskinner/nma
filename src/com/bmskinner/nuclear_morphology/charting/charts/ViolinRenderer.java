@@ -26,9 +26,11 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.ValueAxis;
@@ -55,15 +57,6 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
-
-    // /** The color used to paint the median line and average marker. */
-    // private transient Paint artifactPaint;
-    //
-    // /** A flag that controls whether or not the box is filled. */
-    // private boolean fillBox;
-    //
-    // /** The margin between items (boxes) within a category. */
-    // private double itemMargin;
 
     /**
      * Default constructor.
@@ -100,143 +93,154 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
 
     }
 
-    private double calculateStepSize(ViolinCategoryDataset dataset, int row, int column) {
-
-        double stepSize = Double.NaN;
-        // log("Getting min and max y values");
-        try {
-            double ymax = dataset.getMax(row, column);
-            double ymin = dataset.getMin(row, column);
-
-
-            List<Number> values = dataset.getPdfValues(row, column);
-
-            if (values != null) {
-                stepSize = (ymax - ymin) / values.size();
-            }
-
-        } catch (Exception e) {
-            error("Error in step size", e);
-        }
-
-        return stepSize;
-    }
-
     private Shape makeViolinPath(ViolinCategoryDataset dataset, int row, int column, CategoryItemRendererState state,
             Rectangle2D dataArea, CategoryPlot plot, CategoryAxis domainAxis, ValueAxis rangeAxis) {
 
-        double stepSize = calculateStepSize(dataset, row, column);
-
-        double categoryEnd = domainAxis.getCategoryEnd(column, getColumnCount(), dataArea, plot.getDomainAxisEdge());
-        double categoryStart = domainAxis.getCategoryStart(column, getColumnCount(), dataArea,
-                plot.getDomainAxisEdge());
-        double categoryWidth = categoryEnd - categoryStart;
-
-        double xx = categoryStart; //
-        int seriesCount = getRowCount();
-        int categoryCount = getColumnCount();
-
-        if (seriesCount > 1) {
-
-            double seriesGap = dataArea.getWidth() * getItemMargin() / (categoryCount * (seriesCount - 1));
-            double usedWidth = (state.getBarWidth() * seriesCount) + (seriesGap * (seriesCount - 1));
-            // offset the start of the boxes if the total width used is smaller
-            // than the category width
-            double offset = (categoryWidth - usedWidth) / 2;
-            xx = xx + offset + (row * (state.getBarWidth() + seriesGap));
-
-        } else {
-            // offset the start of the box if the box width is smaller than the
-            // category width
-            double offset = (categoryWidth - state.getBarWidth()) / 2;
-            xx = xx + offset;
-        }
-
-        double xxmid = xx + state.getBarWidth() / 2d; // the middle of the
-                                                      // active bar
-        double xxrange = state.getBarWidth();
+    	ViolinPath vp = new ViolinPath(dataset, row, column, state,
+                dataArea, plot, domainAxis, rangeAxis);
 
         // Get the y-values that must be used for step calculations
-        double yValMin = dataset.getMin(row, column); // the lowest y-value in
-                                                      // the dataset
-        double yValMax = dataset.getMax(row, column); // the highest y-value in
-                                                      // the dataset
+        Path2D shape = new Path2D.Double();
 
-        RectangleEdge location = plot.getRangeAxisEdge();
-
-        Path2D leftShape = new Path2D.Double();
-
-        double yValPos = yValMin;
+        shape.moveTo(vp.xxmid, vp.yValue(0)); // start with the lowest value at the midpoint
         
-        double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
-
-        leftShape.moveTo(xxmid, yy); // start with the lowest value
+        double[] values = dataset.getPdfValues(row, column);
         
-        List<Number> values = dataset.getPdfValues(row, column);
-        double maxProbability = values.parallelStream()
-        		.mapToDouble(d->d.doubleValue()).max().orElse(0);
-        
-        for (int i=0; i<values.size(); i++) {
-
-        	Number v = values.get(i);
-
-         // Express the probability as a fraction of the bar width
-            double xValPos = (v.doubleValue() / maxProbability);
-
-         // multiply the fraction by the bar width to get x position
-            double xxPosR = xxmid + ((xxrange / 2) * xValPos);
-            
-            // Connect the lowest value to the midpoint
-            if(i==0)
-        		leftShape.lineTo(xxPosR, yy);
-            
-         // Get the y position on the chart
-            yValPos += stepSize;
-            
-         // convert y values to to java coordinates
-            yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
-
-            // Add to the line
-            leftShape.lineTo(xxPosR, yy);
-
+        for (int i=0; i<values.length; i++) {
+        	double v = values[i];            
+        	double xx = vp.xValueR(v);
+            double yy = vp.yValue(i);
+            shape.lineTo(xx, yy);
         }
 
-        // Move back to the x-midpoint at the highest value in the y-axis
-        leftShape.lineTo(xxmid, yy);
-        yValPos -= stepSize;
+        // Move back to the x-midpoint
+        shape.lineTo(vp.xxmid, vp.yMax());
         // Now do the same on the other side of the midpoint
-        Collections.reverse(values);
-
-        for (int i=0; i<values.size(); i++) {
-
-        	Number v = values.get(i);
-
-            // Express the probability as a fraction of the bar width
-            double xValPos = (v.doubleValue() / maxProbability); 
-
-            // multiply the fraction by the bar width to get x position
-            double xxPosL = xxmid - ((xxrange / 2) * xValPos);
-            
-            // Add to the line
-            leftShape.lineTo(xxPosL, yy);
-            
-            
-            // convert y values to to java coordinates
-            yy = rangeAxis.valueToJava2D(yValPos, dataArea, location); //
-
-            // Get the y position on the chart
-            yValPos -= stepSize;
-            
-            // Bring the shape down to the y-min beforfe closing
-            if(i==values.size()-1)
-            	leftShape.lineTo(xxPosL, rangeAxis.valueToJava2D(yValPos, dataArea, location));
+        for (int i=values.length-1; i>=0; i--) {
+        	double v = values[i];            
+        	double xx = vp.xValueL(v);
+            double yy = vp.yValue(i);
+            shape.lineTo(xx, yy);
         }
+        
+        // Move back to the x-midpoint
+        shape.lineTo(vp.xxmid, vp.yValue(0));
+        shape.closePath();
 
-        leftShape.closePath();
-        Collections.reverse(values); // restore original order
-        return leftShape;
+        return shape;
     }
+    
+    private class ViolinPath {
+    	
+    	Rectangle2D dataArea;
+    	RectangleEdge location;
+    	ViolinCategoryDataset dataset; 
+    	CategoryItemRendererState state;
+        CategoryPlot plot;
+        CategoryAxis domainAxis;
+        ValueAxis rangeAxis;
+    	
+    	int row;
+    	int column;
+    	double xxmid;
+    	double stepSize;
+    	double xxrange;
+    	double yValMin;
+    	double yValMax;
+        double maxProbability;
+    	
+    	public ViolinPath(ViolinCategoryDataset dataset, int row, int column, CategoryItemRendererState state,
+                Rectangle2D dataArea, CategoryPlot plot, CategoryAxis domainAxis, ValueAxis rangeAxis){
+    		this.dataArea = dataArea;
+    		this.dataset = dataset;
+    		this.row = row;
+    		this.column = column;
+    		this.state = state;
+    		this.plot = plot;
+    		this.domainAxis = domainAxis;
+    		this.rangeAxis = rangeAxis;
+    		location = plot.getRangeAxisEdge();
+    		stepSize = calculateStepSize();
+    		xxmid = calculateXMid();
+    		xxrange = state.getBarWidth();
+    		yValMin = dataset.getMin(row, column); // the lowest y-value
+    		yValMax = dataset.getMax(row, column);
+    		
+    		maxProbability = DoubleStream.of(dataset.getPdfValues(row, column)).max().orElse(0);
+    	}
+    	
+    	public double yValue(int i){
+    		double yValPos = yValMin + (stepSize*i); 
+    		return rangeAxis.valueToJava2D(yValPos, dataArea, location);
+    	}
+    	
+    	public double yMax(){
+    		return rangeAxis.valueToJava2D(yValMax, dataArea, location);
+    	}
+    	
+    	public double xValueR(double x){
+    		 // Express the probability as a fraction of the bar width
+            double xValPos = (x/maxProbability);
+         // multiply the fraction by the bar width to get x position
+            return xxmid + ((xxrange / 2) * xValPos);
+    	}
+    	
+    	public double xValueL(double x){
+            double xValPos = (x/maxProbability); 
+            return xxmid - ((xxrange / 2) * xValPos);
+    	}
+    	
+    	private double calculateStepSize() {
 
+            double stepSize = Double.NaN;
+
+            try {
+                double ymax = dataset.getMax(row, column);
+                double ymin = dataset.getMin(row, column);
+
+                double[] values = dataset.getPdfValues(row, column);
+
+                if (values != null) {
+                    stepSize = (ymax - ymin) / values.length;
+                }
+
+            } catch (Exception e) {
+                error("Error in step size", e);
+            }
+
+            return stepSize;
+        }
+    	
+    	private double calculateXMid(){
+    		double categoryEnd = domainAxis.getCategoryEnd(column, getColumnCount(), dataArea, plot.getDomainAxisEdge());
+            double categoryStart = domainAxis.getCategoryStart(column, getColumnCount(), dataArea,
+                    plot.getDomainAxisEdge());
+            double categoryWidth = categoryEnd - categoryStart;
+
+            double xx = categoryStart; //
+            int seriesCount = getRowCount();
+            int categoryCount = getColumnCount();
+
+            if (seriesCount > 1) {
+
+                double seriesGap = dataArea.getWidth() * getItemMargin() / (categoryCount * (seriesCount - 1));
+                double usedWidth = (state.getBarWidth() * seriesCount) + (seriesGap * (seriesCount - 1));
+                // offset the start of the boxes if the total width used is smaller
+                // than the category width
+                double offset = (categoryWidth - usedWidth) / 2;
+                xx = xx + offset + (row * (state.getBarWidth() + seriesGap));
+
+            } else {
+                // offset the start of the box if the box width is smaller than the category width
+                double offset = (categoryWidth - state.getBarWidth()) / 2;
+                xx = xx + offset;
+            }
+
+            return xx + state.getBarWidth() / 2d; // the middle of the active bar
+    	}
+    	
+    }
+    
     /**
      * Draws the visual representation of a single data item when the plot has a
      * vertical orientation.
