@@ -249,7 +249,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             selectedDatasets = event.getDatasets();
 
             if (event.method().equals(DatasetEvent.PROFILING_ACTION)) {
-                fine("Creating new profiling and segmentation");
 
                 int flag = 0; // set the downstream analyses to run
                 flag |= SingleDatasetResultAction.ADD_POPULATION;
@@ -268,14 +267,17 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.method().equals(DatasetEvent.NEW_MORPHOLOGY)) {
                 log("Running new morphology analysis");
                 final int flag = SingleDatasetResultAction.ADD_POPULATION;
-
                 return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, mw);
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {
-                finer("Refreshing segmentation across nuclei using existing border tags");
                 final int flag = 0;
                 return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, mw);
+            }
+            
+            if (event.method().equals(DatasetEvent.REFPAIR_SEGMENTATION)) {
+                final int flag = 0;
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, mw);
             }
 
             if (event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)) {
@@ -304,8 +306,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             }
 
             if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)) {
-                fine("Recalculating the median for the given datasets");
-
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
             }
             

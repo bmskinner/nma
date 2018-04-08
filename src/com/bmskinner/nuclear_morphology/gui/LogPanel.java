@@ -92,6 +92,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
     private static final String THROW_CMD = "throw";
     private static final String LIST_CMD  = "list";
     private static final String KILL_CMD  = "kill";
+    private static final String REPAIR_CMD  = "unfuck";
 
     private static final Map<String, Runnable> LOCAL_CMDS = new HashMap<>();
 
@@ -135,7 +136,7 @@ public class LogPanel extends DetailPanel implements ActionListener {
         }
 
     }
-
+    
     @Override
     public void setChartsAndTablesLoading() {
     }
@@ -256,6 +257,10 @@ public class LogPanel extends DetailPanel implements ActionListener {
         });
         LOCAL_CMDS.put(KILL_CMD, () -> {
             killAllTasks();
+        });
+        
+        LOCAL_CMDS.put(REPAIR_CMD, () ->{
+        	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
         });
     }
 

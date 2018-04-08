@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
+import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -58,6 +59,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -368,7 +370,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 model.addColumn(dataset.getCollection().getName(), collectionData);
 
             } else {
-                fine("No analysis options in dataset " + dataset.getName());
+                fine("No analysis options in dataset " + dataset.getName()+", treating as merge");
                 Object[] collectionData = createAnalysisParametersMergeColumn(dataset);
 
                 model.addColumn(dataset.getCollection().getName(), collectionData);
@@ -390,11 +392,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         Object[] data = new Object[ANALYSIS_PARAMETERS_ROWS.length];
 
         if (dataset.hasMergeSources()) {
-
-            fine("Dataset has merge sources");
             if (IAnalysisDataset.mergedSourceOptionsAreSame(dataset)) {
-
-                fine("Merge source options are the same");
 
                 // The options are the same in all merge sources
                 // Show the first options from the first source
@@ -408,13 +406,19 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             } else {
                 // Merge sources have different options
                 Arrays.fill(data, NA_MERGE);
-                fine("Merge source options are different");
             }
-
         } else {
-            // there are no options to use; fill blank
-            Arrays.fill(data, NA);
-            fine("No merge sources, and no options");
+        	// if this is a child of merged datasets, get the root.
+        	if(!dataset.isRoot()){
+        		ICellCollection c = dataset.getCollection();
+        		if(c.isVirtual()){
+        			VirtualCellCollection v = (VirtualCellCollection)c;
+        			return createAnalysisParametersMergeColumn(v.getRootParent());
+        		}
+        		
+        	} else {
+        		Arrays.fill(data, NA); // there are no options to use; fill blank
+        	}
         }
         return data;
     }
@@ -429,12 +433,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
+    	int rowCount = 23;
     	Optional<IMutableAnalysisOptions> o = dataset.getAnalysisOptions();
-    	if(options == null && !o.isPresent()){
-            Object[] err = new Object[23];
-            Arrays.fill(err, 0, 22, "Error");
-            return err;
-    	}
+    	if(options == null && !o.isPresent())
+    		return makeErrorArray(rowCount);
     	
     	options = options == null ? o.get() : options;
     	
@@ -446,6 +448,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String logFile;
 
         Optional<IMutableDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        
+        if(!nO.isPresent())
+        	fine("No nucleus options in dataset "+dataset.getName());
         
         if (dataset.hasMergeSources()) {
             date = NA_MERGE;
@@ -469,19 +474,18 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         
-        if(!nO.isPresent()){
-            Object[] err = new Object[23];
-            Arrays.fill(err, 0, 22, "Error");
-            return err;
-        }
+        if(!nO.isPresent())
+            return makeErrorArray(rowCount);
+        
+        if(!nO.isPresent())
+        	fine("No nucleus options in dataset "+dataset.getName());
         	
         ICannyOptions nucleusCannyOptions;
 		try {
 			nucleusCannyOptions = nO.get().getCannyOptions();
 		} catch (MissingOptionException e) {
-			Object[] err = new Object[23];
-            Arrays.fill(err, 0, 22, "Error");
-            return err;
+			fine("No canny options in dataset "+dataset.getName());
+			return makeErrorArray(rowCount);
 		}
           
 
@@ -516,6 +520,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 df.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
                 time, folder, logFile, options.getNucleusType().toString(), dataset.getVersion().toString() };
         return collectionData;
+    }
+    
+    private Object[] makeErrorArray(int rows){
+    	Object[] err = new Object[rows];
+        Arrays.fill(err, 0, rows-1, "Error");
+        return err;
     }
 
     /**

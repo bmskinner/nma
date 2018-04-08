@@ -66,6 +66,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
@@ -380,19 +381,6 @@ public class VirtualCellCollection implements ICellCollection {
     public void createProfileCollection() {
         profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());
     }
-    //
-    // @Override
-    // public void setProfileCollection(ProfileType type, IProfileCollection p)
-    // {
-    // profileCollections.put(type, p);
-    //
-    // }
-    //
-    // @Override
-    // public void removeProfileCollection(ProfileType type) {
-    // profileCollections.remove(type);
-    //
-    // }
 
     @Override
     public File getFolder() {
@@ -603,15 +591,16 @@ public class VirtualCellCollection implements ICellCollection {
 
     private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
         boolean makeVirtual = false;
-        if (other instanceof VirtualCellCollection) {
-            // Decide if the other collectionis also a child of the root parent
-            IAnalysisDataset rootParent = this.getRootParent();
-            IAnalysisDataset rootOther = ((VirtualCellCollection) other).getRootParent();
-
-            if (rootParent == rootOther) {
-                makeVirtual = true;
-            }
-        }
+        
+        // Decide if the other collection is also a child of the root parent
+        IAnalysisDataset rootParent = this.getRootParent();
+        IAnalysisDataset rootOther = other.isVirtual() ?
+            ((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
+        
+        log(rootParent.getName());
+        log(rootOther.getName());
+        if (rootParent == rootOther)
+            makeVirtual = true;
 
         ICellCollection newCollection;
         if (makeVirtual) {
@@ -621,6 +610,15 @@ public class VirtualCellCollection implements ICellCollection {
         }
         return newCollection;
     }
+
+	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
+		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
+			if(d.getCollection().equals(other) 
+					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(other.getID())))
+				return d;
+		}
+		return null;
+	}
 
     @Override
     public ICellCollection and(ICellCollection other) {

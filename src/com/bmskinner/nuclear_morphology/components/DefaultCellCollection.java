@@ -76,6 +76,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.components.stats.VennCache;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
 
 /**
@@ -1182,18 +1183,11 @@ public class DefaultCellCollection implements ICellCollection {
     @Override
     public ICellCollection and(ICellCollection other) {
 
-        ICellCollection newCollection = new DefaultCellCollection(this, "AND operation");
+        ICellCollection newCollection = chooseNewCollectionType(this, "AND operation");
 
         other.streamCells()
             .filter(c->contains(c))
             .forEach(c->newCollection.addCell(new DefaultCell(c)));
-            
-//        for (ICell c : other.getCells()) {
-//
-//            if (this.contains(c)) {
-//                newCollection.addCell(new DefaultCell(c));
-//            }
-//        }
 
         return newCollection;
     }
@@ -1201,18 +1195,11 @@ public class DefaultCellCollection implements ICellCollection {
     @Override
     public ICellCollection not(ICellCollection other) {
 
-        ICellCollection newCollection = new DefaultCellCollection(this, "NOT operation");
+        ICellCollection newCollection = chooseNewCollectionType(this, "NOT operation");
         
         streamCells()
             .filter(c->!other.contains(c))
             .forEach(c->newCollection.addCell(new DefaultCell(c)));
-
-//        for (ICell c : getCells()) {
-//
-//            if (!other.contains(c)) {
-//                newCollection.addCell(new DefaultCell(c));
-//            }
-//        }
 
         return newCollection;
     }
@@ -1220,7 +1207,7 @@ public class DefaultCellCollection implements ICellCollection {
     @Override
     public ICellCollection xor(ICellCollection other) {
 
-        ICellCollection newCollection = new DefaultCellCollection(this, "XOR operation");
+        ICellCollection newCollection = chooseNewCollectionType(this, "XOR operation");
         
         streamCells()
             .filter(c->!other.contains(c))
@@ -1230,48 +1217,40 @@ public class DefaultCellCollection implements ICellCollection {
             .filter(c->!contains(c))
             .forEach(c->newCollection.addCell(new DefaultCell(c)));
 
-//        for (ICell c : getCells()) {
-//
-//            if (!other.contains(c)) {
-//                newCollection.addCell(new DefaultCell(c));
-//            }
-//        }
-//
-//        for (ICell c : other.getCells()) {
-//
-//            if (!this.contains(c)) {
-//                newCollection.addCell(new DefaultCell(c));
-//            }
-//        }
-
         return newCollection;
     }
 
     @Override
     public ICellCollection or(ICellCollection other) {
 
-        ICellCollection newCollection = new DefaultCellCollection(this, "OR operation");
+        ICellCollection newCollection = chooseNewCollectionType(this, "OR operation");
         
         getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
         
         other.getCells().forEach(c->newCollection.addCell(new DefaultCell(c)));
-        
-
-//        for (ICell c : getCells()) {
-//
-//            newCollection.addCell(new DefaultCell(c));
-//
-//        }
-//
-//        for (ICell c : other.getCells()) {
-//
-//            if (!this.contains(c)) {
-//                newCollection.addCell(new DefaultCell(c));
-//            }
-//        }
 
         return newCollection;
     }
+    
+    private ICellCollection chooseNewCollectionType(ICellCollection other, String name) {
+        
+        // Decide if the other collection is also a child of the root parent
+        IAnalysisDataset rootParent = getDatasetOfRealCollection(this);
+        IAnalysisDataset rootOther = other.isVirtual() ?
+            ((VirtualCellCollection) other).getRootParent() : getDatasetOfRealCollection(other);
+        return rootParent == rootOther 
+        		? new VirtualCellCollection(rootParent, name)
+        		: new DefaultCellCollection(this, name);
+    }
+
+	private IAnalysisDataset getDatasetOfRealCollection(ICellCollection other){
+		for(IAnalysisDataset d : DatasetListManager.getInstance().getRootDatasets()){
+			if(d.getCollection().equals(other) 
+					|| d.getAllChildDatasets().stream().map(t->t.getCollection()).anyMatch(c->c.getID().equals(other.getID())))
+				return d;
+		}
+		return null;
+	}
 
     /**
      * Invalidate the existing cached vertically rotated nuclei, and

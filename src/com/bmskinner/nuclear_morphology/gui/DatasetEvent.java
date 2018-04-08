@@ -40,7 +40,17 @@ public class DatasetEvent extends EventObject {
      */
     public static final String COPY_PROFILE_SEGMENTATION = "Copy profile segmentation";
 
+    /**
+     * Rerun the segmentation on the given datasets, without trying to add as a new
+     * population.
+     */
     public static final String REFRESH_MORPHOLOGY = "Refresh morphology";
+    
+    /**
+     * Run new segmentation on the given datasets, without trying to add as a new
+     * population.
+     */
+    public static final String REFPAIR_SEGMENTATION = "Repair segmentation";
 
     public static final String REFOLD_CONSENSUS   = "Refold consensus";
     public static final String SELECT_DATASETS    = "Select multiple datasets";

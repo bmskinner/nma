@@ -20,10 +20,12 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
@@ -43,7 +45,6 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
     @Override
     public void run() {
         try {
-            fine("Performing arithmetic...");
 
             /*
              * Make a dialog with a dropdown for dataset 1, operator, then
@@ -96,8 +97,6 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
                 makeNewDataset(newCollection);
 
-            } else {
-                fine("User cancelled operation");
             }
 
         } catch (Exception e1) {
@@ -112,16 +111,21 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
         if (newCollection != null && newCollection.size() > 0) {
 
             log("Found " + newCollection.size() + " cells");
-            log("Running morphology analysis...");
-
             IAnalysisDataset newDataset;
 
             if (newCollection instanceof VirtualCellCollection) {
 
                 IAnalysisDataset root = ((VirtualCellCollection) newCollection).getRootParent();
 
-                root.addChildCollection(newCollection);
-                newDataset = root.getChildDataset(newCollection.getID());
+                try {
+					root.getCollection().getProfileManager().copyCollectionOffsets(newCollection);
+					root.addChildCollection(newCollection);
+	                newDataset = root.getChildDataset(newCollection.getID());
+	                getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
+				} catch (ProfileException e) {
+					warn("Error: unable to complete operation");
+					fine("Error copying profile offsets", e);
+				}
 
             } else {
                 newDataset = new DefaultAnalysisDataset(newCollection);
@@ -130,7 +134,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 flag |= SingleDatasetResultAction.SAVE_DATASET;
                 flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
                 RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
-
+                log("Running morphology analysis...");
                 ThreadManager.getInstance().execute(pr);
             }
 

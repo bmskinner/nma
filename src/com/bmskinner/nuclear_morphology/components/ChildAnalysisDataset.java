@@ -29,8 +29,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -52,7 +53,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
      * @param parent
      * @param collection
      */
-    public ChildAnalysisDataset(IAnalysisDataset parent, ICellCollection collection) {
+    public ChildAnalysisDataset(@NonNull IAnalysisDataset parent, @NonNull ICellCollection collection) {
         super(collection);
         this.parent = parent;
     }
@@ -69,10 +70,9 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void addChildCollection(ICellCollection collection) {
-        if (collection == null) {
+    public void addChildCollection(@NonNull ICellCollection collection) {
+        if (collection == null)
             throw new IllegalArgumentException("Nucleus collection is null");
-        }
 
         IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
         this.childDatasets.add(childDataset);
@@ -80,7 +80,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void addChildDataset(IAnalysisDataset dataset) {
+    public void addChildDataset(@NonNull IAnalysisDataset dataset) {
         childDatasets.add(dataset);
 
     }
@@ -210,10 +210,6 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     @Override
     public List<IAnalysisDataset> getAllChildDatasets() {
         List<IAnalysisDataset> result = new ArrayList<IAnalysisDataset>();
-
-        // log(this.getName());
-        // log("Has children: "+this.hasChildren());
-
         if (!childDatasets.isEmpty()) {
 
             for (IAnalysisDataset d : childDatasets) {

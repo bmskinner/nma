@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
 
+import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
@@ -129,13 +130,21 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @throws Exception
      */
     private IAnalysisResult runNewAnalysis() throws Exception {
-        fine("Beginning core morphology analysis");
-
         Tag pointType = Tag.REFERENCE_POINT;
-
-        // segment the profiles from head
+        dataset.getCollection().setConsensus(null); // clear if present
         runSegmentation(dataset.getCollection(), pointType);
-        fine("Core morphology analysis complete");
+        
+        if(dataset.hasChildren()){
+        	DatasetValidator v = new DatasetValidator();
+        	for(IAnalysisDataset child: dataset.getAllChildDatasets()){
+        		child.getCollection().setConsensus(null);
+        		dataset.getCollection().getProfileManager().copyCollectionOffsets(child.getCollection());
+        	}
+        	v.validate(dataset);
+            for(String s : v.getErrors()){
+                warn(s);
+            }
+        }
 
         return new DefaultAnalysisResult(dataset);
     }
@@ -154,10 +163,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
     }
 
     private IAnalysisResult runRefreshAnalysis() throws Exception {
-        fine("Refreshing segmentation");
-
         refresh(dataset.getCollection());
-        fine("Refresh complete");
         return new DefaultAnalysisResult(dataset);
     }
 
@@ -192,19 +198,14 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
     /**
      * Refresh the given collection. Assumes that the segmentation in the
-     * profile collection is correct, and updates all nuclei to match
+     * median profile is correct, and updates all nuclei to match
      * 
      * @param collection
      * @return
      */
     public boolean refresh(ICellCollection collection) throws Exception {
-
-        fine("Refreshing mophology");
-
         Tag pointType = Tag.REFERENCE_POINT;
-
         assignMedianSegmentsToNuclei(collection, pointType);
-
         return true;
     }
 
@@ -215,14 +216,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @param pointType
      */
     private void runSegmentation(ICellCollection collection, Tag pointType) throws Exception {
-
-        fine("Beginning segmentation...");
-
         createSegmentsInMedian(collection);
-
         assignMedianSegmentsToNuclei(collection, pointType);
-
-        fine("Segmentation complete");
     }
 
     /**

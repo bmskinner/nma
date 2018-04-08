@@ -31,6 +31,11 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
+/**
+ * Run segmentation on the given datasets
+ * @author ben
+ *
+ */
 public class RunSegmentationAction extends SingleDatasetResultAction {
 
     private MorphologyAnalysisMode mode = MorphologyAnalysisMode.NEW;
@@ -119,33 +124,24 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
         setProgressMessage("Copying segmentation");
         IAnalysisMethod m = new DatasetSegmentationMethod(dataset, source.getCollection());
         worker = new DefaultAnalysisWorker(m);
-        // worker = new DatasetSegmenter(dataset, source.getCollection());
         worker.addPropertyChangeListener(this);
         ThreadManager.getInstance().submit(worker);
     }
 
     private void runRefreshAnalysis() {
-
-        setProgressMessage("Refreshing segmentation");
-
-        IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
-        worker = new DefaultAnalysisWorker(m);
-
-        // worker = new DatasetSegmenter(dataset, mode);
-        worker.addPropertyChangeListener(this);
-        ThreadManager.getInstance().submit(worker);
-
+    	runAnalysis("Refreshing segmentation");
     }
 
     private void runNewAnalysis() {
-
-        setProgressMessage("Segmenting: " + dataset.getName());
+    	runAnalysis("Segmenting: " + dataset.getName());
+    }
+    
+    private void runAnalysis(String message){
+    	setProgressMessage(message);
         IAnalysisMethod m = new DatasetSegmentationMethod(dataset, mode);
         worker = new DefaultAnalysisWorker(m);
-        // worker = new DatasetSegmenter(dataset, mode);
         worker.addPropertyChangeListener(this);
         ThreadManager.getInstance().submit(worker);
-
     }
 
     @Override

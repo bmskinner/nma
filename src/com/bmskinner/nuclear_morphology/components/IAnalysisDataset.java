@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Handler;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -78,14 +80,14 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @param collection
      *            the collection to add
      */
-    void addChildCollection(ICellCollection collection);
+    void addChildCollection(@NonNull ICellCollection collection);
 
     /**
      * Add the given dataset as a child of this dataset
      * 
      * @param dataset
      */
-    void addChildDataset(IAnalysisDataset dataset);
+    void addChildDataset(@NonNull IAnalysisDataset dataset);
 
     UUID getUUID();
 
