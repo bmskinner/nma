@@ -23,7 +23,14 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Stores the basic methods for an IAnalysisMethod
+ * Stores the basic methods for an IAnalysisMethod. The logic for an analysis
+ * should be written within the run() method. To signal progress through the task
+ * use a {@code fireProgressEvent()}. This will tell registered {@code ProgressListener}s 
+ * to update UI elements accordingly. Typically this will be an {@link IAnalysisWorker}. 
+ * Calling {@code fireProgressEvent()} with no parameters indicates that the external worker
+ * should increase the progress by one, where the worker is tracking the total amount of 'work'
+ * in the task. Calling {@code fireProgressEvent(long l)} will tell the worker to update the progress
+ * to the given value out of the total amount of 'work' in the task. 
  * 
  * @author ben
  *
