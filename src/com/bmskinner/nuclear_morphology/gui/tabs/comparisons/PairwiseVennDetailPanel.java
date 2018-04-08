@@ -169,18 +169,6 @@ public class PairwiseVennDetailPanel extends DetailPanel {
 
             }
 
-            if (columnName.equals("Population 1") || columnName.equals("Population 2")) {
-                IAnalysisDataset d1 = (IAnalysisDataset) value;
-                if (d1.hasDatasetColour()) {
-                    backColour = (Color) d1.getDatasetColour();
-                } else {
-                    backColour = (Color) ColourSelecter.getColor(getIndex(d1));
-                    if (backColour.getBlue() > 60) {
-                        foreColour = Color.WHITE;
-                    }
-                }
-            }
-
             l.setBackground(backColour);
             l.setForeground(foreColour);
 

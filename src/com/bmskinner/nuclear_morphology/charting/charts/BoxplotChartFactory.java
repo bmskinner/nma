@@ -146,10 +146,10 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
             for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-                Paint color = options.getDatasets().get(series).getDatasetColour() == null
-                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+            	Paint colour = options.getDatasets().get(series)
+                		.getDatasetColour().orElse(ColourSelecter.getColor(series));
 
-                renderer.setSeriesPaint(series, color);
+                renderer.setSeriesPaint(series, colour);
                 renderer.setSeriesOutlinePaint(series, Color.BLACK);
             }
 
@@ -233,9 +233,10 @@ public class BoxplotChartFactory extends AbstractChartFactory {
 
             IAnalysisDataset d = list.get(i);
 
-            Paint color = d.hasDatasetColour() ? d.getDatasetColour() : ColourSelecter.getColor(i);
+            Paint colour = options.getDatasets().get(i)
+            		.getDatasetColour().orElse(ColourSelecter.getColor(i));
 
-            renderer.setSeriesPaint(i, color);
+            renderer.setSeriesPaint(i, colour);
         }
     }
 

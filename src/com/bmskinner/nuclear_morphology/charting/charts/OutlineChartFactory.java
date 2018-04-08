@@ -738,7 +738,6 @@ public class OutlineChartFactory extends AbstractChartFactory {
                 ip.getHeight());
         plot.setDataset(0, bounds);
 
-        // plot.setRenderer(0, new DefaultXYItemRenderer());
         XYItemRenderer rend = plot.getRenderer(0); // index zero should be the
                                                    // nucleus outline dataset
         rend.setBaseSeriesVisible(false);
@@ -1030,9 +1029,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int i = 0;
         int datasetNumber = 0;
         for (IAnalysisDataset dataset : options.getDatasets()) {
-
-            Paint colour = dataset.hasDatasetColour() ? dataset.getDatasetColour()
-                    : ColourSelecter.getColor(datasetNumber++);
+        	Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(datasetNumber++));
 
             XYLineAndShapeRenderer r = new XYLineAndShapeRenderer(true, false);
             r.setBaseSeriesVisibleInLegend(false);

@@ -63,7 +63,7 @@ public class CosmeticHandler implements Loggable {
     public void changeDatasetColour(IAnalysisDataset dataset) {
         
         int row = DatasetListManager.getInstance().getSelectedDatasets().indexOf(dataset);
-        Paint oldColour = dataset.hasDatasetColour() ? dataset.getDatasetColour() : ColourSelecter.getColor(row);
+        Paint oldColour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(row));
         
         Color newColor = JColorChooser.showDialog((Component) parent, "Choose dataset Color", (Color) oldColour);
 

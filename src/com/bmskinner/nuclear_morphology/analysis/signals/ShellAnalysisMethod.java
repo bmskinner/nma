@@ -19,14 +19,11 @@
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
@@ -42,13 +39,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.stats.Sum;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import ij.ImageStack;
 
@@ -194,8 +187,9 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                             counter.addSignalValues(signalInSignals, normalisedSignals, countsInSignals);
                             counter.addNucleusValues(signalInNucleus, normalisedNucleus, countsInNucleus);
 
-                            totalPixels += new Sum(counter.getPixelCounts(CountType.SIGNAL)).intValue();
-
+                            totalPixels += counter.getPixelCounts(CountType.SIGNAL)
+                            		.stream().mapToInt(i->i.intValue()).sum();
+  
                         } catch (ShellAnalysisException e) {
                             warn("Error in shell analysis");
                             stack("Error in signal in shell analysis", e);

@@ -886,8 +886,8 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getDatasetColour()
      */
     @Override
-    public Paint getDatasetColour() {
-        return this.datasetColour;
+    public Optional<Paint> getDatasetColour() {
+        return Optional.ofNullable(this.datasetColour);
     }
 
     /*

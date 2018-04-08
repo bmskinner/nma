@@ -480,60 +480,49 @@ public class DefaultProfileTest {
 	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetSlidingWindowOffset() throws ProfileException {
-		
-		/*
-		 * Testing with equal array lengths
-		 */
-		
-		float[] test       = { 9, 20, 13, 6, 4, 10, 5, 1, 2, 7, 19, 12, 3 };
-
-		int expectedOffset = 8;
-		
-		IProfile dataProfile = comp.new DefaultProfile(data);
-		IProfile templateProfile = comp.new DefaultProfile(test);
-
-		
-		int offset = dataProfile.getSlidingWindowOffset(templateProfile);
-
-
-		assertEquals(expectedOffset, offset,0);
-		
-		/*
-		 * Testing with shorter test array
-		 */
-		
-		float[] smallTest  = { 9, 16, 5, 7, 1.5f, 13, 7 };
-		IProfile pTest = comp.new DefaultProfile(smallTest);
-		
-		offset =  dataProfile.getSlidingWindowOffset(pTest);
-		assertEquals(expectedOffset, offset,0);
-		
-		/*
-		 * Testing with longer test array
-		 */
-		float[] longTest  = { 9, 14, 20, 16, 13, 9, 6, 5, 4, 7, 10, 7, 5, 2, 1, 1.5f, 2, 4, 7, 13, 19, 15, 12, 7, 3 };
-		pTest = comp.new DefaultProfile(longTest);
-		offset = dataProfile.getSlidingWindowOffset(pTest);
-		assertEquals(expectedOffset, offset,0);
+	public void testGetSlidingWindowOffsetPositive() throws ProfileException {
+		int exp = 10;
+		IProfile test = profile.offset(exp);
+		int offset = profile.getSlidingWindowOffset(test);
+		assertEquals(exp, offset);
+	}
+	
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * @throws ProfileException 
+	 */
+	@Test
+	public void testGetSlidingWindowOffsetNegative() throws ProfileException {
+		int exp = -10;
+		IProfile test = profile.offset(exp);
+		int offset = profile.getSlidingWindowOffset(test);
+		assertEquals(exp, offset);
+	}
+	
+	/**
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * @throws ProfileException 
+	 */
+	@Test
+	public void testGetSlidingWindowOffseZero() throws ProfileException {
+		int exp = 0;
+		IProfile test = profile.offset(exp);
+		int offset = profile.getSlidingWindowOffset(test);
+		assertEquals(exp, offset);
 	}
 
 	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getLocalMinima(int)}.
+	 * @throws ProfileException 
 	 */
 	@Test
-	public void testGetLocalMinimaInt() {
+	public void testGetLocalMinimaInt() throws ProfileException {
 	    
-	    float[] arr  = { 10, 9, 8, 7, 6, 5, 6, 7, 8, 9, 10 };
-	    
-	    IProfile p = comp.new DefaultProfile(arr);
-	    
-	    BooleanProfile b = p.getLocalMinima(3);
-	    
-	    assertTrue(b.get(5));
-	    assertFalse(b.get(4));
-	    assertFalse(b.get(6));
+	    BooleanProfile b = profile.getLocalMinima(3);
+	    assertFalse(b.get(183));
+	    assertTrue(b.get(184));
+	    assertFalse(b.get(185));
 	}
 	
 	@Test
@@ -547,10 +536,12 @@ public class DefaultProfileTest {
 	 */
 	@Test
 	public void testGetLocalMinimaIntDoubleWithBothPassingThreshold() {
-	    BooleanProfile b = profile.getLocalMinima(3, 8);
-	    assertTrue(b.get(5));
-	    assertTrue(b.get(13));
-	    assertFalse(b.get(4));
+	    BooleanProfile b = profile.getLocalMinima(3, 180);
+	    System.out.println(b);
+	    assertFalse(b.get(183));
+	    assertTrue(b.get(184));
+	    assertFalse(b.get(185));
+	    
 	    assertFalse(b.get(6));
 	    assertFalse(b.get(12));
 	    assertFalse(b.get(14));
@@ -591,7 +582,7 @@ public class DefaultProfileTest {
     public void testGetLocalMaximaIntDoubleWithBothPassingThreshold() {
     	System.out.println(Arrays.toString(profile.toFloatArray()));
         BooleanProfile b = profile.getLocalMaxima(3, 180);
-        System.out.println(Arrays.toString(b.toArray()));
+        System.out.println(b);
 
         assertFalse(b.get(302));
         assertTrue(b.get(303));

@@ -646,9 +646,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             int index = MorphologyChartFactory.getIndexFromLabel(name);
 
             // make a transparent color based on teh profile segmenter system
-            Paint profileColour = options.getDatasets().get(index).getDatasetColour() == null
-                    ? ColourSelecter.getColor(i) : options.getDatasets().get(index).getDatasetColour();
-
+            Paint profileColour = options.getDatasets().get(index).getDatasetColour().orElse(ColourSelecter.getColor(i));
             Paint iqrColour = ColourSelecter.getTransparentColour((Color) profileColour, true, 128);
 
             // fill beteween the upper and lower IQR with single colour; do not
@@ -676,9 +674,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             String name = (String) medianProfiles.getSeriesKey(j);
             int index = MorphologyChartFactory.getIndexFromLabel(name);
 
-            Paint profileColour = options.getDatasets().get(index).getDatasetColour() == null
-                    ? ColourSelecter.getColor(j) : options.getDatasets().get(index).getDatasetColour();
-
+            Paint profileColour = options.getDatasets().get(index).getDatasetColour().orElse(ColourSelecter.getColor(j));
             medianRenderer.setSeriesPaint(j, ((Color) profileColour).darker());
         }
 
@@ -800,9 +796,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             plot.getRenderer().setSeriesVisibleInLegend(j, false);
             plot.getRenderer().setSeriesStroke(j, ChartComponents.QUARTILE_STROKE);
             int index = MorphologyChartFactory.getIndexFromLabel((String) ds.getSeriesKey(j));
-            Paint profileColour = options.getDatasets().get(index).getDatasetColour() == null
-                    ? ColourSelecter.getColor(index) : options.getDatasets().get(index).getDatasetColour();
-
+            Paint profileColour = options.getDatasets().get(index).getDatasetColour().orElse(ColourSelecter.getColor(j));
             plot.getRenderer().setSeriesPaint(j, profileColour);
         }
         applyAxisOptions(chart);
@@ -817,25 +811,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      * @throws Exception
      */
     private JFreeChart makeMultiSegmentStartPositionChart(ChartOptions options) {
-
-        finest("Creating multi segment start position chart");
-
         XYDataset positionDataset;
         try {
             positionDataset = new CellDatasetCreator(options).createPositionFeatureDataset();
         } catch (ChartDatasetCreationException e) {
             return makeErrorChart();
         }
-        finest("Created position dataset");
-
         XYDataset nuclearOutlines;
         try {
             nuclearOutlines = new NucleusDatasetCreator(options).createMultiNucleusOutline();
         } catch (ChartDatasetCreationException e) {
             return makeErrorChart();
         }
-        finest("Created nucleus outline dataset");
-
+        
         if (positionDataset == null || nuclearOutlines == null) {
             // a null dataset is returned if segment counts do not match
             return ConsensusNucleusChartFactory.makeEmptyChart();
@@ -887,8 +875,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
         for (int j = 0; j < positionDataset.getSeriesCount(); j++) {
 
-            Paint profileColour = options.getDatasets().get(j).getDatasetColour() == null ? ColourSelecter.getColor(j)
-                    : options.getDatasets().get(j).getDatasetColour();
+        	Paint profileColour = options.getDatasets().get(j).getDatasetColour().orElse(ColourSelecter.getColor(j));
 
             pointRenderer.setSeriesPaint(j, profileColour);
             pointRenderer.setSeriesShape(j, ChartComponents.DEFAULT_POINT_SHAPE);
@@ -898,7 +885,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             }
         }
         applyAxisOptions(chart);
-        finest("Created segment position chart");
         return chart;
 
     }
@@ -952,8 +938,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                     type);
             XYDataset values = new NucleusDatasetCreator(options).createModalityValuesDataset(position, dataset, type);
 
-            Paint colour = dataset.getDatasetColour() == null ? ColourSelecter.getColor(iteration)
-                    : dataset.getDatasetColour();
+            Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(iteration));
 
             plot.setDataset(datasetCount, ds);
 
@@ -1014,7 +999,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
             IAnalysisDataset dataset = options.getDatasets().get(i);
 
-            Paint colour = dataset.hasDatasetColour() ? dataset.getDatasetColour() : ColourSelecter.getColor(i);
+            Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(i));
 
             plot.getRenderer().setSeriesPaint(i, colour);
             plot.getRenderer().setSeriesStroke(i, ChartComponents.MARKER_STROKE);
@@ -1070,8 +1055,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             XYTextAnnotation annotation = new XYTextAnnotation(statisticalTesting, 355, yPos);
 
             // Set the text colour
-            Paint colour = dataset.getDatasetColour() == null ? ColourSelecter.getColor(index)
-                    : dataset.getDatasetColour();
+            Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(index));
             annotation.setPaint(colour);
             annotation.setTextAnchor(TextAnchor.TOP_RIGHT);
             plot.addAnnotation(annotation);
@@ -1227,15 +1211,14 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         logRenderer.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
 
         XYItemRenderer angleRendererOne = new XYLineAndShapeRenderer(true, false);
-        Paint colorOne = options.getDatasets().get(0).getDatasetColour() == null ? ColourSelecter.getColor(0)
-                : options.getDatasets().get(0).getDatasetColour();
+        Paint colorOne = options.firstDataset().getDatasetColour().orElse(ColourSelecter.getColor(0));
+
         angleRendererOne.setSeriesPaint(0, colorOne);
         angleRendererOne.setSeriesVisibleInLegend(0, false);
         angleRendererOne.setSeriesStroke(0, ChartComponents.MARKER_STROKE);
 
         XYItemRenderer angleRendererTwo = new XYLineAndShapeRenderer(true, false);
-        Paint colorTwo = options.getDatasets().get(1).getDatasetColour() == null ? ColourSelecter.getColor(1)
-                : options.getDatasets().get(1).getDatasetColour();
+        Paint colorTwo = options.getDatasets().get(1).getDatasetColour().orElse(ColourSelecter.getColor(1));
         angleRendererTwo.setSeriesPaint(0, colorTwo);
         angleRendererTwo.setSeriesVisibleInLegend(0, false);
         angleRendererTwo.setSeriesStroke(0, ChartComponents.MARKER_STROKE);

@@ -179,7 +179,7 @@ public class DatasetConverter implements Loggable, Importer {
                 newDataset.setAnalysisOptions(null);
             }
 
-            newDataset.setDatasetColour(oldDataset.getDatasetColour());
+            newDataset.setDatasetColour(oldDataset.getDatasetColour().orElse(null));
 
             // arrange root cluster groups
             for (IClusterGroup oldGroup : oldDataset.getClusterGroups()) {

@@ -59,6 +59,8 @@ public class DefaultCell implements IMutableCell {
                                                                  // values
                                                                  // stored for
                                                                  // this object
+    
+    private transient int hashCode; // no need to recalculate all the time
 
     /**
      * Create a new cell with a random ID
@@ -80,6 +82,7 @@ public class DefaultCell implements IMutableCell {
         tails = new ArrayList<Flagellum>(0);
         acrosomes = new ArrayList<IAcrosome>(0);
         statistics = new HashMap<PlottableStatistic, Double>();
+        recalculateHashCode();
     }
 
     /**
@@ -91,6 +94,7 @@ public class DefaultCell implements IMutableCell {
     public DefaultCell(Nucleus n) {
         this();
         nuclei.add(n);
+        recalculateHashCode();
     }
 
     /**
@@ -102,6 +106,7 @@ public class DefaultCell implements IMutableCell {
     public DefaultCell(ICytoplasm c) {
         this();
         cytoplasm = c;
+        recalculateHashCode();
     }
 
     /**
@@ -139,6 +144,7 @@ public class DefaultCell implements IMutableCell {
         }
 
         statistics = new HashMap<PlottableStatistic, Double>();
+        recalculateHashCode();
     }
 
     /*
@@ -228,7 +234,7 @@ public class DefaultCell implements IMutableCell {
         if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) {
             return getNuclearRatio();
         }
-
+        recalculateHashCode();
         return result;
     }
 
@@ -249,6 +255,7 @@ public class DefaultCell implements IMutableCell {
         if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) {
             statistics.put(stat, d);
         }
+        recalculateHashCode();
     }
 
     @Override
@@ -309,11 +316,13 @@ public class DefaultCell implements IMutableCell {
         } else {
             nuclei.set(0, nucleus);
         }
+        recalculateHashCode();
     }
 
     @Override
     public void addNucleus(Nucleus nucleus) {
         nuclei.add(nucleus);
+        recalculateHashCode();
     }
 
     /*
@@ -334,6 +343,7 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void setMitochondria(List<IMitochondrion> mitochondria) {
         this.mitochondria = mitochondria;
+        recalculateHashCode();
     }
 
     /*
@@ -344,6 +354,7 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void addMitochondrion(IMitochondrion mitochondrion) {
         this.mitochondria.add(mitochondrion);
+        recalculateHashCode();
     }
 
     /*
@@ -364,6 +375,7 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void addFlagellum(Flagellum tail) {
         this.tails.add(tail);
+        recalculateHashCode();
     }
 
     /*
@@ -384,6 +396,7 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void addAcrosome(IAcrosome acrosome) {
         this.acrosomes.add(acrosome);
+        recalculateHashCode();
     }
 
     /*
@@ -439,6 +452,7 @@ public class DefaultCell implements IMutableCell {
     @Override
     public void setCytoplasm(ICytoplasm cytoplasm) {
         this.cytoplasm = cytoplasm;
+        recalculateHashCode();
     }
     
     
@@ -475,6 +489,7 @@ public class DefaultCell implements IMutableCell {
         if(cytoplasm!=null){
         	cytoplasm.setScale(scale);
         }
+        recalculateHashCode();
     }
     
     @Override
@@ -547,6 +562,17 @@ public class DefaultCell implements IMutableCell {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+    
+    private void recalculateHashCode(){
+    	final int prime = 31;
+        hashCode = 1;
+        hashCode = prime * hashCode + ((acrosomes == null) ? 0 : acrosomes.hashCode());
+        hashCode = prime * hashCode + ((mitochondria == null) ? 0 : mitochondria.hashCode());
+        hashCode = prime * hashCode + ((nucleus == null) ? 0 : nucleus.hashCode());
+        hashCode = prime * hashCode + ((tails == null) ? 0 : tails.hashCode());
+        hashCode = prime * hashCode + ((uuid == null) ? 0 : uuid.hashCode());
+        hashCode = prime * hashCode + ((nuclei == null) ? 0 : nuclei.hashCode());
+    }
 
     /*
      * (non-Javadoc)
@@ -555,20 +581,19 @@ public class DefaultCell implements IMutableCell {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((acrosomes == null) ? 0 : acrosomes.hashCode());
-        result = prime * result + ((mitochondria == null) ? 0 : mitochondria.hashCode());
-        result = prime * result + ((nucleus == null) ? 0 : nucleus.hashCode());
-        result = prime * result + ((tails == null) ? 0 : tails.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-        result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
-        return result;
+    	return hashCode;
+//        final int prime = 31;
+//        int result = 1;
+//        result = prime * result + ((acrosomes == null) ? 0 : acrosomes.hashCode());
+//        result = prime * result + ((mitochondria == null) ? 0 : mitochondria.hashCode());
+//        result = prime * result + ((nucleus == null) ? 0 : nucleus.hashCode());
+//        result = prime * result + ((tails == null) ? 0 : tails.hashCode());
+//        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+//        result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
+//        return result;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("Reading cell");
-        // warn("Reading cell");
         in.defaultReadObject();
 
         // Replacce old single nucleus fields
@@ -581,7 +606,7 @@ public class DefaultCell implements IMutableCell {
         if (statistics == null) {
             statistics = new HashMap<PlottableStatistic, Double>();
         }
-
+        recalculateHashCode();
     }
 
 }

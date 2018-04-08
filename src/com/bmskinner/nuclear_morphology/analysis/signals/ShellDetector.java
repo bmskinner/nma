@@ -24,12 +24,6 @@
 */
 package com.bmskinner.nuclear_morphology.analysis.signals;
 
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.plugin.RoiEnlarger;
-import ij.process.ImageProcessor;
-
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -37,6 +31,7 @@ import java.awt.geom.Area;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -45,8 +40,13 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.stats.Sum;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
+
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.plugin.RoiEnlarger;
+import ij.process.ImageProcessor;
 
 /**
  * The shell detector carries out the task of dividing components into shells of
@@ -528,18 +528,15 @@ public class ShellDetector extends Detector {
             throw new IllegalArgumentException("Array length is zero");
         }
 
-        int total = new Sum(counts).intValue();
+        int total = IntStream.of(counts).sum();
 
         double[] result = makeZeroDoubleArray();
 
-        if (total == 0) {
-            fine("No pixels found when getting proportions");
+        if (total == 0)
             return result;
-        }
 
         for (int i = 0; i < counts.length; i++) {
             result[i] = (double) counts[i] / (double) total;
-
         }
 
         return result;

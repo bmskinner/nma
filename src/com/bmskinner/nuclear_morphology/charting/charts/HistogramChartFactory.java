@@ -338,13 +338,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
      */
     private JFreeChart createNuclearStatsHistogram() {
 
-        if (options.isUseDensity()) {
+        if (options.isUseDensity())
             return createNuclearDensityStatsChart();
-        }
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return makeEmptyChart();
-        }
 
         HistogramDataset ds;
 
@@ -353,8 +351,6 @@ public class HistogramChartFactory extends AbstractChartFactory {
         } catch (ChartDatasetCreationException e) {
             return makeErrorChart();
         }
-
-        finer("Creating histogram for " + options.getStat());
 
         String xLabel = options.getStat().label(options.getScale());
 
@@ -375,9 +371,8 @@ public class HistogramChartFactory extends AbstractChartFactory {
             for (IAnalysisDataset dataset : options.getDatasets()) {
 
                 if (seriesName.equals(dataset.getName())) {
-                    Paint colour = dataset.hasDatasetColour() ? dataset.getDatasetColour() : ColourSelecter.getColor(j);
-
-                    finest("Setting histogram series colour: " + colour.toString());
+                	Paint colour = options.getDatasets().get(j)
+                    		.getDatasetColour().orElse(ColourSelecter.getColor(j));
 
                     plot.getRenderer().setSeriesPaint(j, colour);
 
@@ -433,15 +428,10 @@ public class HistogramChartFactory extends AbstractChartFactory {
             String seriesKey = (String) ds.getSeriesKey(j);
             String seriesName = seriesKey.replaceFirst(options.getStat().toString() + "_", "");
 
-            Paint colour = ColourSelecter.getColor(j);
             for (IAnalysisDataset dataset : options.getDatasets()) {
-
                 if (seriesName.equals(dataset.getName())) {
-
-                    colour = dataset.hasDatasetColour() ? dataset.getDatasetColour() : colour;
-
+                	Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(j));
                     plot.getRenderer().setSeriesPaint(j, colour);
-
                 }
             }
 
@@ -476,8 +466,6 @@ public class HistogramChartFactory extends AbstractChartFactory {
             return makeErrorChart();
         }
 
-        finer("Creating histogram for Seg_" + options.getSegPosition());
-
         JFreeChart chart = createHistogram(ds,
                 IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + " length (" + options.getScale() + ")",
                 "Nuclei");
@@ -500,11 +488,7 @@ public class HistogramChartFactory extends AbstractChartFactory {
                 for (IAnalysisDataset dataset : options.getDatasets()) {
 
                     if (seriesName.equals(dataset.getName())) {
-                        Paint colour = dataset.hasDatasetColour() ? dataset.getDatasetColour()
-                                : ColourSelecter.getColor(j);
-
-                        finest("Setting histogram series colour: " + colour.toString());
-
+                    	Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(j));
                         plot.getRenderer().setSeriesPaint(j, colour);
 
                     }
@@ -565,15 +549,11 @@ public class HistogramChartFactory extends AbstractChartFactory {
                 String seriesKey = (String) ds.getSeriesKey(j);
                 String seriesName = seriesKey.replaceFirst("Seg_" + options.getSegPosition() + "_", "");
 
-                Paint colour = ColourSelecter.getColor(j);
                 for (IAnalysisDataset dataset : options.getDatasets()) {
 
                     if (seriesName.equals(dataset.getName())) {
-
-                        colour = dataset.hasDatasetColour() ? dataset.getDatasetColour() : colour;
-
+                    	Paint colour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(j));
                         plot.getRenderer().setSeriesPaint(j, colour);
-
                     }
                 }
 

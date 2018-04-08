@@ -19,14 +19,12 @@
 package com.bmskinner.nuclear_morphology.stats;
 
 import java.util.Arrays;
-import java.util.List;
 
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
+public class Quartile {
 
-@SuppressWarnings("serial")
-public class Quartile extends DescriptiveStatistic {
-
+	public static final String NULL_OR_EMPTY_ARRAY_ERROR = "The data array either is null or does not contain any data.";
+    public static final String NULL_OR_EMPTY_LIST_ERROR  = "The data list either is null or does not contain any data.";
+	
     public static final int LOWER_QUARTILE = 25;
     public static final int UPPER_QUARTILE = 75;
     public static final int MEDIAN         = 50;
@@ -40,17 +38,14 @@ public class Quartile extends DescriptiveStatistic {
      */
     public static float quartile(float[] values, int quartile) {
 
-        if (values == null || values.length == 0) {
+        if (values == null || values.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
 
-        if (values.length == 1) {
+        if (values.length == 1)
             return values[0];
-        }
 
-        if (values.length == 2) {
+        if (values.length == 2)
             return quartile < MEDIAN ? values[0] : values[1];
-        }
 
         // Rank order the values
         float[] v = new float[values.length];
@@ -58,8 +53,6 @@ public class Quartile extends DescriptiveStatistic {
         Arrays.sort(v);
 
         int n = Math.round(((float) v.length * quartile) / 100);
-        // int n = (int) Math.round(v.length * quartile / 100);
-
         return v[n];
     }
     
@@ -72,17 +65,14 @@ public class Quartile extends DescriptiveStatistic {
      */
     public static int quartile(int[] values, int quartile) {
 
-        if (values == null || values.length == 0) {
+        if (values == null || values.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
 
-        if (values.length == 1) {
+        if (values.length == 1)
             return values[0];
-        }
 
-        if (values.length == 2) {
+        if (values.length == 2)
             return quartile < MEDIAN ? values[0] : values[1];
-        }
 
         // Rank order the values
         int[] v = new int[values.length];
@@ -105,17 +95,14 @@ public class Quartile extends DescriptiveStatistic {
      */
     public static double quartile(double[] values, int quartile) {
 
-        if (values == null || values.length == 0) {
+        if (values == null || values.length == 0)
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-        }
 
-        if (values.length == 1) {
+        if (values.length == 1)
             return values[0];
-        }
 
-        if (values.length == 2) {
+        if (values.length == 2)
             return quartile < MEDIAN ? values[0] : values[1];
-        }
 
         // Rank order the values
         double[] v = new double[values.length];
@@ -126,96 +113,4 @@ public class Quartile extends DescriptiveStatistic {
 
         return v[n];
     }
-//
-//    public Quartile(List<? extends Number> values, double lowerPercent) {
-//
-//        Number[] array = values.toArray(new Number[0]);
-//        value = new Quartile(array, lowerPercent);
-//
-//    }
-//
-//    /*
-//     * Calculate the <lowerPercent> quartile from a float[] array
-//     */
-//    public Quartile(int[] values, double lowerPercent) {
-//
-//        Integer[] temp2;
-//        try {
-//            temp2 = new ArrayConverter(values).toIntegerObjectArray();
-//        } catch (ArrayConversionException e) {
-//            stack("Error converting values", e);
-//            temp2 = new Integer[0];
-//        }
-//
-//        value = new Quartile(temp2, lowerPercent);
-//
-//    }
-//
-//    /*
-//     * Calculate the <lowerPercent> quartile from a float[] array
-//     */
-//    public Quartile(float[] values, float lowerPercent) {
-//
-//        Float[] temp2;
-//        try {
-//            temp2 = new ArrayConverter(values).toFloatObjectArray();
-//        } catch (ArrayConversionException e) {
-//            stack("Error converting values", e);
-//            temp2 = new Float[0];
-//        }
-//
-//        value = new Quartile(temp2, lowerPercent);
-//
-//    }
-//
-//    /*
-//     * Calculate the <lowerPercent> quartile from a Double[] array
-//     */
-//    public Quartile(double[] values, double lowerPercent) {
-//
-//        Double[] temp2;
-//        try {
-//            temp2 = new ArrayConverter(values).toDoubleObjectArray();
-//        } catch (ArrayConversionException e) {
-//            stack("Error converting values", e);
-//            temp2 = new Double[0];
-//        }
-//
-//        value = new Quartile(temp2, lowerPercent);
-//
-//    }
-//
-//    /**
-//     * Calculate the given quartile for an array of values
-//     * 
-//     * @param values
-//     * @param lowerPercent
-//     * @return
-//     */
-//    public Quartile(Number[] values, double lowerPercent) {
-//        if (values == null || values.length == 0) {
-//            throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);
-//        }
-//
-//        if (values.length == 1) {
-//            value = values[0];
-//        }
-//
-//        if (values.length == 2) {
-//            value = lowerPercent < MEDIAN ? values[0] : values[1];
-//        }
-//
-//        if (values.length > 2) {
-//
-//            // Rank order the values
-//            Number[] v = new Number[values.length];
-//            System.arraycopy(values, 0, v, 0, values.length);
-//            Arrays.sort(v);
-//
-//            int n = (int) Math.round(v.length * lowerPercent / 100);
-//
-//            value = v[n];
-//        }
-//    }
-
 }

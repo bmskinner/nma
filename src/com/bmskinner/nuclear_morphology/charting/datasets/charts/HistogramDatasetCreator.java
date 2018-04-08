@@ -3,7 +3,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets.charts;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.DoubleStream;
 
 import org.jfree.data.statistics.HistogramDataset;
 import org.jfree.data.xy.DefaultXYDataset;
@@ -16,8 +16,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.stats.Max;
-import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
@@ -209,18 +207,9 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
             throws ChartDatasetCreationException {
         HistogramDataset ds = new HistogramDataset();
         if (!list.isEmpty()) {
-
-            double[] values;
-
-            try {
-                values = new ArrayConverter(list).toDoubleArray();
-
-            } catch (ArrayConversionException e) {
-                values = new double[0];
-            }
-
-            double min = new Min(list).doubleValue();
-            double max = new Max(list).doubleValue();
+            double[] values = list.stream().mapToDouble(d->d.doubleValue()).toArray();
+            double min = DoubleStream.of(values).min().orElse(0);
+            double max = DoubleStream.of(values).max().orElse(0);
             int bins = 100;
 
             ds.addSeries("Sample", values, bins, min, max);
@@ -228,54 +217,45 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
         return ds;
     }
 
+    /**
+     * Create a probabilty desnsity function dataset from the given list of values
+     * @param list
+     * @param binWidth
+     * @return
+     * @throws ChartDatasetCreationException
+     */
     public XYDataset createDensityDatasetFromList(List<Double> list, double binWidth)
             throws ChartDatasetCreationException {
         DefaultXYDataset ds = new DefaultXYDataset();
-        if (!list.isEmpty()) {
+        if (list.isEmpty())
+        	return ds;
 
-            double[] values;
+        double[] values = list.stream().mapToDouble(d->d.doubleValue()).toArray();
+        double min = DoubleStream.of(values).min().orElse(0);
+        double max = DoubleStream.of(values).max().orElse(0);
 
-            try {
-                values = new ArrayConverter(list).toDoubleArray();
-
-            } catch (ArrayConversionException e) {
-                values = new double[0];
-            }
-
-            KernelEstimator est;
-            try {
-                est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, binWidth);
-            } catch (Exception e1) {
-                throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
-            }
-
-            List<Double> xValues = new ArrayList<Double>();
-            List<Double> yValues = new ArrayList<Double>();
-
-            double min = new Min(list).doubleValue();
-            double max = new Max(list).doubleValue();
-
-            for (double i = min; i <= max; i += 0.0001) {
-                xValues.add(i);
-                yValues.add(est.getProbability(i));
-            }
-
-            double[] xData;
-            double[] yData;
-
-            try {
-
-                xData = new ArrayConverter(xValues).toDoubleArray();
-                yData = new ArrayConverter(yValues).toDoubleArray();
-
-            } catch (ArrayConversionException e) {
-                xData = new double[0];
-                yData = new double[0];
-            }
-            double[][] data = { xData, yData };
-
-            ds.addSeries("Density", data);
+        KernelEstimator est;
+        try {
+        	est = new NucleusDatasetCreator(options).createProbabililtyKernel(values, binWidth);
+        } catch (Exception e1) {
+        	throw new ChartDatasetCreationException("Cannot make probability kernel", e1);
         }
+
+        List<Double> xValues = new ArrayList<>();
+        List<Double> yValues = new ArrayList<>();
+
+        for (double i = min; i <= max; i += 0.0001) {
+        	xValues.add(i);
+        	yValues.add(est.getProbability(i));
+        }
+
+        double[] xData = xValues.stream().mapToDouble(d->d.doubleValue()).toArray();
+        double[] yData = yValues.stream().mapToDouble(d->d.doubleValue()).toArray();
+
+        double[][] data = { xData, yData };
+
+        ds.addSeries("Density", data);
+        
         return ds;
 
     }

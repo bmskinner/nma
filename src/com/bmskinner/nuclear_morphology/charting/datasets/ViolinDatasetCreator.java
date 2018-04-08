@@ -24,8 +24,6 @@ import java.util.UUID;
 
 import org.jfree.data.Range;
 
-import weka.estimators.KernelEstimator;
-
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -42,11 +40,9 @@ import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.stats.Max;
-import com.bmskinner.nuclear_morphology.stats.Mean;
-import com.bmskinner.nuclear_morphology.stats.Min;
 import com.bmskinner.nuclear_morphology.stats.Quartile;
-import com.bmskinner.nuclear_morphology.stats.Sum;
+
+import weka.estimators.KernelEstimator;
 
 /**
  * Creator for violin datasets
@@ -388,13 +384,13 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
             return;
         }
 
-        Number total = new Sum(list); // Stats.sum(list);
-        double min = new Min(list).doubleValue();
-        double max = new Max(list).doubleValue();
+        double total = list.stream().mapToDouble(n->n.doubleValue()).sum();
+        double min = list.stream().mapToDouble(n->n.doubleValue()).min().orElse(0);
+        double max = list.stream().mapToDouble(n->n.doubleValue()).max().orElse(0);
 
         // If all values are the same, min==max, and there will be a step error
         // calculating values between them for pdf
-        if (list.size() > 2 && total.doubleValue() > 0 && min != max) { // don't
+        if (list.size() > 2 && total > 0 && min != max) { // don't
                                                                         // bother
                                                                         // with
                                                                         // a

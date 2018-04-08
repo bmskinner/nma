@@ -2,36 +2,52 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 public class DefaultSegmentedProfileTest extends DefaultProfileTest{
 	
 	private ISegmentedProfile sProfile;
 	
+	@Override
 	@Before
 	public void setUp() throws UnavailableProfileTypeException{
 		super.setUp();
 		sProfile = comp.getProfile(ProfileType.ANGLE);
 	}
 
+	@Override
 	@Test
 	public void testEqualsObject() {
 		fail("Not yet implemented");
 	}
 
+	@Override
 	@Test
 	public void testReverse() {
-		fail("Not yet implemented");
-	}
+		super.testReverse();
+		List<IBorderSegment> segs = sProfile.getSegments();
+		int[] old = new int[segs.size()];
+		for(int i=0; i<old.length; i++){
+			old[i] = segs.get(i).getStartIndex();
+		}
+		
+		int[] exp = new int[old.length];
+		for(int i=0; i<old.length; i++){
+			exp[i] = sProfile.size()-1-old[old.length-i-1];
+		}
 
-	@Test
-	public void testToString() {
-		fail("Not yet implemented");
+		sProfile.reverse();
+		segs = sProfile.getSegments();
+		for(int i=0; i<old.length; i++){
+			assertEquals(exp[i], segs.get(i).getStartIndex());
+		}
 	}
 
 	@Test
@@ -188,7 +204,12 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest{
 
 	@Test
 	public void testIsSplittable() {
-		fail("Not yet implemented");
+		assertTrue(sProfile.isSplittable(sProfile.getSegmentContaining(1).getID(), 50));
+	}
+	
+	@Test
+	public void testIsSplittableReturnsFalseWhenTooSmall() {
+		assertFalse(sProfile.isSplittable(sProfile.getSegmentContaining(1).getID(), 2));
 	}
 
 	@Test

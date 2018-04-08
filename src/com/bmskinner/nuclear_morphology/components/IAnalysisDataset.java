@@ -420,7 +420,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @return colour or null
      */
-    Paint getDatasetColour();
+    Optional<Paint> getDatasetColour();
 
     /**
      * Test if the dataset colour is set or null
@@ -435,9 +435,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @return
      */
-    // public ColourSwatch getSwatch() {
-    // return swatch;
-    // }
 
     String toString();
 

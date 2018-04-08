@@ -271,13 +271,8 @@ public abstract class AbstractChartFactory implements Loggable {
 
         XYItemRenderer renderer = plot.getRenderer();
         for (int i = 0; i < seriesCount; i++) {
-
-            Paint colour = ColourSelecter.getColor(i);
-
-            if (options.getDatasets().get(i).hasDatasetColour()) {
-                colour = options.getDatasets().get(i).getDatasetColour();
-            }
-
+        	Paint colour = options.getDatasets().get(i)
+            		.getDatasetColour().orElse(ColourSelecter.getColor(i));
             renderer.setSeriesPaint(i, colour);
 
         }

@@ -42,6 +42,7 @@ public interface IProfile extends Serializable, Loggable {
     static final int ARRAY_BEFORE = -1;
     static final int ARRAY_AFTER  = 1;
     static final int ZERO_INDEX   = 0;
+    static final int MINIMUM_PROFILE_LENGTH = 3;
 
     /**
      * Create a new profile of the default type

@@ -371,14 +371,15 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
             // in this context, segment colour refers to the entire
             // dataset colour (they use the same pallates in ColourSelecter)
-            Paint color = d.getDatasetColour() == null ? ColourSelecter.getColor(i) : d.getDatasetColour();
+            Paint colour = options.getDatasets().get(i)
+            		.getDatasetColour().orElse(ColourSelecter.getColor(i));
 
             // get the group id from the name, and make colour
-            plot.getRenderer().setSeriesPaint(i, color);
+            plot.getRenderer().setSeriesPaint(i, colour);
             if (name.startsWith("Q")) {
 
                 // make the IQR distinct from the median
-                plot.getRenderer().setSeriesPaint(i, ((Color) color).darker());
+                plot.getRenderer().setSeriesPaint(i, ((Color) colour).darker());
             }
         }
         return chart;

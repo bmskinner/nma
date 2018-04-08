@@ -43,7 +43,6 @@ import org.jfree.ui.RectangleEdge;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Max;
 
 /**
  * The ViolinRenderer draws a boxplot with a probability density function
@@ -172,10 +171,11 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         double yy = rangeAxis.valueToJava2D(yValPos, dataArea, location);
 
         leftShape.moveTo(xxmid, yy); // start with the lowest value
-
-        double maxProbability = new Max(dataset.getPdfValues(row, column)).doubleValue();
-
+        
         List<Number> values = dataset.getPdfValues(row, column);
+        double maxProbability = values.parallelStream()
+        		.mapToDouble(d->d.doubleValue()).max().orElse(0);
+        
         for (int i=0; i<values.size(); i++) {
 
         	Number v = values.get(i);

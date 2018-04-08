@@ -70,7 +70,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         if(mergeSource.getAnalysisOptions().isPresent())
         	analysisOptions = mergeSource.getAnalysisOptions().get();
 
-        this.datasetColour = mergeSource.getDatasetColour();
+        this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
         this.getCollection().createProfileCollection();
         try {

@@ -59,11 +59,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
      * @return
      */
     public JFreeChart createStatisticPlot(String component) {
-        finest("Making violin plot for " + component);
-
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets()) 
             return makeEmptyChart();
-        }
 
         try {
 
@@ -89,7 +86,6 @@ public class ViolinChartFactory extends AbstractChartFactory {
         }
 
         fine("No chart of type " + component);
-
         return makeEmptyChart();
 
     }
@@ -186,8 +182,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
             for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
                 renderer.setSeriesVisibleInLegend(series, false);
-                Paint color = options.getDatasets().get(series).getDatasetColour() == null
-                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+                Paint color = options.getDatasets().get(series)
+                		.getDatasetColour().orElse(ColourSelecter.getColor(series));
 
                 renderer.setSeriesPaint(series, color);
                 renderer.setSeriesOutlinePaint(series, Color.BLACK);
@@ -203,22 +199,21 @@ public class ViolinChartFactory extends AbstractChartFactory {
     }
 
     private JFreeChart createNucleusStatisticPlot() {
+    	
+    	if(!options.hasDatasets())
+    		return makeEmptyChart();
 
         ViolinCategoryDataset ds = null;
-        if (options.hasDatasets()) {
+
             try {
                 ds = new ViolinDatasetCreator(options).createPlottableStatisticViolinDataset(CellularComponent.NUCLEUS);
             } catch (ChartDatasetCreationException e) {
                 stack("Error making chart dataset", e);
                 return makeErrorChart();
             }
-        } else {
-            return makeEmptyChart();
-        }
+
 
         JFreeChart chart = createViolinChart(null, null, options.getStat().label(options.getScale()), ds, false);
-
-        // log("Making violin chart");
 
         CategoryPlot plot = chart.getCategoryPlot();
         ViolinRenderer renderer = (ViolinRenderer) plot.getRenderer();
@@ -231,17 +226,17 @@ public class ViolinChartFactory extends AbstractChartFactory {
             for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
                 renderer.setSeriesVisibleInLegend(series, false);
-                Paint color = options.getDatasets().get(series).getDatasetColour() == null
-                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+                
+                Paint color = options.getDatasets().get(series)
+                		.getDatasetColour().orElse(ColourSelecter.getColor(series));
 
                 renderer.setSeriesPaint(series, color);
                 renderer.setSeriesOutlinePaint(series, Color.BLACK);
             }
         }
 
-        if (ds.hasProbabilities()) {
+        if (ds.hasProbabilities())
             plot.getRangeAxis().setRange(ds.getProbabiltyRange());
-        }
 
         return chart;
 
@@ -337,8 +332,8 @@ public class ViolinChartFactory extends AbstractChartFactory {
 
             for (int series = 0; series < plot.getDataset(datasetIndex).getRowCount(); series++) {
 
-                Paint color = options.getDatasets().get(series).getDatasetColour() == null
-                        ? ColourSelecter.getColor(series) : options.getDatasets().get(series).getDatasetColour();
+            	Paint color = options.getDatasets().get(series)
+                		.getDatasetColour().orElse(ColourSelecter.getColor(series));
 
                 renderer.setSeriesPaint(series, color);
                 renderer.setSeriesOutlinePaint(series, Color.BLACK);

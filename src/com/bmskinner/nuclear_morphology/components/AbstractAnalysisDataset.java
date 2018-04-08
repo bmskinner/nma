@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -88,8 +89,8 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
 
     }
 
-    public Paint getDatasetColour() {
-        return datasetColour;
+    public Optional<Paint> getDatasetColour() {
+        return Optional.ofNullable(datasetColour);
     }
 
     public boolean hasDatasetColour() {

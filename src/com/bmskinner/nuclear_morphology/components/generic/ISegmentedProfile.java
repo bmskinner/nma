@@ -18,7 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
