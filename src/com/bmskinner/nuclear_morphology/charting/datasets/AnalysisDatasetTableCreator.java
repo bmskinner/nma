@@ -542,7 +542,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         }
 
         final String NUCLEUS_LABEL = "Nuclei";
-        final String[] VALUE_LABELS = { " median", " mean", " S.E.M.", " mean 95% CI", " p(unimodal)" };
+        final String[] VALUE_LABELS = { " median", " mean", " S.E.M.", " coefficient of variation", " mean 95% CI", " p(unimodal)" };
 
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets()); // default,
                                                                                            // applies
@@ -584,11 +584,12 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         NucleusType type = IAnalysisDataset.getBroadestNucleusType(options.getDatasets());
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats(type)) {
-            // log("Getting stats for "+stat);
             double[] stats = collection.getRawValues(stat, CellularComponent.NUCLEUS, scale);
 
             double mean = DoubleStream.of(stats).average().orElse(0);
             double sem = Stats.stderr(stats);
+            double cv = Stats.stdev(stats)/mean;
+            
             double median = Quartile.quartile(stats, Quartile.MEDIAN);
 
             ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
@@ -599,6 +600,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             datasetData.add(df.format(median));
             datasetData.add(df.format(mean));
             datasetData.add(df.format(sem));
+            datasetData.add(df.format(cv));
             datasetData.add(ciString);
             datasetData.add(pf.format(diptest));
         }
