@@ -248,8 +248,8 @@ public class ExportableChartPanel extends ChartPanel implements Loggable, ChartS
             double xMin = Double.MAX_VALUE;
             double yMin = Double.MAX_VALUE;
             //
-            double xMax = Double.MIN_VALUE;
-            double yMax = Double.MIN_VALUE;
+            double xMax = -Double.MAX_VALUE;
+            double yMax = -Double.MAX_VALUE;
 
             // get the max and min values on the chart by looking for
             // the min and max values within each dataset in the chart

@@ -67,7 +67,6 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         this.setMeanVisible(false);
         this.setWhiskerWidth(0.05);
         this.setUseOutlinePaintForWhiskers(true);
-
     }
 
     @Override
@@ -106,17 +105,21 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
         
         double[] values = dataset.getPdfValues(row, column);
         
-        for (int i=0; i<values.length; i++) {
+        for (int i=0; i<values.length-1; i++) {
         	double v = values[i];            
         	double xx = vp.xValueR(v);
             double yy = vp.yValue(i);
             shape.lineTo(xx, yy);
         }
+        
+        // The final value in the array is at yMax (see ViolinDatasetCreator::addProbabilities)
+        shape.lineTo(vp.xValueR(values[values.length-1]), vp.yMax());
 
         // Move back to the x-midpoint
         shape.lineTo(vp.xxmid, vp.yMax());
         // Now do the same on the other side of the midpoint
-        for (int i=values.length-1; i>=0; i--) {
+        shape.lineTo(vp.xValueL(values[values.length-1]), vp.yMax());
+        for (int i=values.length-2; i>=0; i--) {
         	double v = values[i];            
         	double xx = vp.xValueL(v);
             double yy = vp.yValue(i);
@@ -159,14 +162,14 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
     		this.plot = plot;
     		this.domainAxis = domainAxis;
     		this.rangeAxis = rangeAxis;
+    		yValMin = dataset.getMin(row, column); // the lowest y-value
+    		yValMax = dataset.getMax(row, column);
     		location = plot.getRangeAxisEdge();
     		stepSize = calculateStepSize();
     		xxmid = calculateXMid();
     		xxrange = state.getBarWidth();
-    		yValMin = dataset.getMin(row, column); // the lowest y-value
-    		yValMax = dataset.getMax(row, column);
-    		
-    		maxProbability = DoubleStream.of(dataset.getPdfValues(row, column)).max().orElse(0);
+    		maxProbability = dataset.getMaxPdfValue();
+//    		maxProbability = DoubleStream.of(dataset.getPdfValues(row, column)).max().orElse(0);
     	}
     	
     	public double yValue(int i){
@@ -192,23 +195,11 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
     	
     	private double calculateStepSize() {
 
-            double stepSize = Double.NaN;
-
-            try {
-                double ymax = dataset.getMax(row, column);
-                double ymin = dataset.getMin(row, column);
-
-                double[] values = dataset.getPdfValues(row, column);
-
-                if (values != null) {
-                    stepSize = (ymax - ymin) / values.length;
-                }
-
-            } catch (Exception e) {
-                error("Error in step size", e);
-            }
-
-            return stepSize;
+    		if(!dataset.hasProbabilities())
+    			return 0;
+    		
+            double[] values = dataset.getPdfValues(row, column);
+            return (yValMax - yValMin) / values.length;
         }
     	
     	private double calculateXMid(){

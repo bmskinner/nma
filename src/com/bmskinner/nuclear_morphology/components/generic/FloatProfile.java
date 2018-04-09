@@ -198,7 +198,7 @@ public class FloatProfile implements IProfile {
         if ( limits.size() != array.length)
             throw new IllegalArgumentException("Limits are wrong size for this profile");
 
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
         int maxIndex = -1;
         for (int i = 0; i < array.length; i++) {
             if (limits.get(i) && array[i] > max) {

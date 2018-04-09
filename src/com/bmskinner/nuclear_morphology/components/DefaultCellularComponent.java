@@ -279,9 +279,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     private void calculateBounds() {
-        double xMax = Double.MIN_VALUE;
+        double xMax = -Double.MAX_VALUE;
         double xMin = Double.MAX_VALUE;
-        double yMax = Double.MIN_VALUE;
+        double yMax = -Double.MAX_VALUE;
         double yMin = Double.MAX_VALUE;
 
         for (IBorderPoint p : borderList) {

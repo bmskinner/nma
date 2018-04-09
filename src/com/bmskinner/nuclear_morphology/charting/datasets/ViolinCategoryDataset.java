@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.DoubleStream;
 
 import org.jfree.data.KeyedObjects2D;
 import org.jfree.data.Range;
@@ -42,6 +43,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     private KeyedObjects2D pdfData;
     private KeyedObjects2D ranges; // hold the min and max for each set of
                                    // values for pdf step calculation
+    private double maxPdfValue = Double.NaN;
 
     public ViolinCategoryDataset() {
 
@@ -60,7 +62,6 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
         if (columnKey == null)
             throw new IllegalArgumentException("Null 'columnKey' argument.");
         super.add(list, rowKey, columnKey);
-
     }
 
     public boolean hasProbabilities(Comparable<?> r, Comparable<?> c) {
@@ -101,7 +102,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     public Range getProbabiltyRange() {
 
         double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
 
         for (Object c : ranges.getColumnKeys()) {
 
@@ -122,7 +123,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
 
         }
 
-        if (min == Double.MAX_VALUE || max == Double.MIN_VALUE)
+        if (min == Double.MAX_VALUE || max == -Double.MAX_VALUE)
             return null;
 
         double range = max - min;
@@ -140,15 +141,47 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
             throw new IllegalArgumentException("Null 'columnKey' argument.");
 
         pdfData.addObject(values, rowKey, columnKey);
+        maxPdfValue = getMaxPdfValue();
         fireDatasetChanged();
     }
 
+    /**
+     * Get the probability values for the given row and column
+     * @param rowKey
+     * @param columnKey
+     * @return
+     */
     public double[] getPdfValues(Comparable<?> rowKey, Comparable<?> columnKey) {
         return (double[]) pdfData.getObject(rowKey, columnKey);
     }
 
+    /**
+     * Get the probability values for the given row and column
+     * @param rowKey
+     * @param columnKey
+     * @return
+     */
     public double[] getPdfValues(int row, int column) {
         return (double[]) pdfData.getObject(row, column);
+    }
+    
+    /**
+     * Get the maximum probability value across all rows and columns
+     * @return
+     */
+    public double getMaxPdfValue(){
+    	if(!Double.isNaN(maxPdfValue))
+    		return maxPdfValue;
+    	
+    	maxPdfValue = -Double.MAX_VALUE;
+    	for (int c=0; c<pdfData.getColumnCount(); c++) {
+    		for (int r=0; r<pdfData.getRowCount(); r++) {
+    			double[] data = (double[]) pdfData.getObject(r, c);
+    			double d = DoubleStream.of(data).max().orElse(Double.NaN);
+    			maxPdfValue = d>maxPdfValue?d:maxPdfValue;
+    		}
+    	}
+    	return maxPdfValue;
     }
 
     public double getMax(Comparable<?> rowKey, Comparable<?> columnKey) {

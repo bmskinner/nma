@@ -398,10 +398,12 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
 
-            for(int i=0; i<=STEP_COUNT; i++){
+            for(int i=0; i<STEP_COUNT; i++){
             	double v = min+(stepSize*i);
             	pdfValues[i] = est.getProbability(v);
             }
+            // ensure last value in the array is at yMax; allows the renderer to have a flat top
+            pdfValues[STEP_COUNT] = est.getProbability(max);
 
             Range r = new Range(min, max);
             dataset.addProbabilityRange(r, rowKey, colKey);
