@@ -59,7 +59,6 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -67,7 +66,6 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.stats.ConfidenceInterval;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -171,7 +169,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             List<IBorderSegment> segments;
             try {
                 segments = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN).getOrderedSegments();
+                        .getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN).getOrderedSegments();
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
                 stack("Error getting median profile", e);
@@ -285,7 +283,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             List<IBorderSegment> segs;
             try {
-                segs = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
+                segs = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN)
                         .getOrderedSegments();
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -590,7 +588,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             double sem = Stats.stderr(stats);
             double cv = Stats.stdev(stats)/mean;
             
-            double median = Quartile.quartile(stats, Quartile.MEDIAN);
+            double median = Stats.quartile(stats, Stats.MEDIAN);
 
             ConfidenceInterval ci = new ConfidenceInterval(stats, 0.95);
             String ciString = df.format(mean) + " ± "
@@ -891,7 +889,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             IBorderSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -911,7 +909,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     IBorderSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
-                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
@@ -1049,7 +1047,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             IBorderSegment medianSeg1;
             try {
                 medianSeg1 = dataset.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(options.getSegPosition());
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -1065,7 +1063,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             DescriptiveStatistics ds = new DescriptiveStatistics(
                     dataset.getCollection().getRawValues(PlottableStatistic.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg1.getID()));
-                    double value1 = ds.getPercentile(Quartile.MEDIAN);
+                    double value1 = ds.getPercentile(Stats.MEDIAN);
             
             
 
@@ -1083,7 +1081,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     IBorderSegment medianSeg2;
                     try {
                         medianSeg2 = dataset2.getCollection().getProfileCollection()
-                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                                .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                                 .getSegmentAt(options.getSegPosition());
                     } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                             | UnsegmentedProfileException e) {
@@ -1094,7 +1092,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     DescriptiveStatistics ss = new DescriptiveStatistics(
                     dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
                             CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()));
-                    double value2 = ss.getPercentile(Quartile.MEDIAN);
+                    double value2 = ss.getPercentile(Stats.MEDIAN);
                     
 //                    double value2 = new Quartile(dataset2.getCollection().getRawValues(PlottableStatistic.LENGTH,
 //                            CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, medianSeg2.getID()),

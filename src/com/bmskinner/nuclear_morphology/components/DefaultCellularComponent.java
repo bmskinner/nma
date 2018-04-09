@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
 import ij.ImageStack;
@@ -867,7 +867,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             IBorderPoint next = borderList.get(wrapIndex(i + 1));
             distances[i] = p.getLengthTo(next);
         }
-        return Quartile.quartile(distances, Quartile.MEDIAN);
+        return Stats.quartile(distances, Stats.MEDIAN);
     }
 
     /**

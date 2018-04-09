@@ -101,7 +101,7 @@ public class SVGWriter implements Exporter, Loggable {
      * 
      * @param c
      */
-    public void export(@NonNull List<? extends CellularComponent> list) {
+    public void export(@NonNull List<? extends @NonNull CellularComponent> list) {
     	
     	double w = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getWidth()).sum();
     	double h = list.stream().mapToDouble( c-> c.toShape().getBounds2D().getHeight()).max().orElse(100);

@@ -22,16 +22,13 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
-import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * The method for profiling nuclei within a dataset
@@ -103,7 +100,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
             // Create a median from the current reference points in the nuclei
             IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                    Quartile.MEDIAN);
+            		Stats.MEDIAN);
             finest("Fetched median from initial RP");
 
             // RP index *should be* zero in the median profile at this point
@@ -185,7 +182,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
                 // Create a median from the current reference points in the
                 // nuclei
                 IProfile tagMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag,
-                        Quartile.MEDIAN);
+                		Stats.MEDIAN);
 
                 collection.getProfileManager().offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
                 fine("Assigned offset in nucleus profiles for " + tag);

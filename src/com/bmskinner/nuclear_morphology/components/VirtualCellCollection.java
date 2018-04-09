@@ -59,7 +59,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -67,7 +66,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This class provides access to child dataset ICell lists and statistics
@@ -510,7 +509,7 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
         IProfile medianProfile = this.getProfileCollection()
-                .getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+                .getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
         Nucleus n = null;
         double difference = Arrays.stream(getDifferencesToMedianFromPoint(pointType)).max().orElse(0);
@@ -545,7 +544,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         IProfile medianProfile;
         try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             for (int j = 0; i < result.length; j++) {
@@ -831,7 +830,7 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        return Quartile.quartile(p, Quartile.MEDIAN);
+        return Stats.quartile(p, Stats.MEDIAN);
     }
 
     /**
@@ -1097,7 +1096,7 @@ public class VirtualCellCollection implements ICellCollection {
 
         IProfile medianProfile;
         try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             warn("Cannot get median profile for collection");
             fine("Error getting median profile", e);
@@ -1163,7 +1162,7 @@ public class VirtualCellCollection implements ICellCollection {
                 for(double v  : values){
                 	s.addValue(v);
                 }
-                median = s.getPercentile(Quartile.MEDIAN);
+                median = s.getPercentile(Stats.MEDIAN);
             }
 
             statsCache.setMedian(stat, component, scale, id, median);
@@ -1213,7 +1212,7 @@ public class VirtualCellCollection implements ICellCollection {
     public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
         IProfile medianProfile;
         try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             return 0;

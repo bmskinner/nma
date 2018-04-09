@@ -749,8 +749,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 }
                 
                 Boolean ok = (Boolean) f.get();
-                
-                if(!ok){
+
+                if(ok!=null && !ok){
                     warn("Error updating the UI panels");
                 }
 

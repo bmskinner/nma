@@ -18,12 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.ImageStack;
-import ij.gui.PolygonRoi;
-import ij.gui.Roi;
-import ij.process.FloatPolygon;
-import ij.process.ImageProcessor;
-
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
@@ -55,8 +49,14 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
+
+import ij.ImageStack;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
+import ij.process.ImageProcessor;
 
 /**
  * @author bms41
@@ -771,7 +771,7 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
             IBorderPoint next = this.getBorderPoint(wrapIndex(i + 1, this.borderList.size()));
             distances[i] = p.getLengthTo(next);
         }
-        return Quartile.quartile(distances, Quartile.MEDIAN);
+        return Stats.quartile(distances, Stats.MEDIAN);
     }
 
     /**

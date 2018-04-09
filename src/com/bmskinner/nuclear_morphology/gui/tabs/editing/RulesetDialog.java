@@ -68,7 +68,7 @@ import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
 public class RulesetDialog extends LoadingIconDialog implements TreeSelectionListener {
@@ -461,7 +461,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
                 Rule r = data.getRule();
 
                 IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                        Tag.REFERENCE_POINT, Stats.MEDIAN);
                 BooleanProfile b = finder.getMatchingIndexes(p, r);
                 chart = chf.createBooleanProfileChart(p, b);
             }
@@ -470,7 +470,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
                 RuleSet r = data.getRuleSet();
 
                 IProfile p = dataset.getCollection().getProfileCollection().getProfile(data.getType(),
-                        Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                        Tag.REFERENCE_POINT, Stats.MEDIAN);
 
                 BooleanProfile b = finder.getMatchingIndexes(p, r);
                 chart = chf.createBooleanProfileChart(p, b);
@@ -480,7 +480,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
             if (data.hasRuleSetCollection()) {
                 RuleSetCollection c = data.getCollection();
                 IProfile p = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                        Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                        Tag.REFERENCE_POINT, Stats.MEDIAN);
 
                 BooleanProfile limits = finder.getMatchingProfile(dataset.getCollection(),
                         c.getRuleSets(data.getTag()));

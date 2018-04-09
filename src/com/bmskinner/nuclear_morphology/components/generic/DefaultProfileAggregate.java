@@ -19,16 +19,11 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import javax.xml.transform.stream.StreamSource;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
@@ -91,7 +86,7 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
     }
 
     public IProfile getMedian() {
-        return calculateQuartile(Quartile.MEDIAN);
+        return calculateQuartile(Stats.MEDIAN);
     }
 
     public IProfile getQuartile(float quartile) {
@@ -212,7 +207,7 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
             float[] values = getValuesAtIndex(i);
 
-            medians[i] = Quartile.quartile(values, quartile);
+            medians[i] = Stats.quartile(values, quartile);
         }
 
         IProfile profile = new FloatProfile(medians);

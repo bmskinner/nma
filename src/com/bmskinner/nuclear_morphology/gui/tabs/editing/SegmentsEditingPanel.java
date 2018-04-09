@@ -65,7 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
 public class SegmentsEditingPanel extends AbstractEditingPanel implements ActionListener, SegmentEventListener {
@@ -199,7 +199,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         try {
             profile = activeDataset().getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                    Tag.REFERENCE_POINT, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                 | UnsegmentedProfileException e) {
             stack("Error getting profile", e);
@@ -253,7 +253,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             ISegmentedProfile medianProfile;
             try {
                 medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                        Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                        Tag.REFERENCE_POINT, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
                 warn("Error getting profile");
@@ -349,7 +349,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         pc.createProfileAggregate(activeDataset().getCollection(), pc.length());
 
         ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Quartile.MEDIAN);
+                Stats.MEDIAN);
 
         // Does nothing, but needed to access segment fitter
         // DatasetSegmenter segmenter = new DatasetSegmenter(activeDataset(),
@@ -388,7 +388,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         try {
             ICellCollection collection = activeDataset().getCollection();
             ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                    Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             SegmentsEditingPanel.this.setAnalysing(true);
 

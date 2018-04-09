@@ -28,12 +28,11 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Offset the profiles of individual nuclei within a CellCollection based on the
@@ -75,7 +74,7 @@ public class ProfileOffsetter implements Loggable {
             segID = collection.getProfileCollection().getSegmentContaining(tag).getID();
 
             profile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                    Quartile.MEDIAN);
+            		Stats.MEDIAN);
 
             segFromRef = profile.getSegment(segID);
         } catch (ProfileException | UnsegmentedProfileException | UnavailableComponentException e1) {

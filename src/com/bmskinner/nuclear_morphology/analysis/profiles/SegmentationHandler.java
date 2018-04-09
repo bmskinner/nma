@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This coordinates updates to segmentation between datasets and their children.
@@ -72,7 +72,7 @@ public class SegmentationHandler implements Loggable {
         try {
 
             medianProfile = dataset.getCollection().getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                    Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             IBorderSegment seg1 = medianProfile.getSegment(segID1);
             IBorderSegment seg2 = medianProfile.getSegment(segID2);
@@ -86,7 +86,7 @@ public class SegmentationHandler implements Loggable {
                 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
                     ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
-                            .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                            .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
                     IBorderSegment childSeg1 = childProfile.getSegment(segID1);
                     IBorderSegment childSeg2 = childProfile.getSegment(segID2);
@@ -124,7 +124,7 @@ public class SegmentationHandler implements Loggable {
         try {
 
             ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             IBorderSegment seg = medianProfile.getSegment(segID);
 
@@ -140,7 +140,7 @@ public class SegmentationHandler implements Loggable {
             for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
 
                 ISegmentedProfile childProfile = child.getCollection().getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
                 IBorderSegment childSeg = childProfile.getSegment(segID);
 
@@ -167,7 +167,7 @@ public class SegmentationHandler implements Loggable {
         try {
 
             ISegmentedProfile medianProfile = dataset.getCollection().getProfileCollection()
-                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                    .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
             IBorderSegment seg = medianProfile.getSegment(segID);
 
@@ -207,7 +207,7 @@ public class SegmentationHandler implements Loggable {
         try {
 
             double prop = dataset.getCollection().getProfileCollection()
-                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getFractionOfIndex(index);
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
             // Update the median profile
             dataset.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, index); // DraggablePanel
@@ -223,7 +223,7 @@ public class SegmentationHandler implements Loggable {
                 // index
 
                 int childIndex = child.getCollection().getProfileCollection()
-                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getIndexOfFraction(prop);
+                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
 
                 child.getCollection().getProfileManager().updateMedianProfileSegmentIndex(true, id, childIndex);
             }
@@ -259,7 +259,7 @@ public class SegmentationHandler implements Loggable {
         try {
 
             double prop = dataset.getCollection().getProfileCollection()
-                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getFractionOfIndex(index);
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getFractionOfIndex(index);
 
             dataset.getCollection().getProfileManager().updateBorderTag(tag, index);
 
@@ -269,7 +269,7 @@ public class SegmentationHandler implements Loggable {
                 // index
 
                 int childIndex = child.getCollection().getProfileCollection()
-                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).getIndexOfFraction(prop);
+                        .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).getIndexOfFraction(prop);
 
                 child.getCollection().getProfileManager().updateBorderTag(tag, childIndex);
             }

@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -68,8 +67,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSetCollection;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
@@ -77,7 +74,7 @@ import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatsCache;
 import com.bmskinner.nuclear_morphology.components.stats.VennCache;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This is a more efficient replacement for the <=1.13.2 cell collections
@@ -555,7 +552,7 @@ public class DefaultCellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        return Quartile.quartile(p, Quartile.MEDIAN);
+        return Stats.quartile(p, Stats.MEDIAN);
     }
 
     public int getMaxProfileLength() {
@@ -630,7 +627,7 @@ public class DefaultCellCollection implements ICellCollection {
 
         IProfile medianProfile;
         try {
-            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             for (int j = 0; i < result.length; j++) {
@@ -670,7 +667,7 @@ public class DefaultCellCollection implements ICellCollection {
         int i = 0;
         IProfile medianProfile;
         try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             for (int j = 0; i < result.length; j++) {
@@ -729,7 +726,7 @@ public class DefaultCellCollection implements ICellCollection {
     public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {
         IProfile medianProfile;
         try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile for collection", e);
             return 0;
@@ -817,7 +814,7 @@ public class DefaultCellCollection implements ICellCollection {
             }
         }
 
-        IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+        IProfile medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
         // the profile we compare the nucleus to
         // Nucleus n = this.getNuclei()..get(0); // default to the first nucleus
@@ -933,7 +930,7 @@ public class DefaultCellCollection implements ICellCollection {
                 for(double v  : values){
                 	s.addValue(v);
                 }
-                median = s.getPercentile(Quartile.MEDIAN);
+                median = s.getPercentile(Stats.MEDIAN);
             }
 
             statsCache.setMedian(stat, component, scale, id, median);

@@ -32,7 +32,7 @@ import java.util.Set;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
@@ -191,7 +191,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
     public IProfile getMedian() throws ProfileException {
         IProfile result = null;
         try {
-            result = calculateQuartile(Quartile.MEDIAN);
+            result = calculateQuartile(Stats.MEDIAN);
         } catch (ProfileException e) {
             // if the profile >200, scale down to 200. Otherwise, reduce
             // stepwise until we get a profile
@@ -253,7 +253,7 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
                         d[j++] = val;
                     }
 
-                    double median = Quartile.quartile(d, (int) quartile);
+                    double median = Stats.quartile(d, (int) quartile);
 
                     medians[i] = median;
                 } else {

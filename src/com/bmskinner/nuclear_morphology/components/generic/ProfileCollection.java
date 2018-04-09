@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values, and stores the
@@ -165,7 +165,7 @@ public class ProfileCollection implements IProfileCollection {
             throw new UnavailableBorderTagException("Tag is not present: " + tag.toString());
         }
 
-        ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Quartile.MEDIAN), getSegments(tag));
+        ISegmentedProfile result = new SegmentedFloatProfile(getProfile(tag, Stats.MEDIAN), getSegments(tag));
         return result;
     }
 
@@ -581,8 +581,8 @@ public class ProfileCollection implements IProfileCollection {
             throw new UnavailableBorderTagException("Tag " + tag + " not present");
         }
 
-        IProfile q25 = getProfile(tag, Quartile.LOWER_QUARTILE);
-        IProfile q75 = getProfile(tag, Quartile.UPPER_QUARTILE);
+        IProfile q25 = getProfile(tag, Stats.LOWER_QUARTILE);
+        IProfile q75 = getProfile(tag, Stats.UPPER_QUARTILE);
 
         if (q25 == null || q75 == null) { // if something goes wrong, return a
                                           // zero profile

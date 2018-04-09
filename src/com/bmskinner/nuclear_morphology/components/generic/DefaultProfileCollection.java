@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Holds the ProfileAggregate with individual nucleus values, and stores the
@@ -650,8 +650,8 @@ public class DefaultProfileCollection implements IProfileCollection {
     public IProfile getIQRProfile(ProfileType type, Tag tag)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException {
 
-        IProfile q25 = getProfile(type, tag, Quartile.LOWER_QUARTILE);
-        IProfile q75 = getProfile(type, tag, Quartile.UPPER_QUARTILE);
+        IProfile q25 = getProfile(type, tag, Stats.LOWER_QUARTILE);
+        IProfile q75 = getProfile(type, tag, Stats.UPPER_QUARTILE);
 
         if (q25 == null || q75 == null) { // if something goes wrong, return a
                                           // zero profile

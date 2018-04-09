@@ -18,10 +18,10 @@
 
 package com.bmskinner.nuclear_morphology.stats;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.DoubleStream;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 @SuppressWarnings("serial")
 public class Mean extends DescriptiveStatistic {
@@ -47,7 +47,7 @@ public class Mean extends DescriptiveStatistic {
         compareList(list);
     }
 
-    private void compareList(List<? extends Number> list) {
+    private void compareList(@NonNull List<? extends @NonNull Number> list) {
 
         if (list.size() == 0) {
             throw new IllegalArgumentException(NULL_OR_EMPTY_ARRAY_ERROR);

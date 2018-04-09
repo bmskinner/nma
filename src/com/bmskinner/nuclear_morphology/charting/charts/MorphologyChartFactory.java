@@ -67,8 +67,8 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class MorphologyChartFactory extends AbstractChartFactory {
 
@@ -484,7 +484,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
             if (options.isShowAnnotations()) {
                 try {
                     for (IBorderSegment seg : options.firstDataset().getCollection().getProfileCollection()
-                            .getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Quartile.MEDIAN)
+                            .getSegmentedProfile(ProfileType.ANGLE, options.getTag(), Stats.MEDIAN)
                             .getOrderedSegments()) {
 
                         int midPoint = seg.getMidpointIndex();

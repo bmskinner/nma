@@ -18,12 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.analysis.image;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.process.ByteProcessor;
-import ij.process.FloodFiller;
-import ij.process.ImageProcessor;
-
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -31,9 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import mmorpho.MorphoProcessor;
-import mmorpho.StructureElement;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
@@ -43,7 +34,15 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
+
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.ByteProcessor;
+import ij.process.FloodFiller;
+import ij.process.ImageProcessor;
+import mmorpho.MorphoProcessor;
+import mmorpho.StructureElement;
 
 /**
  * Provides easy access to the filters used for nucleus detection, such as
@@ -751,7 +750,6 @@ public class ImageFilterer extends AbstractImageFilterer {
         for(double d : values){
         	ds.addValue(d);
         }
-        return ds.getPercentile(Quartile.MEDIAN);
-//        return new Quartile(values, Quartile.MEDIAN).doubleValue();
+        return ds.getPercentile(Stats.MEDIAN);
     }
 }

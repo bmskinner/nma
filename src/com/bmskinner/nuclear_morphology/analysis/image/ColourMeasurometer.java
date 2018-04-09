@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -60,7 +60,7 @@ public class ColourMeasurometer implements Loggable {
      */
     public int calculateAverageIntensity(CellularComponent component) throws UnloadableImageException {
         Area a = new Area(component.toOriginalShape());
-        return calculateAverageIntensity(a, component.getImage(), Quartile.MEDIAN);
+        return calculateAverageIntensity(a, component.getImage(), Stats.MEDIAN);
     }
 
     /**
@@ -74,7 +74,7 @@ public class ColourMeasurometer implements Loggable {
      */
     public static int calculateAverageIntensity(CellularComponent component, ImageProcessor ip) {
         Area a = new Area(component.toOriginalShape());
-        return calculateAverageIntensity(a, ip, Quartile.MEDIAN);
+        return calculateAverageIntensity(a, ip, Stats.MEDIAN);
     }
     
     /**
@@ -286,7 +286,7 @@ public class ColourMeasurometer implements Loggable {
         for(int d : list){
         	ds.addValue(d);
         }
-        return (int) ds.getPercentile(Quartile.MEDIAN);
+        return (int) ds.getPercentile(Stats.MEDIAN);
 //        Quartile q = new Quartile(list, Quartile.MEDIAN);
 //        return q.intValue();
     }

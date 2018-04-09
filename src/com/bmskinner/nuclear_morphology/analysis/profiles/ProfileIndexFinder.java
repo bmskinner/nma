@@ -26,13 +26,12 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.rules.Rule;
 import com.bmskinner.nuclear_morphology.components.rules.Rule.RuleType;
 import com.bmskinner.nuclear_morphology.components.rules.RuleSet;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This is a testbed for rule based identification of indexes in a profile.
@@ -254,7 +253,7 @@ public class ProfileIndexFinder implements Loggable {
         BooleanProfile indexes;
         try {
             indexes = new BooleanProfile(collection.getProfileCollection().getProfile(ProfileType.ANGLE,
-                    Tag.REFERENCE_POINT, Quartile.MEDIAN), true);
+                    Tag.REFERENCE_POINT, Stats.MEDIAN), true);
 
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Cannot get matching profile", e);
@@ -266,7 +265,7 @@ public class ProfileIndexFinder implements Loggable {
             // Get the correct profile for the RuleSet
             IProfile p;
             try {
-                p = collection.getProfileCollection().getProfile(r.getType(), Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                p = collection.getProfileCollection().getProfile(r.getType(), Tag.REFERENCE_POINT, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
                 fine("Cannot get matching profile", e);
                 return new BooleanProfile(collection.getProfileCollection().length(), false);

@@ -51,7 +51,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.NucleusFactory;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.CircleTools;
 
 /**
@@ -118,7 +118,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
-                        Quartile.MEDIAN);
+                        Stats.MEDIAN);
                 int newIndex = cons.getProfile(ProfileType.ANGLE).getSlidingWindowOffset(median);
                 cons.setBorderTag(tag, newIndex);
             }
@@ -128,7 +128,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         // Check the profile generated
 
         IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
         IProfile nucProfile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         double diff = median.absoluteSquareDifference(nucProfile);
         fine("Difference to median: " + diff);
@@ -214,8 +214,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
             ypoints[i] = p.getY();
         }
 
-        double xMed = Quartile.quartile(xpoints, Quartile.MEDIAN);
-        double yMed = Quartile.quartile(ypoints, Quartile.MEDIAN);
+        double xMed = Stats.quartile(xpoints, Stats.MEDIAN);
+        double yMed = Stats.quartile(ypoints, Stats.MEDIAN);
 
         IPoint avgRP = IPoint.makeNew(xMed, yMed);
         return avgRP;

@@ -41,13 +41,12 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * This class is designed to simplify operations on CellCollections involving
@@ -168,7 +167,7 @@ public class ProfileManager implements Loggable {
         IProfile median;
         try {
             median = collection.getProfileCollection()
-                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN).offset(index);
+                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).offset(index);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
             fine("Error updating the RP", e);
             return;
@@ -221,10 +220,10 @@ public class ProfileManager implements Loggable {
 
         try {
             topMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.TOP_VERTICAL,
-                    Quartile.MEDIAN);
+                    Stats.MEDIAN);
 
             btmMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.BOTTOM_VERTICAL,
-                    Quartile.MEDIAN);
+                    Stats.MEDIAN);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
             fine("Error getting TV or BV profile", e);
             return;
@@ -298,7 +297,7 @@ public class ProfileManager implements Loggable {
 
         // Use the median profile to set the tag in the nuclei
 
-        IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
+        IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
 
         finer("Updating tag in nuclei");
         offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
@@ -373,7 +372,7 @@ public class ProfileManager implements Loggable {
         }
 
         finest("Existing median from " + tag + ":");
-        finest(collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN).toString());
+        finest(collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN).toString());
 
         // Overwrite the new tag for segmentation
         map.put(tag, index);
@@ -386,7 +385,7 @@ public class ProfileManager implements Loggable {
         /*
          * Now we need to update the tag indexes in the nucleus profiles.
          */
-        IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Quartile.MEDIAN);
+        IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
         finer("Fetched median from new offset of " + tag);
 
         finest("New median from " + tag + ":");
@@ -463,7 +462,7 @@ public class ProfileManager implements Loggable {
         IProfileCollection pc = collection.getProfileCollection();
 
         IProfile medianToSegment = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Quartile.MEDIAN);
+                Stats.MEDIAN);
 
         ProfileSegmenter segmenter = new ProfileSegmenter(medianToSegment, map);
 
@@ -731,7 +730,7 @@ public class ProfileManager implements Loggable {
             throws ProfileException, UnsegmentedProfileException, UnavailableComponentException {
 
         ISegmentedProfile oldProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         IBorderSegment seg = oldProfile.getSegment(id);
 
@@ -829,7 +828,7 @@ public class ProfileManager implements Loggable {
     public int countNucleiNotMatchingMedianSegmentation() throws UnavailableComponentException, ProfileException, UnsegmentedProfileException{
      // Check that the state of all nuclei in the collection is consistent
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
         int error = 0;
         for (Nucleus n : collection.getNuclei()) {
             if(!hasSegmentsMatchingMedian(n, medianProfile)){
@@ -861,7 +860,7 @@ public class ProfileManager implements Loggable {
             throw new IllegalArgumentException("New segment UUID cannot be null");
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
 
          // Only try the merge if both segments are present in the profile
         if (!medianProfile.hasSegment(seg1.getID()))
@@ -998,7 +997,7 @@ public class ProfileManager implements Loggable {
         }
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         // Replace the segment with the actual median profile segment - eg when
         // updating child datasets
@@ -1083,7 +1082,7 @@ public class ProfileManager implements Loggable {
             return false;
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         int index = medianProfile.getSegment(id).getProportionalIndex(proportion);
 
@@ -1146,7 +1145,7 @@ public class ProfileManager implements Loggable {
             throw new IllegalArgumentException("Segment to unmerge cannot be null");
 
         ISegmentedProfile medianProfile = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE,
-                Tag.REFERENCE_POINT, Quartile.MEDIAN);
+                Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         // Get the segments to merge
         IBorderSegment test = medianProfile.getSegment(seg.getID());

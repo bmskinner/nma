@@ -63,14 +63,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.Lobe;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.LobedNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.KruskalTester;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
@@ -222,7 +221,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             try {
                 IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                        Quartile.MEDIAN);
+                        Stats.MEDIAN);
 
                 IProfile xpoints = createXPositions(profile, 100);
                 float[][] data = { xpoints.toFloatArray(), profile.toFloatArray() };
@@ -306,7 +305,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
             try {
                 IProfile profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                        Quartile.MEDIAN);
+                        Stats.MEDIAN);
 
                 IProfile xpoints = createXPositions(profile, (int) collection.getMedianArrayLength());
 
@@ -363,7 +362,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile profile;
         try {
-            profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.MEDIAN);
+            profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting median profile", e);
             throw new ChartDatasetCreationException("Cannot get median profile", e);
@@ -411,7 +410,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile profile;
         try {
             profile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, options.getTag(),
-                    Quartile.MEDIAN);
+                    Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -475,7 +474,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile profile;
         try {
-            profile = collection.getProfileCollection().getProfile(type, options.getTag(), Quartile.MEDIAN);
+            profile = collection.getProfileCollection().getProfile(type, options.getTag(), Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -498,7 +497,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // add the segments
         List<IBorderSegment> segments;
         try {
-            segments = collection.getProfileCollection().getSegmentedProfile(type, options.getTag(), Quartile.MEDIAN)
+            segments = collection.getProfileCollection().getSegmentedProfile(type, options.getTag(), Stats.MEDIAN)
                     .getOrderedSegments();
 
             if (normalised) {
@@ -517,8 +516,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile profile25;
         IProfile profile75;
         try {
-            profile25 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.LOWER_QUARTILE);
-            profile75 = collection.getProfileCollection().getProfile(type, borderTag, Quartile.UPPER_QUARTILE);
+            profile25 = collection.getProfileCollection().getProfile(type, borderTag, Stats.LOWER_QUARTILE);
+            profile75 = collection.getProfileCollection().getProfile(type, borderTag, Stats.UPPER_QUARTILE);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
@@ -597,7 +596,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             ICellCollection collection = dataset.getCollection();
             IProfile profile;
             try {
-                profile = collection.getProfileCollection().getProfile(type, borderTag, Quartile.MEDIAN);
+                profile = collection.getProfileCollection().getProfile(type, borderTag, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
                 fine("Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -646,7 +645,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             ICellCollection collection = dataset.getCollection();
             IProfile profile;
             try {
-                profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, borderTag, Quartile.MEDIAN);
+                profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, borderTag, Stats.MEDIAN);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
                 fine("Error getting profile from tag", e);
                 throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -690,7 +689,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile profile;
         try {
-            profile = pc.getProfile(type, point, Quartile.MEDIAN);
+            profile = pc.getProfile(type, point, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get median profile", e);
@@ -715,8 +714,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile profile25;
         IProfile profile75;
         try {
-            profile25 = pc.getProfile(type, point, Quartile.LOWER_QUARTILE);
-            profile75 = pc.getProfile(type, point, Quartile.UPPER_QUARTILE);
+            profile25 = pc.getProfile(type, point, Stats.LOWER_QUARTILE);
+            profile75 = pc.getProfile(type, point, Stats.UPPER_QUARTILE);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
@@ -814,7 +813,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IProfile profile = collection.getProfileCollection().getIQRProfile(options.getType(), options.getTag());
 
             List<IBorderSegment> segments = collection.getProfileCollection()
-                    .getSegmentedProfile(options.getType(), options.getTag(), Quartile.MEDIAN).getOrderedSegments();
+                    .getSegmentedProfile(options.getType(), options.getTag(), Stats.MEDIAN).getOrderedSegments();
 
             ds = addSegmentsFromProfile(segments, profile, new FloatXYDataset(), 100, 0);
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException
@@ -867,7 +866,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         IProfile profile;
         try {
-            profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Quartile.MEDIAN);
+            profile = collection.getProfileCollection().getProfile(ProfileType.FRANKEN, point, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e1) {
             fine("Error getting profile from tag", e1);
             throw new ChartDatasetCreationException("Unable to get median profile", e1);
@@ -882,7 +881,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         // collection.getProfileCollection(ProfileCollectionType.REGULAR).getSegments(point);
         List<IBorderSegment> segments;
         try {
-            segments = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Quartile.MEDIAN)
+            segments = collection.getProfileCollection().getSegmentedProfile(ProfileType.ANGLE, point, Stats.MEDIAN)
                     .getOrderedSegments();
 
             addSegmentsFromProfile(segments, profile, ds, 100, 0);
@@ -897,8 +896,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile profile25;
         IProfile profile75;
         try {
-            profile25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.LOWER_QUARTILE);
-            profile75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Quartile.UPPER_QUARTILE);
+            profile25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Stats.LOWER_QUARTILE);
+            profile75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, point, Stats.UPPER_QUARTILE);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             fine("Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);
@@ -1048,7 +1047,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IBorderSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -1108,7 +1107,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             IBorderSegment medianSeg;
             try {
                 medianSeg = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getSegmentAt(segPosition);
             } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
                     | UnsegmentedProfileException e) {
@@ -1162,7 +1161,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
             List<IBorderSegment> segments;
             try {
                 segments = collection.getProfileCollection()
-                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
+                        .getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN)
                         .getOrderedSegments();
 
                 for (IBorderSegment medianSeg : segments) {
@@ -1272,8 +1271,8 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
         IProfile q25;
         IProfile q75;
         try {
-            q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.LOWER_QUARTILE);
-            q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Quartile.UPPER_QUARTILE);
+            q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.LOWER_QUARTILE);
+            q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.UPPER_QUARTILE);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             stack("Error getting upper or lower quartile profile from tag", e);
             throw new ChartDatasetCreationException("Unable to get quartile profile", e);

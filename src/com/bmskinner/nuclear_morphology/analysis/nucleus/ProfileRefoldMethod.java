@@ -39,7 +39,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.DefaultConsensusNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * The method that refolds a median angle profile into a shape.
@@ -110,11 +110,11 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
         fine("Subject: " + refoldNucleus.getSourceFile().getAbsolutePath() + "-" + refoldNucleus.getNucleusNumber());
 
         IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Quartile.MEDIAN);
+                Stats.MEDIAN);
         IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Quartile.LOWER_QUARTILE);
+                Stats.LOWER_QUARTILE);
         IProfile q75 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-                Quartile.UPPER_QUARTILE);
+                Stats.UPPER_QUARTILE);
 
         if (targetProfile == null) {
             throw new Exception("Null reference to target profile");

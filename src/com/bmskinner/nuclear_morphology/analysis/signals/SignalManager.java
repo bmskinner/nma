@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
 import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
@@ -394,7 +394,7 @@ public class SignalManager implements Loggable {
                 return 0;
             }
 
-            median = Quartile.quartile(values, Quartile.MEDIAN);
+            median = Stats.quartile(values, Stats.MEDIAN);
             median += getMeanSignalAngle(signalGroupId);
         } else {
             values = this.getSignalStatistics(stat, scale, signalGroupId);
@@ -404,7 +404,7 @@ public class SignalManager implements Loggable {
                 return 0;
             }
 
-            median = Quartile.quartile(values, Quartile.MEDIAN);
+            median = Stats.quartile(values, Stats.MEDIAN);
         }
 
         return median;

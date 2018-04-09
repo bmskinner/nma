@@ -72,7 +72,7 @@ import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SegmentStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.SignalStatistic;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * @author bms41
@@ -692,7 +692,7 @@ public class CellCollection implements ICellCollection {
         }
 
         int[] p = this.getArrayLengths();
-        return Quartile.quartile(p, Quartile.MEDIAN);
+        return Stats.quartile(p, Stats.MEDIAN);
     }
 
     public int getMaxProfileLength() {
@@ -734,7 +734,7 @@ public class CellCollection implements ICellCollection {
         double[] result = new double[count];
         int i = 0;
 
-        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
+        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Stats.MEDIAN);
         for (Nucleus n : this.getNuclei()) {
 
             try {
@@ -766,7 +766,7 @@ public class CellCollection implements ICellCollection {
         int count = this.getNucleusCount();
         double[] result = new double[count];
         int i = 0;
-        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
+        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Stats.MEDIAN);
 
         for (Nucleus n : this.getNuclei()) {
 
@@ -819,7 +819,7 @@ public class CellCollection implements ICellCollection {
     @Override
     public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) throws UnavailableBorderTagException {
 
-        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN);
+        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Stats.MEDIAN);
         IProfile angleProfile;
 
         try {
@@ -911,7 +911,7 @@ public class CellCollection implements ICellCollection {
             }
         }
 
-        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Quartile.MEDIAN); // the
+        IProfile medianProfile = profileCollections.get(ProfileType.ANGLE).getProfile(pointType, Stats.MEDIAN); // the
                                                                                                                    // profile
                                                                                                                    // we
                                                                                                                    // compare
@@ -1036,7 +1036,7 @@ public class CellCollection implements ICellCollection {
             double median = 0;
             if (this.getNucleusCount() > 0) {
                 double[] values = this.getNuclearStatistics(stat, scale);
-                median =  Quartile.quartile(values, Quartile.MEDIAN);
+                median =  Stats.quartile(values, Stats.MEDIAN);
             }
 
             statsCache.setStatistic(stat, scale, median);
@@ -1181,7 +1181,7 @@ public class CellCollection implements ICellCollection {
         }
 
         double[] values = this.getSegmentStatistics(stat, scale, id);
-        return Quartile.quartile(values, Quartile.MEDIAN);
+        return Stats.quartile(values, Stats.MEDIAN);
     }
 
     /**

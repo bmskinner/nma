@@ -125,7 +125,7 @@ public class KruskalTester implements Loggable, SignificanceTest {
              * execute the analysis function in the segmenter
              */
             ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, options.getTag(),
-                    Quartile.MEDIAN);
+            		Stats.MEDIAN);
 
             SegmentFitter fitter = new SegmentFitter(medianProfile);
 

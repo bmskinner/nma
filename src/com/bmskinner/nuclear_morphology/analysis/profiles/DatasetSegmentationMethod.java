@@ -34,7 +34,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
@@ -43,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.stats.Quartile;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
@@ -271,7 +270,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         IProfileCollection pc = collection.getProfileCollection();
 
         // find the corresponding point in each Nucleus
-        ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+        ISegmentedProfile median = pc.getSegmentedProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         /*
          * NEW CODE
@@ -420,7 +419,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
 
         // the reference point is always index 0, so the segments will match
         // the profile
-        IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN);
+        IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
         Map<Tag, Integer> map = new HashMap<Tag, Integer>();
         int opIndex = pc.getIndex(Tag.ORIENTATION_POINT);
@@ -467,7 +466,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
          */
 
         // Get the median profile for the population
-        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Quartile.MEDIAN);
+        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
 
         /*
          * Split the recombining task into chunks for multithreading
