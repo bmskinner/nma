@@ -30,7 +30,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 
 public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
 

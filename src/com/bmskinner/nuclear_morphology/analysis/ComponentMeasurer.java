@@ -22,7 +22,7 @@ import java.util.Iterator;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
-import com.bmskinner.nuclear_morphology.stats.Area;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
  * Calculate basic stats for cellular components. Used to fill in missing values
@@ -54,12 +54,11 @@ public class ComponentMeasurer {
     /**
      * Calculate the area of the object
      * 
-     * @param c
-     *            the component to measure
+     * @param c the component to measure
      * @return
      */
     public static double calculateArea(CellularComponent c) {
-        return new Area(c.toShape()).doubleValue();
+        return Stats.area(c.toShape());
     }
 
 }

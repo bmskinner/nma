@@ -48,8 +48,6 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -421,28 +419,34 @@ public class SignalManager implements Loggable {
      */
     public double[] getSignalStatistics(@NonNull final PlottableStatistic stat, @NonNull final MeasurementScale scale, @NonNull final UUID signalGroupId) {
 
-        if (!this.hasSignals(signalGroupId)) {
+        if (!this.hasSignals(signalGroupId))
             return new double[0];
-        }
 
         Set<ICell> cells = getCellsWithNuclearSignals(signalGroupId, true);
-        List<Double> a = new ArrayList<Double>(0);
-        for (ICell c : cells) {
-            for (Nucleus n : c.getNuclei()) {
-                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroupId));
-            }
-
-        }
-
-        double[] values;
-
-        try {
-            values = new ArrayConverter(a).toDoubleArray();
-
-        } catch (ArrayConversionException e) {
-            values = new double[0];
-        }
-        return values;
+//        List<Double> a = new ArrayList<Double>(0);
+        
+        return cells.stream().flatMap(  c->c.getNuclei().stream()  )
+            .flatMap(  n->n.getSignalCollection()
+                    .getStatistics(stat, scale, signalGroupId)
+                    .stream()  )
+            .mapToDouble(d->d.doubleValue()).toArray();
+        
+//        for (ICell c : cells) {
+//            for (Nucleus n : c.getNuclei()) {
+//                a.addAll(n.getSignalCollection().getStatistics(stat, scale, signalGroupId));
+//            }
+//
+//        }
+//
+//        double[] values;
+//
+//        try {
+//            values = new ArrayConverter(a).toDoubleArray();
+//
+//        } catch (ArrayConversionException e) {
+//            values = new double[0];
+//        }
+//        return values;
     }
 
     /**

@@ -70,8 +70,6 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.stats.DipTester;
 import com.bmskinner.nuclear_morphology.stats.KruskalTester;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import ij.process.FloatPolygon;
 import weka.estimators.KernelEstimator;
@@ -1740,22 +1738,24 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @return
      * @throws ChartDatasetCreationException
      */
-    public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset dataset, ProfileType type)
-            throws ChartDatasetCreationException {
+    public XYDataset createModalityValuesDataset(double xposition, IAnalysisDataset dataset, ProfileType type) throws ChartDatasetCreationException {
 
         FloatXYDataset ds = new FloatXYDataset();
 
         ICellCollection collection = dataset.getCollection();
 
-        float[] values;
-        
-       
+        double[] dValues;
         try {
-            values = new ArrayConverter( collection.getProfileCollection().getValuesAtPosition(type, xposition)).toFloatArray();
-        } catch (UnavailableProfileTypeException | ArrayConversionException e) {
-            throw new ChartDatasetCreationException("Cannot get profile values at position " + xposition, e);
+            dValues = collection.getProfileCollection().getValuesAtPosition(type, xposition);
+        } catch (UnavailableProfileTypeException e) {
+            throw new ChartDatasetCreationException("Cannot get profile values", e);
+        }
+        float[] values = new float[dValues.length];
+        for(int i=0; i<dValues.length; i++){
+            values[i] = (float) dValues[i];
         }
 
+        
         float[] xvalues = new float[values.length];
         for (int i = 0; i < values.length; i++) {
             xvalues[i] = 0;
@@ -2001,47 +2001,25 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
     public XYDataset createBooleanProfileDataset(IProfile p, BooleanProfile limits)
             throws ChartDatasetCreationException {
         FloatXYDataset result = new FloatXYDataset();
+        
+        float[] xTrueData = new float[limits.countTrue()];
+        float[] yTrueData = new float[limits.countTrue()];
+        float[] xFalseData = new float[limits.countFalse()];
+        float[] yFalseData = new float[limits.countFalse()];
 
-        List<Double> trueXValues = new ArrayList<Double>();
-        List<Double> trueYValues = new ArrayList<Double>();
-
-        List<Double> falseXValues = new ArrayList<Double>();
-        List<Double> falseYValues = new ArrayList<Double>();
-
-        for (int i = 0; i < p.size(); i++) {
+        // Split true and false values from limits to separate arrays 
+        for (int i = 0, t=0, f=0; i < p.size(); i++) {
 
             boolean b = limits.get(i);
             double value = p.get(i);
-
             if (b) {
-                trueXValues.add((double) i);
-                trueYValues.add(value);
-
+                xTrueData[t] = (float) i;
+                yTrueData[t++] = (float) value;
             } else {
-                falseXValues.add((double) i);
-                falseYValues.add(value);
+                xFalseData[f] = (float) i;
+                yFalseData[f++] = (float) value;
             }
 
-        }
-
-        float[] xTrueData;
-        float[] yTrueData;
-        float[] xFalseData;
-        float[] yFalseData;
-
-        try {
-
-            xTrueData = new ArrayConverter(trueXValues).toFloatArray();
-            yTrueData = new ArrayConverter(trueYValues).toFloatArray();
-            xFalseData = new ArrayConverter(falseXValues).toFloatArray();
-            yFalseData = new ArrayConverter(falseYValues).toFloatArray();
-
-        } catch (ArrayConversionException e) {
-            error("Error converting arrays", e);
-            xTrueData = new float[0];
-            yTrueData = new float[0];
-            xFalseData = new float[0];
-            yFalseData = new float[0];
         }
         float[][] trueData = { xTrueData, yTrueData };
         float[][] falseData = { xFalseData, yFalseData };

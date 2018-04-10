@@ -21,13 +21,12 @@ package com.bmskinner.nuclear_morphology.stats;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DoubleProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.stats.ModalityTest.BinnedData.Bin;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * Test a set of values for multimodality and return the values of the modes.
@@ -116,16 +115,8 @@ public class ModalityTest implements SignificanceTest {
                 result.add(d);
             }
         }
-
-        double[] temp;
-        try {
-            temp = new ArrayConverter(result).toDoubleArray();
-        } catch (ArrayConversionException e) {
-            temp = new double[0];
-        }
-
-        return temp;
-
+        
+        return result.stream().mapToDouble(d->d.doubleValue()).toArray();
     }
 
     private BinnedData calculateBins(double[] data, double binWidth) {
@@ -146,8 +137,6 @@ public class ModalityTest implements SignificanceTest {
             } else {
                 // new bin
                 result.addBin(binStart, count);
-                // bins[bin] = count;
-                // bin++;
                 binStart = binEnd;
                 binEnd += binWidth;
                 count = 0;
@@ -176,7 +165,6 @@ public class ModalityTest implements SignificanceTest {
 
     private int getLargestBinCount(BinnedData bins) {
         return Arrays.stream(bins.toArray()).max().orElse(0);
-        // return Stats.max(bins.toArray());
     }
 
     /**
@@ -187,8 +175,7 @@ public class ModalityTest implements SignificanceTest {
      * @return
      */
     private double calculateMValue(int sumOfDifferences, int largestBinCount) {
-        double result = (double) sumOfDifferences / (double) largestBinCount;
-        return result;
+        return (double) sumOfDifferences / (double) largestBinCount;
     }
 
     public class BinnedData {
@@ -223,15 +210,7 @@ public class ModalityTest implements SignificanceTest {
             for (Bin b : bins) {
                 result.add(b.value);
             }
-
-            int[] temp;
-            try {
-                temp = new ArrayConverter(result).toIntArray();
-            } catch (ArrayConversionException e) {
-                temp = new int[0];
-            }
-
-            return temp;
+            return result.stream().mapToInt(d->d.intValue()).toArray();
         }
 
         public List<Bin> getBins() {
@@ -240,12 +219,7 @@ public class ModalityTest implements SignificanceTest {
 
         public double[] getLocalMaxima() {
 
-            double[] temp;
-            try {
-                temp = new ArrayConverter(this.toArray()).toDoubleArray();
-            } catch (ArrayConversionException e) {
-                temp = new double[0];
-            }
+            double[] temp = IntStream.of(toArray()).mapToDouble(i-> (double)i).toArray();
 
             IProfile profile = new DoubleProfile(temp);
             BooleanProfile maxima = profile.smooth(DEFAULT_SMOOTHING_WINDOW).smooth(DEFAULT_SMOOTHING_WINDOW)
@@ -258,15 +232,8 @@ public class ModalityTest implements SignificanceTest {
                     result.add(new Double(this.midpoint(bins.get(i))));
                 }
             }
-
-            double[] temp2;
-            try {
-                temp2 = new ArrayConverter(result).toDoubleArray();
-            } catch (ArrayConversionException e) {
-                temp2 = new double[0];
-            }
-
-            return temp2;
+  
+            return result.stream().mapToDouble(d->d.doubleValue()).toArray();
         }
 
         public class Bin {

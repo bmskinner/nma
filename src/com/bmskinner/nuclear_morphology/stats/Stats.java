@@ -27,6 +27,8 @@
 
 package com.bmskinner.nuclear_morphology.stats;
 
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.DoubleStream;
@@ -38,8 +40,12 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 import org.apache.commons.math3.stat.inference.OneWayAnova;
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.gui.Roi;
+import ij.process.FloatPolygon;
 
 public class Stats implements Loggable {
 
@@ -49,6 +55,7 @@ public class Stats implements Loggable {
     public static final int LOWER_QUARTILE = 25;
     public static final int UPPER_QUARTILE = 75;
     public static final int MEDIAN         = 50;
+    public static final int ONE_HUNDRED_PERCENT = 100;
 
     static double max(double[] array) {
         return DoubleStream.of(array).max().orElse(0);
@@ -230,9 +237,7 @@ public class Stats implements Loggable {
                                                         // of applicable ranks
 
         if (isGetPValue) { // above diagonal, p-value
-            result = test.mannWhitneyUTest(values0, values1); // correct for the
-                                                              // number of
-                                                              // datasets tested
+            result = test.mannWhitneyUTest(values0, values1);
 
         } else { // below diagonal, U statistic
             result = test.mannWhitneyU(values0, values1);
@@ -263,7 +268,7 @@ public class Stats implements Loggable {
         System.arraycopy(values, 0, v, 0, values.length);
         Arrays.sort(v);
 
-        int n = Math.round(((float) v.length * quartile) / 100);
+        int n = Math.round(((float) v.length * quartile) / ONE_HUNDRED_PERCENT);
         return v[n];
     }
     
@@ -323,6 +328,68 @@ public class Stats implements Loggable {
         int n = Math.round(((float) v.length * quartile) / 100);
 
         return v[n];
+    }
+    
+    /**
+     * Calculate the area of the given roi
+     * @param r
+     * @return
+     * @throws IllegalArgumentException if the roi does not enclose an area (i.e if it is a line)
+     */
+    public static double area(@NonNull Roi r) {
+        if (!r.isArea())
+            throw new IllegalArgumentException("Roi is not an area");
+
+        return calculatePolygonArea(r);
+    }
+
+    /**
+     * Calculate the area of the given shape in pixels
+     * @param s
+     * @return
+     */
+    public static double area(@NonNull Shape s) {
+        return calculateShapeIntArea(s);
+    }
+
+    /**
+     * Calculate the integer area of the shape. Checks each pixel for belonging
+     * to the shape.
+     * 
+     * @param s
+     * @return
+     */
+    private static int calculateShapeIntArea(@NonNull Shape s) {
+        int count = 0;
+        Rectangle roiBounds = s.getBounds();
+        // get the bounding box of the intersection
+        // test each pixel for overlaps
+        int minX = (int) roiBounds.getX();
+        int maxX = minX + (int) roiBounds.getWidth();
+
+        int minY = (int) roiBounds.getY();
+        int maxY = minY + (int) roiBounds.getHeight();
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                if (s.contains(x, y)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+
+    }
+
+    private static double calculatePolygonArea(@NonNull Roi r) {
+
+        FloatPolygon f = r.getFloatPolygon();
+        double sum = 0;
+        for (int i = 0; i < f.npoints - 1; i++) {
+            sum = sum + f.xpoints[i] * f.ypoints[i + 1] - f.ypoints[i] * f.xpoints[i + 1];
+        }
+
+        return Math.abs(sum / 2);
     }
 
 }

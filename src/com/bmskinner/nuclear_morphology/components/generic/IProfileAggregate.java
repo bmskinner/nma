@@ -33,6 +33,10 @@ public interface IProfileAggregate {
      */
     double getBinSize();
 
+    /**
+     * Get the aggregate length
+     * @return
+     */
     int length();
 
     /**
@@ -42,23 +46,20 @@ public interface IProfileAggregate {
      */
     IProfile getXPositions();
 
-    /**
-     * Get the number of values within each bin as a profile
-     * 
-     * @return
-     */
-    // public Profile getNumberOfPoints(){
-    // double[] result = new double[length];
-    //
-    // for(int i=0;i<length;i++){
-    // double x = xPositions[i];
-    // result[i] = aggregate.containsKey(x) ? aggregate.get(x).size() : 0;
-    // }
-    // return new Profile(result);
-    // }
 
+    /**
+     * Get the median profile of the aggregate
+     * @return
+     * @throws ProfileException
+     */
     IProfile getMedian() throws ProfileException;
 
+    /**
+     * Get the profile corresponding to the given quartile of the values in the aggregate
+     * @param quartile
+     * @return
+     * @throws ProfileException
+     */
     IProfile getQuartile(double quartile) throws ProfileException;
 
     /**
@@ -74,7 +75,4 @@ public interface IProfileAggregate {
     double[] getValuesAtPosition(double position);
 
     List<Double> getXKeyset();
-
-    String toString();
-
 }

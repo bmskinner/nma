@@ -26,8 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * A profile contains an array of values, and this interface details both access
@@ -59,11 +57,11 @@ public interface IProfile extends Serializable, Loggable {
      * @return a profile
      */
     static IProfile makeNew(double[] array) {
-        try {
-            return new FloatProfile(new ArrayConverter(array).toFloatArray());
-        } catch (ArrayConversionException e) {
-            return null;
+        float[] d = new float[array.length];
+        for(int i=0; i<array.length; i++){
+            d[i] = (float) array[i];
         }
+        return new FloatProfile(d);
     }
     
     static IProfile merge(@NonNull List<IProfile> list){

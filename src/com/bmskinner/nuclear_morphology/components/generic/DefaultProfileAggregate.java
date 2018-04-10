@@ -24,8 +24,6 @@ import java.util.List;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * This is for testing a replacement of the profile aggregate using arrays
@@ -119,24 +117,21 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      * @return an unsorted array of the values at the given position
      */
     public double[] getValuesAtPosition(double position) {
-        if (position < 0 || position > 1) {
+        if (position < 0 || position > 1)
             throw new IllegalArgumentException("Desired x-position is out of range: " + position);
-        }
 
         double indexPosition = (double) this.length * position;
 
         // Choose the best position to return
         int index = (int) Math.round(indexPosition);
-        // log("xposition "+position+": index "+index);
 
         float[] result = getValuesAtIndex(index);
-
-        try {
-            return new ArrayConverter(result).toDoubleArray();
-        } catch (ArrayConversionException e) {
-            stack("Error getting values from aggregate", e);
-            return null;
+        
+        double[] d = new double[result.length];
+        for(int i=0; i<result.length; i++){
+            d[i] = result[i];
         }
+        return d;
     }
 
     /**

@@ -18,6 +18,25 @@
 
 package com.bmskinner.nuclear_morphology.analysis.tail;
 
+import java.awt.Color;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+
+import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
+import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.components.Flagellum;
+import com.bmskinner.nuclear_morphology.components.SpermTail;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -27,36 +46,10 @@ import ij.process.BinaryProcessor;
 import ij.process.ByteProcessor;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
-
-import java.awt.Color;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-
 import skeleton_analysis.AnalyzeSkeleton_;
 import skeleton_analysis.Edge;
 import skeleton_analysis.Graph;
 import skeleton_analysis.SkeletonResult;
-
-import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
-import com.bmskinner.nuclear_morphology.analysis.detection.StatsMap;
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
-import com.bmskinner.nuclear_morphology.components.Flagellum;
-import com.bmskinner.nuclear_morphology.components.SpermTail;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
-import com.bmskinner.nuclear_morphology.io.ImageImporter;
-import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 public class TailDetector extends Detector {
 
@@ -422,23 +415,16 @@ public class TailDetector extends Detector {
                 List<Integer> ypoints = new ArrayList<Integer>(0);
 
                 for (skeleton_analysis.Point p : e.getSlabs()) {
-
                     xpoints.add(p.x);
                     ypoints.add(p.y);
-
                 }
-
-                float[] xData;
-                float[] yData;
-
-                try {
-
-                    xData = new ArrayConverter(xpoints).toFloatArray();
-                    yData = new ArrayConverter(ypoints).toFloatArray();
-
-                } catch (ArrayConversionException e1) {
-                    xData = new float[0];
-                    yData = new float[0];
+                
+                float[] xData = new float[xpoints.size()];
+                float[] yData = new float[ypoints.size()];
+                
+                for(int i=0; i<xpoints.size(); i++){
+                    xData[i] = (float) xpoints.get(i);
+                    yData[i] = (float) ypoints.get(i);
                 }
 
                 Roi potentialSkeleton = new PolygonRoi(xData, yData, PolygonRoi.POLYLINE);

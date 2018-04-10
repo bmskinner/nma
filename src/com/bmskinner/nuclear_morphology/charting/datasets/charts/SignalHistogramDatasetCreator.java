@@ -17,10 +17,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import weka.estimators.KernelEstimator;
 
@@ -188,19 +185,11 @@ import weka.estimators.KernelEstimator;
                     xValues.add(i);
                     yValues.add(est.getProbability(i));
                 }
+                
+                double[] xData = xValues.stream().mapToDouble(d->d.doubleValue()).toArray();
+                double[] yData = yValues.stream().mapToDouble(d->d.doubleValue()).toArray();
 
-                double[] xData;
-                double[] yData;
 
-                try {
-
-                    xData = new ArrayConverter(xValues).toDoubleArray();
-                    yData = new ArrayConverter(yValues).toDoubleArray();
-
-                } catch (ArrayConversionException e) {
-                    xData = new double[0];
-                    yData = new double[0];
-                }
                 double[][] data = { xData, yData };
 
                 ds.addSeries(groupLabel, data);

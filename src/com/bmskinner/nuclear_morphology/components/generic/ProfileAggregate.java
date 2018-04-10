@@ -33,8 +33,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 /**
  * This class holds the aggregates of individual profiles, so that a median
@@ -394,15 +392,8 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
 
         // the desired position is chosen
         Collection<Double> values = aggregate.get(position);
-
-        double[] temp;
-        try {
-            temp = new ArrayConverter(values).toDoubleArray();
-        } catch (ArrayConversionException e) {
-            temp = new double[0];
-        }
-
-        return temp;
+        
+        return values.stream().mapToDouble(d->d.doubleValue()).toArray();
     }
 
     /*

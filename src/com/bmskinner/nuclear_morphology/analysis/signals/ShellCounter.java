@@ -27,7 +27,6 @@ import java.util.stream.DoubleStream;
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.stats.Mean;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
@@ -40,32 +39,39 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
 public class ShellCounter implements Loggable {
 
     private int                        numberOfShells;
-    private Map<Integer, List<Double>> signalProportionValues = new HashMap<Integer, List<Double>>(0); // raw
-                                                                                                       // values
-    private Map<Integer, List<Double>> signalNormalisedValues = new HashMap<Integer, List<Double>>(0); // values
-                                                                                                       // after
-                                                                                                       // DAPI
-                                                                                                       // normalisation
-    private Map<Integer, Integer>      signalPixelCounts      = new HashMap<Integer, Integer>(0);      // store
-                                                                                                       // the
-                                                                                                       // pixel
-                                                                                                       // counts
-                                                                                                       // for
-                                                                                                       // signals
+    
+    
+    /**
+     * Raw values
+     */
+    private Map<Integer, List<Double>> signalProportionValues = new HashMap<Integer, List<Double>>(0);
+    
+    /**
+     * Values after DAPI normalisation
+     */
+    private Map<Integer, List<Double>> signalNormalisedValues = new HashMap<Integer, List<Double>>(0);
+    
+    /**
+     * Pixel counts for signals 
+     */
+    private Map<Integer, Integer>      signalPixelCounts      = new HashMap<Integer, Integer>(0);
 
-    private Map<Integer, List<Double>> nucleusProportionValues = new HashMap<Integer, List<Double>>(0); // raw
-                                                                                                        // the
-                                                                                                        // values
-    private Map<Integer, List<Double>> nucleusNormalisedValues = new HashMap<Integer, List<Double>>(0); // values
-                                                                                                        // after
-                                                                                                        // DAPI
-                                                                                                        // normalisation
-    private Map<Integer, Integer>      nucleusPixelCounts      = new HashMap<Integer, Integer>(0);      // store
-                                                                                                        // the
-                                                                                                        // pixel
-                                                                                                        // counts
-                                                                                                        // for
-                                                                                                        // nuclei
+    
+    /**
+     * Raw nucleus values
+     */
+    private Map<Integer, List<Double>> nucleusProportionValues = new HashMap<Integer, List<Double>>(0); 
+    
+    
+    /**
+     * Normalised DAPI values
+     */
+    private Map<Integer, List<Double>> nucleusNormalisedValues = new HashMap<Integer, List<Double>>(0);
+    
+    /**
+     * Pixel counts for nuclei 
+     */
+    private Map<Integer, Integer>      nucleusPixelCounts      = new HashMap<Integer, Integer>(0);
 
     /**
      * The type of pixels to be counted. These can be only pixels within the

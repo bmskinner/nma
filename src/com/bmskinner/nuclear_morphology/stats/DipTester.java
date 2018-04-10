@@ -30,8 +30,6 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import jdistlib.InvNormal;
 import jdistlib.disttest.DistributionTest;
@@ -64,27 +62,24 @@ public class DipTester implements Loggable, SignificanceTest {
     public IProfile testCollectionGetPValues(Tag tag, ProfileType type) {
         IProfile resultProfile = null;
 
-        double[] pvals = null;
+        float[] pvals = null;
         try {
             int offset = collection.getProfileCollection().getIndex(tag);
 
             // ensure the postions are starting from the right place
             List<Double> keys = collection.getProfileCollection().getXKeyset(type);
 
-            pvals = new double[keys.size()];
+            pvals = new float[keys.size()];
 
             for (int i = 0; i < keys.size(); i++) {
-
                 double position = keys.get(i).doubleValue();
                 double[] values = collection.getProfileCollection().getValuesAtPosition(type, position);
-                pvals[i] = getDipTestPValue(values);
+                pvals[i] = (float) getDipTestPValue(values);
             }
 
-            float[] floatPvals = new ArrayConverter(pvals).toFloatArray();
-
-            resultProfile = new FloatProfile(floatPvals);
+            resultProfile = new FloatProfile(pvals);
             resultProfile = resultProfile.offset(offset);
-        } catch (ArrayConversionException | ProfileException | UnavailableBorderTagException
+        } catch (ProfileException | UnavailableBorderTagException
                 | UnavailableProfileTypeException e) {
             stack("Error converting values or offsetting profile", e);
             resultProfile = createErrorPValueProfile();

@@ -30,9 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.AbstractAnalysisMethod;
@@ -47,9 +44,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPoin
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.io.CountedInputStream.CountListener;
 import com.bmskinner.nuclear_morphology.io.DatasetConverter.DatasetConversionException;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;

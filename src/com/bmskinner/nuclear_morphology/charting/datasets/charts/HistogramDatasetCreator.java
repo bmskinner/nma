@@ -16,8 +16,6 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import weka.estimators.KernelEstimator;
 
@@ -150,7 +148,7 @@ public abstract class HistogramDatasetCreator extends AbstractDatasetCreator<Cha
                                      // chart looks silly
         return bins;
     }
-    
+        
     /**
      * Given an existing range for an axis scale, check if the range must be
      * expanded for the given set of values

@@ -24,8 +24,9 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import ij.IJ;
 
@@ -65,16 +66,14 @@ public class TableExporter implements Exporter {
             throw new IllegalArgumentException("Column or array is null");
         }
 
-        String[] values = new ArrayConverter(array).toStringArray();
-
+        String[] values = DoubleStream.of(array).mapToObj(d->String.valueOf(d)).toArray(String[]::new);
         this.addColumn(s, values);
     }
 
     public void addColumn(String s, Integer[] array) {
-        if (s == null || array == null) {
+        if (s == null || array == null)
             throw new IllegalArgumentException("Column or array is null");
-        }
-        String[] values = new ArrayConverter(array).toStringArray();
+        String[] values = Stream.of(array).map(i->String.valueOf(i)).toArray(String[]::new);
         this.addColumn(s, values);
     }
 
@@ -82,7 +81,7 @@ public class TableExporter implements Exporter {
         if (s == null || array == null) {
             throw new IllegalArgumentException("Column or array is null");
         }
-        String[] values = new ArrayConverter(array).toStringArray();
+        String[] values = IntStream.of(array).mapToObj(d->String.valueOf(d)).toArray(String[]::new);
         this.addColumn(s, values);
     }
 

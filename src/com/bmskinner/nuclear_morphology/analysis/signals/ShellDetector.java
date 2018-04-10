@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
+import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImageStack;
 import ij.gui.PolygonRoi;
@@ -166,7 +166,7 @@ public class ShellDetector extends Detector {
         for (int i = 0; i < shells.size(); i++) {
 
             Shell shell = shells.get(i);
-            int count = new com.bmskinner.nuclear_morphology.stats.Area(shell.shellRoi).intValue();
+            int count = (int) Stats.area(shell.shellRoi);
             counts[i] = count;
 
         }
@@ -226,22 +226,11 @@ public class ShellDetector extends Detector {
      */
     public double[] findProportionPerShell(ImageStack st, int channel) {
 
-        fine("Calculating the proportion of image pixels per shell, weighted by intensity");
-
         // Get the pixel intensities per shell for signal channel
         int[] signalDensities = getChannelIntensities(st, channel);
 
-        // Get the pixel intensities per shell for the dapi channel
-        // int[] dapiDensities = getChannelIntensities(signal,
-        // Constants.RGB_BLUE);
-
         // find the proportion of the total signal within each shell
-        double[] signalProportions = getProportions(signalDensities);
-
-        // normalise the signals to the dapi intensity
-        // double[] result = normalise(signalProportions, dapiDensities);
-
-        return signalProportions;
+        return getProportions(signalDensities);
     }
 
     /**
@@ -256,19 +245,11 @@ public class ShellDetector extends Detector {
      */
     public double[] findProportionPerShell(CellularComponent signal) throws ShellAnalysisException {
 
-        fine("Calculating the proportion of total signal pixels per shell");
-
         // Get the pixel intensities per shell for signal channel
         int[] signalDensities = getSignalIntensities(signal);
 
-        // log("Sig dens: "+print(signalDensities));
-
         // find the proportion of the total signal within each shell
-        double[] signalProportions = getProportions(signalDensities);
-
-        // log("Sig prop: "+print(signalProportions));
-
-        return signalProportions;
+        return getProportions(signalDensities);
     }
 
     /*
@@ -451,7 +432,7 @@ public class ShellDetector extends Detector {
         Roi nucleusRoi = new PolygonRoi(c.toOriginalPolygon(), Roi.POLYGON);
         fine("Creating shells");
 
-        double initialArea = new com.bmskinner.nuclear_morphology.stats.Area(nucleusRoi).doubleValue();
+        double initialArea = Stats.area(nucleusRoi);
 
         fine("Nucleus area: " + initialArea);
         double target = initialArea / shellCount;
@@ -476,8 +457,6 @@ public class ShellDetector extends Detector {
             // the max area for this shell
             double maxArea = initialArea * maxFraction;
 
-            fine("Max area: " + maxArea + " at fraction " + maxFraction);
-
             double area = initialArea;
 
             // Converge on the best shrinking factor
@@ -491,7 +470,7 @@ public class ShellDetector extends Detector {
 
                 shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, -1);
 
-                area = new com.bmskinner.nuclear_morphology.stats.Area(shrinkingRoi).doubleValue();
+                area = Stats.area(shrinkingRoi);
 
                 prevDiffToTarget = diffToTarget;
                 diffToTarget = area - maxArea;
@@ -502,7 +481,7 @@ public class ShellDetector extends Detector {
             // Correct overspills by enlarging the roi again
             if (Math.abs(prevDiffToTarget) < Math.abs(diffToTarget)) {
                 shrinkingRoi = RoiEnlarger.enlarge(shrinkingRoi, 1);
-                area = new com.bmskinner.nuclear_morphology.stats.Area(shrinkingRoi).doubleValue();
+                area = Stats.area(shrinkingRoi);
                 fine("\tIncreasing area if shell by 1 pixel");
             }
 
@@ -511,7 +490,6 @@ public class ShellDetector extends Detector {
             areas[i] = area;
             shells.add(new Shell((Roi) shrinkingRoi.clone(), c));
         }
-        fine("Shell areas: " + new ArrayConverter(areas).toString());
 
     }
 
@@ -604,7 +582,7 @@ public class ShellDetector extends Detector {
             // Keep pixels that are in both shapes
             signalArea.intersect(shellArea);
 
-            int count = new com.bmskinner.nuclear_morphology.stats.Area(signalArea).intValue();
+            int count = (int) Stats.area(signalArea);
 
             return count;
         }
@@ -660,12 +638,10 @@ public class ShellDetector extends Detector {
             // Keep pixels that are in both shapes
             componentArea.intersect(shellArea);
 
-            int overlappingArea = new com.bmskinner.nuclear_morphology.stats.Area(componentArea).intValue();
-            // log("Size of intersection: "+overlappingArea);
+            int overlappingArea = (int) Stats.area(componentArea);
 
-            if (overlappingArea == 0) {
+            if (overlappingArea == 0)
                 return 0;
-            }
 
             int result = getDensity(ip, componentArea);
 

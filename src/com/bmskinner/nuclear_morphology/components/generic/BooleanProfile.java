@@ -224,6 +224,27 @@ public class BooleanProfile implements Serializable, Loggable {
         return new BooleanProfile(result);
     }
     
+    /**
+     * Count the number of true values in the profile
+     * @return
+     */
+    public int countTrue(){
+        int i=0;
+        for(boolean b : array){
+            if(b)
+                i++;
+        }
+        return i;
+    }
+    
+    /**
+     * Count the number of false values in the profile
+     * @return
+     */
+    public int countFalse(){
+        return array.length - countTrue();
+    }
+    
     @Override
     public String toString(){
     	return Arrays.toString(array);

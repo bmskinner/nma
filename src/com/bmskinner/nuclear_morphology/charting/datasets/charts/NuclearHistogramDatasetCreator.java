@@ -44,8 +44,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter;
-import com.bmskinner.nuclear_morphology.utility.ArrayConverter.ArrayConversionException;
 
 import weka.estimators.KernelEstimator;
 
@@ -131,6 +129,7 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             double[] minMax = findMinAndMaxForHistogram(values);
 
+            
             List<Double> xValues = new ArrayList<Double>();
             List<Double> yValues = new ArrayList<Double>();
 
@@ -141,20 +140,11 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
 
             }
 
-            // Make into an array or arrays
+            // Make into an array of arrays
 
-            double[] xData;
-            double[] yData;
+            double[] xData = xValues.stream().mapToDouble(d->d.doubleValue()).toArray();
+            double[] yData = yValues.stream().mapToDouble(d->d.doubleValue()).toArray();
 
-            try {
-
-                xData = new ArrayConverter(xValues).toDoubleArray();
-                yData = new ArrayConverter(yValues).toDoubleArray();
-
-            } catch (ArrayConversionException e) {
-                xData = new double[0];
-                yData = new double[0];
-            }
             double[][] data = { xData, yData };
 
             ds.addSeries(groupLabel + "_" + collection.getName(), data);
@@ -368,18 +358,9 @@ public class NuclearHistogramDatasetCreator extends HistogramDatasetCreator {
                 yValues.add(est.getProbability(i));
             }
 
-            double[] xData;
-            double[] yData;
+            double[] xData = xValues.stream().mapToDouble(d->d.doubleValue()).toArray();
+            double[] yData = yValues.stream().mapToDouble(d->d.doubleValue()).toArray();
 
-            try {
-
-                xData = new ArrayConverter(xValues).toDoubleArray();
-                yData = new ArrayConverter(yValues).toDoubleArray();
-
-            } catch (ArrayConversionException e) {
-                xData = new double[0];
-                yData = new double[0];
-            }
             double[][] data = { xData, yData };
 
             ds.addSeries(IBorderSegment.SEGMENT_PREFIX + options.getSegPosition() + "_" + collection.getName(), data);

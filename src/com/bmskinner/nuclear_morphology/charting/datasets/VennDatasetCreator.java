@@ -20,10 +20,7 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.bmskinner.nuclear_morphology.components.AnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.Cell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
