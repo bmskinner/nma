@@ -141,7 +141,7 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
             throw new IllegalArgumentException("Null 'columnKey' argument.");
 
         pdfData.addObject(values, rowKey, columnKey);
-        maxPdfValue = getMaxPdfValue();
+        calculateMaxPdfValue();
         fireDatasetChanged();
     }
 
@@ -165,14 +165,8 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
         return (double[]) pdfData.getObject(row, column);
     }
     
-    /**
-     * Get the maximum probability value across all rows and columns
-     * @return
-     */
-    public double getMaxPdfValue(){
-    	if(!Double.isNaN(maxPdfValue))
-    		return maxPdfValue;
-    	
+    
+    private double calculateMaxPdfValue() {
     	maxPdfValue = -Double.MAX_VALUE;
     	for (int c=0; c<pdfData.getColumnCount(); c++) {
     		for (int r=0; r<pdfData.getRowCount(); r++) {
@@ -182,6 +176,16 @@ public class ViolinCategoryDataset extends ExportableBoxAndWhiskerCategoryDatase
     		}
     	}
     	return maxPdfValue;
+    }
+    
+    /**
+     * Get the maximum probability value across all rows and columns
+     * @return
+     */
+    public double getMaxPdfValue(){
+    	if(!Double.isNaN(maxPdfValue))
+    		return maxPdfValue;
+    	else return calculateMaxPdfValue();
     }
 
     public double getMax(Comparable<?> rowKey, Comparable<?> columnKey) {

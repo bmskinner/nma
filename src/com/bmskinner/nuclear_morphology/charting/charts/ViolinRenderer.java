@@ -53,12 +53,26 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 @SuppressWarnings("serial")
 public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
-
-    /**
-     * Default constructor.
+	
+	private boolean showBoxplot = true;
+	private boolean showViolin = true;
+	
+	/**
+     * Default constructor that draws the box and the violin
      */
     public ViolinRenderer() {
+        this(true, true);
+    }
+
+    /**
+     * Constructor specifying whether the boxplot and the violin should be drawn.
+     * @param showBox true if the boxplot should be drawn
+     * @param showViolin true if the violin should be drawn
+     */
+    public ViolinRenderer(boolean showBox, boolean showViolin) {
         super();
+        showBoxplot = showBox;
+        this.showViolin = showViolin;
         this.setMaximumBarWidth(0.5);
         this.setMeanVisible(false);
         this.setWhiskerWidth(0.05);
@@ -165,7 +179,6 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
     		xxmid = calculateXMid();
     		xxrange = state.getBarWidth();
     		maxProbability = dataset.getMaxPdfValue();
-//    		maxProbability = DoubleStream.of(dataset.getPdfValues(row, column)).max().orElse(0);
     	}
     	
     	public double yValue(int i){
@@ -178,15 +191,24 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
     	}
     	
     	public double xValueR(double x){
-    		 // Express the probability as a fraction of the bar width
-            double xValPos = (x/maxProbability);
-         // multiply the fraction by the bar width to get x position
-            return xxmid + ((xxrange / 2) * xValPos);
+            return xxmid + xOffset(x);
     	}
     	
     	public double xValueL(double x){
-            double xValPos = (x/maxProbability); 
-            return xxmid - ((xxrange / 2) * xValPos);
+            return xxmid - xOffset(x);
+    	}
+    	
+    	/**
+    	 * Calculate the offset to apply to the x midpoint to draw the
+    	 * given x value
+    	 * @param x
+    	 * @return
+    	 */
+    	private double xOffset(double x) {
+    		 // Express the probability as a fraction of the total bar width
+            double xFractionOfRange = x/maxProbability;
+         // multiply the fraction by the bar width to get x position
+            return ((xxrange / 2) * xFractionOfRange);
     	}
     	
     	private double calculateStepSize() {
@@ -256,37 +278,39 @@ public class ViolinRenderer extends BoxAndWhiskerRenderer implements Loggable {
             CategoryPlot plot, CategoryAxis domainAxis, ValueAxis rangeAxis, CategoryDataset dataset, int row,
             int column) {
 
-        ViolinCategoryDataset vioDataset = (ViolinCategoryDataset) dataset;
+    	if(showViolin) {
+    		ViolinCategoryDataset vioDataset = (ViolinCategoryDataset) dataset;
 
-        if (vioDataset.hasProbabilities(row, column)) {
+    		if (vioDataset.hasProbabilities(row, column)) {
 
-            // Draw the pdf behind of the boxplot
+    			// Draw the pdf behind of the boxplot
 
-            Shape leftShape = makeViolinPath(vioDataset, row, column, state, dataArea, plot, domainAxis, rangeAxis);
+    			Shape leftShape = makeViolinPath(vioDataset, row, column, state, dataArea, plot, domainAxis, rangeAxis);
 
-            Paint p = getItemPaint(row, column);
-            Color c = (Color) p;
+    			Paint p = getItemPaint(row, column);
+    			Color c = (Color) p;
 
-            Color tr = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128); // make
-                                                                              // the
-                                                                              // pdf
-                                                                              // transparent
-                                                                              // version
-                                                                              // of
-                                                                              // dataset
-                                                                              // colour
+    			Color tr = new Color(c.getRed(), c.getGreen(), c.getBlue(), 128); // make
+    			// the
+    			// pdf
+    			// transparent
+    			// version
+    			// of
+    			// dataset
+    			// colour
 
-            g2.setPaint(tr);
+    			g2.setPaint(tr);
 
-            Stroke s = getItemStroke(row, column);
-            g2.setStroke(s);
+    			Stroke s = getItemStroke(row, column);
+    			g2.setStroke(s);
 
-            g2.fill(leftShape);
-            g2.draw(leftShape);
-        }
+    			g2.fill(leftShape);
+    			g2.draw(leftShape);
+    		}
+    	}
 
-        drawVerticalBoxplotItem(g2, state, dataArea, plot, domainAxis, rangeAxis, dataset, row, column);
-
+    	if(showBoxplot)
+    		drawVerticalBoxplotItem(g2, state, dataArea, plot, domainAxis, rangeAxis, dataset, row, column);
     }
 
     /**
