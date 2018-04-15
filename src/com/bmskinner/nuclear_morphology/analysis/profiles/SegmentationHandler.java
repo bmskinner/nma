@@ -158,11 +158,12 @@ public class SegmentationHandler implements Loggable {
      * @param segID
      *            the segment ID to be split
      */
-    public void splitSegment(UUID segID) {
+    public void splitSegment(@NonNull UUID segID) {
 
-        if (dataset.getCollection().isVirtual()) {
+        if (dataset.getCollection().isVirtual())
             return;
-        }
+        
+        fine("Dataset is not virtual: "+dataset.getName());
 
         try {
 
@@ -174,15 +175,16 @@ public class SegmentationHandler implements Loggable {
             UUID newID1 = java.util.UUID.randomUUID();
             UUID newID2 = java.util.UUID.randomUUID();
 
+            fine("Splitting segment in root dataset "+dataset.getName());
             boolean ok = dataset.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
 
             if (ok) {
 
+                // Child datasets should all be virtual
                 for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-
+                    fine("Splitting segment in "+child.getName());
                     child.getCollection().getProfileManager().splitSegment(seg, newID1, newID2);
                 }
-//                log("Segment split sucessful");
             } else {
                 warn("Splitting segment cancelled");
             }
