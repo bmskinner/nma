@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -100,7 +101,7 @@ public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
 		        }
 
 		        ds.add(list, "Default", colKey); // Don't use a rowKey - it  will cause an empty box space
-		        addProbabilities(ds, list, "Default", colKey);
+//		        addProbabilities(ds, list, "Default", colKey);
 
 		    }
 
@@ -167,7 +168,7 @@ public class SignalViolinDatasetCreator extends ViolinDatasetCreator {
 		            }
 
 		            ds.add(list, "Default", colKey);
-		            addProbabilities(ds, list, "Default", colKey);
+//		            addProbabilities(ds, list, "Default", colKey);
 
 		        }
 

@@ -23,7 +23,7 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.Plot;
 import org.jfree.data.Range;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.ViolinCategoryDataset;
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 
 @SuppressWarnings("serial")
 public class ViolinChartPanel extends ExportableChartPanel {

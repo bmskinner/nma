@@ -32,6 +32,7 @@ import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
 import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
+import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;

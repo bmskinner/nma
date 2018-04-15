@@ -5,7 +5,7 @@
   <version>1.13.8a6</version>
   <properties>
     <project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
-    <jar.finalName>Nuclear_Morphology_${version}</jar.finalName>
+    <jar.finalName>Nuclear_Morphology_${project.version}</jar.finalName>
   </properties>
   <build>
     <sourceDirectory>src</sourceDirectory>
@@ -185,6 +185,11 @@
   		<artifactId>junit</artifactId>
   		<version>4.12</version>
   		<scope>test</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>com.bmskinner</groupId>
+  		<artifactId>ViolinPlots</artifactId>
+  		<version>0.0.1</version>
   	</dependency>
   </dependencies>
 </project>

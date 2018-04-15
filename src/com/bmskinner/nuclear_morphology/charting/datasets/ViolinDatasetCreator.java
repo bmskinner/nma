@@ -22,8 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.jfree.data.Range;
-
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -41,8 +40,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.stats.Stats;
-
-import weka.estimators.KernelEstimator;
 
 /**
  * Creator for violin datasets
@@ -135,7 +132,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ds.add(list, rowKey, colKey);
 
-            addProbabilities(ds, list, rowKey, colKey);
+//            addProbabilities(ds, list, rowKey, colKey);
         }
 
         return ds;
@@ -171,7 +168,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             ds.add(list, rowKey, colKey);
 
-            addProbabilities(ds, list, rowKey, colKey);
+//            addProbabilities(ds, list, rowKey, colKey);
         }
 
         return ds;
@@ -220,7 +217,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
                     ds.add(list, rowKey, colKey);
 
-                    addProbabilities(ds, list, rowKey, colKey);
+//                    addProbabilities(ds, list, rowKey, colKey);
                 }
             }
         }
@@ -305,7 +302,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                 String colKey = IBorderSegment.SEGMENT_PREFIX + segPosition;
                 dataset.add(list, rowKey, colKey);
 
-                addProbabilities(dataset, list, rowKey, colKey);
+//                addProbabilities(dataset, list, rowKey, colKey);
 
             } catch (ProfileException | UnavailableComponentException e) {
                 fine("Error getting segmented profile", e);
@@ -369,47 +366,47 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
 
             dataset.add(list, rowKey, colKey);
 
-            addProbabilities(dataset, list, rowKey, colKey);
+//            addProbabilities(dataset, list, rowKey, colKey);
         }
         return dataset;
     }
 
-    protected synchronized void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
-            Comparable<?> colKey) {
-
-        double[] pdfValues = new double[STEP_COUNT+1];
-
-        if (list.isEmpty()) {
-            Range r = new Range(0, 0);
-            dataset.addProbabilityRange(r, rowKey, colKey);
-            dataset.addProbabilities(pdfValues, rowKey, colKey);
-            return;
-        }
-
-        double total = list.stream().mapToDouble(n->n.doubleValue()).sum();
-        double min = list.stream().mapToDouble(n->n.doubleValue()).min().orElse(0);
-        double max = list.stream().mapToDouble(n->n.doubleValue()).max().orElse(0);
-
-        // If all values are the same, min==max, and there will be a step error
-        // calculating values between them for pdf
-        if (list.size() > 2 && total > 0 && min < max) { // don't bother with  a dataset of a single cell, or if the  stat  is not present
-
-            double stepSize = (max - min) / STEP_COUNT;
-
-            KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
-
-            for(int i=0; i<STEP_COUNT; i++){
-            	double v = min+(stepSize*i);
-            	pdfValues[i] = est.getProbability(v);
-            }
-            // ensure last value in the array is at yMax; allows the renderer to have a flat top
-            pdfValues[STEP_COUNT] = est.getProbability(max);
-
-            Range r = new Range(min, max);
-            dataset.addProbabilityRange(r, rowKey, colKey);
-        }
-        dataset.addProbabilities(pdfValues, rowKey, colKey);
-
-    }
+//    protected synchronized void addProbabilities(ViolinCategoryDataset dataset, List<Number> list, Comparable<?> rowKey,
+//            Comparable<?> colKey) {
+//
+//        double[] pdfValues = new double[STEP_COUNT+1];
+//
+//        if (list.isEmpty()) {
+//            Range r = new Range(0, 0);
+//            dataset.addProbabilityRange(r, rowKey, colKey);
+//            dataset.addProbabilities(pdfValues, rowKey, colKey);
+//            return;
+//        }
+//
+//        double total = list.stream().mapToDouble(n->n.doubleValue()).sum();
+//        double min = list.stream().mapToDouble(n->n.doubleValue()).min().orElse(0);
+//        double max = list.stream().mapToDouble(n->n.doubleValue()).max().orElse(0);
+//
+//        // If all values are the same, min==max, and there will be a step error
+//        // calculating values between them for pdf
+//        if (list.size() > 2 && total > 0 && min < max) { // don't bother with  a dataset of a single cell, or if the  stat  is not present
+//
+//            double stepSize = (max - min) / STEP_COUNT;
+//
+//            KernelEstimator est = new NucleusDatasetCreator(options).createProbabililtyKernel(list, 0.001);
+//
+//            for(int i=0; i<STEP_COUNT; i++){
+//            	double v = min+(stepSize*i);
+//            	pdfValues[i] = est.getProbability(v);
+//            }
+//            // ensure last value in the array is at yMax; allows the renderer to have a flat top
+//            pdfValues[STEP_COUNT] = est.getProbability(max);
+//
+//            Range r = new Range(min, max);
+//            dataset.addProbabilityRange(r, rowKey, colKey);
+//        }
+//        dataset.addProbabilities(pdfValues, rowKey, colKey);
+//
+//    }
 
 }

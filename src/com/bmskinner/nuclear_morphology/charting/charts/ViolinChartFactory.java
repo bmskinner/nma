@@ -28,15 +28,15 @@ import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 
+import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
+import com.bmskinner.ViolinPlots.ViolinRenderer;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalViolinDatasetCreator;
-import com.bmskinner.nuclear_morphology.charting.datasets.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.charting.datasets.ViolinDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 
 public class ViolinChartFactory extends AbstractChartFactory {
