@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.io;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
@@ -30,11 +32,14 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -55,6 +60,8 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
     private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
 
     private boolean includeProfiles = true;
+    private boolean includeSegments = false;
+    private int segCount = 0;
 
     /**
      * Create specifying the folder stats will be exported into
@@ -80,7 +87,7 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * 
      * @param folder
      */
-    public DatasetStatsExporter(File file, IAnalysisDataset dataset) {
+    public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
         super(dataset);
 
         if (file.isDirectory()) {
@@ -106,14 +113,15 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * 
      * @param d
      */
-    public void export(IAnalysisDataset d) {
+    public void export(@NonNull IAnalysisDataset d) {
 
         log(EXPORT_MESSAGE);
-
+        includeSegments = true;
+        segCount = d.getCollection().getProfileManager().getSegmentCount();
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
         try {
-            export(d, outLine, exportFile);
+            append(d, outLine);
         } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
             error("Error exporting dataset", e);
         }
@@ -126,16 +134,18 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * 
      * @param list
      */
-    public void export(List<IAnalysisDataset> list) {
+    public void export(@NonNull List<IAnalysisDataset> list) {
 
         log(EXPORT_MESSAGE);
+        
+        segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+        includeSegments = list.parallelStream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         StringBuilder outLine = new StringBuilder();
-
         writeHeader(outLine);
 
         try {
             for (IAnalysisDataset d : list) {
-                export(d, outLine, exportFile);
+                append(d, outLine);
                 fireProgressEvent();
             }
         } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
@@ -184,6 +194,15 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
 
             }
         }
+        
+        if(includeSegments){
+            String label = "Length_seg_";
+            for (int i = 0; i < segCount; i++) {
+                outLine.append(label + i +"_pixels" + TAB);
+                outLine.append(label + i +"_microns" + TAB);
+            }
+        }
+        
         outLine.append(NEWLINE);
     }
 
@@ -215,23 +234,18 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
 
     }
 
-    public void export(IAnalysisDataset d, StringBuilder outLine, File exportFile)
+    /**
+     * Append the given dataset stats into the string builder
+     * @param d the dataset to export
+     * @param outLine the string builder to append to
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
+    private void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
             throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
-        // log("Exporting stats...");
 
         for (ICell cell : d.getCollection().getCells()) {
-
-            // if(cell.hasCytoplasm()){
-            //
-            // ICytoplasm c = cell.getCytoplasm();
-            // outLine.append(d.getName()+"\t")
-            // .append(cell.getId()+"\t")
-            // .append("Cytoplasm\t")
-            // .append(c.getSourceFileName()+"\t");
-            //
-            // appendNucleusStats(outLine, d, cell, c);
-            // outLine.append(NEWLINE);
-            // }
 
             if (cell.hasNucleus()) {
 
@@ -247,6 +261,10 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
 
                     if (includeProfiles) {
                         appendProfiles(outLine, n);
+                    }
+                    
+                    if(includeSegments){
+                        appendSegments(outLine, n);
                     }
 
                     outLine.append(NEWLINE);
@@ -298,6 +316,28 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
                 outLine.append(value + TAB);
             }
 
+        }
+    }
+    
+    private void appendSegments(StringBuilder outLine, Taggable c)
+            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+        
+        double varP = 0;
+        double varM = 0;
+                
+        ISegmentedProfile p = c.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        List<IBorderSegment> segs = p.getOrderedSegments();
+        
+        for(IBorderSegment segment : segs){
+            double perimeterLength = 0;
+            if (segment != null) {
+                int indexLength = segment.length();
+                double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+                varP = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
+                varM = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.MICRONS);
+                outLine.append(varP + TAB);
+                outLine.append(varM + TAB);
+            }
         }
     }
 }
