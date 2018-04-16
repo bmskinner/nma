@@ -131,7 +131,6 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
                 Tag.REFERENCE_POINT, Stats.MEDIAN);
         IProfile nucProfile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
         double diff = median.absoluteSquareDifference(nucProfile);
-        fine("Difference to median: " + diff);
 
         // // Adjust segments to fit size
         ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);

@@ -50,12 +50,15 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
  */
 public class FileSelector {
 
-    public static File chooseTableExportFile(){
+    public static @Nullable File chooseTableExportFile(){
         
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", Exporter.TAB_FILE_EXTENSION);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
         File dir = GlobalOptions.getInstance().getDefaultDir();
         File file = chooseSaveFile(dir, filter);
+        
+        if(file==null)
+            return null;
      // Add extension if needed
         if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
             file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
@@ -70,7 +73,7 @@ public class FileSelector {
      * @param datasets the datasets to be exported
      * @return the file to export to
      */
-    public static File chooseStatsExportFile(List<IAnalysisDataset> datasets) {
+    public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets) {
 
         File dir = null;
         if (datasets.size() == 1) {
@@ -82,9 +85,11 @@ public class FileSelector {
                 dir = GlobalOptions.getInstance().getDefaultDir();
             }
         }
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", Exporter.TAB_FILE_EXTENSION);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
         File file = chooseSaveFile(dir, filter);
+        if(file==null)
+            return null;
 
         // Add extension if needed
         if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
@@ -99,7 +104,7 @@ public class FileSelector {
      * 
      * @return the file
      */
-    public static File chooseRemappingFile(@NonNull IAnalysisDataset dataset) {
+    public static @Nullable File chooseRemappingFile(@NonNull IAnalysisDataset dataset) {
 
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
         File defaultDir = null;
@@ -121,7 +126,7 @@ public class FileSelector {
      * @param defaultFolder the default folder
      * @return the selected file, or null on cancel or error
      */
-    private static File chooseOpenFile(File defaultFolder){
+    private static @Nullable File chooseOpenFile(File defaultFolder){
         return chooseOpenFile(defaultFolder, null);
     }
     
@@ -131,7 +136,7 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    private static File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
+    private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
         if(filter!=null){
@@ -145,9 +150,8 @@ public class FileSelector {
         
         File file = fc.getSelectedFile();
 
-        if (file.isDirectory()) {
+        if (file.isDirectory())
             return null;
-        }
         return file;
     }
         
@@ -157,7 +161,7 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    public static File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter){
+    public static @Nullable File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
         if(filter!=null){
@@ -167,9 +171,8 @@ public class FileSelector {
         fc.setDialogTitle("Specify a file to save as");
 
         int returnVal = fc.showSaveDialog(fc);
-        if (returnVal != 0) {
+        if (returnVal != 0)
             return null; // user cancelled
-        }
 
         return fc.getSelectedFile();
     }
@@ -179,7 +182,7 @@ public class FileSelector {
      * @param defaultFolder the default folder for the file chooser
      * @return the selected folder, or null if cancelled or error
      */
-    public static File chooseFolder(@Nullable File defaultFolder){
+    public static @Nullable File chooseFolder(@Nullable File defaultFolder){
         
     	if(defaultFolder!=null && !defaultFolder.exists())
     		defaultFolder=null;
@@ -205,7 +208,7 @@ public class FileSelector {
      * @param datasets the datasets in the workspace
      * @return a workspace file
      */
-    public static File chooseWorkspaceExportFile(List<IAnalysisDataset> datasets) {
+    public static @Nullable File chooseWorkspaceExportFile(List<IAnalysisDataset> datasets) {
 
         String fileName = null;
         File dir = null;

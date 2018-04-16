@@ -114,9 +114,10 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * @param d
      */
     public void export(@NonNull IAnalysisDataset d) {
-
         log(EXPORT_MESSAGE);
         includeSegments = true;
+        if(includeSegments)
+            log("Including segments");
         segCount = d.getCollection().getProfileManager().getSegmentCount();
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
@@ -135,11 +136,15 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * @param list
      */
     public void export(@NonNull List<IAnalysisDataset> list) {
-
         log(EXPORT_MESSAGE);
         
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-        includeSegments = list.parallelStream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
+        if(list.size()==1){
+            includeSegments = true;
+        } else {
+            includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
+        }
+        
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
 
@@ -197,11 +202,16 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
         
         if(includeSegments){
             String label = "Length_seg_";
-            for (int i = 0; i < segCount; i++) {
+            
+            for (int i = 0; i < segCount; i++) { 
                 outLine.append(label + i +"_pixels" + TAB);
                 outLine.append(label + i +"_microns" + TAB);
             }
         }
+        
+        // remove the final tab character
+        if (outLine.length() > 0)
+            outLine.setLength(outLine.length() - 1);
         
         outLine.append(NEWLINE);
     }
@@ -266,6 +276,10 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
                     if(includeSegments){
                         appendSegments(outLine, n);
                     }
+                    
+                    // Remove final tab 
+                    if (outLine.length() > 0)
+                        outLine.setLength(outLine.length() - 1);
 
                     outLine.append(NEWLINE);
                 }
