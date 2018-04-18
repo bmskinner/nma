@@ -293,14 +293,14 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
     @Override
     public synchronized void update() {
-
+    	
         setUpdating(true);
 
         for (TabPanel t : this.getSubPanels()) {
             t.update();
         }
-
-        updateDetail();
+        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+        updateDetail(list);
 
     }
     
@@ -323,7 +323,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
             t.update(list);
         }
 
-        updateDetail();
+        updateDetail(list);
 
     }
 
@@ -331,8 +331,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * This method sets which of the overriden handling methods are run by
      * extending classes.
      */
-    private synchronized void updateDetail() {
-        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
+    private synchronized void updateDetail(List<IAnalysisDataset> list) {
+//        List<IAnalysisDataset> list = DatasetListManager.getInstance().getSelectedDatasets();
 
         try {
             if (list.isEmpty()) {
@@ -637,6 +637,10 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
     private synchronized void setRenderers(@NonNull TableOptions options) {
         JTable table = options.getTarget();
+        
+       if(table.getRowCount()==0)
+    	   return;
+       
         int columns = table.getColumnModel().getColumnCount();
 
         for (int i : options.getRendererColumns()) {
@@ -842,12 +846,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
             try {
                 if (options.hasTarget()) {
-
                     options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 }
-                finest("Creating table type");
                 TableModel model = createPanelTableType(options);
-                finest("Adding table type to cache");
                 tableCache.add(options, model);
 
                 return model;
@@ -867,7 +868,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                     TableModel model = get();
                     if (model != null) {
                         options.getTarget().setModel(model);
-                        finest("Set table to new model");
                         setRenderers(options);
                     }
 
@@ -939,10 +939,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * DatasetUpdateEvent)
      */
     public void datasetUpdateEventReceived(DatasetUpdateEvent e) {
-
-        // Tell this panel to set all charts and tables to loading status
-        // setChartsAndTablesLoading();
-
         // Signal sub panels to update
         duh.fireDatasetUpdateEvent(e.getDatasets());
         this.update(e.getDatasets());

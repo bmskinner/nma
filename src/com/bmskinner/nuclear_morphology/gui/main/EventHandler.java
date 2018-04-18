@@ -355,7 +355,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     @Override
-    public void signalChangeReceived(final SignalChangeEvent event) {
+    public synchronized void signalChangeReceived(final SignalChangeEvent event) {
         final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
         final IAnalysisDataset selectedDataset = selected.isEmpty() ? null
                 : selected.get(0);
@@ -393,6 +393,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
 
         if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) ){
+        	
         	fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
         }
 
@@ -408,7 +409,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     @Override
-    public void datasetEventReceived(final DatasetEvent event) {
+    public synchronized void datasetEventReceived(final DatasetEvent event) {
 
         // Try to launch via factory
         new ActionFactory().run(event);
@@ -448,7 +449,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     @Override
-    public void interfaceEventReceived(final InterfaceEvent event) {
+    public synchronized void interfaceEventReceived(final InterfaceEvent event) {
 
         InterfaceMethod method = event.method();
         
@@ -622,22 +623,13 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public void saveDataset(final IAnalysisDataset d, boolean saveAs) {
 
         if (d.isRoot()) {
-            finer("Dataset is root");
-            finest("Creating latch");
             final CountDownLatch latch = new CountDownLatch(1);
 
             Runnable r = new SaveDatasetAction(d, mw, latch, saveAs);
-            finest("Passing save action to executor service");
             r.run();
-
-            fine("Root dataset saved");
         } else {
-            finest("Not a root dataset, checking for parent");
             IAnalysisDataset target = null;
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
-                // for(AnalysisDataset root :
-                // populationsPanel.getRootDatasets()){
-
                 for (IAnalysisDataset child : root.getAllChildDatasets()) {
                     if (child.getUUID().equals(d.getUUID())) {
                         target = root;
@@ -714,9 +706,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * 
      * @param list
      */
-    public void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
+    public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
         PanelUpdater r = new PanelUpdater(list);
-        ThreadManager.getInstance().executeAndCancelUpdate(r);
+        ThreadManager.getInstance().submit(r);
     }
 
     public class PanelUpdater implements CancellableRunnable {
@@ -731,9 +723,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
             final PanelLoadingUpdater loader = new PanelLoadingUpdater();
-
             try {
 
                 final Future<?> f = ThreadManager.getInstance().submit(loader);
@@ -766,7 +757,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             } catch (Exception e1){
                 error("Undefined error setting panel loading state", e1);
             }
-
+            
             // Now fire the update
             DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
             Iterator<Object> iterator = updateListeners.iterator();
@@ -789,9 +780,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public class PanelLoadingUpdater implements Callable {
 
         @Override
-        public Boolean call() {
+        public synchronized Boolean call() {
             // Update charts and panels to loading
-
             try {
                 for (TabPanel p : mw.getTabPanels()) {
                     p.setChartsAndTablesLoading();

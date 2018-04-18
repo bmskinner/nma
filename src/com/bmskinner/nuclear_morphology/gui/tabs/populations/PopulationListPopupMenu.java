@@ -28,7 +28,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 
@@ -54,7 +53,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
     JMenuItem booleanMenuItem;
     
     JMenuItem extractMenuItem;
-
+   
     JMenuItem saveMenuItem = new JMenuItem(new AbstractAction(SAVE_AS_LBL) {
         @Override
         public void actionPerformed(ActionEvent arg0) {
@@ -147,9 +146,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
     public void createButtons() {
 
         moveUpMenuItem = new JMenuItem("Move up");
-        moveUpMenuItem.addActionListener(e -> {
-            fireSignalChangeEvent("MoveDatasetUpAction");
-        });
+        moveUpMenuItem.addActionListener(e -> fireSignalChangeEvent("MoveDatasetUpAction"));
 
         moveDownMenuItem = new JMenuItem("Move down");
         moveDownMenuItem.addActionListener(e -> {

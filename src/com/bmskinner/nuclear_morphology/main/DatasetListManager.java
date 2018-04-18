@@ -275,48 +275,32 @@ public final class DatasetListManager implements Loggable {
         return null;
     }
 
+    /**
+     * Add the given dataset to the manager
+     * @param d
+     */
     public synchronized void addDataset(IAnalysisDataset d) {
         if (d.isRoot() && !list.contains(d)) {
             list.add(d);
-            fine("Adding hash code: " + d.getName() + " - " + d.hashCode());
             map.put(d.getUUID(), d.hashCode());
-        } else {
-            finer("Not adding a root dataset");
         }
     }
 
+    /**
+     * Remove the selected dataset from the list of open datasets
+     * @param d
+     */
     public synchronized void removeDataset(IAnalysisDataset d) {
 
-        if (!d.isRoot()) { // only remove root datasets
+        if (!d.isRoot()) // only remove root datasets
             return;
-        }
 
-        if (!list.contains(d)) {
-            warn("Requested dataset " + d.getName() + " is not in list; checking UUIDs");
-        }
+        if (!list.contains(d))
+        	return;
 
-        // The hashcode may have changed from what is stored in the list, so
-        // check
-        if (hashCodeChanged(d)) {
-            finer("Dataset hashcode changed");
-        }
-
-        finer("List manager has " + list.size() + " root datasets and " + map.size() + " hashcodes");
-
-        Iterator<IAnalysisDataset> it = list.iterator();
-        while (it.hasNext()) {
-            IAnalysisDataset test = it.next();
-
-            if (test.getUUID().equals(d.getUUID())) {
-                finer("Found id matching dataset");
-                it.remove(); // TODO: figure out why this does not actually
-                             // remove anything from the list
-            }
-        }
+        list.remove(d);
         map.remove(d.getUUID());
-
-        finer("List manager now has " + list.size() + " root datasets and " + map.size() + " hashcodes");
-
+        selected.remove(d);
     }
 
     /**
@@ -338,6 +322,7 @@ public final class DatasetListManager implements Loggable {
     public void clear() {
         list.clear();
         map.clear();
+        selected.clear();
     }
 
     /**

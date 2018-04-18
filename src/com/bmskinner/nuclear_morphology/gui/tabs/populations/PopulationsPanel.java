@@ -405,7 +405,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
     }
 
-    private void deleteSelectedDatasets() {
+    private synchronized void deleteSelectedDatasets() {
         final List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
         final List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
@@ -425,23 +425,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             }
         }
 
-        if (datasets.isEmpty()) {
-            finest("No datasets selected");
+        if (datasets.isEmpty())
             return;
-        }
 
-        // TODO: Check if root datasets need saving before closing
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
         DatasetDeleter deleter = new DatasetDeleter();
         deleter.deleteDatasets(datasets);
         
-        update();
-        finest("Firing update panel event");
-        
-//        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+        update();        
         getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
-        finest("Deletion complete");
-
     }
 
     /**
