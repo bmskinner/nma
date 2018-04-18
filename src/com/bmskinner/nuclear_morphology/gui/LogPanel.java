@@ -121,7 +121,8 @@ public class LogPanel extends DetailPanel implements ActionListener {
     private void listDatasets() {
         int i = 0;
         for (IAnalysisDataset d : DatasetListManager.getInstance().getAllDatasets()) {
-            log(i + "\t" + d.getName());
+            String type = d.getCollection().isReal() ? "Real" : "Virtual";
+            log(i + "\t" + d.getName()+"\t"+type);
             i++;
         }
     }

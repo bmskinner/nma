@@ -486,8 +486,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         // show a list of segments that can be unmerged, and merge the selected
         // option
 
-        IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segments to unmerge",
-                "Unmerge", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
+        IBorderSegment option = (IBorderSegment) JOptionPane.showInputDialog(null, "Choose segment to split",
+                "Split segment", JOptionPane.QUESTION_MESSAGE, null, nameArray, nameArray[0]);
 
         if (option != null) {
 
