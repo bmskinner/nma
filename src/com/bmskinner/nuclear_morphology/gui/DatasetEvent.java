@@ -59,7 +59,7 @@ public class DatasetEvent extends EventObject {
     public static final String CLUSTER            = "Cluster";
     public static final String BUILD_TREE         = "Build tree";
     public static final String TRAIN_CLASSIFIER   = "Train classifier";
-    public static final String REFRESH_CACHE      = "Refresh caches";
+    public static final String REFRESH_CACHE      = "Refresh caches"; // signal the chart cache should be refreshed for given datasets
     public static final String CLEAR_CACHE        = "Clear caches";
     public static final String SAVE               = "Save selected";
     public static final String SAVE_AS            = "Save as new file";

@@ -688,6 +688,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 panel.refreshChartCache(list);
                 panel.refreshTableCache(list);
             }
+            fireDatasetUpdateEvent(DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
         };
         ThreadManager.getInstance().submit(task);
 
