@@ -57,10 +57,6 @@ public interface TableOptions extends DisplayOptions {
      */
     TableType getType();
 
-    int hashCode();
-
-    boolean equals(Object obj);
-
     /**
      * Get the table the resulting model should be loaded into. Used by the
      * TableFactoryWorker in a DetailPanel
@@ -85,12 +81,13 @@ public interface TableOptions extends DisplayOptions {
     TableCellRenderer getRenderer(int i);
 
     /**
-     * Get the columns for which renderers have been set
+     * Get the rendering options. These are detailed as the column index, with special
+     * indices for {@code ALL_COLUMNS}, {@code FIRST_COLUMN}, and {@code ALL_EXCEPT_FIRST_COLUMN}
      * 
      * @return
      */
     Set<Integer> getRendererColumns();
-    
+        
     boolean isNormalised();
 
 }

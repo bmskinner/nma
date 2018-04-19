@@ -643,32 +643,30 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
        
         int columns = table.getColumnModel().getColumnCount();
 
-        for (int i : options.getRendererColumns()) {
-
-            TableCellRenderer renderer = options.getRenderer(i);
-
-            if (i == TableOptions.FIRST_COLUMN) {
-
-                table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-                continue;
+        for (int colIndex : options.getRendererColumns()) {
+            
+            TableCellRenderer renderer = options.getRenderer(colIndex);
+            
+            switch(colIndex){
+                case TableOptions.FIRST_COLUMN: 
+                    table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+                    break;
+                    
+                case TableOptions.ALL_COLUMNS: 
+                    for (int j = 0; j < columns; j++) {
+                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+                    }
+                    break;
+                
+               case TableOptions.ALL_EXCEPT_FIRST_COLUMN:
+                   for (int j = 1; j < columns; j++) {
+                       table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+                   }
+                   break;
+                   
+               default: table.getColumnModel().getColumn(colIndex).setCellRenderer(renderer);
+                
             }
-
-            if (i == TableOptions.ALL_COLUMNS) {
-                for (int j = 0; j < columns; j++) {
-                    table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                }
-                continue;
-            }
-
-            if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
-                for (int j = 1; j < columns; j++) {
-                    table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                }
-                continue;
-            }
-
-            table.getColumnModel().getColumn(i).setCellRenderer(renderer);
-
         }
 
     }
