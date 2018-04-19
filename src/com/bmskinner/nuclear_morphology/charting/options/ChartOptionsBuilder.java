@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -242,7 +243,7 @@ public class ChartOptionsBuilder {
      * Create the options object
      * @return
      */
-    public ChartOptions build() {
+    public @NonNull ChartOptions build() {
         return options;
     }
 

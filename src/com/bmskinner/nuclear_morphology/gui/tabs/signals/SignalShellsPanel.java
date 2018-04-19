@@ -267,11 +267,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
      */
     private JPanel createShellBarPanel() {
         JPanel panel = new JPanel(new BorderLayout());
-
         ChartOptions options = new ChartOptionsBuilder().build();
-
-        JFreeChart chart = getChart(options);
-
+        JFreeChart chart = new NuclearSignalChartFactory(options).createEmptyShellChart();
         chartPanel = new ExportableChartPanel(chart);
 
         panel.add(chartPanel, BorderLayout.CENTER);

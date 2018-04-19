@@ -397,13 +397,11 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * 
      * @param options
      */
-    protected synchronized void setChart(ChartOptions options) {
+    protected synchronized void setChart(@NonNull ChartOptions options) {
         if (chartCache.has(options)) {
-            JFreeChart chart = getChartCache().get(options);
-
-            if (options.getTarget() != null) {
+            JFreeChart chart = chartCache.get(options);
+            if (options.getTarget() != null)
                 options.getTarget().setChart(chart);
-            }
 
         } else { // No cached chart
             // Make a background worker to generate the chart and
@@ -447,25 +445,22 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
      * @return
      * @throws Exception
      */
-    protected synchronized JFreeChart getChart(ChartOptions options) {
-        JFreeChart chart;
-        if (chartCache.has(options)) {
-            chart = getChartCache().get(options);
+    protected synchronized JFreeChart getChart(@NonNull ChartOptions options) {
 
+        if (chartCache.has(options)) {
+            return chartCache.get(options);
         } else { // No cached chart
 
             try {
-                chart = createPanelChartType(options);
+                JFreeChart chart = createPanelChartType(options);
+                chartCache.add(options, chart);
+                return chart;
             } catch (Exception e) {
                 warn("Error creating chart: " + this.getClass().getSimpleName());
                 fine(this.getClass().getName() + ": Error creating chart", e);
-
-                // Draw an empty chart to fill the space
-                chart = ScatterChartFactory.makeEmptyChart();
+                return ScatterChartFactory.makeErrorChart();
             }
-            getChartCache().add(options, chart);
         }
-        return chart;
     }
 
     /**
@@ -763,9 +758,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
             try {
                 if (options.hasTarget()) {
-
                     options.getTarget().setChart(get());
-//                    finest("Set chart panel to new chart");
                     options.getTarget().setCursor(Cursor.getDefaultCursor());
                 }
             } catch (InterruptedException e) {

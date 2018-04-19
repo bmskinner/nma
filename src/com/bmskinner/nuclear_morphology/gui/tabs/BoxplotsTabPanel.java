@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -94,28 +95,18 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
     }
 
     @Override
-    protected synchronized JFreeChart createPanelChartType(ChartOptions options) {
-        if (GlobalOptions.getInstance().isViolinPlots()) {
-            return new ViolinChartFactory(options).createStatisticPlot(component);
-        } else {
-            return new BoxplotChartFactory(options).createStatisticBoxplot(component);
-        }
+    protected synchronized JFreeChart createPanelChartType(@NonNull ChartOptions options) {
+    	return new ViolinChartFactory(options).createStatisticPlot(component);
     }
 
     @Override
-    protected synchronized TableModel createPanelTableType(TableOptions options) {
+    protected synchronized TableModel createPanelTableType(@NonNull TableOptions options) {
         return null;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        try {
-            this.update(getDatasets());
-        } catch (Exception e1) {
-            error("Error updating boxplot panel from action listener", e1);
-        }
-
+    	this.update(getDatasets());
     }
 
 }

@@ -50,7 +50,7 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
 
     private JComboBox<Level>        levelBox;
     private JComboBox<ColourSwatch> colourBox;
-    private JCheckBox               violinBox;
+//    private JCheckBox               violinBox;
     private JCheckBox               fillConsensusBox;
     private JCheckBox               refoldOverrideBox;
     private JCheckBox               antiAliasBox;
@@ -124,12 +124,12 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
         labels.add(swatchLabel);
         fields.add(colourBox);
 
-        JLabel violinLabel = new JLabel("Violin plots");
-        violinBox = new JCheckBox((String) null, GlobalOptions.getInstance().isViolinPlots());
-        violinBox.addActionListener(this);
-
-        labels.add(violinLabel);
-        fields.add(violinBox);
+//        JLabel violinLabel = new JLabel("Violin plots");
+//        violinBox = new JCheckBox((String) null, GlobalOptions.getInstance().isViolinPlots());
+//        violinBox.addActionListener(this);
+//
+//        labels.add(violinLabel);
+//        fields.add(violinBox);
 
         JLabel fillConsensusLabel = new JLabel("Fill consensus");
         fillConsensusBox = new JCheckBox((String) null, GlobalOptions.getInstance().isFillConsensus());
@@ -180,11 +180,11 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
             fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
         }
 
-        boolean useViolins = violinBox.isSelected();
-        if (GlobalOptions.getInstance().isViolinPlots() != useViolins) {
-            GlobalOptions.getInstance().setViolinPlots(useViolins);
-            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-        }
+//        boolean useViolins = violinBox.isSelected();
+//        if (GlobalOptions.getInstance().isViolinPlots() != useViolins) {
+//            GlobalOptions.getInstance().setViolinPlots(useViolins);
+//            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
+//        }
 
         boolean fillConsensus = fillConsensusBox.isSelected();
         if (GlobalOptions.getInstance().isFillConsensus() != fillConsensus) {

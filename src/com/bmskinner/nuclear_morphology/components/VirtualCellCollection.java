@@ -787,40 +787,19 @@ public class VirtualCellCollection implements ICellCollection {
      */
     private synchronized int countSharedNuclei(ICellCollection d2) {
 
-        if (d2 == this) {
+        if (d2 == this)
             return this.size();
-        }
 
-        if (parent.getCollection() == d2) {
+        if (parent.getCollection() == d2)
             return this.size();
-        }
+        
 
-        if (d2.getNucleusType() != this.getNucleusType()) {
+        if (d2.getNucleusType() != this.getNucleusType())
             return 0;
-        }
-
-        Set<UUID> toSearch1 = this.getCellIDs();
-        Set<UUID> toSearch2 = d2.getCellIDs();
-
-        // choose the smaller to search within
-
-        int shared = 0;
-        for (UUID id1 : toSearch1) {
-
-            Iterator<UUID> it = toSearch2.iterator();
-
-            while (it.hasNext()) {
-                UUID id2 = it.next();
-
-                if (id1.equals(id2)) {
-                    it.remove();
-                    shared++;
-                    break;
-                }
-            }
-
-        }
-        return shared;
+        
+        Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
+        toSearch.retainAll(getCellIDs());
+        return toSearch.size();
     }
 
     @Override
@@ -887,35 +866,24 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized double[] getRawValues(PlottableStatistic stat, String component,
+    public double[] getRawValues(PlottableStatistic stat, String component,
             MeasurementScale scale) {
         return getRawValues(stat, component, scale, null);
     }
 
     @Override
-    public synchronized double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
+    public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
             UUID id) {
 
-        try {
-
-            if (CellularComponent.WHOLE_CELL.equals(component)) {
-                return getCellStatistics(stat, scale);
-            }
-
-            if (CellularComponent.NUCLEUS.equals(component)) {
-                return getNuclearStatistics(stat, scale);
-            }
-
-            if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-                return getSegmentStatistics(stat, scale, id);
-
-            }
-        } catch (Exception e) {
-            stack("Error fetching stats from virtual collection", e);
-            return new double[0];
-        }
-        fine("No stats returned");
-        return new double[0];
+    	switch(component) {
+		case CellularComponent.WHOLE_CELL: return getCellStatistics(stat, scale);
+		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
+		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
+		default: {
+			warn("No component of type " + component + " can be handled");
+			return null;
+		}
+	}
     }
 
     @Override
@@ -983,15 +951,12 @@ public class VirtualCellCollection implements ICellCollection {
      * Calculate the length of the segment with the given name in each nucleus
      * of the collection
      * 
-     * @param segName
-     *            the segment name
-     * @param scale
-     *            the scale to use
+     * @param segName the segment name
+     * @param scale the scale to use
      * @return a list of segment lengths
      * @throws Exception
      */
-    private synchronized double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id)
-    		throws Exception {
+    private double[] getSegmentStatistics(PlottableStatistic stat, MeasurementScale scale, UUID id) {
 
     	double[] result = null;
     	if (statsCache.hasValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id)) {
@@ -1025,14 +990,12 @@ public class VirtualCellCollection implements ICellCollection {
      * Get a list of the given statistic values for each nucleus in the
      * collection
      * 
-     * @param stat
-     *            the statistic to use
-     * @param scale
-     *            the measurement scale
+     * @param stat the statistic to use
+     * @param scale the measurement scale
      * @return a list of values
      * @throws Exception
      */
-    private synchronized double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
+    private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
         double[] result = null;
 
@@ -1063,7 +1026,7 @@ public class VirtualCellCollection implements ICellCollection {
      * @return a list of values
      * @throws Exception
      */
-    private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+    private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
         double[] result = null;
 
@@ -1184,29 +1147,6 @@ public class VirtualCellCollection implements ICellCollection {
         }
 
     }
-
-    // public double getNormalisedDifferenceToMedian(Tag pointType, ICell c) {
-    //
-    // try {
-    // IProfile medianProfile =
-    // this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType,
-    // Quartile.MEDIAN);
-    // IProfile angleProfile = c.getNucleus().getProfile(ProfileType.ANGLE,
-    // pointType);
-    // double diff = angleProfile.absoluteSquareDifference(medianProfile);
-    // diff /= c.getNucleus().getStatistic(PlottableStatistic.PERIMETER,
-    // MeasurementScale.PIXELS); // normalise to the number of points in the
-    // perimeter (approximately 1 point per pixel)
-    // double rootDiff = Math.sqrt(diff); // use the differences in degrees,
-    // rather than square degrees
-    // return rootDiff;
-    // } catch(ProfileException | UnavailableBorderTagException |
-    // UnavailableProfileTypeException e){
-    // fine("Error getting difference to median profile for cell
-    // "+c.getNucleus().getNameAndNumber());
-    // return Double.MAX_VALUE;
-    // }
-    // }
 
     @Override
     public double getNormalisedDifferenceToMedian(Tag pointType, Taggable t) {

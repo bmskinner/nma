@@ -158,12 +158,12 @@ public class ImagesTabPanel extends DetailPanel {
      * 
      */
     @Override
-    protected void updateSingle() {
+    protected synchronized void updateSingle() {
         updateMultiple();
     }
 
     @Override
-    protected void updateMultiple() {
+    protected synchronized void updateMultiple() {
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
 
@@ -185,7 +185,7 @@ public class ImagesTabPanel extends DetailPanel {
     }
 
     @Override
-    protected void updateNull() {
+    protected synchronized void updateNull() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
 
         tree.setEnabled(false);

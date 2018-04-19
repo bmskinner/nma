@@ -27,6 +27,8 @@ import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
@@ -106,7 +108,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
     }
 
     @Override
-    public void setChartsAndTablesLoading() {
+    public synchronized void setChartsAndTablesLoading() {
 
         table.setModel(AbstractTableCreator.createLoadingTable());
     }
@@ -128,7 +130,7 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
 
         if (getCellModel().hasCell()) {
             return new CellTableDatasetCreator(options, getCellModel().getCell()).createPairwiseSignalDistanceTable();

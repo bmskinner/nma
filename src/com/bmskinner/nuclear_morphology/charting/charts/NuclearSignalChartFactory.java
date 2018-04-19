@@ -76,7 +76,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
      * 
      * @return
      */
-    private JFreeChart createEmptyShellChart() {
+    public JFreeChart createEmptyShellChart() {
         JFreeChart shellsChart = ChartFactory.createBarChart(null, "Shell", "Percent", null);
         shellsChart.getCategoryPlot().setBackgroundPaint(Color.WHITE);
         shellsChart.getCategoryPlot().getRangeAxis().setRange(0, 100);

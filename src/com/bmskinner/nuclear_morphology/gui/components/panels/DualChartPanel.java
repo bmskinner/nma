@@ -113,9 +113,9 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
 
     public void setCharts(JFreeChart chart, JFreeChart rangeChart) {
 
-        if (chart == rangeChart) {
+        if (chart == rangeChart)
             throw new IllegalArgumentException("Charts cannot be the same object");
-        }
+
         this.chartPanel.setChart(chart);
         this.rangePanel.setChart(rangeChart);
 

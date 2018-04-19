@@ -46,7 +46,6 @@ public class ViolinChartFactory extends AbstractChartFactory {
     }
 
     public JFreeChart makeEmptyChart() {
-
         return BoxplotChartFactory.makeEmptyChart();
     }
 
@@ -62,39 +61,24 @@ public class ViolinChartFactory extends AbstractChartFactory {
         if (!options.hasDatasets()) 
             return makeEmptyChart();
 
-        try {
-
-            if (CellularComponent.WHOLE_CELL.equals(component)) {
-                return createCellStatisticPlot();
-            }
-
-            if (CellularComponent.NUCLEUS.equals(component)) {
-                return createNucleusStatisticPlot();
-            }
-
-            if (CellularComponent.NUCLEAR_SIGNAL.equals(component)) {
-                return createSignalStatisticPlot();
-            }
-
-            if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-                return createSegmentPlot();
-            }
-
+        try {  	
+        	switch(component) {
+        		case CellularComponent.WHOLE_CELL: return createCellStatisticPlot();
+        		case CellularComponent.NUCLEUS: return createNucleusStatisticPlot();
+        		case CellularComponent.NUCLEAR_SIGNAL: return createSignalStatisticPlot();
+        		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return createSegmentPlot();
+        		default: return makeEmptyChart();
+        	}
         } catch (Exception e) {
             stack("Error making violin chart", e);
             return makeErrorChart();
         }
-
-        fine("No chart of type " + component);
-        return makeEmptyChart();
-
     }
 
     /**
      * Create a segment length boxplot for the given segment name
      * 
-     * @param ds
-     *            the dataset
+     * @param ds the dataset
      * @return
      */
     public JFreeChart createSignalColocalisationViolinChart() {

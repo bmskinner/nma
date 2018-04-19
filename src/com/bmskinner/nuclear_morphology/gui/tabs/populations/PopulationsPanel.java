@@ -141,7 +141,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     @Override
     public void update(final List<IAnalysisDataset> list) {
         this.update();
-        finest("Preparing to select datasets");
         treeTable.selectDatasets(list);
         treeTable.repaint();
     }
@@ -157,7 +156,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      * chooser. Root populations are ordered according to position in the
      * treeListOrder map.
      */
-    public void update() {
+    public synchronized void update() {
 
         int nameColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).getWidth();
         int colourColWidth = treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).getWidth();
@@ -165,11 +164,9 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         /*
          * Determine the ids of collapsed datasets, and store them
          */
-        finest("Storing collapsed rows");
         List<Object> collapsedRows = treeTable.getCollapsedRows();
 
         // Need to modify the model, not replace it to keep ordering
-        // PopulationTreeTableModel newModel = createTableModel();
         PopulationTreeTableModel newModel = new PopulationTreeTableModel();
         treeTable.setTreeTableModel(newModel);
 
@@ -280,15 +277,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      *            the dataset to add
      */
     public void addDataset(IAnalysisDataset dataset) {
-
-        if (dataset.isRoot()) { // add to the list of datasets that can be
-                                // ordered
-            // treeOrderMap.put(dataset.getUUID(), treeOrderMap.size()); // add
-            // to the end of the list
-            fine("Adding root dataset " + dataset.getName() + " to list manager");
+        if (dataset.isRoot())
             DatasetListManager.getInstance().addDataset(dataset);
-
-        }
     }
 
     /**
@@ -302,7 +292,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
             list.add(dataset);
             treeTable.selectDatasets(list);
-            // selectDatasets(list);
         }
     }
 
@@ -428,11 +417,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         if (datasets.isEmpty())
             return;
 
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
+        
         DatasetDeleter deleter = new DatasetDeleter();
         deleter.deleteDatasets(datasets);
-        
-        update();        
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
+        update();  
+        treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
+        treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
         getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
     }
 
@@ -445,15 +436,13 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
             try {
 
-                if (!isCtrlPressed()) {
-
+                if (!isCtrlPressed())
                     datasetSelectionOrder.clear();
-                }
 
                 int cellTotal = 0;
 
                 // Track the datasets currently selected
-                List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(5);
+                List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(8);
 
                 TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
                 int totalSelectionCount = lsm.getSelectionCount();
@@ -545,7 +534,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                                 populationPopup.enableMenuDown();
                             }
                         }
-                        finer("Firing update panel event due to tree selection");
+
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
                     }
                 }

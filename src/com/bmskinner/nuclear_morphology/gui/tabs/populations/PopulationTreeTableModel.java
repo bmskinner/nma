@@ -63,18 +63,12 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
         try {
 
             if (DatasetListManager.getInstance().hasWorkspaces()) {
-
-//                finer("List manager has " + DatasetListManager.getInstance().workspaceCount() + " workspaces");
                 List<IWorkspace> ws = DatasetListManager.getInstance().getWorkspaces();
 
                 for (IWorkspace workspace : ws) {
                     addWorkspace(workspace);                    
                 }
 
-                finer("Added datasets to nodes");
-
-            } else {
-                finer("No datasets loaded");
             }
         } catch (Exception e) {
             error("Error adding nodes to table model", e);
@@ -88,20 +82,13 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
             if (DatasetListManager.getInstance().hasDatasets()) {
 
-                finer("List manager has " + DatasetListManager.getInstance().datasetCount() + " datasets");
-
                 for (IAnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()) {
-                    finer("Adding " + rootDataset.getName() + " as node");
                     
                     if(! DatasetListManager.getInstance().isInWorkspace(rootDataset)){
                         this.addRootDataset(rootDataset);
                     }
                 }
 
-                finer("Added datasets to nodes");
-
-            } else {
-                finer("No datasets loaded");
             }
         } catch (Exception e) {
             error("Error adding nodes to table model", e);
@@ -150,9 +137,8 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
     public void addChildDataset(IAnalysisDataset dataset) {
 
-        if (this.getNode(dataset) != null) {
+        if (this.getNode(dataset) != null)
             return; // ignore datasets already present
-        }
 
         IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
 
@@ -199,7 +185,6 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
                                                     // not added twice
 
         for (IClusterGroup group : dataset.getClusterGroups()) {
-            fine("Making node for cluster group " + group.getName());
             PopulationTreeTableNode clusterGroupNode = new PopulationTreeTableNode(group);
             category.add(clusterGroupNode);
 
@@ -220,9 +205,6 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
                 category.add(childNode);
             }
         }
-        finer("Added all child nodes for dataset " + dataset.toString());
-
-        // category.sortNode(COLUMN_NAME, true, false);
         return category;
     }
     
@@ -237,9 +219,8 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      */
     private PopulationTreeTableNode createNodes(IWorkspace ws) {
 
-        if (ws == null) {
+        if (ws == null)
             throw new IllegalArgumentException("Workspace is null when generating population table nodes");
-        }
 
         PopulationTreeTableNode category = new PopulationTreeTableNode(ws);
         
@@ -263,31 +244,22 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      */
     public void moveNodesDown(List<PopulationTreeTableNode> nodes) {
 
-        finer("Selected " + nodes.size() + " nodes");
-
         for (PopulationTreeTableNode n : nodes) {
             PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
 
             // get the index of the child in the parent node
             int oldIndex = this.getIndexOfChild(parent, n);
 
-            finest("Old index " + oldIndex);
-
             // if the index is last, do nothing
-            if (oldIndex == parent.getChildCount() - 1) {
+            if (oldIndex == parent.getChildCount() - 1)
                 return;
-            }
 
             int sibIndex = oldIndex + 1;
-            finest("Sib index " + sibIndex);
 
             // Get the next node up
             PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
             this.removeNodeFromParent(n);
             this.removeNodeFromParent(sib);
-
-            finest("Old node:  " + n.toString());
-            finest("Sib node:  " + sib.toString());
 
             this.insertNodeInto(sib, parent, oldIndex);
             this.insertNodeInto(n, parent, sibIndex);
@@ -304,31 +276,21 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      */
     public void moveNodesUp(List<PopulationTreeTableNode> nodes) {
 
-        finer("Selected " + nodes.size() + " nodes");
-
         for (PopulationTreeTableNode n : nodes) {
             PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
 
             // get the index of the child in the parent node
             int oldIndex = this.getIndexOfChild(parent, n);
 
-            finest("Old index " + oldIndex);
-
             // if the index is first, do nothing
-            if (oldIndex == 0) {
+            if (oldIndex == 0)
                 return;
-            }
 
             int sibIndex = oldIndex - 1;
-            finest("Sib index " + sibIndex);
-
             // Get the next node up
             PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
             this.removeNodeFromParent(n);
             this.removeNodeFromParent(sib);
-
-            finest("Old node:  " + n.toString());
-            finest("Sib node:  " + sib.toString());
 
             this.insertNodeInto(n, parent, sibIndex);
             this.insertNodeInto(sib, parent, oldIndex);
@@ -345,9 +307,9 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      */
     public PopulationTreeTableNode getNode(IClusterGroup g) {
 
-        if (g == null) {
+        if (g == null)
             throw new IllegalArgumentException("Cluster group cannot be null");
-        }
+
         PopulationTreeTableNode result = null;
 
         PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();
@@ -374,9 +336,8 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      */
     public PopulationTreeTableNode getNode(IWorkspace w) {
 
-        if (w == null) {
+        if (w == null)
             throw new IllegalArgumentException("Cluster group cannot be null");
-        }
         PopulationTreeTableNode result = null;
 
         PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();

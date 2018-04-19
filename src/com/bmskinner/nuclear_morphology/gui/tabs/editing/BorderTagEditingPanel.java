@@ -128,11 +128,19 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
         boolean normaliseProfile = false; // cannot be normalised because we
                                           // must get absolute indexes
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
-                .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(true)
-                .setProfileType(ProfileType.ANGLE).setShowPoints(true)
-                .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowAnnotations(false).setShowXAxis(false)
-                .setShowYAxis(false).setTarget(dualPanel.getMainPanel()).build();
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+        		.setNormalised(normaliseProfile)
+                .setAlignment(ProfileAlignment.LEFT)
+                .setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(true)
+                .setProfileType(ProfileType.ANGLE)
+                .setShowPoints(true)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setShowAnnotations(false)
+                .setShowXAxis(false)
+                .setShowYAxis(false)
+                .setTarget(dualPanel.getMainPanel())
+                .build();
 
         JFreeChart chart = getChart(options);
 
@@ -161,7 +169,6 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
     @Override
     protected void updateNull() {
         setButtonsEnabled(false);
-
         dualPanel.setCharts(MorphologyChartFactory.createEmptyChart(), MorphologyChartFactory.createEmptyChart());
     }
 

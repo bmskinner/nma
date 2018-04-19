@@ -113,16 +113,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
     private JPanel createConsensusPanel() {
 
         final JPanel panel = new JPanel(new BorderLayout());
-
-        ChartOptions options = new ChartOptionsBuilder().build();
-
-        JFreeChart chart = null;
-        try {
-            chart = getChart(options);
-        } catch (Exception e1) {
-            warn("Error creating blank signals chart");
-            stack("Error creating blank signals chart", e1);
-        }
+        JFreeChart chart = OutlineChartFactory.makeEmptyChart();
 
         // the chart is inside a chartPanel; the chartPanel is inside a JPanel
         // this allows a checkbox panel to be added to the JPanel later

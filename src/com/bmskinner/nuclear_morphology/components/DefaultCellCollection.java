@@ -865,7 +865,7 @@ public class DefaultCellCollection implements ICellCollection {
     }
 
     @Override
-    public synchronized double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
+    public double getMedian(PlottableStatistic stat, String component, MeasurementScale scale,
             UUID id) throws Exception {
 
         if (CellularComponent.NUCLEAR_SIGNAL.equals(component) || stat.getClass() == SignalStatistic.class) {
@@ -878,37 +878,25 @@ public class DefaultCellCollection implements ICellCollection {
         return 0;
     }
 
-    public synchronized double[] getRawValues(PlottableStatistic stat, String component,
+    public double[] getRawValues(PlottableStatistic stat, String component,
             MeasurementScale scale) {
 
         return getRawValues(stat, component, scale, null);
 
     }
 
-    public synchronized double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
+    public double[] getRawValues(PlottableStatistic stat, String component, MeasurementScale scale,
             UUID id) {
 
-        try {
-
-            if (CellularComponent.WHOLE_CELL.equals(component)) {
-                return getCellStatistics(stat, scale);
-            }
-
-            if (CellularComponent.NUCLEUS.equals(component)) {
-                return getNuclearStatistics(stat, scale);
-            }
-
-            if (CellularComponent.NUCLEAR_BORDER_SEGMENT.equals(component)) {
-                return getSegmentStatistics(stat, scale, id);
-
-            }
-        } catch (Exception e) {
-            stack("Unable to get raw values of " + stat + " for " + component + " at " + scale, e);
-            return null;
-        }
-
-        warn("No component of type " + component + " can be handled");
-        return null;
+    	switch(component) {
+    		case CellularComponent.WHOLE_CELL: return getCellStatistics(stat, scale);
+    		case CellularComponent.NUCLEUS: return getNuclearStatistics(stat, scale);
+    		case CellularComponent.NUCLEAR_BORDER_SEGMENT: return getSegmentStatistics(stat, scale, id);
+    		default: {
+    			warn("No component of type " + component + " can be handled");
+    			return null;
+    		}
+    	}
     }
 
     private synchronized double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,
@@ -997,29 +985,22 @@ public class DefaultCellCollection implements ICellCollection {
      * Get a list of the given statistic values for each nucleus in the
      * collection
      * 
-     * @param stat
-     *            the statistic to use
-     * @param scale
-     *            the measurement scale
+     * @param stat the statistic to use
+     * @param scale the measurement scale
      * @return a list of values
      * @throws Exception
      */
-    private synchronized double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
+    private double[] getCellStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
         double[] result = null;
 
         if (statsCache.hasValues(stat, CellularComponent.WHOLE_CELL, scale, null)) {
             return statsCache.getValues(stat, CellularComponent.WHOLE_CELL, scale, null);
-
         } else {
-
             result = cells.parallelStream().mapToDouble(c -> c.getStatistic(stat, scale)).toArray();
-
             Arrays.sort(result);
             statsCache.setValues(stat, CellularComponent.WHOLE_CELL, scale, null, result);
-
         }
-
         return result;
 
     }
@@ -1028,14 +1009,12 @@ public class DefaultCellCollection implements ICellCollection {
      * Get a list of the given statistic values for each nucleus in the
      * collection
      * 
-     * @param stat
-     *            the statistic to use
-     * @param scale
-     *            the measurement scale
+     * @param stat the statistic to use
+     * @param scale the measurement scale
      * @return a list of values
      * @throws Exception
      */
-    private synchronized double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
+    private double[] getNuclearStatistics(PlottableStatistic stat, MeasurementScale scale) {
 
         double[] result = null;
 
@@ -1095,9 +1074,9 @@ public class DefaultCellCollection implements ICellCollection {
     		}).toArray();
     		Arrays.sort(result);
     		statsCache.setValues(stat, CellularComponent.NUCLEAR_BORDER_SEGMENT, scale, id, result);
-    		if(errorCount.get()>0){
+    		if(errorCount.get()>0)
               warn(String.format("%d nuclei had errors getting segments", errorCount.get()));
-          }
+
     	}
     	return result;
     }
@@ -1401,9 +1380,7 @@ public class DefaultCellCollection implements ICellCollection {
      * @return
      */
     public synchronized int countShared(IAnalysisDataset d2) {
-
         return countShared(d2.getCollection());
-
     }
 
     /**
@@ -1414,9 +1391,8 @@ public class DefaultCellCollection implements ICellCollection {
      */
     public synchronized int countShared(ICellCollection d2) {
 
-        if (vennCache.hasCount(d2)) {
+        if (vennCache.hasCount(d2))
             return vennCache.getCount(d2);
-        }
         int shared = countSharedNuclei(d2);
         d2.setSharedCount(this, shared);
         vennCache.addCount(d2, shared);
@@ -1439,39 +1415,15 @@ public class DefaultCellCollection implements ICellCollection {
      */
     private synchronized int countSharedNuclei(ICellCollection d2) {
 
-        if (d2 == this) {
+        if (d2 == this)
             return cells.size();
-        }
 
-        if (d2.getNucleusType() != this.nucleusType) {
+        if (d2.getNucleusType() != nucleusType)
             return 0;
-        }
-
-        Set<UUID> toSearch1 = this.getCellIDs();
-        Set<UUID> toSearch2 = d2.getCellIDs();
-
-        finest("Beginning search for shared cells");
-
-        // choose the smaller to search within
-
-        int shared = 0;
-        for (UUID id1 : toSearch1) {
-
-            Iterator<UUID> it = toSearch2.iterator();
-
-            while (it.hasNext()) {
-                UUID id2 = it.next();
-
-                if (id1.equals(id2)) {
-                    it.remove();
-                    shared++;
-                    break;
-                }
-            }
-
-        }
-        finest("Completed search for shared cells");
-        return shared;
+        
+        Set<UUID> toSearch = new HashSet<>(d2.getCellIDs());
+        toSearch.retainAll(getCellIDs());
+        return toSearch.size();
     }
 
     public int countClockWiseRPNuclei() {
@@ -1492,10 +1444,8 @@ public class DefaultCellCollection implements ICellCollection {
             c.setScale(scale);
         }
 
-        if (hasConsensus()) {
+        if (hasConsensus())
         	consensusNucleus.setScale(scale);
-        }
-
     }
 
     public String toString() {
@@ -1510,11 +1460,6 @@ public class DefaultCellCollection implements ICellCollection {
 
         IProfileCollection pc = this.getProfileCollection();
         b.append(pc.toString() + newLine);
-        // for(ProfileType type : ProfileType.values() ){
-        // b.append("Profile type: "+type+newLine);
-        //
-        // b.append( pc.toString()+ newLine);
-        // }
 
         b.append(this.ruleSets.toString() + newLine);
 

@@ -74,11 +74,7 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     public ConsensusNucleusPanel() {
         super();
         this.setLayout(new BorderLayout());
-
-        ChartOptions options = new ChartOptionsBuilder().setScale(GlobalOptions.getInstance().getScale())
-                .setSwatch(GlobalOptions.getInstance().getSwatch()).setShowXAxis(false).setShowYAxis(false).build();
-
-        JFreeChart consensusChart = getChart(options);
+        JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyChart();
         consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);
         consensusChartPanel.addSignalChangeListener(this);
 

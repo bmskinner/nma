@@ -53,33 +53,24 @@ public class DatasetDeleter implements Loggable {
      */
     public void deleteDatasets(List<IAnalysisDataset> datasets) {
 
-        if (datasets == null || datasets.isEmpty()) {
-            fine("No datasets selected");
+        if (datasets == null || datasets.isEmpty())
             return;
-        }
 
         try {
 
-            // Now extract the unique UUIDs of all datasets to be deleted
-            // (including children)
-            fine("There are " + datasets.size() + " datasets selected");
-
             Deque<UUID> list = unique(datasets);
 
-            // Ask before closing, if any root datasets have changed since
-            // last save
+            // Ask before closing, if any root datasets have changed since last save
             if (rootHasChanged(list)) {
                 warn("A root dataset has changed since last save");
 
                 Object[] buttonLabels = { KEEP_LBL, DELETE_LBL };
 
-                Object selectedValue = JOptionPane.showOptionDialog(null, WARNING_LBL, TITLE_LBL,
+                int selectedValue = JOptionPane.showOptionDialog(null, WARNING_LBL, TITLE_LBL,
                         JOptionPane.OK_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE, null, buttonLabels, KEEP_LBL); // default
 
-                if (!selectedValue.toString().equals("1")) {
+                if (selectedValue!=1)
                     return;
-                }
-
             }
 
             deleteDatasetsInList(list);
@@ -88,14 +79,11 @@ public class DatasetDeleter implements Loggable {
                                                                 // cluster
                                                                 // groups from
                                                                 // datasets
-            
-            fine("Updating cluster groups in tree panel");
-            fine("Deletion complete");
         } catch (Exception e) {
             warn("Error deleting dataset");
             stack("Error deleting dataset", e);
         }
-
+        System.gc();
     }
 
     private boolean rootHasChanged(Deque<UUID> list) {
@@ -105,10 +93,8 @@ public class DatasetDeleter implements Loggable {
             IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
 
             if (d.isRoot()) {
-
-                if (DatasetListManager.getInstance().hashCodeChanged(d)) {
+                if (DatasetListManager.getInstance().hashCodeChanged(d))
                     return true;
-                }
             }
         }
         return false;
@@ -116,32 +102,18 @@ public class DatasetDeleter implements Loggable {
 
     private void deleteDataset(IAnalysisDataset d) {
 
-        fine("Deleting dataset: " + d.getName());
         UUID id = d.getUUID();
 
         // remove the dataset from its parents
         for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) { // analysisDatasets.keySet()){
-
-            fine("Parent dataset " + parent.getName());
-
-            if (parent.hasChild(id)) {
-                fine("  " + parent.getName() + " is a parent to " + d.getName());
+            if (parent.hasChild(id))
                 parent.deleteChild(id);
-            }
-
         }
 
-        fine("Checking if dataset is root");
-
-        if (d.isRoot()) {
-
+        if (d.isRoot())
             DatasetListManager.getInstance().removeDataset(d);
-        }
 
-        fine("Clearing dataset from memory");
-
-        d = null; // clear from memory
-        fine("Deleted dataset");
+        d = null;
 
     }
 
@@ -154,11 +126,8 @@ public class DatasetDeleter implements Loggable {
      */
     private void deleteDatasetsInList(Deque<UUID> ids) {
 
-        if (ids.isEmpty()) {
+        if (ids.isEmpty())
             return;
-        }
-
-        fine("Candidate delete list has " + ids.size() + " datasets");
 
         UUID id = ids.removeFirst();
 
@@ -167,7 +136,6 @@ public class DatasetDeleter implements Loggable {
         if (!d.hasChildren()) {
             deleteDataset(d);
         } else {
-            fine(d.getName() + " still has children");
             ids.addLast(id); // put at the end of the deque to be handled last
         }
 
@@ -183,18 +151,13 @@ public class DatasetDeleter implements Loggable {
     private Deque<UUID> unique(List<IAnalysisDataset> list) {
         Set<UUID> set = new HashSet<UUID>();
         for (IAnalysisDataset d : list) {
-            fine("Selected dataset for deletion: " + d.getName());
-
             set.add(d.getUUID());
 
             if (d.hasChildren()) {
-                fine("Children found in: " + d.getName());
                 // add all the children of a dataset
                 for (UUID childID : d.getAllChildUUIDs()) {
                     set.add(childID);
                 }
-            } else {
-                fine("No children in: " + d.getName());
             }
         }
 

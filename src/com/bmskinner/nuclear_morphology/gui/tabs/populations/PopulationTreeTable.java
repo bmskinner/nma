@@ -126,14 +126,9 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
     /**
      * Select the given datasets in the tree table
      * 
-     * @param dataset
-     *            the dataset to select
+     * @param dataset the dataset to select
      */
     public void selectDatasets(List<IAnalysisDataset> list) {
-        finer("Selecting list of " + list.size() + " datasets in populations panel");
-
-//        PopulationTreeTableModel model = (PopulationTreeTableModel) getTreeTableModel();
-
         Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
         int selectedIndexOrder = 0;
         for (IAnalysisDataset dataset : list) {
