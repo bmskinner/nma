@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -477,24 +477,4 @@ public class ShellCounter implements Loggable {
 
         return 0;
     }
-
-    // /**
-    // * For debugging - print the contents of the dataset to log
-    // */
-    // public void print(){
-    // if(this.size()==0){ // don't make empty log files
-    // return;
-    // }
-    // for(int i = 0; i< signalProportionValues.get(0).size();i++){ // go
-    // through each signal
-    // String line = "";
-    // for(int j = 0; j<numberOfShells; j++){ // each shell for signal
-    // List<Double> list = signalProportionValues.get(j);
-    // line += list.get(i)+"\t";
-    // }
-    // log(line);
-    // }
-    // log("");
-    // }
-
 }

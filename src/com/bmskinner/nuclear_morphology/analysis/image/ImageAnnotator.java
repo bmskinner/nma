@@ -32,7 +32,7 @@ import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;

@@ -26,7 +26,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.TableType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;

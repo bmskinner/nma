@@ -35,7 +35,7 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;

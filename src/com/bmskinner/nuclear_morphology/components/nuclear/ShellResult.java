@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @Deprecated

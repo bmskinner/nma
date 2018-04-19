@@ -24,8 +24,8 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;

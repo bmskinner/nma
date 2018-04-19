@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.io.File;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultShellResult;
@@ -85,11 +85,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
         ICellCollection collection = dataset.getCollection();
 
-        if (!collection.getSignalManager().hasSignals()) {
-            fine("No signals in population");
+        if (!collection.getSignalManager().hasSignals()) 
             return;
-
-        }
 
         log("Performing shell analysis with " + shells + " shells...");
 
@@ -98,9 +95,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-                if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+                if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID))
                     continue;
-                }
                 counters.put(signalGroup, new ShellCounter(shells));
             }
 
@@ -151,10 +147,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
                 if (collection.getSignalManager().hasSignals(signalGroup)) {
                     List<INuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup);
-                    if (signals.isEmpty()) {
-                        fine("No signals in signal group " + signalGroup + "in nucleus");
+                    if (signals.isEmpty())
                         continue;
-                    }
 
                     File sourceFile = n.getSignalCollection().getSourceFile(signalGroup);
 

@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 public class ShellAnalysisException extends Exception {
     private static final long serialVersionUID = 1L;

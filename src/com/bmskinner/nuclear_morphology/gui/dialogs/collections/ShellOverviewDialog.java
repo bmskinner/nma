@@ -21,9 +21,9 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisException;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;

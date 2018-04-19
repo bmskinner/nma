@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;

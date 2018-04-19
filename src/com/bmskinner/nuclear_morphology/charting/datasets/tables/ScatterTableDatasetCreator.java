@@ -29,8 +29,8 @@ import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;

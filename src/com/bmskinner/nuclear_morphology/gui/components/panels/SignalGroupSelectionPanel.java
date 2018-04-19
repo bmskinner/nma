@@ -27,8 +27,8 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;

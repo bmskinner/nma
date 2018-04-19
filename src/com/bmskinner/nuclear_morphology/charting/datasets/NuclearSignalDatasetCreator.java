@@ -33,11 +33,11 @@ import org.jfree.data.xy.DefaultXYDataset;
 import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellAnalysisException;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellDetector.Shell;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisException;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;

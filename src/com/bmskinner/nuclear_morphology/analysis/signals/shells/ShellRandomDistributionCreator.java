@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;

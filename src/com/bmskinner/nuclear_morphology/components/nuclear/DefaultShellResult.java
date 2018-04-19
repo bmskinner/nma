@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 
 /**
  * A default implementation of the IShellResult interface. It uses a builder
@@ -62,14 +62,12 @@ public class DefaultShellResult implements IShellResult {
     /**
      * Construct with a given shell count
      * 
-     * @param shellCount
-     *            the shell count
+     * @param shellCount the shell count
      */
     public DefaultShellResult(int shellCount) {
 
-        if (shellCount < 1) {
+        if (shellCount < 1) 
             throw new IllegalArgumentException("Shell count must be greater than 1");
-        }
 
         this.shellCount = shellCount;
 
@@ -82,7 +80,6 @@ public class DefaultShellResult implements IShellResult {
         nucleusNormMeans = new double[shellCount];
         nucleusRawStderrs = new double[shellCount];
         nucleusNormStderrs = new double[shellCount];
-
     }
 
     /**

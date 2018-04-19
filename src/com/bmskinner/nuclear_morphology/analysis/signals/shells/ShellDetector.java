@@ -22,7 +22,7 @@
   -----------------------
   Signal positions in round nuclei.
 */
-package com.bmskinner.nuclear_morphology.analysis.signals;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
 import java.awt.Polygon;
 import java.awt.Rectangle;

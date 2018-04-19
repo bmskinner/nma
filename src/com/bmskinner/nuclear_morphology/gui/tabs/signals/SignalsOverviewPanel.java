@@ -38,8 +38,8 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;

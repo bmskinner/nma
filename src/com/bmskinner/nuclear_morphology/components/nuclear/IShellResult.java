@@ -21,7 +21,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.io.Serializable;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellCounter.CountType;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**

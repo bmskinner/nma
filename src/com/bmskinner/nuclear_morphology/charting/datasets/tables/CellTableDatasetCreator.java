@@ -30,7 +30,7 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.signals.ShellRandomDistributionCreator;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
