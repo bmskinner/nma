@@ -1006,12 +1006,6 @@ public class ProfileManager implements Loggable {
         seg = medianProfile.getSegment(seg.getID());
         int index = seg.getMidpointIndex();
 
-        if (newID1 == null)
-            newID1 = java.util.UUID.randomUUID();
-
-        if (newID2 == null)
-            newID2 = java.util.UUID.randomUUID();
-
         if (!seg.contains(index))
             return false;
 
@@ -1025,6 +1019,8 @@ public class ProfileManager implements Loggable {
         }
 
         // split the two segments in the median
+        newID1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
+        newID2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
         medianProfile.splitSegment(seg, index, newID1, newID2);
         fine("Split median profile");
 

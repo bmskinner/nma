@@ -219,6 +219,10 @@
 //            }
 //
 //            double max = Double.MIN_VALUE;
+//            if ( limits.size() != array.length)
+//                throw new IllegalArgumentException("Limits are wrong size for this profile");
+//
+//            double max = -Double.MAX_VALUE;
 //            int maxIndex = -1;
 //            for (int i = 0; i < array.length; i++) {
 //                if (limits.get(i) && array[i] > max) {
@@ -227,9 +231,8 @@
 //                }
 //            }
 //
-//            if (maxIndex == -1) {
+//            if (maxIndex == -1)
 //                throw new ProfileException("No valid index for maximum value");
-//            }
 //            return maxIndex;
 //        }
 //

@@ -28,6 +28,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
@@ -144,7 +146,7 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
     }
 
     @Override
-    protected TableModel createPanelTableType(TableOptions options) {
+    protected TableModel createPanelTableType(@NonNull TableOptions options) {
         return new AnalysisDatasetTableCreator(options).createMagnitudeStatisticTable(CellularComponent.NUCLEUS);
     }
 

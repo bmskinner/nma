@@ -619,7 +619,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         clearTableCache(list);
         this.update(getDatasets());
     }
-
+    
     /**
      * Set the given table to use a custom table renderer. The renderer will be
      * used for every column except the first.
@@ -633,42 +633,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                 table.getColumnModel().getColumn(i).setCellRenderer(renderer);
             }
         }
-    }
-
-    private synchronized void setRenderers(@NonNull TableOptions options) {
-        JTable table = options.getTarget();
-        
-       if(table.getRowCount()==0)
-    	   return;
-       
-        int columns = table.getColumnModel().getColumnCount();
-
-        for (int colIndex : options.getRendererColumns()) {
-            
-            TableCellRenderer renderer = options.getRenderer(colIndex);
-            
-            switch(colIndex){
-                case TableOptions.FIRST_COLUMN: 
-                    table.getColumnModel().getColumn(0).setCellRenderer(renderer);
-                    break;
-                    
-                case TableOptions.ALL_COLUMNS: 
-                    for (int j = 0; j < columns; j++) {
-                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                    }
-                    break;
-                
-               case TableOptions.ALL_EXCEPT_FIRST_COLUMN:
-                   for (int j = 1; j < columns; j++) {
-                       table.getColumnModel().getColumn(j).setCellRenderer(renderer);
-                   }
-                   break;
-                   
-               default: table.getColumnModel().getColumn(colIndex).setCellRenderer(renderer);
-                
-            }
-        }
-
     }
 
     public synchronized void addSignalChangeListener(SignalChangeListener l) {
@@ -733,7 +697,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                finest("Passing interface event upwards");
                 ih.fireInterfaceEvent(new InterfaceEvent(this, event));
             }
         }
@@ -744,7 +707,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                finest("Passing dataset event upwards");
                 dh.fireDatasetEvent(new DatasetEvent(this, event));
             }
         }
@@ -754,7 +716,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         // Pass messages upwards
         for (TabPanel panel : this.subPanels) {
             if (event.getSource().equals(panel)) {
-                finest("Passing signal change event upwards");
                 sh.fireSignalChangeEvent(new SignalChangeEvent(this, event));
             }
         }
@@ -834,7 +795,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
 
         final private TableOptions options;
 
-        public TableFactoryWorker(final TableOptions o) {
+        public TableFactoryWorker(@NonNull final TableOptions o) {
             options = o;
 
         }
@@ -843,9 +804,9 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         protected synchronized TableModel doInBackground() throws Exception {
 
             try {
-                if (options.hasTarget()) {
+                if (options.hasTarget())
                     options.getTarget().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                }
+                
                 TableModel model = createPanelTableType(options);
                 tableCache.add(options, model);
 
@@ -866,7 +827,7 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
                     TableModel model = get();
                     if (model != null) {
                         options.getTarget().setModel(model);
-                        setRenderers(options);
+                        setRenderers();
                     }
 
                     options.getTarget().setCursor(Cursor.getDefaultCursor());
@@ -884,6 +845,45 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         public void cancel() {
             log("Cancelling detail panel table update");
             this.cancel(true);
+        }
+        
+        
+        private synchronized void setRenderers() {
+            JTable table = options.getTarget();
+            
+           if(table.getRowCount()==0)
+        	   return;
+           
+            int columns = table.getColumnModel().getColumnCount();
+
+            for (int i : options.getRendererColumns()) {
+
+                TableCellRenderer renderer = options.getRenderer(i);
+
+                if (i == TableOptions.FIRST_COLUMN) {
+
+                    table.getColumnModel().getColumn(0).setCellRenderer(renderer);
+                    continue;
+                }
+
+                if (i == TableOptions.ALL_COLUMNS) {
+                    for (int j = 0; j < columns; j++) {
+                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+                    }
+                    continue;
+                }
+
+                if (i == TableOptions.ALL_EXCEPT_FIRST_COLUMN) {
+                    for (int j = 1; j < columns; j++) {
+                        table.getColumnModel().getColumn(j).setCellRenderer(renderer);
+                    }
+                    continue;
+                }
+
+                table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+
+            }
+
         }
 
     }

@@ -541,6 +541,9 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     	
     	File exportFile = FileSelector.chooseSaveFile(null, new FileNameExtensionFilter("SVG file", "svg"));
     	
+    	if(exportFile==null)
+    		return;
+    	
     	if(!exportFile.getName().endsWith(Exporter.SVG_FILE_EXTENSION))
     		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Exporter.SVG_FILE_EXTENSION);
 

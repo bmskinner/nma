@@ -31,11 +31,9 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
@@ -59,7 +57,7 @@ public class FileSelector {
         
         if(file==null)
             return null;
-     // Add extension if needed
+
         if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
             file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
         }
@@ -120,16 +118,7 @@ public class FileSelector {
         defaultDir = im.get().getFolder();
         return chooseOpenFile(defaultDir, filter);
     }
-    
-    /**
-     * Choose a file from a default folder.
-     * @param defaultFolder the default folder
-     * @return the selected file, or null on cancel or error
-     */
-    private static @Nullable File chooseOpenFile(File defaultFolder){
-        return chooseOpenFile(defaultFolder, null);
-    }
-    
+        
     /**
      * Choose a file from a default folder with a file extension filter.
      * @param defaultFolder the default folder
@@ -139,14 +128,12 @@ public class FileSelector {
     private static @Nullable File chooseOpenFile(File defaultFolder, FileNameExtensionFilter filter){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
-        if(filter!=null){
+        if(filter!=null)
             fc.setFileFilter(filter);
-        }
 
         int returnVal = fc.showOpenDialog(fc);
-        if (returnVal != 0) {
+        if (returnVal != 0)
             return null;
-        }
         
         File file = fc.getSelectedFile();
 
@@ -336,12 +323,7 @@ public class FileSelector {
             }
         }
 
-        if (countFiles == 0) {
-            return false;
-        }
-
-        return true;
-
+        return countFiles>0;
     }
 
 }
