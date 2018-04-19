@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import java.io.Serializable;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -32,6 +31,24 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface IShellResult extends Serializable, Loggable {
+    
+    /**
+     * The types of pixel value that can be stored
+     * @author bms41
+     *
+     */
+    public enum CountType {
+        SIGNAL, COUNTERSTAIN;
+    }
+    
+    /**
+     * The types of normalisation that can be applied to signals
+     * @author bms41
+     *
+     */
+    public enum Normalisation {
+        NONE, DAPI;
+    }
 
     /**
      * Get the mean pixel proportions for the given type

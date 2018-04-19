@@ -35,7 +35,6 @@ import javax.swing.table.TableModel;
 
 import org.jfree.chart.JFreeChart;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.NuclearSignalChartFactory;
@@ -47,6 +46,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
@@ -281,7 +281,7 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     private void updateChartAndTable() {
 
-        CountType type = withinNucleiBtn.isSelected() ? CountType.NUCLEUS : CountType.SIGNAL;
+        CountType type = withinNucleiBtn.isSelected() ? CountType.COUNTERSTAIN : CountType.SIGNAL;
 
         boolean showRandom = showRandomCheckbox.isSelected();
 

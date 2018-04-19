@@ -20,10 +20,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 
 /**
  * A default implementation of the IShellResult interface. It uses a builder
@@ -107,7 +104,7 @@ public class DefaultShellResult implements IShellResult {
             target = signalRawMeans;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             target = nucleusRawMeans;
             break;
         }
@@ -150,7 +147,7 @@ public class DefaultShellResult implements IShellResult {
             target = signalNormMeans;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             target = nucleusNormMeans;
             break;
         }
@@ -193,7 +190,7 @@ public class DefaultShellResult implements IShellResult {
             target = signalRawStderrs;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             target = nucleusRawStderrs;
             break;
         }
@@ -235,7 +232,7 @@ public class DefaultShellResult implements IShellResult {
             target = signalNormStderrs;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             target = nucleusNormStderrs;
             break;
         }
@@ -276,7 +273,7 @@ public class DefaultShellResult implements IShellResult {
             signalRawPval = pval;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             nucleusRawChi = chi;
             nucleusRawPval = pval;
             break;
@@ -316,7 +313,7 @@ public class DefaultShellResult implements IShellResult {
             signalNormPval = pval;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             nucleusNormChi = chi;
             nucleusNormPval = pval;
             break;
@@ -341,23 +338,23 @@ public class DefaultShellResult implements IShellResult {
     public DefaultShellResult(IShellResult s) {
         this(s.getNumberOfShells());
         this.setRawMeans(CountType.SIGNAL, s.getRawMeans(CountType.SIGNAL))
-                .setRawMeans(CountType.NUCLEUS, s.getRawMeans(CountType.NUCLEUS))
+                .setRawMeans(CountType.COUNTERSTAIN, s.getRawMeans(CountType.COUNTERSTAIN))
                 .setNormalisedMeans(CountType.SIGNAL, s.getNormalisedMeans(CountType.SIGNAL))
-                .setNormalisedMeans(CountType.NUCLEUS, s.getNormalisedMeans(CountType.NUCLEUS))
+                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getNormalisedMeans(CountType.COUNTERSTAIN))
                 .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
-                .setRawStandardErrors(CountType.NUCLEUS, s.getRawStandardErrors(CountType.NUCLEUS))
+                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
                 // .setPixelCounts(CountType.SIGNAL,
                 // s.getPixelCounts(CountType.SIGNAL))
                 // .setPixelCounts(CountType.NUCLEUS,
                 // s.getPixelCounts(CountType.NUCLEUS))
                 .setRawChiResult(CountType.SIGNAL, s.getRawChiSquare(CountType.SIGNAL),
                         s.getRawPValue(CountType.SIGNAL))
-                .setRawChiResult(CountType.NUCLEUS, s.getRawChiSquare(CountType.NUCLEUS),
-                        s.getRawPValue(CountType.NUCLEUS))
+                .setRawChiResult(CountType.COUNTERSTAIN, s.getRawChiSquare(CountType.COUNTERSTAIN),
+                        s.getRawPValue(CountType.COUNTERSTAIN))
                 .setNormalisedChiResult(CountType.SIGNAL, s.getNormalisedChiSquare(CountType.SIGNAL),
                         s.getNormalisedPValue(CountType.SIGNAL))
-                .setNormalisedChiResult(CountType.NUCLEUS, s.getNormalisedChiSquare(CountType.NUCLEUS),
-                        s.getNormalisedPValue(CountType.NUCLEUS));
+                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getNormalisedChiSquare(CountType.COUNTERSTAIN),
+                        s.getNormalisedPValue(CountType.COUNTERSTAIN));
 
     }
 
@@ -406,7 +403,7 @@ public class DefaultShellResult implements IShellResult {
             template = signalRawMeans;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             template = nucleusRawMeans;
             break;
         }
@@ -432,7 +429,7 @@ public class DefaultShellResult implements IShellResult {
 	        	}
 	        	return mean;
 	        }
-	        case NUCLEUS: {
+	        case COUNTERSTAIN: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*nucleusRawMeans[i];
@@ -460,7 +457,7 @@ public class DefaultShellResult implements IShellResult {
 	        	}
 	        	return mean;
 	        }
-	        case NUCLEUS: {
+	        case COUNTERSTAIN: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*nucleusNormMeans[i];
@@ -492,7 +489,7 @@ public class DefaultShellResult implements IShellResult {
             template = signalNormMeans;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             template = nucleusNormMeans;
             break;
         }
@@ -522,7 +519,7 @@ public class DefaultShellResult implements IShellResult {
             template = signalRawStderrs;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             template = nucleusRawStderrs;
             break;
         }
@@ -552,7 +549,7 @@ public class DefaultShellResult implements IShellResult {
             template = signalNormStderrs;
             break;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             template = nucleusNormStderrs;
             break;
         }
@@ -580,7 +577,7 @@ public class DefaultShellResult implements IShellResult {
         case SIGNAL: {
             return signalRawChi;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             return nucleusRawChi;
         }
         default:
@@ -601,7 +598,7 @@ public class DefaultShellResult implements IShellResult {
         case SIGNAL: {
             return signalNormChi;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             return nucleusNormChi;
         }
         default:
@@ -621,7 +618,7 @@ public class DefaultShellResult implements IShellResult {
         case SIGNAL: {
             return signalRawPval;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             return nucleusRawPval;
         }
         default:
@@ -640,7 +637,7 @@ public class DefaultShellResult implements IShellResult {
         case SIGNAL: {
             return signalNormPval;
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             return nucleusNormPval;
         }
         default:

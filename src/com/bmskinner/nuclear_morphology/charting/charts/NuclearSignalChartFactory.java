@@ -38,13 +38,13 @@ import org.jfree.data.xy.XYDataset;
 import org.jfree.util.SortOrder;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -155,7 +155,7 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
         chart.getCategoryPlot().getRangeAxis().setRange(range);
 
         String percentLabel = options.isNormalised() ? "Normalised percent" : "Percent";
-        String locationLabel = options.getCountType().equals(CountType.NUCLEUS) ? Labels.NUCLEI : "flurochrome border";
+        String locationLabel = options.getCountType().equals(CountType.COUNTERSTAIN) ? Labels.NUCLEI : "flurochrome border";
 
         chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " of signal within " + locationLabel);
 

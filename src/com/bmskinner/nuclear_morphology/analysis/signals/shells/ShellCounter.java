@@ -26,6 +26,7 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.math3.stat.inference.ChiSquareTest;
 
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -73,17 +74,17 @@ public class ShellCounter implements Loggable {
      */
     private Map<Integer, Integer>      nucleusPixelCounts      = new HashMap<Integer, Integer>(0);
 
-    /**
-     * The type of pixels to be counted. These can be only pixels within the
-     * borders of a signal, or all pixels within the borders of a nucleus.
-     * 
-     * @author bms41
-     * @since 1.13.3
-     *
-     */
-    public enum CountType {
-        SIGNAL, NUCLEUS;
-    }
+//    /**
+//     * The type of pixels to be counted. These can be only pixels within the
+//     * borders of a signal, or all pixels within the borders of a nucleus.
+//     * 
+//     * @author bms41
+//     * @since 1.13.3
+//     *
+//     */
+//    public enum CountType {
+//        SIGNAL, NUCLEUS;
+//    }
 
     /**
      * Create a new shell counter with the given number of shells
@@ -184,7 +185,7 @@ public class ShellCounter implements Loggable {
                 values = getRawSignalShell(i);
                 break;
             }
-            case NUCLEUS: {
+            case COUNTERSTAIN: {
                 values = getRawNucleusShell(i);
                 break;
             }
@@ -206,7 +207,7 @@ public class ShellCounter implements Loggable {
                 values = getNormSignalShell(i);
                 break;
             }
-            case NUCLEUS: {
+            case COUNTERSTAIN: {
                 values = getNormNucleusShell(i);
                 break;
             }
@@ -231,7 +232,7 @@ public class ShellCounter implements Loggable {
                 result.add(Stats.stderr(getRawSignalShell(i)));
                 break;
             }
-            case NUCLEUS: {
+            case COUNTERSTAIN: {
                 result.add(Stats.stderr(getRawNucleusShell(i)));
                 break;
             }
@@ -250,7 +251,7 @@ public class ShellCounter implements Loggable {
                 result.add(Stats.stderr(getNormSignalShell(i)));
                 break;
             }
-            case NUCLEUS: {
+            case COUNTERSTAIN: {
                 result.add(Stats.stderr(getNormNucleusShell(i)));
                 break;
             }
@@ -268,7 +269,7 @@ public class ShellCounter implements Loggable {
                 result.add(signalPixelCounts.get(i));
                 break;
             }
-            case NUCLEUS: {
+            case COUNTERSTAIN: {
                 result.add(nucleusPixelCounts.get(i));
                 break;
             }
@@ -470,7 +471,7 @@ public class ShellCounter implements Loggable {
         case SIGNAL: {
             return signalProportionValues.get(0).size();
         }
-        case NUCLEUS: {
+        case COUNTERSTAIN: {
             return nucleusProportionValues.get(0).size();
         }
         }

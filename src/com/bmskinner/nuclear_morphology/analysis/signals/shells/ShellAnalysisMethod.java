@@ -31,12 +31,12 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellCounter.CountType;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -263,11 +263,11 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 			List<Double> errList = DoubleStream.of(err).boxed().collect(Collectors.toList());
 
 			IShellResult randomResult = new DefaultShellResult(shells).setRawMeans(CountType.SIGNAL, list)
-			        .setRawMeans(CountType.NUCLEUS, list).setNormalisedMeans(CountType.SIGNAL, list)
-			        .setNormalisedMeans(CountType.NUCLEUS, list).setRawStandardErrors(CountType.SIGNAL, errList)
-			        .setRawStandardErrors(CountType.NUCLEUS, errList)
+			        .setRawMeans(CountType.COUNTERSTAIN, list).setNormalisedMeans(CountType.SIGNAL, list)
+			        .setNormalisedMeans(CountType.COUNTERSTAIN, list).setRawStandardErrors(CountType.SIGNAL, errList)
+			        .setRawStandardErrors(CountType.COUNTERSTAIN, errList)
 			        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
-			        .setNormalisedStandardErrors(CountType.NUCLEUS, errList);
+			        .setNormalisedStandardErrors(CountType.COUNTERSTAIN, errList);
 
 			dataset.getCollection().getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
