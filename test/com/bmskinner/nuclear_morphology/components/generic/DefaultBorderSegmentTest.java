@@ -390,16 +390,17 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testTestContains() {
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		assertTrue(s1.testContains(0, 25, 0));
-		assertTrue(s1.testContains(0, 25, 10));
-		assertTrue(s1.testContains(0, 25, 20));
-		assertFalse(s1.testContains(0, 25, 99));
-		assertTrue(s1.testContains(0, 25, 21));
-		assertFalse(s1.testContains(0, 25, 60));
+
+		assertTrue(IBorderSegment.contains(0, 25, 0, s1.length()));
+		assertTrue(IBorderSegment.contains(0, 25, 10, s1.length()));
+		assertTrue(IBorderSegment.contains(0, 25, 20, s1.length()));
+		assertFalse(IBorderSegment.contains(0, 25, 99, s1.length()));
+		assertTrue(IBorderSegment.contains(0, 25, 21, s1.length()));
+		assertFalse(IBorderSegment.contains(0, 25, 60, s1.length()));
 		
-		assertFalse(s1.testContains(90, 25, 60));
-		assertTrue(s1.testContains(90, 25, 90));
-		assertFalse(s1.testContains(90, 25, 89));
+		assertFalse(IBorderSegment.contains(90, 25, 60, s1.length()));
+		assertTrue(IBorderSegment.contains(90, 25, 90, s1.length()));
+		assertFalse(IBorderSegment.contains(90, 25, 89, s1.length()));
 	}
 	
 	

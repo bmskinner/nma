@@ -79,6 +79,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	public DummyRodentSpermNucleus(String name) throws ComponentCreationException{
 		component = new DefaultRodentSpermNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
 	            POSITION , component_NUMBER);
+		nucleus = (Nucleus) component;
         initialise(PROFILE_WINDOW);	    
         setStatistic(PlottableStatistic.AREA,     AREA);
         setStatistic(PlottableStatistic.MAX_FERET, MAX_FERET);

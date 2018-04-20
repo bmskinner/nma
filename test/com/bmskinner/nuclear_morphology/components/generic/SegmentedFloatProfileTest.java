@@ -219,16 +219,6 @@ public class SegmentedFloatProfileTest {
     }
 
 	@Test
-	public void testSegmentIterator() throws Exception {
-        List<IBorderSegment> result = sp.getSegments(); 
-        Iterator<IBorderSegment> it = sp.segmentIterator();
-        int i=0;
-        while(it.hasNext()){
-            assertEquals(result.get(i++), it.next());
-        }
-	}
-
-	@Test
 	public void testGetSegmentUUID() throws ProfileException, UnavailableComponentException {
 	    List<IBorderSegment> test = makeTestSegments();
 	    

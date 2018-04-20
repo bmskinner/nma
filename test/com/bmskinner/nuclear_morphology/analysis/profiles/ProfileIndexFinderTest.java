@@ -67,59 +67,5 @@ public class ProfileIndexFinderTest {
     public void testGetMatchingProfile() {
         fail("Not yet implemented");
     }
-    
-    /**
-     * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#getConsistentRegionBounds(double, double, int)}.
-     */
-    @Test
-    public void testGetConsistentRegionBounds() {
-        
-        float[] arr = {  1, 2, 3, 4, 5, 5, 5, 5, 5, 6, 7, 8, 9 };
-        
-        IProfile p = new FloatProfile(arr);
-        
-        double value = 5;
-        double tolerance = 0.1;
-        int points = 5;
-        
-        int[] bounds = p.getConsistentRegionBounds(value, tolerance, points);
-        
-        assertEquals( 4, bounds[0] );
-        assertEquals( 8, bounds[1] );
-    }
-    
-    @Test
-    public void testGetConsistentRegionBoundsFailsWhenTooShort() {
-        
-        float[] arr = {  1, 2, 3, 4, 5, 5, 5, 5, 6, 7, 8, 9 };
-        
-        IProfile p = new FloatProfile(arr);
-        
-        double value = 5;
-        double tolerance = 0.1;
-        int points = 5;
-        
-        int[] bounds = p.getConsistentRegionBounds(value, tolerance, points);
-        
-        assertEquals( -1, bounds[0] );
-        assertEquals( -1, bounds[1] );
-    }
-    
-    @Test
-    public void testGetConsistentRegionBoundsSucceedssWhenToleranceRaised() {
-        
-        float[] arr = {  1, 2, 3, 4, 5, 5, 5, 5, 6, 7, 8, 9 };
-        
-        IProfile p = new FloatProfile(arr);
-        
-        double value = 5.5;
-        double tolerance = 0.6;
-        int points = 5;
-        
-        int[] bounds = p.getConsistentRegionBounds(value, tolerance, points);
-        
-        assertEquals( 4, bounds[0] );
-        assertEquals( 8, bounds[1] );
-    }
 
 }
