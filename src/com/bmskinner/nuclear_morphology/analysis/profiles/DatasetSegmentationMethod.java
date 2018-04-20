@@ -488,9 +488,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
          */
         pc.createProfileAggregate(collection, pc.length());
 
-        if (!checkRPmatchesSegments(collection)) {
+        if (!checkRPmatchesSegments(collection))
             warn("Segments do not all start on reference point after recombining");
-        }
 
     }
 

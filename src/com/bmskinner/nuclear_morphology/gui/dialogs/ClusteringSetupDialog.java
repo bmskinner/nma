@@ -42,7 +42,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusClusteringMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.NucleusClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.ClusteringMethod;
 import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.HierarchicalClusterMethod;

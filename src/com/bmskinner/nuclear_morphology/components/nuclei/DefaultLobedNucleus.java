@@ -59,9 +59,8 @@ public class DefaultLobedNucleus extends DefaultNucleus implements LobedNucleus 
 
     @Override
     public void addLobe(Lobe l) {
-        if (l == null) {
+        if (l == null)
             throw new IllegalArgumentException("Lobe cannot be null");
-        }
         lobes.add(l);
     }
 

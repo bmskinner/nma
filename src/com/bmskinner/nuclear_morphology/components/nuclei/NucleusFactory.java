@@ -27,6 +27,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -49,11 +51,10 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
      * @param imageFile
      * @param nucleusType
      */
-    public NucleusFactory(NucleusType nucleusType) {
+    public NucleusFactory(@NonNull NucleusType nucleusType) {
 
-        if (nucleusType == null) {
+        if (nucleusType == null)
             throw new IllegalArgumentException("Type cannot be null in nucleus factory");
-        }
         type = nucleusType;
     }
 
@@ -100,9 +101,8 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     public Nucleus buildInstance(Roi roi, File imageFile, int channel, int[] originalPosition, IPoint centreOfMass)
             throws ComponentCreationException {
 
-        if (roi == null || centreOfMass == null) {
+        if (roi == null || centreOfMass == null)
             throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
-        }
 
         Nucleus n = null;
 

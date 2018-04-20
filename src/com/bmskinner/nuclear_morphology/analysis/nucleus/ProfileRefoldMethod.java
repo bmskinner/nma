@@ -99,16 +99,11 @@ public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
 
         collection = dataset.getCollection();
 
-        fine("Creating refolder");
-
         // make an entirely new nucleus to play with
         Nucleus n = collection.getNucleusMostSimilarToMedian(Tag.REFERENCE_POINT);
 
         refoldNucleus = new DefaultConsensusNucleus(n, collection.getNucleusType());
-
-        finer("Refolding nucleus of class: " + collection.getNucleusType().toString());
-        fine("Subject: " + refoldNucleus.getSourceFile().getAbsolutePath() + "-" + refoldNucleus.getNucleusNumber());
-
+        
         IProfile targetProfile = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
                 Stats.MEDIAN);
         IProfile q25 = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,

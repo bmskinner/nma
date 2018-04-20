@@ -43,7 +43,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.TreeBuildingMethod;
+import com.bmskinner.nuclear_morphology.analysis.classification.TreeBuildingMethod;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;

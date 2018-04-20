@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -151,15 +151,11 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     }
 
     public boolean hasCluster(UUID id) {
-
-        boolean result = false;
         for (IClusterGroup g : this.clusterGroups) {
-            if (g.hasDataset(id)) {
-                result = true;
-                break;
-            }
+            if (g.hasDataset(id)) 
+            	return true;
         }
-        return result;
+        return false;
     }
 
     public List<IClusterGroup> getClusterGroups() {
@@ -175,11 +171,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     }
 
     public boolean hasClusters() {
-        if (this.clusterGroups != null && this.clusterGroups.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+    	return this.clusterGroups != null && this.clusterGroups.size() > 0;
     }
 
     public boolean hasClusterGroup(IClusterGroup group) {
@@ -189,25 +181,6 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     @Override
     public String toString(){
         return getName();
-//        String newLine = System.getProperty("line.separator");
-//        StringBuilder b = new StringBuilder(this.getName()+newLine);
-//        b.append(this.getUUID().toString()+newLine);
-//        b.append(version.toString()+newLine);
-//        b.append( (datasetColour==null?"":datasetColour.toString())+newLine);
-//        
-//        b.append( "Children:"+newLine);
-//        for(IAnalysisDataset d : childDatasets){
-//            b.append( "\t"+d.getUUID()+newLine);
-//        }
-//        
-//        b.append( "Cluster groups:"+newLine);
-//        for(IClusterGroup g : clusterGroups){
-//            b.append( "\t"+g.getName()+newLine);
-//        }
-//        
-//        b.append( cellCollection.toString()+newLine);
-//        
-//        return b.toString();
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -216,11 +189,6 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
     	// If not supported, an UnsupportedVersionException will be thrown, and
     	// passed upwards here for the import method to handle.
         in.defaultReadObject();
-
-        if (cellCollection == null) {
-            warn("Missing cell collection");
-        }
-
     }
 
 }

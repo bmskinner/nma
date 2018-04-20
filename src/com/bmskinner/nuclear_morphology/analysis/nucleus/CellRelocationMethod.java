@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -79,8 +78,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
         try {
             findCells();
-            fine("Completed remapping");
-
         } catch (Exception e) {
             warn("Error selecting cells");
             stack("Error selecting cells", e);
@@ -92,15 +89,11 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         try {
             newDatasets = parsePathList();
         } catch (CellRelocationException e) {
-            // warn("Error relocating cells");
             stack("Error relocating cells", e);
             return;
         }
 
-        fine("Parsing complete");
         int newSize = newDatasets.size();
-        fine("Found " + newSize + " datasets in file");
-
         if (newDatasets.size() > 0) {
 
             try {
@@ -108,9 +101,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 for (UUID id : newDatasets) {
 
                     if (!id.equals(dataset.getUUID())) {
-                        /*
-                         * Copy profile offsets and make the median profile
-                         */
                         dataset.getCollection().getProfileManager()
                                 .copyCollectionOffsets(dataset.getChildDataset(id).getCollection());
 
@@ -126,8 +116,6 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
     }
 
     private Set<UUID> parsePathList() throws CellRelocationException {
-        fine("Input file: " + inputFile.toString());
-
         Scanner scanner;
         try {
             scanner = new Scanner(inputFile);

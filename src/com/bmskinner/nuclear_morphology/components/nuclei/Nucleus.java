@@ -37,14 +37,14 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
     // so that it can be accessed by the Nucleus interface itself.
 
     // for debugging - use in calling dumpInfo()
-    public static final int ALL_POINTS    = 0;
-    public static final int BORDER_POINTS = 1;
-    public static final int BORDER_TAGS   = 2;
+    static final int ALL_POINTS    = 0;
+    static final int BORDER_POINTS = 1;
+    static final int BORDER_TAGS   = 2;
 
     /**
      * @return a copy of the data in this nucleus
      */
-    public Nucleus duplicate();
+    Nucleus duplicate();
 
     /**
      * Get a representation of the nucleus name as the name of the image plus
@@ -52,43 +52,39 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * 
      * @return
      */
-    public String getNameAndNumber();
+    String getNameAndNumber();
 
     /**
      * Get the number of the nucleus in the image
      * 
      * @return
      */
-    public int getNucleusNumber();
+    int getNucleusNumber();
 
-    public String getPathAndNumber();
+    /**
+     * Get the path to the nucleus image, and the nucleus number within the image
+     * @return
+     */
+    String getPathAndNumber();
 
     /**
      * Calculate the angle signal centres of mass make with the nucleus centre
      * of mass and the given border point
      * 
-     * @param p
-     *            the border point to orient from (the zero angle)
+     * @param p the border point to orient from (the zero angle)
      * @throws Exception
      */
-    public void calculateSignalAnglesFromPoint(IBorderPoint p);
+    void calculateSignalAnglesFromPoint(IBorderPoint p);
 
-    public String dumpInfo(int type);
+    String dumpInfo(int type);
 
     /**
      * Get the signals in this nucleus
      * 
      * @return
      */
-    public ISignalCollection getSignalCollection();
+    ISignalCollection getSignalCollection();
 
-    /**
-     * Get the name of the folder to store analysis specific data. This is the
-     * folder with the analysis date/time name.
-     * 
-     * @return
-     */
-    // public String getOutputFolderName();
 
     /**
      * Fetch the vertically oriented copy of the nucleus. Calculate if needed.
@@ -97,13 +93,13 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * 
      * @return
      */
-    public Nucleus getVerticallyRotatedNucleus();
+    Nucleus getVerticallyRotatedNucleus();
 
     /**
      * Invalidate the existing cached vertically rotated nucleus, and
      * recalculate.
      */
-    public void updateVerticallyRotatedNucleus();
+    void updateVerticallyRotatedNucleus();
 
     /**
      * Is the reference point of the vertically rotated nucleus pointing to the
@@ -111,7 +107,7 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * 
      * @return
      */
-    public boolean isClockwiseRP();
+    boolean isClockwiseRP();
 
     /**
      * Thrown when a nucleus type in a collection is incorrect for a requested
@@ -120,7 +116,7 @@ public interface Nucleus extends CellularComponent, Profileable, Taggable, Compa
      * @author ben
      * @since 1.13.5
      */
-    public class IncorrectNucleusTypeException extends Exception {
+    class IncorrectNucleusTypeException extends Exception {
         private static final long serialVersionUID = 1L;
 
         public IncorrectNucleusTypeException() {

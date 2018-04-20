@@ -120,12 +120,6 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
 
         ISegmentedProfile segmented = new SegmentedFloatProfile(recombinedProfile, medianProfile.getOrderedSegments());
         n.setProfile(ProfileType.FRANKEN, segmented);
-
-        // n.log("Recombined segments:");
-        // n.log(segmented.toString());
-
-//        log(Level.FINEST, "Recombined segments for nucleus " + n.getNameAndNumber());
-//        log(Level.FINEST, segmented.toString());
     }
 
 }

@@ -138,8 +138,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
             setBorderTag(Tag.ORIENTATION_POINT, rpIndex);
 
             if (!this.isProfileOrientationOK() && canReverse) {
-                fine("Reversing profile");
-                this.reverse();
+                reverse();
 
                 // the number of border points can change when reversing
                 // due to float interpolation from different starting positions
@@ -174,17 +173,17 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
     @Override
     public int getNucleusNumber() {
-        return this.nucleusNumber;
+        return nucleusNumber;
     }
 
     @Override
     public String getNameAndNumber() {
-        return this.getSourceFileName() + "-" + this.getNucleusNumber();
+        return getSourceFileName() + "-" + getNucleusNumber();
     }
 
     @Override
     public String getPathAndNumber() {
-        return this.getSourceFile() + File.separator + this.nucleusNumber;
+        return getSourceFile() + File.separator + nucleusNumber;
     }
 
     @Override
@@ -203,24 +202,20 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         double result = super.calculateStatistic(stat);
 
         // Note - variability will remain zero here
-
         // These stats are specific to nuclei
+        
+        if (PlottableStatistic.ASPECT.equals(stat))
+            return getAspectRatio();
 
-        if (PlottableStatistic.ASPECT.equals(stat)) {
-            return this.getAspectRatio();
-        }
+        if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat))
+            return getVerticallyRotatedNucleus().getBounds().getHeight();
 
-        if (PlottableStatistic.BOUNDING_HEIGHT.equals(stat)) {
-            return this.getVerticallyRotatedNucleus().getBounds().getHeight();
-        }
-
-        if (PlottableStatistic.BOUNDING_WIDTH.equals(stat)) {
-            return this.getVerticallyRotatedNucleus().getBounds().getWidth();
-        }
+        if (PlottableStatistic.BOUNDING_WIDTH.equals(stat))
+            return getVerticallyRotatedNucleus().getBounds().getWidth();
 
         if (PlottableStatistic.OP_RP_ANGLE.equals(stat)) {
             try {
-                result = this.getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
+                result = getCentreOfMass().findAngle(this.getBorderTag(Tag.REFERENCE_POINT),
                         this.getBorderTag(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {
                 stack("Cannot get border tag", e);
@@ -232,14 +227,14 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     private double getAspectRatio() {
-        double h = this.getVerticallyRotatedNucleus().getBounds().getHeight();
-        double w = this.getVerticallyRotatedNucleus().getBounds().getWidth();
+        double h = getVerticallyRotatedNucleus().getBounds().getHeight();
+        double w = getVerticallyRotatedNucleus().getBounds().getWidth();
 
         return h / w;
     }
 
     protected void setSignals(ISignalCollection collection) {
-        this.signalCollection = collection;
+        signalCollection = collection;
     }
 
     @Override
@@ -248,7 +243,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     public ISignalCollection getSignalCollection() {
-        return this.signalCollection;
+        return signalCollection;
     }
 
     public void updateSignalAngle(UUID channel, int signal, double angle) {
@@ -306,7 +301,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
      * Checks if the smoothed array nuclear shape profile has the appropriate
      * orientation.Counts the number of points above 180 degrees in each half of
      * the array.
-     * 
+     * TODO -- this is mouse sperm specific
      * @return
      */
     @Override
@@ -322,41 +317,29 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
             return false;
         }
 
-        int midPoint = this.getBorderLength() >> 1;
-        for (int i = 0; i < this.getBorderLength(); i++) { // integrate points
+        int midPoint = getBorderLength() >> 1;
+        for (int i = 0; i < getBorderLength(); i++) { // integrate points
                                                            // over 180
-
-            if (i < midPoint) {
+            if (i < midPoint) 
                 frontPoints += profile.get(i);
-            }
-            if (i > midPoint) {
+            if (i > midPoint) 
                 rearPoints += profile.get(i);
-            }
         }
-
-        if (frontPoints > rearPoints) { // if the maxIndex is closer to the end
-                                        // than the beginning
-            return true;
-        } else {
-            return false;
-        }
+        
+        // if the maxIndex is closer to the end than the beginning
+        return frontPoints > rearPoints;
     }
 
     @Override
     public void updateVerticallyRotatedNucleus() {
-
-        verticalNucleus = null;
-        verticalNucleus = this.getVerticallyRotatedNucleus();
+    	verticalNucleus = null;
+        verticalNucleus = getVerticallyRotatedNucleus();
     }
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-//        fine("Getting vertically rotated nucleus");
-
-        if (verticalNucleus != null) {
-//            fine("Vertical nucleus not null, not creating");
+        if (verticalNucleus != null)
             return verticalNucleus;
-        }
 
         // Make an exact copy of the nucleus
         verticalNucleus = this.duplicate();
@@ -366,21 +349,19 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         // of the template nucleus, then moved to the current CoM.
         // Now align the nucleus on vertical.
 
-//        fine("Creating new vertical nucleus: " + verticalNucleus.getClass().getSimpleName());
-
         verticalNucleus.alignVertically();
 
         double h = verticalNucleus.getBounds().getHeight();
         double w = verticalNucleus.getBounds().getWidth();
 
-        this.setStatistic(PlottableStatistic.BOUNDING_HEIGHT, h);
-        this.setStatistic(PlottableStatistic.BOUNDING_WIDTH, w);
+        setStatistic(PlottableStatistic.BOUNDING_HEIGHT, h);
+        setStatistic(PlottableStatistic.BOUNDING_WIDTH, w);
 
         double aspect = h / w;
-        this.setStatistic(PlottableStatistic.ASPECT, aspect);
+        setStatistic(PlottableStatistic.ASPECT, aspect);
 
-        this.setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
-        this.setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
+        setStatistic(PlottableStatistic.BODY_WIDTH, STAT_NOT_CALCULATED);
+        setStatistic(PlottableStatistic.HOOK_LENGTH, STAT_NOT_CALCULATED);
 
         return verticalNucleus;
     }
@@ -388,9 +369,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     @Override
     public void moveCentreOfMass(IPoint point) {
 
-        double diffX = point.getX() - this.getCentreOfMass().getX();
-        double diffY = point.getY() - this.getCentreOfMass().getY();
-
+        double diffX = point.getX() - getCentreOfMass().getX();
+        double diffY = point.getY() - getCentreOfMass().getY();
         offset(diffX, diffY);
     }
 
@@ -520,12 +500,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         super.flipXAroundPoint(p);
 
         for (UUID id : signalCollection.getSignalGroupIDs()) {
-
-            signalCollection.getSignals(id).parallelStream().forEach(s -> {
-
-                s.flipXAroundPoint(p);
-            });
-
+            signalCollection.getSignals(id).stream().forEach(s -> s.flipXAroundPoint(p));
         }
 
     }
@@ -547,8 +522,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
                     // rotation
 
                     IPoint p = AngleTools.rotateAboutPoint(s.getCentreOfMass(), getCentreOfMass(), angle);
-                    // IPoint p = getPositionAfterRotation(s.getCentreOfMass(),
-                    // angle);
                     s.moveCentreOfMass(p);
                 });
 
@@ -557,7 +530,8 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     /*
-     * ############################################# Object methods
+     * ############################################# 
+     * Object methods
      * #############################################
      */
 

@@ -93,10 +93,8 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
             if (!pred.test(c)) {
 
-                if (failCollection != null) {
+                if (failCollection != null)
                     failCollection.addCell(new DefaultCell(c));
-                }
-                // collection.removeCell(c);
                 it.remove();
 
             }
@@ -107,25 +105,14 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
 
     }
 
-    //// @Override
-    // public ICellCollection filter(ICellCollection collection, Predicate
-    //// pred){
-    //
-    // return collection.filter(pred);
-    // }
-
     /**
      * Filter the given collection to retain cells in which the given statistic
      * is within the lower and upper bounds inclusive.
      * 
-     * @param collection
-     *            the collection to filter
-     * @param stat
-     *            the statistic to filter on
-     * @param lower
-     *            the lower bound
-     * @param upper
-     *            the upper bound
+     * @param collection the collection to filter
+     * @param stat the statistic to filter on
+     * @param lower the lower bound
+     * @param upper the upper bound
      * @return a new cell collection with copies of the original cells
      * @throws CollectionFilteringException
      */
@@ -133,16 +120,13 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
     public ICellCollection filter(ICellCollection collection, PlottableStatistic stat, double lower, double upper, MeasurementScale scale)
             throws CollectionFilteringException {
 
-        finer("Filtering on " + stat);
         ICellCollection filtered = collection.filterCollection(stat, scale, lower, upper);
 
-        if (filtered == null) {
+        if (filtered == null)
             throw new CollectionFilteringException("No collection returned");
-        }
 
-        if (!filtered.hasCells()) {
+        if (!filtered.hasCells())
             throw new CollectionFilteringException("No cells returned for " + stat);
-        }
 
         try {
 
@@ -156,7 +140,6 @@ public class CellCollectionFilterer extends Filterer<ICellCollection> {
             stack("Error in offsetting", e);
         }
 
-        finer("Filter on " + stat + " gave " + filtered.size() + " cells");
         return filtered;
     }
 

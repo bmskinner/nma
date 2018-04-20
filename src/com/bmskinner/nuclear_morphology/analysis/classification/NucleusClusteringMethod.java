@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.nucleus;
+package com.bmskinner.nuclear_morphology.analysis.classification;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,10 +58,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
     /**
      * Construct from a dataset and options
      * 
-     * @param dataset
-     *            the analysis dataset with nuclei to cluster
-     * @param options
-     *            the clustering options
+     * @param dataset the analysis dataset with nuclei to cluster
+     * @param options the clustering options
      */
     public NucleusClusteringMethod(IAnalysisDataset dataset, IClusteringOptions options) {
         super(dataset, options);
@@ -133,8 +131,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      */
     public boolean cluster(ICellCollection collection) {
 
-        fine("Beginning clustering of population");
-
         try {
 
             // create Instances to hold Instance
@@ -143,7 +139,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             // create the clusterer to run on the Instances
             String[] optionArray = this.options.getOptions();
 
-            finer("Clusterer is type " + options.getType());
             for (String s : optionArray) {
                 finest("Clusterer options: " + s);
             }
@@ -166,8 +161,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 this.newickTree = clusterer.graph();
 
                 clusterer.setNumClusters(options.getClusterNumber());
-
-                finest("Building hierarchical clusterer");
                 clusterer.buildClusterer(instances); // build the clusterer
                 assignClusters(clusterer, collection);
 
@@ -177,7 +170,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                 EM clusterer = new EM(); // new instance of clusterer
                 clusterer.setOptions(optionArray); // set the options
                 clusterer.buildClusterer(instances); // build the clusterer
-                finest("Assigning clusters via EM");
                 assignClusters(clusterer, collection);
             }
 
@@ -185,7 +177,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
             error("Error in assignments", e);
             return false;
         }
-        fine("Clustering complete");
         return true;
     }
 
@@ -200,13 +191,8 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
      */
     private void assignClusters(Clusterer clusterer, ICellCollection collection) {
         try {
-            // construct new collections for each cluster
-            fine("Assigning nuclei to clusters");
-            fine("Clusters : " + clusterer.numberOfClusters());
 
             for (int i = 0; i < clusterer.numberOfClusters(); i++) {
-                fine("Cluster " + i + ": " + collection.getName() + "_Cluster_" + i);
-
                 ICellCollection clusterCollection = new VirtualCellCollection(dataset, "Cluster_" + i);
 
                 clusterCollection.setName("Cluster_" + i);
@@ -227,8 +213,6 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                                                                          // the
                                                                          // model
 
-                    finest("\tTesting instance " + i + ": " + clusterNumber);
-
                     ICellCollection cluster = clusterMap.get(clusterNumber);
 
                     // should never be null
@@ -237,14 +221,12 @@ public class NucleusClusteringMethod extends TreeBuildingMethod {
                     } else {
                         warn("Error: cell with ID " + cellID + " is not found");
                     }
-                    finest("\tInstance handled");
                     fireProgressEvent();
                 } catch (Exception e) {
                     error("Error assigning instance to cluster", e);
                 }
 
             }
-            finer("Assignment of clusters complete");
         } catch (Exception e) {
             warn("Error making clusters");
             fine("Error clustering", e);
