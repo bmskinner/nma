@@ -39,7 +39,6 @@ import javax.swing.table.TableModel;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ConsensusNucleusChartPanel;
@@ -54,7 +53,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -193,7 +192,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
             for (UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()) {
 
-                if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID)) {
                     continue;
                 }
 

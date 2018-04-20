@@ -35,7 +35,6 @@ import org.jfree.data.xy.XYDataset;
 import com.bmskinner.ViolinPlots.ExportableBoxAndWhiskerCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -221,7 +220,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
             ICellCollection collection = dataset.getCollection();
 
-            if (collection.hasSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+            if (collection.hasSignalGroup(IShellResult.RANDOM_SIGNAL_ID)) {
                 if (options.isShowAnnotations()) {
                     addRandomShellData(ds, collection, options);
                 }
@@ -310,7 +309,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      */
     private void addRandomShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options) {
 
-        UUID signalGroup = ShellRandomDistributionCreator.RANDOM_SIGNAL_ID;
+        UUID signalGroup = IShellResult.RANDOM_SIGNAL_ID;
 
 		// Choose between signal or nucleus level analysis
 		CountType type = options.getCountType();

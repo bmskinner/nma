@@ -53,7 +53,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
@@ -64,6 +63,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -1252,8 +1252,6 @@ public class DefaultCellCollection implements ICellCollection {
     public boolean updateSourceFolder(File newFolder) {
         File oldFile = this.getFolder();
         boolean ok = false;
-
-        finest("Updating the source folder of all nuclei");
         if (newFolder.exists()) {
 
             try {
@@ -1287,8 +1285,6 @@ public class DefaultCellCollection implements ICellCollection {
      */
     public boolean contains(ICell c) {
         return contains(c.getId());
-        // return cells.parallelStream().anyMatch( cell ->
-        // cell.getId().equals(id));
     }
 
     @Override
@@ -1305,12 +1301,6 @@ public class DefaultCellCollection implements ICellCollection {
      */
     public boolean containsExact(ICell c) {
         return cells.parallelStream().anyMatch(cell -> cell == c);
-        // for(ICell cell : cells){
-        // if (cell==c){
-        // return true;
-        // }
-        // }
-        // return false;
     }
 
     /**
@@ -1322,7 +1312,7 @@ public class DefaultCellCollection implements ICellCollection {
     public Set<UUID> getSignalGroupIDs() {
 
         Set<UUID> ids = new HashSet<UUID>(signalGroups.keySet());
-        ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
+        ids.remove(IShellResult.RANDOM_SIGNAL_ID);
         return ids;
     }
 

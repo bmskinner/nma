@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @author bms41
  *
  */
+@Deprecated
 public class ShellCounter implements Loggable {
 
     private int                        numberOfShells;

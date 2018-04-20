@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -101,7 +100,7 @@ public class SignalManager implements Loggable {
      */
     public int getSignalGroupCount() {
         int count = getSignalGroupIDs().size();
-        if (this.hasSignals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+        if (this.hasSignals(IShellResult.RANDOM_SIGNAL_ID)) {
             count--;
         }
         return count;
@@ -116,7 +115,7 @@ public class SignalManager implements Loggable {
     public Set<UUID> getSignalGroupIDs() {
 
         Set<UUID> ids = new HashSet<>(collection.getSignalGroupIDs());
-        ids.remove(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID);
+        ids.remove(IShellResult.RANDOM_SIGNAL_ID);
         return ids;
     }
 

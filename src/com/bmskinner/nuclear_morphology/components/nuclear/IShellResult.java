@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -31,6 +32,8 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  *
  */
 public interface IShellResult extends Serializable, Loggable {
+    
+    public static final UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     
     /**
      * The types of pixel value that can be stored

@@ -30,7 +30,6 @@ import javax.swing.table.TableModel;
 
 import com.bmskinner.nuclear_morphology.analysis.image.ColourMeasurometer;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.AbstractCellDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
@@ -47,10 +46,10 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -368,7 +367,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
         for (UUID signalGroup : d.getCollection().getSignalGroupIDs()) {
 
-            if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+            if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID)) {
                 continue;
             }
 

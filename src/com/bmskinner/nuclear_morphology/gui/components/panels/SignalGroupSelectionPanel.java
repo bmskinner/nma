@@ -28,10 +28,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
-import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellRandomDistributionCreator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 
 @SuppressWarnings("serial")
 public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
@@ -108,7 +107,7 @@ public class SignalGroupSelectionPanel extends EnumeratedOptionsPanel {
         List<SignalIDToGroup> list = new ArrayList<SignalIDToGroup>();
         for (UUID id : signalGroups) {
 
-            if (id.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID)) {
+            if (id.equals(IShellResult.RANDOM_SIGNAL_ID)) {
                 continue;
             }
             list.add(new SignalIDToGroup(id, d.getCollection().getSignalGroup(id).get()));

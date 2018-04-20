@@ -18,12 +18,15 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
+import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
@@ -31,9 +34,11 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
@@ -44,6 +49,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImageStack;
 
@@ -64,7 +70,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private int totalPixels = 0;
 
     private static Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
-//    private static Map<UUID, ShellCounter> counters = new HashMap<UUID, ShellCounter>(0);
 
     public ShellAnalysisMethod(IAnalysisDataset dataset, int shells) {
         super(dataset);
@@ -98,7 +103,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
-                if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID))
+                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                     continue;
                 counters.put(signalGroup, new KeyedShellResult(shells));
             }
@@ -162,7 +167,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
                 for (UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()) {
 
-                    if (signalGroup.equals(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID))
+                    if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                         continue;
                     analyseSignalGroup(n, signalGroup);  
                 }
@@ -216,46 +221,29 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         boolean addRandom = false;
 
         for (UUID group : counters.keySet()) {
+            addRandom |= collection.getSignalManager().hasSignals(group);
             if (collection.getSignalManager().hasSignals(group)) {
-
-                addRandom = true;
                 KeyedShellResult channelCounter = counters.get(group);
-
-//                DefaultShellResult result = new DefaultShellResult(shells);
-//
-//                for (CountType type : CountType.values()) {
-//                    result.setRawMeans(type, channelCounter.getRawMeans(type))
-//                            .setNormalisedMeans(type, channelCounter.getNormalisedMeans(type))
-//                            .setRawStandardErrors(type, channelCounter.getRawStandardErrors(type))
-//                            .setNormalisedStandardErrors(type, channelCounter.getNormalisedStandardErrors(type))
-//                            .setRawChiResult(type, channelCounter.getRawChiSquare(type),
-//                                    channelCounter.getRawPValue(type))
-//                            .setNormalisedChiResult(type, channelCounter.getNormalisedChiSquare(type),
-//                                    channelCounter.getNormalisedPValue(type));
-//                }
-
                 dataset.getCollection().getSignalGroup(group).get().setShellResult(channelCounter);
-
             }
         }
 
-        if (addRandom) {
+        if (addRandom)
             addRandomSignal();
-        }
     }
 
     private void addRandomSignal() {
 
         ICellCollection collection = dataset.getCollection();
 
-        // Create a random sample distibution
+        // Create a random sample distribution
         if (collection.hasConsensus()) {
 
             ISignalGroup random = new SignalGroup();
             random.setGroupName("Random distribution");
             random.setFolder(new File(""));
 
-            dataset.getCollection().addSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID, random);
+            dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
             
@@ -278,12 +266,186 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 			        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
 			        .setNormalisedStandardErrors(CountType.COUNTERSTAIN, errList);
 
-			dataset.getCollection().getSignalGroup(ShellRandomDistributionCreator.RANDOM_SIGNAL_ID).get()
+			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
         } else {
             warn("Cannot create simulated dataset, no consensus");
         }
 
+    }
+    
+    private static class ShellRandomDistributionCreator {
+        /**
+         * Store the shell as a key, and the number of signals measured as a value
+         */
+        private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+
+        public static final int DEFAULT_ITERATIONS = 10000;
+
+        public ShellRandomDistributionCreator(CellularComponent template, int shellCount, int iterations) {
+
+            if (shellCount <= 1)
+                throw new IllegalArgumentException("Shell count must be > 1");
+            // Make a list of random points
+
+            double xCen = template.getBounds().getCenterX();
+            double yCen = template.getBounds().getCenterY();
+            double xMin = template.getBounds().getMinX();
+            double xMax = template.getBounds().getMaxX();
+            double yMin = template.getBounds().getMinY();
+            double yMax = template.getBounds().getMaxY();
+
+            List<IPoint> list = new ArrayList<IPoint>();
+            for (int i = 0; i < iterations; i++) {
+                list.add(createRandomPoint(template));
+            }
+
+            // Find the shell for these points in the template
+            ShellDetector detector;
+            try {
+                detector = new ShellDetector(template, shellCount);
+
+                // initialise the map
+                for (int i = -1; i < shellCount; i++) {
+                    map.put(i, 0);
+                }
+
+                for (IPoint p : list) {
+                    int shell = detector.findShell(p);
+
+                    int count = map.get(shell);
+                    map.put(shell, ++count);
+                }
+
+            } catch (ShellAnalysisException e) {
+//                error("Simulation failed", e);
+            }
+
+//            int neg1 = -1;
+//
+//            if (map.get(neg1) > 0) {
+//                fine("Unable to map " + map.get(neg1) + " points");
+//            }
+
+        }
+
+        /**
+         * Get the number of signals measured in the given shell
+         * 
+         * @param shell
+         * @return
+         */
+        public int getCount(int shell) {
+            if (!map.containsKey(shell)) {
+                return 0;
+            }
+            return map.get(shell);
+        }
+
+        /**
+         * Get the total number of hits excluding unmapped points
+         * 
+         * @return
+         */
+        private int getTotalCount() {
+            int result = 0;
+            for (int i : map.keySet()) {
+                if (i == -1) {
+                    continue;
+                }
+                result += map.get(i);
+            }
+            return result;
+        }
+
+        /**
+         * Get the proportion of total signal in the given shell
+         * 
+         * @param shell
+         * @return
+         */
+        public double getProportion(int shell) {
+            if (!map.containsKey(shell)) {
+                return 0;
+            }
+            int total = getTotalCount();
+
+            int count = map.get(shell);
+
+            double prop = (double) count / (double) total;
+
+            return prop;
+        }
+
+        public double[] getProportions() {
+
+            int shells = map.size() - 1;
+
+            double[] result = new double[shells];
+
+            for (int i = 0; i < shells; i++) {
+                result[i] = getProportion(i);
+            }
+            return result;
+        }
+
+        public int[] getCounts() {
+
+            int shells = map.size() - 1;
+
+            int[] result = new int[shells];
+
+            for (int i = 0; i < shells; i++) {
+                result[i] = getCount(i);
+            }
+            return result;
+        }
+
+        /**
+         * Create a random point that lies within the template
+         * 
+         * @param template
+         * @return
+         */
+        private IPoint createRandomPoint(CellularComponent template) {
+
+            Rectangle2D r = template.getBounds();
+
+            // Make a random position in the rectangle
+            // nextDouble is exclusive of the top value,
+            // so add 1 to make it inclusive
+            double rx = ThreadLocalRandom.current().nextDouble(r.getX(), r.getWidth() + 1);
+            double ry = ThreadLocalRandom.current().nextDouble(r.getY(), r.getHeight() + 1);
+
+            IPoint p = IPoint.makeNew(rx, ry);
+
+            if (template.containsPoint(p)) {
+                return p;
+            } else {
+                return createRandomPoint(template);
+            }
+
+        }
+    }
+    
+    public class ShellAnalysisException extends Exception {
+        private static final long serialVersionUID = 1L;
+
+        public ShellAnalysisException() {
+            super();
+        }
+
+        public ShellAnalysisException(String message) {
+            super(message);
+        }
+
+        public ShellAnalysisException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ShellAnalysisException(Throwable cause) {
+            super(cause);
+        }
     }
 
 }
