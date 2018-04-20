@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -36,19 +38,17 @@ public interface Rotatable extends Loggable {
      * Otherwise, the ORIENTATION_POINT will be rotated to lie directly below
      * the centre of mass
      */
-    public void alignVertically();
+    void alignVertically();
 
     /**
      * Given two points, rotate the object so that they are vertical. It is not
      * necessary for the points to be within the object, only that they have the
      * same coordinate system
      * 
-     * @param topPoint
-     *            the point to have the higher Y value
-     * @param bottomPoint
-     *            the point to have the lower Y value
+     * @param topPoint the point to have the higher Y value
+     * @param bottomPoint the point to have the lower Y value
      */
-    public default void alignPointsOnVertical(IPoint topPoint, IPoint bottomPoint) {
+    default void alignPointsOnVertical(@NonNull IPoint topPoint, @NonNull IPoint bottomPoint) {
 
         /*
          * If the points are already aligned vertically, the rotation should not
@@ -111,13 +111,13 @@ public interface Rotatable extends Loggable {
      * 
      * @param bottomPoint
      */
-    public void rotatePointToBottom(IPoint bottomPoint);
+    void rotatePointToBottom(IPoint bottomPoint);
 
     /**
      * Rotate the object by the given amount around the centre of mass
      * 
      * @param angle
      */
-    public void rotate(double angle);
+    void rotate(double angle);
 
 }

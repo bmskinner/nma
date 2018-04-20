@@ -256,12 +256,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             double[] err = new double[c.length];
             Arrays.fill(err, 0);
 
-            List<Double> list = DoubleStream.of(c).boxed().collect(Collectors.toList());
 			List<Double> errList = DoubleStream.of(err).boxed().collect(Collectors.toList());
 
-			IShellResult randomResult = new DefaultShellResult(shells).setRawMeans(CountType.SIGNAL, list)
-			        .setRawMeans(CountType.COUNTERSTAIN, list).setNormalisedMeans(CountType.SIGNAL, list)
-			        .setNormalisedMeans(CountType.COUNTERSTAIN, list).setRawStandardErrors(CountType.SIGNAL, errList)
+			IShellResult randomResult = new DefaultShellResult(shells)
+					.setRawMeans(CountType.SIGNAL, c)
+			        .setRawMeans(CountType.COUNTERSTAIN, c)
+			        .setNormalisedMeans(CountType.SIGNAL, c)
+			        .setNormalisedMeans(CountType.COUNTERSTAIN, c)
+			        .setRawStandardErrors(CountType.SIGNAL, errList)
 			        .setRawStandardErrors(CountType.COUNTERSTAIN, errList)
 			        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
 			        .setNormalisedStandardErrors(CountType.COUNTERSTAIN, errList);

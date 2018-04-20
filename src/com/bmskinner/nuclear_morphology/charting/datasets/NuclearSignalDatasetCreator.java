@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -326,13 +327,13 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			return;
 
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
-			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell) * 100
-					: r.get().getRawMeans(type).get(shell) * 100;
+			double d = isNormalised ? r.get().getNormalisedMeans(type, Aggregation.BY_NUCLEUS)[shell] * 100
+					: r.get().getRawMeans(type, Aggregation.BY_NUCLEUS)[shell] * 100;
 
 //			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
 //					: r.get().getRawStandardErrors(type).get(shell) * 100;
 
-			ds.add(signalGroup, -d.doubleValue(), 0,
+			ds.add(signalGroup, -d, 0,
 					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
 			// we need the string value for shell otherwise we get error
 			// "the method addValue(Number, Comparable, Comparable) is
@@ -371,9 +372,8 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 
 		    
-			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell)
-					: r.get().getRawMeans(type).get(shell);
-			fine("Getting value for "+type+" "+isNormalised+" shell "+shell+": "+d.toString());
+			double d = isNormalised ? r.get().getNormalisedMeans(type, Aggregation.BY_NUCLEUS)[shell]
+					: r.get().getRawMeans(type, Aggregation.BY_NUCLEUS)[shell];
 
 //			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell)
 //					: r.get().getRawStandardErrors(type).get(shell);

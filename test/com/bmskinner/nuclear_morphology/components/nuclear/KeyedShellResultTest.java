@@ -19,16 +19,19 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyNuclearSignal;
@@ -66,8 +69,8 @@ public class KeyedShellResultTest {
     
     @Test
     public void testGetRawMeansWithNoValue() {
-        List<Double> raw = k.getRawMeans(CountType.SIGNAL);
-        assertEquals(N_SHELLS, raw.size());
+       double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
+        assertEquals(N_SHELLS, raw.length);
     }
 
     @Test
@@ -76,8 +79,8 @@ public class KeyedShellResultTest {
         long[] data = { 0, 0, 1, 0, 0 };
         double[] exp = { 0, 0, 1, 0, 0};
         k.addShellData(CountType.SIGNAL, c, n, data);
-        List<Double> raw = k.getRawMeans(CountType.SIGNAL);
-        equals(raw, exp);
+        double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
+        assertTrue(Arrays.equals(raw, exp));
     }
     
     @Test
@@ -89,8 +92,8 @@ public class KeyedShellResultTest {
         k.addShellData(CountType.SIGNAL, c, n, data1);
         k.addShellData(CountType.SIGNAL, c, n, data2);
         
-        List<Double> raw = k.getRawMeans(CountType.SIGNAL);
-        equals(raw, exp);
+        double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
+        assertTrue(Arrays.equals(raw, exp));
     }
 
     @Test
@@ -101,8 +104,8 @@ public class KeyedShellResultTest {
         k.addShellData(CountType.SIGNAL, c, n, sig);
         k.addShellData(CountType.COUNTERSTAIN, c, n, cnt);
         
-        List<Double> raw = k.getNormalisedMeans(CountType.SIGNAL);
-        equals(raw, exp);
+        double[] raw = k.getNormalisedMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
+        assertTrue(Arrays.equals(raw, exp));
     }
 
     @Test
@@ -119,12 +122,4 @@ public class KeyedShellResultTest {
     public void testGetAverageProportion() {
         fail("Not yet implemented");
     }
-    
-    private static void equals(List<Double> obs, double[] exp){
-        assertEquals(N_SHELLS, obs.size());
-        for(int i=0; i<N_SHELLS; i++){
-            assertEquals(exp[i], obs.get(i), 0);
-        }
-    }
-
 }

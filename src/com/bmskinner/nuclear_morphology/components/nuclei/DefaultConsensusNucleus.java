@@ -47,7 +47,6 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
     private static final long serialVersionUID = 1L;
 
     private NucleusType type;
-    // private IPoint originalCoM; // store to allow repositioning on load
 
     public DefaultConsensusNucleus(Nucleus n, NucleusType type) throws UnprofilableObjectException {
 
@@ -85,15 +84,12 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
             this.offset(diffX, diffY);
 
         } else {
-
-            this.moveCentreOfMass(IPoint.makeNew(0, 0));
+            moveCentreOfMass(IPoint.makeNew(0, 0));
         }
-
-        finest("Constructed consensus nucleus from " + n.getNameAndNumber());
     }
 
     public NucleusType getType() {
-        return this.type;
+        return type;
     }
 
     @Override
@@ -126,36 +122,29 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 
     @Override
     public FloatPolygon toOriginalPolygon() {
-
         // There is no original position for a consensus
-        return this.toPolygon();
+        return toPolygon();
     }
 
     @Override
     public Shape toOriginalShape() {
-
         // There is no original position for a consensus
-        return this.toShape();
+        return toShape();
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
-
-        this.alignVertically();
-
-        // Check that the horizontal orientation is correct
-
         try {
+        	if (hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL))
+        		alignPointsOnVertical(getBorderTag(Tag.TOP_VERTICAL), getBorderTag(Tag.BOTTOM_VERTICAL));
 
-            if (type.equals(NucleusType.RODENT_SPERM)) {
-                if (getBorderTag(Tag.REFERENCE_POINT).getX() > 0) {
-                    flipXAroundPoint(getCentreOfMass());
-                }
-            }
-        } catch (UnavailableBorderTagException e) {
-            fine("Cannot get border tag", e);
+        	if (type.equals(NucleusType.RODENT_SPERM) && getBorderTag(Tag.REFERENCE_POINT).getX() > 0)
+        			flipXAroundPoint(getCentreOfMass());
+        } catch (UnavailableBorderTagException e1) {
+        	fine("Cannot get border tag", e1);
         }
+
 
     }
 

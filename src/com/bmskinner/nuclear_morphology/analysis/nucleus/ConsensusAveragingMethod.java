@@ -83,9 +83,7 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
         try {
             List<IPoint> border = getPointAverage();
-
             Nucleus refoldNucleus = makeConsensus(border);
-
             dataset.getCollection().setConsensus(refoldNucleus);
 
         } catch (Exception e) {
@@ -112,9 +110,8 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
 
         for (Tag tag : BorderTagObject.values()) {
 
-            if (Tag.INTERSECTION_POINT.equals(tag)) { // not relevant here
+            if (Tag.INTERSECTION_POINT.equals(tag)) // not relevant here
                 continue;
-            }
 
             if (dataset.getCollection().getProfileCollection().hasBorderTag(tag)) {
                 IProfile median = dataset.getCollection().getProfileCollection().getProfile(ProfileType.ANGLE, tag,
@@ -138,15 +135,13 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
         profile.setSegments(newSegs);
         cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
-
+        
+        // Do not use DefaultNucleus::roateVertically; it will not align properly
         if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
             cons.alignPointsOnVertical(cons.getBorderTag(Tag.TOP_VERTICAL), cons.getBorderTag(Tag.BOTTOM_VERTICAL));
 
-            if (cons.getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.getCentreOfMass().getX()) {
-                // need to flip about the CoM
+            if (cons.getBorderPoint(Tag.REFERENCE_POINT).getX() > cons.getCentreOfMass().getX())
                 cons.flipXAroundPoint(cons.getCentreOfMass());
-            }
-
         }
         return cons;
 

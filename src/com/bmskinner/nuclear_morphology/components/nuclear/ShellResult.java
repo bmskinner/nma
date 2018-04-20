@@ -93,8 +93,12 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * @see components.nuclear.IShellResult#getMeans()
      */
     @Override
-    public List<Double> getRawMeans(CountType type) {
-        return this.means;
+    public double[] getRawMeans(CountType type, Aggregation agg) {
+    	double[] arr = new double[means.size()];
+    	for(int i=0; i<arr.length; i++) {
+    		arr[i] = means.get(i);
+    	}
+        return arr;
     }
 
     /*
@@ -103,8 +107,12 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * @see components.nuclear.IShellResult#getNormalisedMeans()
      */
     @Override
-    public List<Double> getNormalisedMeans(CountType type) {
-        return this.normalisedMeans;
+    public double[] getNormalisedMeans(CountType type, Aggregation agg) {
+    	double[] arr = new double[normalisedMeans.size()];
+    	for(int i=0; i<arr.length; i++) {
+    		arr[i] = normalisedMeans.get(i);
+    	}
+        return arr;
     }
 
     /*

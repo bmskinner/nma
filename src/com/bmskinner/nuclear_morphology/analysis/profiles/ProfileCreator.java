@@ -29,13 +29,11 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderPointException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
-import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.utility.AngleTools;
 
@@ -57,45 +55,22 @@ public class ProfileCreator implements Loggable {
     /**
      * Create a profile for the desired profile type on the template object
      * 
-     * @param type
-     *            the profile type
+     * @param type the profile type
      * @return a segmented profile of the requested type.
      * @throws ProfileException
      */
     public ISegmentedProfile createProfile(ProfileType type) throws ProfileException {
-
         try {
-
             switch (type) {
-            case ANGLE: {
-                return calculateAngleProfile();
-            }
-
-            case DIAMETER: {
-                return calculateDiameterProfile();
-            }
-
-            case RADIUS: {
-                return calculateRadiusProfile();
-            }
-
-            case ZAHN_ROSKIES: {
-                return calculateZahnRoskieProfile();
-            }
-
-            // case P2P:{
-            // return calculatePointToPointDistanceProfile();
-            // }
-
-            default: {
-                return calculateAngleProfile(); // Franken profiles will be
-                                                // angle until modified
-            }
+	            case ANGLE:        return calculateAngleProfile();
+	            case DIAMETER:     return calculateDiameterProfile();
+	            case RADIUS:       return calculateRadiusProfile();
+	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
+	            default: return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
-            warn("Cannot make profile " + type);
             stack("Cannot create profile", e);
-            throw new ProfileException("Error getting border point", e);
+            throw new ProfileException("Cannot make profile " + type, e);
         }
     }
 
@@ -108,8 +83,6 @@ public class ProfileCreator implements Loggable {
         List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
 
         ISegmentedProfile templateProfile = null;
-        // store segments to reapply later
-
         try {
             if (target.hasProfile(ProfileType.ANGLE)) {
 
@@ -137,31 +110,23 @@ public class ProfileCreator implements Loggable {
         int index = 0;
         List<IBorderPoint> borderList = target.getBorderList();
 
-        if (borderList == null) {
+        if (borderList == null)
             throw new UnavailableBorderPointException("Null border list in target");
-        }
 
         int pointOffset = target.getWindowSize(ProfileType.ANGLE);
 
-        if (pointOffset == 0) {
+        if (pointOffset == 0)
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
-        }
-        // finest("Point offset: "+pointOffset );
+
         Iterator<IBorderPoint> it = borderList.iterator();
-        // finer("Iterating border");
+
         while (it.hasNext()) {
-            // finest("Getting points");
 
             IBorderPoint point = it.next();
 
             IBorderPoint pointBefore = point.prevPoint(pointOffset);
 
             IBorderPoint pointAfter = point.nextPoint(pointOffset);
-
-            // double rad = AngleTools.angleBetweenLines(pointBefore, point,
-            // point, pointAfter);
-            // float angle = (float) Math.toDegrees(rad);
-            // angles[index] = angle;
 
             // Get the smallest angle between the points
             float angle = (float) point.findAngle(pointBefore, pointAfter);
@@ -177,25 +142,20 @@ public class ProfileCreator implements Loggable {
             float midY = (float) ((pointBefore.getY() + pointAfter.getY()) / 2);
 
             // Check if the polygon contains the point
-            // finest("Checking position in shape");
             if (s.contains(midX, midY)) {
-
                 angles[index] = angle;
             } else {
                 angles[index] = 360 - angle;
             }
             index++;
         }
-        // finer("Making new profile");
+
         // Make a new profile. This will have two segments by default
         ISegmentedProfile newProfile = new SegmentedFloatProfile(angles);
 
         // Reapply any segments that were present in the original profile
-        if (!segments.isEmpty()) {
-            // finer("Applying segments");
+        if (!segments.isEmpty()) 
             reapplySegments(segments, newProfile);
-        }
-        // finer("Returning profile");
         return newProfile;
     }
 
@@ -224,11 +184,10 @@ public class ProfileCreator implements Loggable {
      * @throws UnavailableBorderPointException
      * @throws UnavailableBorderTagException
      */
-    private ISegmentedProfile calculateZahnRoskieProfile()
+    private ISegmentedProfile calculateZahnRoskiesProfile()
             throws UnavailableBorderPointException, UnavailableBorderTagException {
 
         float[] profile = new float[target.getBorderLength()];
-        int window = target.getWindowSize(ProfileType.ANGLE);
         int index = 0;
 
         Iterator<IBorderPoint> it = target.getBorderList().iterator();
@@ -236,35 +195,29 @@ public class ProfileCreator implements Loggable {
 
             IBorderPoint point = it.next();
 
-            IBorderPoint prev = point.prevPoint(window);
-            IBorderPoint next = point.nextPoint(window);
+            IBorderPoint prev = point.prevPoint(1);
+            IBorderPoint next = point.nextPoint(1);
 
             // Get the equation between the first two points
             LineEquation eq = new DoubleEquation(prev, point);
 
-            IPoint p = eq.getPointOnLine(point, point.getLengthTo(prev)); // move
-                                                                          // out
-                                                                          // along
-                                                                          // line
+            // Move out along line
+            IPoint p = eq.getPointOnLine(point, point.getLengthTo(prev)); 
 
             // Don't go the wrong way along the line
-            if (p.getLengthTo(prev) < point.getLengthTo(prev)) {
+            if (p.getLengthTo(prev) < point.getLengthTo(prev))
                 p = eq.getPointOnLine(point, -point.getLengthTo(prev));
-            }
 
             // Get the angle between the points
             double rad = AngleTools.angleBetweenLines(point, p, point, next);
 
             double angle = Math.toDegrees(rad);
 
-            if (angle > 180) {
+            if (angle > 180)
                 angle = -180 + (angle - 180);
-            }
 
-            if (angle < -180) {
+            if (angle < -180)
                 angle = 180 + (angle + 180);
-                // angle = -180-angle;
-            }
 
             profile[index++] = (float) angle;
 

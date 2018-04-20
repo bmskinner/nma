@@ -88,13 +88,13 @@ public class DefaultShellResult implements IShellResult {
      *            the mean values
      * @return this shell result
      */
-    public DefaultShellResult setRawMeans(CountType type, List<Double> means) {
+    public DefaultShellResult setRawMeans(CountType type, double[] means) {
 
         if (type == null || means == null) {
             throw new IllegalArgumentException("Type or list is null");
         }
 
-        if (means.size() != shellCount) {
+        if (means.length != shellCount) {
             throw new IllegalArgumentException("List size does not match shell count");
         }
 
@@ -114,8 +114,8 @@ public class DefaultShellResult implements IShellResult {
         }
         }
 
-        for (int i = 0; i < means.size(); i++) {
-            target[i] = means.get(i);
+        for (int i = 0; i < means.length; i++) {
+            target[i] = means[i];
         }
 
         return this;
@@ -131,13 +131,13 @@ public class DefaultShellResult implements IShellResult {
      *            the mean values
      * @return this shell result
      */
-    public DefaultShellResult setNormalisedMeans(CountType type, List<Double> means) {
+    public DefaultShellResult setNormalisedMeans(CountType type, double[] means) {
 
         if (type == null || means == null) {
             throw new IllegalArgumentException("Type or list is null");
         }
 
-        if (means.size() != shellCount) {
+        if (means.length != shellCount) {
             throw new IllegalArgumentException("List size does not match shell count");
         }
 
@@ -157,8 +157,8 @@ public class DefaultShellResult implements IShellResult {
         }
         }
 
-        for (int i = 0; i < means.size(); i++) {
-            target[i] = means.get(i);
+        for (int i = 0; i < means.length; i++) {
+            target[i] = means[i];
         }
 
         return this;
@@ -337,10 +337,10 @@ public class DefaultShellResult implements IShellResult {
      */
     public DefaultShellResult(IShellResult s) {
         this(s.getNumberOfShells());
-        this.setRawMeans(CountType.SIGNAL, s.getRawMeans(CountType.SIGNAL))
-                .setRawMeans(CountType.COUNTERSTAIN, s.getRawMeans(CountType.COUNTERSTAIN))
-                .setNormalisedMeans(CountType.SIGNAL, s.getNormalisedMeans(CountType.SIGNAL))
-                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getNormalisedMeans(CountType.COUNTERSTAIN))
+        this.setRawMeans(CountType.SIGNAL, s.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL))
+                .setRawMeans(CountType.COUNTERSTAIN, s.getRawMeans(CountType.COUNTERSTAIN, Aggregation.BY_SIGNAL))
+                .setNormalisedMeans(CountType.SIGNAL, s.getNormalisedMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL))
+                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getNormalisedMeans(CountType.COUNTERSTAIN, Aggregation.BY_SIGNAL))
 //                .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
 //                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
                 // .setPixelCounts(CountType.SIGNAL,
@@ -361,62 +361,15 @@ public class DefaultShellResult implements IShellResult {
     /*
      * (non-Javadoc)
      * 
-     * @see components.nuclear.IShellResult#getCounts()
-     */
-    // @Override
-    // public List<Integer> getPixelCounts(CountType type){
-    //
-    // List<Integer> result = new ArrayList<Integer>(shellCount);
-    // int[] template = null;
-    // switch(type){
-    // case SIGNAL:{
-    // template = signalCounts;
-    // break;
-    // }
-    // case NUCLEUS:{
-    // template = nucleusCounts;
-    // break;
-    // }
-    // default: {
-    // template = signalCounts;
-    // break;
-    // }
-    // }
-    //
-    // for(int i : template){
-    // result.add(i);
-    // }
-    // return result;
-    // }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.nuclear.IShellResult#getMeans()
      */
     @Override
-    public List<Double> getRawMeans(CountType type) {
-        List<Double> result = new ArrayList<Double>(shellCount);
-        double[] template = null;
+    public double[] getRawMeans(CountType type, Aggregation agg) {
         switch (type) {
-        case SIGNAL: {
-            template = signalRawMeans;
-            break;
+	        case SIGNAL:       return signalRawMeans;
+	        case COUNTERSTAIN: return nucleusRawMeans;
+	        default:           return signalRawMeans;
         }
-        case COUNTERSTAIN: {
-            template = nucleusRawMeans;
-            break;
-        }
-        default: {
-            template = signalRawMeans;
-            break;
-        }
-        }
-
-        for (double i : template) {
-            result.add(i);
-        }
-        return result;
     }
     
     @Override
@@ -481,28 +434,12 @@ public class DefaultShellResult implements IShellResult {
      * @see components.nuclear.IShellResult#getNormalisedMeans()
      */
     @Override
-    public List<Double> getNormalisedMeans(CountType type) {
-        List<Double> result = new ArrayList<Double>(shellCount);
-        double[] template = null;
-        switch (type) {
-        case SIGNAL: {
-            template = signalNormMeans;
-            break;
-        }
-        case COUNTERSTAIN: {
-            template = nucleusNormMeans;
-            break;
-        }
-        default: {
-            template = signalNormMeans;
-            break;
-        }
-        }
-
-        for (double i : template) {
-            result.add(i);
-        }
-        return result;
+    public double[] getNormalisedMeans(CountType type, Aggregation agg) {
+    	switch (type) {
+	        case SIGNAL:       return signalNormMeans;
+	        case COUNTERSTAIN: return nucleusNormMeans;
+	        default:           return signalNormMeans;
+    	}
     }
 
     /*

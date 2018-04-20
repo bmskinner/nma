@@ -408,51 +408,27 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     }
 
     /*
-     * ############################################# Methods implementing the
-     * Rotatable interface #############################################
+     * ############################################# 
+     * Methods implementing the Rotatable interface
+     * #############################################
      */
 
     @Override
     public void alignVertically() {
 
-        boolean useTVandBV = true;
+        boolean useTVandBV = hasBorderTag(Tag.TOP_VERTICAL) && hasBorderTag(Tag.BOTTOM_VERTICAL);
+        int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
+        int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
 
-        if (this.hasBorderTag(Tag.TOP_VERTICAL) && this.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-
-//            fine(this.getNameAndNumber() + ": TV and BV are present");
-            int topPoint = getBorderIndex(Tag.TOP_VERTICAL);
-            int bottomPoint = getBorderIndex(Tag.BOTTOM_VERTICAL);
-
-            if (topPoint == BORDER_INDEX_NOT_FOUND) { // check if the point was
-                                                      // set but not found
-//                fine(this.getNameAndNumber() + ": TV index not found");
-                useTVandBV = false;
-            }
-
-            if (bottomPoint == BORDER_INDEX_NOT_FOUND) {
-//                fine(this.getNameAndNumber() + ": BV index not found");
-                useTVandBV = false;
-            }
-
-            if (topPoint == bottomPoint) { // Situation when something went very
-                                           // wrong
-//                fine(this.getNameAndNumber() + ": TV index == BV index");
-                useTVandBV = false;
-            }
-
-        } else {
-
-//            fine(this.getNameAndNumber() + ": TV and BV are not present");
-            useTVandBV = false;
-
-        }
-
+        // check if the point was set but not found
+        useTVandBV &= topPoint!=BORDER_INDEX_NOT_FOUND;
+        useTVandBV &= bottomPoint!=BORDER_INDEX_NOT_FOUND;
+        useTVandBV &= topPoint != bottomPoint; // Situation when something went very wrong
+        
         if (useTVandBV) {
 
-            IBorderPoint[] points;
             try {
-
-                points = getBorderPointsForVerticalAlignment();
+            	IBorderPoint[] points = getBorderPointsForVerticalAlignment();
                 alignPointsOnVertical(points[0], points[1]);
 
             } catch (UnavailableBorderTagException | UnavailableProfileTypeException e) {
@@ -467,8 +443,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
         } else {
 
             // Default if top and bottom vertical points have not been specified
-
-//            fine(this.getNameAndNumber() + ": Rotating OP to bottom");
             try {
                 rotatePointToBottom(getBorderPoint(Tag.ORIENTATION_POINT));
             } catch (UnavailableBorderTagException e) {

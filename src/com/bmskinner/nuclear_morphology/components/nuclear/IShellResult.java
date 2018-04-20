@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -54,22 +55,33 @@ public interface IShellResult extends Serializable, Loggable {
     public enum Normalisation {
         NONE, DAPI;
     }
+    
+    /**
+     * How pixels within a nucleus should be analysed: only the pixels within defined signals,
+     * or any pixel in the nucleus 
+     * @author bms41
+     * @since 1.13.8
+     *
+     */
+    public enum Aggregation {
+        BY_SIGNAL, BY_NUCLEUS;
+    }
 
     /**
      * Get the mean pixel proportions for the given type.
      * 
      * @param type the counting type
-     * @return a list of proportions of signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
+     * @return proportions of signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
      */
-    List<Double> getRawMeans(CountType type);
+    double[] getRawMeans(CountType type, Aggregation agg);
 
     /**
      * Get the normalised pixel proportions for the given type
      * 
      * @param type the counting type
-     * @return a list of proportions of normalised signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
+     * @return proportions of normalised signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
      */
-    List<Double> getNormalisedMeans(CountType type);
+    double[] getNormalisedMeans(CountType type, Aggregation agg);
 
 //    /**
 //     * Get the standard error of pixel proportions for the given type
