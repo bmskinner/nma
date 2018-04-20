@@ -112,10 +112,10 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * 
      * @see components.nuclear.IShellResult#getStandardErrors()
      */
-    @Override
-    public List<Double> getRawStandardErrors(CountType type) {
-        return this.stderrs;
-    }
+//    @Override
+//    public List<Double> getRawStandardErrors(CountType type) {
+//        return this.stderrs;
+//    }
 
     /*
      * (non-Javadoc)
@@ -168,11 +168,11 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
         // finest("\tWrote shell result");
     }
 
-    @Override
-    public List<Double> getNormalisedStandardErrors(CountType type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
+//    @Override
+//    public List<Double> getNormalisedStandardErrors(CountType type) {
+//        // TODO Auto-generated method stub
+//        return null;
+//    }
 
     @Override
     public double getNormalisedChiSquare(CountType type) {

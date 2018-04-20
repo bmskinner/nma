@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -34,7 +35,8 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * This extension to the default shell result is designed to allow raw data to be
- * exported from shell analyses.
+ * exported from shell analyses. Averages and normalisations are computed when data are requested,
+ * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}.
  * @author bms41
  * @since 1.13.8
  *
@@ -42,10 +44,14 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 public class KeyedShellResult implements IShellResult {
     
     final int nShells;
-    private final ShellCount signalCounts;
-    private final ShellCount counterCounts;
+    private final ShellCount signalCounts; // measurement in signal channel
+    private final ShellCount counterCounts; // measurements in counterstain channel
     
     
+    /**
+     * Create with the given number of shells
+     * @param nShells
+     */
     public KeyedShellResult(int nShells){
         if (nShells < 1) 
             throw new IllegalArgumentException("Shell count must be greater than 1");
@@ -61,7 +67,7 @@ public class KeyedShellResult implements IShellResult {
      * @param nucleus the nucleus
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell c, @NonNull Nucleus n, long[] shellData){
+    public void addShellData(@NonNull CountType type, @NonNull ICell c, @NonNull Nucleus n, @NonNull long[] shellData){
         addShellData(type, c, n, null, shellData);
     }
     
@@ -72,7 +78,7 @@ public class KeyedShellResult implements IShellResult {
      * @param signal the signal
      * @param shellData the pixel intensity counts per shell
      */
-    public void addShellData(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, long[] shellData){
+    public void addShellData(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal, @NonNull long[] shellData){
         if (shellData.length != nShells) 
             throw new IllegalArgumentException("Shell count must be "+nShells);
         
@@ -89,26 +95,20 @@ public class KeyedShellResult implements IShellResult {
         
     @Override
     public List<Double> getRawMeans(CountType type) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Double> result = new ArrayList<>(nShells);
+        for(int i=0; i<nShells; i++){
+            result.add(getAverageProportion(type, Normalisation.NONE, i));
+        }
+        return result;
     }
 
     @Override
     public List<Double> getNormalisedMeans(CountType type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<Double> getRawStandardErrors(CountType type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public List<Double> getNormalisedStandardErrors(CountType type) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Double> result = new ArrayList<>(nShells);
+        for(int i=0; i<nShells; i++){
+            result.add(getAverageProportion(type, Normalisation.DAPI, i));
+        }
+        return result;
     }
 
     @Override
@@ -143,7 +143,6 @@ public class KeyedShellResult implements IShellResult {
 
     @Override
     public double getNormalisedMeanShell(CountType type) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
@@ -157,29 +156,65 @@ public class KeyedShellResult implements IShellResult {
      * @param type the type of signal to fetch
      * @param norm the normalisation to apply
      * @param shell the shell to fetch
-     * @return the values
+     * @return the values in that shell
      */
     public List<Double> getProportions(CountType type, Normalisation norm, int shell){
         if(shell<0||shell>=nShells)
             throw new IllegalArgumentException("Shell is out of bounds");
         
         List<Double> values = new ArrayList<>();
+        
+        switch(type){
+            case SIGNAL: return getSignalProportions(norm, shell);
+            default: return values;
+        }
                 
-        for(Key id : signalCounts.objects()){
-            long rawSignal  = signalCounts.getPixelIntensity(id, shell);
-            long rawCounter = counterCounts.getPixelIntensity(id, shell);
+//        for(Key id : signalCounts.objects()){
+//            long rawSignal  = signalCounts.getPixelIntensity(id, shell);
+//            long rawCounter = counterCounts.getPixelIntensity(id, shell);
+//            
+//            // No need to worry about normalising in either case
+//            if(type.equals(CountType.COUNTERSTAIN) || (type.equals(CountType.SIGNAL) && norm.equals(Normalisation.NONE))){
+//                long sum = signalCounts.sum(id);
+//                double prop = (double) rawCounter / (double) sum; 
+//                values.add(prop);  
+//            } else { // Need to normalise values
+//                long sumSignal  = signalCounts.sum(id);
+//                long sumCounter = counterCounts.sum(id);
+//                double propCounter = (double) rawCounter / (double) sumCounter; 
+//                
+//                double propSignal = (double) rawSignal / (double) sumSignal; 
+//                double normSignal = (double) propSignal / (double) sumCounter; 
+//                values.add(normSignal);
+//            }            
+//        }
+//        return values;
+    }
+    
+    private List<Double> getSignalProportions(Normalisation norm, int shell){
+        List<Double> values = new ArrayList<>();
+        
+        
+        
+        for(Key componentKey : signalCounts.componentObjects()){
+            
+//            Key componentKey = id.componentKey();
+            
+//            long signalSignal = signalCounts.getPixelIntensity(id, shell);
+            long totalSignal  = signalCounts.getPixelIntensity(componentKey, shell);
+            long totalCounter = counterCounts.getPixelIntensity(componentKey, shell);
             
             // No need to worry about normalising in either case
-            if(type.equals(CountType.COUNTERSTAIN) || (type.equals(CountType.SIGNAL) && norm.equals(Normalisation.NONE))){
-                long sum = signalCounts.sum(id);
-                double prop = (double) rawCounter / (double) sum; 
+            if(norm.equals(Normalisation.NONE)){
+                long sum = signalCounts.sum(componentKey);
+                double prop = (double) totalSignal / (double) sum; 
                 values.add(prop);  
             } else { // Need to normalise values
-                long sumSignal  = signalCounts.sum(id);
-                long sumCounter = counterCounts.sum(id);
-                double propCounter = (double) rawCounter / (double) sumCounter; 
+                long sumSignal  = signalCounts.sum(componentKey);
+                long sumCounter = counterCounts.sum(componentKey);
+                double propCounter = (double) totalSignal / (double) sumCounter; 
                 
-                double propSignal = (double) rawSignal / (double) sumSignal; 
+                double propSignal = (double) totalSignal / (double) sumSignal; 
                 double normSignal = (double) propSignal / (double) sumCounter; 
                 values.add(normSignal);
             }            
@@ -198,7 +233,10 @@ public class KeyedShellResult implements IShellResult {
         return getProportions(type, norm, shell).stream().mapToDouble(d->d.doubleValue()).average().orElse(0);
     }
     
-        
+    @Override
+    public String toString(){
+        return CountType.SIGNAL+"\n"+signalCounts.toString()+"\n\n"+CountType.COUNTERSTAIN+"\n"+counterCounts.toString();
+    }
     
     /**
      * Store the individual counts per shell keyed to a source object
@@ -235,6 +273,8 @@ public class KeyedShellResult implements IShellResult {
          * @return
          */
         long sum(int shell){
+            if(shell<0||shell>=nShells)
+                throw new IllegalArgumentException("Shell is out of bounds");
             return results.values().stream().mapToLong(a->a[shell]).sum();
         }
         
@@ -244,19 +284,67 @@ public class KeyedShellResult implements IShellResult {
          * @return
          */
         long sum(Key k){
-            return LongStream.of(results.get(k)).sum();
+            if(results.containsKey(k))
+                return LongStream.of(results.get(k)).sum();
+            return 0;
         }
                 
         Set<Key> objects(){
             return results.keySet();
         }
         
+        Set<Key> signalObjects(){
+            return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
+        }
+        
+        Set<Key> componentObjects(){
+            return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
+        }
+        
         long getPixelIntensity(Key k, int shell){
-            return results.get(k)[shell];
+            if(results.containsKey(k))
+                return results.get(k)[shell];
+            return 0;
         }
         
         long[] getPixelIntensities(Key k){
             return results.get(k);
+        }
+        
+        List<long[]> getCellPixelIntensities(@NonNull UUID cellId){
+            return results.keySet().stream()
+                    .filter(k->k.hasCell(cellId))
+                    .map(k->results.get(k))
+                    .collect(Collectors.toList());
+        }
+        
+        List<long[]> getComponentPixelIntensities(@NonNull UUID componentId){
+            return results.keySet().stream()
+                    .filter(k->k.hasComponent(componentId))
+                    .map(k->results.get(k))
+                    .collect(Collectors.toList());
+        }
+        
+        List<long[]> getSignalPixelIntensities(@NonNull UUID signalId){
+            return results.keySet().stream()
+                    .filter(k->k.hasSignal(signalId))
+                    .map(k->results.get(k))
+                    .collect(Collectors.toList());
+        }
+        
+        
+        @Override
+        public String toString(){
+            StringBuilder b = new StringBuilder("Shells : "+nShells+"\n");
+            b.append("Size : "+size()+"\n");
+            b.append("Keys :\n");
+            for(Key k :objects()){
+                b.append(k+"\n");
+            }
+            for(int i=0; i<nShells; i++){
+                 b.append("Shell "+i+": "+sum(i)+"\n");
+            }
+           return b.toString();
         }
     }
     
@@ -280,6 +368,14 @@ public class KeyedShellResult implements IShellResult {
             this.componentId = componentId;
             this.signalId = signalId;
         }
+        
+        /**
+         * Fetch the key covering the cell and component only
+         * @return
+         */
+        public Key componentKey(){
+            return new Key(cellId, componentId);
+        }
 
         @Override
         public int hashCode() {
@@ -290,6 +386,27 @@ public class KeyedShellResult implements IShellResult {
             result = prime * result + ((componentId == null) ? 0 : componentId.hashCode());
             result = prime * result + ((signalId == null) ? 0 : signalId.hashCode());
             return result;
+        }
+        
+        public boolean hasCell(@NonNull UUID cellId){
+            return this.cellId.equals(cellId);
+        }
+        
+        public boolean hasComponent(@NonNull UUID id){
+            return this.componentId.equals(id);
+        }
+        
+        public boolean hasSignal(@NonNull UUID id){
+            return signalId!=null&&signalId.equals(id);
+        }
+                
+        public boolean hasSignal(){
+            return signalId!=null;
+        }
+        
+        @Override
+        public String toString(){
+            return signalId==null ? cellId.toString()+"_"+componentId.toString() : cellId.toString()+"_"+componentId.toString()+"_"+signalId.toString();
         }
 
         @Override

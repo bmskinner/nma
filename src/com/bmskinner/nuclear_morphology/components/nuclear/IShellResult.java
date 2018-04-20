@@ -35,6 +35,7 @@ public interface IShellResult extends Serializable, Loggable {
     /**
      * The types of pixel value that can be stored
      * @author bms41
+     * @since 1.13.8
      *
      */
     public enum CountType {
@@ -44,6 +45,7 @@ public interface IShellResult extends Serializable, Loggable {
     /**
      * The types of normalisation that can be applied to signals
      * @author bms41
+     * @since 1.13.8
      *
      */
     public enum Normalisation {
@@ -51,46 +53,41 @@ public interface IShellResult extends Serializable, Loggable {
     }
 
     /**
-     * Get the mean pixel proportions for the given type
+     * Get the mean pixel proportions for the given type.
      * 
-     * @param type
-     *            the counting type
-     * @return a list of proportions of signal per shell
+     * @param type the counting type
+     * @return a list of proportions of signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
      */
     List<Double> getRawMeans(CountType type);
 
     /**
      * Get the normalised pixel proportions for the given type
      * 
-     * @param type
-     *            the counting type
-     * @return a list of proportions of signal per shell
+     * @param type the counting type
+     * @return a list of proportions of normalised signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
      */
     List<Double> getNormalisedMeans(CountType type);
 
-    /**
-     * Get the standard error of pixel proportions for the given type
-     * 
-     * @param type
-     *            the counting type
-     * @return a list of proportions of signal per shell
-     */
-    List<Double> getRawStandardErrors(CountType type);
-
-    /**
-     * Get the standard error of pixel proportions for the given type
-     * 
-     * @param type
-     *            the counting type
-     * @return a list of proportions of signal per shell
-     */
-    List<Double> getNormalisedStandardErrors(CountType type);
+//    /**
+//     * Get the standard error of pixel proportions for the given type
+//     * 
+//     * @param type the counting type
+//     * @return a list of standard errors per shell
+//     */
+//    List<Double> getRawStandardErrors(CountType type);
+//
+//    /**
+//     * Get the standard error of pixel proportions for the given type
+//     * 
+//     * @param type the counting type
+//     * @return a list of proportions of signal per shell
+//     */
+//    List<Double> getNormalisedStandardErrors(CountType type);
 
     /**
      * Get the raw chi square test value for the given type
      * 
-     * @param type
-     *            the counting type
+     * @param type the counting type
      * @return the result of a chi square test against equal proportions per
      *         shell
      */
@@ -99,8 +96,7 @@ public interface IShellResult extends Serializable, Loggable {
     /**
      * Get the normalised chi square test value for the given type
      * 
-     * @param type
-     *            the counting type
+     * @param type the counting type
      * @return the result of a chi square test against equal proportions per
      *         shell
      */
@@ -109,8 +105,7 @@ public interface IShellResult extends Serializable, Loggable {
     /**
      * Get the raw chi square p-value for the given type
      * 
-     * @param type
-     *            the counting type
+     * @param type the counting type
      * @return the result of a chi square test against equal proportions per
      *         shell
      */
@@ -119,8 +114,7 @@ public interface IShellResult extends Serializable, Loggable {
     /**
      * Get the normalised chi square p-value for the given type
      * 
-     * @param type
-     *            the counting type
+     * @param type the counting type
      * @return the result of a chi square test against equal proportions per
      *         shell
      */

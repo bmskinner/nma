@@ -304,12 +304,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
      * Add the simulated random data from the given collection to the result
      * dataset
      * 
-     * @param ds
-     *            the dataset to add values to
-     * @param collection
-     *            the cell collection to take random shell data from
-     * @param options
-     *            the chart options
+     * @param ds the dataset to add values to
+     * @param collection the cell collection to take random shell data from
+     * @param options the chart options
      */
     private void addRandomShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options) {
 
@@ -333,10 +330,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell) * 100
 					: r.get().getRawMeans(type).get(shell) * 100;
 
-			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
-					: r.get().getRawStandardErrors(type).get(shell) * 100;
+//			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
+//					: r.get().getRawStandardErrors(type).get(shell) * 100;
 
-			ds.add(signalGroup, -d.doubleValue(), std.doubleValue(),
+			ds.add(signalGroup, -d.doubleValue(), 0,
 					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
 			// we need the string value for shell otherwise we get error
 			// "the method addValue(Number, Comparable, Comparable) is
@@ -349,22 +346,15 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
     /**
      * Add the real shell data from the given collection to the result dataset
      * 
-     * @param ds
-     *            the dataset to add values to
-     * @param collection
-     *            the cell collection to take shell data from
-     * @param options
-     *            the chart options
+     * @param ds the dataset to add values to
+     * @param collection the cell collection to take shell data from
+     * @param options the chart options
      */
     private void addRealShellData(ShellResultDataset ds, ICellCollection collection, ChartOptions options,
             UUID signalGroup) {
 
         // Choose between signal or nucleus level analysis
 		CountType type = options.getCountType();
-
-		// Choose whether to display signals or pixel counts
-		// boolean showSignals = options.isShowSignals();
-
 		boolean isNormalised = options.isNormalised();
 		
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
@@ -376,20 +366,22 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 		if(!r.isPresent())
 			return;
+		
+//		fine(r.get().toString());
 
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 
+		    
 			Double d = isNormalised ? r.get().getNormalisedMeans(type).get(shell)
 					: r.get().getRawMeans(type).get(shell);
+			fine("Getting value for "+type+" "+isNormalised+" shell "+shell+": "+d.toString());
 
-			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell)
-					: r.get().getRawStandardErrors(type).get(shell);
-			ds.add(signalGroup, d * 100, std.doubleValue() * 100,
+//			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell)
+//					: r.get().getRawStandardErrors(type).get(shell);
+			ds.add(signalGroup, d * 100, 0,
 					"Group_" + g.get().getGroupName() + "_" + collection.getName(), String.valueOf(shell));
-			// we need the string value for shell otherwise we get
-			// error
-			// "the method addValue(Number, Comparable, Comparable)
-			// is ambiguous for the type DefaultCategoryDataset"
+			// we need the string value for shell otherwise we get error
+			// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"
 			// ditto the doublevalue for std
 
 		}

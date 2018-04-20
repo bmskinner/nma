@@ -341,8 +341,8 @@ public class DefaultShellResult implements IShellResult {
                 .setRawMeans(CountType.COUNTERSTAIN, s.getRawMeans(CountType.COUNTERSTAIN))
                 .setNormalisedMeans(CountType.SIGNAL, s.getNormalisedMeans(CountType.SIGNAL))
                 .setNormalisedMeans(CountType.COUNTERSTAIN, s.getNormalisedMeans(CountType.COUNTERSTAIN))
-                .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
-                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
+//                .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
+//                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
                 // .setPixelCounts(CountType.SIGNAL,
                 // s.getPixelCounts(CountType.SIGNAL))
                 // .setPixelCounts(CountType.NUCLEUS,
@@ -510,60 +510,60 @@ public class DefaultShellResult implements IShellResult {
      * 
      * @see components.nuclear.IShellResult#getStandardErrors()
      */
-    @Override
-    public List<Double> getRawStandardErrors(CountType type) {
-        List<Double> result = new ArrayList<Double>(shellCount);
-        double[] template = null;
-        switch (type) {
-        case SIGNAL: {
-            template = signalRawStderrs;
-            break;
-        }
-        case COUNTERSTAIN: {
-            template = nucleusRawStderrs;
-            break;
-        }
-        default: {
-            template = signalRawStderrs;
-            break;
-        }
-        }
-
-        for (double i : template) {
-            result.add(i);
-        }
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getStandardErrors()
-     */
-    @Override
-    public List<Double> getNormalisedStandardErrors(CountType type) {
-        List<Double> result = new ArrayList<Double>(shellCount);
-        double[] template = null;
-        switch (type) {
-        case SIGNAL: {
-            template = signalNormStderrs;
-            break;
-        }
-        case COUNTERSTAIN: {
-            template = nucleusNormStderrs;
-            break;
-        }
-        default: {
-            template = signalNormStderrs;
-            break;
-        }
-        }
-
-        for (double i : template) {
-            result.add(i);
-        }
-        return result;
-    }
+//    @Override
+//    public List<Double> getRawStandardErrors(CountType type) {
+//        List<Double> result = new ArrayList<Double>(shellCount);
+//        double[] template = null;
+//        switch (type) {
+//        case SIGNAL: {
+//            template = signalRawStderrs;
+//            break;
+//        }
+//        case COUNTERSTAIN: {
+//            template = nucleusRawStderrs;
+//            break;
+//        }
+//        default: {
+//            template = signalRawStderrs;
+//            break;
+//        }
+//        }
+//
+//        for (double i : template) {
+//            result.add(i);
+//        }
+//        return result;
+//    }
+//
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see components.nuclear.IShellResult#getStandardErrors()
+//     */
+//    @Override
+//    public List<Double> getNormalisedStandardErrors(CountType type) {
+//        List<Double> result = new ArrayList<Double>(shellCount);
+//        double[] template = null;
+//        switch (type) {
+//        case SIGNAL: {
+//            template = signalNormStderrs;
+//            break;
+//        }
+//        case COUNTERSTAIN: {
+//            template = nucleusNormStderrs;
+//            break;
+//        }
+//        default: {
+//            template = signalNormStderrs;
+//            break;
+//        }
+//        }
+//
+//        for (double i : template) {
+//            result.add(i);
+//        }
+//        return result;
+//    }
 
     /*
      * (non-Javadoc)
