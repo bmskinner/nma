@@ -40,6 +40,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -508,12 +510,16 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				    String groupName = group.getGroupName();
 
 				    double mean = options.isNormalised() 
-				    		? r.get().getNormalisedMeanShell(options.getCountType())
-				    		: r.get().getRawMeanShell(options.getCountType());
+				    		? r.get().getOverallShell(Aggregation.BY_NUCLEUS, Normalisation.DAPI)
+				    		: r.get().getOverallShell(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+//				    		? r.get().getNormalisedMeanShell(options.getCountType())
+//				    		: r.get().getRawMeanShell(options.getCountType());
 				    		
 				   double pval =  options.isNormalised() 
-				   		? r.get().getNormalisedPValue(options.getCountType())
-				   		: r.get().getRawPValue(options.getCountType());
+						   ? r.get().getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI)
+						   : r.get().getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+//				   		? r.get().getNormalisedPValue(options.getCountType())
+//				   		: r.get().getRawPValue(options.getCountType());
 
 				    Object[] rowData = {
 

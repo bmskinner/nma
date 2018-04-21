@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -66,88 +68,44 @@ public interface IShellResult extends Serializable, Loggable {
     public enum Aggregation {
         BY_SIGNAL, BY_NUCLEUS;
     }
-
-    /**
-     * Get the mean pixel proportions for the given type.
-     * 
-     * @param type the counting type
-     * @return proportions of signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
-     */
-    double[] getRawMeans(CountType type, Aggregation agg);
-
-    /**
-     * Get the normalised pixel proportions for the given type
-     * 
-     * @param type the counting type
-     * @return proportions of normalised signal per shell. If there are 5 shells, the list will have 5 items, each item the mean of that shell
-     */
-    double[] getNormalisedMeans(CountType type, Aggregation agg);
-
-//    /**
-//     * Get the standard error of pixel proportions for the given type
-//     * 
-//     * @param type the counting type
-//     * @return a list of standard errors per shell
-//     */
-//    List<Double> getRawStandardErrors(CountType type);
-//
-//    /**
-//     * Get the standard error of pixel proportions for the given type
-//     * 
-//     * @param type the counting type
-//     * @return a list of proportions of signal per shell
-//     */
-//    List<Double> getNormalisedStandardErrors(CountType type);
-
-    /**
-     * Get the raw chi square test value for the given type
-     * 
-     * @param type the counting type
-     * @return the result of a chi square test against equal proportions per
-     *         shell
-     */
-    double getRawChiSquare(CountType type);
-
-    /**
-     * Get the normalised chi square test value for the given type
-     * 
-     * @param type the counting type
-     * @return the result of a chi square test against equal proportions per
-     *         shell
-     */
-    double getNormalisedChiSquare(CountType type);
-
-    /**
-     * Get the raw chi square p-value for the given type
-     * 
-     * @param type the counting type
-     * @return the result of a chi square test against equal proportions per
-     *         shell
-     */
-    double getRawPValue(CountType type);
-
-    /**
-     * Get the normalised chi square p-value for the given type
-     * 
-     * @param type the counting type
-     * @return the result of a chi square test against equal proportions per
-     *         shell
-     */
-    double getNormalisedPValue(CountType type);
     
     /**
-     * Get the mean shell position from all measured signals
-     * @param type the counting type
-     * @return the mean of the shell positions for all signals
+     * Get the pixel proportions of signal in each shell
+     * 
+     * @param agg the aggregation of signal
+     * @param norm the normalisation method
+     * @return the pixel proportions of signal
      */
-    double getRawMeanShell(CountType type);
+    double[] getProportions(Aggregation agg, Normalisation norm);
     
     /**
-     * Get the mean shell position from all measured signals
-     * @param type the counting type
-     * @return the mean of the shell positions for all signals
+     * Get the chi square test value for the given signal against counterstain
+     * 
+     * @param agg the aggregation of signal
+     * @param norm the normalisation method
+     * @return the result of a chi square test against equal proportions per
+     *         shell
      */
-    double getNormalisedMeanShell(CountType type);
+    double getChiSquareValue(Aggregation agg, Normalisation norm);
+    
+    /**
+     * Get the chi square p-value for the given signal against counterstain
+     * 
+     * @param agg the aggregation of signal
+     * @param norm the normalisation method
+     * @return the result of a chi square test against equal proportions per
+     *         shell
+     */
+    double getPValue(Aggregation agg, Normalisation norm);
+    
+    /**
+     * Get the overall shell position for the signal 
+     * 
+     * @param agg the aggregation of signal
+     * @param norm the normalisation method
+     * @return the overall shell position
+     */
+    double getOverallShell(Aggregation agg, Normalisation norm);
 
     /**
      * Get the number of shells in the shell result

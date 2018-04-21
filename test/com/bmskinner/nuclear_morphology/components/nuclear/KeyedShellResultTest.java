@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCre
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyNuclearSignal;
@@ -69,43 +70,52 @@ public class KeyedShellResultTest {
     
     @Test
     public void testGetRawMeansWithNoValue() {
-       double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
+       double[] raw = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE);
         assertEquals(N_SHELLS, raw.length);
     }
 
     @Test
-    public void testGetRawMeansWithSingleValue() {
+    public void testGetNonNormalisedProportionsWithSingleValue() {
 
         long[] data = { 0, 0, 1, 0, 0 };
         double[] exp = { 0, 0, 1, 0, 0};
         k.addShellData(CountType.SIGNAL, c, n, data);
-        double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
-        assertTrue(Arrays.equals(raw, exp));
+        double[] raw = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+        assertTrue(equals(exp, raw));
     }
     
     @Test
-    public void testGetRawMeansWithTwoValues() {
+    public void testGetNonNormalisedProportionsWithTwoValues() {
 
         long[] data1 = { 0, 0, 1, 0, 0 };
         long[] data2 = { 0, 0, 0, 1, 0 };
         double[] exp = { 0, 0, 0.5, 0.5, 0};
-        k.addShellData(CountType.SIGNAL, c, n, data1);
-        k.addShellData(CountType.SIGNAL, c, n, data2);
+
+        k.addShellData(CountType.SIGNAL,  new DummyCell(), n, data1);
+        k.addShellData(CountType.SIGNAL,  new DummyCell(), n, data2);
         
-        double[] raw = k.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
-        assertTrue(Arrays.equals(raw, exp));
+        double[] raw = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+        assertTrue(equals(exp, raw));
     }
 
     @Test
-    public void testGetNormalisedMeans() {
+    public void testGetNormalisedProportions() {
         long[] sig = { 1, 2, 3, 4, 5 };
         long[] cnt = { 1, 2, 3, 4, 5 };
         double[] exp = { 0.2, 0.2, 0.2, 0.2, 0.2};
-        k.addShellData(CountType.SIGNAL, c, n, sig);
-        k.addShellData(CountType.COUNTERSTAIN, c, n, cnt);
+
+        k.addShellData(CountType.SIGNAL,  new DummyCell(), n, sig);
+        k.addShellData(CountType.COUNTERSTAIN,  new DummyCell(), n, cnt);
         
-        double[] raw = k.getNormalisedMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL);
-        assertTrue(Arrays.equals(raw, exp));
+        
+     // Check the proportions are correct for non-normalised values
+        double[] expRaw = { 1d/15d, 2d/15d, 3d/15d, 4d/15d, 5d/15d};
+        double[] raw = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+        assertTrue(equals(expRaw, raw));
+        
+        double[] norm = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI);
+        assertTrue(equals(exp, norm));
+
     }
 
     @Test
@@ -121,5 +131,19 @@ public class KeyedShellResultTest {
     @Test
     public void testGetAverageProportion() {
         fail("Not yet implemented");
+    }
+    
+    /**
+     * A detailed comparison of arrays that will show *where* differences occur
+     * @param exp
+     * @param obs
+     * @return
+     */
+    private boolean equals(double[] exp, double[] obs){
+    	assertEquals(exp.length, obs.length);
+    	for(int i=0; i<obs.length; i++) {
+    		assertEquals("Shell "+i,exp[i], obs[i], 0);
+    	}
+    	return Arrays.equals(obs, exp);
     }
 }

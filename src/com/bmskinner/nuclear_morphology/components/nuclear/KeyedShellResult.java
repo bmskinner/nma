@@ -19,24 +19,28 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
- * This extension to the default shell result is designed to allow raw data to be
+ * This shell result is designed to allow raw data to be
  * exported from shell analyses. Averages and normalisations are computed when data are requested,
- * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}.
+ * rather than needing to be pre-computed and stored as in the {@link DefaultShellResult}. It also prompted
+ * the refactoring of the {@link IShellResult} interface.
  * @author bms41
  * @since 1.13.8
  *
@@ -93,58 +97,14 @@ public class KeyedShellResult implements IShellResult {
         }
     }
        
-        
+    
     @Override
-    public double[] getRawMeans(CountType type, Aggregation agg) {
-        double[] result = new double[nShells];
-        for(int i=0; i<nShells; i++){
-            result[i] = getAverageProportion(type, Normalisation.NONE, agg, i);
+    public double[] getProportions(Aggregation agg, Normalisation norm) {
+    	double[] result = new double[nShells];
+    	for(int i=0; i<nShells; i++){
+            result[i] = getAverageProportion(norm, agg, i);
         }
         return result;
-    }
-
-    @Override
-    public double[] getNormalisedMeans(CountType type, Aggregation agg) {
-    	 double[] result = new double[nShells];
-        for(int i=0; i<nShells; i++){
-        	result[i] = getAverageProportion(type, Normalisation.DAPI, agg, i);
-        }
-        return result;
-    }
-
-    @Override
-    public double getRawChiSquare(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getNormalisedChiSquare(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getRawPValue(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getNormalisedPValue(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getRawMeanShell(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getNormalisedMeanShell(CountType type) {
-        return 0;
     }
 
     @Override
@@ -152,104 +112,113 @@ public class KeyedShellResult implements IShellResult {
         return nShells;
     }
     
+    @Override
+    public double getChiSquareValue(Aggregation agg, Normalisation norm) {
+    	return 0;
+    }
+    
+    @Override
+    public double getPValue(Aggregation agg, Normalisation norm) {
+    	return 0;
+    }
+    
+	@Override
+	public double getOverallShell(Aggregation agg, Normalisation norm) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+    
     /**
      * Get the proportions of signal in the given shell by type
-     * @param type the type of signal to fetch
+     * @param agg the type of signal to fetch
      * @param norm the normalisation to apply
      * @param shell the shell to fetch
      * @return the values in that shell
      */
-    public List<Double> getProportions(CountType type, Aggregation agg, Normalisation norm, int shell){
+    private double[] getProportions(Aggregation agg, Normalisation norm, int shell){
         if(shell<0||shell>=nShells)
             throw new IllegalArgumentException("Shell is out of bounds");
-        
-        List<Double> values = new ArrayList<>();
-        
-        switch(type){
-            case SIGNAL: return getSignalProportions(norm, agg, shell);
-            default: return values;
-        }
                 
-//        for(Key id : signalCounts.objects()){
-//            long rawSignal  = signalCounts.getPixelIntensity(id, shell);
-//            long rawCounter = counterCounts.getPixelIntensity(id, shell);
+        switch(agg) {
+	    	case BY_NUCLEUS: return getProportionsByNucleus(norm, shell);
+	    	case BY_SIGNAL:  return getProportionsBySignal(norm, shell);
+	    	default: return new double[0];
+ 
+        }
+    }
+    
+    private double[] getProportionsByNucleus(Normalisation norm, int shell){
+        
+        switch(norm) {
+        	case NONE: return signalCounts.componentObjects().stream()
+					.mapToDouble(k->signalCounts.getPixelIntensity(k, shell) / (double) signalCounts.sum(k))
+					.toArray();
+        	case DAPI: {
+        		return signalCounts.componentObjects().stream()
+        		.mapToDouble(k-> {
+        			double sig = signalCounts.getPixelIntensity(k, shell);
+        			double cnt = counterCounts.getPixelIntensity(k, shell);
+        			double nor = sig/cnt;
+        			
+        			double totalNor = 0;
+        			for(int i=0; i<nShells; i++) {
+        				double s = signalCounts.getPixelIntensity(k, i);
+        				double c = counterCounts.getPixelIntensity(k, i);
+        				totalNor += c==0||s==0?0:s/c;
+        			}
+        			
+        			return nor / totalNor;	
+        		}).toArray();
+        	}
+        	default: return new double[0];
+        }	
+    }
+    
+    private double[] getProportionsBySignal(Normalisation norm, int shell){
+        switch(norm) {
+        	case NONE: return signalCounts.signalObjects().stream()
+					.mapToDouble(k->signalCounts.getPixelIntensity(k, shell) / (double) signalCounts.sum(k))
+					.toArray();
+        	case DAPI: return new double[0];
+        	default: return new double[0];
+        }
+        		
+		
+//		for(Key k : signalCounts.signalObjects()){
+//			long totalSignal  = signalCounts.getPixelIntensity(k, shell);
+//			if(norm.equals(Normalisation.NONE)){
+//                long sum = signalCounts.sum(k);
+//                double prop = (double) totalSignal / (double) sum; 
+//                values.add(prop);  
+//            } 
+//		}
+        
+        
+        
+//        for(Key componentKey : signalCounts.componentObjects()){
+//            
+//            long totalSignal  = signalCounts.getPixelIntensity(componentKey, shell);
+////            long totalCounter = counterCounts.getPixelIntensity(componentKey, shell);
 //            
 //            // No need to worry about normalising in either case
-//            if(type.equals(CountType.COUNTERSTAIN) || (type.equals(CountType.SIGNAL) && norm.equals(Normalisation.NONE))){
-//                long sum = signalCounts.sum(id);
-//                double prop = (double) rawCounter / (double) sum; 
+//            if(norm.equals(Normalisation.NONE)){
+//                long sum = signalCounts.sum(componentKey);
+//                double prop = (double) totalSignal / (double) sum; 
 //                values.add(prop);  
 //            } else { // Need to normalise values
-//                long sumSignal  = signalCounts.sum(id);
-//                long sumCounter = counterCounts.sum(id);
-//                double propCounter = (double) rawCounter / (double) sumCounter; 
+//            	
+//            	// For each signal, DAPI normalise counts
+//            	
+//                long sumSignal  = signalCounts.sum(componentKey);
+//                long sumCounter = counterCounts.sum(componentKey);
+//                double propCounter = (double) totalSignal / (double) sumCounter; 
 //                
-//                double propSignal = (double) rawSignal / (double) sumSignal; 
+//                double propSignal = (double) totalSignal / (double) sumSignal; 
 //                double normSignal = (double) propSignal / (double) sumCounter; 
 //                values.add(normSignal);
 //            }            
 //        }
-//        return values;
-    }
-    
-    private List<Double> getSignalProportions(Normalisation norm, Aggregation agg, int shell){
-        List<Double> values = new ArrayList<>();
-        
-        
-        switch(agg) {
-        	case BY_NUCLEUS:{
-        		if(norm.equals(Normalisation.NONE)){
-        			return signalCounts.componentObjects().stream()
-        					.map(k->signalCounts.getPixelIntensity(k, shell) / (double) signalCounts.sum(k))
-        					.collect(Collectors.toList());
-        		}
-        		
-        	}
-        	case BY_SIGNAL:{
-        		if(norm.equals(Normalisation.NONE)){
-        			return signalCounts.signalObjects().stream()
-        					.map(k->signalCounts.getPixelIntensity(k, shell) / (double) signalCounts.sum(k))
-        					.collect(Collectors.toList());
-        		}
-        		
-        		
-        		for(Key k : signalCounts.signalObjects()){
-        			long totalSignal  = signalCounts.getPixelIntensity(k, shell);
-        			if(norm.equals(Normalisation.NONE)){
-                        long sum = signalCounts.sum(k);
-                        double prop = (double) totalSignal / (double) sum; 
-                        values.add(prop);  
-                    } 
-        		}
-        		
-        	}
-        }
-        
-        
-        for(Key componentKey : signalCounts.componentObjects()){
-            
-            long totalSignal  = signalCounts.getPixelIntensity(componentKey, shell);
-//            long totalCounter = counterCounts.getPixelIntensity(componentKey, shell);
-            
-            // No need to worry about normalising in either case
-            if(norm.equals(Normalisation.NONE)){
-                long sum = signalCounts.sum(componentKey);
-                double prop = (double) totalSignal / (double) sum; 
-                values.add(prop);  
-            } else { // Need to normalise values
-            	
-            	// For each signal, DAPI normalise counts
-            	
-                long sumSignal  = signalCounts.sum(componentKey);
-                long sumCounter = counterCounts.sum(componentKey);
-                double propCounter = (double) totalSignal / (double) sumCounter; 
-                
-                double propSignal = (double) totalSignal / (double) sumSignal; 
-                double normSignal = (double) propSignal / (double) sumCounter; 
-                values.add(normSignal);
-            }            
-        }
-        return values;
     }
     
     /**
@@ -259,13 +228,15 @@ public class KeyedShellResult implements IShellResult {
      * @param shell the shell to fetch
      * @return the mean signal proportion (the mean of the values returned by {@link getProportions()}
      */
-    public double getAverageProportion(CountType type, Normalisation norm, Aggregation agg, int shell){
-        return getProportions(type, agg, norm, shell).stream().mapToDouble(d->d.doubleValue()).average().orElse(0);
+    private double getAverageProportion(Normalisation norm, Aggregation agg, int shell){
+    	fine(norm+" - "+agg+" - shell "+shell+"\n"+Arrays.toString(getProportions(agg, norm, shell)));
+        return DoubleStream.of(getProportions(agg, norm, shell)).average().orElse(-1);
     }
     
     @Override
     public String toString(){
-        return CountType.SIGNAL+"\n"+signalCounts.toString()+"\n\n"+CountType.COUNTERSTAIN+"\n"+counterCounts.toString();
+        return CountType.SIGNAL+"\n"+signalCounts.toString()
+        	+"\n\n"+CountType.COUNTERSTAIN+"\n"+counterCounts.toString();
     }
     
     /**
@@ -273,9 +244,10 @@ public class KeyedShellResult implements IShellResult {
      * @author bms41
      *
      */
-    private class ShellCount {
-        
-        final CountType type;
+    private class ShellCount implements Serializable {
+
+		private static final long serialVersionUID = 1L;
+		final CountType type;
         final Map<Key, long[]> results;
         
         public ShellCount(@NonNull CountType type){
@@ -383,8 +355,9 @@ public class KeyedShellResult implements IShellResult {
      * @author bms41
      *
      */
-     private class Key {
-        private final UUID cellId;
+     private class Key implements Serializable {
+		private static final long serialVersionUID = 1L;
+		private final UUID cellId;
         private final UUID componentId;
         private final UUID signalId;
         
@@ -472,8 +445,5 @@ public class KeyedShellResult implements IShellResult {
             return KeyedShellResult.this;
         }
     }
-
-    
-
     
 }
