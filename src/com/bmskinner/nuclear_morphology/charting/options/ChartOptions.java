@@ -254,9 +254,4 @@ public interface ChartOptions extends DisplayOptions {
      * @return
      */
     boolean isShowSignals();
-
-    int hashCode();
-
-    boolean equals(Object obj);
-
 }

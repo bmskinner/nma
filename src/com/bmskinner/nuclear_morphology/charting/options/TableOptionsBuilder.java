@@ -30,7 +30,9 @@ import com.bmskinner.nuclear_morphology.charting.options.DefaultTableOptions.Tab
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -108,8 +110,13 @@ public class TableOptionsBuilder {
         return this;
     }
 
-    public TableOptionsBuilder setCountType(CountType type) {
-        options.setCountType(type);
+    public TableOptionsBuilder setAggregation(Aggregation c) {
+        options.setAggregation(c);
+        return this;
+    }
+    
+    public TableOptionsBuilder setNormalisation(Normalisation c) {
+        options.setNormalisation(c);
         return this;
     }
     

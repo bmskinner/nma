@@ -24,7 +24,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -144,10 +146,17 @@ public interface DisplayOptions {
     boolean hasCell();
 
     /**
-     * Get the signal counting type for shell analysis
+     * Get the signal aggregation for shell analysis
      * 
      * @return
      */
-    CountType getCountType();
+    Aggregation getAggregation();
+    
+    /**
+     * Get the signal normalisation method for shell analysis
+     * 
+     * @return
+     */
+    Normalisation getNormalisation();
 
 }

@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -337,52 +335,94 @@ public class DefaultShellResult implements IShellResult {
      */
     public DefaultShellResult(IShellResult s) {
         this(s.getNumberOfShells());
-        this.setRawMeans(CountType.SIGNAL, s.getRawMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL))
-                .setRawMeans(CountType.COUNTERSTAIN, s.getRawMeans(CountType.COUNTERSTAIN, Aggregation.BY_SIGNAL))
-                .setNormalisedMeans(CountType.SIGNAL, s.getNormalisedMeans(CountType.SIGNAL, Aggregation.BY_SIGNAL))
-                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getNormalisedMeans(CountType.COUNTERSTAIN, Aggregation.BY_SIGNAL))
+        this.setRawMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.NONE))
+                .setRawMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE))
+                .setNormalisedMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.DAPI))
+                .setNormalisedMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI))
 //                .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
 //                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
                 // .setPixelCounts(CountType.SIGNAL,
                 // s.getPixelCounts(CountType.SIGNAL))
                 // .setPixelCounts(CountType.NUCLEUS,
                 // s.getPixelCounts(CountType.NUCLEUS))
-                .setRawChiResult(CountType.SIGNAL, s.getRawChiSquare(CountType.SIGNAL),
-                        s.getRawPValue(CountType.SIGNAL))
-                .setRawChiResult(CountType.COUNTERSTAIN, s.getRawChiSquare(CountType.COUNTERSTAIN),
-                        s.getRawPValue(CountType.COUNTERSTAIN))
-                .setNormalisedChiResult(CountType.SIGNAL, s.getNormalisedChiSquare(CountType.SIGNAL),
-                        s.getNormalisedPValue(CountType.SIGNAL))
-                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getNormalisedChiSquare(CountType.COUNTERSTAIN),
-                        s.getNormalisedPValue(CountType.COUNTERSTAIN));
+                .setRawChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE))
+                .setRawChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE))
+                .setNormalisedChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI))
+                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI));
 
     }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see components.nuclear.IShellResult#getNumberOfShells()
+     */
+    @Override
+    public int getNumberOfShells() {
+        return shellCount;
+    }
+
+	@Override
+	public double[] getProportions(Aggregation agg, Normalisation norm) {
+		switch (norm) {
+	        case NONE: return getRawMeans(agg);
+	        case DAPI: return getNormalisedMeans(agg);
+	        default:   return getRawMeans(agg);
+	    }
+	}
+
+	@Override
+	public double getChiSquareValue(Aggregation agg, Normalisation norm) {
+		switch (norm) {
+	        case NONE: return getRawChiSquare(agg);
+	        case DAPI: return getNormalisedChiSquare(agg);
+	        default:   return getRawChiSquare(agg);
+	    }
+	}
+
+	@Override
+	public double getPValue(Aggregation agg, Normalisation norm) {
+		switch (norm) {
+	        case NONE: return getRawPValues(agg);
+	        case DAPI: return getNormalisedPValues(agg);
+	        default:   return getRawPValues(agg);
+	    }
+	}
+
+	@Override
+	public double getOverallShell(Aggregation agg, Normalisation norm) {
+		switch (norm) {
+	        case NONE: return getRawMeanShell(agg);
+	        case DAPI: return getNormalisedMeanShell(agg);
+	        default:   return getRawMeanShell(agg);
+	    }
+	}
+    
+    
 
     /*
      * (non-Javadoc)
      * 
      * @see components.nuclear.IShellResult#getMeans()
      */
-    @Override
-    public double[] getRawMeans(CountType type, Aggregation agg) {
-        switch (type) {
-	        case SIGNAL:       return signalRawMeans;
-	        case COUNTERSTAIN: return nucleusRawMeans;
+    private double[] getRawMeans(Aggregation agg) {
+        switch (agg) {
+	        case BY_SIGNAL:  return signalRawMeans;
+	        case BY_NUCLEUS: return nucleusRawMeans;
 	        default:           return signalRawMeans;
         }
     }
     
-    @Override
-    public double getRawMeanShell(CountType type){
-        switch (type) {
-	        case SIGNAL: {
+    private double getRawMeanShell(Aggregation agg){
+        switch (agg) {
+	        case BY_SIGNAL: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*signalRawMeans[i];
 	        	}
 	        	return mean;
 	        }
-	        case COUNTERSTAIN: {
+	        case BY_NUCLEUS: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*nucleusRawMeans[i];
@@ -400,17 +440,16 @@ public class DefaultShellResult implements IShellResult {
 
     }
     
-    @Override
-    public double getNormalisedMeanShell(CountType type){
-        switch (type) {
-	        case SIGNAL: {
+    private double getNormalisedMeanShell(Aggregation agg){
+        switch (agg) {
+	        case BY_SIGNAL: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*signalNormMeans[i];
 	        	}
 	        	return mean;
 	        }
-	        case COUNTERSTAIN: {
+	        case BY_NUCLEUS: {
 	        	double mean = 0;
 	        	for(int i=0; i<shellCount; i++){
 	        		mean += i*nucleusNormMeans[i];
@@ -428,108 +467,53 @@ public class DefaultShellResult implements IShellResult {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getNormalisedMeans()
-     */
-    @Override
-    public double[] getNormalisedMeans(CountType type, Aggregation agg) {
-    	switch (type) {
-	        case SIGNAL:       return signalNormMeans;
-	        case COUNTERSTAIN: return nucleusNormMeans;
+
+    private double[] getNormalisedMeans(Aggregation agg) {
+    	switch (agg) {
+	        case BY_SIGNAL:  return signalNormMeans;
+	        case BY_NUCLEUS: return nucleusNormMeans;
 	        default:           return signalNormMeans;
     	}
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getStandardErrors()
-     */
-//    @Override
-//    public List<Double> getRawStandardErrors(CountType type) {
-//        List<Double> result = new ArrayList<Double>(shellCount);
-//        double[] template = null;
-//        switch (type) {
-//        case SIGNAL: {
-//            template = signalRawStderrs;
-//            break;
-//        }
-//        case COUNTERSTAIN: {
-//            template = nucleusRawStderrs;
-//            break;
-//        }
-//        default: {
-//            template = signalRawStderrs;
-//            break;
-//        }
-//        }
-//
-//        for (double i : template) {
-//            result.add(i);
-//        }
-//        return result;
-//    }
-//
-//    /*
-//     * (non-Javadoc)
-//     * 
-//     * @see components.nuclear.IShellResult#getStandardErrors()
-//     */
-//    @Override
-//    public List<Double> getNormalisedStandardErrors(CountType type) {
-//        List<Double> result = new ArrayList<Double>(shellCount);
-//        double[] template = null;
-//        switch (type) {
-//        case SIGNAL: {
-//            template = signalNormStderrs;
-//            break;
-//        }
-//        case COUNTERSTAIN: {
-//            template = nucleusNormStderrs;
-//            break;
-//        }
-//        default: {
-//            template = signalNormStderrs;
-//            break;
-//        }
-//        }
-//
-//        for (double i : template) {
-//            result.add(i);
-//        }
-//        return result;
-//    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getChiSquare()
-     */
-    @Override
-    public double getRawChiSquare(CountType type) {
+    private double getRawChiSquare(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalRawChi;
+	    	case BY_NUCLEUS: return nucleusRawChi;
+	    	default:         return signalRawChi;
+    	}
 
-        switch (type) {
-        case SIGNAL: {
-            return signalRawChi;
-        }
-        case COUNTERSTAIN: {
-            return nucleusRawChi;
-        }
-        default:
-            return signalRawChi;
-        }
+    }
+    
+    private double getNormalisedChiSquare(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalNormChi;
+	    	case BY_NUCLEUS: return nucleusNormChi;
+	    	default:         return signalNormChi;
+    	}
+
+    }
+    
+    private double getRawPValues(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalRawPval;
+	    	case BY_NUCLEUS: return nucleusRawPval;
+	    	default:         return signalRawPval;
+    	}
+
+    }
+    
+    private double getNormalisedPValues(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalNormPval;
+	    	case BY_NUCLEUS: return nucleusNormPval;
+	    	default:         return signalNormPval;
+    	}
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getChiSquare()
-     */
-    @Override
-    public double getNormalisedChiSquare(CountType type) {
+    private double getNormalisedChiSquare(CountType type) {
 
         switch (type) {
         case SIGNAL: {
@@ -544,13 +528,7 @@ public class DefaultShellResult implements IShellResult {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getPValue()
-     */
-    @Override
-    public double getRawPValue(CountType type) {
+    private double getRawPValue(CountType type) {
         switch (type) {
         case SIGNAL: {
             return signalRawPval;
@@ -563,13 +541,7 @@ public class DefaultShellResult implements IShellResult {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getPValue()
-     */
-    @Override
-    public double getNormalisedPValue(CountType type) {
+    private double getNormalisedPValue(CountType type) {
         switch (type) {
         case SIGNAL: {
             return signalNormPval;
@@ -580,24 +552,6 @@ public class DefaultShellResult implements IShellResult {
         default:
             return signalNormPval;
         }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IShellResult#getNumberOfShells()
-     */
-    @Override
-    public int getNumberOfShells() {
-        return shellCount;
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
     }
 
 }

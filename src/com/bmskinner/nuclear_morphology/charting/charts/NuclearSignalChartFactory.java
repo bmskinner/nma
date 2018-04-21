@@ -43,7 +43,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.NuclearSignalDatasetCr
 import com.bmskinner.nuclear_morphology.charting.datasets.ShellResultDataset;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
@@ -152,8 +154,8 @@ public class NuclearSignalChartFactory extends AbstractChartFactory {
 
         chart.getCategoryPlot().getRangeAxis().setRange(range);
 
-        String percentLabel = options.isNormalised() ? "Normalised percent" : "Percent";
-        String locationLabel = options.getCountType().equals(CountType.COUNTERSTAIN) ? Labels.NUCLEI : "flurochrome border";
+        String percentLabel = options.getNormalisation().equals(Normalisation.DAPI) ? "Normalised percent" : "Percent";
+        String locationLabel = options.getAggregation().equals(Aggregation.BY_NUCLEUS) ? Labels.NUCLEI : "flurochrome border";
 
         chart.getCategoryPlot().getRangeAxis().setLabel(percentLabel + " of signal within " + locationLabel);
 

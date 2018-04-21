@@ -45,6 +45,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -313,9 +314,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         UUID signalGroup = IShellResult.RANDOM_SIGNAL_ID;
 
 		// Choose between signal or nucleus level analysis
-		CountType type = options.getCountType();
+		Aggregation agg = options.getAggregation();
+		Normalisation norm = options.getNormalisation();
 
-		boolean isNormalised = options.isNormalised();
+//		boolean isNormalised = options.isNormalised();
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
 		
 		if(!g.isPresent())
@@ -325,13 +327,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 		if(!r.isPresent())
 			return;
-
+		
+		double[] arr = r.get().getProportions(agg, norm);
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
-			double d = isNormalised ? r.get().getNormalisedMeans(type, Aggregation.BY_NUCLEUS)[shell] * 100
-					: r.get().getRawMeans(type, Aggregation.BY_NUCLEUS)[shell] * 100;
-
-//			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell) * 100
-//					: r.get().getRawStandardErrors(type).get(shell) * 100;
+			double d = arr[shell]* 100;
 
 			ds.add(signalGroup, -d, 0,
 					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
@@ -354,8 +353,9 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             UUID signalGroup) {
 
         // Choose between signal or nucleus level analysis
-		CountType type = options.getCountType();
-		boolean isNormalised = options.isNormalised();
+    	Aggregation agg = options.getAggregation();
+		Normalisation norm = options.getNormalisation();
+//		boolean isNormalised = options.isNormalised();
 		
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
 		
@@ -366,18 +366,12 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 
 		if(!r.isPresent())
 			return;
-		
-//		fine(r.get().toString());
 
+		double[] arr = r.get().getProportions(agg, norm);
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
+			double d = arr[shell]*100;
 
-		    
-			double d = isNormalised ? r.get().getNormalisedMeans(type, Aggregation.BY_NUCLEUS)[shell]
-					: r.get().getRawMeans(type, Aggregation.BY_NUCLEUS)[shell];
-
-//			Double std = isNormalised ? r.get().getNormalisedStandardErrors(type).get(shell)
-//					: r.get().getRawStandardErrors(type).get(shell);
-			ds.add(signalGroup, d * 100, 0,
+			ds.add(signalGroup, d, 0,
 					"Group_" + g.get().getGroupName() + "_" + collection.getName(), String.valueOf(shell));
 			// we need the string value for shell otherwise we get error
 			// "the method addValue(Number, Comparable, Comparable) is ambiguous for the type DefaultCategoryDataset"

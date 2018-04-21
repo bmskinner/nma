@@ -46,7 +46,9 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
@@ -278,33 +280,34 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     private void updateChartAndTable() {
 
-        CountType type = withinNucleiBtn.isSelected() ? CountType.COUNTERSTAIN : CountType.SIGNAL;
+        Aggregation agg = withinNucleiBtn.isSelected() ? Aggregation.BY_NUCLEUS : Aggregation.BY_SIGNAL;
+        Normalisation norm = dapiNormalise.isSelected() ? Normalisation.DAPI : Normalisation.NONE;
 
         boolean showRandom = showRandomCheckbox.isSelected();
 
         ChartOptions barChartOptions = new ChartOptionsBuilder()
         		.setDatasets(getDatasets())
         		.setTarget(chartPanel)
-                .setNormalised(dapiNormalise.isSelected())
                 .setShowAnnotations(showRandom) // proxy fpr random
-                .setCountType(type).build();
+                .setAggregation(agg)
+                .setNormalisation(norm).build();
 
         setChart(barChartOptions);
 
         ChartOptions consensusChartOptions = new ChartOptionsBuilder()
         		.setDatasets(getDatasets())
                 .setTarget(consensusPanel)
-                .setNormalised(dapiNormalise.isSelected())
                 .setShowAnnotations(showRandom) // proxy distribution
                 .setShowXAxis(false)
                 .setShowYAxis(false)
-                .setCountType(type).build();
+                .setAggregation(agg)
+                .setNormalisation(norm).build();
 
         setChart(consensusChartOptions);
 
         TableOptions tableOptions = new TableOptionsBuilder().setDatasets(getDatasets())
-        		.setCountType(type)
-        		.setNormalised(dapiNormalise.isSelected())
+        		.setAggregation(agg)
+                .setNormalisation(norm)
                 .setTarget(table)
                 .setRenderer(P_VALUE_COLUMN, new PValueTableCellRenderer()).build();
 

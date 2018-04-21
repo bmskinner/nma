@@ -25,7 +25,9 @@ import java.util.UUID;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -64,7 +66,9 @@ public abstract class AbstractOptions implements DisplayOptions {
     private MeasurementScale         scale       = MeasurementScale.PIXELS;
     private ColourSwatch             swatch      = ColourSwatch.REGULAR_SWATCH;
     private ICell                    cell        = null;
-    private CountType                type        = CountType.SIGNAL;
+//    private CountType                type        = CountType.SIGNAL;
+    private Aggregation agg = Aggregation.BY_NUCLEUS;
+    private Normalisation norm = Normalisation.NONE;
     private boolean isNormalised = false;
 
     /**
@@ -298,12 +302,20 @@ public abstract class AbstractOptions implements DisplayOptions {
         return this.cell != null;
     }
 
-    public CountType getCountType() {
-        return type;
+    public Aggregation getAggregation() {
+        return agg;
     }
 
-    public void setCountType(CountType t) {
-        type = t;
+    public void setAggregation(Aggregation t) {
+    	agg = t;
+    }
+    
+    public Normalisation getNormalisation() {
+        return norm;
+    }
+
+    public void setNormalisation(Normalisation t) {
+    	norm = t;
     }
     
     public boolean isNormalised(){
@@ -325,7 +337,8 @@ public abstract class AbstractOptions implements DisplayOptions {
         result = prime * result + ((stats == null) ? 0 : stats.hashCode());
         result = prime * result + ((swatch == null) ? 0 : swatch.hashCode());
         result = prime * result + ((cell == null) ? 0 : cell.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((agg == null) ? 0 : agg.hashCode());
+        result = prime * result + ((norm == null) ? 0 : norm.hashCode());
         result = prime * result + (isNormalised ? 1231 : 1237);
         return result;
     }
@@ -362,17 +375,20 @@ public abstract class AbstractOptions implements DisplayOptions {
             return false;
         if (swatch != other.swatch)
             return false;
-
+        if (agg == null) {
+            if (other.agg != null)
+                return false;
+        } else if (!agg.equals(other.agg))
+            return false;
+        if (norm == null) {
+            if (other.norm != null)
+                return false;
+        } else if (!norm.equals(other.norm))
+            return false;
         if (cell == null) {
             if (other.cell != null)
                 return false;
         } else if (!cell.equals(other.cell))
-            return false;
-
-        if (type == null) {
-            if (other.type != null)
-                return false;
-        } else if (!type.equals(other.type))
             return false;
         if (isNormalised != other.isNormalised)
             return false;
