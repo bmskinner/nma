@@ -509,17 +509,9 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
 				    String groupName = group.getGroupName();
 
-				    double mean = options.isNormalised() 
-				    		? r.get().getOverallShell(Aggregation.BY_NUCLEUS, Normalisation.DAPI)
-				    		: r.get().getOverallShell(Aggregation.BY_NUCLEUS, Normalisation.NONE);
-//				    		? r.get().getNormalisedMeanShell(options.getCountType())
-//				    		: r.get().getRawMeanShell(options.getCountType());
-				    		
-				   double pval =  options.isNormalised() 
-						   ? r.get().getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI)
-						   : r.get().getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE);
-//				   		? r.get().getNormalisedPValue(options.getCountType())
-//				   		: r.get().getRawPValue(options.getCountType());
+				    double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
+	
+				    double pval = r.get().getPValue(options.getAggregation(), options.getNormalisation());
 
 				    Object[] rowData = {
 

@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
@@ -49,7 +51,7 @@ public interface IShellResult extends Serializable, Loggable {
     }
     
     /**
-     * The types of normalisation that can be applied to signals
+     * The types of normalisation that can be applied to pixels
      * @author bms41
      * @since 1.13.8
      *
@@ -70,49 +72,57 @@ public interface IShellResult extends Serializable, Loggable {
     }
     
     /**
-     * Get the pixel proportions of signal in each shell
+     * Get the pixel proportions in each shell
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
      * @return the pixel proportions of signal
      */
-    double[] getProportions(Aggregation agg, Normalisation norm);
+    double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm);
     
     /**
-     * Get the chi square test value for the given signal against counterstain
+     * Get the standard errors of the proportions in each shell
+     * 
+     * @param agg the aggregation of signal
+     * @param norm the normalisation method
+     * @return the pixel proportions of signal
+     */
+	double[] getStdErrs(@NonNull Aggregation agg, @NonNull Normalisation norm);
+    
+    /**
+     * Get the chi square test value for the pixels against a random distribution
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
      * @return the result of a chi square test against equal proportions per
      *         shell
      */
-    double getChiSquareValue(Aggregation agg, Normalisation norm);
+    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm);
     
     /**
-     * Get the chi square p-value for the given signal against counterstain
+     * Get the chi square p-value for the the pixels against a random distribution
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
      * @return the result of a chi square test against equal proportions per
      *         shell
      */
-    double getPValue(Aggregation agg, Normalisation norm);
+    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm);
     
     /**
-     * Get the overall shell position for the signal 
+     * Get the overall shell position for the pixels 
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
      * @return the overall shell position
      */
-    double getOverallShell(Aggregation agg, Normalisation norm);
+    double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm);
 
     /**
      * Get the number of shells in the shell result
      * 
      * @return the shell count
      */
-    int getNumberOfShells();
-    
+    int getNumberOfShells();    
 
 }

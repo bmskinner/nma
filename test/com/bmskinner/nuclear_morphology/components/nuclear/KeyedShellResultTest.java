@@ -75,7 +75,7 @@ public class KeyedShellResultTest {
     }
 
     @Test
-    public void testGetNonNormalisedProportionsWithSingleValue() {
+    public void testGetNonNormalisedProportionsWithSingleValueByNucleus() {
 
         long[] data = { 0, 0, 1, 0, 0 };
         double[] exp = { 0, 0, 1, 0, 0};
@@ -85,7 +85,7 @@ public class KeyedShellResultTest {
     }
     
     @Test
-    public void testGetNonNormalisedProportionsWithTwoValues() {
+    public void testGetNonNormalisedProportionsWithTwoValuesByNucleus() {
 
         long[] data1 = { 0, 0, 1, 0, 0 };
         long[] data2 = { 0, 0, 0, 1, 0 };
@@ -99,13 +99,13 @@ public class KeyedShellResultTest {
     }
 
     @Test
-    public void testGetNormalisedProportions() {
+    public void testGetNormalisedProportionsByNucleus() {
         long[] sig = { 1, 2, 3, 4, 5 };
         long[] cnt = { 1, 2, 3, 4, 5 };
         double[] exp = { 0.2, 0.2, 0.2, 0.2, 0.2};
 
-        k.addShellData(CountType.SIGNAL,  new DummyCell(), n, sig);
-        k.addShellData(CountType.COUNTERSTAIN,  new DummyCell(), n, cnt);
+        k.addShellData(CountType.SIGNAL,  c, n, sig);
+        k.addShellData(CountType.COUNTERSTAIN,  c, n, cnt);
         
         
      // Check the proportions are correct for non-normalised values
@@ -117,6 +117,11 @@ public class KeyedShellResultTest {
         assertTrue(equals(exp, norm));
 
     }
+    
+    @Test
+    public void testGetNormalisedProportionsBySignals() {
+    	fail("Not yet implemented");
+    }
 
     @Test
     public void testGetNumberOfShells() {
@@ -124,13 +129,35 @@ public class KeyedShellResultTest {
     }
 
     @Test
-    public void testGetProportions() {
-        fail("Not yet implemented");
-    }
+    public void testGetOverallShellForNonNormalisedDataByNucleus() {
+        long[] sig = { 1, 1, 1, 1, 1 };
+        double exp = 2;
 
+        k.addShellData(CountType.SIGNAL,  c, n, sig);
+        
+        double obs = k.getOverallShell(Aggregation.BY_NUCLEUS, Normalisation.NONE);
+        assertEquals(exp, obs, 0);
+    }
+    
     @Test
-    public void testGetAverageProportion() {
-        fail("Not yet implemented");
+    public void testGetOverallShellForNonNormalisedDataBySignal() {
+    	long[] sig = { 1, 1, 1, 1, 1 };
+        double exp = 2;
+
+        k.addShellData(CountType.SIGNAL,  c, n, s, sig);
+        
+        double obs = k.getOverallShell(Aggregation.BY_SIGNAL, Normalisation.NONE);
+        assertEquals(exp, obs, 0);
+    }
+    
+    @Test
+    public void testGetOverallShellForNormalisedDataByNucleus() {
+    	fail("Not yet implemented");
+    }
+    
+    @Test
+    public void testGetOverallShellForNormalisedDataBySignal() {
+    	fail("Not yet implemented");
     }
     
     /**

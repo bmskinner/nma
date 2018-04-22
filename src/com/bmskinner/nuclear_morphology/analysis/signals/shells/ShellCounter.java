@@ -43,6 +43,7 @@ public class ShellCounter implements Loggable {
     private int                        numberOfShells;
     
     
+    
     /**
      * Raw values
      */
