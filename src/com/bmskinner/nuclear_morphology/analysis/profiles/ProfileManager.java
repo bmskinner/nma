@@ -50,7 +50,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This class is designed to simplify operations on CellCollections involving
+ * This class is designed to simplify operations on cell collections involving
  * copying and refreshing of ProfileCollections and ProfileAggregates. It
  * handles movement of tag indexes within the median and the nuclei
  * 
@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileManager implements Loggable {
-
     final private ICellCollection collection;
 
     public ProfileManager(final ICellCollection collection) {

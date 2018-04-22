@@ -26,6 +26,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -52,20 +54,13 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     static final String NUCLEAR_SIGNAL         = "NuclearSignal";
     static final String NUCLEAR_LOBE           = "NuclearLobe";
     static final String NUCLEAR_BORDER_SEGMENT = "NuclearBorderSegment";
-
+    
     /**
      * Get the UUID of the object
      * 
      * @return
      */
-    public UUID getID();
-
-    /**
-     * A string prepended to any exported image files, so that they will be
-     * ignored by the program on subsequent analyses. Not really used now, since
-     * image exports are not longer performed by default
-     */
-    public static final String IMAGE_PREFIX = "export.";
+    @NonNull UUID getID();
 
     /**
      * An equality check that relies solely on the component ids.

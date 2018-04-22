@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.DoubleStream;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -92,8 +95,7 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * 
      * @see components.nuclear.IShellResult#getMeans()
      */
-    @Override
-    public double[] getRawMeans(CountType type, Aggregation agg) {
+    private double[] getRawMeans(CountType type, Aggregation agg) {
     	double[] arr = new double[means.size()];
     	for(int i=0; i<arr.length; i++) {
     		arr[i] = means.get(i);
@@ -106,8 +108,7 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * 
      * @see components.nuclear.IShellResult#getNormalisedMeans()
      */
-    @Override
-    public double[] getNormalisedMeans(CountType type, Aggregation agg) {
+    private double[] getNormalisedMeans(CountType type, Aggregation agg) {
     	double[] arr = new double[normalisedMeans.size()];
     	for(int i=0; i<arr.length; i++) {
     		arr[i] = normalisedMeans.get(i);
@@ -130,8 +131,7 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * 
      * @see components.nuclear.IShellResult#getChiSquare()
      */
-    @Override
-    public double getRawChiSquare(CountType type) {
+    private double getRawChiSquare(CountType type) {
         return this.chisquare;
     }
 
@@ -140,8 +140,7 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
      * 
      * @see components.nuclear.IShellResult#getPValue()
      */
-    @Override
-    public double getRawPValue(CountType type) {
+    private double getRawPValue(CountType type) {
         return this.pvalue;
     }
 
@@ -156,7 +155,6 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading shell result");
         in.defaultReadObject();
 
         if (counts == null) {
@@ -166,43 +164,35 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
         if (normalisedMeans == null) {
             normalisedMeans = new ArrayList<Double>();
         }
-
-        // finest("\tRead shell result");
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting shell result");
-        out.defaultWriteObject();
-        // finest("\tWrote shell result");
-    }
-
-//    @Override
-//    public List<Double> getNormalisedStandardErrors(CountType type) {
-//        // TODO Auto-generated method stub
-//        return null;
-//    }
-
-    @Override
-    public double getNormalisedChiSquare(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public double getNormalisedPValue(CountType type) {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
 	@Override
-	public double getRawMeanShell(CountType type) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		switch(norm) {
+		case DAPI: return normalisedMeans.stream().mapToDouble(d->d.doubleValue()).toArray();
+		case NONE: return means.stream().mapToDouble(d->d.doubleValue()).toArray();
+		default: return means.stream().mapToDouble(d->d.doubleValue()).toArray();			
+		}
+		
 	}
 
 	@Override
-	public double getNormalisedMeanShell(CountType type) {
-		// TODO Auto-generated method stub
+	public double[] getStdErrs(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		return stderrs.stream().mapToDouble(d->d.doubleValue()).toArray();			
+	}
+
+	@Override
+	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		return chisquare;
+	}
+
+	@Override
+	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+		return pvalue;
+	}
+
+	@Override
+	public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
 		return 0;
 	}
 }

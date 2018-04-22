@@ -370,6 +370,15 @@ public class DefaultShellResult implements IShellResult {
 	        default:   return getRawMeans(agg);
 	    }
 	}
+	
+	@Override
+	public double[] getStdErrs(Aggregation agg, Normalisation norm) {
+		switch (norm) {
+	        case NONE: return getRawStdErrs(agg);
+	        case DAPI: return getNormalisedStdErrs(agg);
+	        default:   return getRawStdErrs(agg);
+	    }
+	}
 
 	@Override
 	public double getChiSquareValue(Aggregation agg, Normalisation norm) {
@@ -512,46 +521,22 @@ public class DefaultShellResult implements IShellResult {
     	}
 
     }
-
-    private double getNormalisedChiSquare(CountType type) {
-
-        switch (type) {
-        case SIGNAL: {
-            return signalNormChi;
-        }
-        case COUNTERSTAIN: {
-            return nucleusNormChi;
-        }
-        default:
-            return signalNormChi;
-        }
+    
+    private double[] getRawStdErrs(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalRawStderrs;
+	    	case BY_NUCLEUS: return nucleusRawStderrs;
+	    	default:         return signalRawStderrs;
+    	}
 
     }
+    
+    private double[] getNormalisedStdErrs(Aggregation agg) {
+    	switch (agg) {
+	    	case BY_SIGNAL:  return signalNormStderrs;
+	    	case BY_NUCLEUS: return nucleusNormStderrs;
+	    	default:         return signalNormStderrs;
+    	}
 
-    private double getRawPValue(CountType type) {
-        switch (type) {
-        case SIGNAL: {
-            return signalRawPval;
-        }
-        case COUNTERSTAIN: {
-            return nucleusRawPval;
-        }
-        default:
-            return signalRawPval;
-        }
     }
-
-    private double getNormalisedPValue(CountType type) {
-        switch (type) {
-        case SIGNAL: {
-            return signalNormPval;
-        }
-        case COUNTERSTAIN: {
-            return nucleusNormPval;
-        }
-        default:
-            return signalNormPval;
-        }
-    }
-
 }

@@ -495,7 +495,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         DecimalFormat pFormat = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
 
-        Object[] columnNames = { Labels.DATASET, Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.AVERAGE_POSITION, Labels.Stats.PROBABILITY, };
+        Object[] columnNames = { Labels.DATASET, 
+        		Labels.Signals.SIGNAL_GROUP_LABEL, 
+        		Labels.Signals.AVERAGE_POSITION, 
+        		Labels.Stats.PROBABILITY };
 
         model.setColumnIdentifiers(columnNames);
 
@@ -508,24 +511,18 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				if (r.isPresent()) {
 
 				    String groupName = group.getGroupName();
-
 				    double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
-	
 				    double pval = r.get().getPValue(options.getAggregation(), options.getNormalisation());
 
 				    Object[] rowData = {
-
 				            d.getName(), 
 				            groupName, 
 				            pFormat.format(mean),
 				            pFormat.format(pval) };
-
 				    model.addRow(rowData);
 				}
             }
-
         }
-
         return model;
     }
 

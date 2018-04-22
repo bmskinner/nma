@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -41,7 +43,7 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      * 
      * @return
      */
-    UUID getId();
+	@NonNull UUID getId();
 
     /**
      * Get the first nucleus of the cell. Use {@link #getNuclei()} instead to

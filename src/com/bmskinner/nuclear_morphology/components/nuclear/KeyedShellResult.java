@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +34,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -95,6 +93,21 @@ public class KeyedShellResult implements IShellResult {
         		: new Key(cell.getId(), nucleus.getID(), signal.getID());
 
         map.get(type).addValues(k, shellData);
+    }
+    
+    /**
+     * Get the pixel count data for a signal in the given nucleus in the given cell.
+     * @param type the type of pixel to fetch
+     * @param cell the cell
+     * @param nucleus the nucleus
+     * @param signal the signal
+     * @return the pixel counts in that object per shell
+     */
+    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal) {
+    	Key k = signal==null 
+        		? new Key(cell.getId(), nucleus.getID()) 
+        		: new Key(cell.getId(), nucleus.getID(), signal.getID());
+    	return map.get(type).getPixelIntensities(k);
     }
        
     
@@ -192,14 +205,14 @@ public class KeyedShellResult implements IShellResult {
             throw new IllegalArgumentException("Shell is out of bounds");
                         
         switch(norm) {
-	    	case NONE: return map.get(CountType.SIGNAL).objects(agg).stream()
+	    	case NONE: return map.get(CountType.SIGNAL).keys(agg).stream()
 					.mapToDouble(key->{
 						double sig = map.get(CountType.SIGNAL).getPixelIntensity(key, shell);
 						double tot = map.get(CountType.SIGNAL).sum(key);
 						return sig/tot;
 					}).toArray();
 	    	case DAPI: {
-	    		return map.get(CountType.SIGNAL).objects(agg).stream()
+	    		return map.get(CountType.SIGNAL).keys(agg).stream()
 	    		.mapToDouble(k-> {
 	    			
 	    			long[] sigs = map.get(CountType.SIGNAL).getPixelIntensities(k);
@@ -250,10 +263,6 @@ public class KeyedShellResult implements IShellResult {
      * @author bms41
      *
      */
-    /**
-     * @author ben
-     *
-     */
     private class ShellCount implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -282,7 +291,7 @@ public class KeyedShellResult implements IShellResult {
         }
         
         int size(Aggregation agg){
-            return objects(agg).size();
+            return keys(agg).size();
         }
         
         /**
@@ -311,7 +320,7 @@ public class KeyedShellResult implements IShellResult {
          * Fetch all the object keys
          * @return
          */
-        Set<Key> objects(){
+        Set<Key> keys(){
             return results.keySet();
         }
         
@@ -322,7 +331,7 @@ public class KeyedShellResult implements IShellResult {
          * @param agg the aggregation level
          * @return the object keys matching the aggregation level
          */
-        Set<Key> objects(Aggregation agg){
+        Set<Key> keys(Aggregation agg){
         	switch(agg){
         		case BY_NUCLEUS: return results.keySet().stream().filter(k->!k.hasSignal()).collect(Collectors.toSet());
         		case BY_SIGNAL:  return results.keySet().stream().filter(k->k.hasSignal()).collect(Collectors.toSet());
@@ -367,7 +376,7 @@ public class KeyedShellResult implements IShellResult {
             StringBuilder b = new StringBuilder("Shells : "+nShells+"\n");
             b.append("Size : "+size()+"\n");
             b.append("Keys :\n");
-            for(Key k :objects()){
+            for(Key k :keys()){
                 b.append(k+"\n");
             }
             for(int i=0; i<nShells; i++){
