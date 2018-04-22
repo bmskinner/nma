@@ -43,6 +43,22 @@ public class Labels {
     public static final String NULL_DATASETS               = "No datasets selected";
     
 
+    public static class Populations {
+    	public static final String SAVE_AS_LBL = "Save nmd as...";
+    	
+    	public static final String ADD = "Add...";
+        public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
+        public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
+        public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
+        
+        public static final String CHANGE_SCALE_LBL = "Set scale";
+        
+        public static final String EXPORT = "Export...";
+        public static final String EXPORT_STATS = "Export stats";
+        public static final String EXPORT_SHELLS = "Export shells";
+        public static final String EXPORT_CELL_LOCS = "Export cell locations";
+    }
+    
     /**
      * Labels relating to signals for tables and UI
      * @author ben

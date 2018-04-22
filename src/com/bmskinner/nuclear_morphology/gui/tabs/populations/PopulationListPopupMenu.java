@@ -25,9 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.AbstractAction;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 
@@ -36,68 +38,44 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
     public static final String SOURCE_COMPONENT = "PopupMenu";
 
-    public static final String SAVE_AS_LBL = "Save nmd as...";
-
-    public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
-    public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
+    private JMenuItem changeScaleItem;
+    private JMenuItem mergeMenuItem;
+    private JMenuItem curateMenuItem;
+    private JMenuItem deleteMenuItem;
+    private JMenuItem booleanMenuItem;
+    private JMenuItem extractMenuItem;
     
-    public static final String CHANGE_SCALE_LBL = "Set scale";
-
-    JMenuItem changeScaleItem;
+    private JMenu exportSubMenu;
+    private JMenuItem exportStatsMenuItem;
+    private JMenuItem exportShellsItem;
+    private JMenuItem saveCellsMenuItem;
     
-    JMenuItem mergeMenuItem;
-    JMenuItem curateMenuItem;
+    private JMenuItem saveMenuItem;
 
-    JMenuItem deleteMenuItem;
-
-    JMenuItem booleanMenuItem;
-    
-    JMenuItem extractMenuItem;
-   
-    JMenuItem saveMenuItem = new JMenuItem(new AbstractAction(SAVE_AS_LBL) {
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            fireSignalChangeEvent("SaveCollectionAction");
-        }
-    });
-
-    JMenuItem saveCellsMenuItem = new JMenuItem(new AbstractAction("Save cell locations") {
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            fireSignalChangeEvent("SaveCellLocations");
-        }
-    });
-
-    JMenuItem relocateMenuItem = new JMenuItem(new AbstractAction("Relocate cells") {
+    private JMenuItem relocateMenuItem = new JMenuItem(new AbstractAction("Relocate cells") {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             fireSignalChangeEvent("RelocateCellsAction");
         }
     });
 
-    JMenuItem exportStatsMenuItem;
+   
 
-    JMenuItem moveUpMenuItem;
+    private JMenuItem moveUpMenuItem;
+    private JMenuItem moveDownMenuItem;
 
-    JMenuItem moveDownMenuItem;
-
-    JMenuItem replaceFolderMenuItem = new JMenuItem(new AbstractAction("Change folder") {
+    private JMenuItem replaceFolderMenuItem = new JMenuItem(new AbstractAction("Change folder") {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             fireSignalChangeEvent("ChangeNucleusFolderAction");
         }
     });
+    
+    
+    private JMenu addSubMenu;
+    private JMenuItem addNuclearSignalMenuItem;
 
-    JMenuItem addNuclearSignalMenuItem;
-
-    JMenuItem fishRemappinglMenuItem = new JMenuItem(new AbstractAction("Post-FISH mapping") {
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            fireSignalChangeEvent("PostFISHRemappingAction");
-        }
-    });
+    private JMenuItem fishRemappinglMenuItem;
 
     private List<Object> listeners = new ArrayList<Object>();
 
@@ -114,7 +92,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
         this.add(mergeMenuItem);
         this.add(deleteMenuItem);
         this.add(booleanMenuItem);
-        this.add(extractMenuItem);
+//        this.add(extractMenuItem);
         this.add(curateMenuItem);
 
         this.addSeparator();
@@ -123,19 +101,18 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
         this.addSeparator();
 
-        this.add(saveCellsMenuItem);
         this.add(relocateMenuItem);
 
         this.addSeparator();
 
         this.add(replaceFolderMenuItem);
-        this.add(exportStatsMenuItem);
+        this.add(exportSubMenu);
         this.add(changeScaleItem);
 
         this.addSeparator();
 
-        this.add(addNuclearSignalMenuItem);
-        this.add(fishRemappinglMenuItem);
+        this.add(addSubMenu);
+        
 
     }
 
@@ -144,6 +121,10 @@ public class PopulationListPopupMenu extends JPopupMenu {
     }
 
     public void createButtons() {
+    	
+    	saveMenuItem = new JMenuItem(Labels.Populations.SAVE_AS_LBL);
+    	saveMenuItem.addActionListener(e -> fireSignalChangeEvent("SaveCollectionAction"));
+
 
         moveUpMenuItem = new JMenuItem("Move up");
         moveUpMenuItem.addActionListener(e -> fireSignalChangeEvent("MoveDatasetUpAction"));
@@ -178,21 +159,34 @@ public class PopulationListPopupMenu extends JPopupMenu {
         extractMenuItem.addActionListener(e->fireSignalChangeEvent(SignalChangeEvent.EXTRACT_SUBSET));
         
 
-        changeScaleItem = new JMenuItem(CHANGE_SCALE_LBL);
-        changeScaleItem.addActionListener(e -> {
-            fireSignalChangeEvent(SignalChangeEvent.CHANGE_SCALE);
-        });
+        changeScaleItem = new JMenuItem(Labels.Populations.CHANGE_SCALE_LBL);
+        changeScaleItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.CHANGE_SCALE));
         
-        exportStatsMenuItem = new JMenuItem("Export stats");
-        exportStatsMenuItem.addActionListener(e -> {
-            fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS);
-        });
+        exportSubMenu = new JMenu(Labels.Populations.EXPORT);
+        
+        exportStatsMenuItem = new JMenuItem(Labels.Populations.EXPORT_STATS);
+        exportStatsMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS));
+        
+        exportShellsItem = new JMenuItem(Labels.Populations.EXPORT_SHELLS);
+        exportShellsItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_SHELLS));
+        
+        saveCellsMenuItem = new JMenuItem(Labels.Populations.EXPORT_CELL_LOCS);
+        saveCellsMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_CELL_LOCS));
 
-        addNuclearSignalMenuItem = new JMenuItem(ADD_NUCLEAR_SIGNAL_LBL);
-        addNuclearSignalMenuItem.setToolTipText(ADD_NUCLEAR_SIGNAL_TIP);
-        addNuclearSignalMenuItem.addActionListener(e -> {
-            fireSignalChangeEvent(SignalChangeEvent.ADD_NUCLEAR_SIGNAL);
-        });
+        exportSubMenu.add(exportStatsMenuItem);
+        exportSubMenu.add(exportShellsItem);
+        exportSubMenu.add(saveCellsMenuItem);
+        
+        addNuclearSignalMenuItem = new JMenuItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL);
+        addNuclearSignalMenuItem.setToolTipText(Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP);
+        addNuclearSignalMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.ADD_NUCLEAR_SIGNAL));
+        
+        fishRemappinglMenuItem = new JMenuItem(Labels.Populations.POST_FISH_MAPPING_LBL);
+        fishRemappinglMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.POST_FISH_MAPPING));
+        
+        addSubMenu = new JMenu(Labels.Populations.ADD);
+        addSubMenu.add(addNuclearSignalMenuItem);
+        addSubMenu.add(fishRemappinglMenuItem);
 
     }
 
@@ -201,81 +195,49 @@ public class PopulationListPopupMenu extends JPopupMenu {
             c.setEnabled(b);
         }
     }
-
-    public void enableMerge() {
-        mergeMenuItem.setEnabled(true);
+    
+    public void updateSingle() {
+    	deleteMenuItem.setEnabled(true);
+    	booleanMenuItem.setEnabled(true);
+    	extractMenuItem.setEnabled(true);
+    	saveMenuItem.setEnabled(true);
+    	curateMenuItem.setEnabled(true);
+    	relocateMenuItem.setEnabled(true);
+    	saveCellsMenuItem.setEnabled(true);
+    	exportSubMenu.setEnabled(true);
+    	exportShellsItem.setEnabled(true);
+    	exportStatsMenuItem.setEnabled(true);
+    	changeScaleItem.setEnabled(true);
+    	addSubMenu.setEnabled(true);
+    	
+    	moveUpMenuItem.setEnabled(true);
+    	moveDownMenuItem.setEnabled(true);
+    	
+    	
+    	mergeMenuItem.setEnabled(false);
+    	
     }
+    
+    public void updateMultiple(){
+    	setEnabled(false);
+    	changeScaleItem.setEnabled(true);
+    	mergeMenuItem.setEnabled(true);
+    	deleteMenuItem.setEnabled(true);
+    	booleanMenuItem.setEnabled(true);
+    	exportSubMenu.setEnabled(true);
+    	exportShellsItem.setEnabled(true);
+    	exportStatsMenuItem.setEnabled(true);
 
-    public void disableMerge() {
-        mergeMenuItem.setEnabled(false);
     }
-
-    public void enableCurate() {
-        curateMenuItem.setEnabled(true);
+    
+    public void updateNull(){
+    	setEnabled(false);
     }
-
-    public void disableCurate() {
-        curateMenuItem.setEnabled(false);
-    }
-
-    public void enableDelete() {
-        deleteMenuItem.setEnabled(true);
-    }
-
-    public void disableDelete() {
-        deleteMenuItem.setEnabled(false);
-    }
-
-    public void enableBoolean() {
-        booleanMenuItem.setEnabled(true);
-    }
-
-    public void disableBoolean() {
-        booleanMenuItem.setEnabled(false);
-    }
-
-    public void enableSave() {
-        saveMenuItem.setEnabled(true);
-    }
-
-    public void disableSave() {
-        saveMenuItem.setEnabled(false);
-    }
-
-    public void enableSaveCells() {
-        saveCellsMenuItem.setEnabled(true);
-    }
-
-    public void disableSaveCells() {
-        saveCellsMenuItem.setEnabled(false);
-    }
-
-    public void enableMenuUp() {
-        moveUpMenuItem.setEnabled(true);
-    }
-
-    public void disableMenuUp() {
-        moveUpMenuItem.setEnabled(false);
-    }
-
-    public void enableMenuDown() {
-        moveDownMenuItem.setEnabled(true);
-    }
-
-    public void disableMenuDown() {
-        moveDownMenuItem.setEnabled(false);
-    }
-
-    public void enableReplaceFolder() {
-        replaceFolderMenuItem.setEnabled(true);
-    }
-
-    public void disableReplaceFolder() {
-        replaceFolderMenuItem.setEnabled(false);
-    }
-
-    public void setRelocateCellsEnabled(boolean b) {
-        relocateMenuItem.setEnabled(b);
+    
+    public void updateClusterGroup(){
+    	setEnabled(false);
+    	moveUpMenuItem.setEnabled(true);
+    	moveDownMenuItem.setEnabled(true);
     }
 
     public void setAddNuclearSignalEnabled(boolean b) {
@@ -284,18 +246,6 @@ public class PopulationListPopupMenu extends JPopupMenu {
 
     public void setFishRemappingEnabled(boolean b) {
         this.fishRemappinglMenuItem.setEnabled(b);
-    }
-
-    public void setExportStatsEnabled(boolean b) {
-        this.exportStatsMenuItem.setEnabled(b);
-    }
-    
-    public void setChangeScaleEnabled(boolean b){
-    	this.changeScaleItem.setEnabled(b);
-    }
-    
-    public void setExtractCellsEnabled(boolean b){
-    	this.extractMenuItem.setEnabled(b);
     }
 
     public synchronized void addSignalChangeListener(SignalChangeListener l) {

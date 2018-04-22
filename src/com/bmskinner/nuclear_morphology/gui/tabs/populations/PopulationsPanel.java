@@ -510,28 +510,24 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                             .setHeaderValue("Cells (" + cellTotal + ")");
 
                     if (datasets.isEmpty() && totalSelectionCount == 0) {
-                        populationPopup.setEnabled(false);
+                        populationPopup.updateNull();
                     } else {
 
                         if (totalSelectionCount > 1) { // multiple of datasets
                                                        // or clusters
                             // single dataset
-                            populationPopup.setEnabled(false);
-                            populationPopup.setChangeScaleEnabled(true);
-                            populationPopup.enableMerge();
-                            populationPopup.enableDelete();
-                            populationPopup.enableBoolean();
-                            populationPopup.setExportStatsEnabled(true);
+                        	populationPopup.updateMultiple();
 
                         } else { // single population
 
                             if (datasets.size() == 1) { // single datasets
                                 IAnalysisDataset d = datasets.get(0);
-                                setMenuForSingleDataset(d);
+                                populationPopup.updateSingle();
+                            	populationPopup.setAddNuclearSignalEnabled(d.isRoot());
+                            	populationPopup.setFishRemappingEnabled(d.isRoot());
                             } else {
-                                // single clustergoup
-                                populationPopup.enableMenuUp();
-                                populationPopup.enableMenuDown();
+                                // single clustergoup or workspace
+                                populationPopup.updateClusterGroup();
                             }
                         }
 
@@ -570,33 +566,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             }
             return selectedIndexes;
         }
-
-    }
-
-    private void setMenuForSingleDataset(IAnalysisDataset d) {
-
-    	
-        populationPopup.enableDelete();
-        populationPopup.disableMerge();
-        populationPopup.enableBoolean();
-        populationPopup.setExtractCellsEnabled(true);
-        populationPopup.enableSave();
-        populationPopup.enableCurate();
-        populationPopup.setRelocateCellsEnabled(true);
-        populationPopup.enableSaveCells();
-        populationPopup.setExportStatsEnabled(true);
-        populationPopup.setChangeScaleEnabled(true);
-
-        if (d instanceof ChildAnalysisDataset) {
-            populationPopup.setAddNuclearSignalEnabled(false);
-            populationPopup.setFishRemappingEnabled(false);
-        } else {
-            populationPopup.setAddNuclearSignalEnabled(true);
-            populationPopup.setFishRemappingEnabled(true);
-        }
-
-        populationPopup.enableMenuUp();
-        populationPopup.enableMenuDown();
 
     }
 

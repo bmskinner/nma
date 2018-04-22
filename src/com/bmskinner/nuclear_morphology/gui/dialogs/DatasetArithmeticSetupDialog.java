@@ -30,6 +30,7 @@ import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
@@ -38,10 +39,10 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.DatasetSelectionPa
 @SuppressWarnings("serial")
 public class DatasetArithmeticSetupDialog extends SettingsDialog implements ActionListener {
 
-    DatasetSelectionPanel                 boxOne;
-    DatasetSelectionPanel                 boxTwo;
-    JComboBox<DatasetArithmeticOperation> operatorBox;
-    JLabel                                operatorDescription = new JLabel(
+    private DatasetSelectionPanel                 boxOne;
+    private DatasetSelectionPanel                 boxTwo;
+    private JComboBox<DatasetArithmeticOperation> operatorBox;
+    private JLabel                                operatorDescription = new JLabel(
             DatasetArithmeticOperation.AND.getDescription());
 
     public enum DatasetArithmeticOperation {
@@ -64,11 +65,10 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
     public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list, MainWindow mw) {
         super(mw, true);
 
-        this.setTitle("Dataset arithmetic options");
+        this.setTitle("Dataset boolean options");
         setSize(450, 300);
         this.setLocationRelativeTo(null);
         createGUI(list);
-        // this.pack();
         this.setVisible(true);
     }
 
@@ -87,10 +87,12 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
     private void createGUI(List<IAnalysisDataset> list) {
 
         setLayout(new BorderLayout());
+    	
 
         JPanel panel = new JPanel();
         GridBagLayout layout = new GridBagLayout();
         panel.setLayout(layout);
+        panel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
         List<JLabel> labels = new ArrayList<JLabel>();
         List<Component> fields = new ArrayList<Component>();
