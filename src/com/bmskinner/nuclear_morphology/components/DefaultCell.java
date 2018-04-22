@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -75,7 +77,7 @@ public class DefaultCell implements IMutableCell {
      * @param id
      *            the id for the new cell
      */
-    public DefaultCell(UUID id) {
+    public DefaultCell(@NonNull UUID id) {
         this.uuid = id;
         nuclei = new ArrayList<Nucleus>(0);
         mitochondria = new ArrayList<IMitochondrion>(0);
@@ -153,7 +155,7 @@ public class DefaultCell implements IMutableCell {
      * @see components.ICell#getId()
      */
     @Override
-    public UUID getId() {
+    public @NonNull UUID getId() {
         return uuid;
     }
 

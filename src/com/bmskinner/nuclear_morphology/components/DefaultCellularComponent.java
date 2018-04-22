@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.BooleanMask;
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
@@ -375,7 +377,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     @Override
-    public UUID getID() {
+    public @NonNull UUID getID() {
         return this.id;
     }
 

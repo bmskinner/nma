@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -90,7 +92,7 @@ public class Cell implements IMutableCell {
      * @see components.ICell#getId()
      */
     @Override
-    public UUID getId() {
+    public @NonNull UUID getId() {
         return uuid;
     }
 

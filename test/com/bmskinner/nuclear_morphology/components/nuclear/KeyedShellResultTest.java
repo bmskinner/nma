@@ -22,9 +22,13 @@ package com.bmskinner.nuclear_morphology.components.nuclear;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,8 +39,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountTyp
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
-import com.bmskinner.nuclear_morphology.samples.dummy.DummyNuclearSignal;
-import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 
 public class KeyedShellResultTest {
     
@@ -49,10 +51,14 @@ public class KeyedShellResultTest {
     @Before
     public void setUp() throws ComponentCreationException{
         k = new KeyedShellResult(N_SHELLS);
-        c = new DummyCell();
-        n = new DummyRodentSpermNucleus();
-        s = new DummyNuclearSignal();
-        c.addNucleus(n);
+        c = mock(ICell.class);
+        when(c.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        
+        n = mock(Nucleus.class);
+        when(n.getID()).thenReturn(UUID.fromString("00000000-0000-0000-0001-000000000001"));
+
+        s = mock(INuclearSignal.class);
+        when(s.getID()).thenReturn(UUID.fromString("00000000-0000-0001-0000-000000000001"));
     }
 
     @Test
@@ -100,27 +106,32 @@ public class KeyedShellResultTest {
 
     @Test
     public void testGetNormalisedProportionsByNucleus() {
-        long[] sig = { 1, 2, 3, 4, 5 };
-        long[] cnt = { 1, 2, 3, 4, 5 };
-        double[] exp = { 0.2, 0.2, 0.2, 0.2, 0.2};
-
-        k.addShellData(CountType.SIGNAL,  c, n, sig);
-        k.addShellData(CountType.COUNTERSTAIN,  c, n, cnt);
-        
-        
-     // Check the proportions are correct for non-normalised values
-        double[] expRaw = { 1d/15d, 2d/15d, 3d/15d, 4d/15d, 5d/15d};
-        double[] raw = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE);
-        assertTrue(equals(expRaw, raw));
-        
-        double[] norm = k.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI);
-        assertTrue(equals(exp, norm));
-
+    	testGetNormalisedProportions(Aggregation.BY_NUCLEUS);
     }
     
     @Test
     public void testGetNormalisedProportionsBySignals() {
-    	fail("Not yet implemented");
+    	testGetNormalisedProportions(Aggregation.BY_SIGNAL);
+    }
+    
+    private void testGetNormalisedProportions(@NonNull Aggregation agg) {
+    	long[] sig = { 1, 2, 3, 4, 5 };
+        long[] cnt = { 1, 2, 3, 4, 5 };
+        
+        if(agg.equals(Aggregation.BY_NUCLEUS))
+        	s=null;
+        
+        k.addShellData(CountType.SIGNAL,  c, n, s, sig);
+        k.addShellData(CountType.COUNTERSTAIN,  c, n, cnt);
+
+     // Check the proportions are correct for non-normalised values
+        double[] expRaw = { 1d/15d, 2d/15d, 3d/15d, 4d/15d, 5d/15d};
+        double[] raw = k.getProportions(agg, Normalisation.NONE);
+        assertTrue(equals(expRaw, raw));
+        
+        double[] exp = { 0.2, 0.2, 0.2, 0.2, 0.2};
+        double[] norm = k.getProportions(agg, Normalisation.DAPI);
+        assertTrue(equals(exp, norm));
     }
 
     @Test
@@ -152,12 +163,27 @@ public class KeyedShellResultTest {
     
     @Test
     public void testGetOverallShellForNormalisedDataByNucleus() {
-    	fail("Not yet implemented");
+    	testGetOverallShellForNormalisedData(Aggregation.BY_NUCLEUS);
     }
     
     @Test
     public void testGetOverallShellForNormalisedDataBySignal() {
-    	fail("Not yet implemented");
+    	testGetOverallShellForNormalisedData(Aggregation.BY_SIGNAL);
+    }
+    
+    private void testGetOverallShellForNormalisedData(@NonNull Aggregation agg) {
+    	long[] sig = { 1, 2, 3, 4, 5 };
+        long[] cnt = { 1, 2, 3, 4, 5 };
+        
+        if(agg.equals(Aggregation.BY_NUCLEUS))
+        	s=null;
+        
+        k.addShellData(CountType.SIGNAL,  c, n, s, sig);
+        k.addShellData(CountType.COUNTERSTAIN,  c, n, cnt);
+        
+        double exp = 2d;
+        double obs = k.getOverallShell(agg, Normalisation.DAPI);
+        assertEquals(exp, obs, 0);
     }
     
     /**

@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -241,7 +242,7 @@ public class KeyedShellResult implements IShellResult {
      * @return the mean signal proportion (the mean of the values returned by {@link getProportions()}
      */
     private double getAverageProportion(Normalisation norm, Aggregation agg, int shell){
-//    	fine(norm+" - "+agg+" - shell "+shell+"\n"+Arrays.toString(getProportions(agg, norm, shell)));
+    	fine(norm+" - "+agg+" - shell "+shell+"\n"+Arrays.toString(getProportions(agg, norm, shell)));
         return DoubleStream.of(getProportions(agg, norm, shell)).average().orElse(-1);
     }
     
