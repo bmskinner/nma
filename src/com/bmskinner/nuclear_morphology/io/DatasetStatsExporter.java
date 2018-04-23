@@ -238,13 +238,6 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
     }
 
     /**
-     * Write the dataset level info that will always be present *
-     */
-    private void writeDatasetHeader() {
-
-    }
-
-    /**
      * Append the given dataset stats into the string builder
      * @param d the dataset to export
      * @param outLine the string builder to append to
