@@ -18,7 +18,14 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
+import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
  * A default implementation of the IShellResult interface. It uses a builder
@@ -538,5 +545,13 @@ public class DefaultShellResult implements IShellResult {
 	    	default:         return signalNormStderrs;
     	}
 
+    }
+
+    @Override
+    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus,
+            @Nullable INuclearSignal signal) {
+        long[] result = new long[shellCount];
+        Arrays.fill(result, 0);
+        return result;
     }
 }

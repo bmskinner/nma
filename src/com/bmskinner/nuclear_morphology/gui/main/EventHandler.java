@@ -57,6 +57,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportShellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
@@ -130,42 +131,35 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
          */
         public Runnable create(final SignalChangeEvent event) {
 
-            if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE)) {
+            if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
                 return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), mw);
-            }
 
-            if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC)) {
+            if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
                 return new DatasetArithmeticAction(selectedDatasets, mw);
-            }
             
-            if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET)) {
+            if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET))
                 return new ExtractRandomCellsAction(selectedDataset, mw);
-            }
 
-            if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER)) {
+            if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
                 return new ReplaceSourceImageDirectoryAction(selectedDataset, mw);
-            }
 
-            if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL)) {
+            if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
                 return new AddNuclearSignalAction(selectedDataset, mw);
-            }
 
-            if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING)) {
+            if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
                 return new FishRemappingAction(selectedDatasets, mw);
-            }
 
-            if (event.type().equals(SignalChangeEvent.EXPORT_STATS)) {
-
+            if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
                 return new ExportStatsAction(selectedDatasets, mw);
-            }
-
-            if (event.type().equals(SignalChangeEvent.LOBE_DETECTION)) {
-                return new LobeDetectionAction(selectedDataset, mw);
-            }
             
-            if (event.type().equals(SignalChangeEvent.MERGE_COLLECTION_ACTION)) {
+            if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
+                return new ExportShellsAction(selectedDatasets, mw);
+
+            if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
+                return new LobeDetectionAction(selectedDataset, mw);
+            
+            if (event.type().equals(SignalChangeEvent.MERGE_COLLECTION_ACTION))
                 return new MergeCollectionAction(selectedDatasets, mw);
-            }
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
 

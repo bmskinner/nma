@@ -2,6 +2,10 @@ package com.bmskinner.nuclear_morphology.io;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -9,11 +13,20 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -72,16 +85,12 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
      * 
      * @param d
      */
-    public void export(@NonNull IAnalysisDataset d) {
+    private void export(@NonNull IAnalysisDataset d) {
         log(EXPORT_MESSAGE);
 ;
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
-//        try {
-//            append(d, outLine);
-//        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-//            error("Error exporting dataset", e);
-//        }
+        append(d, outLine);
         IJ.append(outLine.toString(), exportFile.getAbsolutePath());
         log("Exported stats to " + exportFile.getAbsolutePath());
     }
@@ -91,59 +100,168 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
      * 
      * @param list
      */
-    public void export(@NonNull List<IAnalysisDataset> list) {
+    private void export(@NonNull List<IAnalysisDataset> list) {
         log(EXPORT_MESSAGE);
         
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
 
-//        try {
-//            for (IAnalysisDataset d : list) {
-//                append(d, outLine);
-//                fireProgressEvent();
-//            }
-//        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-//            error("Error exporting dataset", e);
-//        }
+        for (IAnalysisDataset d : list) {
+            append(d, outLine);
+            fireProgressEvent();
+        }
+
         IJ.append(outLine.toString(), exportFile.getAbsolutePath());
         log("Exported stats to " + exportFile.getAbsolutePath());
     }
 
     /**
-     * Write a column header line to the StringBuilder. Only nuclear stats for
-     * now
-     * 
+     * Append a column header line to the StringBuilder.
      * @param outLine
      */
     private void writeHeader(StringBuilder outLine) {
 
-        outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
-        
-        
+        String[] headers = {
+            "Dataset",
+            "CellID",
+            "Component",
+            "Folder",
+            "ComponentImage",
+            "SignalGroup",
+            "SignalFolder",
+            "SignalImage",
+            "SignalChannel",
+            "Aggregation"
+        };
 
-//        for (PlottableStatistic s : PlottableStatistic.getNucleusStats()) {
-//
-//            String label = s.label(MeasurementScale.PIXELS).replaceAll(" ", "_").replaceAll("\\(", "_")
-//                    .replaceAll("\\)", "").replaceAll("__", "_");
-//            outLine.append(label + TAB);
-//
-//            if (!s.isDimensionless() && !s.isAngle()) { // only give micron
-//                                                        // measurements when
-//                                                        // length or area
-//
-//                label = s.label(MeasurementScale.MICRONS).replaceAll(" ", "_").replaceAll("\\(", "_")
-//                        .replaceAll("\\)", "").replaceAll("__", "_");
-//
-//                outLine.append(label + TAB);
-//            }
-//
-//        }
+        outLine.append(Stream.of(headers).collect(Collectors.joining(TAB))+TAB);
+        
+        for(int i=0; i<getMaximumNumberOfShells(); i++){
+            String label = "Signal_shell_"+i;
+            outLine.append(label + TAB); 
+        }
+        
+        for(int i=0; i<getMaximumNumberOfShells(); i++){
+            String label = "Counterstain_shell_"+i;
+            outLine.append(label + TAB); 
+        }
         
         // remove the final tab character
         if (outLine.length() > 0)
             outLine.setLength(outLine.length() - 1);
         
         outLine.append(NEWLINE);
+    }
+    
+    /**
+     * Append the given dataset stats into the string builder
+     * @param d the dataset to export
+     * @param outLine the string builder to append to
+     * @throws UnloadableImageException 
+     * @throws UnavailableBorderTagException
+     * @throws UnavailableProfileTypeException
+     * @throws ProfileException
+     */
+    private void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) {
+        
+        
+        for(UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
+            ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
+            String groupName   = signalGroup.getGroupName();
+            String groupFolder = signalGroup.getFolder().getAbsolutePath();
+            int groupChannel   = signalGroup.getChannel();
+            
+            Optional<IShellResult> oShellResult = signalGroup.getShellResult();
+            if(!oShellResult.isPresent())
+                continue;
+            
+            IShellResult shellResult = oShellResult.get();
+
+            for (ICell cell : d.getCollection().getCells()) {
+                
+                if (!cell.hasNucleus())
+                    continue;
+
+                for (Nucleus n : cell.getNuclei()) {
+
+                    if(!n.getSignalCollection().hasSignal(signalGroupId))
+                        continue;
+
+                    outLine.append(d.getName() + TAB)
+                    .append(cell.getId() + TAB)
+                    .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
+                    .append(n.getSourceFolder() + TAB)
+                    .append(n.getSourceFileName() + TAB)
+                    .append(groupName + TAB)
+                    .append(groupFolder + TAB)
+                    .append(n.getSignalCollection().getSourceFile(signalGroupId).getAbsolutePath() + TAB)
+                    .append(n.getSignalCollection().getSourceChannel(signalGroupId)+TAB)
+                    .append(Aggregation.BY_NUCLEUS + TAB);
+
+                    long[] signalByNucleus = shellResult.getPixelValues(CountType.SIGNAL, cell, n, null);
+                    long[] counterstain    = shellResult.getPixelValues(CountType.COUNTERSTAIN, cell, n, null);
+
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(signalByNucleus[i]+TAB);
+                    }
+                    for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                        outLine.append(counterstain[i]+TAB);
+                    }
+
+                    if (outLine.length() > 0)
+                        outLine.setLength(outLine.length() - 1);
+                    outLine.append(NEWLINE);
+
+                    for(INuclearSignal s : n.getSignalCollection().getSignals(signalGroupId)){
+
+                        outLine.append(d.getName() + TAB)
+                        .append(cell.getId() + TAB)
+                        .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
+                        .append(n.getSourceFolder() + TAB)
+                        .append(n.getSourceFileName() + TAB)
+                        .append(groupName + TAB)
+                        .append(groupFolder + TAB)
+                        .append(s.getSourceFile().getAbsolutePath() + TAB)
+                        .append(s.getChannel() + TAB)
+                        .append(Aggregation.BY_SIGNAL + TAB);
+
+                        long[] signalBySignal = shellResult.getPixelValues(CountType.SIGNAL, cell, n, s);
+
+                        for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                            outLine.append(signalBySignal[i]+TAB);
+                        }
+                        for(int i=0; i<shellResult.getNumberOfShells(); i++){
+                            outLine.append(counterstain[i]+TAB);
+                        }
+
+                        if (outLine.length() > 0)
+                            outLine.setLength(outLine.length() - 1);
+                        outLine.append(NEWLINE);
+                    }
+                }
+
+
+
+            }
+        }
+    }
+    
+    private void appendSignalStats(@NonNull StringBuilder outLine, @NonNull IAnalysisDataset d, @NonNull Nucleus n, @NonNull INuclearSignal s){
+        
+    }
+    
+    /**
+     * Find the maximum number of shells within the datasets
+     * @return
+     */
+    private int getMaximumNumberOfShells(){
+        int shells = 0;
+        for(IAnalysisDataset d : datasets){
+            SignalManager sm = d.getCollection().getSignalManager();
+            int sc = sm.getShellCount();
+            shells = sc>shells?sc:shells;
+        }
+        return shells;
     }
 
 }

@@ -30,6 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.ProgressEvent;
@@ -45,6 +47,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -66,7 +69,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	
     private final int shells;
 
-    private int totalPixels = 0;
+//    private int totalPixels = 0;
 
     private static Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
 
@@ -183,7 +186,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             if (!collection.getSignalManager().hasSignals(signalGroup))
                 return;
 
-
             List<INuclearSignal> signals = n.getSignalCollection().getSignals(signalGroup);
             if (signals.isEmpty())
                 return;
@@ -198,16 +200,16 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             KeyedShellResult counter = counters.get(signalGroup);
 
-            int channel = n.getSignalCollection().getSourceChannel(signalGroup);
+            int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
-            long[] totalSignalIntensity  = shellDetector.findPixelIntensityPerShell(signalStack, channel);
+            long[] totalSignalIntensity  = shellDetector.findPixelIntensityPerShell(signalStack, signalChannel);
             long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(nucleusStack, n.getChannel());
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
 
             for (INuclearSignal s : signals) {
-                long[] countsInSignals = shellDetector.findPixelCountPerShell(s);
+                long[] countsInSignals = shellDetector.findPixelIntensityPerShell(s);
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal
             }
         }
@@ -238,35 +240,21 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         // Create a random sample distribution
         if (collection.hasConsensus()) {
 
-            ISignalGroup random = new SignalGroup();
-            random.setGroupName("Random distribution");
+            ISignalGroup random = new SignalGroup("Random distribution");
             random.setFolder(new File(""));
 
             dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
+//            int iterations = totalPixels < 100000 ? totalPixels : 100000; // stop stupidly long calculations 
+
+            RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
+
+            long[] c = sr.getCounts();
             
-            int iterations = totalPixels < 100000 ? totalPixels : 100000; // stop stupidly long calculations 
-
-            ShellRandomDistributionCreator sr = new ShellRandomDistributionCreator(collection.getConsensus(), shells,
-                    iterations);
-
-            double[] c = sr.getProportions();
-            double[] err = new double[c.length];
-            Arrays.fill(err, 0);
-
-			List<Double> errList = DoubleStream.of(err).boxed().collect(Collectors.toList());
-
-			IShellResult randomResult = new DefaultShellResult(shells)
-					.setRawMeans(CountType.SIGNAL, c)
-			        .setRawMeans(CountType.COUNTERSTAIN, c)
-			        .setNormalisedMeans(CountType.SIGNAL, c)
-			        .setNormalisedMeans(CountType.COUNTERSTAIN, c)
-			        .setRawStandardErrors(CountType.SIGNAL, errList)
-			        .setRawStandardErrors(CountType.COUNTERSTAIN, errList)
-			        .setNormalisedStandardErrors(CountType.SIGNAL, errList)
-			        .setNormalisedStandardErrors(CountType.COUNTERSTAIN, errList);
-
+            fine("Random dist: "+Arrays.toString(c));
+			RandomShellResult randomResult = new RandomShellResult(shells, c);
+			
 			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
         } else {
@@ -275,20 +263,23 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
     }
     
-    private static class ShellRandomDistributionCreator {
-        /**
-         * Store the shell as a key, and the number of signals measured as a value
-         */
-        private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    private class RandomDistribution {
+        
+        private long[] counts;
 
         public static final int DEFAULT_ITERATIONS = 10000;
 
-        public ShellRandomDistributionCreator(CellularComponent template, int shellCount, int iterations) {
+        public RandomDistribution(@NonNull CellularComponent template, int iterations) {
+                        
+            if(iterations<=0)
+                throw new IllegalArgumentException("Must have at least one iteration");
+            
+            counts = new long[shells];
+            for(int i=0; i<shells; i++){
+                counts[i] = 0;
+            }
 
-            if (shellCount <= 1)
-                throw new IllegalArgumentException("Shell count must be > 1");
             // Make a list of random points
-
             double xCen = template.getBounds().getCenterX();
             double yCen = template.getBounds().getCenterY();
             double xMin = template.getBounds().getMinX();
@@ -300,106 +291,26 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             for (int i = 0; i < iterations; i++) {
                 list.add(createRandomPoint(template));
             }
+            
 
             // Find the shell for these points in the template
-            ShellDetector detector;
             try {
-                detector = new ShellDetector(template, shellCount);
-
-                // initialise the map
-                for (int i = -1; i < shellCount; i++) {
-                    map.put(i, 0);
-                }
-
+                ShellDetector detector = new ShellDetector(template, shells);
                 for (IPoint p : list) {
                     int shell = detector.findShell(p);
-
-                    int count = map.get(shell);
-                    map.put(shell, ++count);
+                    if(shell>=0) // -1 for point not found
+                        counts[shell]++;
                 }
 
             } catch (ShellAnalysisException e) {
-//                error("Simulation failed", e);
+                System.err.println(e.getMessage());
+                e.printStackTrace();
             }
-
-//            int neg1 = -1;
-//
-//            if (map.get(neg1) > 0) {
-//                fine("Unable to map " + map.get(neg1) + " points");
-//            }
 
         }
 
-        /**
-         * Get the number of signals measured in the given shell
-         * 
-         * @param shell
-         * @return
-         */
-        public int getCount(int shell) {
-            if (!map.containsKey(shell)) {
-                return 0;
-            }
-            return map.get(shell);
-        }
-
-        /**
-         * Get the total number of hits excluding unmapped points
-         * 
-         * @return
-         */
-        private int getTotalCount() {
-            int result = 0;
-            for (int i : map.keySet()) {
-                if (i == -1) {
-                    continue;
-                }
-                result += map.get(i);
-            }
-            return result;
-        }
-
-        /**
-         * Get the proportion of total signal in the given shell
-         * 
-         * @param shell
-         * @return
-         */
-        public double getProportion(int shell) {
-            if (!map.containsKey(shell)) {
-                return 0;
-            }
-            int total = getTotalCount();
-
-            int count = map.get(shell);
-
-            double prop = (double) count / (double) total;
-
-            return prop;
-        }
-
-        public double[] getProportions() {
-
-            int shells = map.size() - 1;
-
-            double[] result = new double[shells];
-
-            for (int i = 0; i < shells; i++) {
-                result[i] = getProportion(i);
-            }
-            return result;
-        }
-
-        public int[] getCounts() {
-
-            int shells = map.size() - 1;
-
-            int[] result = new int[shells];
-
-            for (int i = 0; i < shells; i++) {
-                result[i] = getCount(i);
-            }
-            return result;
+        public long[] getCounts() {
+            return counts;
         }
 
         /**

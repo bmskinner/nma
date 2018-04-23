@@ -316,8 +316,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		// Choose between signal or nucleus level analysis
 		Aggregation agg = options.getAggregation();
 		Normalisation norm = options.getNormalisation();
-
-//		boolean isNormalised = options.isNormalised();
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
 		
 		if(!g.isPresent())
@@ -331,6 +329,7 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
 		double[] arr = r.get().getProportions(agg, norm);
 		for (int shell = 0; shell < r.get().getNumberOfShells(); shell++) {
 			double d = arr[shell]* 100;
+//			fine("Shell "+shell+": "+d);
 
 			ds.add(signalGroup, -d, 0,
 					"Group_" + signalGroup + "_" + collection.getName(), String.valueOf(shell));
@@ -355,7 +354,6 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
         // Choose between signal or nucleus level analysis
     	Aggregation agg = options.getAggregation();
 		Normalisation norm = options.getNormalisation();
-//		boolean isNormalised = options.isNormalised();
 		
 		Optional<ISignalGroup> g = collection.getSignalGroup(signalGroup);
 		

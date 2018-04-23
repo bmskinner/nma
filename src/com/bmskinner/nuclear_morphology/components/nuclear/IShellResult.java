@@ -23,10 +23,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -118,6 +121,16 @@ public interface IShellResult extends Serializable, Loggable {
      */
     double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm);
 
+    /**
+     * Get the pixel count data for a signal in the given nucleus in the given cell.
+     * @param type the type of pixel to fetch
+     * @param cell the cell
+     * @param nucleus the nucleus
+     * @param signal the signal
+     * @return the pixel counts in that object per shell
+     */
+    public long[] getPixelValues(@NonNull CountType type, @NonNull ICell cell, @NonNull Nucleus nucleus, @Nullable INuclearSignal signal);
+    
     /**
      * Get the number of shells in the shell result
      * 

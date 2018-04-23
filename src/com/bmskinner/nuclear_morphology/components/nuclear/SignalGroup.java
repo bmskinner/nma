@@ -48,6 +48,13 @@ public class SignalGroup implements ISignalGroup {
      */
     public SignalGroup() {
     }
+    
+    /**
+     * Default constructor
+     */
+    public SignalGroup(String name) {
+        groupName = name;
+    }
 
     /**
      * Construct from an existing group, duplicating the values in the template
