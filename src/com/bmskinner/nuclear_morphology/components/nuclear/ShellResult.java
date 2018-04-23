@@ -30,6 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -157,6 +158,11 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
     @Override
     public int getNumberOfShells() {
         return this.means.size();
+    }
+    
+    @Override
+    public ShrinkType getType() {
+        return ShrinkType.AREA;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {

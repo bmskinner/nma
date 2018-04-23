@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -123,6 +124,11 @@ public class TableOptionsBuilder {
     public TableOptionsBuilder setNormalised(boolean b){
     	options.setNormalised(b);
     	return this;
+    }
+    
+    public TableOptionsBuilder setShrinkType(ShrinkType t) {
+        options.setShrinkType(t);
+        return this;
     }
 
     public TableOptions build() {

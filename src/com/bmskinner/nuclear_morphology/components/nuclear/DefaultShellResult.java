@@ -368,6 +368,11 @@ public class DefaultShellResult implements IShellResult {
     public int getNumberOfShells() {
         return shellCount;
     }
+    
+    @Override
+    public ShrinkType getType() {
+        return ShrinkType.AREA;
+    }
 
 	@Override
 	public double[] getProportions(Aggregation agg, Normalisation norm) {

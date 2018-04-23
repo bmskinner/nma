@@ -34,6 +34,7 @@ import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
@@ -243,6 +244,11 @@ public class ChartOptionsBuilder {
     
     public ChartOptionsBuilder setNormalisation(Normalisation c) {
         options.setNormalisation(c);
+        return this;
+    }
+    
+    public ChartOptionsBuilder setShrinkType(ShrinkType t) {
+        options.setShrinkType(t);
         return this;
     }
 

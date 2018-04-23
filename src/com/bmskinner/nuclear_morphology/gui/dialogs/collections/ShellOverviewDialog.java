@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.LabelInfo;
 import com.bmskinner.nuclear_morphology.io.ImageImportWorker;
@@ -158,6 +159,9 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
             stack("Cannot load image for component", e);
             return null;
         }
+        
+        int shellCount = dataset.getCollection().getSignalManager().getShellCount();
+        ShrinkType t = dataset.getCollection().getSignalManager().getShrinkType().get();
 
         ImageAnnotator an = new ImageAnnotator(ip);
 
@@ -165,7 +169,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 
         	 try {
         		
- 				List<Shell> shells = new ShellDetector(n, ShellDetector.DEFAULT_SHELL_COUNT).getShells();
+ 				List<Shell> shells = new ShellDetector(n, shellCount, t).getShells();
  				
  				for(Shell shell : shells){
  					fine("Drawing shell at "+shell.getBase().toString());

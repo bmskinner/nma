@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyCell;
 
@@ -50,7 +51,7 @@ public class KeyedShellResultTest {
     
     @Before
     public void setUp() throws ComponentCreationException{
-        k = new KeyedShellResult(N_SHELLS);
+        k = new KeyedShellResult(N_SHELLS, ShrinkType.AREA);
         c = mock(ICell.class);
         when(c.getId()).thenReturn(UUID.fromString("00000000-0000-0000-0000-000000000001"));
         

@@ -20,7 +20,6 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
@@ -51,17 +51,19 @@ public class KeyedShellResult implements IShellResult {
     
 	private static final long serialVersionUID = 1L;
 	final int nShells;
+	final ShrinkType type;
 	private final Map<CountType, ShellCount> map = new HashMap<>();    
     
     /**
      * Create with the given number of shells
      * @param nShells
      */
-    public KeyedShellResult(int nShells){
+    public KeyedShellResult(int nShells, ShrinkType type){
         if (nShells < 1) 
             throw new IllegalArgumentException("Shell count must be greater than 1");
         
         this.nShells = nShells;
+        this.type = type;
         
         for(CountType t : CountType.values()) {
         	map.put(t, new ShellCount());
@@ -140,6 +142,11 @@ public class KeyedShellResult implements IShellResult {
     @Override
     public int getNumberOfShells() {
         return nShells;
+    }
+    
+    @Override
+    public ShrinkType getType() {
+        return type;
     }
     
     @Override

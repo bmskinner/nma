@@ -38,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.nuclear.Colocalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceValue;
@@ -590,6 +591,15 @@ public class SignalManager implements Loggable {
                 return r.get().getNumberOfShells();
         }
         return 0;
+    }
+    
+    public Optional<ShrinkType> getShrinkType() {
+    	for (ISignalGroup group : this.getSignalGroups()) {
+        	Optional<IShellResult> r = group.getShellResult();
+        	if(r.isPresent())
+                return Optional.ofNullable(r.get().getType());
+        }
+        return Optional.empty();
     }
 
     /**

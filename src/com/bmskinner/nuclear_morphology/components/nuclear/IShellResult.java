@@ -43,6 +43,20 @@ public interface IShellResult extends Serializable, Loggable {
     
     public static final UUID RANDOM_SIGNAL_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     
+    
+    /**
+     * The types of shrinking that can be used to generate shells.
+     * An area shrinking will attempt to keep all shells at equal area.
+     * A radius shrinking will attempt to make shells evenly spaced from the centre
+     * @author bms41
+     * @since 1.13.8
+     *
+     */
+    public enum ShrinkType {
+        RADIUS, AREA;
+    }
+    
+    
     /**
      * The types of pixel value that can be stored
      * @author bms41
@@ -73,6 +87,12 @@ public interface IShellResult extends Serializable, Loggable {
     public enum Aggregation {
         BY_SIGNAL, BY_NUCLEUS;
     }
+    
+    /**
+     * Get the type of shrinking used to generate the shells
+     * @return
+     */
+    ShrinkType getType();
     
     /**
      * Get the pixel proportions in each shell

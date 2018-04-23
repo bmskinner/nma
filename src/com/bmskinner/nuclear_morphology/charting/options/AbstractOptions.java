@@ -28,6 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 
@@ -69,6 +70,7 @@ public abstract class AbstractOptions implements DisplayOptions {
 //    private CountType                type        = CountType.SIGNAL;
     private Aggregation agg = Aggregation.BY_NUCLEUS;
     private Normalisation norm = Normalisation.NONE;
+    private ShrinkType shrinkType = ShrinkType.AREA;
     private boolean isNormalised = false;
 
     /**
@@ -316,6 +318,15 @@ public abstract class AbstractOptions implements DisplayOptions {
 
     public void setNormalisation(Normalisation t) {
     	norm = t;
+    }
+    
+    @Override
+    public ShrinkType getShrinkType() {
+        return shrinkType;
+    }
+
+    public void setShrinkType(ShrinkType t) {
+    	shrinkType = t;
     }
     
     public boolean isNormalised(){

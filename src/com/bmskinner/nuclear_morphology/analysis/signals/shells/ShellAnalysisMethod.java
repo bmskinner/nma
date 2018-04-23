@@ -27,8 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -41,10 +39,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
-import com.bmskinner.nuclear_morphology.components.nuclear.DefaultShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.KeyedShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.RandomShellResult;
@@ -68,15 +66,16 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	public static final double MINIMUM_CIRCULARITY = 0.3;
 	
     private final int shells;
+    private final ShrinkType type;
 
 //    private int totalPixels = 0;
 
     private static Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
 
-    public ShellAnalysisMethod(IAnalysisDataset dataset, int shells) {
+    public ShellAnalysisMethod(IAnalysisDataset dataset, int shells, ShrinkType t) {
         super(dataset);
         this.shells = shells;
-
+        type = t;
     }
 
     @Override
@@ -98,7 +97,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         if (!collection.getSignalManager().hasSignals()) 
             return;
 
-        log("Performing shell analysis with " + shells + " shells...");
+        log("Performing "+type+" shell analysis with " + shells + " shells...");
 
         try {
             counters = new HashMap<>(0);
@@ -107,7 +106,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
                 if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                     continue;
-                counters.put(signalGroup, new KeyedShellResult(shells));
+                counters.put(signalGroup, new KeyedShellResult(shells, type));
             }
 
             // make the shells and measure the values
@@ -156,7 +155,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private void analyseNucleus(Nucleus n) {
 
             try {
-                shellDetector = new ShellDetector(n, shells);
+                shellDetector = new ShellDetector(n, shells, type);
             } catch (ShellAnalysisException e1) {
                 warn("Unable to make shells for " + n.getNameAndNumber());
                 stack("Error in shell detector", e1);
@@ -253,7 +252,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             long[] c = sr.getCounts();
             
             fine("Random dist: "+Arrays.toString(c));
-			RandomShellResult randomResult = new RandomShellResult(shells, c);
+			RandomShellResult randomResult = new RandomShellResult(shells, type, c);
 			
 			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
 			        .setShellResult(randomResult);
@@ -279,14 +278,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 counts[i] = 0;
             }
 
-            // Make a list of random points
-            double xCen = template.getBounds().getCenterX();
-            double yCen = template.getBounds().getCenterY();
-            double xMin = template.getBounds().getMinX();
-            double xMax = template.getBounds().getMaxX();
-            double yMin = template.getBounds().getMinY();
-            double yMax = template.getBounds().getMaxY();
-
             List<IPoint> list = new ArrayList<IPoint>();
             for (int i = 0; i < iterations; i++) {
                 list.add(createRandomPoint(template));
@@ -295,7 +286,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             // Find the shell for these points in the template
             try {
-                ShellDetector detector = new ShellDetector(template, shells);
+                ShellDetector detector = new ShellDetector(template, shells, type);
                 for (IPoint p : list) {
                     int shell = detector.findShell(p);
                     if(shell>=0) // -1 for point not found

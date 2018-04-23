@@ -44,8 +44,8 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregation;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -266,8 +266,10 @@ public class NuclearSignalDatasetCreator extends AbstractDatasetCreator<ChartOpt
             if (shellCount == 0) {
                 throw new ChartDatasetCreationException("Cannot make dataset for zero shells");
             }
+            
+            ShrinkType type = options.firstDataset().getCollection().getSignalManager().getShrinkType().orElse(ShrinkType.AREA);
 
-            c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount);
+            c = new ShellDetector(options.firstDataset().getCollection().getConsensus(), shellCount, type);
         } catch (ShellAnalysisException e) {
             stack("Error making shells in consensus", e);
             throw new ChartDatasetCreationException("Error making shells", e);

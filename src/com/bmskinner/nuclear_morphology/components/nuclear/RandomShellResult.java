@@ -25,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -38,6 +39,7 @@ public class RandomShellResult implements IShellResult{
     
     private static final long serialVersionUID = 1L;
     final int nShells;
+    final ShrinkType type;
     long[] counts;
 
     
@@ -45,11 +47,17 @@ public class RandomShellResult implements IShellResult{
      * Create with the given number of shells
      * @param nShells
      */
-    public RandomShellResult(int nShells, long[] counts){
+    public RandomShellResult(int nShells, ShrinkType type, long[] counts){
         if (nShells < 1) 
             throw new IllegalArgumentException("Shell count must be greater than 1");
         this.nShells = nShells;
         this.counts = counts;
+        this.type = type;
+    }
+    
+    @Override
+    public ShrinkType getType() {
+        return type;
     }
 
     @Override

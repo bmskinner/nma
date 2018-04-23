@@ -18,9 +18,20 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
@@ -29,9 +40,11 @@ import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -56,31 +69,22 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 
     @Override
     public void run() {
-        SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
-        JSpinner spinner = new JSpinner(sModel);
-
-        int option = JOptionPane.showOptionDialog(null, spinner, "Select number of shells",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-        if (option == JOptionPane.CANCEL_OPTION) {
-            // user hit cancel
-            this.cancel();
-            return;
-
-        } else if (option == JOptionPane.OK_OPTION) {
-
-            int shellCount = (Integer) spinner.getModel().getValue();
-            
-            if(! datasetParametersOk(shellCount)){
+    	
+    	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(mw, dataset);
+    	if(sd.isReadyToRun()) {
+    		
+    		int shellCount = sd.getShellCount();
+    		if(! datasetParametersOk(shellCount)){
             	this.cancel();
             	return;
             }
-
-            IAnalysisMethod m = new ShellAnalysisMethod(dataset, shellCount);
-            worker = new DefaultAnalysisWorker(m);
-
-            worker.addPropertyChangeListener(this);
-            ThreadManager.getInstance().submit(worker);
-        }
+    		    		
+    		IAnalysisMethod m = sd.getMethod();
+    		worker = new DefaultAnalysisWorker(m);
+    		worker.addPropertyChangeListener(this);
+    		ThreadManager.getInstance().submit(worker);
+    		
+    	}
     }
     
     /**
@@ -120,5 +124,102 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
     public void finished() {
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
         super.finished();
+    }
+    
+    
+    @SuppressWarnings("serial")
+    private class ShellAnalysisSetupDialog extends SubAnalysisSetupDialog {
+
+        private static final String DIALOG_TITLE = "Shell analysis options";
+        
+        private int nShells = ShellDetector.DEFAULT_SHELL_COUNT;
+        private ShrinkType type = ShrinkType.AREA;
+
+
+        protected JPanel headingPanel;
+        protected JPanel optionsPanel;
+        protected JPanel footerPanel;
+
+        public ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
+            this(mw, dataset, DIALOG_TITLE);
+        }
+        
+        public int getShellCount() {
+        	return nShells;
+        }
+
+        /**
+         * Constructor that does not make panel visible
+         * 
+         * @param mw
+         * @param title
+         */
+        protected ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
+            super(mw, dataset, title);
+            setDefaults();
+            createUI();
+            packAndDisplay();
+        }
+
+        protected JPanel createHeader() {
+
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            return panel;
+        }
+
+        @Override
+        public IAnalysisMethod getMethod() {
+        	return new ShellAnalysisMethod(dataset, nShells, type);
+        }
+
+        @Override
+        protected void createUI() {
+
+            contentPanel.setLayout(new BorderLayout());
+            contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+            setContentPane(contentPanel);
+
+
+            headingPanel = createHeader();
+            contentPanel.add(headingPanel, BorderLayout.NORTH);
+
+            footerPanel = createFooter();
+            contentPanel.add(footerPanel, BorderLayout.SOUTH);
+
+
+            optionsPanel = new JPanel();
+            GridBagLayout layout = new GridBagLayout();
+            optionsPanel.setLayout(layout);
+            
+            List<JLabel> labels = new ArrayList<JLabel>();
+            List<Component> fields = new ArrayList<Component>();
+            
+            JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
+            typeBox.setSelectedItem(ShrinkType.AREA);
+            typeBox.addActionListener(e -> type = (ShrinkType) typeBox.getSelectedItem());
+            
+            labels.add(new JLabel("Shrink method"));
+            fields.add(typeBox);
+            
+            
+            SpinnerNumberModel sModel = new SpinnerNumberModel(ShellDetector.DEFAULT_SHELL_COUNT, 2, 10, 1);
+            JSpinner spinner = new JSpinner(sModel);
+            spinner.addChangeListener(e-> nShells = (int) sModel.getValue());
+            
+            labels.add(new JLabel("Number of shells"));
+            fields.add(spinner);
+            
+            this.addLabelTextRows(labels, fields, layout, optionsPanel);
+            
+
+            contentPanel.add(optionsPanel, BorderLayout.CENTER);
+        }
+
+		@Override
+		protected void setDefaults() {
+			// TODO Auto-generated method stub
+			
+		}
     }
 }
