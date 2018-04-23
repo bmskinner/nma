@@ -194,7 +194,7 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
                     .append(n.getSourceFileName() + TAB)
                     .append(groupName + TAB)
                     .append(groupFolder + TAB)
-                    .append(n.getSignalCollection().getSourceFile(signalGroupId).getAbsolutePath() + TAB)
+                    .append(n.getSignalCollection().getSourceFile(signalGroupId).getName() + TAB)
                     .append(n.getSignalCollection().getSourceChannel(signalGroupId)+TAB)
                     .append(Aggregation.BY_NUCLEUS + TAB);
 
@@ -221,7 +221,7 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
                         .append(n.getSourceFileName() + TAB)
                         .append(groupName + TAB)
                         .append(groupFolder + TAB)
-                        .append(s.getSourceFile().getAbsolutePath() + TAB)
+                        .append(s.getSourceFile().getName() + TAB)
                         .append(s.getChannel() + TAB)
                         .append(Aggregation.BY_SIGNAL + TAB);
 
