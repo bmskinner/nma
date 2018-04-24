@@ -181,7 +181,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
  			}
         	 
         	 ISignalCollection signalCollection = n.getSignalCollection();
-        	 for (UUID id : signalCollection.getSignalGroupIDs()) {
+        	 for (UUID id : signalCollection.getSignalGroupIds()) {
 
         		 Optional<Color> col = dataset.getCollection().getSignalGroup(id).get().getGroupColour(); 
         		 an = an.annotateSignal(n, id, col.orElse(Color.YELLOW));	                 

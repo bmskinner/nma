@@ -728,7 +728,7 @@ public class DatasetConverter implements Loggable, Importer {
 
         fine("Copying signals for " + template.getNameAndNumber());
 
-        for (UUID signalGroup : template.getSignalCollection().getSignalGroupIDs()) {
+        for (UUID signalGroup : template.getSignalCollection().getSignalGroupIds()) {
 
             for (INuclearSignal s : template.getSignalCollection().getSignals(signalGroup)) {
 

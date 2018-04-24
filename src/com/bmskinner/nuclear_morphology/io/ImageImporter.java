@@ -88,28 +88,25 @@ public class ImageImporter implements Loggable, Importer {
      * are attached to exported images at later stages of analysis. This
      * prevents exported images from previous runs being analysed.
      *
-     * @param file
-     *            the File to check
+     * @param file the File to check
      * @return a true or false of whether the file passed checks
      */
     public static boolean fileIsImportable(File file) {
 
-        if (!file.isFile()) {
+        
+        if (!file.isFile())
             return false;
-        }
 
         String fileName = file.getName();
 
         for (String prefix : PREFIXES_TO_IGNORE) {
-            if (fileName.startsWith(prefix)) {
+            if (fileName.startsWith(prefix))
                 return false;
-            }
         }
 
         for (String fileType : IMPORTABLE_FILE_TYPES) {
-            if (fileName.endsWith(fileType)) {
+            if (fileName.endsWith(fileType))
                 return true;
-            }
         }
         return false;
     }

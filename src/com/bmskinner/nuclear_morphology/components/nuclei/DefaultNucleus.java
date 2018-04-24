@@ -254,7 +254,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     // RodentSpermNucleus
     public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 
-        for (UUID signalGroup : signalCollection.getSignalGroupIDs()) {
+        for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
 
@@ -499,7 +499,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     public void flipXAroundPoint(IPoint p) {
         super.flipXAroundPoint(p);
 
-        for (UUID id : signalCollection.getSignalGroupIDs()) {
+        for (UUID id : signalCollection.getSignalGroupIds()) {
             signalCollection.getSignals(id).stream().forEach(s -> s.flipXAroundPoint(p));
         }
 
@@ -512,7 +512,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
 
         if (angle != 0) {
 
-            for (UUID id : signalCollection.getSignalGroupIDs()) {
+            for (UUID id : signalCollection.getSignalGroupIds()) {
 
                 signalCollection.getSignals(id).parallelStream().forEach(s -> {
 

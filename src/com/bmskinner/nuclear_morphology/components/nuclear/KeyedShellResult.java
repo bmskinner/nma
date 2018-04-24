@@ -155,6 +155,11 @@ public class KeyedShellResult implements IShellResult {
     	
     	double[] other = expected.getProportions(agg, norm);
     	double[] exp = getExpected(agg, norm, other);
+    	
+    	for(double d : exp){
+            if(d<=0) // we can't do a chi square test if one of the values is zero
+                return 1;
+        }
 
     	ChiSquareTest test = new ChiSquareTest();
     	return test.chiSquare(exp, observed);
@@ -165,6 +170,11 @@ public class KeyedShellResult implements IShellResult {
     	 long[] observed   = getObserved(agg, norm);
     	 double[] other = expected.getProportions(agg, norm);
          double[] exp = getExpected(agg, norm, other);
+         
+         for(double d : exp){
+             if(d<=0) // we can't do a chi square test if one of the values is zero
+                 return 1;
+         }
 
     	 ChiSquareTest test = new ChiSquareTest();
     	 return test.chiSquareTest(exp, observed);

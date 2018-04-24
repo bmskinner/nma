@@ -105,7 +105,7 @@ public class ComponentListPanel extends AbstractCellDetailPanel implements ListS
             ISignalCollection signalCollection = n.getSignalCollection();
 
             // Add signals groups present
-            for (UUID signalGroupId : signalCollection.getSignalGroupIDs()) {
+            for (UUID signalGroupId : signalCollection.getSignalGroupIds()) {
 
                 if (signalCollection.hasSignal(signalGroupId)) {
 

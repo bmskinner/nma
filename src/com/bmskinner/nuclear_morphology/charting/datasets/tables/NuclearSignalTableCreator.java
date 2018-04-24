@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregat
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Normalisation;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.PairwiseSignalDistanceCollection;
+import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
@@ -504,7 +505,10 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 
         for (IAnalysisDataset d : options.getDatasets()) {
             
-            Optional<IShellResult> random = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult();
+            Optional<ISignalGroup> randomGroup = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID);
+            Optional<IShellResult> random = randomGroup.isPresent() ? 
+                    d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult() 
+                    : Optional.empty();
 
             for (UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()) {
 

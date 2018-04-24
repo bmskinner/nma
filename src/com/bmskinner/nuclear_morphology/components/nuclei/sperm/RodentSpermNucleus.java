@@ -604,7 +604,7 @@ public class RodentSpermNucleus extends SpermNucleus {
             // IJ.log(this.dumpInfo(BORDER_TAGS));
 
             // update signal angles with hook or hump side
-            for (UUID i : signalCollection.getSignalGroupIDs()) {
+            for (UUID i : signalCollection.getSignalGroupIds()) {
 
                 if (signalCollection.hasSignal(i)) {
 

@@ -179,7 +179,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
         }
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
 		// Make the first column, of names
-		for (UUID id : sc.getSignalGroupIDs()) {
+		for (UUID id : sc.getSignalGroupIds()) {
 
 		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 
@@ -201,7 +201,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 		// Make the subequent columns, one per signal
 		int col = 0;
 
-		for (UUID id : sc.getSignalGroupIDs()) {
+		for (UUID id : sc.getSignalGroupIds()) {
 
 		    String signalName = d.getCollection().getSignalGroup(id).get().getGroupName();
 

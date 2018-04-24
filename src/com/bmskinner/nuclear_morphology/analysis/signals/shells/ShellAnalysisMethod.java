@@ -50,6 +50,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
+import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 import ij.ImageStack;
 
@@ -67,8 +68,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 	
     private final int shells;
     private final ShrinkType type;
-
-//    private int totalPixels = 0;
 
     private static Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
 
@@ -166,7 +165,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
                 ImageStack nucleusStack = new ImageImporter(n.getSourceFile()).importToStack();
 
-                for (UUID signalGroup : n.getSignalCollection().getSignalGroupIDs()) {
+                for (UUID signalGroup : n.getSignalCollection().getSignalGroupIds()) {
 
                     if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                         continue;
@@ -190,7 +189,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
                 return;
 
             File sourceFile = n.getSignalCollection().getSourceFile(signalGroup);
-
+            
             if (sourceFile == null) 
                 return;
 
@@ -201,15 +200,14 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
-            long[] totalSignalIntensity  = shellDetector.findPixelIntensityPerShell(signalStack, signalChannel);
-//            long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(nucleusStack, n.getChannel());
-            long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(n);
+            long[] totalSignalIntensity  = shellDetector.findPixelIntensities(signalStack, signalChannel);
+            long[] totalCounterIntensity = shellDetector.findPixelIntensities(n);
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
 
             for (INuclearSignal s : signals) {
-                long[] countsInSignals = shellDetector.findPixelIntensityPerShell(s);
+                long[] countsInSignals = shellDetector.findPixelIntensities(s);
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal
             }
         }
@@ -308,7 +306,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
          * @param template
          * @return
          */
-        private IPoint createRandomPoint(CellularComponent template) {
+        private IPoint createRandomPoint(@NonNull CellularComponent template) {
 
             Rectangle2D r = template.getBounds();
 

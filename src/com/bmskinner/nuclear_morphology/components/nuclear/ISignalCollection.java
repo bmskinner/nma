@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -45,57 +47,42 @@ public interface ISignalCollection extends Serializable, Loggable {
     /**
      * Add a list of nuclear signals to the collection
      * 
-     * @param list
-     *            the signals
-     * @param groupID
-     *            the group id - this should be consistent across all nuclei in
-     *            a dataset
-     * @param sourceFile
-     *            the file the signals originated from
-     * @param sourceChannel
-     *            the channel the signals originated from
+     * @param list the signals
+     * @param groupID the group id - this should be consistent across all nuclei in a dataset
+     * @param sourceFile the file the signals originated from
+     * @param sourceChannel the channel the signals originated from
      */
-    void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel);
+    void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel);
 
-    Set<UUID> getSignalGroupIDs();
+    /**
+     * Get the signal group ids within the dataset
+     * @return
+     */
+    Set<UUID> getSignalGroupIds();
 
     /**
      * Change the id of the given signal group
      * 
-     * @param signalGroup
-     *            the original signal group ID
-     * @param newID
-     *            the new ID
+     * @param signalGroup the original signal group ID
+     * @param newID the new ID
      */
-    void updateSignalGroupID(UUID oldID, UUID newID);
-
-    /**
-     * Get the group number of a signal group in the collection.
-     * 
-     * @param signalGroup
-     * @return the group number, or zero if not present
-     */
-    int getSignalGroupNumber(UUID signalGroup);
+    void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID);
 
     /**
      * Add a single signal to the given signal group
      * 
-     * @param n
-     *            the signal
-     * @param signalGroup
-     *            the signal group
+     * @param n the signal
+     * @param signalGroup the signal group
      */
-    void addSignal(INuclearSignal n, UUID signalGroup);
+    void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup);
 
     /**
      * Append a list of signals to the given signal group
      * 
-     * @param list
-     *            the signals
-     * @param signalGroup
-     *            the signal group
+     * @param list the signals
+     * @param signalGroup the signal group
      */
-    void addSignals(List<INuclearSignal> list, UUID signalGroup);
+    void addSignals(@NonNull List<INuclearSignal> list, @NonNull UUID signalGroup);
 
     /**
      * Get all the signals in all signal groups, as a list of lists. Fetches the
@@ -109,11 +96,10 @@ public interface ISignalCollection extends Serializable, Loggable {
      * Get the signals in the given group. Fetches the actual signals, not a
      * copy
      * 
-     * @param signalGroup
-     *            the signal group
+     * @param signalGroup the signal group
      * @return a list of signals
      */
-    List<INuclearSignal> getSignals(UUID signalGroup);
+    List<INuclearSignal> getSignals(@NonNull UUID signalGroup);
 
     /**
      * Get all the signals in the nucleus. Fetches the actual signals, not a
@@ -127,30 +113,26 @@ public interface ISignalCollection extends Serializable, Loggable {
     /**
      * Get the file containing the signals in the given signal group
      * 
-     * @param signalGroup
-     *            the group id
+     * @param signalGroup the group id
      * @return the File with the signals
      */
-    File getSourceFile(UUID signalGroup);
+    File getSourceFile(@NonNull UUID signalGroup);
 
     /**
      * Update the source file for the given signal group
      * 
-     * @param signalGroup
-     *            the signal group id
-     * @param f
-     *            the new source file
+     * @param signalGroup the signal group id
+     * @param f the new source file
      */
-    void updateSourceFile(UUID signalGroup, File f);
+    void updateSourceFile(@NonNull UUID signalGroup, @NonNull File f);
 
     /**
      * Get the channel containing the signals in the given signal group
      * 
-     * @param signalGroup
-     *            the group id
+     * @param signalGroup the group id
      * @return the RGB channel with the signals (0 if greyscale)
      */
-    int getSourceChannel(UUID signalGroup);
+    int getSourceChannel(@NonNull UUID signalGroup);
 
     /**
      * Get the number of signal groups
@@ -169,29 +151,25 @@ public interface ISignalCollection extends Serializable, Loggable {
     /**
      * Check if the signal group contains signals in this collection
      * 
-     * @param signalGroup
-     *            the group id
-     * @return yes or no
+     * @param signalGroup the group id
+     * @return true if at least one signal is present in the group, false otherwise
      */
-    boolean hasSignal(UUID signalGroup);
+    boolean hasSignal(@NonNull UUID signalGroup);
 
     /**
      * Check if the signal group contains signals in this collection
      * 
-     * @param signalGroup
-     *            the group id
-     * @return yes or no
+     * @return true if at least one signal is present in any signal group, false otherwise
      */
     boolean hasSignal();
 
     /**
      * Get the total number of signals in a given group
      * 
-     * @param signalGroup
-     *            the group id
-     * @return the number of signals in the given group
+     * @param signalGroup the group id
+     * @return the number of signals in the group
      */
-    int numberOfSignals(UUID signalGroup);
+    int numberOfSignals(@NonNull UUID signalGroup);
 
     /**
      * Remove all signals from the collection
@@ -201,35 +179,29 @@ public interface ISignalCollection extends Serializable, Loggable {
     /**
      * Remove the given signal group from the collection
      * 
-     * @param signalGroup
-     *            the signal group ID
+     * @param signalGroup the signal group ID
      */
-    void removeSignals(UUID signalGroup);
+    void removeSignals(@NonNull UUID signalGroup);
 
     /**
      * Get the statistics of signals in a group
      * 
-     * @param stat
-     *            the statistic to fetch
-     * @param scale
-     *            the scale to fetch values at
-     * @param signalGroup
-     *            the signal group ID
+     * @param stat the statistic to fetch
+     * @param scale the scale to fetch values at
+     * @param signalGroup the signal group ID
      * @return the values from each signal in the group
      */
-    List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup);
+    List<Double> getStatistics(@NonNull PlottableStatistic stat, MeasurementScale scale, @NonNull UUID signalGroup);
 
     /**
      * Get the ImageJ image processor for the source image for signals in the
      * given group
      * 
-     * @param signalGroup
-     *            the signal group ID
+     * @param signalGroup the signal group ID
      * @return an image processor
-     * @throws UnloadableImageException
-     *             if the image cannot be loaded from file
+     * @throws UnloadableImageException if the image cannot be loaded from file
      */
-    ImageProcessor getImage(UUID signalGroup) throws UnloadableImageException;
+    ImageProcessor getImage(@NonNull UUID signalGroup) throws UnloadableImageException;
 
     /**
      * Calculate the pairwise distances between all signals in the nucleus
@@ -249,11 +221,9 @@ public interface ISignalCollection extends Serializable, Loggable {
      * groups. Each signal is considered only once. Hence a group with 4 signals
      * compared to a group with 3 signals will produce a list of 3 values.
      * 
-     * @param id1
-     *            the first signal group
-     * @param id2
-     *            the second signal group
+     * @param id1 the first signal group
+     * @param id2 the second signal group
      * @return a list of the pixel distances between paired signals
      */
-    List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2);
+    List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2);
 }

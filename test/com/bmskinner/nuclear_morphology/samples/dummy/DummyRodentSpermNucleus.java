@@ -80,7 +80,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		component = new DefaultRodentSpermNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
 	            POSITION , component_NUMBER);
 		nucleus = (Nucleus) component;
-		nucleus.offset(COM.getX(), COM.getY());
+//		nucleus.offset(COM.getX(), COM.getY());
 		
         initialise(PROFILE_WINDOW);	    
         setStatistic(PlottableStatistic.AREA,     AREA);

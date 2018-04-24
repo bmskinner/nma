@@ -320,7 +320,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         double xOffset = centreOfMass.getX() - getCentreOfMass().getX();
         double yOffset = centreOfMass.getY() - getCentreOfMass().getY();
 
-        for (UUID id : signalCollection.getSignalGroupIDs()) {
+        for (UUID id : signalCollection.getSignalGroupIds()) {
 
             signalCollection.getSignals(id).parallelStream().forEach(s -> {
 
@@ -481,7 +481,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
     // RodentSpermNucleus
     public void calculateSignalAnglesFromPoint(IBorderPoint p) {
 
-        for (UUID signalGroup : signalCollection.getSignalGroupIDs()) {
+        for (UUID signalGroup : signalCollection.getSignalGroupIds()) {
 
             if (signalCollection.hasSignal(signalGroup)) {
 
@@ -1167,7 +1167,7 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
             // log(this.getNameAndNumber()+": Rotating signals");
 
-            for (UUID id : signalCollection.getSignalGroupIDs()) {
+            for (UUID id : signalCollection.getSignalGroupIds()) {
 
                 signalCollection.getSignals(id).parallelStream().forEach(s -> {
 

@@ -71,7 +71,7 @@ public class SignalCollection implements ISignalCollection {
      */
     public SignalCollection(ISignalCollection s) {
 
-        for (UUID group : s.getSignalGroupIDs()) {
+        for (UUID group : s.getSignalGroupIds()) {
 
             // String groupName = s.names.get(group);
             int channel = s.getSourceChannel(group);
@@ -114,7 +114,7 @@ public class SignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
      */
     @Override
-    public Set<UUID> getSignalGroupIDs() {
+    public Set<UUID> getSignalGroupIds() {
         return collection.keySet();
     }
 
@@ -126,7 +126,7 @@ public class SignalCollection implements ISignalCollection {
      * java.util.UUID)
      */
     @Override
-    public void updateSignalGroupID(UUID oldID, UUID newID) {
+    public void updateSignalGroupId(UUID oldID, UUID newID) {
 
         if (!collection.containsKey(oldID)) {
             // The nucleus does not have the old id - skip
@@ -150,27 +150,6 @@ public class SignalCollection implements ISignalCollection {
         sourceChannels.put(newID, sourceChannel);
         // names.put( newID, name);
 
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#getSignalGroupNumber(java.util.UUID)
-     */
-    @Override
-    public int getSignalGroupNumber(UUID signalGroup) {
-        int i = 0;
-        for (UUID id : collection.keySet()) {
-            i++;
-            if (id.equals(signalGroup)) {
-                return i;
-            }
-            // if(collection.get(id).equals(signalGroup)){
-            // return i;
-            // }
-        }
-        return i;
     }
 
     /*
@@ -224,7 +203,7 @@ public class SignalCollection implements ISignalCollection {
     @Override
     public List<List<INuclearSignal>> getSignals() {
         ArrayList<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
-        for (UUID signalGroup : this.getSignalGroupIDs()) {
+        for (UUID signalGroup : this.getSignalGroupIds()) {
             result.add(getSignals(signalGroup));
         }
         return result;
@@ -238,7 +217,7 @@ public class SignalCollection implements ISignalCollection {
     @Override
     public List<INuclearSignal> getAllSignals() {
         List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
-        for (UUID signalGroup : this.getSignalGroupIDs()) {
+        for (UUID signalGroup : this.getSignalGroupIds()) {
             result.addAll(getSignals(signalGroup));
         }
         return result;
@@ -702,11 +681,11 @@ public class SignalCollection implements ISignalCollection {
 
         List<PairwiseSignalDistanceValue> result = new ArrayList<PairwiseSignalDistanceValue>();
 
-        for (UUID id1 : this.getSignalGroupIDs()) {
+        for (UUID id1 : this.getSignalGroupIds()) {
 
             List<INuclearSignal> signalList1 = this.getSignals(id1);
 
-            for (UUID id2 : this.getSignalGroupIDs()) {
+            for (UUID id2 : this.getSignalGroupIds()) {
 
                 if (id1.equals(id2)) {
                     continue;

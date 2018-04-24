@@ -295,7 +295,7 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
 
             if (n.getSignalCollection().hasSignal()) {
 
-                for (UUID id : n.getSignalCollection().getSignalGroupIDs()) {
+                for (UUID id : n.getSignalCollection().getSignalGroupIds()) {
 
                     n.getSignalCollection().getSignals(id).parallelStream().forEach(s -> {
 

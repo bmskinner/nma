@@ -150,7 +150,7 @@ public class ShellDetector extends Detector {
      * @param signal
      * @return
      */
-    public long[] findPixelCountPerShell(@NonNull CellularComponent component) {
+    public long[] findPixelCounts(@NonNull CellularComponent component) {
         long[] counts = makeZeroArray();
         for (int i=0; i<shells.size(); i++) {
             Shell shell = shells.get(i);
@@ -164,7 +164,7 @@ public class ShellDetector extends Detector {
      * 
      * @return
      */
-    public long[] findPixelCountPerShell() {
+    public long[] findPixelCounts() {
         long[] result = makeZeroArray();
         for (int i=0; i<shells.size(); i++) {
             Shell shell = shells.get(i);
@@ -179,7 +179,7 @@ public class ShellDetector extends Detector {
      * @param signal the component to measure.
      * @return
      */
-    public long[] findPixelIntensityPerShell(@NonNull CellularComponent component) {
+    public long[] findPixelIntensities(@NonNull CellularComponent component) {
         long[] result = makeZeroArray();
         try {
             for (int i = 0; i < shells.size(); i++) {
@@ -204,7 +204,7 @@ public class ShellDetector extends Detector {
      * @param channel the RGB channel in the stack
      * @return
      */
-    public long[] findPixelIntensityPerShell(@NonNull ImageStack st, int channel) {
+    public long[] findPixelIntensities(@NonNull ImageStack st, int channel) {
         long[] result = makeZeroArray();
         for (int i = 0; i < shells.size(); i++) {
             Shell shell = shells.get(i);
@@ -218,6 +218,12 @@ public class ShellDetector extends Detector {
      * 
      */
     
+    /**
+     * Assuming each interior shell is a subset of the preceding shell,
+     * subtract the interior values to leave only the counts for the shell. 
+     * @param array
+     * @return
+     */
     private long[] correctNestedIntensities(long[] array) {
 
         if (array.length == 0)

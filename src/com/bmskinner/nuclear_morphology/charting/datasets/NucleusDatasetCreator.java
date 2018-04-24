@@ -1552,7 +1552,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         finest("Attempting to create signal outlines for " + nucleus.getNameAndNumber());
 
-        for (UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIDs()) {
+        for (UUID signalGroup : nucleus.getSignalCollection().getSignalGroupIds()) {
 
             if (!nucleus.getSignalCollection().hasSignal(signalGroup)) {
                 continue;

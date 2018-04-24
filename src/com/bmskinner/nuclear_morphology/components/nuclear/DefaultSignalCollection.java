@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
@@ -61,9 +63,9 @@ public class DefaultSignalCollection implements ISignalCollection {
      * 
      * @param s
      */
-    public DefaultSignalCollection(ISignalCollection s) {
+    public DefaultSignalCollection(@NonNull ISignalCollection s) {
 
-        for (UUID group : s.getSignalGroupIDs()) {
+        for (UUID group : s.getSignalGroupIds()) {
 
             List<INuclearSignal> list = new ArrayList<INuclearSignal>();
 
@@ -83,7 +85,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * java.util.UUID, java.io.File, int)
      */
     @Override
-    public void addSignalGroup(List<INuclearSignal> list, UUID groupID, File sourceFile, int sourceChannel) {
+    public void addSignalGroup(@NonNull List<INuclearSignal> list, @NonNull UUID groupID, @NonNull File sourceFile, int sourceChannel) {
         if (list == null || Integer.valueOf(sourceChannel) == null || sourceFile == null || groupID == null) {
             throw new IllegalArgumentException("Signal list or channel is null");
         }
@@ -97,7 +99,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#getSignalGroupIDs()
      */
     @Override
-    public Set<UUID> getSignalGroupIDs() {
+    public Set<UUID> getSignalGroupIds() {
         return collection.keySet();
     }
 
@@ -109,42 +111,15 @@ public class DefaultSignalCollection implements ISignalCollection {
      * java.util.UUID)
      */
     @Override
-    public void updateSignalGroupID(UUID oldID, UUID newID) {
+    public void updateSignalGroupId(@NonNull UUID oldID, @NonNull UUID newID) {
 
-        if (!collection.containsKey(oldID)) {
-            // The nucleus does not have the old id - skip
+        if (!collection.containsKey(oldID))
             return;
-        }
 
         List<INuclearSignal> list = collection.get(oldID);
 
-        // Remove the old values
         collection.remove(oldID);
-
-        // Insert the new values
         collection.put(newID, list);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.nuclear.ISignalCollection#getSignalGroupNumber(java.util.UUID)
-     */
-    @Override
-    public int getSignalGroupNumber(UUID signalGroup) {
-        int i = 0;
-        for (UUID id : collection.keySet()) {
-            i++;
-            if (id.equals(signalGroup)) {
-                return i;
-            }
-
-            // if(collection.get(id).equals(signalGroup)){
-            // return i;
-            // }
-        }
-        return i;
     }
 
     /*
@@ -154,13 +129,11 @@ public class DefaultSignalCollection implements ISignalCollection {
      * NuclearSignal, java.util.UUID)
      */
     @Override
-    public void addSignal(INuclearSignal n, UUID signalGroup) {
-        if (signalGroup == null) {
+    public void addSignal(@NonNull INuclearSignal n, @NonNull UUID signalGroup) {
+        if (signalGroup == null)
             throw new IllegalArgumentException("Group is null");
-        }
 
         if (collection.get(signalGroup) == null) {
-            // add new list when not present
             List<INuclearSignal> list = new ArrayList<INuclearSignal>();
             collection.put(signalGroup, list);
         }
@@ -174,31 +147,15 @@ public class DefaultSignalCollection implements ISignalCollection {
      * java.util.UUID)
      */
     @Override
-    public void addSignals(List<INuclearSignal> list, UUID signalGroup) {
-        if (list == null) {
+    public void addSignals(@NonNull List<INuclearSignal> list, @NonNull UUID signalGroup) {
+        if (list == null)
             throw new IllegalArgumentException("Signal is null");
-        }
-        if (signalGroup == null) {
+
+        if (signalGroup == null)
             throw new IllegalArgumentException("Group is null");
-        }
+        
         collection.get(signalGroup).addAll(list);
     }
-
-    /**
-     * Append a list of signals to the given signal group
-     * 
-     * @param list
-     *            the signals
-     * @param signalGroupName
-     *            the signal group name
-     */
-    // public void addSignals(List<NuclearSignal> list, String signalGroupName){
-    // if(list==null){
-    // throw new IllegalArgumentException("Signal or group is null");
-    // }
-    // checkSignalGroup(signalGroupName);
-    // this.addSignals(list, names.get(signalGroupName));
-    // }
 
     /*
      * (non-Javadoc)
@@ -208,7 +165,7 @@ public class DefaultSignalCollection implements ISignalCollection {
     @Override
     public List<List<INuclearSignal>> getSignals() {
         List<List<INuclearSignal>> result = new ArrayList<List<INuclearSignal>>(0);
-        for (UUID signalGroup : this.getSignalGroupIDs()) {
+        for (UUID signalGroup : this.getSignalGroupIds()) {
             result.add(getSignals(signalGroup));
         }
         return result;
@@ -222,7 +179,7 @@ public class DefaultSignalCollection implements ISignalCollection {
     @Override
     public List<INuclearSignal> getAllSignals() {
         List<INuclearSignal> result = new ArrayList<INuclearSignal>(0);
-        for (UUID signalGroup : this.getSignalGroupIDs()) {
+        for (UUID signalGroup : this.getSignalGroupIds()) {
             result.addAll(getSignals(signalGroup));
         }
         return result;
@@ -234,7 +191,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#getSignals(java.util.UUID)
      */
     @Override
-    public List<INuclearSignal> getSignals(UUID signalGroup) {
+    public List<INuclearSignal> getSignals(@NonNull UUID signalGroup) {
         // checkSignalGroup(signalGroup);
         if (this.hasSignal(signalGroup)) {
             return this.collection.get(signalGroup);
@@ -249,7 +206,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#getSourceFile(java.util.UUID)
      */
     @Override
-    public File getSourceFile(UUID signalGroup) {
+    public File getSourceFile(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
 
             List<INuclearSignal> list = collection.get(signalGroup);
@@ -271,7 +228,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * java.io.File)
      */
     @Override
-    public void updateSourceFile(UUID signalGroup, File f) {
+    public void updateSourceFile(@NonNull UUID signalGroup, @NonNull File f) {
 
         for (INuclearSignal s : collection.get(signalGroup)) {
             s.setSourceFile(f);
@@ -285,7 +242,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * components.nuclear.ISignalCollection#getSourceChannel(java.util.UUID)
      */
     @Override
-    public int getSourceChannel(UUID signalGroup) {
+    public int getSourceChannel(@NonNull UUID signalGroup) {
         if (collection.containsKey(signalGroup)) {
 
             List<INuclearSignal> list = collection.get(signalGroup);
@@ -330,7 +287,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#hasSignal(java.util.UUID)
      */
     @Override
-    public boolean hasSignal(UUID signalGroup) {
+    public boolean hasSignal(@NonNull UUID signalGroup) {
         if (signalGroup == null) {
             throw new IllegalArgumentException("Signal group is null");
         }
@@ -359,10 +316,9 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#numberOfSignals(java.util.UUID)
      */
     @Override
-    public int numberOfSignals(UUID signalGroup) {
-        if (signalGroup == null) {
+    public int numberOfSignals(@NonNull UUID signalGroup) {
+        if (signalGroup == null)
             return 0;
-        }
 
         if (this.hasSignal(signalGroup)) {
             return collection.get(signalGroup).size();
@@ -387,7 +343,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#removeSignals(java.util.UUID)
      */
     @Override
-    public void removeSignals(UUID signalGroup) {
+    public void removeSignals(@NonNull UUID signalGroup) {
         collection.remove(signalGroup);
     }
 
@@ -399,7 +355,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * components.generic.MeasurementScale, java.util.UUID)
      */
     @Override
-    public List<Double> getStatistics(PlottableStatistic stat, MeasurementScale scale, UUID signalGroup) {
+    public List<Double> getStatistics(@NonNull PlottableStatistic stat, MeasurementScale scale, @NonNull UUID signalGroup) {
         List<INuclearSignal> list = getSignals(signalGroup);
         List<Double> result = new ArrayList<Double>(0);
         for (int i = 0; i < list.size(); i++) {
@@ -414,7 +370,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      * @see components.nuclear.ISignalCollection#getImage(java.util.UUID)
      */
     @Override
-    public ImageProcessor getImage(final UUID signalGroup) throws UnloadableImageException {
+    public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
 
         if (signalGroup == null) {
             throw new UnloadableImageException("Signal group is null");
@@ -499,7 +455,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 
         Set<UUID> completeIDs = new HashSet<UUID>();
 
-        for (UUID id1 : this.getSignalGroupIDs()) {
+        for (UUID id1 : this.getSignalGroupIds()) {
 
             if (!this.hasSignal(id1)) {
                 continue;
@@ -507,7 +463,7 @@ public class DefaultSignalCollection implements ISignalCollection {
 
             List<INuclearSignal> signalList1 = this.getSignals(id1);
 
-            for (UUID id2 : this.getSignalGroupIDs()) {
+            for (UUID id2 : this.getSignalGroupIds()) {
 
                 if (id1.equals(id2)) {
                     continue;
@@ -557,7 +513,7 @@ public class DefaultSignalCollection implements ISignalCollection {
      *            the second signal group
      * @return a list of the pixel distances between paired signals
      */
-    public List<Colocalisation<INuclearSignal>> calculateColocalisation(UUID id1, UUID id2) {
+    public List<Colocalisation<INuclearSignal>> calculateColocalisation(@NonNull UUID id1, @NonNull UUID id2) {
 
         if (id1.equals(id2)) {
             throw new IllegalArgumentException("Signal IDs are the same");
@@ -583,8 +539,8 @@ public class DefaultSignalCollection implements ISignalCollection {
      *            the measurement scale
      * @return a list of best colocalising signals
      */
-    private List<Colocalisation<INuclearSignal>> findColocalisingSignals(Set<INuclearSignal> d1,
-            Set<INuclearSignal> d2) {
+    private List<Colocalisation<INuclearSignal>> findColocalisingSignals(@NonNull Set<INuclearSignal> d1,
+            @NonNull Set<INuclearSignal> d2) {
 
         List<Colocalisation<INuclearSignal>> result = new ArrayList<Colocalisation<INuclearSignal>>();
 

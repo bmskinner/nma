@@ -160,21 +160,6 @@ public class SignalManager implements Loggable {
         return g.isPresent() ? g.get().getGroupName() : "";
     }
 
-    /**
-     * Get the signal group number
-     * @param signalGroupId the signal group
-     * @return
-     */
-    public int getSignalGroupNumber(@NonNull final UUID signalGroupId) {
-        int result = 0;
-        for (Nucleus n : collection.getNuclei()) {
-            if (n.getSignalCollection().hasSignal(signalGroupId)) {
-                result = n.getSignalCollection().getSignalGroupNumber(signalGroupId);
-            }
-        }
-        return result;
-    }
-
     public int getSignalChannel(@NonNull final UUID signalGroupId) {
     	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
         return g.isPresent() ? g.get().getChannel() : -1;
@@ -233,7 +218,7 @@ public class SignalManager implements Loggable {
             return;
 
         for (Nucleus n : collection.getNuclei()) {
-            n.getSignalCollection().updateSignalGroupID(oldID, newID);
+            n.getSignalCollection().updateSignalGroupId(oldID, newID);
         }
 
         // the group the signals are currently in
