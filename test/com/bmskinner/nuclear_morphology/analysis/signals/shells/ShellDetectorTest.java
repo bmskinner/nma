@@ -24,8 +24,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.awt.Shape;
 import java.awt.geom.Path2D;
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +35,7 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -47,12 +50,15 @@ import ij.process.ImageProcessor;
 
 public class ShellDetectorTest {
     
+	private static final UUID signalGroup = UUID.fromString("00000000-0000-0000-0000-100000000001");
     private ShellDetector sd;
     private Nucleus testNucleus;
+    private INuclearSignal testSignal;
 
     @Before
     public void setUp() throws Exception {
     	testNucleus = createMockNucleus(400);
+    	testSignal = createMockSignal(400);
     }
     
     private Nucleus createMockNucleus(int diameter) throws UnloadableImageException {
@@ -60,8 +66,25 @@ public class ShellDetectorTest {
     	ImageProcessor ip = createRoundImage(r, diameter+100);
     	Nucleus n = mock(Nucleus.class);
     	when(n.toRoi()).thenReturn(r);
-    	when(n.toOriginalPolygon()).thenReturn(r.getFloatPolygon());
+    	when(n.toOriginalPolygon()).thenReturn(r.getFloatPolygon());    	
+    	when(n.toOriginalShape()).thenReturn(createShape(r));
+    	when(n.getBounds()).thenReturn(r.getBounds());
+    	when(n.getImage()).thenReturn(ip);
+    	return n;
+    }
+    
+    private INuclearSignal createMockSignal(int diameter) throws UnloadableImageException {
     	
+    	INuclearSignal s = mock(INuclearSignal.class);
+    	Roi signalRoi = new OvalRoi(diameter/3-20, diameter/3, 60, 60);
+    	ImageProcessor ip = createRoundImage(signalRoi, diameter+100);
+    	when(s.toRoi()).thenReturn(signalRoi);
+    	when(s.toOriginalShape()).thenReturn(createShape(signalRoi));
+    	when(s.getImage()).thenReturn(ip);
+    	return s;
+    }
+    
+    private Shape createShape(Roi r) {
     	float[] xpoints = r.getFloatPolygon().xpoints;
     	float[] ypoints = r.getFloatPolygon().ypoints;
     	Path2D.Double path = new Path2D.Double();
@@ -70,11 +93,7 @@ public class ShellDetectorTest {
     		path.lineTo(xpoints[i], ypoints[i]);
     	}
     	path.closePath();
-    	
-    	when(n.toOriginalShape()).thenReturn(path);
-    	when(n.getBounds()).thenReturn(r.getBounds());
-    	when(n.getImage()).thenReturn(ip);
-    	return n;
+    	return path;
     }
     
     private ImageProcessor createRoundImage(Roi r, int diameter) {
@@ -202,12 +221,23 @@ public class ShellDetectorTest {
         long[] exp = {44572*255, 35388*255, 24796*255, 15492*255, 5428*255 };
         assertTrue(testEquals(exp, obs));
     }
-
-    @Test
-    public void testFindPixelIntensityPerShellImageStackInt() {
-        fail("Not yet implemented");
-    }
     
+    @Test
+    public void testFindPixelIntensityPerShellCellularComponentWorksForSignals() throws ComponentCreationException, ShellAnalysisException, UnloadableImageException, InterruptedException {
+    	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
+        long[] obs = sd.findPixelIntensities(testSignal);
+        
+        ImageProcessor ip = testSignal.getImage();
+    	ip.setColor(128);
+    	ip.setLineWidth(2);
+    	for(Shell s : sd.getShells()) {
+    		ip.draw(s.toRoi());
+    	}
+    	showImage("Signals", ip);
+        long[] exp = {0, 0, 0, 0, 0 };
+        assertTrue(testEquals(exp, obs));
+    }
+
     private boolean testEquals(long[] exp, long[ ]obs){
         assertEquals(exp.length, obs.length);
         for(int i=0; i<obs.length; i++) {
