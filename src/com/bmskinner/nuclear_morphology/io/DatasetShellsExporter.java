@@ -81,21 +81,6 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
     }
     
     /**
-     * Export stats from the dataset to a file
-     * 
-     * @param d
-     */
-    private void export(@NonNull IAnalysisDataset d) {
-        log(EXPORT_MESSAGE);
-;
-        StringBuilder outLine = new StringBuilder();
-        writeHeader(outLine);
-        append(d, outLine);
-        IJ.append(outLine.toString(), exportFile.getAbsolutePath());
-        log("Exported stats to " + exportFile.getAbsolutePath());
-    }
-
-    /**
      * Export stats from all datasets in the list to the same file
      * 
      * @param list
@@ -106,7 +91,7 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
         StringBuilder outLine = new StringBuilder();
         writeHeader(outLine);
 
-        for (IAnalysisDataset d : list) {
+        for (@NonNull IAnalysisDataset d : list) {
             append(d, outLine);
             fireProgressEvent();
         }
@@ -165,11 +150,11 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
     private void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) {
         
         
-        for(UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
+        for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
             String groupFolder = signalGroup.getFolder().getAbsolutePath();
-            int groupChannel   = signalGroup.getChannel();
+//            int groupChannel   = signalGroup.getChannel();
             
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
@@ -246,9 +231,6 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
         }
     }
     
-    private void appendSignalStats(@NonNull StringBuilder outLine, @NonNull IAnalysisDataset d, @NonNull Nucleus n, @NonNull INuclearSignal s){
-        
-    }
     
     /**
      * Find the maximum number of shells within the datasets

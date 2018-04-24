@@ -17,51 +17,33 @@
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
 
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.analysis.signals.shells;
+
+import static org.junit.Assert.*;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileOffsetter.ProfileOffsetException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 
-
-public class ProfileOffsetterTest {
+public class ShellAnalysisMethodTest {
     
-    private static IAnalysisDataset d;
-    
-    @Rule
-    public final ExpectedException exception = ExpectedException.none();
+    private ShellAnalysisMethod m;
+    private IAnalysisDataset d;
+    private static final int DEFAULT_SHELL_COUNT = 5;
     
     @Before
-    public void init() {
-        try {
-            d = SampleDatasetReader.openTestRodentDataset();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    
-    @Test
-    public void testProfileOffsetter() {
-        ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-    }
-   
-    @Test
-    public void testAssignBorderTagToNucleiViaFrankenProfile() throws ProfileOffsetException {
-        ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        p.assignBorderTagToNucleiViaFrankenProfile(Tag.ORIENTATION_POINT);
+    public void setUp() throws Exception{
+        d = SampleDatasetReader.openTestRodentDataset();  
     }
 
     @Test
-    public void testReCalculateVerticals() throws ProfileOffsetException {
-        ProfileOffsetter p = new ProfileOffsetter(d.getCollection());
-        p.reCalculateVerticals();
-
+    public void testAreaMethodOnRodentDatasetWithNoSignals() throws Exception {
+        m = new ShellAnalysisMethod(d, DEFAULT_SHELL_COUNT, ShrinkType.AREA);
+        m.call();
     }
 
 }

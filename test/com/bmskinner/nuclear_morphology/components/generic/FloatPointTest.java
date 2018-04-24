@@ -3,16 +3,16 @@
  */
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.geom.Point2D;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import com.bmskinner.nuclear_morphology.components.generic.FloatPoint;
-import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 /**
  * @author ben
@@ -20,10 +20,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  */
 public class FloatPointTest {
     
-    private static final IPoint CENTRE_POINT = new FloatPoint(0, 0);
-    private static final IPoint POINT_10x_10y = new FloatPoint(10, 10);
-    private static final IPoint POINT_n10x_n10y = new FloatPoint(-10, -10);
-    private static final IPoint POINT_0x_10y = new FloatPoint(0, 10);
+    private static final @NonNull IPoint CENTRE_POINT = new FloatPoint(0, 0);
+    private static final @NonNull IPoint POINT_10x_10y = new FloatPoint(10, 10);
+    private static final @NonNull IPoint POINT_n10x_n10y = new FloatPoint(-10, -10);
+    private static final @NonNull IPoint POINT_0x_10y = new FloatPoint(0, 10);
 	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -106,13 +106,6 @@ public class FloatPointTest {
 		assertEquals(POINT_10x_10y, f);
 	}
 
-	@Test
-	public void testSetExceptsOnNull() {
-	    FloatPoint f = new FloatPoint(CENTRE_POINT);
-	    exception.expect(IllegalArgumentException.class);
-	    f.set(null);
-	}
-
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#getLengthTo(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
@@ -122,11 +115,6 @@ public class FloatPointTest {
 	    assertEquals(10, CENTRE_POINT.getLengthTo(f), 0.000001);
 	}
 	
-	@Test
-	public void testGetLengthToExceptsOnNull() {
-	    exception.expect(IllegalArgumentException.class);
-	    CENTRE_POINT.getLengthTo(null);
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#overlaps(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
@@ -137,13 +125,7 @@ public class FloatPointTest {
 	    FloatPoint f2 = new FloatPoint(10.77777, 11.888888);
 	    assertTrue(f1.overlaps(f2));
 	}
-	
-	@Test
-	public void testOverlapsExceptsOnNull() {
-	    exception.expect(IllegalArgumentException.class);
-	    CENTRE_POINT.overlaps(null);
-	}
-	
+		
 	@Test
     public void testOverlapsReturnsTrueOnIntX() {
         FloatPoint f1 = new FloatPoint(11.33333, 11.888888);
@@ -186,11 +168,6 @@ public class FloatPointTest {
 	    assertFalse(CENTRE_POINT.isAbove(CENTRE_POINT));
 	}
 
-	@Test
-	public void testIsAboveExceptsOnNull() {
-	    exception.expect(IllegalArgumentException.class);
-	    CENTRE_POINT.isAbove(null);
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isBelow(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
@@ -204,12 +181,6 @@ public class FloatPointTest {
     @Test
     public void testIsBelowReturnsFalseOnSelf() {
         assertFalse(CENTRE_POINT.isBelow(CENTRE_POINT));
-    }
-
-    @Test
-    public void testIsBelowExceptsOnNull() {
-        exception.expect(IllegalArgumentException.class);
-        CENTRE_POINT.isBelow(null);
     }
 
 	/**
@@ -226,12 +197,6 @@ public class FloatPointTest {
         assertFalse(CENTRE_POINT.isLeftOf(CENTRE_POINT));
     }
 
-    @Test
-    public void testIsLeftOfExceptsOnNull() {
-        exception.expect(IllegalArgumentException.class);
-        CENTRE_POINT.isLeftOf(null);
-    }
-
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#isRightOf(com.bmskinner.nuclear_morphology.components.generic.IPoint)}.
 	 */
@@ -244,12 +209,6 @@ public class FloatPointTest {
     @Test
     public void testIsRightOfReturnsFalseOnSelf() {
         assertFalse(CENTRE_POINT.isRightOf(CENTRE_POINT));
-    }
-
-    @Test
-    public void testIsRightOfExceptsOnNull() {
-        exception.expect(IllegalArgumentException.class);
-        CENTRE_POINT.isRightOf(null);
     }
 
 	/**
@@ -286,12 +245,6 @@ public class FloatPointTest {
         assertFalse(f1.overlapsPerfectly(f2));
     }
 	
-	@Test
-	public void testOverlapsPerfectlyExceptsOnNull() {
-	    exception.expect(IllegalArgumentException.class);
-	    CENTRE_POINT.overlapsPerfectly(null);
-	}
-
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatPoint#toPoint2D()}.
 	 */
@@ -365,21 +318,7 @@ public class FloatPointTest {
 		angle = CENTRE_POINT.findAngle(d, f);
 		assertEquals(exp, angle, 0);
 	}
-	
-	@Test
-	public void testFindAngleExceptsOnNullPoint1(){
-	    IPoint f = new FloatPoint(10, -10);
-	    exception.expect(IllegalArgumentException.class);
-	    CENTRE_POINT.findAngle(null, f);
-	}
-	
-	@Test
-    public void testFindAngleExceptsOnNullPoint2(){
-        IPoint f = new FloatPoint(10, -10);
-        exception.expect(IllegalArgumentException.class);
-        CENTRE_POINT.findAngle(f, null);
-    }
-	
+			
 	@Test
 	public void testMinusIPoint(){
 	    IPoint test = POINT_10x_10y.minus(new FloatPoint(5, 5));
@@ -388,22 +327,10 @@ public class FloatPointTest {
 	}
 	
 	@Test
-    public void testMinusIPointExceptsOnNull(){
-	    exception.expect(IllegalArgumentException.class);
-        POINT_10x_10y.minus(null);
-    }
-	
-	@Test
     public void testPlusIPoint(){
         IPoint test = POINT_10x_10y.plus(new FloatPoint(5, 5));
         IPoint exp = new FloatPoint(15, 15);
         assertEquals(exp, test);
-    }
-    
-    @Test
-    public void testPlusIPointExceptsOnNull(){
-        exception.expect(IllegalArgumentException.class);
-        POINT_10x_10y.plus(null);
     }
     
     @Test

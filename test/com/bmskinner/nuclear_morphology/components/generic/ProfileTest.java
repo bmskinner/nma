@@ -98,12 +98,6 @@ public class ProfileTest {
 		}		
 	}
 	
-	@Test
-    public void testFloatProfileIProfileExceptsOnNullProfile() {
-        exception.expect(IllegalArgumentException.class);
-        new FloatProfile( (IProfile)null);
-    }
-
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.FloatProfile#FloatProfile(float, int)}.
 	 */
@@ -213,13 +207,7 @@ public class ProfileTest {
 	    int index = p1.getIndexOfMax(b);
 	    assertEquals( expected , index);
 	}
-	
-	@Test
-    public void testGetIndexOfMaxBooleanProfileExceptsOnNullProfile() throws ProfileException{
-	    exception.expect(IllegalArgumentException.class);
-	    profile.getIndexOfMax(null);
-	}
-	
+		
 	@Test
     public void testGetIndexOfMaxBooleanProfileExceptsOnAllFalseProfile() throws ProfileException{
 	    BooleanProfile b = new BooleanProfile(data.length, false);
@@ -322,13 +310,7 @@ public class ProfileTest {
 	    assertEquals( expected , index);
 
 	}
-	
-	@Test
-    public void testGetIndexOfMinBooleanProfileExceptsOnNullProfile() throws ProfileException{
-        exception.expect(IllegalArgumentException.class);
-        profile.getIndexOfMin(null);
-    }
-    
+	    
     @Test
     public void testGetIndexOfMinBooleanProfileExceptsOnAllFalseProfile() throws ProfileException{
         BooleanProfile b = new BooleanProfile(data.length, false);
@@ -737,12 +719,7 @@ public class ProfileTest {
             assertEquals(data[i], p.get(i), 0);
         }
 	}
-	
-	@Test
-    public void testGetSubregionIBorderSegmentExceptsOnNullSegment() throws ProfileException{
-	    exception.expect(IllegalArgumentException.class);
-	    profile.getSubregion(null);
-	}
+
 		
 	@Test
     public void testGetSubregionIBorderSegmentExceptsOnSegmentOutOfUpperBounds() throws ProfileException{
@@ -1129,11 +1106,6 @@ public class ProfileTest {
 		
 	}
 	
-	@Test
-    public void testMergeExceptsOnNullList() {
-	    exception.expect(IllegalArgumentException.class);
-	    IProfile.merge(null);
-	}
 		
 	@Test
 	public void interpolationShouldLinearExtend() throws Exception{

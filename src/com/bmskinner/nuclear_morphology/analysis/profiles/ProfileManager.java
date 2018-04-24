@@ -1018,9 +1018,9 @@ public class ProfileManager implements Loggable {
         }
 
         // split the two segments in the median
-        newID1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
-        newID2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
-        medianProfile.splitSegment(seg, index, newID1, newID2);
+        @NonNull UUID nId1 = newID1 == null ? java.util.UUID.randomUUID() : newID1;
+        @NonNull UUID nId2 = newID2 == null ? java.util.UUID.randomUUID() : newID2;
+        medianProfile.splitSegment(seg, index, nId1, nId2);
         fine("Split median profile");
 
         // put the new segment pattern back with the appropriate offset

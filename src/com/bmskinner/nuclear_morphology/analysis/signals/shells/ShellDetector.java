@@ -46,6 +46,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
+import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
 import ij.gui.PolygonRoi;
@@ -288,9 +289,9 @@ public class ShellDetector extends Detector {
             ratios[i] = areas[i]/areas[0];
             shells.add(new Shell(shrinkingRoi, c));
         }
-        fine("Shells at "+ objectRoi.getBounds().getX()+" - "+ objectRoi.getBounds().getY() );
-        fine("Areas: "+Arrays.toString(areas));
-        fine("Ratios: "+Arrays.toString(ratios));
+//        fine("Shells at "+ objectRoi.getBounds().getX()+" - "+ objectRoi.getBounds().getY() );
+//        fine("Areas: "+Arrays.toString(areas));
+//        fine("Ratios: "+Arrays.toString(ratios));
 
     }
 
@@ -301,15 +302,15 @@ public class ShellDetector extends Detector {
          * the component from which it was made. Things that are to be compared
          * to it must be offset to the same coordinate space
          */
-        private Roi shellRoi;
-        private Imageable source;
+        private @NonNull Roi shellRoi;
+        private @NonNull Imageable source;
 
         /**
          * Create a shell from the given roi, with the given source object
          * @param r
          * @param source
          */
-        public Shell(Roi r, Imageable source) {
+        public Shell(@NonNull Roi r, @NonNull Imageable source) {
             this.shellRoi = r;
             this.source = source;
         }
@@ -350,7 +351,7 @@ public class ShellDetector extends Detector {
          * @param s the component
          * @return
          */
-        public long getPixelCount(CellularComponent s) {
+        public long getPixelCount(@NonNull CellularComponent s) {
             long count = getPixelCount(s.toRoi());
             return count;
         }
@@ -407,17 +408,9 @@ public class ShellDetector extends Detector {
          * @return the sum of signal intensities in the signal
          * @throws UnloadableImageException
          */
-        private long getPixelIntensity(CellularComponent s) throws UnloadableImageException {
-            try {
-                ImageStack st = new ImageImporter(s.getSourceFile()).importToStack();
-                int stackNumber = ImageImporter.rgbToStack(s.getChannel());
-                ImageProcessor ip = st.getProcessor(stackNumber);
-                return getPixelIntensity(ip, s.toOriginalShape());
-            } catch (ImageImportException e) {
-                e.printStackTrace();
-                throw new UnloadableImageException(
-                        "Error importing image source file " + s.getSourceFile().getAbsolutePath(), e);
-            }
+        private long getPixelIntensity(@NonNull CellularComponent s) throws UnloadableImageException {
+        	ImageProcessor ip = s.getImage();
+        	return getPixelIntensity(ip, s.toOriginalShape());
         }
 
 
@@ -456,7 +449,8 @@ public class ShellDetector extends Detector {
          * 
          * @return
          */
-        public int[] getPosition() {
+        @Override
+		public int[] getPosition() {
             int[] result = { (int) shellRoi.getBounds().getX(), (int) shellRoi.getBounds().getY(),
                     (int) shellRoi.getBounds().getWidth(), (int) shellRoi.getBounds().getHeight() };
             return result;
@@ -467,7 +461,8 @@ public class ShellDetector extends Detector {
          * 
          * @return
          */
-        public Rectangle getBounds() {
+        @Override
+		public Rectangle getBounds() {
             return shellRoi.getBounds();
         }
 
@@ -487,7 +482,8 @@ public class ShellDetector extends Detector {
         	return shellRoi;
         }
 
-        public String toString() {
+        @Override
+		public String toString() {
             return this.getBounds().toString();
         }
 
@@ -576,8 +572,8 @@ public class ShellDetector extends Detector {
      */
     private class RoiShrinker {
         
-        private final Roi roi;
-        private final Rectangle bounds;
+        private final @NonNull Roi roi;
+        private final @NonNull Rectangle bounds;
         
         public RoiShrinker(@NonNull Roi r){
             roi = r;
@@ -630,8 +626,6 @@ public class ShellDetector extends Detector {
         
         
         private Roi shrinkByArea(int shell) {
-//            if(shell==0)
-//                return roi;
             
             // scale the image such that the EDM can be calculated
 
@@ -645,23 +639,27 @@ public class ShellDetector extends Detector {
 
             final ImageProcessor ip1 = ip.duplicate();
 
-            new EDM().toEDM(ip1); // zero at edge, 255 at centre
+            new EDM().toEDM(ip1); // zero at edge, up to 255 at centre
             
-            int threshold = 0;
-            Roi roi2 = (Roi) roi.clone();
-            double area = Stats.area(roi2);
+            int threshold = 1;
+            @NonNull Roi roi2 = (Roi) roi.clone();
+            double area = Stats.area(roi);
             double scaledArea = area;
             double desiredArea = scaledArea*ratio;
 
-            
-            while(scaledArea>desiredArea || threshold==0) { // ensure we go through at least once
+            while(scaledArea>desiredArea || threshold==1) { // ensure we go through at least once
                 final ImageProcessor newIp = ip1.duplicate();
                 newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
                 roi2 = (new ThresholdToSelection()).convert(newIp);
                 scaledArea = Stats.area(roi2);
+//                showImage(""+threshold, newIp);
                 threshold++;
             }
-            fine("Shell "+shell+" Ratio: "+ratio+" Thresh: "+threshold+" Des: "+desiredArea+" Act:"+scaledArea);
+            
+            
+            
+            
+//            fine("Shell "+shell+" Ratio: "+ratio+" Thresh: "+threshold+" Des: "+desiredArea+" Act:"+scaledArea);
             Prefs.blackBackground = bb;
             
             Rectangle bounds2 = roi2.getBounds();
@@ -669,7 +667,11 @@ public class ShellDetector extends Detector {
                 return roi;
             roi2.setLocation(bounds.x+bounds2.x-1, bounds.y+bounds2.y-1);           
             return roi2;
-
+        }
+        
+        private void showImage(String title, ImageProcessor ip)  {
+        	ImagePlus img = new ImagePlus(title, ip);
+        	img.show();
         }
         
         private ImageProcessor createFromRoi() {

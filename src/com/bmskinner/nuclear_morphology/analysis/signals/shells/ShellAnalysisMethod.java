@@ -69,7 +69,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
     private final int shells;
     private final ShrinkType type;
 
-    private static Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
+    private final Map<UUID, KeyedShellResult> counters = new HashMap<UUID, KeyedShellResult>(0);
 
     public ShellAnalysisMethod(IAnalysisDataset dataset, int shells, ShrinkType t) {
         super(dataset);
@@ -85,7 +85,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         fireProgressEvent(e);
         run();
         IAnalysisResult r = new DefaultAnalysisResult(dataset);
-
         return r;
     }
 
@@ -99,7 +98,6 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         log("Performing "+type+" shell analysis with " + shells + " shells...");
 
         try {
-            counters = new HashMap<>(0);
 
             for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 

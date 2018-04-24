@@ -728,13 +728,6 @@ public class DefaultBorderSegmentTest {
 	}
 	
 	@Test
-	public void testNudgeUnlinkedWithoutMergeSourcesExceptsOnNullList(){
-	    exception.expect(IllegalArgumentException.class);
-        IBorderSegment.nudgeUnlinked(null, -2);
-	}
-	
-	
-	@Test
     public void testNudgeUnlinkedWithMergeSources(){
 		
 		int[] start = { 0,  10, 30, 88 };
@@ -829,10 +822,4 @@ public class DefaultBorderSegmentTest {
         assertTrue(s3.overlaps(s2));
 	}
 	
-	@Test
-    public void testOverlapsExceptsOnNullInput(){
-	    DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-	    exception.expect(IllegalArgumentException.class);
-	    s1.overlaps(null);
-	}
 }

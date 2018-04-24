@@ -342,20 +342,26 @@ public class DefaultShellResult implements IShellResult {
      */
     public DefaultShellResult(IShellResult s) {
         this(s.getNumberOfShells());
+        long[] random = new long[s.getNumberOfShells()];
+        Arrays.fill(random, 100);
+        
+        RandomShellResult r = new RandomShellResult(s.getNumberOfShells(), s.getType(), random);
         this.setRawMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.NONE))
                 .setRawMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.NONE))
                 .setNormalisedMeans(CountType.SIGNAL, s.getProportions(Aggregation.BY_SIGNAL, Normalisation.DAPI))
                 .setNormalisedMeans(CountType.COUNTERSTAIN, s.getProportions(Aggregation.BY_NUCLEUS, Normalisation.DAPI))
-//                .setRawStandardErrors(CountType.SIGNAL, s.getRawStandardErrors(CountType.SIGNAL))
-//                .setRawStandardErrors(CountType.COUNTERSTAIN, s.getRawStandardErrors(CountType.COUNTERSTAIN))
-                // .setPixelCounts(CountType.SIGNAL,
-                // s.getPixelCounts(CountType.SIGNAL))
-                // .setPixelCounts(CountType.NUCLEUS,
-                // s.getPixelCounts(CountType.NUCLEUS))
-                .setRawChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE, null), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE, null))
-                .setRawChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, null), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, null))
-                .setNormalisedChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, null), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, null))
-                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, null), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, null));
+                .setRawChiResult(CountType.SIGNAL, 
+                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r), 
+                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE, r))
+                .setRawChiResult(CountType.COUNTERSTAIN, 
+                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r), 
+                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, r))
+                .setNormalisedChiResult(CountType.SIGNAL, 
+                		s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r), 
+                		s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, r))
+                .setNormalisedChiResult(CountType.COUNTERSTAIN, 
+                		s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r), 
+                		s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, r));
 
     }
     

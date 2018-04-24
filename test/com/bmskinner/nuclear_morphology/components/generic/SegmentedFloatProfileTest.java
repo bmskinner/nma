@@ -131,21 +131,7 @@ public class SegmentedFloatProfileTest {
 	    List<IBorderSegment> list = makeTestSegments();
 	    assertEquals(list.size(), sp.getSegmentCount());
 	}
-	
-	@Test
-    public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnNullProfile() throws ProfileException {
-	    List<IBorderSegment> list = makeTestSegments();
-        exception.expect(IllegalArgumentException.class);
-        new SegmentedFloatProfile(null, list);
-    }
-	
-	@Test
-	public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnNullSegmentList() throws ProfileException {
-	    IProfile profile = new FloatProfile(10, 100);
-	    exception.expect(IllegalArgumentException.class);
-	    new SegmentedFloatProfile(profile, null);
-	}
-	
+		
 	@Test
     public void testSegmentedFloatProfileIProfileListOfIBorderSegmentExceptsOnMismatchedProfileAndList() throws ProfileException {
         List<IBorderSegment> list = makeTestSegments();
@@ -167,12 +153,6 @@ public class SegmentedFloatProfileTest {
 	    assertEquals(2, p.getSegmentCount());
 	}
 	
-	@Test
-	public void testSegmentedFloatProfileIProfileExceptsOnNullProfile() {
-	    exception.expect(IllegalArgumentException.class);
-	    new SegmentedFloatProfile((IProfile)null);
-	}
-
 	@Test
 	public void testSegmentedFloatProfileFloatArray() {
 	    float[] array = new float[100];
@@ -228,11 +208,6 @@ public class SegmentedFloatProfileTest {
 	    }
 	}
 	
-	@Test
-    public void testGetSegmentUUIDExceptsOnNullId() throws ProfileException, UnavailableComponentException {
-	    exception.expect(IllegalArgumentException.class);
-	    IBorderSegment seg = sp.getSegment( (UUID) null);
-    }
 	
 	@Test
     public void testGetSegmentUUIDExceptsOnInvalidId() throws ProfileException, UnavailableComponentException {
@@ -258,12 +233,6 @@ public class SegmentedFloatProfileTest {
 	    List<IBorderSegment> result = sp.getSegmentsFrom(UUID.fromString(SEG_1));
 	    assertEquals(test.get(1), result.get(0));
 	}
-	
-	@Test
-    public void testGetSegmentsFromExceptsOnNullId() throws Exception {
-	    exception.expect(IllegalArgumentException.class);
-        List<IBorderSegment> result = sp.getSegmentsFrom((UUID) null);
-    }
 	
 	@Test
     public void testGetSegmentsFromExceptsOnInvalidId() throws Exception {
@@ -293,12 +262,6 @@ public class SegmentedFloatProfileTest {
 	}
 	
 	@Test
-    public void testGetSegmentStringExceptsWithNullInput() throws UnavailableComponentException{
-        exception.expect(IllegalArgumentException.class);
-        sp.getSegment( (String)null);
-    }
-	
-	@Test
     public void testGetSegmentStringExceptsWithInvalidInput() throws UnavailableComponentException{
         exception.expect(UnavailableComponentException.class);
         sp.getSegment("Not present");
@@ -312,12 +275,6 @@ public class SegmentedFloatProfileTest {
 	    assertEquals(test.getStartIndex(), result.getStartIndex());
 	    assertEquals(test.getEndIndex(), result.getEndIndex());
 	}
-	
-	@Test
-    public void testGetSegmentIBorderSegmentExceptsWithNullInput(){
-        exception.expect(IllegalArgumentException.class);
-        sp.getSegment( (IBorderSegment)null);
-    }
 
 	@Test
 	public void testGetSegmentAt() {
@@ -384,13 +341,7 @@ public class SegmentedFloatProfileTest {
 	    exception.expect(IllegalArgumentException.class);
 	    sp.setSegments(new ArrayList<IBorderSegment>(0));
 	}
-	
-	@Test
-	public void testSetSegmentsExceptsOnNullList() {
-	    exception.expect(IllegalArgumentException.class);
-	    sp.setSegments(null);
-	}
-	
+		
 	@Test
     public void testSetSegmentsExceptsOnListWithDifferentProfileLength() throws ProfileException {
 	    List<IBorderSegment> list = new ArrayList<>();
@@ -471,12 +422,6 @@ public class SegmentedFloatProfileTest {
 	}
 	
 	@Test
-    public void testGetDisplacementExceptsOnNullSegment() {
-        exception.expect(IllegalArgumentException.class);
-        sp.getDisplacement(null);
-    }
-	
-	@Test
     public void testGetDisplacementExceptsOnInvalidSegment() {
 	    IBorderSegment s1 = new DefaultBorderSegment(5,  10, 110, UUID.randomUUID());
         exception.expect(IllegalArgumentException.class);
@@ -495,11 +440,6 @@ public class SegmentedFloatProfileTest {
         assertFalse(sp.contains(s1));
     }
 	
-	@Test
-    public void testContainsReturnsFalseWhenSegmentNull() {
-        assertFalse(sp.contains(null));
-    }
-
 	@Test
 	public void testAdjustSegmentStartPositive() throws SegmentUpdateException {
 	    IBorderSegment s1 = sp.getSegmentAt(1);
@@ -534,13 +474,7 @@ public class SegmentedFloatProfileTest {
         assertFalse(sp.adjustSegmentStart(s1.getID(), -(length-1)));
         assertEquals(expStart, s1.getStartIndex()); 
     }
-	
-	@Test
-    public void testAdjustSegmentStartExceptsWhenIdIsNull() throws SegmentUpdateException {
-	    exception.expect(IllegalArgumentException.class);
-        sp.adjustSegmentStart(null, 5);
-    }
-	
+		
 	@Test
     public void testAdjustSegmentStartExceptsWhenIdIsInvalid() throws SegmentUpdateException {
 	    UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
@@ -582,13 +516,7 @@ public class SegmentedFloatProfileTest {
         assertFalse(sp.adjustSegmentEnd(s1.getID(), -(length-1)));
         assertEquals(expStart, s1.getEndIndex()); 
     }
-    
-    @Test
-    public void testAdjustSegmentEndExceptsWhenIdIsNull() throws SegmentUpdateException {
-        exception.expect(IllegalArgumentException.class);
-        sp.adjustSegmentEnd(null, 5);
-    }
-    
+        
     @Test
     public void testAdjustSegmentEndExceptsWhenIdIsInvalid() throws SegmentUpdateException {
         UUID id = UUID.fromString("00000001-1000-1000-1000-100000000000");
@@ -752,12 +680,6 @@ public class SegmentedFloatProfileTest {
     }
 	
 	@Test
-    public void testFrankenNormaliseToProfileExceptsOnNullTemplate() throws ProfileException {
-	    exception.expect(IllegalArgumentException.class);
-	    sp.frankenNormaliseToProfile(null);
-    }
-
-	@Test
 	public void testMergeSegments() throws ProfileException, UnavailableComponentException {
 	    
 	    int expCount = sp.getSegmentCount()-1;
@@ -773,40 +695,7 @@ public class SegmentedFloatProfileTest {
 	    assertEquals(s1.getStartIndex(), m.getStartIndex());
 	    assertEquals(s2.getEndIndex(), m.getEndIndex());
 	}
-	
-	@Test
-    public void testMergeSegmentsExceptsOnNullSeg1() throws ProfileException, UnavailableComponentException {
-        
-        UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        IBorderSegment s1 = sp.getSegmentAt(1);
-        IBorderSegment s2 = sp.getSegmentAt(2);
-        
-        exception.expect(IllegalArgumentException.class);
-        sp.mergeSegments(null, s2, mergedId);
-    }
-	
-	@Test
-	public void testMergeSegmentsExceptsOnNullSeg2() throws ProfileException, UnavailableComponentException {
-
-	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
-	    IBorderSegment s1 = sp.getSegmentAt(1);
-	    IBorderSegment s2 = sp.getSegmentAt(2);
-
-	    exception.expect(IllegalArgumentException.class);
-	    sp.mergeSegments(s1, null, mergedId);
-	}
-	
-	@Test
-	public void testMergeSegmentsExceptsOnNullId() throws ProfileException, UnavailableComponentException {
-
-	    UUID mergedId = UUID.fromString("00000001-1000-1000-1000-100000000000");
-	    IBorderSegment s1 = sp.getSegmentAt(1);
-	    IBorderSegment s2 = sp.getSegmentAt(2);
-
-	    exception.expect(IllegalArgumentException.class);
-	    sp.mergeSegments(s1, s2, null);
-	}
-	
+			
 	@Test
     public void testMergeSegmentsExceptsWhenSegmentsNotLinked() throws ProfileException, UnavailableComponentException {
 
@@ -864,13 +753,7 @@ public class SegmentedFloatProfileTest {
         IBorderSegment s1 = sp.getSegmentAt(1);   
         sp.unmergeSegment(s1);
 	}
-	
-	@Test
-	public void testUnmergeSegmentExceptsOnNullSegment() throws ProfileException {
-	    exception.expect(IllegalArgumentException.class);
-	    sp.unmergeSegment(null);
-	}
-	
+		
 	@Test
     public void testIsSplittable() {
 	    IBorderSegment s1 = sp.getSegmentAt(1);
@@ -894,12 +777,6 @@ public class SegmentedFloatProfileTest {
 	    IBorderSegment s1 = sp.getSegmentAt(1);
 	    exception.expect(IllegalArgumentException.class);
 	    assertFalse(sp.isSplittable(s1.getID(), s1.getEndIndex()+1));
-	}
-
-	@Test
-	public void testIsSplittableExceptsOnNullId() {
-	    exception.expect(IllegalArgumentException.class);
-	    sp.isSplittable(null, 30);
 	}
 
 	@Test
@@ -933,45 +810,6 @@ public class SegmentedFloatProfileTest {
 	    assertEquals("r2 start", mid, r2.getStartIndex());
 	    assertEquals("r2 end", end, r2.getEndIndex());
 	}
-	
-	@Test
-    public void testSplitSegmentExceptsOnNullSegment() throws ProfileException {
-        IBorderSegment s1 = sp.getSegmentAt(1);
-        
-        int mid = s1.getMidpointIndex();
-        
-        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
-        
-        exception.expect(IllegalArgumentException.class);
-        sp.splitSegment(null, mid, id1, id2);
-    }
-	
-	@Test
-    public void testSplitSegmentExceptsOnNullId1() throws ProfileException {
-        IBorderSegment s1 = sp.getSegmentAt(1);
-        
-        int mid = s1.getMidpointIndex();
-        
-        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
-        
-        exception.expect(IllegalArgumentException.class);
-        sp.splitSegment(s1, mid, null, id2);
-    }
-	
-	@Test
-    public void testSplitSegmentExceptsOnNullId2() throws ProfileException {
-        IBorderSegment s1 = sp.getSegmentAt(1);
-        
-        int mid = s1.getMidpointIndex();
-        
-        UUID id1 = UUID.fromString("00000001-1000-1000-1000-100000000000");
-        UUID id2 = UUID.fromString("00000002-2000-2000-2000-200000000000");
-        
-        exception.expect(IllegalArgumentException.class);
-        sp.splitSegment(s1, mid, id1, null);
-    }
 	
 	@Test
     public void testSplitSegmentExceptsOnInvalidIndex() throws ProfileException {

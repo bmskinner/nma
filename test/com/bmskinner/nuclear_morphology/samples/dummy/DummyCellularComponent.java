@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.detection.Mask;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -96,7 +98,7 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public UUID getID() {
+	public @NonNull UUID getID() {
 		return component.getID();
 	}
 	
