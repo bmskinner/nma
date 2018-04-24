@@ -352,10 +352,10 @@ public class DefaultShellResult implements IShellResult {
                 // s.getPixelCounts(CountType.SIGNAL))
                 // .setPixelCounts(CountType.NUCLEUS,
                 // s.getPixelCounts(CountType.NUCLEUS))
-                .setRawChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE))
-                .setRawChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE))
-                .setNormalisedChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI))
-                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI));
+                .setRawChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.NONE, null), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.NONE, null))
+                .setRawChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, null), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.NONE, null))
+                .setNormalisedChiResult(CountType.SIGNAL, s.getChiSquareValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, null), s.getPValue(Aggregation.BY_SIGNAL, Normalisation.DAPI, null))
+                .setNormalisedChiResult(CountType.COUNTERSTAIN, s.getChiSquareValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, null), s.getPValue(Aggregation.BY_NUCLEUS, Normalisation.DAPI, null));
 
     }
     
@@ -393,7 +393,7 @@ public class DefaultShellResult implements IShellResult {
 	}
 
 	@Override
-	public double getChiSquareValue(Aggregation agg, Normalisation norm) {
+	public double getChiSquareValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
 		switch (norm) {
 	        case NONE: return getRawChiSquare(agg);
 	        case DAPI: return getNormalisedChiSquare(agg);
@@ -402,7 +402,7 @@ public class DefaultShellResult implements IShellResult {
 	}
 
 	@Override
-	public double getPValue(Aggregation agg, Normalisation norm) {
+	public double getPValue(Aggregation agg, Normalisation norm, @NonNull IShellResult expected) {
 		switch (norm) {
 	        case NONE: return getRawPValues(agg);
 	        case DAPI: return getNormalisedPValues(agg);

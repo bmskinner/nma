@@ -117,20 +117,20 @@ public interface IShellResult extends Serializable, Loggable {
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
-     * @return the result of a chi square test against equal proportions per
-     *         shell
+     * @param expected a shell distribution to compare against
+     * @return the result of a chi square test against the given distribution
      */
-    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm);
+    double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
     
     /**
      * Get the chi square p-value for the the pixels against a random distribution
      * 
      * @param agg the aggregation of signal
      * @param norm the normalisation method
-     * @return the result of a chi square test against equal proportions per
-     *         shell
+     * @param expected a shell distribution to compare against
+     * @return the result of a chi square test against the given distribution
      */
-    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm);
+    double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected);
     
     /**
      * Get the overall shell position for the pixels 

@@ -19,6 +19,7 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
+import java.util.Arrays;
 import java.util.stream.LongStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -62,15 +63,31 @@ public class RandomShellResult implements IShellResult{
 
     @Override
     public double[] getProportions(@NonNull Aggregation agg, @NonNull Normalisation norm) {
-        long total = LongStream.of(counts).sum();
-        if(total==0){
-            double[] result = new double[nShells];
-            for(int i=0; i<nShells; i++){
-                result[i] = 0;
+        
+        switch(norm){
+        
+            case NONE:{long total = LongStream.of(counts).sum();
+                if(total==0){
+                    double[] result = new double[nShells];
+                    for(int i=0; i<nShells; i++){
+                        result[i] = 0;
+                    }
+                    return result;
+                }
+                return LongStream.of(counts).mapToDouble(l-> (double)l/(double)total).toArray();
             }
-            return result;
+            case DAPI:{
+                double[] result = new double[nShells];
+                Arrays.fill(result, 1d/nShells);
+                return result;
+            }     
+            default:{
+                double[] result = new double[nShells];
+                Arrays.fill(result, 1d/nShells);
+                return result;
+            } 
         }
-        return LongStream.of(counts).mapToDouble(l-> (double)l/(double)total).toArray();
+
     }
 
     @Override
@@ -83,19 +100,18 @@ public class RandomShellResult implements IShellResult{
     }
 
     @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
         return 1;
     }
 
     @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
         return 1;
     }
 
     @Override
     public double getOverallShell(@NonNull Aggregation agg, @NonNull Normalisation norm) {
-        // TODO Auto-generated method stub
-        return 0;
+        return (nShells-1)/2;
     }
 
     @Override

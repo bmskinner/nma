@@ -72,6 +72,7 @@ public class ShellDetector extends Detector {
     private final int nShells;
     private final ShrinkType type;
     private static final int DEFAULT_SCALE_FACTOR = 4;
+    private boolean isScale = false;
 
     /**
      * The shell ROIs within the template object. This list begins with the
@@ -80,13 +81,15 @@ public class ShellDetector extends Detector {
      */
     private List<Shell> shells = new ArrayList<Shell>(0);
 
+
     /**
-     * Create shells in the given component, using the default shell count
-     * 
      * @param component the component to analyse
+     * @param type the method used to generate the shells
+     * @param isScale should the component be scaled up for more precise shell creation
+     * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull CellularComponent component, @NonNull ShrinkType type) throws ShellAnalysisException {
-        this(component, ShellDetector.DEFAULT_SHELL_COUNT, type);
+    public ShellDetector(@NonNull CellularComponent component, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
+        this(component, ShellDetector.DEFAULT_SHELL_COUNT, type, isScale);
     }
 
     /**
@@ -94,11 +97,16 @@ public class ShellDetector extends Detector {
      *
      * @param component the component to analyse
      * @param shellCount the number of shells to create
+     * @param type the method used to generate the shells
+     * @param isScale should the component be scaled up for more precise shell creation
      * @throws ShellAnalysisException
      */
-    public ShellDetector(@NonNull CellularComponent component, int shellCount, @NonNull ShrinkType type) throws ShellAnalysisException {
+    public ShellDetector(@NonNull CellularComponent component, int shellCount, @NonNull ShrinkType type, boolean isScale) throws ShellAnalysisException {
         nShells = shellCount;
         this.type = type;
+        this.isScale = isScale;
+        component.getBounds().getX();
+        fine("Creating shell for component at "+ component.getBounds().getX()+" - "+ component.getBounds().getY() );
         createShells(component);
     }
 
@@ -137,48 +145,33 @@ public class ShellDetector extends Detector {
      */
 
     /**
-     * Find the number pixels of the signal within each shell
+     * Find the number of pixels of the component within each shell
      * 
      * @param signal
      * @return
      */
-    public long[] findPixelCountPerShell(@NonNull CellularComponent signal) {
+    public long[] findPixelCountPerShell(@NonNull CellularComponent component) {
         long[] counts = makeZeroArray();
-
-        for (int i = 0; i < shells.size(); i++) {
+        for (int i=0; i<shells.size(); i++) {
             Shell shell = shells.get(i);
-            long count = shell.getPixelCount(signal);
-            counts[i] = count;
+            counts[i] = shell.getPixelCount(component);
         }
-
         return correctNestedIntensities(counts);
     }
     
     /**
-     * Find the number of pixels within the area of each shell. Formally,
-     * calculates the area of each shell in pixel units via the Area() polygon
-     * method.
+     * Find the number of pixels within the area of each shell.
      * 
      * @return
      */
-    public long[] findPixelCountPerShell(@NonNull ImageStack st, int channel) {
-        
+    public long[] findPixelCountPerShell() {
         long[] result = makeZeroArray();
-
-        // find the total signal in the signal channel
-        for (int i = 0; i < shells.size(); i++) {
-
+        for (int i=0; i<shells.size(); i++) {
             Shell shell = shells.get(i);
-            int density = shell.getPixelCount(st, channel);
-            result[i] = density;
-
+            result[i] = shell.getPixelCount();
         }
-
-        // Correct for nested shells
         return correctNestedIntensities(result);
     }
-    
-    
     
     /**
      * Find the total pixel intensity per shell contained within the component
@@ -188,25 +181,18 @@ public class ShellDetector extends Detector {
      */
     public long[] findPixelIntensityPerShell(@NonNull CellularComponent component) {
         long[] result = makeZeroArray();
-
-        // find the total signal in the signal channel
-        for (int i = 0; i < shells.size(); i++) {
-
-            Shell shell = shells.get(i);
-            long density;
-            try {
-                density = shell.getPixelIntensity(component);
-                result[i] = density;
-            } catch (UnloadableImageException e) {
-                warn("Unable to load image for signal");
-                fine("Error loading image", e);
-                return makeZeroArray();
+        try {
+            for (int i = 0; i < shells.size(); i++) {
+                Shell shell = shells.get(i);
+                result[i] = shell.getPixelIntensity(component);
             }
+        } catch (UnloadableImageException e) {
+            warn("Unable to load image for signal");
+            fine("Error loading image", e);
+            return makeZeroArray();
         }
-
-        // Correct for nested shells
         result = correctNestedIntensities(result);
-
+        System.out.println(Arrays.toString(result));
         return result;
     }
 
@@ -220,17 +206,10 @@ public class ShellDetector extends Detector {
      */
     public long[] findPixelIntensityPerShell(@NonNull ImageStack st, int channel) {
         long[] result = makeZeroArray();
-
-        // find the total signal in the signal channel
         for (int i = 0; i < shells.size(); i++) {
-
             Shell shell = shells.get(i);
-            int density = shell.getPixelIntensity(st, channel);
-            result[i] = density;
-
+            result[i] = shell.getPixelIntensity(st, channel);
         }
-
-        // Correct for nested shells
         return correctNestedIntensities(result);
     }
     
@@ -284,7 +263,7 @@ public class ShellDetector extends Detector {
         // Position of the shells is with respect to the source image
         Roi objectRoi = new PolygonRoi(c.toOriginalPolygon(), Roi.POLYGON);
         double[] areas = new double[nShells];
-
+        double[] ratios = new double[nShells];
         // First shell encloses the entire object        
 //        areas[0] = Stats.area(objectRoi);
 //        shells.add(new Shell(objectRoi, c));
@@ -300,26 +279,13 @@ public class ShellDetector extends Detector {
 
             // Make the shell
             areas[i] = Stats.area(shrinkingRoi);
+            ratios[i] = areas[i]/areas[0];
             shells.add(new Shell(shrinkingRoi, c));
         }
+        fine("Shells at "+ objectRoi.getBounds().getX()+" - "+ objectRoi.getBounds().getY() );
         fine("Areas: "+Arrays.toString(areas));
+        fine("Ratios: "+Arrays.toString(ratios));
 
-    }
-
-    private String print(int[] arr) {
-        String s = "";
-        for (int i : arr) {
-            s += i + "\t";
-        }
-        return s;
-    }
-
-    private String print(double[] arr) {
-        String s = "";
-        for (double i : arr) {
-            s += i + "\t";
-        }
-        return s;
     }
 
     public class Shell implements Imageable {
@@ -362,48 +328,34 @@ public class ShellDetector extends Detector {
         }
         
         /**
-         * Find the sum of all pixel intensities within this shell from the
-         * given channel.
+         * Find the number of pixels within this shell
          *
-         * @param st the stack to measure
-         * @param channel within the stack to measure
-         * @return the sum of intensities in the shell
+         * @return the count of pixels in this shell 
          */
-        private int getPixelCount(ImageStack st, int channel) {
-
-            int stackNumber = ImageImporter.rgbToStack(channel);
-            ImageProcessor ip = st.getProcessor(stackNumber);
-            return getPixelCount(ip, this.toShape());
+        public long getPixelCount() {
+            long count = getPixelCount(this.toRoi());
+            return count;
         }
 
         /**
-         * Count the number of pixels within the signal that are also within
+         * Count the number of pixels within the object that are also within
          * this shell.
          * 
-         * @param s
-         * @param channel
+         * @param s the component
          * @return
          */
-        public int getPixelCount(CellularComponent s) {
-
-            Area signalArea = new Area(s.toOriginalShape());
-            Area shellArea = this.toArea();
-
-            // Keep pixels that are in both shapes
-            signalArea.intersect(shellArea);
-
-            int count = (int) Stats.area(signalArea);
+        public long getPixelCount(CellularComponent s) {
+            long count = getPixelCount(s.toRoi());
             return count;
         }
         
         /**
-         * Get the total intensity of pixels within the given shape.
+         * Get the total number of pixels within the given shape and this shell
          * 
-         * @param ip the image processor to test
          * @param mask the shape to test
          * @return
          */
-        private int getPixelCount(ImageProcessor ip, Shape mask) {
+        private long getPixelCount(@NonNull Roi mask) {
 
             int result = 0;
 
@@ -433,14 +385,12 @@ public class ShellDetector extends Detector {
          * @param channel within the stack to measure
          * @return the sum of intensities in the shell
          */
-        private int getPixelIntensity(ImageStack st, int channel) {
-
+        private long getPixelIntensity(ImageStack st, int channel) {
             int stackNumber = ImageImporter.rgbToStack(channel);
             ImageProcessor ip = st.getProcessor(stackNumber);
-
-            int result = getPixelIntensity(ip, this.toShape());
-
-            return result;
+//            if(isScale)
+//                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
+            return getPixelIntensity(ip, this.toShape());
         }
 
         /**
@@ -451,34 +401,17 @@ public class ShellDetector extends Detector {
          * @return the sum of signal intensities in the signal
          * @throws UnloadableImageException
          */
-        private int getPixelIntensity(CellularComponent s) throws UnloadableImageException {
-
-            Area componentArea = new Area(s.toOriginalShape());
-            Area shellArea = this.toArea();
-
-            ImageStack st;
+        private long getPixelIntensity(CellularComponent s) throws UnloadableImageException {
             try {
-
-                st = new ImageImporter(s.getSourceFile()).importToStack();
-
+                ImageStack st = new ImageImporter(s.getSourceFile()).importToStack();
+                int stackNumber = ImageImporter.rgbToStack(s.getChannel());
+                ImageProcessor ip = st.getProcessor(stackNumber);
+                return getPixelIntensity(ip, s.toOriginalShape());
             } catch (ImageImportException e) {
-                stack("Error importing component image", e);
+                e.printStackTrace();
                 throw new UnloadableImageException(
                         "Error importing image source file " + s.getSourceFile().getAbsolutePath(), e);
             }
-
-            int stackNumber = ImageImporter.rgbToStack(s.getChannel());
-            ImageProcessor ip = st.getProcessor(stackNumber);
-
-            // Keep pixels that are in both shapes
-            componentArea.intersect(shellArea);
-
-            int overlappingArea = (int) Stats.area(componentArea);
-
-            if (overlappingArea == 0)
-                return 0;
-
-            return getPixelIntensity(ip, componentArea);
         }
 
 
@@ -489,9 +422,9 @@ public class ShellDetector extends Detector {
          * @param mask the shape to test
          * @return
          */
-        private int getPixelIntensity(ImageProcessor ip, Shape mask) {
+        private long getPixelIntensity(@NonNull ImageProcessor ip, @NonNull Shape mask) {
 
-            int result = 0;
+            long result = 0;
 
             Rectangle roiBounds = mask.getBounds();
 
@@ -665,7 +598,7 @@ public class ShellDetector extends Detector {
 
             double ratio = (double) (shell)  / (double) nShells;
 
-            final ImageProcessor ip = createFromRoi();
+            ImageProcessor ip = createFromRoi();
             boolean bb = Prefs.blackBackground;
             Prefs.blackBackground = true;
             
@@ -691,29 +624,31 @@ public class ShellDetector extends Detector {
         
         
         private Roi shrinkByArea(int shell) {
-            if(shell==0)
-                return roi;
+//            if(shell==0)
+//                return roi;
             
             // scale the image such that the EDM can be calculated
 
             double ratio = (double) (nShells-shell)  / (double) nShells;
             
-            final ImageProcessor ip = createFromRoi();
-//            Rectangle bounds = roi.getBounds();
+            ImageProcessor ip = createFromRoi();
+//            if(isScale)
+//                ip = ip.resize(ip.getWidth()*DEFAULT_SCALE_FACTOR);
             boolean bb = Prefs.blackBackground;
             Prefs.blackBackground = true;
 
-            final ImageProcessor ip1 = ip.duplicate();//.resize(width);
+            final ImageProcessor ip1 = ip.duplicate();
 
             new EDM().toEDM(ip1); // zero at edge, 255 at centre
             
             int threshold = 0;
             Roi roi2 = (Roi) roi.clone();
             double area = Stats.area(roi2);
-            double scaledArea  = area;//*DEFAULT_SCALE_FACTOR*2;
+            double scaledArea = area;
             double desiredArea = scaledArea*ratio;
 
-            while(scaledArea>desiredArea) {
+            
+            while(scaledArea>desiredArea || threshold==0) { // ensure we go through at least once
                 final ImageProcessor newIp = ip1.duplicate();
                 newIp.setThreshold(threshold, 255, ImageProcessor.NO_LUT_UPDATE);
                 roi2 = (new ThresholdToSelection()).convert(newIp);
@@ -722,9 +657,6 @@ public class ShellDetector extends Detector {
             }
             fine("Shell "+shell+" Ratio: "+ratio+" Thresh: "+threshold+" Des: "+desiredArea+" Act:"+scaledArea);
             Prefs.blackBackground = bb;
-            
-//            roi2 =  RoiScaler.scale(roi2, 1d/DEFAULT_SCALE_FACTOR, 1d/DEFAULT_SCALE_FACTOR, false);
-
             
             Rectangle bounds2 = roi2.getBounds();
             if (bounds2.width<=0 && bounds2.height<=0)

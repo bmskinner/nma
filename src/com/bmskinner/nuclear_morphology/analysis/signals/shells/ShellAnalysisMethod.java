@@ -155,7 +155,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
         private void analyseNucleus(Nucleus n) {
 
             try {
-                shellDetector = new ShellDetector(n, shells, type);
+                shellDetector = new ShellDetector(n, shells, type, true);
             } catch (ShellAnalysisException e1) {
                 warn("Unable to make shells for " + n.getNameAndNumber());
                 stack("Error in shell detector", e1);
@@ -202,7 +202,8 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             int signalChannel = n.getSignalCollection().getSourceChannel(signalGroup);
 
             long[] totalSignalIntensity  = shellDetector.findPixelIntensityPerShell(signalStack, signalChannel);
-            long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(nucleusStack, n.getChannel());
+//            long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(nucleusStack, n.getChannel());
+            long[] totalCounterIntensity = shellDetector.findPixelIntensityPerShell(n);
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
@@ -245,13 +246,10 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
             dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 
             // Calculate random positions of pixels
-//            int iterations = totalPixels < 100000 ? totalPixels : 100000; // stop stupidly long calculations 
-
             RandomDistribution sr = new RandomDistribution(collection.getConsensus(), RandomDistribution.DEFAULT_ITERATIONS);
 
             long[] c = sr.getCounts();
             
-            fine("Random dist: "+Arrays.toString(c));
 			RandomShellResult randomResult = new RandomShellResult(shells, type, c);
 			
 			dataset.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get()
@@ -286,7 +284,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             // Find the shell for these points in the template
             try {
-                ShellDetector detector = new ShellDetector(template, shells, type);
+                ShellDetector detector = new ShellDetector(template, shells, type, true);
                 for (IPoint p : list) {
                     int shell = detector.findShell(p);
                     if(shell>=0) // -1 for point not found

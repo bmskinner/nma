@@ -150,21 +150,24 @@ public class KeyedShellResult implements IShellResult {
     }
     
     @Override
-    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
     	long[] observed   = getObserved(agg, norm);
-    	double[] expected = getExpected(agg, norm);
+    	
+    	double[] other = expected.getProportions(agg, norm);
+    	double[] exp = getExpected(agg, norm, other);
 
     	ChiSquareTest test = new ChiSquareTest();
-    	return test.chiSquare(expected, observed);
+    	return test.chiSquare(exp, observed);
     }
     
     @Override
-    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
     	 long[] observed   = getObserved(agg, norm);
-    	 double[] expected = getExpected(agg, norm);
+    	 double[] other = expected.getProportions(agg, norm);
+         double[] exp = getExpected(agg, norm, other);
 
     	 ChiSquareTest test = new ChiSquareTest();
-    	 return test.chiSquareTest(expected, observed);
+    	 return test.chiSquareTest(exp, observed);
     }
     
     /**
@@ -188,11 +191,11 @@ public class KeyedShellResult implements IShellResult {
      * 
      * @return the expected values
      */
-    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+    private double[] getExpected(@NonNull Aggregation agg, @NonNull Normalisation norm, double[] other) {
         double[] expected = new double[nShells];
         int count = map.get(CountType.SIGNAL).size(agg);
-        for (int i = 0; i < nShells; i++) {
-            expected[i] = ((double) 1 / (double) nShells) * count;
+        for (int i=0; i<nShells; i++) {
+            expected[i] = other[i] * count;
         }
         return expected;
     }

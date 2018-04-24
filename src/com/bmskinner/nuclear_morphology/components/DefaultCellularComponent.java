@@ -1047,44 +1047,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     }
 
-    // @Override
-    // public List<IPoint> getPixelsAsPoints(){
-    //
-    // // Get a list of all the points within the ROI
-    // List<IPoint> result = new ArrayList<IPoint>(0);
-    //
-    // Rectangle b = this.toShape().getBounds();
-    //
-    // // get the bounding box of the roi
-    // // make a list of all the pixels in the roi
-    // int minX = (int) b.getMinX();
-    // int maxX = (int) (minX + b.getWidth());
-    //
-    // int minY = (int) b.getMinY();
-    // int maxY = minY + (int) b.getHeight();
-    //
-    // for(int x=minX; x<=maxX; x++){
-    // for(int y=minY; y<=maxY; y++){
-    //
-    // if(this.containsPoint(x, y)){
-    //
-    // result.add( IPoint.makeNew(x, y));
-    // }
-    // }
-    // }
-    //
-    // if(result.isEmpty()){
-    //// IJ.log(" Roi has no pixels");
-    // warn("No points found in roi");
-    // fine("X base: "+minX
-    // +" Y base: "+minY
-    // +" X max: "+maxX
-    // +" Y max: "+maxY);
-    // }
-    //
-    // return result;
-    // }
-
     @Override
     public int wrapIndex(int i) {
         return CellularComponent.wrapIndex(i, this.getBorderLength());
@@ -1190,25 +1152,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     public IBorderPoint findOppositeBorder(IBorderPoint p) {
-//
-//        int minDeltaYIndex = 0;
-//        double minAngle = 180;
-//        
         // Find the point that is closest to 180 degrees across the CoM
         return borderList.stream()
             .min(Comparator.comparing(point->180-centreOfMass.findAngle(p, point) ))
             .get();
-
-//        for (int i = 0; i < this.getBorderLength(); i++) {
-//
-//            double angle = this.getCentreOfMass().findAngle(p, this.getBorderPoint(i));
-//
-//            if (Math.abs(180 - angle) < minAngle) {
-//                minDeltaYIndex = i;
-//                minAngle = 180 - angle;
-//            }
-//        }
-//        return this.getBorderPoint(minDeltaYIndex);
     }
 
     @Override
@@ -1217,20 +1164,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return borderList.stream()
                 .min(Comparator.comparing(point-> Math.abs(90-centreOfMass.findAngle(a, point)) ))
                 .get();
-
-//        IBorderPoint orthgonalPoint = a;
-//        double bestAngle = 0;
-//
-//        for (int i = 0; i < this.getBorderLength(); i++) {
-//
-//            IBorderPoint p = this.getBorderPoint(i);
-//            double angle = this.getCentreOfMass().findAngle(a, p);
-//            if (Math.abs(90 - angle) < Math.abs(90 - bestAngle)) {
-//                bestAngle = angle;
-//                orthgonalPoint = p;
-//            }
-//        }
-//        return orthgonalPoint;
     }
 
     @Override
@@ -1239,18 +1172,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return borderList.stream()
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
-
-//        double minDist = Double.MAX_VALUE;
-//        IBorderPoint result = null;
-//
-//        for (IBorderPoint bp : borderList) {
-//            double d = bp.getLengthTo(p);
-//            if (d < minDist) {
-//                minDist = d;
-//                result = bp;
-//            }
-//        }
-//        return result;
     }
 
     /*
@@ -1358,11 +1279,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     }
 
     private synchronized void writeObject(java.io.ObjectOutputStream out) throws IOException {
-
         out.defaultWriteObject();
-        // log("CoM : "+this.getCentreOfMass().toString());
-        // log("B0 : "+xpoints[0]+", "+ypoints[0]);
-        // log("Pos : "+this.getPosition()[0]+", "+this.getPosition()[1]);
     }
 
     /*

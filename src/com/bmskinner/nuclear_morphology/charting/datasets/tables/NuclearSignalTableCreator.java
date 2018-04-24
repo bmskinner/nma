@@ -503,6 +503,8 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
         model.setColumnIdentifiers(columnNames);
 
         for (IAnalysisDataset d : options.getDatasets()) {
+            
+            Optional<IShellResult> random = d.getCollection().getSignalGroup(IShellResult.RANDOM_SIGNAL_ID).get().getShellResult();
 
             for (UUID signalGroup : d.getCollection().getSignalManager().getSignalGroupIDs()) {
 
@@ -511,9 +513,12 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
 				if (r.isPresent()) {
 
 				    String groupName = group.getGroupName();
+				    
 				    double mean = r.get().getOverallShell(options.getAggregation(), options.getNormalisation());
-				    double pval = r.get().getPValue(options.getAggregation(), options.getNormalisation());
-
+				    double pval = 1;
+				    if(random.isPresent())
+	                    pval = r.get().getPValue(options.getAggregation(), options.getNormalisation(), random.get());
+				    
 				    Object[] rowData = {
 				            d.getName(), 
 				            groupName, 

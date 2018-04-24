@@ -169,7 +169,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 
         	 try {
         		
- 				List<Shell> shells = new ShellDetector(n, shellCount, t).getShells();
+ 				List<Shell> shells = new ShellDetector(n, shellCount, t, false).getShells();
  				
  				for(Shell shell : shells){
  					fine("Drawing shell at "+shell.getBase().toString());

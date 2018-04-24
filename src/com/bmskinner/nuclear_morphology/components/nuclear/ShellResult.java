@@ -193,12 +193,12 @@ public class ShellResult implements Serializable, Loggable, IShellResult {
 	}
 
 	@Override
-	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+	public double getChiSquareValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
 		return chisquare;
 	}
 
 	@Override
-	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm) {
+	public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
 		return pvalue;
 	}
 
