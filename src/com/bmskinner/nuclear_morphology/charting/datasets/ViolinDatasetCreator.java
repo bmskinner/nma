@@ -211,11 +211,10 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     if (stat.equals(PlottableStatistic.ANGLE))
                         values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
 
-                    List<Number> list = new ArrayList<Number>();
+                    List<Number> list = new ArrayList<>();
                     for (double value : values) {
                         list.add(new Double(value));
                     }
-
                     ds.add(list, rowKey, colKey);
                 }
             }
