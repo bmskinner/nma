@@ -33,14 +33,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -57,8 +55,9 @@ import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportShellsAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSignalsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
@@ -84,7 +83,6 @@ import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -150,10 +148,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return new FishRemappingAction(selectedDatasets, mw);
 
             if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
-                return new ExportStatsAction(selectedDatasets, mw);
+                return new ExportNuclearStatsAction(selectedDatasets, mw);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
-                log("Not yet implemented");
+            	return new ExportSignalsAction(selectedDatasets, mw);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
                 return new ExportShellsAction(selectedDatasets, mw);
@@ -164,39 +162,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.type().equals(SignalChangeEvent.MERGE_COLLECTION_ACTION))
                 return new MergeCollectionAction(selectedDatasets, mw);
 
-            if (event.type().equals(SignalChangeEvent.CHANGE_SCALE)) {
-
-                return () -> {
-
-            		try {
-            			final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
-
-            			SpinnerNumberModel sModel = new SpinnerNumberModel(1d, 
-            					1d, 100000d, 1d);
-
-            			JSpinner spinner = new JSpinner(sModel);
-
-            			int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, 
-            					JOptionPane.OK_CANCEL_OPTION,
-            					JOptionPane.QUESTION_MESSAGE, null, null, null);
-
-            			if (option == JOptionPane.OK_OPTION) {
-
-            				double scale = (double) spinner.getModel().getValue();
-
-            				if (scale > 0) { // don't allow a scale to cause divide by zero errors
-            					selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
-            					log("Updated scale to "+scale);
-            					interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
-            				}
-            			}
-            		}catch(Exception e){
-            			warn("Error updating scale");
-            			stack("Error updating scale", e);
-            		}
-            	};
+            if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
+                return () -> setScale(selectedDatasets);
             	
-            }
 
             if (event.type().startsWith("Open|")) {
                 String s = event.type().replace("Open|", "");
@@ -389,10 +357,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             fireDatasetUpdateEvent(selected);
         }
 
-        if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) ){
-        	
+        if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
         	fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-        }
+
 
         if (event.type().equals("UpdatePopulationPanel")) {
             this.mw.getPopulationsPanel().update(selected);
@@ -522,6 +489,36 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
     }
 
+    
+    private void setScale(final List<IAnalysisDataset> selectedDatasets) {
+    	try {
+			final String CHOOSE_NEW_SCALE_LBL      = "Pixels per micron";
+
+			SpinnerNumberModel sModel = new SpinnerNumberModel(1d, 
+					1d, 100000d, 1d);
+
+			JSpinner spinner = new JSpinner(sModel);
+
+			int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, 
+					JOptionPane.OK_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+			if (option == JOptionPane.OK_OPTION) {
+
+				double scale = (double) spinner.getModel().getValue();
+
+				if (scale > 0) { // don't allow a scale to cause divide by zero errors
+					selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
+					log("Updated scale to "+scale+" pixels per micron");
+					interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
+				}
+			}
+		}catch(Exception e){
+			warn("Error updating scale");
+			stack("Error updating scale", e);
+		}
+    }
+    
     /**
      * Add the given dataset and all its children to the populations panel
      * 

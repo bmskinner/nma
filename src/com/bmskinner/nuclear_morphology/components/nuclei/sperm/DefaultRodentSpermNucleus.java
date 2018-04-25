@@ -153,25 +153,16 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     private void calculateHookAndBodyLength() {
 
-        // Copy the nucleus
-//        fine("Calculating hook and body length");
-
         // Start with the vertically rotated nucleus
         Nucleus testNucleus = getVerticallyRotatedNucleus();
 
-//        fine("Nucleus " + this.getNameAndNumber());
-        // Only proceed if the verticals have been set
-
         if (testNucleus == null) {
-
-//            fine("Vertical nucleus is not present");
             setStatistic(PlottableStatistic.HOOK_LENGTH, ERROR_CALCULATING_STAT);
             setStatistic(PlottableStatistic.BODY_WIDTH, ERROR_CALCULATING_STAT);
             return;
         }
 
         if (!testNucleus.hasBorderTag(Tag.TOP_VERTICAL) || !testNucleus.hasBorderTag(Tag.BOTTOM_VERTICAL)) {
-            fine("TV or BV is not present in vertical nucleus");
             setStatistic(PlottableStatistic.HOOK_LENGTH, BORDER_POINT_NOT_PRESENT);
             setStatistic(PlottableStatistic.BODY_WIDTH, BORDER_POINT_NOT_PRESENT);
             return;
@@ -465,7 +456,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
          * Find out which side has been captured. The hook side has the
          * reference point
          */
-
         FloatPolygon poly = createRoiPolygon(getHookRoi());
 
         return poly.contains((float) p.getX(), (float) p.getY());
@@ -474,13 +464,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
 
     @Override
     public Nucleus getVerticallyRotatedNucleus() {
-
-        /*
-         * Ensure the nucleus is cached
-         */
         super.getVerticallyRotatedNucleus();
-
-//        fine("Fetched vertical nucleus from round nucleus");
         if (verticalNucleus == null) {
             warn("Unknown error creating vertical nucleus");
             return null;
@@ -496,7 +480,6 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             stack("Cannot get RP from vertical nucleus. Not checking horizontal orientation", e);
             return verticalNucleus;
         }
-//        fine("Checking hook position");
         /*
          * If the reference point is left of the centre of mass, the nucleus is
          * pointing left. If not, flip the nucleus
@@ -506,12 +489,7 @@ public class DefaultRodentSpermNucleus extends AbstractAsymmetricNucleus {
             clockwiseRP = true; // this is only set to true, as the default is
                                 // false, and will become false after the
                                 // nucleus is flipped
-            // int opIndex =
-            // verticalNucleus.getBorderIndex(Tag.ORIENTATION_POINT);
             verticalNucleus.flipXAroundPoint(verticalNucleus.getCentreOfMass());
-            // log(this.getNameAndNumber()+": flip:
-            // "+verticalNucleus.getBorderPoint(opIndex).toString());
-
         }
 
         return verticalNucleus;

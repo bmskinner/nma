@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.analysis.signals.shells;
 
+import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.ArrayList;
@@ -238,6 +239,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             ISignalGroup random = new SignalGroup("Random distribution");
             random.setFolder(new File(""));
+            random.setGroupColour(Color.LIGHT_GRAY);
 
             dataset.getCollection().addSignalGroup(IShellResult.RANDOM_SIGNAL_ID, random);
 

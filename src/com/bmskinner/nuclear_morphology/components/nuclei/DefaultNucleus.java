@@ -419,7 +419,6 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
                     stack("Cannot get border tag", e1);
                 }
             }
-
         } else {
 
             // Default if top and bottom vertical points have not been specified

@@ -21,44 +21,133 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
+import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
- * The action for exporting stats from datasets
+ * The base action for exporting stats from datasets
  * 
  * @author bms41
- * @since 1.13.4
+ * @since 1.13.8
  *
  */
-public class ExportStatsAction extends MultiDatasetResultAction {
+public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
-    private static final String PROGRESS_LBL = "Exporting stats";
-
-    public ExportStatsAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-        super(datasets, PROGRESS_LBL, mw);
+    public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final MainWindow mw) {
+        super(datasets, label, mw);
     }
+    
+    /**
+     * The action for exporting nuclear stats from datasets
+     * 
+     * @author bms41
+     * @since 1.13.4
+     *
+     */
+    public static class ExportNuclearStatsAction extends ExportStatsAction {
 
-    @Override
-    public void run() {
+        private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
-        File file = FileSelector.chooseStatsExportFile(datasets);
-
-        if (file == null) {
-            cancel();
-            return;
+        public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
+            super(datasets, PROGRESS_LBL, mw);
         }
 
-        IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
-        worker = new DefaultAnalysisWorker(m, datasets.size());
-        worker.addPropertyChangeListener(this);
-        this.setProgressMessage("Exporting stats");
-        ThreadManager.getInstance().submit(worker);
+        @Override
+        public void run() {
+
+            File file = FileSelector.chooseStatsExportFile(datasets);
+
+            if (file == null) {
+                cancel();
+                return;
+            }
+
+            IAnalysisMethod m = new DatasetStatsExporter(file, datasets);
+            worker = new DefaultAnalysisWorker(m, datasets.size());
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Exporting stats");
+            ThreadManager.getInstance().submit(worker);
+
+        }
+
+    }
+    
+    /**
+     * The action for exporting shell data from datasets
+     * 
+     * @author bms41
+     * @since 1.13.8
+     *
+     */
+    public static class ExportShellsAction extends ExportStatsAction {
+
+        private static final String PROGRESS_LBL = "Exporting shells";
+
+        public ExportShellsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
+            super(datasets, PROGRESS_LBL, mw);
+        }
+
+        @Override
+        public void run() {
+
+            File file = FileSelector.chooseStatsExportFile(datasets);
+
+            if (file == null) {
+                cancel();
+                return;
+            }
+
+            IAnalysisMethod m = new DatasetShellsExporter(file, datasets);
+            worker = new DefaultAnalysisWorker(m, datasets.size());
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Exporting stats");
+            ThreadManager.getInstance().submit(worker);
+
+        }
+
+    }
+    
+    /**
+     * The action for exporting shell data from datasets
+     * 
+     * @author bms41
+     * @since 1.13.8
+     *
+     */
+    public static class ExportSignalsAction extends ExportStatsAction {
+
+        private static final String PROGRESS_LBL = "Exporting signals";
+
+        public ExportSignalsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
+            super(datasets, PROGRESS_LBL, mw);
+        }
+
+        @Override
+        public void run() {
+
+            File file = FileSelector.chooseStatsExportFile(datasets);
+
+            if (file == null) {
+                cancel();
+                return;
+            }
+
+            IAnalysisMethod m = new DatasetSignalsExporter(file, datasets);
+            worker = new DefaultAnalysisWorker(m, datasets.size());
+            worker.addPropertyChangeListener(this);
+            this.setProgressMessage("Exporting stats");
+            ThreadManager.getInstance().submit(worker);
+
+        }
 
     }
 

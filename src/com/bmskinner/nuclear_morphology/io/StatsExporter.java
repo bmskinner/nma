@@ -102,7 +102,7 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
      * builder.
      * @param outLine
      */
-    protected abstract void appendHeader(StringBuilder outLine);
+    protected abstract void appendHeader(@NonNull StringBuilder outLine);
     
     /**
      * Append the stats for the dataset to the builder
@@ -110,6 +110,6 @@ public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implem
      * @param outLine
      * @throws Exception
      */
-    protected abstract void append(IAnalysisDataset d, StringBuilder outLine) throws Exception;
+    protected abstract void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception;
 
 }

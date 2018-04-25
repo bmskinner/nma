@@ -88,7 +88,7 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * 
      * @param outLine
      */
-    protected void appendHeader(StringBuilder outLine) {
+    protected void appendHeader(@NonNull StringBuilder outLine) {
 
         outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
