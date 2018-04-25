@@ -18,6 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.io.IOException;
+import java.util.HashMap;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 /**
@@ -28,12 +30,13 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
  *
  */
 public enum ProfileType {
-    ANGLE("Angle profile", "Angle", StatisticDimension.ANGLE), FRANKEN("Franken profile", "Angle",
-            StatisticDimension.ANGLE), DIAMETER("Diameter profile", "Distance across CoM",
-                    StatisticDimension.LENGTH), RADIUS("Radius profile", "Distance from CoM",
+    ANGLE("Angle profile", "Angle", StatisticDimension.ANGLE), 
+    FRANKEN("Franken profile", "Angle",
+            StatisticDimension.ANGLE), 
+    DIAMETER("Diameter profile", "Distance across CoM",
+                    StatisticDimension.LENGTH), 
+    RADIUS("Radius profile", "Distance from CoM",
                             StatisticDimension.LENGTH),
-    // P2P ( "P2P length profile" , "Distance from previous" ,
-    // StatisticDimension.LENGTH),
     ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS);
 
     private String             name;

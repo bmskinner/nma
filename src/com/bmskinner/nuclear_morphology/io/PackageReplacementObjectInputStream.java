@@ -157,21 +157,20 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
          */
 
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions",
-                com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);
-
+                com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);      
+        
     }
 
     /**
      * Constructor.
      * 
-     * @param stream
-     *            input stream
-     * @throws IOException
-     *             if io error
+     * @param stream input stream
+     * @throws IOException if io error
      */
     public PackageReplacementObjectInputStream(final InputStream stream) throws IOException {
         super(stream);
     }
+
 
     @Override
     protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
@@ -188,7 +187,7 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
                 try {
                     Field f = resultClassDescriptor.getClass().getDeclaredField("name");
                     f.setAccessible(true);
-                    f.set(resultClassDescriptor, replacement);
+                    f.set(resultClassDescriptor, replacement);  
                 } catch (Exception e) {
 
                     error("Error while replacing class name: " + e.getMessage(), e);

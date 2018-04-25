@@ -26,9 +26,10 @@ import static org.mockito.Mockito.when;
 
 import java.awt.Shape;
 import java.awt.geom.Path2D;
-import java.io.File;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import org.junit.Before;
@@ -37,13 +38,13 @@ import org.junit.Test;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
-import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -69,6 +70,7 @@ public class ShellDetectorTest {
     	Roi r = new OvalRoi(50, 50, diameter, diameter);
     	ImageProcessor ip = createRoundImage(r, diameter+100);
     	Nucleus n = mock(Nucleus.class);
+    	when(n.getID()).thenReturn(signalGroup);
     	when(n.toRoi()).thenReturn(r);
     	when(n.toOriginalPolygon()).thenReturn(r.getFloatPolygon());    	
     	when(n.toOriginalShape()).thenReturn(createShape(r));
@@ -89,6 +91,7 @@ public class ShellDetectorTest {
     	INuclearSignal s = mock(INuclearSignal.class);
     	Roi signalRoi = new OvalRoi(nDiameter/3-20, nDiameter/3, sDiameter, sDiameter);
     	ImageProcessor ip = createRoundImage(signalRoi, nDiameter+100);
+    	when(s.getID()).thenReturn(signalGroup);
     	when(s.toRoi()).thenReturn(signalRoi);
     	when(s.toOriginalShape()).thenReturn(createShape(signalRoi));
     	when(s.getImage()).thenReturn(ip);
@@ -237,49 +240,83 @@ public class ShellDetectorTest {
     }
     
     @Test
-    public void testValueRangesForRoundNucleusShellDetection() throws Exception {
-    	testValueRangesForRoundNucleusShellDetection(ShrinkType.AREA);
+    public void testValueRangesForRoundNucleusShellDetectionArea() throws Exception {
+    	new ShellRangeValidator().testValueRangesForRoundNucleusShellDetection(ShrinkType.AREA);
+    } 
+    
+    private class ShellRangeValidator {
+        
+        public ShellRangeValidator(){
+            
+        }
+        
+        public void testValueRangesForRoundNucleusShellDetection(ShrinkType type) throws Exception {
+            int maxShells = 10;
+            int minShells = 2;
+            int maxDiam = 300;
+            int minDiam = 10;
+            ICell c = mock(ICell.class);
+            when(c.getId()).thenReturn(signalGroup);
+            
+            for(int shell=minShells; shell<=maxShells; shell++) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Shells\tDiam\tArea\tDiff\t");
+                String s = IntStream.range(0, shell).mapToObj(i-> "Shell_"+i).collect(Collectors.joining("\t"));
+                sb.append(s+System.getProperty("line.separator"));
+                for(int diam=minDiam; diam<=maxDiam; diam+=2) {  
+                    
+                    Nucleus n = createMockNucleus(diam);
+                    sd = new ShellDetector(n, shell, type, false);
+                    long[] counts = sd.findPixelCounts(n);
+                    long sum = LongStream.of(counts).sum();
+                    sb.append(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(counts, sum)+System.getProperty("line.separator"));
+                    System.out.println(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(counts, sum));
+                }
+                IJ.append(sb.toString(), "test/"+type+"_"+shell+"_shellReport.txt");
+            }
+            
+        }
+        
+        private String formatArray(long[] obs, long total) {
+            StringBuilder sb = new StringBuilder();
+            
+            double[] obsRatios = getRatios(obs, total);
+
+            double diff = getDifferencesInRatioFromIdeal(obsRatios);   
+
+            sb.append(diff+"\t"+LongStream.of(obs).mapToObj(l->String.valueOf(l)).collect(Collectors.joining("\t")));
+            return sb.toString();
+        }
+        
+        private double getDifferencesInRatioFromIdeal(double[] obs){
+            double sumDiffs = 0;
+            double[] diffs = new double[obs.length];
+            double fraction = 1d/obs.length;
+            for(int i=0; i<obs.length; i++) {
+                diffs[i] = Math.abs( (fraction*i)-obs[i]);
+                sumDiffs += diffs[i];
+            }
+            return sumDiffs;
+        }
+        
+        private double[] getRatios(long[] counts, long sum){
+            double[] ratios = new double[counts.length];
+            for(int i=0; i<counts.length; i++) {
+                ratios[i] = (double)counts[i]/sum;
+
+            }
+            return ratios;
+        }
+        
+        private double[] getExpected(int nShells, long sum){
+            double[] exp = new double[nShells];
+            double expVal = (double) (1d/nShells) *sum;
+            Arrays.fill(exp, expVal);
+            return exp;
+        }
+
     }
     
-    private void testValueRangesForRoundNucleusShellDetection(ShrinkType type) throws Exception {
-    	int maxShells = 10;
-    	int minShells = 2;
-    	int maxDiam = 400;
-    	int minDiam = 10;
-    	StringBuilder sb = new StringBuilder();
-    	sb.append("Shells\tDiam\tArea\tArray"+System.getProperty("line.separator"));
-    	for(int shell=minShells; shell<=maxShells; shell++) {
-    		for(int diam=minDiam; diam<=maxDiam; diam+=5) {
-    			Nucleus n = createMockNucleus(diam);
-        		sd = new ShellDetector(n, shell, type, false);
-        		long[] counts = sd.findPixelCounts(n);
-        		long sum = LongStream.of(counts).sum();
-        		double[] ratios = new double[shell];
-        		for(int i=0; i<shell; i++) {
-        			ratios[i] = sum==0?0: (double)counts[i]/sum;
-        		}
-        		sb.append(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(ratios)+System.getProperty("line.separator"));
-        		System.out.println(shell+"\t"+diam+"\t"+sum+"\t"+formatArray(ratios));
-        	}
-    	}
-    	IJ.append(sb.toString(), "test/shellReport.txt");
-    }
-    
-    private String formatArray(double[] arr) {
-    	StringBuilder sb = new StringBuilder();
-    	for(int i=0; i<arr.length; i++) {
-    		sb.append(arr[i]+"\t");
-    	}
-    	double[] diffs = new double[arr.length];
-    	double sumDiffs = 0;
-		for(int i=0; i<arr.length; i++) {
-			diffs[i] = Math.abs( (1d/arr.length)-arr[i]);
-			sumDiffs += diffs[i];
-			sb.append(diffs[i]+"\t");
-		}
-		sb.append(sumDiffs);
-    	return sb.toString();
-    }
     
     private boolean testEquals(long[] exp, long[ ]obs){
         assertEquals(exp.length, obs.length);

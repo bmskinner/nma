@@ -26,7 +26,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -123,6 +122,16 @@ public class RandomShellResult implements IShellResult{
     @Override
     public int getNumberOfShells() {
         return nShells;
+    }
+    
+    @Override
+    public String toString(){
+            StringBuilder b = new StringBuilder("Shells : "+nShells+"\n");
+            for(int i=0; i<nShells; i++){
+                 b.append("Shell "+i+": "+counts[i]+"\n");
+            }
+           return b.toString();
+        
     }
 
 }

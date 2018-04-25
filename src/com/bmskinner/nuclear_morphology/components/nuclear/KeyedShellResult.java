@@ -20,6 +20,7 @@
 package com.bmskinner.nuclear_morphology.components.nuclear;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,9 +169,13 @@ public class KeyedShellResult implements IShellResult {
     @Override
     public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
     	 long[] observed   = getObserved(agg, norm);
+    	 System.out.println("Obs vals: "+Arrays.toString(observed));
+    	 
     	 double[] other = expected.getProportions(agg, norm);
+    	 System.out.println("Exp prop: "+Arrays.toString(other));
+    	 
          double[] exp = getExpected(agg, norm, other);
-         
+         System.out.println("Exp vals: "+Arrays.toString(exp));
          for(double d : exp){
              if(d<=0) // we can't do a chi square test if one of the values is zero
                  return 1;
@@ -182,7 +187,7 @@ public class KeyedShellResult implements IShellResult {
     
     /**
      * Get the observed values as a long array.
-     * @return the observerd shell values
+     * @return the observed shell values
      */
     private long[] getObserved(@NonNull Aggregation agg, @NonNull Normalisation norm) {
         long[] observed = new long[nShells];

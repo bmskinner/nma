@@ -192,9 +192,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
             for (UUID signalGroup : activeDataset().getCollection().getSignalGroupIDs()) {
 
-                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID)) {
+                if (signalGroup.equals(IShellResult.RANDOM_SIGNAL_ID))
                     continue;
-                }
 
                 // get the status within each dataset
 				boolean visible = activeDataset().getCollection().getSignalGroup(signalGroup).get().isVisible();

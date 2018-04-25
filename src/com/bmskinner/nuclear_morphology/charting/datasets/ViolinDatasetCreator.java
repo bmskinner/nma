@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.ViolinPlots.ViolinCategoryDataset;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -190,11 +192,11 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
         MeasurementScale scale = options.getScale();
         ViolinCategoryDataset ds = new ViolinCategoryDataset();
 
-        for (IAnalysisDataset d : datasets) {
+        for (@NonNull IAnalysisDataset d : datasets) {
 
             ICellCollection collection = d.getCollection();
 
-            for (UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
+            for (@NonNull UUID signalGroup : collection.getSignalManager().getSignalGroupIDs()) {
 
                 if (collection.getSignalManager().hasSignals(signalGroup)) {
 
@@ -206,9 +208,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                      * For charting, use offset angles, otherwise the boxplots
                      * will fail on wrapped signals
                      */
-                    if (stat.equals(PlottableStatistic.ANGLE)) {
+                    if (stat.equals(PlottableStatistic.ANGLE))
                         values = collection.getSignalManager().getOffsetSignalAngles(signalGroup);
-                    }
 
                     List<Number> list = new ArrayList<Number>();
                     for (double value : values) {
@@ -216,8 +217,6 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     }
 
                     ds.add(list, rowKey, colKey);
-
-//                    addProbabilities(ds, list, rowKey, colKey);
                 }
             }
         }
