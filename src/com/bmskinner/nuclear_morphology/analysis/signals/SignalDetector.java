@@ -100,7 +100,7 @@ public class SignalDetector extends Detector {
      */
     public List<INuclearSignal> detectSignal(File sourceFile, ImageStack stack, Nucleus n) throws Exception {
 
-        options.unlock().setThreshold(minThreshold); // reset to default;
+        options.setThreshold(minThreshold); // reset to default;
 
         if (options.getDetectionMode().equals(SignalDetectionMode.FORWARD)) {
             finest("Running forward detection");
@@ -136,10 +136,10 @@ public class SignalDetector extends Detector {
         // the given minimum
         if (newThreshold > minThreshold) {
             fine("Threshold set at: " + newThreshold);
-            options.unlock().setThreshold(newThreshold);
+            options.setThreshold(newThreshold);
         } else {
             fine("Threshold kept at minimum: " + minThreshold);
-            options.unlock().setThreshold(minThreshold);
+            options.setThreshold(minThreshold);
         }
     }
 

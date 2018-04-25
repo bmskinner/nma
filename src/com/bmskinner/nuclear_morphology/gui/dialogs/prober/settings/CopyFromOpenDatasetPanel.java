@@ -29,8 +29,6 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 /**
@@ -51,7 +49,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
     private JButton copyBtn;
 
-    public CopyFromOpenDatasetPanel(IMutableDetectionOptions op) {
+    public CopyFromOpenDatasetPanel(IDetectionOptions op) {
         super(op);
         this.add(createPanel(), BorderLayout.CENTER);
     }
@@ -77,9 +75,9 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
 
             	// Ensure the folder is not overwritten by the new options
             	File folder = options.getFolder();
-            	Optional<IMutableAnalysisOptions> op = sourceDataset.getAnalysisOptions();
+            	Optional<IAnalysisOptions> op = sourceDataset.getAnalysisOptions();
             	if(op.isPresent()){
-            		Optional<IMutableDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
             		options.set(srcOptions.get());
             		options.setFolder(folder);
             	}

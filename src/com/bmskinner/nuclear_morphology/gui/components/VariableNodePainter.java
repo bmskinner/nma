@@ -23,6 +23,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.geom.Rectangle2D;
+
 import jebl.evolution.graphs.Node;
 import jebl.evolution.trees.RootedTree;
 import jebl.gui.trees.treeviewer.painters.BasicLabelPainter;

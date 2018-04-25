@@ -18,7 +18,6 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -26,9 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
@@ -43,7 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements PanelUpdatingEventListener {
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private static final String CYTO_SETTINGS_LBL = "Cytoplasm";
     private static final String NUCL_SETTINGS_LBL = "Nucleus";
@@ -51,7 +48,7 @@ public class NeutrophilDetectionSettingsPanel extends SettingsPanel implements P
 
     private JButton reloadBtn;
 
-    public NeutrophilDetectionSettingsPanel(IMutableAnalysisOptions options) {
+    public NeutrophilDetectionSettingsPanel(IAnalysisOptions options) {
         this.options = options;
 
         this.setLayout(new BorderLayout());

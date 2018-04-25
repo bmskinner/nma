@@ -31,8 +31,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
@@ -68,7 +67,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
 
     private File savePath; // the file to save this dataset to
 
-    private IMutableAnalysisOptions analysisOptions; // the setup for this
+    private IAnalysisOptions analysisOptions; // the setup for this
                                                      // analysis
 
     /*
@@ -581,7 +580,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * @see analysis.IAnalysisDataset#getAnalysisOptions()
      */
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
@@ -602,7 +601,7 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
      * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
      */
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 

@@ -29,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 @SuppressWarnings("serial")
 public class ColourThresholdWatershedSwitchPanel extends DetectionSettingsPanel implements ActionListener {
@@ -43,7 +42,7 @@ public class ColourThresholdWatershedSwitchPanel extends DetectionSettingsPanel 
     private JRadioButton waterBtn     = new JRadioButton(WATERSHED_LBL);
     private ButtonGroup  group        = new ButtonGroup();
 
-    public ColourThresholdWatershedSwitchPanel(final IMutableDetectionOptions options) {
+    public ColourThresholdWatershedSwitchPanel(final IDetectionOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 

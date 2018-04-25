@@ -33,11 +33,11 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
  * @since 1.13.3
  *
  */
-public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
+public class DefaultAnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
 
-    private Map<String, IMutableDetectionOptions> detectionOptions = new HashMap<String, IMutableDetectionOptions>(0);
+    private Map<String, IDetectionOptions> detectionOptions = new HashMap<String, IDetectionOptions>(0);
 
     private double profileWindowProportion;
 
@@ -71,7 +71,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         for (String key : template.getDetectionOptionTypes()) {
 
-            Optional<IMutableDetectionOptions> op  = template.getDetectionOptions(key);
+            Optional<IDetectionOptions> op  = template.getDetectionOptions(key);
             if(op.isPresent())
 	            setDetectionOptions(key, op.get().duplicate());
         }
@@ -84,7 +84,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public Optional<IMutableDetectionOptions> getDetectionOptions(String key){
+    public Optional<IDetectionOptions> getDetectionOptions(String key){
         if (detectionOptions.containsKey(key)) {
             return Optional.of(detectionOptions.get(key));
         } else {
@@ -136,7 +136,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public void setDetectionOptions(String key, IMutableDetectionOptions options) {
+    public void setDetectionOptions(String key, IDetectionOptions options) {
         detectionOptions.put(key, options);
 
     }
@@ -168,7 +168,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
     @Override
     public INuclearSignalOptions getNuclearSignalOptions(UUID signalGroup) {
 
-    	Optional<IMutableDetectionOptions> op = getDetectionOptions(signalGroup.toString());
+    	Optional<IDetectionOptions> op = getDetectionOptions(signalGroup.toString());
     	
     	if(op.isPresent())
     		return (INuclearSignalOptions) op.get();
@@ -209,7 +209,7 @@ public class DefaultAnalysisOptions implements IMutableAnalysisOptions {
 
         for (String s : detectionOptions.keySet()) {
             IDetectionOptions d = detectionOptions.get(s);
-            Optional<IMutableDetectionOptions> otherSub = other.getDetectionOptions(s);
+            Optional<IDetectionOptions> otherSub = other.getDetectionOptions(s);
             if((d!=null && !otherSub.isPresent()) || d==null && otherSub.isPresent())
             	return false;
             

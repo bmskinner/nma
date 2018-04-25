@@ -19,10 +19,11 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober;
 
 import java.awt.FlowLayout;
+
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LoadingIconDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
@@ -38,7 +39,7 @@ public abstract class IntegratedImageProber extends LoadingIconDialog {
 
     private static final String PROCEED_LBL = "Proceed with detection";
 
-    protected IMutableAnalysisOptions options; // the active options
+    protected IAnalysisOptions options; // the active options
 
     protected SettingsPanel optionsSettingsPanel; // settings
 

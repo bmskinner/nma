@@ -34,14 +34,11 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
-import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -50,10 +47,10 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public class NewAnalysisAction extends VoidResultAction {
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
     private Date                    startTime;
     private String                  outputFolderName;
-    IMutableDetectionOptions nucleusOptions;
+    IDetectionOptions nucleusOptions;
 
     private File folder = null;
 
@@ -107,7 +104,7 @@ public class NewAnalysisAction extends VoidResultAction {
 
         if (analysisSetup.isOk()) {
 
-        	Optional<IMutableDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
             if(!op.isPresent()){
             	cancel();
             	return;

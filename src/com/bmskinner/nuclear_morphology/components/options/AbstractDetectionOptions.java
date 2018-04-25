@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  * @since 1.13.3
  *
  */
-public abstract class AbstractDetectionOptions implements IMutableDetectionOptions {
+public abstract class AbstractDetectionOptions implements IDetectionOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -46,7 +46,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
 
     private boolean isNormaliseContrast;
 
-    private IMutableCannyOptions cannyOptions = null;
+    private ICannyOptions cannyOptions = null;
 
     /**
      * Construct specifying a folder of images to be analysed
@@ -216,7 +216,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
     }
 
     @Override
-    public IMutableCannyOptions getCannyOptions() {
+    public ICannyOptions getCannyOptions() {
         return cannyOptions;
     }
 
@@ -265,7 +265,7 @@ public abstract class AbstractDetectionOptions implements IMutableDetectionOptio
     }
 
     @Override
-    public void setCannyOptions(IMutableCannyOptions canny) {
+    public void setCannyOptions(ICannyOptions canny) {
         this.cannyOptions = canny;
     }
 

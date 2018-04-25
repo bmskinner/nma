@@ -26,11 +26,8 @@ import javax.swing.JPanel;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NeutrophilDetectionSettingsPanel;
-import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SettingsPanel;
 
 @SuppressWarnings("serial")
 public class NeutrophilImageProber extends IntegratedImageProber {
@@ -86,7 +83,7 @@ public class NeutrophilImageProber extends IntegratedImageProber {
         this.setVisible(true);
     }
 
-    public IMutableAnalysisOptions getOptions() {
+    public IAnalysisOptions getOptions() {
         return options;
     }
 

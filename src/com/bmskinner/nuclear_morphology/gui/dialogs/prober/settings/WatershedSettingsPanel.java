@@ -18,7 +18,6 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.GridBagLayout;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 public class WatershedSettingsPanel extends DetectionSettingsPanel {
 
@@ -49,7 +47,7 @@ public class WatershedSettingsPanel extends DetectionSettingsPanel {
     private JSpinner dynamicSpinner;
     private JSpinner erosionSpinner;
 
-    public WatershedSettingsPanel(final IMutableDetectionOptions options) {
+    public WatershedSettingsPanel(final IDetectionOptions options) {
         super(options);
 
         this.add(createPanel(), BorderLayout.CENTER);

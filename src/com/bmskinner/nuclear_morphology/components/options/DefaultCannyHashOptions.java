@@ -25,7 +25,7 @@ package com.bmskinner.nuclear_morphology.components.options;
  * @since 1.13.4
  *
  */
-public class DefaultCannyHashOptions extends AbstractHashOptions implements IMutableCannyOptions {
+public class DefaultCannyHashOptions extends AbstractHashOptions implements ICannyOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -66,14 +66,6 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
         this.setKernelWidth(o.getKernelWidth());
         this.setClosingObjectRadius(o.getClosingObjectRadius());
         this.setAddBorder(o.isAddBorder());
-    }
-
-    public IMutableCannyOptions unlock() {
-        return this;
-    }
-
-    public ICannyOptions lock() {
-        return this;
     }
 
     @Override
@@ -137,10 +129,8 @@ public class DefaultCannyHashOptions extends AbstractHashOptions implements IMut
     }
 
     @Override
-    public IMutableCannyOptions duplicate() {
-
-        DefaultCannyHashOptions result = new DefaultCannyHashOptions(this);
-        return result;
+    public ICannyOptions duplicate() {
+        return new DefaultCannyHashOptions(this);
     }
 
     @Override

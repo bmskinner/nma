@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import ij.IJ;
-
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
@@ -37,12 +35,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
+
+import ij.IJ;
 
 /**
  * This holds a CellCollection, the analyses that have been run on it and the
@@ -72,7 +72,7 @@ public class AnalysisDataset implements IAnalysisDataset {
     private CellCollection thisCollection;
     private File           savePath;      // the file to save the analysis to
 
-    private IMutableAnalysisOptions analysisOptions;
+    private IAnalysisOptions analysisOptions;
 
     private Paint datasetColour = null; // use for colouring the dataset in
                                         // comparison with other datasets
@@ -597,7 +597,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getAnalysisOptions()
      */
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
@@ -622,7 +622,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * analysis.IAnalysisDataset#setAnalysisOptions(analysis.AnalysisOptions)
      */
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
     }
 

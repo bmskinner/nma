@@ -18,11 +18,12 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import java.awt.BorderLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
 /**
@@ -37,14 +38,14 @@ import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsPanel extends SettingsPanel {
 
-    private IMutableNuclearSignalOptions options;
+    private INuclearSignalOptions options;
 
     private static final String OBJECT_FINDING_LBL = "Object finding";
     private static final String SIZE_SETTINGS_LBL  = "Filtering";
     private static final String THRESHOLD_LBL      = "Thresholding";
     private static final String CHANNEL_LBL        = "Image";
 
-    public SignalDetectionSettingsPanel(IMutableNuclearSignalOptions options) {
+    public SignalDetectionSettingsPanel(INuclearSignalOptions options) {
 
         try {
             this.options = options;

@@ -33,7 +33,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 
 /**
  * A size settings panel for signals, which replaces the max size with a max
@@ -63,7 +63,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
     private JSpinner minCircSpinner;
     private JSpinner maxCircSpinner;
 
-    public SignalSizeSettingsPanel(final IMutableNuclearSignalOptions options) {
+    public SignalSizeSettingsPanel(final INuclearSignalOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 
@@ -73,7 +73,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
      * Create the settings spinners based on the input options
      */
     private void createSpinners() {
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+    	INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         minSizeSpinner = new JSpinner(
                 new SpinnerNumberModel(new Integer((int) options.getMinSize()), MIN_RANGE_SIZE, null, SIZE_STEP_SIZE));
@@ -137,7 +137,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
     @Override
     protected void update() {
         super.update();
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+        INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         minSizeSpinner.setValue((int) options.getMinSize());
         maxSizeSpinner.setValue(op.getMaxFraction());
@@ -168,7 +168,7 @@ public class SignalSizeSettingsPanel extends DetectionSettingsPanel implements C
     @Override
     public void stateChanged(ChangeEvent e) {
 
-        IMutableNuclearSignalOptions op = (IMutableNuclearSignalOptions) options;
+    	INuclearSignalOptions op = (INuclearSignalOptions) options;
 
         try {
 

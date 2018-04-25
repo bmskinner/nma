@@ -36,8 +36,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -275,7 +273,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @return
      */
-    Optional<IMutableAnalysisOptions> getAnalysisOptions();
+    Optional<IAnalysisOptions> getAnalysisOptions();
 
     /**
      * Test if the dataset has analysis options set. This is not the case for
@@ -290,7 +288,7 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * 
      * @param analysisOptions
      */
-    void setAnalysisOptions(IMutableAnalysisOptions analysisOptions);
+    void setAnalysisOptions(IAnalysisOptions analysisOptions);
 
     /**
      * Add the given dataset as a cluster result. This is a form of child

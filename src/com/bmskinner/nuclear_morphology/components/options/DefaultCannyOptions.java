@@ -29,7 +29,7 @@ import java.util.List;
  * 
  */
 @Deprecated
-public class DefaultCannyOptions implements IMutableCannyOptions {
+public class DefaultCannyOptions implements ICannyOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -98,14 +98,6 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
         kernelWidth = template.getKernelWidth();
         closingObjectRadius = template.getClosingObjectRadius();
         isAddBorder = template.isAddBorder();
-    }
-
-    public IMutableCannyOptions unlock() {
-        return this;
-    }
-
-    public ICannyOptions lock() {
-        return this;
     }
 
     /*
@@ -412,7 +404,7 @@ public class DefaultCannyOptions implements IMutableCannyOptions {
     }
 
     @Override
-    public IMutableCannyOptions duplicate() {
+    public ICannyOptions duplicate() {
         return new DefaultCannyOptions(this);
     }
 

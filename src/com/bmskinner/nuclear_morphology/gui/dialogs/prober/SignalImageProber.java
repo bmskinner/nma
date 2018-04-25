@@ -34,11 +34,8 @@ import com.bmskinner.nuclear_morphology.analysis.signals.SignalFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.SignalDetectionSettingsPanel;
@@ -56,7 +53,7 @@ public class SignalImageProber extends IntegratedImageProber {
     private static final String DIALOG_TITLE_BAR_LBL = "Signal detection settings";
     private static final String NEW_NAME_LBL         = "Enter a signal group name";
 
-    private final IMutableNuclearSignalOptions options;
+    private final INuclearSignalOptions options;
     final IAnalysisDataset                     dataset;
     private UUID                               id;
 
@@ -73,11 +70,11 @@ public class SignalImageProber extends IntegratedImageProber {
         this.dataset = dataset;
         options = OptionsFactory.makeNuclearSignalOptions(folder);
         
-        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	throw new IllegalArgumentException("Dataset has no options");
         
-        Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!nOp.isPresent())
         	throw new IllegalArgumentException("Dataset has no nucles options");

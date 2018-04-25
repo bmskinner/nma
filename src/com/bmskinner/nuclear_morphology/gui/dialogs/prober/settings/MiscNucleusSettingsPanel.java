@@ -28,18 +28,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 @SuppressWarnings("serial")
 public class MiscNucleusSettingsPanel extends SettingsPanel {
 
     private static final String KEEP_FAILED_LBL = "Keep filtered nuclei";
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private JCheckBox keepFailedheckBox = new JCheckBox("", false);
 
-    public MiscNucleusSettingsPanel(final IMutableAnalysisOptions op) {
+    public MiscNucleusSettingsPanel(final IAnalysisOptions op) {
         super();
         options = op;
         this.add(createPanel(), BorderLayout.CENTER);

@@ -59,9 +59,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultPigSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.nuclei.sperm.DefaultRodentSpermNucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.NucleusStatistic;
@@ -151,11 +149,11 @@ public class DatasetConverter implements Loggable, Importer {
 
             if (oldDataset.getAnalysisOptions().isPresent()) {
             	IAnalysisOptions oldOptions = oldDataset.getAnalysisOptions().get();
-                IMutableAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
+            	IAnalysisOptions newOptions = OptionsFactory.makeAnalysisOptions();
 
-                IMutableDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
+                IDetectionOptions oldNucleusOptions = oldOptions.getDetectionOptions(IAnalysisOptions.NUCLEUS).get();
 
-                IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
+                IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(oldNucleusOptions);
                 newOptions.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleusOptions);
 
                 for (UUID id : oldOptions.getNuclearSignalGroups()) {
@@ -164,7 +162,7 @@ public class DatasetConverter implements Loggable, Importer {
                     	File folder = oldDataset.getCollection().getSignalGroup(id).get().getFolder();
                     	int channel = oldDataset.getCollection().getSignalGroup(id).get().getChannel();
 
-                    	IMutableNuclearSignalOptions newSignalOptions = OptionsFactory
+                    	INuclearSignalOptions newSignalOptions = OptionsFactory
                     			.makeNuclearSignalOptions(oldSignalOptions);
                     	newSignalOptions.setFolder(folder);
                     	newSignalOptions.setChannel(channel);

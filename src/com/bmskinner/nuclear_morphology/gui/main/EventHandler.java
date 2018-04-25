@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -221,7 +221,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 flag |= SingleDatasetResultAction.NUCLEUS_ANNOTATE;
                 flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
 
-                Optional<IMutableAnalysisOptions> op = event.firstDataset().getAnalysisOptions();
+                Optional<IAnalysisOptions> op = event.firstDataset().getAnalysisOptions();
                 if(op.isPresent() && op.get().refoldNucleus())
                 	flag |= SingleDatasetResultAction.CURVE_REFOLD;
 
@@ -569,7 +569,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             try {
 
             	latch.await();
-            	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+            	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
             	if(op.isPresent())
             		op.get().setRefoldNucleus(true);
 

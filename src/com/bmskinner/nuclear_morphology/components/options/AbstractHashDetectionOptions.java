@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  * @since 1.13.4
  *
  */
-public abstract class AbstractHashDetectionOptions extends AbstractHashOptions implements IMutableDetectionOptions {
+public abstract class AbstractHashDetectionOptions extends AbstractHashOptions implements IDetectionOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -82,7 +82,7 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
             }
         } else {
 
-            IMutableCannyOptions cannyOptions = OptionsFactory.makeCannyOptions();
+        	ICannyOptions cannyOptions = OptionsFactory.makeCannyOptions();
             cannyOptions.setUseCanny(false);
             subMap.put(IDetectionSubOptions.CANNY_OPTIONS, cannyOptions);
         }
@@ -241,12 +241,12 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
     }
 
     @Override
-    public IMutableCannyOptions getCannyOptions() throws MissingOptionException {
+    public ICannyOptions getCannyOptions() throws MissingOptionException {
 
         if (this.hasCannyOptions()) {
             IDetectionSubOptions c = subMap.get(IDetectionSubOptions.CANNY_OPTIONS);
-            if (c instanceof IMutableCannyOptions) {
-                return (IMutableCannyOptions) c;
+            if (c instanceof ICannyOptions) {
+                return (ICannyOptions) c;
             } else {
                 throw new MissingOptionException("Sub options cannot be cast to canny");
             }
@@ -301,7 +301,7 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
     }
 
     @Override
-    public void setCannyOptions(IMutableCannyOptions canny) {
+    public void setCannyOptions(ICannyOptions canny) {
         subMap.put(IDetectionSubOptions.CANNY_OPTIONS, canny);
     }
 
@@ -404,19 +404,19 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
     }
 
-    @Override
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    @Override
+//    public IMutableDetectionOptions unlock() {
+//        return this;
+//    }
 
     @Override
     public boolean isUseHoughTransform() {
         return boolMap.get(IS_USE_HOUGH);
     }
 
-    @Override
-    public IDetectionOptions lock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions lock() {
+//        return this;
+//    }
 
 }

@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 import ij.ImagePlus;
@@ -720,9 +719,9 @@ public class ImageFilterer extends AbstractImageFilterer {
         double upper = Math.min(255, (1.0 + (0.6 * sigma)) * medianPixel);
         upper = upper < 0.3 ? 0.3 : upper; // hard limit
 
-        if (options instanceof IMutableCannyOptions) {
-            ((IMutableCannyOptions) options).setLowThreshold((float) lower);
-            ((IMutableCannyOptions) options).setHighThreshold((float) upper);
+        if (options instanceof ICannyOptions) {
+            ((ICannyOptions) options).setLowThreshold((float) lower);
+            ((ICannyOptions) options).setHighThreshold((float) upper);
         }
     }
 

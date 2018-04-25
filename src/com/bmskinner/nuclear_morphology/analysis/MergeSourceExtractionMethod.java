@@ -29,15 +29,12 @@ import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.MergeSourceAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.SignalGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * Extract virtual merge source datasets into real root datasets.
@@ -102,7 +99,7 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
             // Copy over the signal collections where appropriate
             copySignalGroups(templateCollection, newDataset);
 
-            Optional<IMutableAnalysisOptions> op = virtualMergeSource.getAnalysisOptions();
+            Optional<IAnalysisOptions> op = virtualMergeSource.getAnalysisOptions();
             if(op.isPresent())
                 newDataset.setAnalysisOptions(op.get());
 

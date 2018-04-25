@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -42,13 +41,9 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
@@ -183,9 +178,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                 if (applyAllOption == 0) { // button at index 1
 
                 	activeDataset().getCollection().setScale(scale);
-                	Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+                	Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
                 	if(op.isPresent()){
-                		Optional<IMutableDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+                		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
                 		if(nOp.isPresent())
                 			nOp.get().setScale(scale);
                 	}

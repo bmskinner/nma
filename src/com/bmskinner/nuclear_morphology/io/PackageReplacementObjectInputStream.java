@@ -159,6 +159,26 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.analysis.nucleus.DefaultNucleusDetectionOptions",
                 com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions.class);      
         
+        /*
+         * Changes from 1.13.7 to 1.13.8
+         */
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions",
+        		com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.class);  
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableLobeDetectionOptions",
+        		com.bmskinner.nuclear_morphology.components.options.ILobeDetectionOptions.class);  
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions",
+        		com.bmskinner.nuclear_morphology.components.options.ICannyOptions.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions",
+        		com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions",
+        		com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions.class); 
+        
+        
     }
 
     /**

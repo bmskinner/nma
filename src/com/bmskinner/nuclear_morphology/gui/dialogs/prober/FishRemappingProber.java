@@ -31,7 +31,6 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FishRemappingFinder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {

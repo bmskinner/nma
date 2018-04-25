@@ -29,8 +29,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
@@ -66,9 +65,9 @@ public class ImagePreprocessingSettingsPanel extends SettingsPanel {
 
     private JCheckBox addBorderCheckBox;
 
-    private IMutableCannyOptions options;
+    private ICannyOptions options;
 
-    public ImagePreprocessingSettingsPanel(final IMutableDetectionOptions options) {
+    public ImagePreprocessingSettingsPanel(final IDetectionOptions options) {
         try {
             this.options = options.getCannyOptions();
         } catch (MissingOptionException e) {

@@ -121,7 +121,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * 
      * @return
      */
-    IMutableDetectionOptions unlock();
+//    IMutableDetectionOptions unlock();
 
     /**
      * Create a copy of these options
@@ -237,7 +237,7 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
      * 
      * @return the Canny options, or null if none have been set
      */
-    IMutableCannyOptions getCannyOptions() throws MissingOptionException;
+    ICannyOptions getCannyOptions() throws MissingOptionException;
 
     /**
      * Test if the given component meets the criteria within these options. Note
@@ -252,5 +252,100 @@ public interface IDetectionOptions extends Serializable, Loggable, HashOptions {
     boolean isValid(CellularComponent c);
 
     List<String> getKeys();
+    
+    /**
+     * Set the RGB channel to detect the object in
+     * 
+     * @param channel
+     */
+    void setChannel(int channel);
+
+    /**
+     * Set the scale of the object in pixels per micron
+     * 
+     * @param scale
+     */
+    void setScale(double scale);
+
+    /**
+     * Set the detection threshold
+     * 
+     * @param nucleusThreshold
+     */
+    void setThreshold(int nucleusThreshold);
+
+    /*
+     * Set the minimum size of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMinSize(double minNucleusSize);
+
+    /*
+     * Set the maximum size of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMaxSize(double maxNucleusSize);
+
+    /*
+     * Set the minimum circularity of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMinCirc(double minNucleusCirc);
+
+    /*
+     * Set the maximum circularity of the object
+     * 
+     * @param minNucleusSize
+     */
+    void setMaxCirc(double maxNucleusCirc);
+
+    /**
+     * Set the folder of images where the objects are to be detected
+     * 
+     * @param folder
+     */
+    void setFolder(File folder);
+
+    /**
+     * Set Canny edge detection options to override thresholds
+     * 
+     * @param canny
+     */
+    void setCannyOptions(ICannyOptions canny);
+
+    void setNormaliseContrast(boolean b);
+
+    /**
+     * Set this options to match the parameters in the given option
+     * 
+     * @param options
+     */
+    void set(IDetectionOptions options);
+
+    /**
+     * Set the hough options
+     * 
+     * @param hough
+     */
+    void setHoughOptions(IHoughDetectionOptions hough);
+
+    /**
+     * Set arbitrary sub options
+     * 
+     * @param s
+     *            the options key
+     * @param sub
+     */
+    void setSubOptions(String s, IDetectionSubOptions sub);
+
+    /**
+     * Set if the image is RGB or greyscale
+     * 
+     * @param b
+     */
+    void setRGB(boolean b);
 
 }

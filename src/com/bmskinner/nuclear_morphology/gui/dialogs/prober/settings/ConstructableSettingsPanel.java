@@ -25,8 +25,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 
@@ -51,7 +51,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     public static final String  THRESHOLDING_LBL   = "Thresholding";
     private static final String RELOAD_LBL         = "Reload";
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private JPanel mainPanel;
 
@@ -60,7 +60,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * 
      * @param options
      */
-    public ConstructableSettingsPanel(IMutableAnalysisOptions options) {
+    public ConstructableSettingsPanel(IAnalysisOptions options) {
         this.options = options;
         mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -117,7 +117,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addEdgeThresholdSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         
@@ -154,7 +154,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addThresholdPanel(String optionsKey, String label) throws MissingOptionException {
-        Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+        Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ThresholdSettingsPanel(subOptions.get());
@@ -188,7 +188,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColourThresholdWatershedSwitchPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdWatershedSwitchPanel(subOptions.get());
@@ -221,7 +221,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addTopHatPanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new TophatPanel(subOptions.get());
@@ -257,7 +257,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addColorThresholdPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ColourThresholdingSettingsPanel(subOptions.get());
@@ -293,7 +293,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageProcessingPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImagePreprocessingSettingsPanel(subOptions.get());
@@ -328,7 +328,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      * @throws MissingOptionException
      */
     public ConstructableSettingsPanel addSizePanel(String optionsKey, String label) throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ComponentSizeSettingsPanel(subOptions.get());
@@ -420,7 +420,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addImageChannelPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new ImageChannelSettingsPanel(subOptions.get());
@@ -456,7 +456,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
      */
     public ConstructableSettingsPanel addCopyFromOpenPanel(String optionsKey, String label)
             throws MissingOptionException {
-    	Optional<IMutableDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
+    	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
         SettingsPanel panel = new CopyFromOpenDatasetPanel(subOptions.get());

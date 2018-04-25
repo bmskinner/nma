@@ -44,13 +44,12 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 
 public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
 
-    protected IMutableNuclearSignalOptions options = null;
+    protected INuclearSignalOptions options = null;
     protected File                         folder;
     protected int                          channel;
     protected UUID                         signalGroup;
@@ -75,7 +74,7 @@ public class SignalDetectionMethod extends SingleDatasetAnalysisMethod {
         if(!d.getCollection().hasSignalGroup(group))
         	throw new IllegalArgumentException("Signal group is not present in dataset");
 
-        this.options = (IMutableNuclearSignalOptions) options.duplicate();
+        this.options = (INuclearSignalOptions) options.duplicate();
         this.folder = options.getFolder();
         this.channel = options.getChannel();
         this.signalGroup = group;

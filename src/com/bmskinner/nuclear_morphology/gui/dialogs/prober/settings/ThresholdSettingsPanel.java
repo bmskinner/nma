@@ -25,8 +25,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 @SuppressWarnings("serial")
 public class ThresholdSettingsPanel extends DetectionSettingsPanel {
@@ -39,7 +39,7 @@ public class ThresholdSettingsPanel extends DetectionSettingsPanel {
 
     private JSpinner thresholdSpinner;
 
-    public ThresholdSettingsPanel(final IMutableDetectionOptions options) {
+    public ThresholdSettingsPanel(final IDetectionOptions options) {
         super(options);
 
         this.add(createPanel(), BorderLayout.CENTER);

@@ -30,7 +30,6 @@ import javax.swing.JRadioButton;
 
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 
 /**
@@ -53,7 +52,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
     private JRadioButton edgeBtn      = new JRadioButton(EDGE_LBL);
     private ButtonGroup  group        = new ButtonGroup();
 
-    public EdgeThresholdSwitchPanel(final IMutableDetectionOptions options) {
+    public EdgeThresholdSwitchPanel(final IDetectionOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 
@@ -79,7 +78,7 @@ public class EdgeThresholdSwitchPanel extends DetectionSettingsPanel implements 
         try {
             ICannyOptions canny = options.getCannyOptions();
 
-            SettingsPanel cannyPanel = new CannySettingsPanel(canny.unlock());
+            SettingsPanel cannyPanel = new CannySettingsPanel(canny);
             SettingsPanel thresholdPanel = new ThresholdSettingsPanel(options);
 
             this.addSubPanel(cannyPanel);

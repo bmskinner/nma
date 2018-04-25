@@ -27,6 +27,11 @@ package com.bmskinner.nuclear_morphology.components.options;
  */
 public interface ILobeDetectionOptions extends IDetectionOptions {
 
+	 /**
+     * Set the diameter of lobes as a fraction of the nuclear diameter
+     */
+    void setLobeDiameter(double d);
+    
     /**
      * Get the diameter of lobes as a fraction of the nuclear diameter
      * 

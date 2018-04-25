@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.options;
 import java.io.File;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
@@ -71,9 +72,9 @@ public class DefaultNucleusHashDetectionOptions extends AbstractHashDetectionOpt
 
     }
 
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    public IMutableDetectionOptions unlock() {
+//        return this;
+//    }
 
     public IDetectionOptions lock() {
         return this;
@@ -97,7 +98,7 @@ public class DefaultNucleusHashDetectionOptions extends AbstractHashDetectionOpt
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new DefaultNucleusHashDetectionOptions(this);
     }
 }

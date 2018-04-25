@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTree;

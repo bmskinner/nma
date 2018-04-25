@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 /**
  * The default detection options for a nucleus
@@ -88,14 +89,14 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new DefaultNucleusDetectionOptions(this);
     }
 
-    @Override
-    public IDetectionOptions lock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions lock() {
+//        return this;
+//    }
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {
@@ -103,10 +104,10 @@ public class DefaultNucleusDetectionOptions extends AbstractDetectionOptions {
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
-    @Override
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions unlock() {
+//        return this;
+//    }
 
     @Override
     public boolean isUseHoughTransform() {

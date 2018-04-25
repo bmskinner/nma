@@ -32,8 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
@@ -107,11 +106,11 @@ public class FileSelector {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Remapping file", Importer.LOC_FILE_EXTENSION);
         File defaultDir = null;
         
-        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
@@ -238,11 +237,11 @@ public class FileSelector {
      */
     public static File chooseFISHDirectory(IAnalysisDataset dataset) {
 
-    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
 
@@ -258,11 +257,11 @@ public class FileSelector {
      * @return the selected folder, or null if user cancelled or invalid choice
      */
     public static File choosePostFISHDirectory(IAnalysisDataset dataset) {
-    	Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
         if(!op.isPresent())
         	return null;
         
-        Optional<IMutableDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         if(!im.isPresent())
         	return null;
         

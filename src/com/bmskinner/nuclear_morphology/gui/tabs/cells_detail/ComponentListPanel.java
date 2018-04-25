@@ -39,7 +39,6 @@ import com.bmskinner.nuclear_morphology.components.IAcrosome;
 import com.bmskinner.nuclear_morphology.components.ICytoplasm;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 @SuppressWarnings("serial")

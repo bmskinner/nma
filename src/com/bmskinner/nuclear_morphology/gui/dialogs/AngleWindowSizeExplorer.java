@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagE
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -105,7 +104,7 @@ public class AngleWindowSizeExplorer extends LoadingIconDialog implements Change
         double windowSizeMin = 0.001;
         double windowSizeMax = 0.50d;
 
-        Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+        Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
      // default if analysis options are not present - e.g. a merge
         double windowSizeActual = op.isPresent() ? op.get().getProfileWindowProportion() : IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 

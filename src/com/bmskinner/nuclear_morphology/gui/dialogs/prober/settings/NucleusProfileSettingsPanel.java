@@ -33,8 +33,7 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 /**
  * Holds other nucleus detection options. E.g. profile window
@@ -53,13 +52,13 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     private static final String TYPE_LBL           = "Nucleus type";
     private static final String PROFILE_WINDOW_LBL = "Profile window";
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
 
     private JSpinner profileWindow;
 
     private JComboBox<NucleusType> typeBox;
 
-    public NucleusProfileSettingsPanel(final IMutableAnalysisOptions op) {
+    public NucleusProfileSettingsPanel(final IAnalysisOptions op) {
         super();
         options = op;
         this.add(createPanel(), BorderLayout.CENTER);
@@ -75,10 +74,10 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         typeBox.addActionListener(e -> {
 
-        	Optional<IMutableDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> nOptions = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         	if(!nOptions.isPresent())
         		return;
-        	IMutableDetectionOptions nucleusOptions = nOptions.get();
+        	IDetectionOptions nucleusOptions = nOptions.get();
 
         	NucleusType type = (NucleusType) typeBox.getSelectedItem();
         	options.setNucleusType(type);

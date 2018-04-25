@@ -27,7 +27,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
+import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions.SignalDetectionMode;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 
@@ -40,13 +40,13 @@ public class SignalMethodSettingsPanel extends SettingsPanel {
     private static final String REVERSE_DESC_LABEL  = Labels.Signals.REVERSE_THRESHOLDING_RADIO_LABEL;
     private static final String ADAPTIVE_DESC_LABEL = Labels.Signals.ADAPTIVE_THRESHOLDING_RADIO_LABEL;
 
-    private IMutableNuclearSignalOptions options;
+    private INuclearSignalOptions options;
 
     private JComboBox<SignalDetectionMode> box;
 
     private JPanel cardPanel;
 
-    public SignalMethodSettingsPanel(IMutableNuclearSignalOptions op) {
+    public SignalMethodSettingsPanel(INuclearSignalOptions op) {
         options = op;
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

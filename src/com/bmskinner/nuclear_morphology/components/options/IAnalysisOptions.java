@@ -53,7 +53,7 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      *            the component to detect
      * @return the detection options for the component
      */
-    Optional<IMutableDetectionOptions> getDetectionOptions(String key);
+    Optional<IDetectionOptions> getDetectionOptions(String key);
 
     /**
      * Get the type of detection options stored
@@ -120,5 +120,42 @@ public interface IAnalysisOptions extends Serializable, Loggable {
      * @return
      */
     boolean isKeepFailedCollections();
+    
+    /**
+     * Set the detection options for the given component
+     * 
+     * @param key
+     * @param options
+     */
+    void setDetectionOptions(String key, IDetectionOptions options);
+
+    /**
+     * Set the proportion of the perimeter to use when profiling nuclei
+     * 
+     * @param proportion
+     */
+    void setAngleWindowProportion(double proportion);
+
+    /**
+     * Set the type of nucleus / cell being analysed
+     * 
+     * @param nucleusType
+     */
+    void setNucleusType(NucleusType nucleusType);
+
+    /**
+     * Set whether the consensus nucleus should be refolded during the analysis
+     * 
+     * @param refoldNucleus
+     */
+    void setRefoldNucleus(boolean refoldNucleus);
+
+    /**
+     * Set whether nuclei that cannot be detected should be retained as a
+     * separate collection
+     * 
+     * @param keepFailedCollections
+     */
+    void setKeepFailedCollections(boolean keepFailedCollections);
 
 }

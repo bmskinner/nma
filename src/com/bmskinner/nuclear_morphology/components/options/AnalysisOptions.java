@@ -42,7 +42,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  *
  */
 @Deprecated
-public class AnalysisOptions implements IMutableAnalysisOptions {
+public class AnalysisOptions implements IAnalysisOptions {
 
     private static final long serialVersionUID = 1L;
     private int               nucleusThreshold;
@@ -102,7 +102,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
      */
     public AnalysisOptions(IAnalysisOptions template) {
         try {
-        	Optional<IMutableDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        	Optional<IDetectionOptions> op = template.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         	if(!op.isPresent())
         		throw new IllegalArgumentException("No nucleus options");
         	
@@ -725,7 +725,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Deprecated
-    public class CannyOptions implements IMutableCannyOptions {
+    public class CannyOptions implements ICannyOptions {
 
         private static final long serialVersionUID = 1L;
 
@@ -1081,7 +1081,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
         }
 
         @Override
-        public IMutableCannyOptions duplicate() {
+        public ICannyOptions duplicate() {
             return new CannyOptions(this);
         }
 
@@ -1089,12 +1089,6 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
         public void set(ICannyOptions options) {
             // TODO Auto-generated method stub
 
-        }
-
-        @Override
-        public IMutableCannyOptions unlock() {
-            // TODO Auto-generated method stub
-            return this;
         }
 
         @Override
@@ -1111,10 +1105,10 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public Optional<IMutableDetectionOptions> getDetectionOptions(String key) {
+    public Optional<IDetectionOptions> getDetectionOptions(String key) {
         if (key.equals(IAnalysisOptions.NUCLEUS)) {
 
-            IMutableDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
+        	IDetectionOptions op = OptionsFactory.makeNucleusDetectionOptions(this.folder);
 
             op.setCannyOptions(OptionsFactory.makeCannyOptions(this.getCannyOptions("nucleus")));
             op.setChannel(channel);
@@ -1144,7 +1138,7 @@ public class AnalysisOptions implements IMutableAnalysisOptions {
     }
 
     @Override
-    public void setDetectionOptions(String key, IMutableDetectionOptions options) {
+    public void setDetectionOptions(String key, IDetectionOptions options) {
 
     }
 }

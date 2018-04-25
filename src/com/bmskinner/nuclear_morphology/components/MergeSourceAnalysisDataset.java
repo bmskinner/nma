@@ -30,8 +30,7 @@ import java.util.UUID;
 import java.util.logging.Handler;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * This provides a virtual dataset view for merge sources.
@@ -47,7 +46,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     private IAnalysisDataset parent; // the 'parent to this dataset; the merged
                                      // dataset with the real cells
 
-    private IMutableAnalysisOptions analysisOptions; // the analysis options for
+    private IAnalysisOptions analysisOptions; // the analysis options for
                                                      // the merge source
 
     /**
@@ -259,7 +258,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return Optional.ofNullable(analysisOptions);
     }
 
@@ -269,7 +268,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     }
 
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
         this.analysisOptions = analysisOptions;
 
     }

@@ -33,7 +33,6 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableNuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -60,7 +59,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
         this.signalOptions = signalOptions;
         this.collection = collection;
 
-        IMutableNuclearSignalOptions testOptions = (IMutableNuclearSignalOptions) signalOptions.duplicate();
+        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
         testOptions.setMinSize(5);
         testOptions.setMaxFraction(1d);
 
@@ -101,7 +100,7 @@ public class SignalFinder extends AbstractFinder<List<INuclearSignal>> {
 
         List<INuclearSignal> list = new ArrayList<>();
 
-        IMutableNuclearSignalOptions testOptions = (IMutableNuclearSignalOptions) signalOptions.duplicate();
+        INuclearSignalOptions testOptions = (INuclearSignalOptions) signalOptions.duplicate();
         testOptions.setMinSize(5);
         testOptions.setMaxFraction(1d);
         detector = new SignalDetector(testOptions, testOptions.getChannel());

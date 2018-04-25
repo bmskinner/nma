@@ -31,7 +31,7 @@ import java.util.logging.Handler;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * This is the virtual child dataset, which retains only the pointer to its
@@ -226,7 +226,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public Optional<IMutableAnalysisOptions> getAnalysisOptions() {
+    public Optional<IAnalysisOptions> getAnalysisOptions() {
         return parent.getAnalysisOptions();
     }
 
@@ -236,7 +236,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void setAnalysisOptions(IMutableAnalysisOptions analysisOptions) {
+    public void setAnalysisOptions(IAnalysisOptions analysisOptions) {
     }
 
     @Override

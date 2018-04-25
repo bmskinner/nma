@@ -19,9 +19,7 @@
 package com.bmskinner.nuclear_morphology.components.options;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The default implementation of the nuclear signal options interface
@@ -31,7 +29,7 @@ import java.util.Map;
  *
  */
 @Deprecated
-public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implements IMutableNuclearSignalOptions {
+public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implements INuclearSignalOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -98,7 +96,7 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new DefaultNuclearSignalOptions(this);
     }
 
@@ -134,10 +132,10 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
 
     }
 
-    @Override
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    @Override
+//    public IMutableDetectionOptions unlock() {
+//        return this;
+//    }
 
     @Override
     public boolean isUseHoughTransform() {
@@ -146,12 +144,12 @@ public class DefaultNuclearSignalOptions extends AbstractDetectionOptions implem
         return false;
     }
 
-    @Override
-    public IDetectionOptions lock() {
-        // TODO Auto-generated method stub
-        warn("Unimplemented method in " + this.getClass().getName());
-        return null;
-    }
+//    @Override
+//    public IDetectionOptions lock() {
+//        // TODO Auto-generated method stub
+//        warn("Unimplemented method in " + this.getClass().getName());
+//        return null;
+//    }
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {

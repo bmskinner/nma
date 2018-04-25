@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
  *
  */
 @Deprecated
-public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
+public class NuclearSignalOptions implements INuclearSignalOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -275,7 +275,7 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
     }
 
     @Override
-    public IMutableCannyOptions getCannyOptions() {
+    public ICannyOptions getCannyOptions() {
         // TODO Auto-generated method stub
         return null;
     }
@@ -311,13 +311,13 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
     }
 
     @Override
-    public void setCannyOptions(IMutableCannyOptions canny) {
+    public void setCannyOptions(ICannyOptions canny) {
         // TODO Auto-generated method stub
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new NuclearSignalOptions(this);
     }
 
@@ -333,10 +333,10 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
         warn("Unimplemented method in " + this.getClass().getName());
     }
 
-    @Override
-    public IMutableDetectionOptions unlock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions unlock() {
+//        return this;
+//    }
 
     @Override
     public boolean isUseHoughTransform() {
@@ -345,10 +345,10 @@ public class NuclearSignalOptions implements IMutableNuclearSignalOptions {
         return false;
     }
 
-    @Override
-    public IDetectionOptions lock() {
-        return this;
-    }
+//    @Override
+//    public IDetectionOptions lock() {
+//        return this;
+//    }
 
     @Override
     public void setHoughOptions(IHoughDetectionOptions hough) {

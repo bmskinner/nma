@@ -34,9 +34,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.NeutrophilDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
@@ -46,7 +44,7 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class NeutrophilAnalysisAction extends VoidResultAction {
 
-    private IMutableAnalysisOptions options;
+    private IAnalysisOptions options;
     private Date                    startTime;
     private String                  outputFolderName;
 
@@ -99,7 +97,7 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
 
             options = analysisSetup.getOptions();
             
-            Optional<IMutableDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+            Optional<IDetectionOptions> op = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
             if(!op.isPresent()){
             	cancel();
             	return;

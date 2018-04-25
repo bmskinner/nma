@@ -48,8 +48,6 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions.IPreprocessingOptions;
 import com.bmskinner.nuclear_morphology.components.options.IHoughDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -152,11 +150,11 @@ public class LobeDetectionMethod extends SingleDatasetAnalysisMethod {
      */
     private void detectLobesViaHough(ICell cell) throws UnloadableImageException, MissingOptionException {
 
-    	Optional<IMutableAnalysisOptions> an = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> an = dataset.getAnalysisOptions();
         if(!an.isPresent())
         	throw new MissingOptionException("Options not present in dataset "+dataset.getName());
 
-        Optional<IMutableDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> no = an.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!no.isPresent())
         	throw new MissingOptionException("Nucleus options not present in dataset "+dataset.getName());

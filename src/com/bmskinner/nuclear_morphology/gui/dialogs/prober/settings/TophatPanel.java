@@ -28,7 +28,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
  * Set the radius for top hat filtering
@@ -48,9 +47,9 @@ public class TophatPanel extends SettingsPanel {
 
     private JSpinner radiusSpinner;
 
-    private IMutableDetectionOptions options;
+    private IDetectionOptions options;
 
-    public TophatPanel(final IMutableDetectionOptions options) {
+    public TophatPanel(final IDetectionOptions options) {
         this.options = options;
         createSpinners();
         createPanel();

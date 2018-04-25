@@ -28,12 +28,10 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
-import org.jdesktop.swingx.JXMultiThumbSlider;
-
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.PreprocessingOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions.IDetectionSubOptions;
 
 @SuppressWarnings("serial")
 public class ColourThresholdingSettingsPanel extends SettingsPanel {
@@ -62,7 +60,7 @@ public class ColourThresholdingSettingsPanel extends SettingsPanel {
 
     private PreprocessingOptions options;
 
-    public ColourThresholdingSettingsPanel(final IMutableDetectionOptions options) {
+    public ColourThresholdingSettingsPanel(final IDetectionOptions options) {
 
         try {
             this.options = (PreprocessingOptions) options.getSubOptions(IDetectionSubOptions.BACKGROUND_OPTIONS);

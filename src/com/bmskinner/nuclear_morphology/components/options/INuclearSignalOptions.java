@@ -84,5 +84,20 @@ public interface INuclearSignalOptions extends IDetectionOptions {
      * @return
      */
     SignalDetectionMode getDetectionMode();
+    
+    /**
+     * Set the maximum fraction of the parent component (e.g. nucleus) that the
+     * signal can occupy
+     * 
+     * @param maxFraction
+     */
+    void setMaxFraction(double maxFraction);
+
+    /**
+     * Set the detection mode for signals
+     * 
+     * @param detectionMode
+     */
+    void setDetectionMode(SignalDetectionMode detectionMode);
 
 }

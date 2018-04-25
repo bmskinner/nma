@@ -58,8 +58,7 @@ import com.bmskinner.nuclear_morphology.components.options.ClusteringOptions.Clu
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
 import com.bmskinner.nuclear_morphology.components.options.IClusteringOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -397,7 +396,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 List<IAnalysisDataset> l = new ArrayList<IAnalysisDataset>(dataset.getAllMergeSources());
 
-                Optional<IMutableAnalysisOptions> o = l.get(0).getAnalysisOptions();
+                Optional<IAnalysisOptions> o = l.get(0).getAnalysisOptions();
                 if(o.isPresent())
                 	data = createAnalysisParametersColumn(dataset, o.get());
                 	
@@ -432,7 +431,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
     	int rowCount = 23;
-    	Optional<IMutableAnalysisOptions> o = dataset.getAnalysisOptions();
+    	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent())
     		return makeErrorArray(rowCount);
     	
@@ -445,7 +444,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         String folder;
         String logFile;
 
-        Optional<IMutableDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        Optional<IDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
         if(!nO.isPresent())
         	fine("No nucleus options in dataset "+dataset.getName());

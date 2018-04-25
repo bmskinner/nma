@@ -56,7 +56,6 @@ import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileExc
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.SegmentEvent;
@@ -311,7 +310,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
         double windowSizeMin = 0.01;
         double windowSizeMax = 0.1;
         double windowSizeActual = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
-        Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+        Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())
         	windowSizeActual = op.get().getProfileWindowProportion();
 
@@ -372,7 +371,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         fitter = null; // clean up
 
-        Optional<IMutableAnalysisOptions> op = activeDataset().getAnalysisOptions();
+        Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
         if(op.isPresent())
         	op.get().setAngleWindowProportion(windowSize);
 

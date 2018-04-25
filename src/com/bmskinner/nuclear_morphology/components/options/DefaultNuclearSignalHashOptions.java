@@ -28,7 +28,7 @@ import java.io.File;
  *
  */
 public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOptions
-        implements IMutableNuclearSignalOptions {
+        implements INuclearSignalOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -96,7 +96,7 @@ public class DefaultNuclearSignalHashOptions extends AbstractHashDetectionOption
     }
 
     @Override
-    public IMutableDetectionOptions duplicate() {
+    public IDetectionOptions duplicate() {
         return new DefaultNuclearSignalHashOptions(this);
     }
 

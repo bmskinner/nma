@@ -33,7 +33,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
  * Provides basic settings parameters for detection of components. Values such
@@ -63,7 +62,7 @@ public class ComponentSizeSettingsPanel extends DetectionSettingsPanel implement
     private JSpinner minCircSpinner;
     private JSpinner maxCircSpinner;
 
-    public ComponentSizeSettingsPanel(final IMutableDetectionOptions options) {
+    public ComponentSizeSettingsPanel(final IDetectionOptions options) {
         super(options);
         this.add(createPanel(), BorderLayout.CENTER);
 

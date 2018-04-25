@@ -24,11 +24,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import javax.swing.SwingWorker;
-
-import org.jfree.chart.ChartPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;

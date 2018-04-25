@@ -26,7 +26,6 @@ import javax.swing.JOptionPane;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 

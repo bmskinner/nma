@@ -45,8 +45,6 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
@@ -65,7 +63,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
     private final String outputFolder;
 
-    private final IMutableAnalysisOptions analysisOptions;
+    private final IAnalysisOptions analysisOptions;
 
     private Map<File, ICellCollection> collectionGroup = new HashMap<File, ICellCollection>();
 
@@ -79,7 +77,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
      * @param debugFile the dataset log file
      * @param options the options to detect with
      */
-    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IMutableAnalysisOptions options) {
+    public NucleusDetectionMethod(@NonNull String outputFolder, @NonNull IAnalysisOptions options) {
         this.outputFolder = outputFolder;
         this.analysisOptions = options;
     }
@@ -195,7 +193,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
                 if (analysisOptions.isKeepFailedCollections()) {
                     log("Keeping failed nuclei as new collection");
                     IAnalysisDataset failed = new DefaultAnalysisDataset(failedNuclei);
-                    IMutableAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
+                    IAnalysisOptions failedOptions = OptionsFactory.makeAnalysisOptions(analysisOptions);
                     failedOptions.setNucleusType(NucleusType.ROUND);
                     failed.setAnalysisOptions(failedOptions);
                     failed.setRoot(true);

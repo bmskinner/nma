@@ -18,7 +18,6 @@
 package com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings;
 
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
 
 /**
  * The top level settings class for detection options
@@ -30,9 +29,9 @@ import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOpti
 @SuppressWarnings("serial")
 public abstract class DetectionSettingsPanel extends SettingsPanel {
 
-    protected IMutableDetectionOptions options;
+    protected IDetectionOptions options;
 
-    public DetectionSettingsPanel(IMutableDetectionOptions op) {
+    public DetectionSettingsPanel(IDetectionOptions op) {
 
         options = op;
     }

@@ -38,7 +38,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 
 /**
  * Find cells from a .cell file and assign them to child datasets.
@@ -168,7 +168,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                 IAnalysisDataset d = new ChildAnalysisDataset(dataset, c);
 
 
-                Optional<IMutableAnalysisOptions> op = dataset.getAnalysisOptions();
+                Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
                 if(op.isPresent())
                 	d.setAnalysisOptions(op.get());
 

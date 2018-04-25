@@ -31,7 +31,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.components.options.ICannyOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableCannyOptions;
 
 /**
  * A panel that allows changes to be made to a CannyOptions
@@ -77,9 +76,9 @@ public class CannySettingsPanel extends SettingsPanel implements ActionListener 
     private JSpinner  closingObjectRadiusSpinner;
     private JCheckBox cannyAutoThresholdCheckBox;
 
-    private IMutableCannyOptions options;
+    private ICannyOptions options;
 
-    public CannySettingsPanel(final IMutableCannyOptions options) {
+    public CannySettingsPanel(final ICannyOptions options) {
         this.options = options;
         createSpinners();
         createPanel();

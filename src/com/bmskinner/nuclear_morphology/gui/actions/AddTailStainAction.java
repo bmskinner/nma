@@ -18,17 +18,8 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
-import java.io.File;
-
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
-import com.bmskinner.nuclear_morphology.analysis.tail.TailDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.dialogs.TailDetectionSettingsDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
-
-import ij.io.DirectoryChooser;
 
 @Deprecated
 public class AddTailStainAction extends SingleDatasetResultAction {

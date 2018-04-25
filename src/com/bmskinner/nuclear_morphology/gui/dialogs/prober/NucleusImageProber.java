@@ -28,7 +28,6 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.FluorescentNucleusFinder;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.ConstructableSettingsPanel;
 //import com.bmskinner.nuclear_morphology.gui.dialogs.prober.settings.NucleusDetectionSettingsPanel;
 
@@ -50,7 +49,7 @@ public class NucleusImageProber extends IntegratedImageProber {
      * @param folder
      * @param o
      */
-    public NucleusImageProber(final File folder, final IMutableAnalysisOptions o) {
+    public NucleusImageProber(final File folder, final IAnalysisOptions o) {
 
         try {
             this.options = o;
@@ -95,7 +94,7 @@ public class NucleusImageProber extends IntegratedImageProber {
         this.setVisible(true);
     }
 
-    public IMutableAnalysisOptions getOptions() {
+    public IAnalysisOptions getOptions() {
         return options;
     }
 

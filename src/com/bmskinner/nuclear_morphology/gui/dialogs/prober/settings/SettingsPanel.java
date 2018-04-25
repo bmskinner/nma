@@ -31,7 +31,6 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.GenericImageProberPanel.PanelUpdatingEventListener;
-
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.OptionsChangeListener;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.ProberReloadEvent;

@@ -28,7 +28,7 @@ import java.io.File;
  *
  */
 public class DefaultLobeDetectionOptions extends DefaultNucleusDetectionOptions
-        implements IMutableLobeDetectionOptions {
+        implements ILobeDetectionOptions {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,10 +43,10 @@ public class DefaultLobeDetectionOptions extends DefaultNucleusDetectionOptions
         lobeFraction = template.getLobeDiameter();
     }
 
-    @Override
-    public IMutableDetectionOptions duplicate() {
-        return new DefaultLobeDetectionOptions(this);
-    }
+//    @Override
+//    public IMutableDetectionOptions duplicate() {
+//        return new DefaultLobeDetectionOptions(this);
+//    }
 
     @Override
     public void setLobeDiameter(double d) {
