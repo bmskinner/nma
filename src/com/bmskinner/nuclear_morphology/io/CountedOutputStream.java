@@ -1,45 +1,48 @@
 package com.bmskinner.nuclear_morphology.io;
 
-import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Count the number of bytes read in an input stream, and 
- * inform count listeners. Used for tracking opening of datasets
+ * Count the number of bytes written in an output stream, and 
+ * inform count listeners. Used for tracking saving of datasets
  * @author ben
  * @since 1.13.8
  *
  */
-public class CountedInputStream extends FilterInputStream {
-
+public class CountedOutputStream extends FilterOutputStream {
+	
 	private long totalBytes = 0;
 	private List<CountListener> listeners = new ArrayList<>();
 	
-	/**
-	 * Construct with an input stream
-	 * @param in
-	 */
-	protected CountedInputStream(InputStream in) {
-		super(in);
+	protected CountedOutputStream(OutputStream out) {
+		super(out);
 	}
 	
 	@Override
-	public int read() throws IOException {
+	public void write(int b) throws IOException{
 		totalBytes++; 
 		fireCountEvent();
-        return in.read();
-    }
+        out.write(b);;
+	}
 	
 	@Override
-	public int read(byte b[], int off, int len) throws IOException {
+	public void write(byte[] b) throws IOException {
+		totalBytes+=b.length; 
+		fireCountEvent();
+        out.write(b);;
+	}
+	
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
 		totalBytes+=len;
 		fireCountEvent();
-        return in.read(b, off, len);
-    }
-		
+		out.write(b, off, len);
+	}
+	
 	public void addCountListener(CountListener l){
 		listeners.add(l);
 	}

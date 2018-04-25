@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -39,48 +41,32 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * to saving to non-default locations, without needing to use the save
      * dialog
      * 
-     * @param dataset
-     *            the dataset to save
-     * @param saveFile
-     *            the location to save to
-     * @param mw
-     *            the main window, to access program logger
-     * @param doneSignal
-     *            a latch to hold threads until the save is complete
+     * @param dataset the dataset to save
+     * @param saveFile the location to save to
+     * @param mw the main window, to access program logger
+     * @param doneSignal a latch to hold threads until the save is complete
      */
     public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
         super(dataset, "Saving dataset", mw);
         setLatch(doneSignal);
-        finest("Save dataset action created by explicit file location");
-
         this.setProgressBarIndeterminate();
-        // worker = new PopulationExporter(dataset, saveFile);
-        // worker.addPropertyChangeListener(this);
-        //
-        // ThreadManager.getInstance().submit(worker);
-        // worker.execute();
     }
 
     /**
      * Default constructor to save the current dataset
      * 
-     * @param dataset
-     *            the dataset to save
-     * @param mw
-     *            the main window, to access program logger
-     * @param doneSignal
-     *            a latch to hold threads until the save is complete
-     * @param chooseSaveLocation
-     *            save to the default dataset save file, or choose another
-     *            location
+     * @param dataset the dataset to save
+     * @param mw the main window, to access program logger
+     * @param doneSignal a latch to hold threads until the save is complete
+     * @param chooseSaveLocation save to the default dataset save file, or choose another location
      */
-    public SaveDatasetAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal,
+    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull MainWindow mw, CountDownLatch doneSignal,
             boolean chooseSaveLocation) {
         super(dataset, "Saving dataset", mw);
         setLatch(doneSignal);
         finest("Save dataset action created by default or manual file location");
         this.setProgressBarIndeterminate();
-        // File saveFile = null;
+
         if (chooseSaveLocation) {
 
             SaveDialog saveDialog = new SaveDialog("Save as...", dataset.getName(), ".nmd");
@@ -104,9 +90,9 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
         if (saveFile != null) {
             log("Saving as " + saveFile.getAbsolutePath() + "...");
-
+            long length = saveFile.exists() ? saveFile.length() : 0;
             IAnalysisMethod m = new DatasetExportMethod(dataset, saveFile);
-            worker = new DefaultAnalysisWorker(m);
+            worker = new DefaultAnalysisWorker(m, length);
 
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);
@@ -117,12 +103,8 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
 
     @Override
     public void finished() {
-
-        finer("Save action complete");
-        finest("Removing save latch");
         this.countdownLatch();
         super.finished();
-
     }
 
 }

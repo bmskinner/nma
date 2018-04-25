@@ -100,9 +100,15 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
             fine("Saving dataset to " + saveFile.getAbsolutePath());
 
             // use buffering
-            OutputStream file = new FileOutputStream(saveFile);
-            OutputStream buffer = new BufferedOutputStream(file);
+            OutputStream fos = new FileOutputStream(saveFile);
+
+            CountedOutputStream cos = new CountedOutputStream(fos);
+            OutputStream buffer = new BufferedOutputStream(cos);
             ObjectOutputStream output = new ObjectOutputStream(buffer);
+            
+            cos.addCountListener( (l) ->{
+            	fireProgressEvent(l);
+            });
 
             try {
 
@@ -120,7 +126,7 @@ public class DatasetExportMethod extends SingleDatasetAnalysisMethod {
             } finally {
                 output.close();
                 buffer.close();
-                file.close();
+                fos.close();
             }
 
             // This line is not always reached when saving multiple datasets
