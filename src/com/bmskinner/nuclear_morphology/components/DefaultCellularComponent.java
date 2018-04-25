@@ -487,6 +487,25 @@ public abstract class DefaultCellularComponent implements CellularComponent {
             throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
         }
     }
+    
+    @Override
+    public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
+
+        if (!getSourceFile().exists())
+            throw new UnloadableImageException("Source image is not available: "+getSourceFile().getAbsolutePath());
+
+        // Get the stack, make greyscale and invert
+        int stack = ImageImporter.rgbToStack(getChannel());
+
+        try {
+            ImageStack imageStack = new ImageImporter(getSourceFile()).importToStack();
+            return imageStack.getProcessor(stack);
+        } catch (ImageImportException e) {
+            stack("Error importing source image " + this.getSourceFile().getAbsolutePath(), e);
+            throw new UnloadableImageException("Source image is not available");
+        }
+
+    }
 
     @Override
     public ImageProcessor getRGBImage() throws UnloadableImageException {

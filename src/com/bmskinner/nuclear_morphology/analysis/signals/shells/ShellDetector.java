@@ -28,6 +28,7 @@ import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.PathIterator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.Detector;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
+import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
@@ -55,6 +57,7 @@ import ij.plugin.RoiScaler;
 import ij.plugin.filter.EDM;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 
 /**
@@ -106,7 +109,7 @@ public class ShellDetector extends Detector {
         nShells = shellCount;
         this.type = type;
         this.isScale = isScale;
-        component.getBounds().getX();
+//        component.getBounds().getX();
 //        fine("Creating shell for component at "+ component.getBounds().getX()+" - "+ component.getBounds().getY() );
         createShells(component);
     }
@@ -193,7 +196,7 @@ public class ShellDetector extends Detector {
             return makeZeroArray();
         }
         result = correctNestedIntensities(result);
-        System.out.println(Arrays.toString(result));
+//        System.out.println(Arrays.toString(result));
         return result;
     }
 
@@ -271,9 +274,6 @@ public class ShellDetector extends Detector {
         Roi objectRoi = new PolygonRoi(c.toOriginalPolygon(), Roi.POLYGON);
         double[] areas = new double[nShells];
         double[] ratios = new double[nShells];
-        // First shell encloses the entire object        
-//        areas[0] = Stats.area(objectRoi);
-//        shells.add(new Shell(objectRoi, c));
         
         RoiShrinker re = new RoiShrinker((Roi)objectRoi.clone());
 
@@ -377,7 +377,7 @@ public class ShellDetector extends Detector {
             for (int x = minX; x <= maxX; x++) {
                 for (int y = minY; y <= maxY; y++) {
                     if (mask.contains(x, y) && shellRoi.contains(x, y))
-                        result ++;
+                        result++;
                 }
             }
 
@@ -409,7 +409,7 @@ public class ShellDetector extends Detector {
          * @throws UnloadableImageException
          */
         private long getPixelIntensity(@NonNull CellularComponent s) throws UnloadableImageException {
-        	ImageProcessor ip = s.getImage();
+        	ImageProcessor ip = s.getGreyscaleImage();
         	return getPixelIntensity(ip, s.toOriginalShape());
         }
 
@@ -424,9 +424,19 @@ public class ShellDetector extends Detector {
         private long getPixelIntensity(@NonNull ImageProcessor ip, @NonNull Shape mask) {
 
             long result = 0;
-
+            
             Rectangle roiBounds = mask.getBounds();
-
+            if(!mask.intersects(roiBounds)){
+                fine("Mask is not in shell bounds: "+mask.getBounds().getMinX()+"-"+mask.getBounds().getMinY());
+                return 0;
+            }
+            
+            if(ip instanceof ColorProcessor){
+                fine("Cannot handle color processors");
+                return 0;
+            }
+                
+            
             int minX = roiBounds.x;
             int maxX = minX + roiBounds.width;
 
@@ -435,12 +445,35 @@ public class ShellDetector extends Detector {
 
             for (int x = minX; x <= maxX; x++) {
                 for (int y = minY; y <= maxY; y++) {
-                    if (mask.contains(x, y) && shellRoi.contains(x, y))
+                    if (mask.contains(x, y) && shellRoi.contains(x, y)){
                         result += ip.getPixel(x, y);
+                    }
                 }
             }
-
+//            drawMasks(ip, mask);
+//            try {
+//                showImage("", ip);
+//            } catch (InterruptedException e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
             return result;
+        }
+        
+        private void drawMasks(ImageProcessor ip, Shape mask){
+            ip.setValue(128);
+            Rectangle bounds = mask.getBounds();
+            ip.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            ip.draw(shellRoi);
+
+        }
+                        
+        private void showImage(String title, ImageProcessor ip) throws InterruptedException {
+            ImagePlus img = new ImagePlus(title, ip);
+            img.show();
+            while(img.isVisible()) {
+                Thread.sleep(1000);
+            }
         }
 
         /**
@@ -501,6 +534,11 @@ public class ShellDetector extends Detector {
 		public ImageProcessor getImage() throws UnloadableImageException {
 			return source.getImage();
 		}
+		
+        @Override
+        public ImageProcessor getGreyscaleImage() throws UnloadableImageException {
+            return source.getGreyscaleImage();
+        }
 
 		@Override
 		public ImageProcessor getRGBImage() throws UnloadableImageException {
@@ -558,7 +596,6 @@ public class ShellDetector extends Detector {
 		public IPoint getBase() {
 			return IPoint.makeNew(shellRoi.getXBase(), shellRoi.getYBase());
 		}
-
     }
 
     
@@ -668,12 +705,7 @@ public class ShellDetector extends Detector {
             roi2.setLocation(bounds.x+bounds2.x-1, bounds.y+bounds2.y-1);           
             return roi2;
         }
-        
-        private void showImage(String title, ImageProcessor ip)  {
-        	ImagePlus img = new ImagePlus(title, ip);
-        	img.show();
-        }
-        
+
         private ImageProcessor createFromRoi() {
             int width = bounds.width + 2;
             int height = bounds.height + 2;
@@ -703,5 +735,4 @@ public class ShellDetector extends Detector {
             return max;
         }
     }
-
 }

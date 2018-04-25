@@ -169,13 +169,13 @@ public class KeyedShellResult implements IShellResult {
     @Override
     public double getPValue(@NonNull Aggregation agg, @NonNull Normalisation norm, @NonNull IShellResult expected) {
     	 long[] observed   = getObserved(agg, norm);
-    	 System.out.println("Obs vals: "+Arrays.toString(observed));
+//    	 System.out.println("Obs vals: "+Arrays.toString(observed));
     	 
     	 double[] other = expected.getProportions(agg, norm);
-    	 System.out.println("Exp prop: "+Arrays.toString(other));
+//    	 System.out.println("Exp prop: "+Arrays.toString(other));
     	 
          double[] exp = getExpected(agg, norm, other);
-         System.out.println("Exp vals: "+Arrays.toString(exp));
+//         System.out.println("Exp vals: "+Arrays.toString(exp));
          for(double d : exp){
              if(d<=0) // we can't do a chi square test if one of the values is zero
                  return 1;

@@ -42,6 +42,7 @@ public class SampleDatasetReader {
     public static final String RODENT_TEST_DATASET = "Testing_1_13_8.nmd";
     public static final String PIG_TEST_DATASET    = "Testing_pig_1_13_8.nmd";
     public static final String ROUND_TEST_DATASET    = "Testing_round_1_13_8.nmd";
+    public static final String MOUSE_SIGNALS_DATASET  = "Testing_signals.nmd";
     
     
     /**
@@ -71,6 +72,16 @@ public class SampleDatasetReader {
      */
     public static final IAnalysisDataset openTestRoundDataset() throws Exception {
         File f = new File(SAMPLE_DATASET_PATH+ROUND_TEST_DATASET);
+        return openDataset(f);
+    }
+    
+    /**
+     * Open the default mouse signals testing dataset
+     * @return
+     * @throws Exception
+     */
+    public static final IAnalysisDataset openTestMouseSignalsDataset() throws Exception {
+        File f = new File(SAMPLE_DATASET_PATH+MOUSE_SIGNALS_DATASET);
         return openDataset(f);
     }
         

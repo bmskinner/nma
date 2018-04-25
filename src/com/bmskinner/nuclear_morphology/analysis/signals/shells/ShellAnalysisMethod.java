@@ -203,7 +203,7 @@ public class ShellAnalysisMethod extends SingleDatasetAnalysisMethod {
 
             counter.addShellData(CountType.COUNTERSTAIN, c, n, totalCounterIntensity); // the counterstain within the nucleus
             counter.addShellData(CountType.SIGNAL, c, n, totalSignalIntensity); // the pixels within the whole nucleus
-
+            
             for (INuclearSignal s : signals) {
                 long[] countsInSignals = shellDetector.findPixelIntensities(s);
                 counter.addShellData(CountType.SIGNAL, c, n, s, countsInSignals); // the pixels within the signal

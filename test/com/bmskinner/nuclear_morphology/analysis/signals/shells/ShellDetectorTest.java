@@ -35,14 +35,18 @@ import java.util.stream.LongStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
+import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod.ShellAnalysisException;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellDetector.Shell;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -72,7 +76,9 @@ public class ShellDetectorTest {
     	Nucleus n = mock(Nucleus.class);
     	when(n.getID()).thenReturn(signalGroup);
     	when(n.toRoi()).thenReturn(r);
+    	when(n.toPolygon()).thenReturn(r.getFloatPolygon());    
     	when(n.toOriginalPolygon()).thenReturn(r.getFloatPolygon());    	
+    	when(n.toShape()).thenReturn(createShape(r));
     	when(n.toOriginalShape()).thenReturn(createShape(r));
     	when(n.getBounds()).thenReturn(r.getBounds());
     	when(n.getImage()).thenReturn(ip);
@@ -93,6 +99,7 @@ public class ShellDetectorTest {
     	ImageProcessor ip = createRoundImage(signalRoi, nDiameter+100);
     	when(s.getID()).thenReturn(signalGroup);
     	when(s.toRoi()).thenReturn(signalRoi);
+    	when(s.toShape()).thenReturn(createShape(signalRoi));
     	when(s.toOriginalShape()).thenReturn(createShape(signalRoi));
     	when(s.getImage()).thenReturn(ip);
     	return s;
@@ -235,8 +242,18 @@ public class ShellDetectorTest {
         long[] obs = sd.findPixelIntensities(testSignal);
         ImageProcessor ip = drawShells(testSignal, sd);
     	showImage("Signals", ip);
-        long[] exp = {0, 0, 0, 0, 0 };
+        long[] exp = {53040, 565590, 102510, 0, 0 };
         assertTrue(testEquals(exp, obs));
+    }
+    
+    
+    @Test
+    public void testRealSignalsDetectedInMouseSpermDataset() throws Exception{
+        IAnalysisDataset dataset = SampleDatasetReader.openTestMouseSignalsDataset();
+        IAnalysisMethod m = new ShellAnalysisMethod(dataset, 5, ShrinkType.AREA);
+        m.call();
+        IAnalysisMethod s = new DatasetExportMethod(dataset, dataset.getSavePath());
+        s.call();
     }
     
     @Test

@@ -105,11 +105,11 @@ public interface Imageable {
      * Get the image from which the component was detected. Opens the image via
      * the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches
      * the appropriate channel and inverts it. The complete image is returned;
-     * no cropping is performed
+     * no cropping is performed. The returned image is a ColorProcessor, so annotations can
+     * be performed.
      * 
-     * @return an ImageJ image processor
-     * @throws UnloadableImageException
-     *             if the image can't be loaded
+     * @return a color image
+     * @throws UnloadableImageException if the image can't be loaded
      */
     ImageProcessor getImage() throws UnloadableImageException;
 
@@ -123,6 +123,18 @@ public interface Imageable {
      * @throws UnloadableImageException
      */
     ImageProcessor getRGBImage() throws UnloadableImageException;
+    
+    /**
+     * Get the image from which the component was detected. Opens the image via
+     * the {@link com.bmskinner.nuclear_morphology.io.ImageImporter}, fetches
+     * the appropriate channel. This will return the 8-bit greyscale image used for
+     * object detection.
+     * 
+     * @return an 8-bit greyscale image
+     * @throws UnloadableImageException if the image can't be loaded
+     */
+    ImageProcessor getGreyscaleImage() throws UnloadableImageException;
+    
 
     /**
      * Get the image from which the component was detected, and crops it to only
