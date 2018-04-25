@@ -84,6 +84,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
     		worker.addPropertyChangeListener(this);
     		ThreadManager.getInstance().submit(worker);
     		
+    	} else {
+    	    this.cancel();
     	}
     }
     
@@ -162,7 +164,6 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         }
 
         protected JPanel createHeader() {
-
             JPanel panel = new JPanel();
             panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
             return panel;
@@ -192,14 +193,14 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
             GridBagLayout layout = new GridBagLayout();
             optionsPanel.setLayout(layout);
             
-            List<JLabel> labels = new ArrayList<JLabel>();
-            List<Component> fields = new ArrayList<Component>();
+            List<JLabel> labels = new ArrayList<>();
+            List<Component> fields = new ArrayList<>();
             
             JComboBox<ShrinkType> typeBox = new JComboBox<>(ShrinkType.values());
             typeBox.setSelectedItem(ShrinkType.AREA);
             typeBox.addActionListener(e -> type = (ShrinkType) typeBox.getSelectedItem());
             
-            labels.add(new JLabel("Shrink method"));
+            labels.add(new JLabel("Erosion method"));
             fields.add(typeBox);
             
             

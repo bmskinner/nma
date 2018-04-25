@@ -62,13 +62,4 @@ public class ExportStatsAction extends MultiDatasetResultAction {
 
     }
 
-    @Override
-    public void finished() {
-
-        this.cancel();
-        fine("Refolding finished, cleaning up");
-        super.finished();
-        this.countdownLatch();
-    }
-
 }

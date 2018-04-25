@@ -54,7 +54,8 @@ public class Labels {
         public static final String CHANGE_SCALE_LBL = "Set scale";
         
         public static final String EXPORT = "Export...";
-        public static final String EXPORT_STATS = "Export stats";
+        public static final String EXPORT_STATS = "Export nuclear stats";
+        public static final String EXPORT_SIGNALS = "Export nuclear signals";
         public static final String EXPORT_SHELLS = "Export shells";
         public static final String EXPORT_CELL_LOCS = "Export cell locations";
     }

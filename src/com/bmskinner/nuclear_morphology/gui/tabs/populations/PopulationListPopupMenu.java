@@ -47,6 +47,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
     
     private JMenu exportSubMenu;
     private JMenuItem exportStatsMenuItem;
+    private JMenuItem exportSignalsItem;
     private JMenuItem exportShellsItem;
     private JMenuItem saveCellsMenuItem;
     
@@ -167,6 +168,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
         exportStatsMenuItem = new JMenuItem(Labels.Populations.EXPORT_STATS);
         exportStatsMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_STATS));
         
+        exportSignalsItem = new JMenuItem(Labels.Populations.EXPORT_SIGNALS);
+        exportSignalsItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_SIGNALS));
+        
         exportShellsItem = new JMenuItem(Labels.Populations.EXPORT_SHELLS);
         exportShellsItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_SHELLS));
         
@@ -174,6 +178,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
         saveCellsMenuItem.addActionListener(e -> fireSignalChangeEvent(SignalChangeEvent.EXPORT_CELL_LOCS));
 
         exportSubMenu.add(exportStatsMenuItem);
+        exportSubMenu.add(exportSignalsItem);
         exportSubMenu.add(exportShellsItem);
         exportSubMenu.add(saveCellsMenuItem);
         
@@ -205,8 +210,9 @@ public class PopulationListPopupMenu extends JPopupMenu {
     	relocateMenuItem.setEnabled(true);
     	saveCellsMenuItem.setEnabled(true);
     	exportSubMenu.setEnabled(true);
-    	exportShellsItem.setEnabled(true);
     	exportStatsMenuItem.setEnabled(true);
+    	exportSignalsItem.setEnabled(true);
+    	exportShellsItem.setEnabled(true);
     	changeScaleItem.setEnabled(true);
     	addSubMenu.setEnabled(true);
     	
@@ -226,6 +232,7 @@ public class PopulationListPopupMenu extends JPopupMenu {
     	booleanMenuItem.setEnabled(true);
     	exportSubMenu.setEnabled(true);
     	exportShellsItem.setEnabled(true);
+    	exportSignalsItem.setEnabled(true);
     	exportStatsMenuItem.setEnabled(true);
 
     }

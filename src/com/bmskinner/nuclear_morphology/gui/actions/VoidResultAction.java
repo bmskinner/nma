@@ -124,9 +124,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      * Remove the progress bar and dataset and interface listeners
      */
     public void cancel() {
-//        finest("Removing interface and dataset listeners");
         removeProgressBar();
-//        removeDatasetEventListener(mw.getEventHandler());
         dh.removeDatasetEventListener(mw.getEventHandler());
         ih.removeInterfaceEventListener(mw.getEventHandler());
     }

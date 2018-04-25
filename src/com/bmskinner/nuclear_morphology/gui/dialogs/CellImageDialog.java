@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.dialogs;
 import java.awt.BorderLayout;
 
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.components.AnnotatedNucleusPanel;
 
 /**
@@ -48,10 +49,13 @@ public class CellImageDialog extends LoadingIconDialog {
         }
 
         if (cell.hasNucleus()) {
-            if (!cell.getNucleus().getSourceFile().exists()) {
-                warn("Cannot load image: source file not present");
-                this.dispose();
+            for(Nucleus n : cell.getNuclei()){
+                if (!n.getSourceFile().exists()) {
+                    warn("Cannot load image: source file not present");
+                    this.dispose();
+                }
             }
+            
         }
 
         this.panel = new AnnotatedNucleusPanel();

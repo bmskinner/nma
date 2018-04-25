@@ -9,16 +9,11 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.INuclearSignal;
@@ -27,10 +22,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.Aggregat
 import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.CountType;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.IJ;
 
 /**
  * Export shell analysis results to a file
@@ -38,7 +30,7 @@ import ij.IJ;
  * @since 1.13.8
  *
  */
-public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+public class DatasetShellsExporter extends StatsExporter implements Exporter, Loggable {
 
     private static final String EXPORT_MESSAGE          = "Exporting shells...";
     private static final String DEFAULT_MULTI_FILE_NAME = "Shell_stats_export" + Exporter.TAB_FILE_EXTENSION;
@@ -50,8 +42,7 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
      * @param folder
      */
     public DatasetShellsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
-        super(list);
-        setupExportFile(file);
+        super(file, list);
     }
 
     /**
@@ -60,58 +51,24 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
      * @param folder
      */
     public DatasetShellsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
-        super(dataset);
-        setupExportFile(file);
-    }
-
-    @Override
-    public IAnalysisResult call() {
-        export(datasets);
-        return new DefaultAnalysisResult(datasets);
-    }
-    
-    private void setupExportFile(@NonNull File file) {
-    	if (file.isDirectory())
-            file = new File(file, DEFAULT_MULTI_FILE_NAME);
-
-        exportFile = file;
-
-        if (exportFile.exists())
-            exportFile.delete();
-    }
-    
-    /**
-     * Export stats from all datasets in the list to the same file
-     * 
-     * @param list
-     */
-    private void export(@NonNull List<IAnalysisDataset> list) {
-        log(EXPORT_MESSAGE);
-        
-        StringBuilder outLine = new StringBuilder();
-        writeHeader(outLine);
-
-        for (@NonNull IAnalysisDataset d : list) {
-            append(d, outLine);
-            fireProgressEvent();
-        }
-
-        IJ.append(outLine.toString(), exportFile.getAbsolutePath());
-        log("Exported stats to " + exportFile.getAbsolutePath());
+        super(file, dataset);
     }
 
     /**
      * Append a column header line to the StringBuilder.
      * @param outLine
      */
-    private void writeHeader(StringBuilder outLine) {
+    @Override
+    protected void appendHeader(StringBuilder outLine) {
 
         String[] headers = {
             "Dataset",
-            "CellID",
-            "Component",
-            "Folder",
+            "CellId",
+            "ComponentId",
+            "ComponentType",
+            "ComponentImageFolder",
             "ComponentImage",
+            "SignalType",
             "SignalGroup",
             "SignalFolder",
             "SignalImage",
@@ -147,15 +104,14 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) {
+    @Override
+    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) {
         
         
         for(@NonNull UUID signalGroupId : d.getCollection().getSignalGroupIDs()){
             ISignalGroup signalGroup = d.getCollection().getSignalGroup(signalGroupId).get();
             String groupName   = signalGroup.getGroupName();
-            String groupFolder = signalGroup.getFolder().getAbsolutePath();
-//            int groupChannel   = signalGroup.getChannel();
-            
+            String groupFolder = signalGroup.getFolder().getAbsolutePath();            
             Optional<IShellResult> oShellResult = signalGroup.getShellResult();
             if(!oShellResult.isPresent())
                 continue;
@@ -174,9 +130,11 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
 
                     outLine.append(d.getName() + TAB)
                     .append(cell.getId() + TAB)
-                    .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
+                    .append(n.getID() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
                     .append(n.getSourceFolder() + TAB)
                     .append(n.getSourceFileName() + TAB)
+                    .append(CellularComponent.NUCLEUS + TAB)
                     .append(groupName + TAB)
                     .append(groupFolder + TAB)
                     .append(n.getSignalCollection().getSourceFile(signalGroupId).getName() + TAB)
@@ -201,9 +159,11 @@ public class DatasetShellsExporter extends MultipleDatasetAnalysisMethod impleme
 
                         outLine.append(d.getName() + TAB)
                         .append(cell.getId() + TAB)
-                        .append(CellularComponent.NUCLEUS+"_" + n.getNameAndNumber() + TAB)
+                        .append(n.getID() + TAB)
+                        .append(CellularComponent.NUCLEUS + TAB)
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB)
+                        .append(CellularComponent.NUCLEAR_SIGNAL + TAB)
                         .append(groupName + TAB)
                         .append(groupFolder + TAB)
                         .append(s.getSourceFile().getName() + TAB)

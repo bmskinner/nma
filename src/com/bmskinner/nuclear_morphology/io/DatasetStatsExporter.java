@@ -23,9 +23,6 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -37,14 +34,11 @@ import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.IJ;
 
 /**
  * Export all the stats from a dataset to a text file for downstream analysis
@@ -53,7 +47,7 @@ import ij.IJ;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+public class DatasetStatsExporter extends StatsExporter implements Exporter, Loggable {
 
     private static final String EXPORT_MESSAGE          = "Exporting stats...";
     private File                exportFile;
@@ -69,17 +63,13 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * @param folder
      */
     public DatasetStatsExporter(File file, List<IAnalysisDataset> list) {
-        super(list);
-//        this.list = list;
-        if (file.isDirectory()) {
-            file = new File(file, DEFAULT_MULTI_FILE_NAME);
+        super(file, list);
+        segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
+        if(list.size()==1){
+            includeSegments = true;
+        } else {
+            includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
         }
-        exportFile = file;
-
-        if (exportFile.exists()) {
-            exportFile.delete();
-        }
-
     }
 
     /**
@@ -88,76 +78,8 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * @param folder
      */
     public DatasetStatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
-        super(dataset);
-
-        if (file.isDirectory()) {
-            file = new File(file, DEFAULT_MULTI_FILE_NAME);
-        }
-        exportFile = file;
-
-        if (exportFile.exists()) {
-            exportFile.delete();
-        }
-
-    }
-
-    @Override
-    public IAnalysisResult call() {
-
-        export(datasets);
-        return new DefaultAnalysisResult(datasets);
-    }
-
-    /**
-     * Export stats from the dataset to a file
-     * 
-     * @param d
-     */
-    public void export(@NonNull IAnalysisDataset d) {
-        log(EXPORT_MESSAGE);
+        super(file, dataset);
         includeSegments = true;
-        if(includeSegments)
-            log("Including segments");
-        segCount = d.getCollection().getProfileManager().getSegmentCount();
-        StringBuilder outLine = new StringBuilder();
-        writeHeader(outLine);
-        try {
-            append(d, outLine);
-        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-            error("Error exporting dataset", e);
-        }
-        IJ.append(outLine.toString(), exportFile.getAbsolutePath());
-        log("Exported stats to " + exportFile.getAbsolutePath());
-    }
-
-    /**
-     * Export stats from all datasets in the list to the same file
-     * 
-     * @param list
-     */
-    public void export(@NonNull List<IAnalysisDataset> list) {
-        log(EXPORT_MESSAGE);
-        
-        segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
-        if(list.size()==1){
-            includeSegments = true;
-        } else {
-            includeSegments = list.stream().allMatch(d->d.getCollection().getProfileManager().getSegmentCount()==segCount);
-        }
-        
-        StringBuilder outLine = new StringBuilder();
-        writeHeader(outLine);
-
-        try {
-            for (IAnalysisDataset d : list) {
-                append(d, outLine);
-                fireProgressEvent();
-            }
-        } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
-            error("Error exporting dataset", e);
-        }
-        IJ.append(outLine.toString(), exportFile.getAbsolutePath());
-        log("Exported stats to " + exportFile.getAbsolutePath());
     }
 
     /**
@@ -166,7 +88,7 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * 
      * @param outLine
      */
-    private void writeHeader(StringBuilder outLine) {
+    protected void appendHeader(StringBuilder outLine) {
 
         outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
@@ -245,8 +167,7 @@ public class DatasetStatsExporter extends MultipleDatasetAnalysisMethod implemen
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    private void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine)
-            throws UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
 
         for (ICell cell : d.getCollection().getCells()) {
 

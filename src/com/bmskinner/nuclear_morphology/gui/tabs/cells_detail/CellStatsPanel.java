@@ -140,9 +140,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         });
 
         sourceButton = new JButton("Show source image");
-        sourceButton.addActionListener(e -> {
-            showCellImage();
-        });
+        sourceButton.addActionListener(e ->  showCellImage() );
 
         panel.add(scaleButton);
         panel.add(sourceButton);

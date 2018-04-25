@@ -1,0 +1,115 @@
+/*******************************************************************************
+ *      Copyright (C) 2016 Ben Skinner
+ *   
+ *     This file is part of Nuclear Morphology Analysis.
+ *
+ *     Nuclear Morphology Analysis is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Nuclear Morphology Analysis is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
+ *******************************************************************************/
+
+package com.bmskinner.nuclear_morphology.io;
+
+import java.io.File;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
+import com.bmskinner.nuclear_morphology.analysis.MultipleDatasetAnalysisMethod;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.IJ;
+
+/**
+ * Abstract exporter
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
+public abstract class StatsExporter extends MultipleDatasetAnalysisMethod implements Exporter, Loggable {
+    
+    private File exportFile;
+    private static final String EXPORT_MESSAGE          = "Exporting...";
+    private static final String DEFAULT_MULTI_FILE_NAME = "Stats_export" + Exporter.TAB_FILE_EXTENSION;
+    
+    /**
+     * Create specifying the folder stats will be exported into
+     * 
+     * @param folder
+     */
+    public StatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
+        super(list);
+        setupExportFile(file);
+    }
+
+    /**
+     * Create specifying the folder stats will be exported into
+     * 
+     * @param folder
+     */
+    public StatsExporter(@NonNull File file, @NonNull IAnalysisDataset dataset) {
+        super(dataset);
+        setupExportFile(file);
+    }
+
+    @Override
+    public IAnalysisResult call() throws Exception{
+        export(datasets);
+        return new DefaultAnalysisResult(datasets);
+    }
+    
+    private void setupExportFile(@NonNull File file) {
+        if (file.isDirectory())
+            file = new File(file, DEFAULT_MULTI_FILE_NAME);
+
+        exportFile = file;
+
+        if (exportFile.exists())
+            exportFile.delete();
+    }
+    
+    /**
+     * Export stats from all datasets in the list to the same file
+     * 
+     * @param list
+     */
+    protected void export(@NonNull List<IAnalysisDataset> list) throws Exception {       
+        StringBuilder outLine = new StringBuilder();
+        appendHeader(outLine);
+
+        for (@NonNull IAnalysisDataset d : list) {
+            append(d, outLine);
+            fireProgressEvent();
+        }
+
+        IJ.append(outLine.toString(), exportFile.getAbsolutePath());
+    }
+    
+    /**
+     * Generate the column headers for the stats, and append to the string
+     * builder.
+     * @param outLine
+     */
+    protected abstract void appendHeader(StringBuilder outLine);
+    
+    /**
+     * Append the stats for the dataset to the builder
+     * @param d
+     * @param outLine
+     * @throws Exception
+     */
+    protected abstract void append(IAnalysisDataset d, StringBuilder outLine) throws Exception;
+
+}

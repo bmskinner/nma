@@ -31,6 +31,13 @@ import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
+/**
+ * The action for exporting shell data from datasets
+ * 
+ * @author bms41
+ * @since 1.13.8
+ *
+ */
 public class ExportShellsAction extends MultiDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Exporting stats";
@@ -55,15 +62,6 @@ public class ExportShellsAction extends MultiDatasetResultAction {
         this.setProgressMessage("Exporting stats");
         ThreadManager.getInstance().submit(worker);
 
-    }
-
-    @Override
-    public void finished() {
-
-        this.cancel();
-        fine("Refolding finished, cleaning up");
-        super.finished();
-        this.countdownLatch();
     }
 
 }

@@ -152,6 +152,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
                 return new ExportStatsAction(selectedDatasets, mw);
             
+            if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
+                log("Not yet implemented");
+            
             if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
                 return new ExportShellsAction(selectedDatasets, mw);
 
