@@ -60,7 +60,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 	private static final int component_NUMBER = 0;
 	private static final int IMAGE_CHANNEL = 0;
 	private static final int[] POSITION = {105, 34};
-	private static final File IMAGE_FILE = new File("test/com/bmskinner/nuclear_morphology/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
+	private static final File IMAGE_FILE = new File("test/samples/images/Testing/s60.tiff"); // This component is from Testing\s60\0
 	private static final IPoint COM = IPoint.makeNew(74, 46);
 	
 	
@@ -80,8 +80,7 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		component = new DefaultRodentSpermNucleus(ROI, COM, IMAGE_FILE, IMAGE_CHANNEL,  
 	            POSITION , component_NUMBER);
 		nucleus = (Nucleus) component;
-//		nucleus.offset(COM.getX(), COM.getY());
-		
+		nucleus.offset(COM.getX(), COM.getY());
         initialise(PROFILE_WINDOW);	    
         setStatistic(PlottableStatistic.AREA,     AREA);
         setStatistic(PlottableStatistic.MAX_FERET, MAX_FERET);

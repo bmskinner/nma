@@ -107,7 +107,7 @@ public class ShellDetector extends Detector {
         this.type = type;
         this.isScale = isScale;
         component.getBounds().getX();
-        fine("Creating shell for component at "+ component.getBounds().getX()+" - "+ component.getBounds().getY() );
+//        fine("Creating shell for component at "+ component.getBounds().getX()+" - "+ component.getBounds().getY() );
         createShells(component);
     }
 
