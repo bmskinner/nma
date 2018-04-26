@@ -31,13 +31,11 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
  */
 public enum ProfileType {
     ANGLE("Angle profile", "Angle", StatisticDimension.ANGLE), 
-    FRANKEN("Franken profile", "Angle",
-            StatisticDimension.ANGLE), 
-    DIAMETER("Diameter profile", "Distance across CoM",
-                    StatisticDimension.LENGTH), 
-    RADIUS("Radius profile", "Distance from CoM",
-                            StatisticDimension.LENGTH),
-    ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS);
+    FRANKEN("Franken profile", "Angle", StatisticDimension.ANGLE), 
+    DIAMETER("Diameter profile", "Distance across CoM", StatisticDimension.LENGTH), 
+    RADIUS("Radius profile", "Distance from CoM", StatisticDimension.LENGTH),
+    ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS),
+    ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // type, only kept for 1.13.5 compat. 
 
     private String             name;
     private String             label;
