@@ -69,22 +69,18 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
                     }
                 }
 
-                // Open the files - we process only *.nmd and *.wrk files
+                // Open the files - we process *.nmd, *.bak and *.wrk files
 
                 for (File f : fileList) {
-                    if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)) {
-                        fine("File is nmd");
+                    if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
+                            || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
                         receiveDatasetFile(f);
-                    }
 
-                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                        fine("File is wrk");
+                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
                         receiveWorkspaceFile(f);
-                    }
 
-                    if (f.isDirectory()) {
+                    if (f.isDirectory())
                         receiveFolder(f);
-                    }
 
                 }
             }

@@ -32,53 +32,68 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class RoundFormatConverterTest extends OldFormatConverterTest {
 
+    private static final String ROUND_FILE = "Round.bak";
     
     @Override
     @Test
     public void test_1_13_0_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_0, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
     
     @Test
     public void test_1_13_1_ConvertsToCurrent() throws Exception {
-
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_1, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
 
     @Test
     public void test_1_13_2_ConvertsToCurrent() throws Exception {
-
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_2, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.currentVersion()));
     }
     
     @Override
     @Test
     public void test_1_13_3_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_3, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.v_1_13_3));
     }
     
     @Override
     @Test
     public void test_1_13_4_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_4, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.v_1_13_4));
     }
 
     @Override
     @Test
     public void test_1_13_5_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_5, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.v_1_13_5));
     }
 
     @Override
     @Test
     public void test_1_13_6_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_6, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.v_1_13_6));
     }
 
     @Override
     @Test
     public void test_1_13_7_ConvertsToCurrent() throws Exception {
-        fail("Not yet implemented");
+        File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+DIR_1_13_7, ROUND_FILE);
+        IAnalysisDataset d = testConvertsToCurrent(f);
+        assertTrue(d.getVersion().equals(Version.v_1_13_7));
     }
 
 }

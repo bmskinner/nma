@@ -297,21 +297,18 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
                         for (File f : fileList) {
                             fine("Checking dropped file");
-                            if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION)) {
-                                finer("Opening file " + f.getAbsolutePath());
-
+                            if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
+                                    || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION)) {
                                 getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
 
                             }
                             
                             if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                                fine("File is wrk");
                                 getSignalChangeEventHandler().fireSignalChangeEvent("Wrk|" + f.getAbsolutePath());
 
                             }
 
                             if (f.isDirectory()) {
-                                // Pass to new analysis
                                 getSignalChangeEventHandler().fireSignalChangeEvent("New|" + f.getAbsolutePath());
 
                             }

@@ -109,15 +109,13 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public IAnalysisResult call() throws Exception {
 
     	try{ 
-    		run();
-        
+    		run(); 
     	} catch (UnsupportedVersionException e) {
     		throw(e);
     	}
 
-        if (dataset == null) {
+        if (dataset == null)
             throw new UnloadableDatasetException("Could not load file '" + file.getAbsolutePath() + "'");
-        }
 
         DefaultAnalysisResult r = new DefaultAnalysisResult(dataset);
         r.setBoolean(WAS_CONVERTED_BOOL, wasConverted);
@@ -145,6 +143,8 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
             }
 
             fine("Read dataset");
+            if(dataset==null)
+                return; // Exception will be thrown in call() method
 
             Version v = dataset.getVersion();
 
