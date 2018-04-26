@@ -33,6 +33,7 @@ import com.bmskinner.nuclear_morphology.analysis.MergeSourceExtractionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 public class MergeSourceExtracterTest extends SampleDatasetReader {
     

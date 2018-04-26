@@ -19,7 +19,6 @@
 
 package com.bmskinner.nuclear_morphology.gui;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -36,8 +35,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 
 public class MergeAnalysisOptionsFormatting {
 		
@@ -61,12 +59,12 @@ public class MergeAnalysisOptionsFormatting {
 	}
 	
 	public IAnalysisOptions makeTestOptions1(){
-		IMutableAnalysisOptions op = new DefaultAnalysisOptions();
+		DefaultAnalysisOptions op = new DefaultAnalysisOptions();
 		
 		op.setAngleWindowProportion(0.05);
 		op.setNucleusType(NucleusType.RODENT_SPERM);
 		
-		IMutableDetectionOptions nucleus = new DefaultNucleusDetectionOptions( (File) null );
+		IDetectionOptions nucleus = new DefaultNucleusDetectionOptions( (File) null );
 		op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nucleus);
 		return op;
 	}

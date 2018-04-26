@@ -26,7 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 /**
  * @author bms41

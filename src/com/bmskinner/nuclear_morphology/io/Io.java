@@ -43,7 +43,9 @@ public interface Io {
     static final String TAB = "\t";
     
     static final String SAVE_FILE_EXTENSION_NODOT = "nmd";
+    static final String BACKUP_FILE_EXTENSION_NODOT = "bak";
     static final String SAVE_FILE_EXTENSION       = "." + SAVE_FILE_EXTENSION_NODOT;
+    static final String BACKUP_FILE_EXTENSION = "." + BACKUP_FILE_EXTENSION_NODOT;
     static final String LOG_FILE_EXTENSION        = ".log";
     
     
@@ -91,7 +93,7 @@ public interface Io {
     }
     
     public interface Importer extends Io {
-
+        
         /**
          * Replace the old file extension in the given file and return a new file
          * 

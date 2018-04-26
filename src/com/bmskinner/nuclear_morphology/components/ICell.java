@@ -178,5 +178,27 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
      */
     boolean hasNuclearSignals(UUID signalGroupId);
     
+    /**
+     * Add a new mitochondrion to the cell
+     * 
+     * @param mitochondrion
+     */
+    void addMitochondrion(IMitochondrion mitochondrion);
+
+    /**
+     * Add a flagellum to the cell
+     * 
+     * @param tail
+     */
+    void addFlagellum(Flagellum tail);
+
+    /**
+     * Set the cytoplasm of the cell
+     * 
+     * @param cytoplasm
+     *            the cytoplasm
+     */
+    void setCytoplasm(ICytoplasm cytoplasm);
+    
 
 }

@@ -1,4 +1,4 @@
-package com.bmskinner.nuclear_morphology.samples;
+package com.bmskinner.nuclear_morphology.io;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -7,7 +7,6 @@ import java.io.File;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 
@@ -43,17 +42,4 @@ public class AnalysisDatasetReadTest extends SampleDatasetReader {
             fail();
         }
     }
-	
-	
-//	@Test
-//	public void testHookBodyDataset() {
-//		File f = new File("C:\\Users\\ben\\Documents\\Borked datasets\\Hook_body_calc\\(PWK X LEW) X LEW (30+ 43).nmd");
-//		try {
-//			IAnalysisDataset d = openDataset(f);
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail();
-//		}
-//	}
 }

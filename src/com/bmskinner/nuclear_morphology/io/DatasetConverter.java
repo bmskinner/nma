@@ -40,7 +40,6 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.IMutableCell;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -385,7 +384,7 @@ public class DatasetConverter implements Loggable, Importer {
     // }
 
     private ICell createNewCell(ICell oldCell) throws DatasetConversionException {
-        IMutableCell newCell = new DefaultCell(oldCell.getId());
+        ICell newCell = new DefaultCell(oldCell.getId());
 
         // make a new nucleus
         Nucleus newNucleus = createNewNucleus(oldCell.getNucleus());
@@ -787,13 +786,12 @@ public class DatasetConverter implements Loggable, Importer {
 
         if (saveFile.exists()) {
 
-            File newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
+            File newFile = new File(saveFile.getAbsolutePath());
+            if(saveFile.getName().endsWith(SAVE_FILE_EXTENSION))
+                newFile = Importer.replaceFileExtension(saveFile, SAVE_FILE_EXTENSION, BAK_FILE_EXTENSION);
 
-            if (newFile.exists()) {
-
+            if (newFile.exists()) 
                 warn("Overwriting existing backup file");
-
-            }
 
             try {
 

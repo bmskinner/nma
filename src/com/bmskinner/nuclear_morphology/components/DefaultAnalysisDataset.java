@@ -94,8 +94,9 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
     public DefaultAnalysisDataset(ICellCollection collection, File saveFile) {
         super(collection);
         this.savePath = saveFile;
-        this.debugFile = Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION,
-                Importer.LOG_FILE_EXTENSION);
+        this.debugFile = savePath.getName().endsWith(Importer.SAVE_FILE_EXTENSION)
+                ? Importer.replaceFileExtension(saveFile, Importer.SAVE_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION)
+                : Importer.replaceFileExtension(saveFile, Importer.BACKUP_FILE_EXTENSION, Importer.LOG_FILE_EXTENSION);
         this.isRoot = false;
     }
 

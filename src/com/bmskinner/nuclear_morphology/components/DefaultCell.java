@@ -40,7 +40,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
  * @author bms41
  * @since 1.13.3
  */
-public class DefaultCell implements IMutableCell {
+public class DefaultCell implements ICell {
 
     private static final long serialVersionUID = 1L;
 

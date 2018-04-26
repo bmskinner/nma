@@ -19,31 +19,25 @@
 
 package com.bmskinner.nuclear_morphology.analysis;
 
-import ij.ImageStack;
-import ij.process.ImageProcessor;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
-import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 //import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetector;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.components.options.DefaultAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.DefaultNucleusDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IMutableDetectionOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 //import com.bmskinner.nuclear_morphology.utility.Constants;
+
+import ij.ImageStack;
 
 public class SpermTracePiplineTest {
 	
@@ -123,7 +117,7 @@ public class SpermTracePiplineTest {
 			this.setNucleusType(NucleusType.RODENT_SPERM);
 			this.setAngleWindowProportion(0.05);
 			
-			IMutableDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions( (File) null);
+			IDetectionOptions nucleusOptions = OptionsFactory.makeNucleusDetectionOptions( (File) null);
 			
 			nucleusOptions.setMinSize(100);
 			nucleusOptions.setMaxSize(20000);

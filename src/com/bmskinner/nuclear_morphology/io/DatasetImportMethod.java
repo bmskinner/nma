@@ -85,19 +85,17 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
     public DatasetImportMethod(final File f) {
         super();
 
-        if (!Importer.isSuitableImportFile(f)) {
+        if (!Importer.isSuitableImportFile(f))
             throw new IllegalArgumentException(INVALID_FILE_ERROR);
-        }
 
-        if (!f.getName().endsWith(SAVE_FILE_EXTENSION)) {
-            throw new IllegalArgumentException("File is not nmd format or has been renamed");
-        }
+        if (! (f.getName().endsWith(SAVE_FILE_EXTENSION) || f.getName().endsWith(BACKUP_FILE_EXTENSION)) )
+            throw new IllegalArgumentException("File is not nmd or bak format or has been renamed");
 
         this.file = f;
     }
         
     /**
-     * Call with an existing map of signal ids to directories of images. Designed for unit
+     * Call with an existing map of signal ids to dairectories of images. Designed for unit
      * testing.
      * @param f
      * @param signalFiles a map of signal group to folder of signals
@@ -164,7 +162,11 @@ public class DatasetImportMethod extends AbstractAnalysisMethod implements Impor
                     log("Updated output folder to " + exportFolder);
                 }
 
-                File logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
+                File logFile = null;
+                if(file.getName().endsWith(SAVE_FILE_EXTENSION))
+                    logFile = Importer.replaceFileExtension(file, SAVE_FILE_EXTENSION, LOG_FILE_EXTENSION);
+                if(file.getName().endsWith(BACKUP_FILE_EXTENSION))
+                    logFile = Importer.replaceFileExtension(file, BACKUP_FILE_EXTENSION, LOG_FILE_EXTENSION);
 
                 dataset.setDebugFile(logFile);
                 fine("Updated log file location");

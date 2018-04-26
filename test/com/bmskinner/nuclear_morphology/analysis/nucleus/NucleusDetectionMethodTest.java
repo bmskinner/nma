@@ -31,8 +31,6 @@ import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
-import com.bmskinner.nuclear_morphology.analysis.SampleDatasetReader;
-import com.bmskinner.nuclear_morphology.analysis.nucleus.NucleusDetectionMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
@@ -40,16 +38,15 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
-import com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
 import com.bmskinner.nuclear_morphology.io.Io;
-
+import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
 import ij.IJ;
 import ij.Prefs;
-import ij.plugin.frame.RoiManager;
 
 /**
  * Test the detection methods to ensure they match previously 
@@ -86,7 +83,7 @@ public class NucleusDetectionMethodTest {
     	IAnalysisDataset exp = SampleDatasetReader.openTestRodentDataset();
 
     	File testFolder = new File(TESTING_RODENT_FOLDER);
-    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRodentAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_RODENT_FOLDER);
     	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
@@ -104,7 +101,7 @@ public class NucleusDetectionMethodTest {
     	IAnalysisDataset exp = SampleDatasetReader.openTestPigDataset();
 
     	File testFolder = new File(TESTING_PIG_FOLDER);
-    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultPigAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_PIG_FOLDER);
     	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
@@ -123,7 +120,7 @@ public class NucleusDetectionMethodTest {
     	IAnalysisDataset exp = SampleDatasetReader.openTestRoundDataset();
 
     	File testFolder = new File(TESTING_ROUND_FOLDER);
-    	IMutableAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
+    	IAnalysisOptions op = OptionsFactory.makeDefaultRoundAnalysisOptions(testFolder);
 
     	File outFile = makeOutfile(TESTING_ROUND_FOLDER);
     	IAnalysisDataset obs = runNewAnalysis(OUT_FOLDER, op, outFile);
@@ -139,7 +136,7 @@ public class NucleusDetectionMethodTest {
      * @return the new dataset
      * @throws Exception
      */
-    private IAnalysisDataset runNewAnalysis(String folder, IMutableAnalysisOptions op, File saveFile) throws Exception {
+    private IAnalysisDataset runNewAnalysis(String folder, IAnalysisOptions op, File saveFile) throws Exception {
         
         if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
             throw new IllegalArgumentException("Detection folder does not exist");

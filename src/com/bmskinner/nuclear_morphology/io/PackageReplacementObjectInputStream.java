@@ -178,6 +178,11 @@ public class PackageReplacementObjectInputStream extends ObjectInputStream imple
         MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.options.IMutableAnalysisOptions",
         		com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions.class); 
         
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.generic.IMutablePoint",
+                com.bmskinner.nuclear_morphology.components.generic.IPoint.class); 
+        
+        MIGRATION_MAP.put("com.bmskinner.nuclear_morphology.components.IMutableCell",
+                com.bmskinner.nuclear_morphology.components.ICell.class); 
         
     }
 
