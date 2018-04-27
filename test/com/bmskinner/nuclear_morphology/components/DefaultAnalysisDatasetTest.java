@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import java.awt.Paint;
 import java.io.File;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -316,7 +317,7 @@ public class DefaultAnalysisDatasetTest {
 
     @Test
     public void testGetDatasetColour() {
-        assertEquals(null, d.getDatasetColour());
+        assertFalse(d.getDatasetColour().isPresent());
     }
 
     @Test

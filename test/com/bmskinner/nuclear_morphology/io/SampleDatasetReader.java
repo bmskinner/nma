@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -87,48 +90,27 @@ public class SampleDatasetReader {
         
     /**
      * Open the dataset in the given file.
-     * @param f
-     * @return
+     * @param f the file to open
+     * @return the dataset
      * @throws Exception
      */
-    public static IAnalysisDataset openDataset(File f) throws Exception {
-        
-        if(f==null)
-            throw new Exception("Null file argument");
-        
-        if(!f.exists())
-            throw new Exception("File does not exist: "+f.getAbsolutePath());
-        
-        IAnalysisMethod m = new DatasetImportMethod(f);
-
-        System.out.println("Importing "+f.toString());
-        IAnalysisResult r = m.call();
-
-        IAnalysisDataset d = r.getFirstDataset();
-        return d;
+    public static IAnalysisDataset openDataset(@NonNull File f) throws Exception {
+        return openDataset(f, null);
     }
     
     /**
      * Open the dataset in the given file. Also provide a map of signal images.
-     * @param f
-     * @param signalMap
-     * @return
+     * @param f the file to open
+     * @param signalMap a map of signal ids to folders. Can be null,
+     * @return the dataset
      * @throws Exception
      */
-    public static IAnalysisDataset openDataset(File f, Map<UUID, File> signalMap) throws Exception {
-        if(f==null)
-            throw new Exception("Null file argument");
-        
+    public static IAnalysisDataset openDataset(@NonNull File f, @Nullable Map<UUID, File> signalMap) throws Exception {        
         if(!f.exists())
-            throw new Exception("File does not exist: "+f.getAbsolutePath());
-        
-        IAnalysisMethod m = new DatasetImportMethod(f, signalMap);
-
-        System.out.println("Importing "+f.toString());
+            throw new Exception("File does not exist: "+f.getAbsolutePath()); 
+        IAnalysisMethod m = signalMap==null ? new DatasetImportMethod(f) : new DatasetImportMethod(f, signalMap);
         IAnalysisResult r = m.call();
-
-        IAnalysisDataset d = r.getFirstDataset();
-        return d;
+        return r.getFirstDataset();
     }
     
     

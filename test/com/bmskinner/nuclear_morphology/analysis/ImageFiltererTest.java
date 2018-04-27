@@ -135,42 +135,42 @@ public class ImageFiltererTest {
 	@Test
 	public void bridgePixelAcrossSquare(){
 		ByteProcessor bp = makeTestSquareProcessor();
-		System.out.println("\n-------------\nSquare:");
+//		System.out.println("\n-------------\nSquare:");
 		bridgePixels(bp);
 	}
 	
 	@Test
 	public void bridgePixelAcrossVerticals(){
 		ByteProcessor bp = makeTestVerticalSidesProcessor();
-		System.out.println("\n-------------\nVertical line:");
+//		System.out.println("\n-------------\nVertical line:");
 		bridgePixels(bp);
 	}
 	
 	@Test
 	public void bridgePixelAcrossHorizontals(){
 		ByteProcessor bp = makeTestHorizontalSidesProcessor();
-		System.out.println("\n-------------\nHorizontal line:");
+//		System.out.println("\n-------------\nHorizontal line:");
 		bridgePixels(bp);
 	}
 	
 	@Test
 	public void bridgePixelAcrossEmpty(){
 		ByteProcessor bp = makeTestEmptyProcessor();
-		System.out.println("\n-------------\nEmpty:");
+//		System.out.println("\n-------------\nEmpty:");
 		bridgePixels(bp);
 	}
 	
 	@Test
 	public void bridgePixelAcrossFilled(){
 		ByteProcessor bp = makeTestFilledProcessor();
-		System.out.println("\n-------------\nFilled:");
+//		System.out.println("\n-------------\nFilled:");
 		bridgePixels(bp);
 	}
 	
 	@Test
 	public void bridgePixelAcrossDiagonal(){
 		ByteProcessor bp = makeTestDiagonalProcessor();
-		System.out.println("\n-------------\nDiagonal:");
+//		System.out.println("\n-------------\nDiagonal:");
 		bridgePixels(bp);
 	}
 	
@@ -180,16 +180,16 @@ public class ImageFiltererTest {
 	 */
 	private void bridgePixels(ByteProcessor bp){
 		
-		System.out.println("Input image:");
+//		System.out.println("Input image:");
 		printPixelArray(bp);
 		
-		System.out.println("\nKernel at 1, 1:");
+//		System.out.println("\nKernel at 1, 1:");
 		int[][] kernel = new ImageFilterer(bp).getKernel(bp.getIntArray(), 1, 1);
-		printPixelArray(kernel);
+//		printPixelArray(kernel);
 		
-		System.out.println("\nBridged image:");
+//		System.out.println("\nBridged image:");
 		ByteProcessor bridged = (ByteProcessor) new ImageFilterer(bp).bridgePixelGaps(3).toProcessor();
-		printPixelArray(bridged);
+//		printPixelArray(bridged);
 
 		
 	}

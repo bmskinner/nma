@@ -141,13 +141,13 @@ public class ShellDetectorTest {
     	return ip;
     }
     
-    private void showImage(String title, ImageProcessor ip) throws InterruptedException {
-    	ImagePlus img = new ImagePlus(title, ip);
-    	img.show();
-    	while(img.isVisible()) {
-    		Thread.sleep(1000);
-    	}
-    }
+//    private void showImage(String title, ImageProcessor ip) throws InterruptedException {
+//    	ImagePlus img = new ImagePlus(title, ip);
+//    	img.show();
+//    	while(img.isVisible()) {
+//    		Thread.sleep(1000);
+//    	}
+//    }
 
     @Test
     public void testGetShellsByRadius() throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
@@ -162,7 +162,7 @@ public class ShellDetectorTest {
     private void testGetShells(ShrinkType type) throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
     	sd = new ShellDetector(testNucleus, type, false);
     	ImageProcessor ip = drawShells(testNucleus, sd);
-    	showImage(type.toString(), ip);
+//    	showImage(type.toString(), ip);
     }
     
     @Test
@@ -180,7 +180,7 @@ public class ShellDetectorTest {
     		Nucleus n = createMockNucleus(i);
     		sd = new ShellDetector(n, type, false);
     		ImageProcessor ip = drawShells(n, sd);
-        	showImage(i+": "+type.toString(), ip);
+//        	showImage(i+": "+type.toString(), ip);
     	}
     	
     }
@@ -241,7 +241,7 @@ public class ShellDetectorTest {
     	sd = new ShellDetector(testNucleus, ShrinkType.RADIUS, false);
         long[] obs = sd.findPixelIntensities(testSignal);
         ImageProcessor ip = drawShells(testSignal, sd);
-    	showImage("Signals", ip);
+//    	showImage("Signals", ip);
         long[] exp = {53040, 565590, 102510, 0, 0 };
         assertTrue(testEquals(exp, obs));
     }
@@ -256,10 +256,10 @@ public class ShellDetectorTest {
         s.call();
     }
     
-    @Test
-    public void testValueRangesForRoundNucleusShellDetectionArea() throws Exception {
-    	new ShellRangeValidator().testValueRangesForRoundNucleusShellDetection(ShrinkType.AREA);
-    } 
+//    @Test
+//    public void testValueRangesForRoundNucleusShellDetectionArea() throws Exception {
+//    	new ShellRangeValidator().testValueRangesForRoundNucleusShellDetection(ShrinkType.AREA);
+//    } 
     
     private class ShellRangeValidator {
         

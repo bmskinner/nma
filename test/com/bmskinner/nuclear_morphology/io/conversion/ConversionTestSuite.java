@@ -23,8 +23,19 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+/**
+ * Test datasets created under older verions of the software for compatability with the
+ * current version
+ * @author bms41
+ * @since 1.14.0
+ *
+ */
 @RunWith(Suite.class)
-@SuiteClasses({ MouseFormatConverterTest.class, PigFormatConverterTest.class, RoundFormatConverterTest.class })
-public class AllTests {
+@SuiteClasses({ 
+    MouseFormatConverterTest.class, 
+    PigFormatConverterTest.class, 
+    RoundFormatConverterTest.class })
+
+public class ConversionTestSuite {
 
 }
