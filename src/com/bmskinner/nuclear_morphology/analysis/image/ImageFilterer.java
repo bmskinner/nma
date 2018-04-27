@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.CannyEdgeDetector;
 import com.bmskinner.nuclear_morphology.analysis.detection.Hough_Circles;
@@ -306,35 +307,35 @@ public class ImageFilterer extends AbstractImageFilterer {
         return this;
     }
 
-    /**
-     * Resize the image to fit the given dimensions, preserving aspect ratio
-     * 
-     * @param newWidth
-     *            the new width of the image
-     * @return
-     */
-    public ImageFilterer resize(int maxWidth, int maxHeight) {
-
-        if (ip == null) {
-            throw new IllegalArgumentException("Image processor is null");
-        }
-
-        int originalWidth = ip.getWidth();
-        int originalHeight = ip.getHeight();
-
-        // keep the image aspect ratio
-        double ratio = (double) originalWidth / (double) originalHeight;
-
-        double finalWidth = maxHeight * ratio; // fix height
-        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
-                                                                    // constrain
-                                                                    // width too
-
-        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
-        ip = result;
-        return this;
-        // return new ImageFilterer(result);
-    }
+//    /**
+//     * Resize the image to fit the given dimensions, preserving aspect ratio
+//     * 
+//     * @param newWidth
+//     *            the new width of the image
+//     * @return
+//     */
+//    public ImageFilterer resize(int maxWidth, int maxHeight) {
+//
+//        if (ip == null) {
+//            throw new IllegalArgumentException("Image processor is null");
+//        }
+//
+//        int originalWidth = ip.getWidth();
+//        int originalHeight = ip.getHeight();
+//
+//        // keep the image aspect ratio
+//        double ratio = (double) originalWidth / (double) originalHeight;
+//
+//        double finalWidth = maxHeight * ratio; // fix height
+//        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
+//                                                                    // constrain
+//                                                                    // width too
+//
+//        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+//        ip = result;
+//        return this;
+//        // return new ImageFilterer(result);
+//    }
 
     /**
      * Resize the image to fit on the screen. By default the width will be 80%,
@@ -352,33 +353,33 @@ public class ImageFilterer extends AbstractImageFilterer {
         return fitToScreen(0.8);
     }
 
-    /**
-     * Crop the image to the region covered by the given nucleus
-     * 
-     * @return
-     */
-    public ImageFilterer crop(CellularComponent c) {
-
-        if (ip == null) {
-            throw new IllegalArgumentException("Image processor is null");
-        }
-        // Choose a clip for the image (an enlargement of the original nucleus
-        // ROI
-        int[] positions = c.getPosition();
-        int wideW = (int) (positions[CellularComponent.WIDTH] + 20);
-        int wideH = (int) (positions[CellularComponent.HEIGHT] + 20);
-        int wideX = (int) (positions[CellularComponent.X_BASE] - 10);
-        int wideY = (int) (positions[CellularComponent.Y_BASE] - 10);
-
-        wideX = wideX < 0 ? 0 : wideX;
-        wideY = wideY < 0 ? 0 : wideY;
-
-        ip.setRoi(wideX, wideY, wideW, wideH);
-        ImageProcessor result = ip.crop();
-        ip = result;
-        return this;
-        // return new ImageFilterer(result);
-    }
+//    /**
+//     * Crop the image to the region covered by the given component
+//     * 
+//     * @return
+//     */
+//    public ImageFilterer crop(@NonNull CellularComponent c) {
+//
+//        if (ip == null) {
+//            throw new IllegalArgumentException("Image processor is null");
+//        }
+//        // Choose a clip for the image (an enlargement of the original nucleus
+//        // ROI
+//        int[] positions = c.getPosition();
+//        int wideW = (int) (positions[CellularComponent.WIDTH] + 20);
+//        int wideH = (int) (positions[CellularComponent.HEIGHT] + 20);
+//        int wideX = (int) (positions[CellularComponent.X_BASE] - 10);
+//        int wideY = (int) (positions[CellularComponent.Y_BASE] - 10);
+//
+//        wideX = wideX < 0 ? 0 : wideX;
+//        wideY = wideY < 0 ? 0 : wideY;
+//
+//        ip.setRoi(wideX, wideY, wideW, wideH);
+//        ImageProcessor result = ip.crop();
+//        ip = result;
+//        return this;
+//        // return new ImageFilterer(result);
+//    }
 
     /**
      * Fetch a 3x3 image kernel from within an int image array

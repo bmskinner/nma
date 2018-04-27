@@ -31,10 +31,8 @@ public class AngleTools {
     /**
      * Find the length on the x-axis of a line at a given angle
      * 
-     * @param length
-     *            the line length
-     * @param angle
-     *            the angle from 0 relative to positive x axis in degrees
+     * @param length the line length
+     * @param angle the angle from 0 relative to positive x axis in degrees
      * @return the x distance
      */
     public static double getXComponentOfAngle(double length, double angle) {
@@ -47,10 +45,8 @@ public class AngleTools {
     /**
      * Find the length on the y-axis of a line at a given angle
      * 
-     * @param length
-     *            the line length
-     * @param angle
-     *            the angle from 0 relative to positive x axis in degrees
+     * @param length the line length
+     * @param angle the angle from 0 relative to positive x axis in degrees
      * @return the y distance
      */
     public static double getYComponentOfAngle(double length, double angle) {
@@ -61,12 +57,9 @@ public class AngleTools {
     /**
      * Rotate the given point about a centre
      * 
-     * @param p
-     *            the point to be moved
-     * @param centre
-     *            the centre of rotation
-     * @param angle
-     *            the angle to rotate in degrees
+     * @param p the point to be moved
+     * @param centre the centre of rotation
+     * @param angle the angle to rotate in degrees
      * @return
      */
     public static IPoint rotateAboutPoint(IPoint p, IPoint centre, double angle) {

@@ -25,10 +25,12 @@ public class GenericCheckboxPanel extends EnumeratedOptionsPanel {
 
     private JCheckBox checkBox = new JCheckBox();
 
+    /**
+     * Construct with a text label
+     * @param label the text to display by the checkbox
+     */
     public GenericCheckboxPanel(String label) {
         super();
-
-        // checkbox to select raw or normalised profiles
         checkBox.setSelected(false);
         checkBox.addActionListener(this);
         checkBox.setText(label);
@@ -41,7 +43,6 @@ public class GenericCheckboxPanel extends EnumeratedOptionsPanel {
     }
 
     public void setEnabled(boolean b) {
-
         checkBox.setEnabled(b);
     }
 

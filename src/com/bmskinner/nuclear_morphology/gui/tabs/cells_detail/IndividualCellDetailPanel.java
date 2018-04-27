@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.tabs;
+package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -33,15 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellBorderTagPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellOutlinePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellProfilePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellSegTablePanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellSignalStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellStatsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellViewModel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.CellsListPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.ComponentListPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel implements SignalChangeListener {

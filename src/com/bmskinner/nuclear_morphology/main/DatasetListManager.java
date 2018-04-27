@@ -29,6 +29,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationTreeTableNode;
@@ -76,27 +78,27 @@ public final class DatasetListManager implements Loggable {
     }
 
     /**
-     * Fetch an instance of the factory
+     * Fetch an instance of the manager
      * 
      * @return
      */
     public static DatasetListManager getInstance() {
 
-        if (instance != null) {
+        if (instance != null)
             return instance;
-        } else {
-
-            synchronized (lockObject) {
-                if (instance == null) {
-                    instance = new DatasetListManager();
-                }
+        
+        synchronized (lockObject) {
+            if (instance == null) {
+                instance = new DatasetListManager();
             }
-
-            return instance;
         }
-
+        return instance;
     }
 
+    /**
+     * Get all root datasets
+     * @return
+     */
     public synchronized List<IAnalysisDataset> getRootDatasets() {
         return list;
     }
@@ -110,15 +112,27 @@ public final class DatasetListManager implements Loggable {
         return selected.get(0);
     }
 
+    /**
+     * Get the currently selected datasets
+     * @return
+     */
     public synchronized List<IAnalysisDataset> getSelectedDatasets() {
         return selected;
     }
 
-    public synchronized List<IAnalysisDataset> getDatasets(List<UUID> ids) {
-
+    /**
+     * Get the datasets with the given ids
+     * @param ids
+     * @return
+     */
+    public synchronized List<IAnalysisDataset> getDatasets(@NonNull List<UUID> ids) {
         return ids.stream().map(id -> getDataset(id)).collect(Collectors.toList());
     }
 
+    /**
+     * Test if a single dataset is selected
+     * @return
+     */
     public synchronized boolean isSingleDataset() {
         return (selected.size() == 1);
     }
@@ -132,34 +146,49 @@ public final class DatasetListManager implements Loggable {
         return (this.selected.size() > 1);
     }
 
+    /**
+     * Test if any datasets are selected
+     * @return true if at least one dataset is selected, false otherwise
+     */
     public synchronized boolean hasSelectedDatasets() {
         return !selected.isEmpty();
     }
 
-    public synchronized void setSelectedDatasets(Collection<IAnalysisDataset> list) {
+    /**
+     * Set the selected datasets to the contents of the list
+     * @param list
+     */
+    public synchronized void setSelectedDatasets(@NonNull Collection<IAnalysisDataset> list) {
         selected.clear();
         selected.addAll(list);
     }
 
-    public synchronized void setSelectedDataset(IAnalysisDataset d) {
+    /**
+     * Set the given dataset to be the only selected dataset
+     * @param d
+     */
+    public synchronized void setSelectedDataset(@NonNull IAnalysisDataset d) {
         selected.clear();
         selected.add(d);
     }
 
     /**
      * Get the index of the given dataset in the list. Returns -1 if the dataset
-     * is not root, not found, or null.
+     * is not root or not found.
      * 
      * @param d
      * @return the index, or -1
      */
-    public synchronized int getPosition(IAnalysisDataset d) {
-        if (d.isRoot()) {
+    public synchronized int getPosition(@NonNull IAnalysisDataset d) {
+        if (d.isRoot())
             return list.indexOf(d);
-        }
         return -1;
     }
 
+    /**
+     * Test if the manager contains at least one dataset
+     * @return
+     */
     public synchronized boolean hasDatasets() {
         return map.size() > 0;
     }
@@ -170,15 +199,10 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized void refreshClusters() {
         try {
-            finest("Refreshing clusters...");
             if (this.hasDatasets()) {
-
                 for (IAnalysisDataset rootDataset : this.getRootDatasets()) {
-
-                    finest("  Root dataset " + rootDataset.getName());
                     rootDataset.refreshClusterGroups();
                     for (IAnalysisDataset child : rootDataset.getAllChildDatasets()) {
-                        finest("    Child dataset " + child.getName());
                         child.refreshClusterGroups();
                     }
 
@@ -196,7 +220,7 @@ public final class DatasetListManager implements Loggable {
      * @param d
      * @return
      */
-    public synchronized IAnalysisDataset getParent(IAnalysisDataset d) {
+    public synchronized IAnalysisDataset getParent(@NonNull IAnalysisDataset d) {
 
         if (d.isRoot()) {
             return d;
@@ -222,6 +246,10 @@ public final class DatasetListManager implements Loggable {
         return result;
     }
 
+    /**
+     * Get all the datasets in the manager. Recursively fetches child datasets.
+     * @return
+     */
     public synchronized Set<IAnalysisDataset> getAllDatasets() {
 
         Set<IAnalysisDataset> result = new HashSet<IAnalysisDataset>();
@@ -239,7 +267,7 @@ public final class DatasetListManager implements Loggable {
      * @param id
      * @return
      */
-    public synchronized boolean hasDataset(UUID id) {
+    public synchronized boolean hasDataset(@NonNull UUID id) {
         for (IAnalysisDataset d : list) {
             if (d.getUUID().equals(id)) {
                 return true;
@@ -260,7 +288,7 @@ public final class DatasetListManager implements Loggable {
      * @param id
      * @return
      */
-    public synchronized IAnalysisDataset getDataset(UUID id) {
+    public synchronized IAnalysisDataset getDataset(@NonNull UUID id) {
         for (IAnalysisDataset d : list) {
             if (d.getUUID().equals(id)) {
                 return d;
@@ -279,7 +307,7 @@ public final class DatasetListManager implements Loggable {
      * Add the given dataset to the manager
      * @param d
      */
-    public synchronized void addDataset(IAnalysisDataset d) {
+    public synchronized void addDataset(@NonNull IAnalysisDataset d) {
         if (d.isRoot() && !list.contains(d)) {
             list.add(d);
             map.put(d.getUUID(), d.hashCode());
@@ -290,7 +318,7 @@ public final class DatasetListManager implements Loggable {
      * Remove the selected dataset from the list of open datasets
      * @param d
      */
-    public synchronized void removeDataset(IAnalysisDataset d) {
+    public synchronized void removeDataset(@NonNull IAnalysisDataset d) {
 
         if (!d.isRoot()) // only remove root datasets
             return;
@@ -332,9 +360,8 @@ public final class DatasetListManager implements Loggable {
      * @param d
      * @return true if the hashcode is different to the stored value
      */
-    public boolean hashCodeChanged(IAnalysisDataset d) {
+    public boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
-
             if (map.containsKey(d.getUUID())) {
                 return d.hashCode() != map.get(d.getUUID());
             } else {
@@ -367,7 +394,7 @@ public final class DatasetListManager implements Loggable {
      * 
      * @param d
      */
-    public void updateHashCode(IAnalysisDataset d) {
+    public void updateHashCode(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
             map.put(d.getUUID(), d.hashCode());
         }
@@ -387,25 +414,39 @@ public final class DatasetListManager implements Loggable {
     
     
     
-    public synchronized void addWorkspace(IWorkspace w) {
+    /**
+     * Add the given workspace to the manager
+     * @param w
+     */
+    public synchronized void addWorkspace(@NonNull IWorkspace w) {
         workspaces.add(w);
     }
     
+    /**
+     * Get the currently loaded workspaces
+     * @return
+     */
     public synchronized List<IWorkspace> getWorkspaces() {
         return workspaces;
     }
     
+    /**
+     * Test if workspaces are present
+     * @return
+     */
     public synchronized boolean hasWorkspaces() {
         return workspaces.size() > 0;
     }
     
-    public synchronized boolean isInWorkspace(IAnalysisDataset d){
-
-        for(IWorkspace w : workspaces){
-            
-            if(w.getFiles().contains(d.getSavePath())){
+    /**
+     * Test if the given dataset is in a workspace
+     * @param d
+     * @return
+     */
+    public synchronized boolean isInWorkspace(@NonNull IAnalysisDataset d){
+        for(IWorkspace w : workspaces){  
+            if(w.getFiles().contains(d.getSavePath()))
                 return true;
-            } 
         }
         return false;
     }

@@ -22,12 +22,17 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
+import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
@@ -35,6 +40,9 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
@@ -43,6 +51,10 @@ import com.bmskinner.nuclear_morphology.gui.RotationMode;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
+
+import ij.process.ImageProcessor;
 
 @SuppressWarnings("serial")
 public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionListener, ChartSetEventListener {
@@ -50,6 +62,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private static final String PANEL_TITLE_LBL = "Outline";
             
     private RotationSelectionSettingsPanel rotationPanel;
+    
+    private JPanel imagePanel;
+    private JLabel imageLabel;
 
     private ExportableChartPanel panel;
 
@@ -92,12 +107,19 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         this.add(settingsPanel, BorderLayout.NORTH);
 
-        panel = new ExportableChartPanel(chart);
-        panel.setFixedAspectRatio(true);
-
-        panel.addChartSetEventListener(this);
-
-        this.add(panel, BorderLayout.CENTER);
+        imagePanel = new JPanel(new BorderLayout());
+        imageLabel = new JLabel();
+        imageLabel.setHorizontalAlignment(JLabel.CENTER);
+        imageLabel.setVerticalAlignment(JLabel.CENTER);
+        imageLabel.setHorizontalTextPosition(JLabel.CENTER);
+        imageLabel.setVerticalTextPosition(JLabel.CENTER);
+        imagePanel.add(imageLabel, BorderLayout.CENTER);
+        add(imagePanel, BorderLayout.CENTER);
+//        panel = new ExportableChartPanel(chart);
+//        panel.setFixedAspectRatio(true);
+//
+//        panel.addChartSetEventListener(this);
+//        this.add(panel, BorderLayout.CENTER);
 
     }
     
@@ -135,63 +157,74 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     public synchronized void update() {
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {
-            panel.setChart(MorphologyChartFactory.createEmptyChart());
+            imageLabel.setIcon(null);
             return;
         }
+        
+        
+        if(!getCellModel().hasCell()){
+            imageLabel.setIcon(null);
+            return;
+        }
+        
+        final ICell cell = getCellModel().getCell();
 
-        CellularComponent component = this.getCellModel().getComponent();
+        CellularComponent component = getCellModel().getComponent();
 
         updateSettingsPanels();
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
-                .setCell(this.getCellModel().getCell()).setRotationMode(rotationPanel.getSelected())
-                .setShowAnnotations(true).setShowSignals(true).setShowMesh(makeMeshPanel.isSelected())
-                .setShowWarp(warpMeshPanel.isSelected()).setShowMeshEdges(false).setShowMeshFaces(true)
-                .setInvertYAxis(rotationPanel.getSelected().equals(RotationMode.ACTUAL)) // only
-                                                                                         // invert
-                                                                                         // for
-                                                                                         // actual
-                .setCellularComponent(component).setTarget(panel).build();
+        if (component==null || !component.getSourceFile().exists()) {
+            imageLabel.setIcon(null);
+            return;
+        }
 
-        setChart(options);
+        Runnable r = () -> {
+            try {
+                ImageProcessor ip = component.getImage();
+                ImageAnnotator an = new ImageAnnotator(ip);
+                
+                if(cell.hasCytoplasm()){
+                    an.crop(cell.getCytoplasm());
+                } else{
+                    an.crop(cell.getNuclei().get(0));
+                }
+                ImageAnnotator an2 = new ImageAnnotator(an.toProcessor(), imagePanel.getWidth(), imagePanel.getHeight());
+                
+                for(Nucleus n : cell.getNuclei()){
+                    an2.annotateCroppedNucleus(n.duplicate());
+                }
+
+                imageLabel.setIcon(an2.toImageIcon());
+
+            } catch (Exception e1) {
+                warn("Error fetching image");
+                stack("Error fetching image", e1);
+            }
+        };
+
+        ThreadManager.getInstance().submit(r);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         update();
-
     }
 
     @Override
     protected void updateSingle() {
         update();
-
     }
 
     @Override
     protected void updateMultiple() {
         updateNull();
-
     }
 
     @Override
     protected void updateNull() {
-        panel.setChart(MorphologyChartFactory.createEmptyChart());
+        imageLabel.setIcon(null);
         updateSettingsPanels();
 
-    }
-
-    @Override
-    public void setChartsAndTablesLoading() {
-        super.setChartsAndTablesLoading();
-
-        panel.setChart(MorphologyChartFactory.createLoadingChart());
-    }
-
-    @Override
-    protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new OutlineChartFactory(options).makeCellOutlineChart();
     }
 
     @Override
@@ -205,16 +238,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
     @Override
     public void chartOptionsRenderedEventReceived(ChartOptionsRenderedEvent e) {
-
         update();
     }
 
     @Override
-    public void chartSetEventReceived(ChartSetEvent e) {
-        if (this.getCellModel().hasCell()) {
-            panel.restoreAutoBounds();
-        }
-
-    }
-
+    public void chartSetEventReceived(ChartSetEvent e) { }
 }

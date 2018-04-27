@@ -25,6 +25,7 @@ import javax.swing.ImageIcon;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.ImagePlus;
@@ -325,6 +326,59 @@ public abstract class AbstractImageFilterer implements Loggable {
         }
 
         return cp;
+    }
+    
+    /**
+     * Crop the image to the region covered by the given component
+     * 
+     * @return
+     */
+    public void crop(@NonNull CellularComponent c) {
+
+        if (ip == null) {
+            throw new IllegalArgumentException("Image processor is null");
+        }
+        // Choose a clip for the image (an enlargement of the original nucleus ROI
+        int[] positions = c.getPosition();
+        int wideW = (int) (positions[CellularComponent.WIDTH] + CellularComponent.COMPONENT_BUFFER*2);
+        int wideH = (int) (positions[CellularComponent.HEIGHT] + CellularComponent.COMPONENT_BUFFER*2);
+        int wideX = (int) (positions[CellularComponent.X_BASE] - CellularComponent.COMPONENT_BUFFER);
+        int wideY = (int) (positions[CellularComponent.Y_BASE] - CellularComponent.COMPONENT_BUFFER);
+
+        wideX = wideX < 0 ? 0 : wideX;
+        wideY = wideY < 0 ? 0 : wideY;
+
+        ip.setRoi(wideX, wideY, wideW, wideH);
+        ImageProcessor result = ip.crop();
+        ip = result;
+    }
+    
+    /**
+     * Resize the image to fit the given dimensions, preserving aspect ratio
+     * 
+     * @param newWidth
+     *            the new width of the image
+     * @return
+     */
+    public void resize(int maxWidth, int maxHeight) {
+
+        if (ip == null) {
+            throw new IllegalArgumentException("Image processor is null");
+        }
+
+        int originalWidth = ip.getWidth();
+        int originalHeight = ip.getHeight();
+
+        // keep the image aspect ratio
+        double ratio = (double) originalWidth / (double) originalHeight;
+
+        double finalWidth = maxHeight * ratio; // fix height
+        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
+                                                                    // constrain
+                                                                    // width too
+
+        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+        ip = result;
     }
     
     /**

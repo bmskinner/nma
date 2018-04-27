@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.analysis.image;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.plugin.RoiScaler;
 import ij.process.FloatPolygon;
 import ij.process.ImageProcessor;
 
@@ -60,9 +61,38 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  *
  */
 public class ImageAnnotator extends AbstractImageFilterer {
+    
+    double scale = 1;
 
     public ImageAnnotator(ImageProcessor ip) {
         super(ip);
+    }
+    
+    /**
+     * Create using the given image, and rescale all annotations
+     * such that the image fits the given dimensions preserving
+     * aspect ratio
+     * @param ip
+     * @param maxWidth
+     * @param maxHeight
+     */
+    public ImageAnnotator(ImageProcessor ip, int maxWidth, int maxHeight) {
+        super(ip);
+        int originalWidth = ip.getWidth();
+        int originalHeight = ip.getHeight();
+
+        // keep the image aspect ratio
+        double ratio = (double) originalWidth / (double) originalHeight;
+
+        double finalWidth = maxHeight * ratio; // fix height
+        finalWidth = finalWidth > maxWidth ? maxWidth : finalWidth; // but
+                                                                    // constrain
+                                                                    // width too
+        
+        scale = finalWidth / originalWidth;
+
+        ImageProcessor result = ip.duplicate().resize((int) finalWidth);
+        this.ip = result;
     }
 
     /**
@@ -88,6 +118,41 @@ public class ImageAnnotator extends AbstractImageFilterer {
             }
         }
 
+        return this;
+    }
+    
+    /**
+     * Draw the outline of the given nucleus and any signals marked.
+     * The image is assumed to be cropped to the nuclear border.
+     * 
+     * @param n the nucleus to draw
+     * @return this annotator
+     */
+    public ImageAnnotator annotateCroppedNucleus(Nucleus n) {
+        
+        try {
+
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
+                    n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
+                    Color.ORANGE);
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                    , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
+                    , Color.BLUE);
+            
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                    , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                    , Color.GRAY);
+            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                    , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                    , Color.GRAY);
+            
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK);
+            annotateSegments(n);
+            annotateSignals(n);
+
+        } catch (Exception e) {
+            error("Error annotating nucleus", e);
+        }
         return this;
     }
 
@@ -152,17 +217,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
      */
     public ImageAnnotator annotatePoint(IPoint p, Color c) {
 
-        if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth()) {
+        if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth())
             throw new IllegalArgumentException("Point x is out of image bounds");
-        }
 
-        if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight()) {
+        if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight())
             throw new IllegalArgumentException("Point y is out of image bounds");
-        }
 
         ip.setColor(c);
         ip.setLineWidth(3);
-        ip.drawDot(p.getXAsInt(), p.getYAsInt());
+        ip.drawDot( (int) (p.getX()*scale), (int) (p.getY()*scale));
         return this;
     }
 
@@ -197,7 +260,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
     private ImageAnnotator annotateLine(IPoint p1, IPoint p2, Color c) {
         ip.setColor(c);
         ip.setLineWidth(1);
-        ip.drawLine(p1.getXAsInt(), p1.getYAsInt(), p2.getXAsInt(), p2.getYAsInt());
+        ip.drawLine( (int) (p1.getXAsInt()*scale), 
+                (int) (p1.getYAsInt()*scale), 
+                (int) (p2.getXAsInt()*scale), 
+                (int) (p2.getYAsInt()*scale));
         return this;
     }
 
@@ -493,17 +559,12 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     float[] ypoints = new float[seg.length() + 1];
                     for (int j = 0; j <= seg.length(); j++) {
                         int k = n.wrapIndex(seg.getStartIndex() + j);
-                        IBorderPoint p = n.getOriginalBorderPoint(k); // get the
-                                                                      // border
-                                                                      // points
-                                                                      // in the
-                                                                      // segment
-                        xpoints[j] = (float) p.getX();
-                        ypoints[j] = (float) p.getY();
+                        IPoint p = n.getBorderPoint(k).plus(Imageable.COMPONENT_BUFFER);
+                        xpoints[j] = (float) (p.getX()*scale);
+                        ypoints[j] = (float) (p.getY()*scale);
                     }
 
                     PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
-
                     Paint color = ColourSelecter.getColor(i);
 
                     annotatePolygon(segRoi, color);
@@ -547,8 +608,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
                                                                       // points
                                                                       // in the
                                                                       // segment
-                        xpoints[j] = (float) p.getX();
-                        ypoints[j] = (float) p.getY();
+                        xpoints[j] = (float) (p.getX()*scale);
+                        ypoints[j] = (float) (p.getY()*scale);
                     }
 
                     PolygonRoi segRoi = new PolygonRoi(xpoints, ypoints, Roi.POLYLINE);
@@ -561,7 +622,6 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     segRoi.setLocation(offset.getX(), offset.getY());
 
                     Paint color = ColourSelecter.getColor(i);
-
                     annotatePolygon(segRoi, color);
                 }
             }
@@ -586,7 +646,7 @@ public class ImageAnnotator extends AbstractImageFilterer {
         for (UUID id : signalCollection.getSignalGroupIds()) {
         	        	            
             if(signalCollection.hasSignal(id)){
-            	
+
             	Color colour = i == ImageImporter.FIRST_SIGNAL_CHANNEL ? Color.RED
             			: i == ImageImporter.FIRST_SIGNAL_CHANNEL + 1 ? Color.GREEN : Color.WHITE;
 
@@ -599,9 +659,19 @@ public class ImageAnnotator extends AbstractImageFilterer {
                 	IPoint base = s.getBase().plus(Imageable.COMPONENT_BUFFER);
 
                     FloatPolygon p = s.toPolygon();
-                    PolygonRoi roi = new PolygonRoi(p, PolygonRoi.POLYGON);
-
-                    roi.setLocation(base.getX(), base.getY());
+                    
+                    float[] x = p.xpoints;
+                    float[] y = p.ypoints;
+                    
+                    if(scale!=1d){
+                        for(int j=0; j<p.npoints; j++){
+                            x[j]*=scale;
+                            y[j]*=scale;
+                        }
+                    }
+                    
+                    PolygonRoi roi = new PolygonRoi(x, y, PolygonRoi.POLYGON);
+                    roi.setLocation(base.getX()*scale, base.getY()*scale);
                     annotatePolygon(roi, colour);
                 }
             }

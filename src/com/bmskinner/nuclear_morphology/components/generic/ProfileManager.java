@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,22 +27,16 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType;
-import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
-import com.bmskinner.nuclear_morphology.components.generic.IProfile;
-import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
-import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
-import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
-import com.bmskinner.nuclear_morphology.components.generic.Tag;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
-import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
-import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -173,18 +167,18 @@ public class ProfileManager implements Loggable {
             return;
         }
 
-        finer("Fetched median from new offset of RP to " + index);
+//        finer("Fetched median from new offset of RP to " + index);
 
-        finest("New median from " + Tag.REFERENCE_POINT + ":");
-        finest(median.toString());
-
-        finest("Offsetting individual nucleus indexes");
+//        finest("New median from " + Tag.REFERENCE_POINT + ":");
+//        finest(median.toString());
+//
+//        finest("Offsetting individual nucleus indexes");
         offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
 
-        finer("Nucleus indexes for " + Tag.REFERENCE_POINT + " updated");
+//        finer("Nucleus indexes for " + Tag.REFERENCE_POINT + " updated");
         collection.createProfileCollection();
         // createProfileCollections(false);
-        finer("Rebuilt the profile collcctions");
+//        finer("Rebuilt the profile collcctions");
     }
 
     /**
