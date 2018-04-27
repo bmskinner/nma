@@ -215,7 +215,8 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     for (double value : values) {
                         list.add(new Double(value));
                     }
-                    ds.add(list, rowKey, colKey);
+                    if(list.size()>0)
+                        ds.add(list, rowKey, colKey);
                 }
             }
         }

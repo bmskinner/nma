@@ -227,6 +227,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         if (PlottableStatistic.PATH_LENGTH.equals(stat)) {
             return this.getPathLength(ProfileType.ANGLE);
         }
+        
+        if (PlottableStatistic.PERIMETER.equals(stat)) {
+            double perimeter=0;
+            for(IBorderPoint p : getBorderList()){
+                perimeter += p.getLengthTo(p.nextPoint());
+            }
+            return perimeter;
+        }
 
         return result;
     }
@@ -460,32 +468,34 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     @Override
     public int getWindowSize(ProfileType type) {
-        switch (type) {
-        case ANGLE: {
-            return angleProfileWindowSize;
-        }
-
-        default: {
-            return Profileable.DEFAULT_PROFILE_WINDOW; // Not needed for
-                                                       // DIAMETER and RADIUS
-        }
-        }
+        return angleProfileWindowSize;
+        // We don't store size separately any more
+//        switch (type) {
+//            case ANGLE: {
+//                return angleProfileWindowSize;
+//            }
+//    
+//            default: {
+//                return Profileable.DEFAULT_PROFILE_WINDOW; // Not needed for
+//                // DIAMETER and RADIUS
+//            }
+//        }
     }
 
     public double getWindowProportion(ProfileType type) {
-
-        switch (type) {
-        case ANGLE: {
-            return angleWindowProportion;
-        }
-
-        default: {
-            return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed
-                                                                  // for
-                                                                  // DIAMETER
-                                                                  // and RADIUS
-        }
-        }
+        return angleWindowProportion;
+//        switch (type) {
+//        case ANGLE: {
+//            return angleWindowProportion;
+//        }
+//
+//        default: {
+//            return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed
+//                                                                  // for
+//                                                                  // DIAMETER
+//                                                                  // and RADIUS
+//        }
+//        }
     }
 
     public void setWindowProportion(ProfileType type, double d) {
@@ -708,12 +718,10 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             IPoint p = getBorderPoint(i);
             double distance = p.getLengthTo(getCentreOfMass());
             double pAngle = getCentreOfMass().findAngle(p, IPoint.makeNew(0, -10));
-            if (p.getX() < 0) {
+            if (p.getX() < 0)
                 pAngle = 360 - pAngle;
-            }
 
             if (Math.abs(angle - pAngle) < bestDiff) {
-
                 bestDiff = Math.abs(angle - pAngle);
                 bestDistance = distance;
             }
@@ -727,16 +735,18 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         // set transient fields
         double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
-        double angleWindow = perimeter * angleWindowProportion;
-        this.angleProfileWindowSize = (int) Math.round(angleWindow);
+        if(perimeter==Statistical.ERROR_CALCULATING_STAT)
+            perimeter = this.calculateStatistic(PlottableStatistic.PERIMETER);
+        
+        angleProfileWindowSize = (int) Math.round( perimeter * angleWindowProportion);
 
-        // Check if calulation needed
+        // Check if calculation needed
         boolean isRecalculate = false;
         for (ProfileType type : ProfileType.values()) {
-            if (!this.hasProfile(type)) {
-                isRecalculate = true;
-            }
+            isRecalculate |= !hasProfile(type);
         }
+        
+        
         if (isRecalculate) {
             try {
                 calculateProfiles();

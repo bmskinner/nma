@@ -78,9 +78,8 @@ public class MainWindow extends JFrame implements Loggable {
                                                          // open datasets
     private ConsensusNucleusPanel consensusNucleusPanel; // show refolded nuclei
                                                          // if present
-
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
-            + Version.currentVersion().toString()+"a6";
+            + Version.currentVersion().toString();
 
     private JTabbedPane tabbedPane; // bottom panel tabs
 
@@ -94,8 +93,7 @@ public class MainWindow extends JFrame implements Loggable {
     /**
      * Create the frame.
      * 
-     * @param standalone
-     *            is the frame a standalone app, or launched within ImageJ?
+     * @param standalone is the frame a standalone app, or launched within ImageJ?
      */
     public MainWindow(boolean standalone) {
 
@@ -174,18 +172,11 @@ public class MainWindow extends JFrame implements Loggable {
             // Create the log panel
             // ---------------
             logPanel = new LogPanel();
-//            logPanel.setDropTarget(this.getDropTarget());
-
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
-            Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO); // by
-                                                                            // default
-                                                                            // do
-                                                                            // not
-                                                                            // log
-                                                                            // everything
-
+            Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
+            
             // ---------------
             // Create the consensus chart
             // ---------------
