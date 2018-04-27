@@ -66,7 +66,7 @@ public class ProfileCreator implements Loggable {
 	            case DIAMETER:     return calculateDiameterProfile();
 	            case RADIUS:       return calculateRadiusProfile();
 	            case ZAHN_ROSKIES: return calculateZahnRoskiesProfile();
-	            default: return calculateAngleProfile();
+	            default:           return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
             stack("Cannot create profile", e);
