@@ -86,11 +86,6 @@ public class Nuclear_Morphology_Analysis
 		return instance;
 	}
 	
-//	public CommandParser getParser(){
-//		return parser;
-//	}
-	
-	
 	/**
 	 * Reset all found files to false
 	 */
@@ -161,46 +156,7 @@ public class Nuclear_Morphology_Analysis
 			splash.dispose();
 		}
 	}
-	
-//	/**
-//	 * Load the program as standalone
-//	 */
-//	private void runStandalone(){
-//		loadLogger();
-//		try {
-//			
-//			// load the config file properties
-//			new PropertiesReader();
-//			loadMainWindow(true);
-//		} catch(Exception e){
-//			error("Error loading main window", e);
-//			System.err.println("Error loading main window");
-//			e.printStackTrace();
-//		} 
-//		
-//			
-//		
-//	}
-//	
-//	private void loadMainWindow(boolean standalone){
-//	    
-//	    Runnable r = () -> {
-//
-//                IJ.setBackgroundColor(0, 0, 0);  // default background is black
-//                try {
-//                    UIManager.setLookAndFeel(
-//                            UIManager.getSystemLookAndFeelClassName());
-//                } catch (Exception e) {
-//
-//                    logToImageJ("Error initialising", e);
-//                }
-//
-//                mw = new MainWindow(standalone);
-//                mw.setVisible(true);
-//        };
-//		java.awt.EventQueue.invokeLater( r );
-//	}
-	
+		
 	/*
 	 * Check all dependencies are present, the
 	 * Java version is correct and load the main window
@@ -216,11 +172,6 @@ public class Nuclear_Morphology_Analysis
 				// Check the ImageJ background colour settings
 				// This must be made consistent on all platforms
 				Prefs.blackBackground = true;
-//				ThresholdAdjuster.update();
-
-				
-//				loadMainWindow(false);
-
 			} else {
 
 				displayMissingPlugins();
@@ -231,8 +182,6 @@ public class Nuclear_Morphology_Analysis
 				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
 
 			}
-
-
 		} catch (Exception e) {
 			logToImageJ("Error initialising", e);
 		} 
@@ -279,42 +228,32 @@ public class Nuclear_Morphology_Analysis
 	 */
 	private void checkDir(File dir){
 				
-		if(dir==null){
+		if(dir==null)
 			return;
-		}
 		
-		if(allPluginsFound()){ // Don't waste time if they have all been found so far
+		if(allPluginsFound()) // Don't waste time if they have all been found so far
 			return;
-		}
 		
-		if( ! dir.exists()){
+		if( ! dir.exists())
 			return;
-		}
-		if( ! dir.isDirectory()){
+		if( ! dir.isDirectory())
 			return;
-		}
 		
 		List<String> toCheck = Arrays.stream(fileNames)
 			.filter( s -> requiredFiles.get(s)==false )
 			.collect(Collectors.toList());
 		
-		if(dir.listFiles()==null){
-			return;
-		}
-				
+		if(dir.listFiles()==null)
+			return;			
 
 		for(File file : dir.listFiles()){
 			
-			if(file.isDirectory()){
+			if(file.isDirectory())
 				continue;
-			}
 				
 			for(String s : toCheck){
-				
-				if(file.getName().startsWith(s)){
+				if(file.getName().startsWith(s))
 					requiredFiles.put(s, true);
-				}
-				
 			}
 		}
 	}
