@@ -1335,15 +1335,13 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
         return true;
     }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\tWriting nucleus");
-        out.defaultWriteObject();
-        // finest("\tWrote nucleus");
-    }
+//    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
+//        // finest("\tWriting nucleus");
+//        out.defaultWriteObject();
+//        // finest("\tWrote nucleus");
+//    }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\tReading nucleus");
-
         in.defaultReadObject();
 
         Map<Tag, Integer> newCache = new HashMap<Tag, Integer>(0);
@@ -1352,18 +1350,12 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 
         while (it.hasNext()) {
             Object tag = it.next();
-            if (tag instanceof BorderTag) {
-                fine("Deserialization has no BorderTagObject for " + tag.toString() + ", creating");
-
+            if (tag instanceof BorderTag)
                 newCache.put(new BorderTagObject((BorderTag) tag), borderTags.get(tag));
-            }
-
         }
 
-        if (!newCache.isEmpty()) {
+        if (!newCache.isEmpty())
             borderTags = newCache;
-        }
-
         this.verticalNucleus = null;
     }
 

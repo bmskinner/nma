@@ -64,7 +64,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "stats");
 
             if (file == null) {
                 cancel();
@@ -99,7 +99,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "shells");
 
             if (file == null) {
                 cancel();
@@ -134,7 +134,7 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
         @Override
         public void run() {
 
-            File file = FileSelector.chooseStatsExportFile(datasets);
+            File file = FileSelector.chooseStatsExportFile(datasets, "signals");
 
             if (file == null) {
                 cancel();

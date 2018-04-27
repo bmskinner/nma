@@ -144,18 +144,18 @@ public class AnalysisDataset implements IAnalysisDataset {
      * 
      * @see analysis.IAnalysisDataset#getLogHandler()
      */
-    @Override
-    public Handler getLogHandler() throws Exception {
-
-        if (debugFile == null || !debugFile.exists()) {
-            return null;
-        }
-
-        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
-        fileHandler.setFormatter(new DebugFileFormatter());
-
-        return fileHandler;
-    }
+//    @Override
+//    public Handler getLogHandler() throws Exception {
+//
+//        if (debugFile == null || !debugFile.exists()) {
+//            return null;
+//        }
+//
+////        Handler fileHandler = new DebugFileHandler(this.getDebugFile());
+//        fileHandler.setFormatter(new DebugFileFormatter());
+//
+//        return fileHandler;
+//    }
 
     /*
      * (non-Javadoc)
@@ -305,35 +305,6 @@ public class AnalysisDataset implements IAnalysisDataset {
     @Override
     public void setSavePath(File file) {
         this.savePath = file;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#getDebugFile()
-     */
-    @Override
-    public File getDebugFile() {
-        return this.debugFile;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see analysis.IAnalysisDataset#setDebugFile(java.io.File)
-     */
-    @Override
-    public void setDebugFile(File f) {
-        try {
-            if (!f.exists()) {
-                f.createNewFile();
-            }
-            if (f.canWrite()) {
-                this.debugFile = f;
-            }
-        } catch (IOException e) {
-            IJ.log("Unable to update debug file location");
-        }
     }
 
     /*

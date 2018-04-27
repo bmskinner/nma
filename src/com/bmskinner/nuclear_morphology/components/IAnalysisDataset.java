@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -56,13 +55,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      * @throws Exception
      */
     IAnalysisDataset duplicate() throws Exception;
-
-    /**
-     * Get the file handler for this dataset. Create a handler if needed.
-     * 
-     * @return
-     */
-    Handler getLogHandler() throws Exception;
 
     /**
      * Get the software version used to create the dataset
@@ -119,21 +111,6 @@ public interface IAnalysisDataset extends Serializable, Loggable {
      */
     void setSavePath(File file);
 
-    /**
-     * Get the log file for the dataset.
-     * 
-     * @return
-     * @see CellCollection
-     */
-    File getDebugFile();
-
-    /**
-     * Allow the collection to update the debug file location
-     * 
-     * @param f
-     *            the new file
-     */
-    void setDebugFile(File f);
 
     /**
      * Get all the direct children of this dataset

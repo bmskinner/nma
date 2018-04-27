@@ -81,7 +81,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             "Nucleus threshold", "Kuwahara filter radius", "Chromocentre flattening threshold", "Canny auto threshold",
             "Canny low threshold", "Canny high threshold", "Canny kernel radius", "Canny kernel width",
             "Closing radius", "Nucleus min size", "Nucleus max size", "Nucleus min circ", "Nucleus max circ",
-            "Consensus folded", "Refold mode", "Run date", "Run time", "Collection source", "Log file", "Type",
+            "Consensus folded", "Refold mode", "Run date", "Run time", "Collection source", "Type",
             "Created in" };
 
     /**
@@ -430,7 +430,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
-    	int rowCount = 23;
+    	int rowCount = 22;
     	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent())
     		return makeErrorArray(rowCount);
@@ -466,8 +466,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             }
 
             folder = nO.isPresent() ? nO.get().getFolder().getAbsolutePath() : "Missing data";
-
-            logFile = dataset.getDebugFile().getAbsolutePath();
         }
 
         
@@ -510,12 +508,28 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
 
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        Object[] collectionData = { options.getProfileWindowProportion(), detectionMethod, nucleusThreshold,
-                kuwaharaRadius, chromocentreThreshold, cannyAutoThreshold, cannyLowThreshold, cannyHighThreshold,
-                cannyKernelRadius, cannyKernelWidth, cannyClosingRadius, nO.get().getMinSize(),
-                nO.get().getMaxSize(), df.format(nO.get().getMinCirc()),
-                df.format(nO.get().getMaxCirc()), options.refoldNucleus(), refoldMode, date,
-                time, folder, logFile, options.getNucleusType().toString(), dataset.getVersion().toString() };
+        Object[] collectionData = { options.getProfileWindowProportion(), 
+                detectionMethod, 
+                nucleusThreshold,
+                kuwaharaRadius, 
+                chromocentreThreshold, 
+                cannyAutoThreshold, 
+                cannyLowThreshold, 
+                cannyHighThreshold,
+                cannyKernelRadius, 
+                cannyKernelWidth, 
+                cannyClosingRadius, 
+                nO.get().getMinSize(),
+                nO.get().getMaxSize(), 
+                df.format(nO.get().getMinCirc()),
+                df.format(nO.get().getMaxCirc()), 
+                options.refoldNucleus(), 
+                refoldMode, 
+                date,
+                time, 
+                folder, 
+                options.getNucleusType().toString(), 
+                dataset.getVersion().toString() };
         return collectionData;
     }
     

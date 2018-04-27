@@ -64,10 +64,10 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
         throw new Exception("Not yet implemented");
     }
 
-    @Override
-    public Handler getLogHandler() throws Exception {
-        return parent.getLogHandler();
-    }
+//    @Override
+//    public Handler getLogHandler() throws Exception {
+//        return parent.getLogHandler();
+//    }
 
     @Override
     public void addChildCollection(@NonNull ICellCollection collection) {
@@ -92,15 +92,6 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public void setSavePath(File file) {
-    }
-
-    @Override
-    public File getDebugFile() {
-        return parent.getDebugFile();
-    }
-
-    @Override
-    public void setDebugFile(File f) {
     }
 
     @Override

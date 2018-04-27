@@ -535,7 +535,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
 
     private void exportConsensusNuclei() {
     	
-    	File exportFile = FileSelector.chooseSaveFile(null, new FileNameExtensionFilter("SVG file", "svg"));
+        String defaultFileName = this.isMultipleDatasets() ? "Outlines.svg" : activeDataset().getName()+".svg";
+    	File exportFile = FileSelector.chooseSaveFile(null, new FileNameExtensionFilter("SVG file", "svg"),defaultFileName);
     	
     	if(exportFile==null)
     		return;

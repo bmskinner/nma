@@ -52,7 +52,7 @@ public class FileSelector {
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
         File dir = GlobalOptions.getInstance().getDefaultDir();
-        File file = chooseSaveFile(dir, filter);
+        File file = chooseSaveFile(dir, filter, null);
         
         if(file==null)
             return null;
@@ -70,21 +70,24 @@ public class FileSelector {
      * @param datasets the datasets to be exported
      * @return the file to export to
      */
-    public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets) {
+    public static @Nullable File chooseStatsExportFile(@NonNull List<IAnalysisDataset> datasets, @Nullable String suffix) {
 
         File dir = null;
+        suffix = suffix==null ? "stats" : suffix;
+        String defaultName = "";
         if (datasets.size() == 1) {
             dir = datasets.get(0).getSavePath().getParentFile();
-
+            defaultName = datasets.get(0).getName()+"_"+suffix+Exporter.TAB_FILE_EXTENSION;
         } else {
             dir = IAnalysisDataset.commonPathOfFiles(datasets);
             if (!dir.exists() || !dir.isDirectory()) {
                 dir = GlobalOptions.getInstance().getDefaultDir();
+                defaultName = "Multiple_"+suffix+"_export"+Exporter.TAB_FILE_EXTENSION;
             }
         }
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
         
-        File file = chooseSaveFile(dir, filter);
+        File file = chooseSaveFile(dir, filter, defaultName);
         if(file==null)
             return null;
 
@@ -147,14 +150,16 @@ public class FileSelector {
      * @param filter the filename extension filter
      * @return the selected file, or null on cancel or error
      */
-    public static @Nullable File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter){
+    public static @Nullable File chooseSaveFile(@Nullable File defaultFolder, @Nullable FileNameExtensionFilter filter, @Nullable String defaultName){
         JFileChooser fc= new JFileChooser(defaultFolder);
 
-        if(filter!=null){
+        if(filter!=null)
             fc.setFileFilter(filter);
-        }
 
         fc.setDialogTitle("Specify a file to save as");
+        
+        if(defaultName!=null)
+            fc.setSelectedFile(new File(defaultFolder, defaultName));
 
         int returnVal = fc.showSaveDialog(fc);
         if (returnVal != 0)

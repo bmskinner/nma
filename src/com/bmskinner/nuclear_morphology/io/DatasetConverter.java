@@ -757,8 +757,7 @@ public class DatasetConverter implements Loggable, Importer {
 
         // Move the roi over the original centre of mass in case it is not
         // already there
-        roi.setLocation(oldSignal.getPosition()[CellularComponent.X_BASE],
-                oldSignal.getPosition()[CellularComponent.Y_BASE]);
+        roi.setLocation(oldSignal.getOriginalBase().getX(), oldSignal.getOriginalBase().getY());
 
         INuclearSignal newSignal = new DefaultNuclearSignal(roi, oldSignal.getOriginalCentreOfMass(),
                 oldSignal.getSourceFile(), oldSignal.getChannel(), oldSignal.getPosition());
@@ -766,11 +765,10 @@ public class DatasetConverter implements Loggable, Importer {
         for (PlottableStatistic st : oldSignal.getStatistics()) {
 
             PlottableStatistic newStat = st;
-            if (st instanceof SignalStatistic) {
+            if (st instanceof SignalStatistic)
                 newStat = SIGNAL_STATS_MAP.get(st);
-            }
+
             newSignal.setStatistic(newStat, oldSignal.getStatistic(st));
-            ;
         }
         return newSignal;
     }

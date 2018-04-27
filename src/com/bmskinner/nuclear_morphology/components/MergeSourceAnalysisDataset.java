@@ -102,10 +102,10 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         throw new Exception("Not yet implemented");
     }
 
-    @Override
-    public Handler getLogHandler() throws Exception {
-        return parent.getLogHandler();
-    }
+//    @Override
+//    public Handler getLogHandler() throws Exception {
+//        return parent.getLogHandler();
+//    }
 
     @Override
     public void addChildCollection(ICellCollection collection) {
@@ -122,15 +122,6 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
     @Override
     public void setSavePath(File file) {
-    }
-
-    @Override
-    public File getDebugFile() {
-        return parent.getDebugFile();
-    }
-
-    @Override
-    public void setDebugFile(File f) {
     }
 
     @Override
