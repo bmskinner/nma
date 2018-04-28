@@ -49,9 +49,9 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class DatasetStatsExporter extends StatsExporter implements Exporter, Loggable {
 
-    private static final String EXPORT_MESSAGE          = "Exporting stats...";
-    private File                exportFile;
-    private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
+//    private static final String EXPORT_MESSAGE          = "Exporting stats...";
+//    private File                exportFile;
+//    private static final String DEFAULT_MULTI_FILE_NAME = "Multiple_stats_export" + Exporter.TAB_FILE_EXTENSION;
 
     private boolean includeProfiles = true;
     private boolean includeSegments = false;
@@ -62,7 +62,7 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * 
      * @param folder
      */
-    public DatasetStatsExporter(File file, List<IAnalysisDataset> list) {
+    public DatasetStatsExporter(@NonNull File file, @NonNull List<IAnalysisDataset> list) {
         super(file, list);
         segCount = list.get(0).getCollection().getProfileManager().getSegmentCount();
         if(list.size()==1){
@@ -88,7 +88,8 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * 
      * @param outLine
      */
-    protected void appendHeader(@NonNull StringBuilder outLine) {
+    @Override
+	protected void appendHeader(@NonNull StringBuilder outLine) {
 
         outLine.append("Dataset\tCellID\tComponent\tFolder\tImage\tCentre_of_mass\t");
 
@@ -167,7 +168,8 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
      * @throws UnavailableProfileTypeException
      * @throws ProfileException
      */
-    protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
+    @Override
+	protected void append(@NonNull IAnalysisDataset d, @NonNull StringBuilder outLine) throws Exception {
 
         for (ICell cell : d.getCollection().getCells()) {
 

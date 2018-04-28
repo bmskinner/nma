@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -43,12 +44,12 @@ public class TableCache implements Cache {
     }
 
     @Override
-    public synchronized void add(TableOptions options, TableModel model) {
+    public synchronized void add(@NonNull TableOptions options, @NonNull TableModel model) {
         tableMap.put(options, model);
     }
 
     @Override
-    public synchronized void add(ChartOptions options, JFreeChart chart) {
+    public synchronized void add(@NonNull ChartOptions options, @NonNull JFreeChart chart) {
     }
 
     @Override
@@ -125,9 +126,8 @@ public class TableCache implements Cache {
 
     @Override
     public synchronized void clear(ICell cell) {
-        if (cell == null) {
+        if (cell == null)
             return;
-        }
 
         // Make a list of the options that need removed
         // These are the options that contain the datasets in the list

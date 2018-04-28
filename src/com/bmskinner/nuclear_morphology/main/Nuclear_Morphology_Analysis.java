@@ -3,21 +3,14 @@ package com.bmskinner.nuclear_morphology.main;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JWindow;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -41,31 +34,30 @@ public class Nuclear_Morphology_Analysis
 	 * Keep a strong reference to the loggers so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);	
+//	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);	
 	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 	
 	// Store which plugins have been found
-	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
+//	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
 	
-	private MainWindow mw;
+//	private MainWindow mw;
 	
 	
-	// The plugins that are needed for the program to start
-	private static String[] fileNames = { "commons-math3",
-			"commons-math3",
-			"jcommon",
-			"jdistlib",
-			"jebl",
-			"jfreechart",
-			"swingx-all",
-			"weka",
-			"AnalyzeSkeleton",
-			"Gray_Morphology",
-			"MorphoLibJ",
-			"jfreesvg"
-	};
+//	// The plugins that are needed for the program to start
+//	private static String[] fileNames = {
+////			"commons-math3",
+////			"jcommon",
+////			"jdistlib",
+////			"jebl",
+////			"jfreechart",
+////			"swingx-all",
+////			"weka",
+////			"AnalyzeSkeleton",
+////			"MorphoLibJ",
+////			"jfreesvg"
+//	};
 	
 	
 	private Nuclear_Morphology_Analysis(String[] args){
@@ -94,11 +86,11 @@ public class Nuclear_Morphology_Analysis
 	/**
 	 * Reset all found files to false
 	 */
-	private void clearFileList(){
-		for(String s : fileNames){
-			requiredFiles.put(s, false);
-		}
-	}
+//	private void clearFileList(){
+//		for(String s : fileNames){
+//			requiredFiles.put(s, false);
+//		}
+//	}
 	
 	private boolean checkJavaVersion(){
 		
@@ -117,8 +109,6 @@ public class Nuclear_Morphology_Analysis
 		// Add a log file for program errors
 		
 		try {
-			
-
 			// Get the location of the jar file
 			File dir =  Importer.getProgramDir();
 			
@@ -132,8 +122,10 @@ public class Nuclear_Morphology_Analysis
 			
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);
+			e.printStackTrace();
 		} catch (IOException e) {
 			logToImageJ("Error initialising", e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -142,9 +134,8 @@ public class Nuclear_Morphology_Analysis
 	 */
 	public void run(String paramString){
 		
-		if(!checkJavaVersion()){
+		if(!checkJavaVersion())
 			return;
-		}
 		
 		loadLogger();
 		
@@ -156,7 +147,7 @@ public class Nuclear_Morphology_Analysis
 		try {
 			load();
 		} catch(Exception e){
-			
+			e.printStackTrace();
 		} finally {
 			splash.dispose();
 		}
@@ -209,9 +200,9 @@ public class Nuclear_Morphology_Analysis
 
 		try {
 			
-			if(checkPlugins()){ 
+//			if(checkPlugins()){ 
 				// load the config file properties
-				new PropertiesReader();
+//				new PropertiesReader();
 				
 				// Check the ImageJ background colour settings
 				// This must be made consistent on all platforms
@@ -221,16 +212,16 @@ public class Nuclear_Morphology_Analysis
 				
 //				loadMainWindow(false);
 
-			} else {
-
-				displayMissingPlugins();
-				IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
-				IJ.log("This is because a required plugin is missing");
-				IJ.log("The names of the missing plugins are listed above");
-				IJ.log("Visit the project wiki for links to download missing plugins:");
-				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
-
-			}
+//			} else {
+//
+//				displayMissingPlugins();
+//				IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
+//				IJ.log("This is because a required plugin is missing");
+//				IJ.log("The names of the missing plugins are listed above");
+//				IJ.log("Visit the project wiki for links to download missing plugins:");
+//				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
+//
+//			}
 
 
 		} catch (Exception e) {
@@ -277,100 +268,100 @@ public class Nuclear_Morphology_Analysis
 	 * Check the given directory for files
 	 * @param dir
 	 */
-	private void checkDir(File dir){
-				
-		if(dir==null){
-			return;
-		}
-		
-		if(allPluginsFound()){ // Don't waste time if they have all been found so far
-			return;
-		}
-		
-		if( ! dir.exists()){
-			return;
-		}
-		if( ! dir.isDirectory()){
-			return;
-		}
-		
-		List<String> toCheck = Arrays.stream(fileNames)
-			.filter( s -> requiredFiles.get(s)==false )
-			.collect(Collectors.toList());
-		
-		if(dir.listFiles()==null){
-			return;
-		}
-				
-
-		for(File file : dir.listFiles()){
-			
-			if(file.isDirectory()){
-				continue;
-			}
-				
-			for(String s : toCheck){
-				
-				if(file.getName().startsWith(s)){
-					requiredFiles.put(s, true);
-				}
-				
-			}
-		}
-	}
+//	private void checkDir(File dir){
+//				
+//		if(dir==null){
+//			return;
+//		}
+//		
+//		if(allPluginsFound()){ // Don't waste time if they have all been found so far
+//			return;
+//		}
+//		
+//		if( ! dir.exists()){
+//			return;
+//		}
+//		if( ! dir.isDirectory()){
+//			return;
+//		}
+//		
+////		List<String> toCheck = Arrays.stream(fileNames)
+////			.filter( s -> requiredFiles.get(s)==false )
+////			.collect(Collectors.toList());
+//		
+//		if(dir.listFiles()==null){
+//			return;
+//		}
+//				
+//
+//		for(File file : dir.listFiles()){
+//			
+//			if(file.isDirectory()){
+//				continue;
+//			}
+//				
+//			for(String s : toCheck){
+//				
+//				if(file.getName().startsWith(s)){
+//					requiredFiles.put(s, true);
+//				}
+//				
+//			}
+//		}
+//	}
 	
-	/**
-	 * Check if all the plugins needed have been found yet
-	 * @return
-	 */
-	private boolean allPluginsFound(){
-		long count = Arrays.stream(fileNames)
-				.filter( s -> requiredFiles.get(s)==false )
-				.count();
-		
-		return count == 0;
-			
-	}
+//	/**
+//	 * Check if all the plugins needed have been found yet
+//	 * @return
+//	 */
+//	private boolean allPluginsFound(){
+//		long count = Arrays.stream(fileNames)
+//				.filter( s -> requiredFiles.get(s)==false )
+//				.count();
+//		
+//		return count == 0;
+//			
+//	}
 	
-	private void displayMissingPlugins(){
-		// report missing jars
-		for(String s : requiredFiles.keySet()){
-			if(requiredFiles.get(s)==false){
-				IJ.log("Cannot find a required plugin: "+s);
-			}
-		}
-	}
+//	private void displayMissingPlugins(){
+//		// report missing jars
+//		for(String s : requiredFiles.keySet()){
+//			if(requiredFiles.get(s)==false){
+//				IJ.log("Cannot find a required plugin: "+s);
+//			}
+//		}
+//	}
 	
 	/**
 	 * Look in the likely plugins folders for the required plugins.
 	 * @return
 	 */
-	private boolean checkPlugins(){
-		
-		clearFileList(); // set all files to false
-		
-		String pluginDirName = IJ.getDirectory("plugins");
-		
-		File pluginDir = new File(pluginDirName);
-		File oldJarDir = new File(pluginDirName, "jars");
-		File jarDir    = new File(pluginDirName, "Nuclear_Morphology_Analysis");
-		
-
-		// check the plugins directory directly
-		checkDir(pluginDir);
-		
-		
-		/*
-		 * Check the new jar dir for jars
-		 */
-		checkDir(jarDir);
-		
-		/*
-		 * Check the old folder for jars (optional storage in 1.12.0 and earlier)
-		 */
-		checkDir(oldJarDir);
-		
-				
-		return allPluginsFound();
-	}
+//	private boolean checkPlugins(){
+//		
+//		clearFileList(); // set all files to false
+//		
+//		String pluginDirName = IJ.getDirectory("plugins");
+//		
+//		File pluginDir = new File(pluginDirName);
+//		File oldJarDir = new File(pluginDirName, "jars");
+//		File jarDir    = new File(pluginDirName, "Nuclear_Morphology_Analysis");
+//		
+//
+//		// check the plugins directory directly
+//		checkDir(pluginDir);
+//		
+//		
+//		/*
+//		 * Check the new jar dir for jars
+//		 */
+//		checkDir(jarDir);
+//		
+//		/*
+//		 * Check the old folder for jars (optional storage in 1.12.0 and earlier)
+//		 */
+//		checkDir(oldJarDir);
+//		
+//				
+//		return allPluginsFound();
+//	}
 }

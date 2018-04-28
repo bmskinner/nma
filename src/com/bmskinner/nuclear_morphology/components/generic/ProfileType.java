@@ -18,8 +18,6 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import java.io.IOException;
-import java.util.HashMap;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 
 /**
@@ -35,6 +33,7 @@ public enum ProfileType {
     DIAMETER("Diameter profile", "Distance across CoM", StatisticDimension.LENGTH), 
     RADIUS("Radius profile", "Distance from CoM", StatisticDimension.LENGTH),
     ZAHN_ROSKIES("Zahn-Roskies profile", "Angle delta", StatisticDimension.DIMENSIONLESS),
+//    P2P("P2P", "Path length", StatisticDimension.LENGTH), // compatability with old version only
     ZAHN_ROSKIE("Zahn-Roskies legacy profile", "Angle delta", StatisticDimension.DIMENSIONLESS); // type, only kept for 1.13.5 compat. 
 
     private String             name;
@@ -55,7 +54,8 @@ public enum ProfileType {
         this.dimension = dimension;
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.name;
     }
 

@@ -46,11 +46,10 @@ public class DefaultCell implements ICell {
 
     protected UUID uuid;
 
-    protected volatile Nucleus              nucleus   = null; // depractated,
-                                                              // use the list
-    protected volatile List<IMitochondrion> mitochondria;     // unknown
-                                                              // staining
-                                                              // patterns so far
+    @Deprecated
+    protected volatile Nucleus              nucleus   = null;// use the list
+    
+    protected volatile List<IMitochondrion> mitochondria;
     protected volatile List<Flagellum>      tails;
     protected volatile List<IAcrosome>      acrosomes;
     protected volatile ICytoplasm           cytoplasm = null;
@@ -74,16 +73,15 @@ public class DefaultCell implements ICell {
     /**
      * Create a new cell with the given ID.
      * 
-     * @param id
-     *            the id for the new cell
+     * @param id the id for the new cell
      */
     public DefaultCell(@NonNull UUID id) {
         this.uuid = id;
-        nuclei = new ArrayList<Nucleus>(0);
-        mitochondria = new ArrayList<IMitochondrion>(0);
-        tails = new ArrayList<Flagellum>(0);
-        acrosomes = new ArrayList<IAcrosome>(0);
-        statistics = new HashMap<PlottableStatistic, Double>();
+        nuclei = new ArrayList<>(0);
+        mitochondria = new ArrayList<>(0);
+        tails = new ArrayList<>(0);
+        acrosomes = new ArrayList<>(0);
+        statistics = new HashMap<>();
         recalculateHashCode();
     }
 
@@ -141,9 +139,8 @@ public class DefaultCell implements ICell {
             acrosomes.add(a.duplicate());
         }
 
-        if (c.hasCytoplasm()) {
+        if (c.hasCytoplasm())
             this.cytoplasm = c.getCytoplasm().duplicate();
-        }
 
         statistics = new HashMap<PlottableStatistic, Double>();
         recalculateHashCode();
@@ -169,7 +166,8 @@ public class DefaultCell implements ICell {
         return nuclei.get(0);
     }
 
-    public List<Nucleus> getNuclei() {
+    @Override
+	public List<Nucleus> getNuclei() {
         return nuclei;
     }
 
@@ -197,66 +195,54 @@ public class DefaultCell implements ICell {
                 : this.hasCytoplasm() ? this.getCytoplasm().getScale() : 1d;
 
         if (hasStatistic(stat)) {
-
             double result = statistics.get(stat);
-
-            result = stat.convert(result, sc, scale);
-            return result;
-        } else {
-
-            double result = calculateStatistic(stat);
-            statistics.put(stat, result);
-            return result;
+            return stat.convert(result, sc, scale);
         }
+
+        double result = calculateStatistic(stat);
+        statistics.put(stat, result);
+        return result;
+
 
     }
 
     protected double calculateStatistic(PlottableStatistic stat) {
 
-        if (stat == null) {
+        if (stat == null)
             throw new IllegalArgumentException("Stat cannot be null");
-        }
-        double result = STAT_NOT_CALCULATED;
 
         // Do not add getters for values added at creation time
         // or you'll get infinite loops when things break
 
-        if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat))
             return nuclei.size();
-        }
 
-        if (PlottableStatistic.LOBE_COUNT.equals(stat)) {
+        if (PlottableStatistic.LOBE_COUNT.equals(stat))
             return getLobeCount();
-        }
 
-        if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat))
             return getNuclearArea();
-        }
 
-        if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat))
             return getNuclearRatio();
-        }
+
         recalculateHashCode();
-        return result;
+        return STAT_NOT_CALCULATED;
     }
 
     @Override
     public void setStatistic(PlottableStatistic stat, double d) {
-        if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEUS_COUNT.equals(stat))
             statistics.put(stat, d);
-        }
 
-        if (PlottableStatistic.LOBE_COUNT.equals(stat)) {
+        if (PlottableStatistic.LOBE_COUNT.equals(stat))
             statistics.put(stat, d);
-        }
 
-        if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEAR_AREA.equals(stat))
             statistics.put(stat, d);
-        }
 
-        if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) {
+        if (PlottableStatistic.CELL_NUCLEAR_RATIO.equals(stat)) 
             statistics.put(stat, d);
-        }
         recalculateHashCode();
     }
 
@@ -266,15 +252,9 @@ public class DefaultCell implements ICell {
     }
 
     private int getLobeCount() {
-
-        return (int) getNuclei().stream().mapToDouble(n -> n.getStatistic(PlottableStatistic.LOBE_COUNT)).sum();
-        // int i = 0;
-        // for(Nucleus n : nuclei){
-        // if(n instanceof LobedNucleus){
-        // i += ((LobedNucleus) n).getLobeCount();
-        // }
-        // }
-        // return i;
+        return (int) getNuclei().stream()
+        		.mapToDouble(n -> n.getStatistic(PlottableStatistic.LOBE_COUNT))
+        		.sum();
     }
 
     private int getNuclearArea() {
@@ -286,18 +266,12 @@ public class DefaultCell implements ICell {
     }
 
     private double getNuclearRatio() {
-
         if (hasCytoplasm()) {
-
             double cy = cytoplasm.getStatistic(PlottableStatistic.AREA);
             double n = getStatistic(PlottableStatistic.CELL_NUCLEAR_AREA);
-
             return n / cy;
-
-        } else {
-            return STAT_NOT_CALCULATED;
         }
-
+        return STAT_NOT_CALCULATED;
     }
 
     /*
@@ -488,9 +462,9 @@ public class DefaultCell implements ICell {
         nuclei.stream().forEach(n->n.setScale(scale));
         tails.stream().forEach(n->n.setScale(scale));
         acrosomes.stream().forEach(n->n.setScale(scale));
-        if(cytoplasm!=null){
+        mitochondria.stream().forEach(n->n.setScale(scale));
+        if(cytoplasm!=null)
         	cytoplasm.setScale(scale);
-        }
         recalculateHashCode();
     }
     
@@ -513,22 +487,15 @@ public class DefaultCell implements ICell {
     @Override
     public boolean equals(Object o) {
 
-        if (this == o) {
+        if (this == o) 
             return true;
-        }
-
-        if (o == null) {
+        if (o == null) 
             return false;
-        }
-
         if (getClass() != o.getClass())
             return false;
-
         ICell other = (ICell) o;
-
-        if (!other.getId().equals(this.getId())) {
+        if (!other.getId().equals(this.getId()))
             return false;
-        }
 
         return true;
     }
@@ -541,15 +508,12 @@ public class DefaultCell implements ICell {
     @Override
     public int compareTo(ICell o) {
 
-        if (!this.hasNucleus()) {
+        if (!this.hasNucleus())
             return -1;
-        }
-        
-        
+
         // If different number of nuclei
-        if(this.getNuclei().size()!=o.getNuclei().size()){
+        if(this.getNuclei().size()!=o.getNuclei().size())
             return this.getNuclei().size() - o.getNuclei().size();
-        }
         
         int val = 0;
         List<Nucleus> other = o.getNuclei();
@@ -584,15 +548,6 @@ public class DefaultCell implements ICell {
     @Override
     public int hashCode() {
     	return hashCode;
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + ((acrosomes == null) ? 0 : acrosomes.hashCode());
-//        result = prime * result + ((mitochondria == null) ? 0 : mitochondria.hashCode());
-//        result = prime * result + ((nucleus == null) ? 0 : nucleus.hashCode());
-//        result = prime * result + ((tails == null) ? 0 : tails.hashCode());
-//        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
-//        result = prime * result + ((nuclei == null) ? 0 : nuclei.hashCode());
-//        return result;
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -600,14 +555,13 @@ public class DefaultCell implements ICell {
 
         // Replacce old single nucleus fields
         if (nuclei == null) {
-            nuclei = new ArrayList<Nucleus>(0);
+            nuclei = new ArrayList<>(0);
             nuclei.add(nucleus);
         }
 
         // Add stats if missing
-        if (statistics == null) {
-            statistics = new HashMap<PlottableStatistic, Double>();
-        }
+        if (statistics == null)
+            statistics = new HashMap<>();
         recalculateHashCode();
     }
 

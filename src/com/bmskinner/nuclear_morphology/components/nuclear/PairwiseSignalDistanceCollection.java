@@ -93,9 +93,8 @@ public class PairwiseSignalDistanceCollection {
     public Set<UUID> getIDs(UUID id) {
         if (values.containsKey(id)) {
             return values.get(id).keySet();
-        } else {
-            throw new IllegalArgumentException("Primary ID is not present");
         }
+        throw new IllegalArgumentException("Primary ID is not present");
     }
 
     /**

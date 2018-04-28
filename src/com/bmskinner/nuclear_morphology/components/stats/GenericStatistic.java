@@ -79,7 +79,8 @@ public class GenericStatistic implements PlottableStatistic {
         return PlottableStatistic.units(scale, dim);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return name;
     }
 
