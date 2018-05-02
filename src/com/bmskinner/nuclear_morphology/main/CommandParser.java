@@ -15,9 +15,13 @@ import ij.IJ;
  */
 public class CommandParser {
     	
+	/**
+	 * Construct with an array of parameters for the program 
+	 * to interpret
+	 * @param arr
+	 */
 	public CommandParser(String[] arr){
-	    execute(arr);
-				
+	    execute(arr);	
 	}
 	
 	
@@ -42,7 +46,8 @@ public class CommandParser {
 	}
 	
 	public void launch(){
-	    System.out.println("Launching headless");
+	    System.out.println("Launching headless...");
+	    System.out.println("No further functionality enabled");
 	}
 	
 	
@@ -51,7 +56,6 @@ public class CommandParser {
      */
     private void runStandalone(){
         try {
-//            System.out.println("Launching with gui");
             // load the config file properties
             new PropertiesReader();
             loadMainWindow(true);

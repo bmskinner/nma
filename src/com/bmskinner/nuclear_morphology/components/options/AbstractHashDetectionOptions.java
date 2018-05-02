@@ -39,7 +39,7 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
     private File folder;
 
-    private Map<String, IDetectionSubOptions> subMap = new HashMap<String, IDetectionSubOptions>();
+    private Map<String, IDetectionSubOptions> subMap = new HashMap<>();
 
     /**
      * Construct specifying a folder of images to be analysed
@@ -245,15 +245,11 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
         if (this.hasCannyOptions()) {
             IDetectionSubOptions c = subMap.get(IDetectionSubOptions.CANNY_OPTIONS);
-            if (c instanceof ICannyOptions) {
+            if (c instanceof ICannyOptions)
                 return (ICannyOptions) c;
-            } else {
-                throw new MissingOptionException("Sub options cannot be cast to canny");
-            }
-        } else {
-            throw new MissingOptionException("Canny options not present");
+            throw new MissingOptionException("Sub options cannot be cast to canny");
         }
-
+        throw new MissingOptionException("Canny options not present");
     }
 
     @Override

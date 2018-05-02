@@ -27,9 +27,6 @@ import java.util.UUID;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
-import com.bmskinner.nuclear_morphology.components.DefaultCell;
-import com.bmskinner.nuclear_morphology.components.DefaultMitochondrion;
-import com.bmskinner.nuclear_morphology.components.IMitochondrion;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummyRodentSpermNucleus;
 

@@ -123,7 +123,7 @@ public interface PlottableStatistic extends Serializable {
     }
 
     /**
-     * Get stats for round nuclei
+     * Get default type of nucleus stats; these are for mouse sperm nuclei
      * 
      * @return
      */
@@ -221,7 +221,8 @@ public interface PlottableStatistic extends Serializable {
      * 
      * @return
      */
-    String toString();
+    @Override
+	String toString();
 
     /**
      * Test if the statistic has units
@@ -308,44 +309,28 @@ public interface PlottableStatistic extends Serializable {
      * Convert the input value (assumed to be pixels) using the given factor (
      * CellularComponent.getScale() ) into the appropriate scale
      * 
-     * @param value
-     *            the pixel measure
-     * @param factor
-     *            the conversion factor to microns
-     * @param scale
-     *            the desired scale
-     * @param dim
-     *            the dimension of the statistic
+     * @param value the pixel measure
+     * @param factor the conversion factor to microns
+     * @param scale the desired scale
+     * @param dim the dimension of the statistic
      * @return the converted value
      */
     static double convert(double value, double factor, MeasurementScale scale, StatisticDimension dim) {
-        double result = value;
-
         switch (scale) {
-        case MICRONS: {
-            switch (dim) {
-            case AREA:
-                result = PlottableStatistic.micronArea(value, factor);
-                break;
-            case DIMENSIONLESS:
-                break;
-            case LENGTH:
-                result = PlottableStatistic.micronLength(value, factor);
-                break;
-            case ANGLE:
-                break;
-            default:
-                break;
+	        case MICRONS: {
+	            switch (dim) {
+		            case AREA:   return PlottableStatistic.micronArea(value, factor);
+		            case LENGTH: return PlottableStatistic.micronLength(value, factor);
+		            case DIMENSIONLESS:
+		            case ANGLE:
+		            default: return value;
+	            }
+	        }
+	
+	        case PIXELS: return value;
+	        default: return value;
+        }
 
-            }
-        }
-            break;
-        case PIXELS:
-            break;
-        default:
-            break;
-        }
-        return result;
     }
 
     /**
@@ -356,25 +341,14 @@ public interface PlottableStatistic extends Serializable {
      * @return
      */
     static String units(MeasurementScale scale, StatisticDimension dim) {
-        String result = "";
         switch (dim) {
-
-        case AREA:
-            result = "square " + scale.toString().toLowerCase();
-            break;
-        case DIMENSIONLESS:
-            break;
-        case LENGTH:
-            result = scale.toString().toLowerCase();
-            break;
-        case ANGLE:
-            result = "degrees";
-            break;
-        default:
-            break;
-
-        }
-        return result;
+	
+	        case AREA:   return "square " + scale.toString().toLowerCase();
+	        case LENGTH: return scale.toString().toLowerCase();
+	        case ANGLE:  return "degrees";
+	        case DIMENSIONLESS:
+	        default: return "";
+	    }
     }
 
 }

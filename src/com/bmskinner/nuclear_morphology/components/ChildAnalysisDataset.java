@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Handler;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -319,7 +318,8 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return this.cellCollection.getName();
     }
 

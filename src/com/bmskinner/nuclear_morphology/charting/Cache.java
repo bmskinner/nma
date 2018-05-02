@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -65,8 +66,8 @@ public interface Cache extends Loggable {
 
     JFreeChart get(ChartOptions options);
 
-    void add(ChartOptions options, JFreeChart chart);
+    void add(@NonNull ChartOptions options, @NonNull JFreeChart chart);
 
-    void add(TableOptions options, TableModel model);
+    void add(@NonNull TableOptions options, @NonNull TableModel model);
 
 }
