@@ -150,8 +150,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     private void changeSignalGroupColour(SignalTableCell signalGroup) {
 
         UUID id = signalGroup.getID();
-        Color oldColour = activeDataset().getCollection().getSignalGroup(id).get().getGroupColour().orElse(Color.YELLOW);
-        ch.changeSignalColour(activeDataset(), oldColour, id);
+        ch.changeSignalColour(activeDataset(), id);
     }
 
     private void updateScale() {

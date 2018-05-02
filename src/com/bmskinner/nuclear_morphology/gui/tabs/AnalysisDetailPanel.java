@@ -84,7 +84,6 @@ public class AnalysisDetailPanel extends DetailPanel {
     @Override
     protected void updateMultiple() {
         updateAnalysisParametersPanel();
-        finest("Updated analysis parameter panel");
     }
 
     @Override
@@ -95,15 +94,15 @@ public class AnalysisDetailPanel extends DetailPanel {
     /**
      * Update the analysis panel with data from the given datasets
      * 
-     * @param list
-     *            the datasets
-     * @throws Exception
      */
     private void updateAnalysisParametersPanel() {
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setType(TableType.ANALYSIS_PARAMETERS).setTarget(tableAnalysisParameters)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer()).build();
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(getDatasets())
+                .setType(TableType.ANALYSIS_PARAMETERS)
+                .setTarget(tableAnalysisParameters)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .build();
 
         setTable(options);
 

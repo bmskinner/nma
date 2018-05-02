@@ -48,6 +48,10 @@ public class DefaultWorkspace implements IWorkspace {
     public void setName(String s){
         this.name = s;
     }
+    
+    public String getName() {
+    	return name;
+    }
 
     @Override
     public void add(final IAnalysisDataset d) {

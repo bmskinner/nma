@@ -38,6 +38,8 @@ public interface IWorkspace {
      */
     void setName(final String s);
     
+    String getName();
+    
     /**
      * Add the given datasest to the workspace
      * @param d

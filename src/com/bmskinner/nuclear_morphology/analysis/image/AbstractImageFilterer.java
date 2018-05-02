@@ -246,7 +246,7 @@ public abstract class AbstractImageFilterer implements Loggable {
         // Create an empty white processor
         ImageProcessor ip = new ColorProcessor(w, h);
         for (int i = 0; i < ip.getPixelCount(); i++) {
-            ip.set(i, 0); // set all to black initially
+            ip.set(i, RGB_WHITE); // set all to white initially
         }
 
         return ip;

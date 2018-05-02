@@ -87,7 +87,7 @@ public class SignalsAnalysisPanel extends DetailPanel {
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
                         update(getDatasets());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }

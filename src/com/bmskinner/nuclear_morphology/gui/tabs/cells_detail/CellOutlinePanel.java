@@ -188,7 +188,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
                     ip = component.getImage();
                 } catch(UnloadableImageException e){
                     fine("Making blank image", e);
-                    ip = AbstractImageFilterer.createBlankByteProcessor( 1500, 1500); //TODO make based on cell location
+                    ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
                 }
                 
                 

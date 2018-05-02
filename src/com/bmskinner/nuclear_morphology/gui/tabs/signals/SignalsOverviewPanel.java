@@ -150,8 +150,7 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
                     String nextRowName = table.getModel().getValueAt(row + 1, 0).toString();
                     if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row + 1, column);
-                        cosmeticHandler.changeSignalColour(d, signalGroup.getColor(), signalGroup.getID());
-//                        update(getDatasets());
+                        cosmeticHandler.changeSignalColour(d, signalGroup.getID());
                         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
                     }
 

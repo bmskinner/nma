@@ -300,7 +300,6 @@ public class ImagesTabPanel extends DetailPanel {
 
     		ImageNode data = (ImageNode) node.getUserObject();
     		
-
     		if (data.getFile() == null || data.getFile().isDirectory()) {
     			label.setIcon(null);
     			return;
@@ -308,17 +307,13 @@ public class ImagesTabPanel extends DetailPanel {
 
     		Runnable r = () -> {
     			try {
-    				ImageProcessor ip;
-    				try {
-    					ip = new ImageImporter(data.getFile()).importToColorProcessor();
-    				}catch(IllegalArgumentException ex) {
-    					ip = ImageAnnotator.createBlankColorProcessor(1500, 1500);
-    				}
-
+    				ImageProcessor ip = data.getFile().exists() ? new ImageImporter(data.getFile()).importToColorProcessor()
+    						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells
+    				
+    				// If an 8bit image was read in, make it colour greyscale
     				ImageConverter cn = new ImageConverter(ip);
-    				if (cn.isByteProcessor()) {
+    				if (cn.isByteProcessor()) 
     					cn.convertToColorProcessor();
-    				}
     				ImageAnnotator an = cn.toAnnotator();
 
     				Optional<IAnalysisDataset> dataset = getDataset(node);
@@ -330,7 +325,6 @@ public class ImagesTabPanel extends DetailPanel {
 
     			} catch (Exception e1) {
     				label.setIcon(null);
-//    				warn("Error fetching image");
     				fine("Error fetching image "+data.getFile().getAbsolutePath(), e1);
     			}
     		};

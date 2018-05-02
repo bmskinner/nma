@@ -53,7 +53,7 @@ public class CosmeticHandler implements Loggable {
     
     private final TabPanel parent;
     
-    public CosmeticHandler(TabPanel p){
+    public CosmeticHandler(@NonNull TabPanel p){
         parent = p;
     }
     
@@ -63,12 +63,12 @@ public class CosmeticHandler implements Loggable {
      * @param dataset
      * @param row
      */
-    public void changeDatasetColour(IAnalysisDataset dataset) {
+    public void changeDatasetColour(@NonNull IAnalysisDataset dataset) {
         
         int row = DatasetListManager.getInstance().getSelectedDatasets().indexOf(dataset);
         Paint oldColour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(row));
         
-        Color newColor = JColorChooser.showDialog((Component) parent, "Choose dataset Color", (Color) oldColour);
+        Color newColor = JColorChooser.showDialog((Component) parent, "Choose dataset colour", (Color) oldColour);
 
         if (newColor != null) {
             dataset.setDatasetColour(newColor);
@@ -80,92 +80,62 @@ public class CosmeticHandler implements Loggable {
     /**
      * Rename an existing dataset and update the population list.
      * 
-     * @param dataset
-     *            the dataset to rename
+     * @param dataset the dataset to rename
      */
     public void renameDataset(@NonNull IAnalysisDataset dataset) {
         ICellCollection collection = dataset.getCollection();
-        String newName = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename collection",
-                JOptionPane.INFORMATION_MESSAGE, null, null, collection.getName()).toString();
-
-        // validate
-        if (newName == null || newName.isEmpty()) {
+        String newName = getNewName(collection.getName());
+        if (newName == null || newName.isEmpty())
             return;
-        }
-
-        // Get the existing names and check duplicates
-        boolean nameMatches =  DatasetListManager.getInstance().getAllDatasets().stream().anyMatch(d->d.getName().equals(newName));
-
-        if (nameMatches) {
-            int result = JOptionPane.showConfirmDialog((Component) parent, "Chosen name exists. Use anyway?");
-
-            if (result != JOptionPane.OK_OPTION) {
-                return;
-            }
-        }
-
         collection.setName(newName);
-
-//        log("Collection renamed: " + newName);
-
-        File saveFile = dataset.getSavePath();
-        if (saveFile.exists())
-            saveFile.delete();
-
-        parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     }
     
     /**
-     * Rename an existing dataset and update the population list.
+     * Rename an existing group and update the population list.
      * 
-     * @param dataset
-     *            the dataset to rename
+     * @param group the group to rename
      */
     public void renameClusterGroup(@NonNull IClusterGroup group) {
-        
-        String newName = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename cluster group",
-                JOptionPane.INFORMATION_MESSAGE, null, null, group.getName()).toString();
-
-        // validate
+    	String newName = getNewName(group.getName());
         if (newName == null || newName.isEmpty())
             return;
-
         group.setName(newName);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     }
     
     /**
-     * Rename an existing dataset and update the population list.
+     * Rename an existing workspace and update the population list.
      * 
-     * @param dataset
-     *            the dataset to rename
+     * @param workspace the workspace to rename
      */
-    public void renameWorkspace(IWorkspace workspace) {
+    public void renameWorkspace(@NonNull IWorkspace workspace) {
         
-        String newName = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename workspace",
-                JOptionPane.INFORMATION_MESSAGE, null, null, workspace.toString()).toString();
-
-        // validate
+    	String newName = getNewName(workspace.getName());
         if (newName == null || newName.isEmpty())
             return;
-
         workspace.setName(newName);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    }
+    
+    private String getNewName(String oldName) {
+    	return JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename",
+                JOptionPane.INFORMATION_MESSAGE, null, null, oldName).toString();
     }
 
     
     /**
-     * Update the colour of the clicked signal group
-     * 
-     * @param row
-     *            the row selected (the colour bar, one above the group name)
+     * Update the colour of a signal group
+     * @param d the dataset
+     * @param oldColour the old colour
+     * @param signalGroupId the signal group to change
      */
-    public void changeSignalColour(IAnalysisDataset d, Color oldColour, UUID signalGroupId) {
+    public void changeSignalColour(@NonNull IAnalysisDataset d, @NonNull UUID signalGroupId) {
 
     	if(!d.getCollection().hasSignalGroup(signalGroupId))
     		return;
     	
+    	Color oldColour = d.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.YELLOW); 
         Color newColor = JColorChooser.showDialog((Component) parent, Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
 
 		if (newColor != null) {
@@ -179,11 +149,12 @@ public class CosmeticHandler implements Loggable {
      * 
      * @param signalGroup
      */
-    public void renameSignalGroup(IAnalysisDataset d, UUID signalGroup) {
+    public void renameSignalGroup(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
     	if(!d.getCollection().hasSignalGroup(signalGroup))
     		return;
 
-		String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
+    	String newName =getNewName(d.getCollection().getSignalGroup(signalGroup).get().getGroupName());
+//		String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
 
 		if (newName == null)
 		    return;
