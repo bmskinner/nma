@@ -269,9 +269,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
      */
     private List<JComponent> createShowTreeButtons() {
 
-        if (!hasDatasets()) {
+        if (!hasDatasets())
             return null;
-        }
 
         List<JComponent> result = new ArrayList<JComponent>();
         Dimension fillerSize = new Dimension(10, 5);
@@ -358,7 +357,9 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
                     statusLabel.setText(NO_CLUSTERS_LBL);
 
                 } else {
-                    statusLabel.setText("Dataset has " + activeDataset().getClusterGroups().size() + " cluster groups");
+                	int nGroups = activeDataset().getClusterGroups().size();
+                	String plural = nGroups==1 ? "" : "s"; 
+                    statusLabel.setText("Dataset has " + activeDataset().getClusterGroups().size() + " cluster group"+plural);
                 }
             } else { // more than one dataset selected
                 statusLabel.setText(Labels.MULTIPLE_DATASETS);
