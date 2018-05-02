@@ -74,9 +74,9 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
     private GenericCheckboxPanel makeMeshPanel = new GenericCheckboxPanel("Compare to consensus");
     private GenericCheckboxPanel warpMeshPanel = new GenericCheckboxPanel("Warp to consensus");
 
-    private JButton redrawBorderBtn = new JButton("Redraw outline");
+//    private JButton redrawBorderBtn = new JButton("Redraw outline");
 
-    private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
+//    private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
 
     public CellOutlinePanel(CellViewModel model) {
         super(model, PANEL_TITLE_LBL);
@@ -100,13 +100,13 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         settingsPanel.add(makeMeshPanel);
         settingsPanel.add(warpMeshPanel);
 
-        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
+//        cellBorderAdjustmentDialog = new CellBorderAdjustmentDialog(model);
 
-        redrawBorderBtn.addActionListener(e -> {
-            cellBorderAdjustmentDialog.load(model.getCell(), activeDataset());
-        });
-        redrawBorderBtn.setEnabled(false);
-        settingsPanel.add(redrawBorderBtn);
+//        redrawBorderBtn.addActionListener(e -> {
+//            cellBorderAdjustmentDialog.load(model.getCell(), activeDataset());
+//        });
+//        redrawBorderBtn.setEnabled(false);
+//        settingsPanel.add(redrawBorderBtn);
 
         this.add(settingsPanel, BorderLayout.NORTH);
 
@@ -132,7 +132,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
             rotationPanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
-            redrawBorderBtn.setEnabled(false);
+//            redrawBorderBtn.setEnabled(false);
             return;
         }
 
@@ -140,10 +140,10 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
             rotationPanel.setEnabled(false);
             makeMeshPanel.setEnabled(false);
             warpMeshPanel.setEnabled(false);
-            redrawBorderBtn.setEnabled(false);
+//            redrawBorderBtn.setEnabled(false);
         } else {
 
-            redrawBorderBtn.setEnabled(true);
+//            redrawBorderBtn.setEnabled(true);
 
             // Only allow one mesh activity to be active
             rotationPanel.setEnabled(!warpMeshPanel.isSelected());
@@ -187,7 +187,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
                 try{
                     ip = component.getImage();
                 } catch(UnloadableImageException e){
-                    fine("Making blank image", e);
                     ip = AbstractImageFilterer.createBlankColorProcessor( 1500, 1500); //TODO make based on cell location
                 }
                 
