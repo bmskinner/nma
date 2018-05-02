@@ -42,7 +42,7 @@ public class PopulationTreeTableNode extends DefaultMutableTreeTableNode {
     }
     
     public PopulationTreeTableNode(IAnalysisDataset dataset) {
-        super(dataset.getUUID().toString());
+        super(dataset.getId().toString());
         this.dataset = dataset;
         columnData[0] = dataset;
         columnData[1] = dataset.getCollection().size();

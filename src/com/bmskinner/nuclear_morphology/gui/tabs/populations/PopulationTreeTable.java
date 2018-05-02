@@ -113,8 +113,8 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
             Object rowObject = this.getValueAt(row, COLUMN_NAME);
 
             if (rowObject instanceof IAnalysisDataset) {
-                UUID targetID = ((IAnalysisDataset) rowObject).getUUID();
-                if (dataset.getUUID().equals(targetID)) {
+                UUID targetID = ((IAnalysisDataset) rowObject).getId();
+                if (dataset.getId().equals(targetID)) {
                     return row;
                 }
             }

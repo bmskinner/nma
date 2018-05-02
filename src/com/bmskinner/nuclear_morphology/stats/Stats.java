@@ -35,6 +35,10 @@ import java.util.stream.DoubleStream;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.TDistribution;
+import org.apache.commons.math3.linear.EigenDecomposition;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math3.stat.inference.KolmogorovSmirnovTest;
@@ -244,7 +248,7 @@ public class Stats implements Loggable {
         }
         return result;
     }
-    
+        
     /**
      * Get the quartile for a float array
      * 

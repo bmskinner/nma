@@ -60,7 +60,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
      *            the original dataset which was merged
      */
     public MergeSourceAnalysisDataset(IAnalysisDataset merged, IAnalysisDataset mergeSource) {
-        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getUUID(),
+        super(new VirtualCellCollection(merged, mergeSource.getName(), mergeSource.getId(),
                 mergeSource.getCollection())
         );
 
@@ -139,14 +139,14 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
         if (this.hasMergeSource(id)) {
 
             for (IAnalysisDataset c : childDatasets) {
-                if (c.getUUID().equals(id)) {
+                if (c.getId().equals(id)) {
                     return c;
                 }
             }
 
         } else {
             for (IAnalysisDataset child : this.getAllMergeSources()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -182,7 +182,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     public Set<UUID> getMergeSourceIDs() {
         Set<UUID> result = new HashSet<UUID>(childDatasets.size());
         for (IAnalysisDataset c : childDatasets) {
-            result.add(c.getUUID());
+            result.add(c.getId());
         }
 
         return result;
@@ -206,7 +206,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
     @Override
     public boolean hasMergeSource(UUID id) {
         for (IAnalysisDataset child : childDatasets) {
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 return true;
             }
         }
@@ -288,7 +288,7 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
         while (it.hasNext()) {
             IAnalysisDataset child = it.next();
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 it.remove();
             }
         }

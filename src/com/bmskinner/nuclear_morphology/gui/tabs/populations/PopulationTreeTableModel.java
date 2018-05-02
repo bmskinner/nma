@@ -219,7 +219,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
         // Add remaining child datasets not in clusters
 
         for (IAnalysisDataset childDataset : dataset.getChildDatasets()) {
-            if (!clusterIDs.contains(childDataset.getUUID())) {
+            if (!clusterIDs.contains(childDataset.getId())) {
                 PopulationTreeTableNode childNode = createNodes(childDataset);
                 category.add(childNode);
             }

@@ -51,20 +51,6 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
                                                          // irregular borders
                                                          // more stringently
 
-    // public boolean run(E collection, E failCollection){
-    //
-    // try{
-    //
-    // fine("Filtering collection...");
-    // removeOutliers(collection, failCollection, maxDifferenceFromMedian);
-    // fine("Filtering complete");
-    // } catch(Exception e){
-    // stack("Error filtering collection", e);
-    // return false;
-    // }
-    // return true;
-    // }
-
     /**
      * Create a collection without elements more than <i>delta</i> proportion
      * away from the median of the element filtering statistics. Formally,
@@ -72,12 +58,9 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      * (median_statistic * delta) && <i>statistic</i> >= (median_statistic /
      * delta)
      * 
-     * @param collection
-     *            the collection to be filtered
-     * @param failCollection
-     *            the collection to store failed nuclei. Can be null.
-     * @param delta
-     *            the variability from the median allowed
+     * @param collection the collection to be filtered
+     * @param failCollection  the collection to store failed nuclei. Can be null.
+     * @param delta the variability from the median allowed
      * @return
      */
     public abstract void removeOutliers(E collection, E failCollection, double delta)
@@ -87,14 +70,10 @@ public abstract class Filterer<E extends Filterable> implements Loggable {
      * Filter the given collection to retain elements in which the given
      * statistic is within the lower and upper bounds inclusive.
      * 
-     * @param collection
-     *            the collection to filter
-     * @param stat
-     *            the statistic to filter on
-     * @param lower
-     *            the lower bound
-     * @param upper
-     *            the upper bound
+     * @param collection the collection to filter
+     * @param stat the statistic to filter on
+     * @param lower the lower bound
+     * @param upper the upper bound
      * @return a new cell collection with copies of the original cells
      * @throws CollectionFilteringException
      */

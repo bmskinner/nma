@@ -102,7 +102,7 @@ public class DatasetDeleter implements Loggable {
 
     private void deleteDataset(IAnalysisDataset d) {
 
-        UUID id = d.getUUID();
+        UUID id = d.getId();
 
         // remove the dataset from its parents
         for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
@@ -151,7 +151,7 @@ public class DatasetDeleter implements Loggable {
     private Deque<UUID> unique(List<IAnalysisDataset> list) {
         Set<UUID> set = new HashSet<UUID>();
         for (IAnalysisDataset d : list) {
-            set.add(d.getUUID());
+            set.add(d.getId());
 
             if (d.hasChildren()) {
                 // add all the children of a dataset

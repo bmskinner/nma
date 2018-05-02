@@ -198,7 +198,7 @@ public class AnalysisDataset implements IAnalysisDataset {
             throw new IllegalArgumentException("Nucleus collection is null");
         }
         dataset.setRoot(false);
-        UUID id = dataset.getUUID();
+        UUID id = dataset.getId();
         this.childCollections.put(id, (AnalysisDataset) dataset);
     }
 
@@ -228,7 +228,7 @@ public class AnalysisDataset implements IAnalysisDataset {
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset is null");
         }
-        UUID id = dataset.getUUID();
+        UUID id = dataset.getId();
         this.otherCollections.put(id, (AnalysisDataset) dataset);
     }
 
@@ -263,7 +263,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      * @see analysis.IAnalysisDataset#getUUID()
      */
     @Override
-    public UUID getUUID() {
+    public UUID getId() {
         return this.thisCollection.getID();
     }
 
@@ -351,7 +351,7 @@ public class AnalysisDataset implements IAnalysisDataset {
             return this.childCollections.get(id);
         } else {
             for (IAnalysisDataset child : this.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -402,7 +402,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public void addMergeSource(IAnalysisDataset dataset) {
-        this.mergeSources.add(dataset.getUUID());
+        this.mergeSources.add(dataset.getId());
         this.addAssociatedDataset(dataset);
     }
 
@@ -473,7 +473,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public boolean hasMergeSource(IAnalysisDataset dataset) {
-        return this.hasMergeSource(dataset.getUUID());
+        return this.hasMergeSource(dataset.getId());
     }
 
     /*
@@ -808,7 +808,7 @@ public class AnalysisDataset implements IAnalysisDataset {
      */
     @Override
     public boolean hasChild(IAnalysisDataset child) {
-        return this.childCollections.containsKey(child.getUUID());
+        return this.childCollections.containsKey(child.getId());
     }
 
     /*
