@@ -132,6 +132,8 @@ public class ImageAnnotator extends AbstractImageFilterer {
         
         try {
 
+            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK);
+            
             annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), 
                     n.getBorderPoint(Tag.REFERENCE_POINT).plus(Imageable.COMPONENT_BUFFER), 
                     Color.ORANGE);
@@ -139,14 +141,15 @@ public class ImageAnnotator extends AbstractImageFilterer {
                     , n.getBorderPoint(Tag.ORIENTATION_POINT).plus(Imageable.COMPONENT_BUFFER)
                     , Color.BLUE);
             
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                    , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                    , Color.GRAY);
-            annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
-                    , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
-                    , Color.GRAY);
-            
-            annotatePoint(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER), Color.PINK);
+            if(n.hasBorderTag(Tag.TOP_VERTICAL) && n.hasBorderTag(Tag.BOTTOM_VERTICAL)){
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.TOP_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GRAY);
+                annotateLine(n.getCentreOfMass().plus(Imageable.COMPONENT_BUFFER)
+                        , n.getBorderPoint(Tag.BOTTOM_VERTICAL).plus(Imageable.COMPONENT_BUFFER)
+                        , Color.GRAY);
+            }
+
             annotateSegments(n);
             annotateSignals(n);
 
@@ -218,10 +221,10 @@ public class ImageAnnotator extends AbstractImageFilterer {
     public ImageAnnotator annotatePoint(IPoint p, Color c) {
 
         if (p.getXAsInt() < 0 || p.getXAsInt() > ip.getWidth())
-            throw new IllegalArgumentException("Point x is out of image bounds");
+            throw new IllegalArgumentException("Point x "+p.getXAsInt()+" is out of image bounds "+ip.getWidth());
 
         if (p.getYAsInt() < 0 || p.getYAsInt() > ip.getHeight())
-            throw new IllegalArgumentException("Point y is out of image bounds");
+            throw new IllegalArgumentException("Point y "+p.getYAsInt()+" is out of image bounds"+ip.getHeight());
 
         ip.setColor(c);
         ip.setLineWidth(3);

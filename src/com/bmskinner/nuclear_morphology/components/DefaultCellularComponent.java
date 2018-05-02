@@ -275,7 +275,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         borderList.get(0).setPrevPoint(borderList.get(borderList.size() - 1));
 
         moveCentreOfMass(oldCoM);
-        // bounds = smoothed.getFloatBounds();
         calculateBounds();
 
     }
@@ -857,7 +856,6 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     @Override
 	public double getMaxX() {
         return bounds.getMaxX();
-        // return this.toShape().getBounds().getMaxX();
     }
 
     @Override

@@ -1048,14 +1048,10 @@ public class VirtualCellCollection implements ICellCollection {
      * the perimeter of the nucleus. This is the sum-of-squares difference,
      * rooted and divided by the nuclear perimeter
      * 
-     * @param pointType
-     *            the point to fetch profiles from
+     * @param pointType the point to fetch profiles from
      * @return an array of normalised differences
      */
-    private double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
-        // List<Double> list = new ArrayList<Double>();
-        int count = this.size();
-        double[] result = new double[count];
+    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
 
         IProfile medianProfile;
         try {
@@ -1063,48 +1059,26 @@ public class VirtualCellCollection implements ICellCollection {
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
             warn("Cannot get median profile for collection");
             fine("Error getting median profile", e);
-            for (int j = 0; j < count; j++) {
-                result[j] = Double.MAX_VALUE;
-            }
+            double[] result = new double[size()];
+            Arrays.fill(result, Double.MAX_VALUE);
             return result;
-
         }
-
-        int i = 0;
-        for (Nucleus n : this.getNuclei()) {
-
+        
+        return getNuclei().stream().mapToDouble(n->{
             try {
 
                 IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
                 double diff = angleProfile.absoluteSquareDifference(medianProfile);
-                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                               // to
-                                                                                               // the
-                                                                                               // number
-                                                                                               // of
-                                                                                               // points
-                                                                                               // in
-                                                                                               // the
-                                                                                               // perimeter
-                                                                                               // (approximately
-                                                                                               // 1
-                                                                                               // point
-                                                                                               // per
-                                                                                               // pixel)
-                double rootDiff = Math.sqrt(diff); // use the differences in
-                                                   // degrees, rather than
-                                                   // square degrees
-                result[i] = rootDiff;
+                
+                // normalise to the number of points in the perimeter
+                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
+                return Math.sqrt(diff); // differences in degrees, rather than square degrees
 
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 fine("Error getting nucleus profile", e);
-                result[i] = Double.MAX_VALUE;
-            } finally {
-                i++;
-            }
-
-        }
-        return result;
+                return  Double.MAX_VALUE;
+            } 
+        }).toArray();
     }
 
     private double getMedianStatistic(PlottableStatistic stat, String component, MeasurementScale scale,

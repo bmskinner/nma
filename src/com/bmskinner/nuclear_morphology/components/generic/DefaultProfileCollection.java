@@ -518,9 +518,8 @@ public class DefaultProfileCollection implements IProfileCollection {
      */
     @Override
     public void createProfileAggregate(ICellCollection collection, int length) {
-        if (length <= 0) {
+        if (length <= 0)
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
-        }
         if (collection == null) {
             throw new IllegalArgumentException("CellCollection is null");
         }

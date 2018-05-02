@@ -667,59 +667,36 @@ public class DefaultCellCollection implements ICellCollection {
      * the perimeter of the nucleus. This is the sum-of-squares difference,
      * rooted and divided by the nuclear perimeter
      * 
-     * @param pointType
-     *            the point to fetch profiles from
+     * @param pointType the point to fetch profiles from
      * @return an array of normalised differences
      */
-    public double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
-        // List<Double> list = new ArrayList<Double>();
-        int count = this.getNucleusCount();
-        double[] result = new double[count];
-        int i = 0;
+    private synchronized double[] getNormalisedDifferencesToMedianFromPoint(BorderTagObject pointType) {
         IProfile medianProfile;
         try {
-            medianProfile = profileCollection.getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+            medianProfile = this.getProfileCollection().getProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
         } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException e) {
-            fine("Error getting median profile for collection", e);
-            for (int j = 0; i < result.length; j++) {
-                result[j] = 0;
-            }
+            warn("Cannot get median profile for collection");
+            fine("Error getting median profile", e);
+            double[] result = new double[size()];
+            Arrays.fill(result, Double.MAX_VALUE);
             return result;
         }
-
-        for (Nucleus n : this.getNuclei()) {
-
-            IProfile angleProfile;
+        
+        return getNuclei().stream().mapToDouble(n->{
             try {
-                angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
+
+                IProfile angleProfile = n.getProfile(ProfileType.ANGLE, pointType);
                 double diff = angleProfile.absoluteSquareDifference(medianProfile);
-                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS); // normalise
-                                                                                               // to
-                                                                                               // the
-                                                                                               // number
-                                                                                               // of
-                                                                                               // points
-                                                                                               // in
-                                                                                               // the
-                                                                                               // perimeter
-                                                                                               // (approximately
-                                                                                               // 1
-                                                                                               // point
-                                                                                               // per
-                                                                                               // pixel)
-                double rootDiff = Math.sqrt(diff); // use the differences in
-                                                   // degrees, rather than
-                                                   // square degrees
-                result[i] = rootDiff;
+                
+                // normalise to the number of points in the perimeter
+                diff /= n.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
+                return Math.sqrt(diff); // differences in degrees, rather than square degrees
+
             } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
                 fine("Error getting nucleus profile", e);
-                result[i] = 0;
-            } finally {
-                i++;
-            }
-
-        }
-        return result;
+                return  Double.MAX_VALUE;
+            } 
+        }).toArray();
     }
 
     /**

@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
@@ -42,6 +43,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Imageable;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.gui.ChartOptionsRenderedEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
@@ -52,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPan
 import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionSettingsPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.process.ImageProcessor;
@@ -173,14 +176,22 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
         updateSettingsPanels();
 
-        if (component==null || !component.getSourceFile().exists()) {
+        if (component==null) {
             imageLabel.setIcon(null);
             return;
         }
 
         Runnable r = () -> {
-            try {
-                ImageProcessor ip = component.getImage();
+                
+                ImageProcessor ip;
+                try{
+                    ip = component.getImage();
+                } catch(UnloadableImageException e){
+                    fine("Making blank image", e);
+                    ip = AbstractImageFilterer.createBlankByteProcessor( 1500, 1500); //TODO make based on cell location
+                }
+                
+                
                 ImageAnnotator an = new ImageAnnotator(ip);
                 
                 if(cell.hasCytoplasm()){
@@ -196,10 +207,6 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
                 imageLabel.setIcon(an2.toImageIcon());
 
-            } catch (Exception e1) {
-                warn("Error fetching image");
-                stack("Error fetching image", e1);
-            }
         };
 
         ThreadManager.getInstance().submit(r);
