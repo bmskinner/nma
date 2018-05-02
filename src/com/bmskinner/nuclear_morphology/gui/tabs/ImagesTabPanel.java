@@ -381,7 +381,7 @@ public class ImagesTabPanel extends DetailPanel {
     	        	File imageFile = imageData.getFile();
     	        	for(IAnalysisDataset d : getDatasets()){
     	        		Set<ICell> cells = d.getCollection().getCells(imageFile);
-    	        		cells.parallelStream().forEach(c->{
+    	        		cells.stream().forEach(c->{
     	        			c.getNuclei().stream().forEach(n->{
     	        				n.setSourceFolder(newFolder);
     	        			});

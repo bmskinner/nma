@@ -31,33 +31,13 @@ public class Nuclear_Morphology_Analysis
 	private CommandParser parser;
 	
 	/*
-	 * Keep a strong reference to the loggers so they can be accessed
+	 * Keep a strong reference to the logger so they can be accessed
 	 * by all other classes implementing the Loggable interface
 	 */
-//	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);	
 	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
-	
-	// Store which plugins have been found
-//	private HashMap<String, Boolean>  requiredFiles = new HashMap<String, Boolean>();
-	
-//	private MainWindow mw;
-	
-	
-//	// The plugins that are needed for the program to start
-//	private static String[] fileNames = {
-////			"commons-math3",
-////			"jcommon",
-////			"jdistlib",
-////			"jebl",
-////			"jfreechart",
-////			"swingx-all",
-////			"weka",
-////			"AnalyzeSkeleton",
-////			"MorphoLibJ",
-////			"jfreesvg"
-//	};
+
 	
 	
 	private Nuclear_Morphology_Analysis(String[] args){
@@ -77,20 +57,6 @@ public class Nuclear_Morphology_Analysis
 	public static Nuclear_Morphology_Analysis getInstance(){
 		return instance;
 	}
-	
-//	public CommandParser getParser(){
-//		return parser;
-//	}
-	
-	
-	/**
-	 * Reset all found files to false
-	 */
-//	private void clearFileList(){
-//		for(String s : fileNames){
-//			requiredFiles.put(s, false);
-//		}
-//	}
 	
 	private boolean checkJavaVersion(){
 		
@@ -143,93 +109,10 @@ public class Nuclear_Morphology_Analysis
 		 * Add a splash screen for long load times
 		 */
 		final JWindow splash = createSplash();
-		
-		try {
-			load();
-		} catch(Exception e){
-			e.printStackTrace();
-		} finally {
-			splash.dispose();
-		}
+		Prefs.blackBackground = true;		
+		splash.dispose();
 	}
-	
-//	/**
-//	 * Load the program as standalone
-//	 */
-//	private void runStandalone(){
-//		loadLogger();
-//		try {
-//			
-//			// load the config file properties
-//			new PropertiesReader();
-//			loadMainWindow(true);
-//		} catch(Exception e){
-//			error("Error loading main window", e);
-//			System.err.println("Error loading main window");
-//			e.printStackTrace();
-//		} 
-//		
-//			
-//		
-//	}
-//	
-//	private void loadMainWindow(boolean standalone){
-//	    
-//	    Runnable r = () -> {
-//
-//                IJ.setBackgroundColor(0, 0, 0);  // default background is black
-//                try {
-//                    UIManager.setLookAndFeel(
-//                            UIManager.getSystemLookAndFeelClassName());
-//                } catch (Exception e) {
-//
-//                    logToImageJ("Error initialising", e);
-//                }
-//
-//                mw = new MainWindow(standalone);
-//                mw.setVisible(true);
-//        };
-//		java.awt.EventQueue.invokeLater( r );
-//	}
-	
-	/*
-	 * Check all dependencies are present, the
-	 * Java version is correct and load the main window
-	 */
-	public void load()  {
-
-		try {
 			
-//			if(checkPlugins()){ 
-				// load the config file properties
-//				new PropertiesReader();
-				
-				// Check the ImageJ background colour settings
-				// This must be made consistent on all platforms
-				Prefs.blackBackground = true;
-//				ThresholdAdjuster.update();
-
-				
-//				loadMainWindow(false);
-
-//			} else {
-//
-//				displayMissingPlugins();
-//				IJ.log("Unable to launch the Nuclear Morphology Analysis plugin for ImageJ");
-//				IJ.log("This is because a required plugin is missing");
-//				IJ.log("The names of the missing plugins are listed above");
-//				IJ.log("Visit the project wiki for links to download missing plugins:");
-//				IJ.log("https://bitbucket.org/bmskinner/nuclear_morphology/wiki/Installation");
-//
-//			}
-
-
-		} catch (Exception e) {
-			logToImageJ("Error initialising", e);
-		} 
-		
-	}
-	
 	/**
 	 * Get the URL for the splash screen gif
 	 * @return
@@ -263,105 +146,4 @@ public class Nuclear_Morphology_Analysis
 		window.setVisible(true);
 		return window;
 	}
-	
-	/**
-	 * Check the given directory for files
-	 * @param dir
-	 */
-//	private void checkDir(File dir){
-//				
-//		if(dir==null){
-//			return;
-//		}
-//		
-//		if(allPluginsFound()){ // Don't waste time if they have all been found so far
-//			return;
-//		}
-//		
-//		if( ! dir.exists()){
-//			return;
-//		}
-//		if( ! dir.isDirectory()){
-//			return;
-//		}
-//		
-////		List<String> toCheck = Arrays.stream(fileNames)
-////			.filter( s -> requiredFiles.get(s)==false )
-////			.collect(Collectors.toList());
-//		
-//		if(dir.listFiles()==null){
-//			return;
-//		}
-//				
-//
-//		for(File file : dir.listFiles()){
-//			
-//			if(file.isDirectory()){
-//				continue;
-//			}
-//				
-//			for(String s : toCheck){
-//				
-//				if(file.getName().startsWith(s)){
-//					requiredFiles.put(s, true);
-//				}
-//				
-//			}
-//		}
-//	}
-	
-//	/**
-//	 * Check if all the plugins needed have been found yet
-//	 * @return
-//	 */
-//	private boolean allPluginsFound(){
-//		long count = Arrays.stream(fileNames)
-//				.filter( s -> requiredFiles.get(s)==false )
-//				.count();
-//		
-//		return count == 0;
-//			
-//	}
-	
-//	private void displayMissingPlugins(){
-//		// report missing jars
-//		for(String s : requiredFiles.keySet()){
-//			if(requiredFiles.get(s)==false){
-//				IJ.log("Cannot find a required plugin: "+s);
-//			}
-//		}
-//	}
-	
-	/**
-	 * Look in the likely plugins folders for the required plugins.
-	 * @return
-	 */
-//	private boolean checkPlugins(){
-//		
-//		clearFileList(); // set all files to false
-//		
-//		String pluginDirName = IJ.getDirectory("plugins");
-//		
-//		File pluginDir = new File(pluginDirName);
-//		File oldJarDir = new File(pluginDirName, "jars");
-//		File jarDir    = new File(pluginDirName, "Nuclear_Morphology_Analysis");
-//		
-//
-//		// check the plugins directory directly
-//		checkDir(pluginDir);
-//		
-//		
-//		/*
-//		 * Check the new jar dir for jars
-//		 */
-//		checkDir(jarDir);
-//		
-//		/*
-//		 * Check the old folder for jars (optional storage in 1.12.0 and earlier)
-//		 */
-//		checkDir(oldJarDir);
-//		
-//				
-//		return allPluginsFound();
-//	}
 }

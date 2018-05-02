@@ -360,7 +360,7 @@ public abstract class Detector implements Loggable {
         private Rectangle r;
 
         private FloodFiller ff;
-        private Polygon polygon;
+//        private Polygon polygon;
 
         private int roiType;
         private int wandMode = Wand.LEGACY_MODE;
@@ -521,21 +521,21 @@ public abstract class Detector implements Loggable {
             if (excludeEdgeParticles) {
                 if (r.x==minX||r.y==minY||r.x+r.width==maxX||r.y+r.height==maxY)
                     include = false;
-                if (polygon!=null) {
-                    Rectangle bounds = roi.getBounds();
-                    int x1=bounds.x+wand.xpoints[wand.npoints-1];
-                    int y1=bounds.y+wand.ypoints[wand.npoints-1];
-                    int x2, y2;
-                    for (int i=0; i<wand.npoints; i++) {
-                        x2=bounds.x+wand.xpoints[i];
-                        y2=bounds.y+wand.ypoints[i];
-                        if (!polygon.contains(x2, y2))
-                            {include = false; break;}
-                        if ((x1==x2 && ip.getPixel(x1,y1-1)==fillColor) || (y1==y2 && ip.getPixel(x1-1,y1)==fillColor))
-                            {include = false; break;}
-                        x1=x2; y1=y2;
-                    }
-                }
+//                if (polygon!=null) {
+//                    Rectangle bounds = roi.getBounds();
+//                    int x1=bounds.x+wand.xpoints[wand.npoints-1];
+//                    int y1=bounds.y+wand.ypoints[wand.npoints-1];
+//                    int x2, y2;
+//                    for (int i=0; i<wand.npoints; i++) {
+//                        x2=bounds.x+wand.xpoints[i];
+//                        y2=bounds.y+wand.ypoints[i];
+//                        if (!polygon.contains(x2, y2))
+//                            {include = false; break;}
+//                        if ((x1==x2 && ip.getPixel(x1,y1-1)==fillColor) || (y1==y2 && ip.getPixel(x1-1,y1)==fillColor))
+//                            {include = false; break;}
+//                        x1=x2; y1=y2;
+//                    }
+//                }
             }
             ImageProcessor mask = ip.getMask();
             if (minCirc>0.0 || maxCirc<1.0) {

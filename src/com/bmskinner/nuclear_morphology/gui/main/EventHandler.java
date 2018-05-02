@@ -709,8 +709,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public class PanelUpdater implements CancellableRunnable {
         private final List<IAnalysisDataset> list;
         
-        private static final int SLEEP_MILLISECONDS = 20;
-
         private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
         public PanelUpdater(final List<IAnalysisDataset> list) {
@@ -726,7 +724,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
                 // Wait for loading state to be set
                 while (!f.isDone() && !isCancelled.get()) {
-                    Thread.sleep(SLEEP_MILLISECONDS);
+                	f.wait();
                 }
 
                 // Again stop if a cancel signal was heard 

@@ -141,14 +141,6 @@ public class ShellDetectorTest {
     	return ip;
     }
     
-//    private void showImage(String title, ImageProcessor ip) throws InterruptedException {
-//    	ImagePlus img = new ImagePlus(title, ip);
-//    	img.show();
-//    	while(img.isVisible()) {
-//    		Thread.sleep(1000);
-//    	}
-//    }
-
     @Test
     public void testGetShellsByRadius() throws ComponentCreationException, ShellAnalysisException, ImageImportException, UnloadableImageException, InterruptedException {
     	testGetShells(ShrinkType.RADIUS);
@@ -209,9 +201,8 @@ public class ShellDetectorTest {
         long[] obs = sd.findPixelCounts();
         
         long total = sd.getShells().get(0).getPixelCount();
-        
-        
-        long[] exp = {total/5, total/5, total/5, total/5, total/5 };
+        long[] exp = new long[obs.length];
+        Arrays.fill(exp, total/5);
         testRoughly(exp, obs);
     }
 
@@ -224,8 +215,13 @@ public class ShellDetectorTest {
     }
     
     @Test
-    public void testFindPixelIntensityPerShellCellularComponentArea() {
-        fail("Not yet implemented");
+    public void testFindPixelIntensityPerShellCellularComponentArea() throws ShellAnalysisException {
+    	 sd = new ShellDetector(testNucleus, ShrinkType.AREA, false);
+         long[] obs = sd.findPixelIntensities(testNucleus);
+         long total = sd.getShells().get(0).getPixelCount();
+         long[] exp = new long[obs.length];
+         Arrays.fill(exp, (total/5)*255);
+         testRoughly(exp, obs);
     }
 
     @Test

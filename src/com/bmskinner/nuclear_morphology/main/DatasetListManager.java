@@ -64,13 +64,7 @@ public final class DatasetListManager implements Loggable {
      * the dataset. This is used to compare actual and saved hashcodes, and
      * detect whether a dataset has changed since the last check.
      */
-    private final Map<UUID, Integer> map = new HashMap<UUID, Integer>(); // store
-                                                                         // the
-                                                                         // hash
-                                                                         // for
-                                                                         // a
-                                                                         // dataset
-                                                                         // id
+    private final Map<UUID, Integer> map = new HashMap<UUID, Integer>();
     
     private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
 
@@ -222,9 +216,8 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized IAnalysisDataset getParent(@NonNull IAnalysisDataset d) {
 
-        if (d.isRoot()) {
+        if (d.isRoot())
             return d;
-        }
 
         IAnalysisDataset result = null;
 
@@ -360,7 +353,7 @@ public final class DatasetListManager implements Loggable {
      * @param d
      * @return true if the hashcode is different to the stored value
      */
-    public boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
+    public synchronized boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
             if (map.containsKey(d.getUUID())) {
                 return d.hashCode() != map.get(d.getUUID());
@@ -378,7 +371,7 @@ public final class DatasetListManager implements Loggable {
      * 
      * @return
      */
-    public boolean hashCodeChanged() {
+    public synchronized boolean hashCodeChanged() {
 
         for (IAnalysisDataset d : list) {
             if (hashCodeChanged(d)) {
@@ -394,7 +387,7 @@ public final class DatasetListManager implements Loggable {
      * 
      * @param d
      */
-    public void updateHashCode(@NonNull IAnalysisDataset d) {
+    public synchronized void updateHashCode(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
             map.put(d.getUUID(), d.hashCode());
         }
@@ -406,7 +399,7 @@ public final class DatasetListManager implements Loggable {
      * 
      * @param d
      */
-    public void updateHashCodes() {
+    public synchronized void updateHashCodes() {
         for (IAnalysisDataset d : list) {
             updateHashCode(d);
         }
