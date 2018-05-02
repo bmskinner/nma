@@ -35,6 +35,7 @@ public class Nuclear_Morphology_Analysis
 	 * by all other classes implementing the Loggable interface
 	 */
 	private static final Logger errorLogger = Logger.getLogger(Loggable.ERROR_LOGGER);
+	private static final Logger programLogger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
 	
 	private static final ThreadManager threadManager = ThreadManager.getInstance();		
 

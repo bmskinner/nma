@@ -60,6 +60,18 @@ public class FloatEquationTest {
 
     @Test
     public void testFloatEquationIPointIPoint() {
+    	
+    	IPoint p0 = IPoint.makeNew(0d, 0d);
+    	
+    	for(int degree=0; degree<360; degree++) {
+    		double x = Math.cos(Math.toRadians(degree));
+    		double y = Math.sin(Math.toRadians(degree));
+    		IPoint p1 = IPoint.makeNew(x, y);
+    		
+    		LineEquation l = new FloatEquation(p0, p1);    		
+    		assertEquals(p1, l.getPointOnLine(p0, 1));
+    	}
+    	
         fail("Not yet implemented");
     }
 

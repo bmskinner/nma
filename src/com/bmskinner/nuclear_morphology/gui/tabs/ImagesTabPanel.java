@@ -308,8 +308,12 @@ public class ImagesTabPanel extends DetailPanel {
 
     		Runnable r = () -> {
     			try {
-
-    				ImageProcessor ip = new ImageImporter(data.getFile()).importToColorProcessor();
+    				ImageProcessor ip;
+    				try {
+    					ip = new ImageImporter(data.getFile()).importToColorProcessor();
+    				}catch(IllegalArgumentException ex) {
+    					ip = ImageAnnotator.createBlankColorProcessor(1500, 1500);
+    				}
 
     				ImageConverter cn = new ImageConverter(ip);
     				if (cn.isByteProcessor()) {
@@ -325,8 +329,9 @@ public class ImagesTabPanel extends DetailPanel {
     				label.setIcon(ic.toImageIcon());
 
     			} catch (Exception e1) {
-    				warn("Error fetching image");
-    				stack("Error fetching image", e1);
+    				label.setIcon(null);
+//    				warn("Error fetching image");
+    				fine("Error fetching image "+data.getFile().getAbsolutePath(), e1);
     			}
     		};
 

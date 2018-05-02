@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -57,6 +58,69 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
 
     }
     
+    /**
+     * Move the given nodes one position up in the model. If the node is at the
+     * top of its sib list, this has no effect. The tree hierarchy is not
+     * changed.
+     * 
+     * @param nodes
+     */
+    public void moveNodesDown(List<PopulationTreeTableNode> nodes) {
+
+        for (PopulationTreeTableNode n : nodes) {
+            PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
+
+            // get the index of the child in the parent node
+            int oldIndex = this.getIndexOfChild(parent, n);
+
+            // if the index is last, do nothing
+            if (oldIndex == parent.getChildCount() - 1)
+                return;
+
+            int sibIndex = oldIndex + 1;
+
+            // Get the next node up
+            PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
+            this.removeNodeFromParent(n);
+            this.removeNodeFromParent(sib);
+
+            this.insertNodeInto(sib, parent, oldIndex);
+            this.insertNodeInto(n, parent, sibIndex);
+
+        }
+    }
+
+    /**
+     * Move the given nodes one position down in the model. If the node is at
+     * the bottom of its sib list, this has no effect. The tree hierarchy is not
+     * changed.
+     * 
+     * @param nodes
+     */
+    public void moveNodesUp(List<PopulationTreeTableNode> nodes) {
+
+        for (PopulationTreeTableNode n : nodes) {
+            PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
+
+            // get the index of the child in the parent node
+            int oldIndex = this.getIndexOfChild(parent, n);
+
+            // if the index is first, do nothing
+            if (oldIndex == 0)
+                return;
+
+            int sibIndex = oldIndex - 1;
+            // Get the next node up
+            PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
+            this.removeNodeFromParent(n);
+            this.removeNodeFromParent(sib);
+
+            this.insertNodeInto(n, parent, sibIndex);
+            this.insertNodeInto(sib, parent, oldIndex);
+
+        }
+    }
+    
     private void addExistingWorkspaces(){
      
    
@@ -77,22 +141,15 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
     }
 
     private void addExistingRootDatasets() {
-        // Add the current root datasets
-        try {
+    	if(!DatasetListManager.getInstance().hasDatasets())
+    		return;
+    	
+    	for (@NonNull IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
 
-            if (DatasetListManager.getInstance().hasDatasets()) {
-
-                for (IAnalysisDataset rootDataset : DatasetListManager.getInstance().getRootDatasets()) {
-                    
-                    if(! DatasetListManager.getInstance().isInWorkspace(rootDataset)){
-                        this.addRootDataset(rootDataset);
-                    }
-                }
-
-            }
-        } catch (Exception e) {
-            error("Error adding nodes to table model", e);
-        }
+    		if(!DatasetListManager.getInstance().isInWorkspace(root)){
+    			addDataset(root);
+    		}
+    	}
     }
 
     /**
@@ -102,63 +159,25 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      * 
      * @param dataset
      */
-    public void addDataset(IAnalysisDataset dataset) {
+    private void addDataset(@NonNull IAnalysisDataset dataset) {
 
-        if (this.getNode(dataset) != null) {
+        if (hasNode(dataset))
             return; // ignore datasets already present
-        }
-
-        if (dataset.isRoot()) {
-            addRootDataset(dataset);
-        } else {
-            addChildDataset(dataset);
-        }
-    }
-
-    /**
-     * Add a dataset to the model. If root, this will be a child of the model
-     * root node. Otherwise, the dataset will be added to the appropriate parent
-     * dataset node
-     * 
-     * @param dataset
-     */
-    public void addRootDataset(IAnalysisDataset dataset) {
-
-        if (this.getNode(dataset) != null) {
-            return; // ignore datasets already present
-        }
-
-        PopulationTreeTableNode datasetNode = createNodes(dataset);
-
-        PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();
-
-        root.add(datasetNode);
-    }
-
-    public void addChildDataset(IAnalysisDataset dataset) {
-
-        if (this.getNode(dataset) != null)
-            return; // ignore datasets already present
-
+        
+        // If dataset is root, parent will be dataset
         IAnalysisDataset parent = DatasetListManager.getInstance().getParent(dataset);
-
-        PopulationTreeTableNode parentNode = this.getNode(parent);
-
+        PopulationTreeTableNode parentNode = dataset.isRoot() ? (PopulationTreeTableNode)getRoot() : getNode(parent);
         PopulationTreeTableNode newNode = createNodes(dataset);
-
         parentNode.add(newNode);
     }
-    
-    public void addWorkspace(IWorkspace ws) {
+        
+    private void addWorkspace(@NonNull IWorkspace ws) {
 
-        if (this.getNode(ws) != null) {
+        if (this.getNode(ws) != null)
             return; // ignore datasets already present
-        }
-
+       
         PopulationTreeTableNode parentNode = ((PopulationTreeTableNode) this.getRoot());
-
         PopulationTreeTableNode newNode = createNodes(ws);
-
         parentNode.add(newNode);
     }
 
@@ -171,7 +190,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      *            the dataset to add
      * @return
      */
-    private PopulationTreeTableNode createNodes(IAnalysisDataset dataset) {
+    private PopulationTreeTableNode createNodes(@NonNull IAnalysisDataset dataset) {
 
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset is null when generating population table nodes");
@@ -236,76 +255,13 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
     }
 
     /**
-     * Move the given nodes one position up in the model. If the node is at the
-     * top of its sib list, this has no effect. The tree hierarchy is not
-     * changed.
-     * 
-     * @param nodes
-     */
-    public void moveNodesDown(List<PopulationTreeTableNode> nodes) {
-
-        for (PopulationTreeTableNode n : nodes) {
-            PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
-
-            // get the index of the child in the parent node
-            int oldIndex = this.getIndexOfChild(parent, n);
-
-            // if the index is last, do nothing
-            if (oldIndex == parent.getChildCount() - 1)
-                return;
-
-            int sibIndex = oldIndex + 1;
-
-            // Get the next node up
-            PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
-            this.removeNodeFromParent(n);
-            this.removeNodeFromParent(sib);
-
-            this.insertNodeInto(sib, parent, oldIndex);
-            this.insertNodeInto(n, parent, sibIndex);
-
-        }
-    }
-
-    /**
-     * Move the given nodes one position down in the model. If the node is at
-     * the bottom of its sib list, this has no effect. The tree hierarchy is not
-     * changed.
-     * 
-     * @param nodes
-     */
-    public void moveNodesUp(List<PopulationTreeTableNode> nodes) {
-
-        for (PopulationTreeTableNode n : nodes) {
-            PopulationTreeTableNode parent = (PopulationTreeTableNode) n.getParent();
-
-            // get the index of the child in the parent node
-            int oldIndex = this.getIndexOfChild(parent, n);
-
-            // if the index is first, do nothing
-            if (oldIndex == 0)
-                return;
-
-            int sibIndex = oldIndex - 1;
-            // Get the next node up
-            PopulationTreeTableNode sib = (PopulationTreeTableNode) parent.getChildAt(sibIndex);
-            this.removeNodeFromParent(n);
-            this.removeNodeFromParent(sib);
-
-            this.insertNodeInto(n, parent, sibIndex);
-            this.insertNodeInto(sib, parent, oldIndex);
-
-        }
-    }
-
-    /**
      * Get the node in the tree corresponding to the given group, or null if no
      * group is found
      * 
      * @param g
      * @return
      */
-    public PopulationTreeTableNode getNode(IClusterGroup g) {
+    private PopulationTreeTableNode getNode(IClusterGroup g) {
 
         if (g == null)
             throw new IllegalArgumentException("Cluster group cannot be null");
@@ -334,7 +290,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      * @param g
      * @return
      */
-    public PopulationTreeTableNode getNode(IWorkspace w) {
+    private PopulationTreeTableNode getNode(IWorkspace w) {
 
         if (w == null)
             throw new IllegalArgumentException("Cluster group cannot be null");
@@ -362,7 +318,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
      * @param g
      * @return
      */
-    public PopulationTreeTableNode getNode(IAnalysisDataset dataset) {
+    private PopulationTreeTableNode getNode(IAnalysisDataset dataset) {
 
         if (dataset == null) {
             throw new IllegalArgumentException("Dataset cannot be null");
@@ -382,6 +338,26 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
             }
         }
         return result;
+    }
+    
+    private boolean hasNode(IAnalysisDataset dataset) {
+
+        if (dataset == null)
+        	return false;
+
+        PopulationTreeTableNode root = (PopulationTreeTableNode) this.getRoot();
+
+        Enumeration<PopulationTreeTableNode> en = (Enumeration<PopulationTreeTableNode>) root.children();
+
+        while (en.hasMoreElements()) {
+            PopulationTreeTableNode p = en.nextElement();
+            if (p.hasDataset()) {
+                if (p.getDataset() == dataset) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

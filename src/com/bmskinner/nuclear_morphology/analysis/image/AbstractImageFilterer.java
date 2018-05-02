@@ -233,14 +233,30 @@ public abstract class AbstractImageFilterer implements Loggable {
         }
         return new ImageIcon(ip.getBufferedImage());
     }
+    
+    /**
+     * Create an empty white byte processor
+     * 
+     * @param w the width
+     * @param h the height
+     * @return
+     */
+    public static ImageProcessor createBlankColorProcessor(int w, int h) {
+
+        // Create an empty white processor
+        ImageProcessor ip = new ColorProcessor(w, h);
+        for (int i = 0; i < ip.getPixelCount(); i++) {
+            ip.set(i, 0); // set all to black initially
+        }
+
+        return ip;
+    }
 
     /**
      * Create an empty white byte processor
      * 
-     * @param w
-     *            the width
-     * @param h
-     *            the height
+     * @param w the width
+     * @param h the height
      * @return
      */
     public static ImageProcessor createBlankByteProcessor(int w, int h) {

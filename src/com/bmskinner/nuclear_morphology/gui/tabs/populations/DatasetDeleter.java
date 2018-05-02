@@ -105,7 +105,7 @@ public class DatasetDeleter implements Loggable {
         UUID id = d.getUUID();
 
         // remove the dataset from its parents
-        for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) { // analysisDatasets.keySet()){
+        for (IAnalysisDataset parent : DatasetListManager.getInstance().getAllDatasets()) {
             if (parent.hasChild(id))
                 parent.deleteChild(id);
         }

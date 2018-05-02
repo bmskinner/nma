@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.tabs.populations;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -27,86 +27,46 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class PopulationsPanelTest {
 	
-	private void addNameToPanel(Object panel, String newName){
-		
-		try {
-			Class c = Class.forName("no.gui.PopulationsPanel");
-		
-			// get the populationNames hash and add a population
-			Field field;
-			field = c.getDeclaredField("populationNames");
-			field.setAccessible(true);
-
-			// make the population
-			Map<String, UUID> names = (Map<String, UUID>) field.get(panel);
-			
-			names.put(newName, java.util.UUID.randomUUID());
-			field.set(panel, names);
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	Class c;
+	Object panel;
+	
+	@Before
+	public void setUp() throws Exception {
+		c = Class.forName("com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationsPanel");
+		panel = c.newInstance();
 	}
 	
-	private Object createPanelWithNames(){
+	private void addNameToPanel(String newName) throws Exception {
 
-		Object panel = null;
-		try {
-			Class c = Class.forName("no.gui.PopulationsPanel");
-			panel = c.newInstance();
+		// get the populationNames hash and add a population
+		Field field;
+		field = c.getDeclaredField("populationNames");
+		field.setAccessible(true);
 
-		} catch (ClassNotFoundException e) {
-			fail("Class error");
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			fail("Security error");
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			fail("Instantiation error");
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			fail("Access error");
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			fail("Argument error");
-		} 
-		return panel;
+		// make the population
+		Map<String, UUID> names = (Map<String, UUID>) field.get(panel);
+
+		names.put(newName, java.util.UUID.randomUUID());
+		field.set(panel, names);
+
 	}
-	
+		
 	@Test
-	public void renameCollectionDetectsExistingName() {
+	public void renameCollectionDetectsExistingName() throws Exception {
 		
 		String oldName = "An_old_name";
 		String newName = "An_old_name_1";
 
-
-		Object panel = createPanelWithNames();
-		addNameToPanel(panel, oldName);
+		addNameToPanel( oldName);
 
 		System.out.println("Beginning test");
 
-		// get the rename method and make it accessible
-		Class c;
-		try {
-			c = Class.forName("no.gui.PopulationsPanel");
-		
+		// get the rename method and make it accessible		
 		Method method = c.getDeclaredMethod("checkName", new Class[] {String.class});
 		method.setAccessible(true);
 
@@ -116,45 +76,27 @@ public class PopulationsPanelTest {
 		String firstPass = (String) method.invoke(panel, new String[] { oldName });
 
 		assertEquals("First pass values should be identical", newName, firstPass );
-		} catch (ClassNotFoundException e) {
-			fail("Class error");
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			fail("Security error");
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			fail("Access error");
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			fail("Argument error");
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-			fail("Invocation error");
-		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
-			fail("Method error");
-		} 
+
 	}
 	
 	/**
 	 * Does the digit increment?
+	 * @throws Exception 
 	 */
 	@Test
-	public void renameCollectionDigitIncrements() {
+	public void renameCollectionDigitIncrements() throws Exception {
 
 		String oldName = "An_old_name";
 		String newName = "An_old_name_1";
 		String newerName = "An_old_name_2";
 
-		Object panel = createPanelWithNames();
-		addNameToPanel(panel, oldName);
-		addNameToPanel(panel, newName);
+		addNameToPanel(oldName);
+		addNameToPanel(newName);
 
 		
 		Class c;
 		try {
-			c = Class.forName("no.gui.PopulationsPanel");
+			c = Class.forName("com.bmskinner.nuclear_morphology.gui.tabs.populations");
 
 			Method method = c.getDeclaredMethod("checkName", new Class[] {String.class});
 			method.setAccessible(true);

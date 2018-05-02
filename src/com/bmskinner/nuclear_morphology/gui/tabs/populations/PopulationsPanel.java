@@ -166,7 +166,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
          */
         List<Object> collapsedRows = treeTable.getCollapsedRows();
 
-        // Need to modify the model, not replace it to keep ordering
+        // TODO: Need to modify the model, not replace it to keep ordering
         PopulationTreeTableModel newModel = new PopulationTreeTableModel();
         treeTable.setTreeTableModel(newModel);
 

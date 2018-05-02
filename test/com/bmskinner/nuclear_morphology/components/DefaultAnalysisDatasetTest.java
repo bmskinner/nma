@@ -39,7 +39,8 @@ import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Testing methods of the analysis dataset
@@ -50,6 +51,10 @@ import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 public class DefaultAnalysisDatasetTest {
     
     private static IAnalysisDataset d;
+    private static final UUID CHILD_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID CHILD_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000002");
+    private static final UUID CHILD_ID_NULL = UUID.fromString("00000000-0000-0000-0000-000000000000");
+    
     
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -57,6 +62,12 @@ public class DefaultAnalysisDatasetTest {
     @Before
     public void loadDataset() throws Exception {
         d = SampleDatasetReader.openTestRodentDataset();
+        IAnalysisDataset child1 = mock(IAnalysisDataset.class);
+		when(child1.getUUID()).thenReturn(CHILD_ID_1);
+		IAnalysisDataset child2 = mock(IAnalysisDataset.class);
+		when(child2.getUUID()).thenReturn(CHILD_ID_2);
+		d.addChildDataset(child1);
+		d.addChildDataset(child2);
     }
 
     @Test
@@ -80,16 +91,9 @@ public class DefaultAnalysisDatasetTest {
     }
 
     @Test
-    public void testDuplicate() {
-        try {
-            IAnalysisDataset dup = d.duplicate();
-            
-            assertEquals(d, dup);
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            fail();
-        }
+    public void testDuplicate() throws Exception {
+    	IAnalysisDataset dup = d.duplicate();
+    	assertEquals(d, dup);
     }
 
     @Test
@@ -131,19 +135,6 @@ public class DefaultAnalysisDatasetTest {
         File f = new File(SampleDatasetReader.SAMPLE_DATASET_PATH+"Test.nmd");
         d.setSavePath(f);
         assertEquals(f, d.getSavePath());
-        
-//        exception.expect(IllegalArgumentException.class);
-//        d.setSavePath(null);
-    }
-
-    @Test
-    public void testGetDebugFile() {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testSetDebugFile() {
-        fail("Not yet implemented");
     }
 
     @Test
@@ -330,12 +321,22 @@ public class DefaultAnalysisDatasetTest {
 
     @Test
     public void testHasChildIAnalysisDataset() {
-        fail("Not yet implemented");
+        
+        IAnalysisDataset child1 = mock(IAnalysisDataset.class);
+		when(child1.getUUID()).thenReturn(CHILD_ID_1);
+		
+		IAnalysisDataset childNull = mock(IAnalysisDataset.class);
+		when(childNull.getUUID()).thenReturn(CHILD_ID_NULL);
+		
+		assertTrue(d.hasChild(child1));
+		assertFalse(d.hasChild(childNull));
     }
 
     @Test
     public void testHasChildUUID() {
-        fail("Not yet implemented");
+    	assertTrue(d.hasChild(CHILD_ID_1));
+    	assertTrue(d.hasChild(CHILD_ID_2));
+    	assertFalse(d.hasChild(CHILD_ID_NULL));
     }
 
     @Test

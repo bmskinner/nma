@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
 
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
@@ -41,6 +42,9 @@ import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
+
+import net.samuelcampos.usbdrivedetector.USBDeviceDetectorManager;
+import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 
 /**
  * Run a new analysis
@@ -96,6 +100,17 @@ public class NewAnalysisAction extends VoidResultAction {
                 this.cancel();
                 return;
             }
+        }
+        
+        // Files on USB drives are causing issues with path names on dataset opening.
+        // Block for now.
+        USBDeviceDetectorManager usb = new USBDeviceDetectorManager();
+        for(USBStorageDevice u : usb.getRemovableDevices()) {
+        	if(folder.getAbsolutePath().startsWith(u.getRootDirectory().getName())) {
+        		warn("Unable to comply. Folder is on a USB stick. Copy images to hard disk.");
+        		 this.cancel();
+                 return;
+        	}
         }
 
         fine("Creating for " + folder.getAbsolutePath());
@@ -190,11 +205,11 @@ public class NewAnalysisAction extends VoidResultAction {
 
         File file = fc.getSelectedFile();
 
-        if (!file.isDirectory()) {
+        if (!file.isDirectory())
             return false;
-        }
 
         folder = file;
+
         nucleusOptions.setFolder(file);
         return true;
     }

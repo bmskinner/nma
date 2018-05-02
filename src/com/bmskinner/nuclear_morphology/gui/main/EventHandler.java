@@ -335,7 +335,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         }
 
-        if (event.type().equals("SaveCellLocations")) {
+        if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS)) {
             log("Exporting cell locations...");
             if (new CellFileExporter().exportCellLocations(selectedDataset)) {
                 log("Export complete");
@@ -705,6 +705,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         PanelUpdater r = new PanelUpdater(list);
         ThreadManager.getInstance().submit(r);
     }
+    
+    private static final class Lock { }
 
     public class PanelUpdater implements CancellableRunnable {
         private final List<IAnalysisDataset> list;
@@ -714,19 +716,22 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         public PanelUpdater(final List<IAnalysisDataset> list) {
             this.list = list;
         }
+        private final Lock lock = new Lock();
 
         @Override
         public synchronized void run() {
-            final PanelLoadingUpdater loader = new PanelLoadingUpdater();
+            final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
             try {
 
                 final Future<?> f = ThreadManager.getInstance().submit(loader);
 
+                synchronized (lock) {
                 // Wait for loading state to be set
-                while (!f.isDone() && !isCancelled.get()) {
-                	f.wait();
+                	while (!f.isDone() && !isCancelled.get()) {
+                		lock.wait();
+                	}
                 }
-
+                
                 // Again stop if a cancel signal was heard 
                 if (isCancelled.get()) {
                     return;
@@ -771,7 +776,12 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     public class PanelLoadingUpdater implements Callable {
-
+    	private final Object lock;
+    	
+    	public PanelLoadingUpdater(Lock l) {
+    		lock = l;
+    	}
+    	
         @Override
         public synchronized Boolean call() {
             // Update charts and panels to loading
@@ -782,6 +792,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             } catch(Exception e){
                 error("Error setting loading state", e);
                 return false;
+            }
+            
+            synchronized (lock) {
+                lock.notifyAll();
             }
             return true;
 
