@@ -43,6 +43,12 @@ public interface IClusterGroup extends Serializable, Loggable {
      * @return
      */
     String getName();
+    
+    
+    /**
+     * Set the name of the cluster group
+     */
+    void setName(String s);
 
     /**
      * Get the number of datasets in the group

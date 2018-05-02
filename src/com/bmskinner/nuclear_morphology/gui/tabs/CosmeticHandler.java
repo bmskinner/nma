@@ -28,8 +28,11 @@ import java.util.UUID;
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -80,7 +83,7 @@ public class CosmeticHandler implements Loggable {
      * @param dataset
      *            the dataset to rename
      */
-    public void renameDataset(IAnalysisDataset dataset) {
+    public void renameDataset(@NonNull IAnalysisDataset dataset) {
         ICellCollection collection = dataset.getCollection();
         String newName = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename collection",
                 JOptionPane.INFORMATION_MESSAGE, null, null, collection.getName()).toString();
@@ -110,6 +113,25 @@ public class CosmeticHandler implements Loggable {
             saveFile.delete();
 
         parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
+        parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    }
+    
+    /**
+     * Rename an existing dataset and update the population list.
+     * 
+     * @param dataset
+     *            the dataset to rename
+     */
+    public void renameClusterGroup(@NonNull IClusterGroup group) {
+        
+        String newName = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename cluster group",
+                JOptionPane.INFORMATION_MESSAGE, null, null, group.getName()).toString();
+
+        // validate
+        if (newName == null || newName.isEmpty())
+            return;
+
+        group.setName(newName);
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     }
     

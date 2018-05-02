@@ -235,7 +235,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             }
 
             private void clusterGroupClicked(IClusterGroup g) {
-                // No functionality assigned yet
+            	cosmeticHandler.renameClusterGroup(g);
             }
             
             private void workspaceClicked(IWorkspace w) {

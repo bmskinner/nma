@@ -108,6 +108,11 @@ public class ClusterGroup implements IClusterGroup {
     public String getName() {
         return this.name;
     }
+    
+    @Override
+    public void setName(String s) {
+        name = s;
+    }
 
     /*
      * (non-Javadoc)
