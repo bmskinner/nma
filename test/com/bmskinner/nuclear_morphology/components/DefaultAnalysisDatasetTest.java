@@ -118,7 +118,7 @@ public class DefaultAnalysisDatasetTest {
      // Values that take ~half the dataset
         ICellCollection c = d.getCollection().filterCollection(PlottableStatistic.AREA, MeasurementScale.PIXELS, 4850, 6000);
         IAnalysisDataset ch = new DefaultAnalysisDataset(c);
-        UUID id = ch.getUUID();
+        UUID id = ch.getId();
         
         d.addChildDataset(ch);
         assertEquals(1, d.getChildCount());

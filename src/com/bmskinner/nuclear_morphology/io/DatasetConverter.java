@@ -231,7 +231,7 @@ public class DatasetConverter implements Loggable, Importer {
 
             ICellCollection oldCollection = child.getCollection();
             // make a virtual collection for the cells
-            ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getUUID());
+            ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getId());
 
             
             child.getCollection().getCells().forEach(c->newCollection.addCell(c));

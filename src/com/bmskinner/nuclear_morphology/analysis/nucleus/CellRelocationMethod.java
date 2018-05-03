@@ -100,7 +100,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
                 for (UUID id : newDatasets) {
 
-                    if (!id.equals(dataset.getUUID())) {
+                    if (!id.equals(dataset.getId())) {
                         dataset.getCollection().getProfileManager()
                                 .copyCollectionOffsets(dataset.getChildDataset(id).getCollection());
 
@@ -145,7 +145,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
                  */
                 activeID = UUID.fromString(line.split(TAB)[1]);
 
-                if (dataset.getUUID().equals(activeID) || dataset.hasChild(activeID)) {
+                if (dataset.getId().equals(activeID) || dataset.hasChild(activeID)) {
                     // the dataset already exists with this id - we must fail
                     scanner.close();
                     warn("Dataset in cell file already exists");

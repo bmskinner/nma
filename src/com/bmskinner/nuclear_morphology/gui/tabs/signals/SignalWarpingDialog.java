@@ -702,7 +702,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
         }
 
         public List<Key> getKeys(IAnalysisDataset n) {
-            return map.keySet().stream().filter(k -> k.target.getUUID().equals(n.getUUID()))
+            return map.keySet().stream().filter(k -> k.target.getId().equals(n.getId()))
                     .collect(Collectors.toList());
         }
 

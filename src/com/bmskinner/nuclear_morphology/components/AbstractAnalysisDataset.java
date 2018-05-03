@@ -72,7 +72,7 @@ public abstract class AbstractAnalysisDataset implements Serializable, Loggable 
         return this.version;
     }
 
-    public UUID getUUID() {
+    public UUID getId() {
         return cellCollection.getID();
     }
 

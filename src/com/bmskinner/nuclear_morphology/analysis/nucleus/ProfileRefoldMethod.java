@@ -49,14 +49,12 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  *
  */
 public class ProfileRefoldMethod extends SingleDatasetAnalysisMethod {
-    private IProfile targetCurve;
-
-    private Nucleus refoldNucleus;
-
+    
+	private IProfile targetCurve;
+	private Nucleus refoldNucleus;
     private ICellCollection collection;
 
-    private CurveRefoldingMode mode = CurveRefoldingMode.FAST; // the dafault
-                                                               // mode
+    private CurveRefoldingMode mode = CurveRefoldingMode.FAST;
 
     private int pointUpdateCounter = 0;
 

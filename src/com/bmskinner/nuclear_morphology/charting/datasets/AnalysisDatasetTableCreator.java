@@ -81,7 +81,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             "Nucleus threshold", "Kuwahara filter radius", "Chromocentre flattening threshold", "Canny auto threshold",
             "Canny low threshold", "Canny high threshold", "Canny kernel radius", "Canny kernel width",
             "Closing radius", "Nucleus min size", "Nucleus max size", "Nucleus min circ", "Nucleus max circ",
-            "Consensus folded", "Refold mode", "Run date", "Run time", "Collection source", "Type",
+            "Run date", "Run time", "Collection source", "Type",
             "Created in" };
 
     /**
@@ -430,19 +430,18 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
      */
     private Object[] createAnalysisParametersColumn(@NonNull IAnalysisDataset dataset, @Nullable IAnalysisOptions options) {
         
-    	int rowCount = 22;
+    	int rowCount = 20;
+    	Object[] collectionData = new Object[rowCount];
+    	
     	Optional<IAnalysisOptions> o = dataset.getAnalysisOptions();
     	if(options == null && !o.isPresent())
     		return makeErrorArray(rowCount);
     	
     	options = options == null ? o.get() : options;
     	
-        String refoldMode = "Fast";
-
         String date;
         String time;
         String folder;
-        String logFile;
 
         Optional<IDetectionOptions> nO = options.getDetectionOptions(IAnalysisOptions.NUCLEUS);
         
@@ -453,7 +452,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             date = NA_MERGE;
             time = NA_MERGE;
             folder = NA_MERGE;
-            logFile = NA_MERGE;
 
         } else {
             if (dataset.getCollection().getOutputFolderName() == null) {
@@ -471,10 +469,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         
         if(!nO.isPresent())
             return makeErrorArray(rowCount);
-        
-        if(!nO.isPresent())
-        	fine("No nucleus options in dataset "+dataset.getName());
-        	
+                	
         ICannyOptions nucleusCannyOptions;
 		try {
 			nucleusCannyOptions = nO.get().getCannyOptions();
@@ -493,6 +488,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage()
                 ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : NA;
+                
+        if(nucleusCannyOptions.isUseCanny()) {
+        	
+        }
 
         String cannyAutoThreshold = nucleusCannyOptions.isUseCanny()
                 ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : NA;
@@ -508,7 +507,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
 
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
-        Object[] collectionData = { options.getProfileWindowProportion(), 
+        collectionData = new Object[] { 
+        		options.getProfileWindowProportion(), 
                 detectionMethod, 
                 nucleusThreshold,
                 kuwaharaRadius, 
@@ -523,8 +523,6 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 nO.get().getMaxSize(), 
                 df.format(nO.get().getMinCirc()),
                 df.format(nO.get().getMaxCirc()), 
-                options.refoldNucleus(), 
-                refoldMode, 
                 date,
                 time, 
                 folder, 
@@ -647,7 +645,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         synchronized (this) {
             for (IAnalysisDataset dataset : list) {
                 for (IAnalysisDataset dataset2 : list) {
-                    if (!dataset2.getUUID().equals(dataset.getUUID())) {
+                    if (!dataset2.getId().equals(dataset.getId())) {
                         dataset.getCollection().countShared(dataset2);
                     }
                 }
@@ -665,7 +663,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
                 String valueString = "";
 
-                if (!dataset2.getUUID().equals(dataset.getUUID())) {
+                if (!dataset2.getId().equals(dataset.getId())) {
 
                     int shared = dataset.getCollection().countShared(dataset2);
 
@@ -717,17 +715,17 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         for (IAnalysisDataset dataset1 : list) {
 
             ArrayList<UUID> set1List = new ArrayList<UUID>();
-            existingMatches.put(dataset1.getUUID(), set1List);
+            existingMatches.put(dataset1.getId(), set1List);
 
             for (IAnalysisDataset dataset2 : list) {
 
                 // Ignore self-self matches
-                if (!dataset2.getUUID().equals(dataset1.getUUID())) {
+                if (!dataset2.getId().equals(dataset1.getId())) {
 
-                    set1List.add(dataset2.getUUID());
+                    set1List.add(dataset2.getId());
 
-                    if (existingMatches.get(dataset2.getUUID()) != null) {
-                        if (existingMatches.get(dataset2.getUUID()).contains(dataset1.getUUID())) {
+                    if (existingMatches.get(dataset2.getId()) != null) {
+                        if (existingMatches.get(dataset2.getId()).contains(dataset1.getId())) {
                             continue;
                         }
                     }
@@ -855,7 +853,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             boolean isGetPVal = false;
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
                     isGetPVal = true;
                 } else {
@@ -914,7 +912,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             boolean getPValue = false;
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
                     getPValue = true;
                 } else {
@@ -1011,7 +1009,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
 
                     popData[i] = "";
 
@@ -1086,7 +1084,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
-                if (dataset2.getUUID().equals(dataset.getUUID())) {
+                if (dataset2.getId().equals(dataset.getId())) {
                     popData[i] = "";
 
                 } else {

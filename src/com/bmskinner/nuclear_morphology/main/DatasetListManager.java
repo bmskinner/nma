@@ -249,12 +249,12 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final boolean hasDataset(@NonNull UUID id) {
         for (IAnalysisDataset d : list) {
-            if (d.getUUID().equals(id)) {
+            if (d.getId().equals(id)) {
                 return true;
             }
 
             for (IAnalysisDataset child : d.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return true;
                 }
             }
@@ -270,12 +270,12 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final IAnalysisDataset getDataset(@NonNull UUID id) {
         for (IAnalysisDataset d : list) {
-            if (d.getUUID().equals(id)) {
+            if (d.getId().equals(id)) {
                 return d;
             }
 
             for (IAnalysisDataset child : d.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -290,7 +290,7 @@ public final class DatasetListManager implements Loggable {
     public synchronized final void addDataset(@NonNull IAnalysisDataset d) {
         if (d.isRoot() && !list.contains(d)) {
             list.add(d);
-            map.put(d.getUUID(), d.hashCode());
+            map.put(d.getId(), d.hashCode());
         }
     }
 
@@ -306,7 +306,7 @@ public final class DatasetListManager implements Loggable {
         	return;
 
         list.remove(d);
-        map.remove(d.getUUID());
+        map.remove(d.getId());
         selected.remove(d);
     }
 
@@ -341,8 +341,8 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
-            if (map.containsKey(d.getUUID())) {
-                return d.hashCode() != map.get(d.getUUID());
+            if (map.containsKey(d.getId())) {
+                return d.hashCode() != map.get(d.getId());
             } else {
                 warn("Missing root dataset hashcode");
             }
@@ -375,7 +375,7 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final void updateHashCode(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
-            map.put(d.getUUID(), d.hashCode());
+            map.put(d.getId(), d.hashCode());
         }
     }
 

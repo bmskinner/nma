@@ -126,8 +126,6 @@ public class DefaultCellTest {
     @Test
     public void testAddMitochondrion() {
         fail("Not yet implemented");
-        
-//        IMitochondrion m = new DefaultMitochondrion();
     }
 
     @Test

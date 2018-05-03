@@ -715,8 +715,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     }
     
     /**
-     * Test if the segment would contain the given index if it had the specified
-     * start and end indexes. Acts as a wrapper for the real contains()
+     * Test if a segment would contain the given index if it had the specified
+     * start and end indexes.
      * 
      * @param start
      *            the start to test
@@ -730,11 +730,10 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         if (index < 0 || index > total)
             return false;
 
-        if (end<start) { // wrapped
+        if (end<start)// wrapped
             return (index <= end || index >= start);
-        } else { // regular
-            return (index >= start && index <= end);
-        }
+//      regular
+        return (index >= start && index <= end);
     }
 
     /**

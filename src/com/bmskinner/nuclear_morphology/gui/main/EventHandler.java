@@ -621,7 +621,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             IAnalysisDataset target = null;
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
                 for (IAnalysisDataset child : root.getAllChildDatasets()) {
-                    if (child.getUUID().equals(d.getUUID())) {
+                    if (child.getId().equals(d.getId())) {
                         target = root;
                         break;
                     }

@@ -140,9 +140,8 @@ public class DefaultBorderSegmentTest {
 	@Test
 	public void testAddMergeSourceExceptsOnOutOfRangeArg1() {	
 		// invalid merge source - out of range
-		DefaultBorderSegment s4 = new DefaultBorderSegment(-1, 20, 100);
 		exception.expect(IllegalArgumentException.class);
-		test.addMergeSource(s4);
+		DefaultBorderSegment s4 = new DefaultBorderSegment(-1, 20, 100);
 	}
 	
 	@Test
@@ -391,16 +390,25 @@ public class DefaultBorderSegmentTest {
 	public void testTestContains() {
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
 
-		assertTrue(IBorderSegment.contains(0, 25, 0, s1.length()));
-		assertTrue(IBorderSegment.contains(0, 25, 10, s1.length()));
-		assertTrue(IBorderSegment.contains(0, 25, 20, s1.length()));
-		assertFalse(IBorderSegment.contains(0, 25, 99, s1.length()));
-		assertTrue(IBorderSegment.contains(0, 25, 21, s1.length()));
-		assertFalse(IBorderSegment.contains(0, 25, 60, s1.length()));
+		// Non wrapping segment
+		for(int i=0; i<=25; i++) {
+			assertTrue(IBorderSegment.contains(0, 25, i, s1.getTotalLength()));
+		}
 		
-		assertFalse(IBorderSegment.contains(90, 25, 60, s1.length()));
-		assertTrue(IBorderSegment.contains(90, 25, 90, s1.length()));
-		assertFalse(IBorderSegment.contains(90, 25, 89, s1.length()));
+		for(int i=26; i<s1.length(); i++) {
+			assertFalse(IBorderSegment.contains(0, 25, i, s1.getTotalLength()));
+		}
+		
+		// Wrapping segment
+		for(int i=90; i<s1.getTotalLength(); i++) {
+			assertTrue(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+		}
+		for(int i=0; i<=25; i++) {
+			assertTrue(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+		}
+		for(int i=26; i<90; i++) {
+			assertFalse(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+		}
 	}
 	
 	

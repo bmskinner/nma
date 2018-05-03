@@ -64,7 +64,7 @@ public class CellFileExporter implements Exporter, Loggable {
         /*
          * Add the cells from the root dataset
          */
-        builder.append(makeDatasetHeaderString(d, d.getUUID()));
+        builder.append(makeDatasetHeaderString(d, d.getId()));
         builder.append(makeDatasetCellsString(d));
 
         /*
@@ -91,7 +91,7 @@ public class CellFileExporter implements Exporter, Loggable {
         StringBuilder builder = new StringBuilder();
 
         for (IAnalysisDataset child : d.getChildDatasets()) {
-            builder.append(makeDatasetHeaderString(child, d.getUUID()));
+            builder.append(makeDatasetHeaderString(child, d.getId()));
             builder.append(makeDatasetCellsString(child));
 
             if (child.hasChildren()) {
@@ -165,7 +165,7 @@ public class CellFileExporter implements Exporter, Loggable {
         StringBuilder builder = new StringBuilder();
 
         builder.append("UUID\t");
-        builder.append(child.getUUID().toString());
+        builder.append(child.getId().toString());
         builder.append(NEWLINE);
 
         builder.append("Name\t");

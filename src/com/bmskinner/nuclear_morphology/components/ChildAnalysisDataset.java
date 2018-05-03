@@ -59,7 +59,6 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public IAnalysisDataset duplicate() throws Exception {
-
         throw new Exception("Not yet implemented");
     }
 
@@ -70,11 +69,8 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
 
     @Override
     public void addChildCollection(@NonNull ICellCollection collection) {
-        if (collection == null)
-            throw new IllegalArgumentException("Nucleus collection is null");
-
         IAnalysisDataset childDataset = new ChildAnalysisDataset(this, collection);
-        this.childDatasets.add(childDataset);
+        childDatasets.add(childDataset);
 
     }
 
@@ -90,14 +86,13 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void setSavePath(File file) {
-    }
+    public void setSavePath(@NonNull File file) {}
 
     @Override
     public Set<UUID> getChildUUIDs() {
         Set<UUID> result = new HashSet<UUID>(childDatasets.size());
         for (IAnalysisDataset c : childDatasets) {
-            result.add(c.getUUID());
+            result.add(c.getId());
         }
 
         return result;
@@ -119,18 +114,18 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public IAnalysisDataset getChildDataset(UUID id) {
+    public IAnalysisDataset getChildDataset(@NonNull UUID id) {
         if (this.hasChild(id)) {
 
             for (IAnalysisDataset c : childDatasets) {
-                if (c.getUUID().equals(id)) {
+                if (c.getId().equals(id)) {
                     return c;
                 }
             }
 
         } else {
             for (IAnalysisDataset child : this.getAllChildDatasets()) {
-                if (child.getUUID().equals(id)) {
+                if (child.getId().equals(id)) {
                     return child;
                 }
             }
@@ -139,7 +134,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public IAnalysisDataset getMergeSource(UUID id) {
+    public IAnalysisDataset getMergeSource(@NonNull UUID id) {
         return null;
     }
 
@@ -149,7 +144,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void addMergeSource(IAnalysisDataset dataset) {
+    public void addMergeSource(@NonNull IAnalysisDataset dataset) {
     }
 
     @Override
@@ -266,13 +261,13 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void deleteChild(UUID id) {
+    public void deleteChild(@NonNull UUID id) {
         Iterator<IAnalysisDataset> it = childDatasets.iterator();
 
         while (it.hasNext()) {
             IAnalysisDataset child = it.next();
 
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 for (IClusterGroup g : clusterGroups) {
                     if (g.hasDataset(id)) {
                         g.removeDataset(id);
@@ -298,14 +293,14 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void deleteMergeSource(UUID id) {
+    public void deleteMergeSource(@NonNull UUID id) {
     }
 
     @Override
     public boolean hasChild(UUID id) {
 
         for (IAnalysisDataset child : childDatasets) {
-            if (child.getUUID().equals(id)) {
+            if (child.getId().equals(id)) {
                 return true;
             }
         }
@@ -313,7 +308,7 @@ public class ChildAnalysisDataset extends AbstractAnalysisDataset implements IAn
     }
 
     @Override
-    public void updateSourceImageDirectory(File expectedImageDirectory) {
+    public void updateSourceImageDirectory(@NonNull File expectedImageDirectory) {
         parent.updateSourceImageDirectory(expectedImageDirectory);
 
     }

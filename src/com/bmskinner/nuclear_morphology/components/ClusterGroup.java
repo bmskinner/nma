@@ -151,7 +151,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public void addDataset(IAnalysisDataset dataset) {
-        this.ids.add(dataset.getUUID());
+        this.ids.add(dataset.getId());
     }
 
     /*
@@ -171,7 +171,7 @@ public class ClusterGroup implements IClusterGroup {
      */
     @Override
     public void removeDataset(IAnalysisDataset dataset) {
-        removeDataset(dataset.getUUID());
+        removeDataset(dataset.getId());
     }
 
     /*
