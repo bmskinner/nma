@@ -238,8 +238,8 @@ public interface IProfile extends Serializable, Loggable {
 
     /**
      * Interpolate another profile to match this, and move this profile along it
-     * one index at a time. Find the point of least difference, and return this
-     * offset.
+     * one index at a time. Find the point of least difference, and return the
+     * offset.  It will always return a positive value.
      * 
      * @param testProfile
      * @return the offset to this profile that must be applied to match the test

@@ -146,10 +146,8 @@ public class FloatProfile implements IProfile {
     @Override
     public double get(int index) throws IndexOutOfBoundsException {
 
-        if (index < 0 || index >= array.length) {
-            throw new IndexOutOfBoundsException(
-                    "Requested value " + index + " is beyond profile end (" + array.length + ")");
-        }
+        if (index < 0 || index >= array.length)
+            throw new IndexOutOfBoundsException("Requested value " + index + " is beyond profile end (" + array.length + ")");
         return array[index];
 
     }
@@ -157,12 +155,9 @@ public class FloatProfile implements IProfile {
     @Override
     public double get(double prop) {
 
-        if (prop < 0 || prop > 1) {
+        if (prop < 0 || prop > 1)
             throw new IndexOutOfBoundsException("Value " + prop + " must be between 0-1");
-        }
-
-        int index = this.getIndexOfFraction(prop);
-
+        int index = getIndexOfFraction(prop);
         return array[index];
 
     }

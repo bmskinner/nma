@@ -43,5 +43,4 @@ public class ProfileException extends Exception {
     public ProfileException(Throwable cause) {
         super(cause);
     }
-
 }
