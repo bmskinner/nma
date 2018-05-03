@@ -186,8 +186,6 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
         IPoint p = getPointInOriginalImage(pnt);
 
-        finer("Clicked in large image " + p.toString());
-
         // See if the clicked position is in a nucleus
 
         int row = table.rowAtPoint(pnt);
@@ -205,8 +203,6 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
                 if (n.containsOriginalPoint(p)) {
 
                     updateSelectedNuclei(e, c);
-                    fine("Click is in nucleus");
-
                     drawNucleus(c, selectedData.getLargeIcon().getImage());
                     // Update the small icon
                     selectedData.setSmallIcon(new ImageIcon(scaleImage(selectedData.getLargeIcon())));

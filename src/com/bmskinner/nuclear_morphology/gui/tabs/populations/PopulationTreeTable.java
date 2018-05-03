@@ -28,6 +28,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -128,7 +129,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * 
      * @param dataset the dataset to select
      */
-    public void selectDatasets(List<IAnalysisDataset> list) {
+    public void selectDatasets(@NonNull List<IAnalysisDataset> list) {
         Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
         int selectedIndexOrder = 0;
         for (IAnalysisDataset dataset : list) {

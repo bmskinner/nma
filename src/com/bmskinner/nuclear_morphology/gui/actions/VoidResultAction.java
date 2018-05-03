@@ -26,6 +26,8 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.swing.JProgressBar;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisWorker;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
@@ -59,7 +61,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      * @param barMessage the message to display in the progress bar
      * @param mw the main window
      */
-    protected VoidResultAction(String barMessage, MainWindow mw) {
+    protected VoidResultAction(@NonNull String barMessage, @NonNull MainWindow mw) {
 
         this.progressBar = new JProgressBar(0, 100);
         this.progressBar.setString(barMessage);

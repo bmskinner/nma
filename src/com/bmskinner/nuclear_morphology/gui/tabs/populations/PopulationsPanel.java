@@ -40,6 +40,8 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
@@ -276,7 +278,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      * @param dataset
      *            the dataset to add
      */
-    public void addDataset(IAnalysisDataset dataset) {
+    public void addDataset(@NonNull IAnalysisDataset dataset) {
         if (dataset.isRoot())
             DatasetListManager.getInstance().addDataset(dataset);
     }
@@ -287,7 +289,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      * @param dataset
      *            the dataset to select
      */
-    public void selectDataset(IAnalysisDataset dataset) {
+    public void selectDataset(@NonNull IAnalysisDataset dataset) {
         if (dataset != null) {
             List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
             list.add(dataset);
@@ -310,56 +312,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         treeTable.repaint();
     }
 
-    public synchronized void selectDataset(UUID id) {
+    public synchronized void selectDataset(@NonNull UUID id) {
         IAnalysisDataset d = DatasetListManager.getInstance().getDataset(id);
         this.selectDataset(d);
         DatasetListManager.getInstance().setSelectedDataset(d);
     }
-
-//    /**
-//     * Rename an existing dataset and update the population list.
-//     * 
-//     * @param dataset
-//     *            the dataset to rename
-//     */
-//    private void renameCollection(IAnalysisDataset dataset) {
-//        ICellCollection collection = dataset.getCollection();
-//        String newName = JOptionPane.showInputDialog(this, "Choose a new name", "Rename collection",
-//                JOptionPane.INFORMATION_MESSAGE, null, null, collection.getName()).toString();
-//
-//        // validate
-//        if (newName == null || newName.isEmpty()) {
-//            fine("New name null or empty");
-//            return;
-//        }
-//
-//        // Get the existing names and check duplicates
-//        List<String> currentNames = treeTable.getDatasetNames();
-//
-//        if (currentNames.contains(newName)) {
-//            fine("Checking duplicate name is OK");
-//            int result = JOptionPane.showConfirmDialog(this, "Chosen name exists. Use anyway?");
-//
-//            if (result != JOptionPane.OK_OPTION) {
-//                log("User cancelled name change");
-//                return;
-//            }
-//        }
-//
-//        collection.setName(newName);
-//
-//        log("Collection renamed: " + newName);
-//
-//        File saveFile = dataset.getSavePath();
-//        if (saveFile.exists()) {
-//            saveFile.delete();
-//        }
-//
-//        this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.SAVE, dataset);
-//
-//        update(dataset);
-//
-//    }
 
     /**
      * Move the selected dataset in the list
@@ -433,7 +390,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      */
     public class TreeSelectionHandler implements TreeSelectionListener {
         public void valueChanged(TreeSelectionEvent e) {
-
             try {
 
                 if (!isCtrlPressed())
@@ -595,7 +551,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
             // Pass on events from the popup menu
             if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)) {
                 getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
-                finest("Firing signal change event: " + event.type());
+                
             }
             break;
         }

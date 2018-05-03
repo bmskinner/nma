@@ -52,7 +52,6 @@ public class FishRemappingAction extends SingleDatasetResultAction {
             }
 
             fishDir = FileSelector.choosePostFISHDirectory(dataset);
-            finer("Selected " + fishDir.getAbsolutePath() + " as post-FISH image directory");
             if (fishDir==null) {
                 log("Remapping cancelled");
                 cancel();

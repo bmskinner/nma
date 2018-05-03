@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -52,7 +53,7 @@ public final class DatasetListManager implements Loggable {
      * the list can be used to determine the order of root datasets within the
      * populations panel.
      */
-    private final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
+    private final List<IAnalysisDataset> list = new ArrayList<>();
 
     /**
      * The datasets currently selected in the UI. Includes child datasets
@@ -64,12 +65,11 @@ public final class DatasetListManager implements Loggable {
      * the dataset. This is used to compare actual and saved hashcodes, and
      * detect whether a dataset has changed since the last check.
      */
-    private final Map<UUID, Integer> map = new HashMap<UUID, Integer>();
+    private final Map<UUID, Integer> map = new HashMap<>();
     
-    private final List<IWorkspace> workspaces = new ArrayList<IWorkspace>();
+    private final List<IWorkspace> workspaces = new ArrayList<>();
 
-    protected DatasetListManager() {
-    }
+    protected DatasetListManager() { }
 
     /**
      * Fetch an instance of the manager
@@ -82,9 +82,9 @@ public final class DatasetListManager implements Loggable {
             return instance;
         
         synchronized (lockObject) {
-            if (instance == null) {
-                instance = new DatasetListManager();
-            }
+        	if (instance == null) 
+        		instance = new DatasetListManager();
+
         }
         return instance;
     }
@@ -299,7 +299,6 @@ public final class DatasetListManager implements Loggable {
      * @param d
      */
     public synchronized final void removeDataset(@NonNull IAnalysisDataset d) {
-
         if (!d.isRoot()) // only remove root datasets
             return;
 

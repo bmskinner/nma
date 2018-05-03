@@ -110,16 +110,8 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      *
      */
     private class ActionFactory {
-        final IAnalysisDataset selectedDataset;
-        List<IAnalysisDataset> selectedDatasets;
 
-        public ActionFactory() {
-
-            selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
-            selectedDataset = selectedDatasets.isEmpty() ? null
-                    : selectedDatasets.get(0);
-
-        }
+        public ActionFactory() { }
 
         /**
          * Create a runnable action for the given event
@@ -127,7 +119,12 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
          * @param event
          * @return
          */
-        public Runnable create(final SignalChangeEvent event) {
+        public synchronized Runnable create(final SignalChangeEvent event) {
+        	
+        	final List<IAnalysisDataset> selectedDatasets = DatasetListManager.getInstance().getSelectedDatasets();
+        	final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
+                    : selectedDatasets.get(0);
+        	
 
             if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
                 return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), mw);
@@ -205,13 +202,12 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
          * @param event
          * @return
          */
-        public Runnable create(final DatasetEvent event) {
+        public synchronized Runnable create(final DatasetEvent event) {
 
-            if (event.getDatasets().isEmpty()) {
+            if (event.getDatasets().isEmpty())
                 return null;
-            }
 
-            selectedDatasets = event.getDatasets();
+            final List<IAnalysisDataset> selectedDatasets = event.getDatasets();
 
             if (event.method().equals(DatasetEvent.PROFILING_ACTION)) {
 
@@ -299,7 +295,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
          * 
          * @param event
          */
-        public void run(final SignalChangeEvent event) {
+        public synchronized void run(final SignalChangeEvent event) {
             Runnable r = create(event);
             if (r != null) {
                 r.run();
@@ -311,7 +307,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
          * 
          * @param event
          */
-        public void run(final DatasetEvent event) {
+        public synchronized void run(final DatasetEvent event) {
             Runnable r = create(event);
             if (r != null) {
                 r.run();
@@ -490,7 +486,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
     
-    private void setScale(final List<IAnalysisDataset> selectedDatasets) {
+    private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
     	try {
 			final String CHOOSE_NEW_SCALE_LBL      = "Pixels per micron";
 
@@ -524,7 +520,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * 
      * @param dataset
      */
-    private void addDataset(final IAnalysisDataset dataset) {
+    private synchronized void addDataset(final IAnalysisDataset dataset) {
 
         mw.getPopulationsPanel().addDataset(dataset);
         for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
@@ -541,7 +537,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * 
      * @param dataset
      */
-    private void refoldConsensus(final IAnalysisDataset dataset) {
+    private synchronized void refoldConsensus(final IAnalysisDataset dataset) {
 
         Runnable r = () -> {
             /*
@@ -586,7 +582,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     /**
      * Save all the root datasets in the populations panel
      */
-    public void saveRootDatasets() {
+    public synchronized void saveRootDatasets() {
 
         Runnable r = () -> {
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
@@ -614,7 +610,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
      * @param saveAs
      *            should the action ask for a directory
      */
-    public void saveDataset(final IAnalysisDataset d, boolean saveAs) {
+    public synchronized void saveDataset(final IAnalysisDataset d, boolean saveAs) {
 
         if (d.isRoot()) {
             final CountDownLatch latch = new CountDownLatch(1);
@@ -643,7 +639,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     /*
      * Trigger a recache of all charts and datasets
      */
-    private void recacheCharts() {
+    private synchronized void recacheCharts() {
 
         Runnable task = () -> {
             for (TabPanel panel : mw.getTabPanels()) {
@@ -654,14 +650,14 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         ThreadManager.getInstance().execute(task);
     }
 
-    private void clearChartCache() {
+    private synchronized void clearChartCache() {
         for (TabPanel panel : mw.getTabPanels()) {
             panel.clearChartCache();
             panel.clearTableCache();
         }
     }
 
-    private void clearChartCache(final List<IAnalysisDataset> list) {
+    private synchronized void clearChartCache(final List<IAnalysisDataset> list) {
 
         if (list == null || list.isEmpty()) {
             warn("A cache clear was requested for a specific list, which was null or empty");
@@ -675,7 +671,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     }
 
 
-    private void recacheCharts(final List<IAnalysisDataset> list) {
+    private synchronized void recacheCharts(final List<IAnalysisDataset> list) {
 
         Runnable task = () -> {
             for (TabPanel panel : mw.getTabPanels()) {

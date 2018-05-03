@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 
@@ -49,7 +51,7 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
     protected IAnalysisDataset dataset     = null; 
     
     // list of datasets that need processing next
-    private List<IAnalysisDataset> processList = new ArrayList<>(0);
+    private final List<IAnalysisDataset> processList = new ArrayList<>(0);
 
     /**
      * Construct with a dataset to analyse, a message to display, and the window
@@ -62,7 +64,7 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      *            the main window for analysis
      */
-    public SingleDatasetResultAction(IAnalysisDataset dataset, String barMessage, MainWindow mw) {
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull MainWindow mw) {
         super(barMessage, mw);
         if (dataset == null) {
             warn("Unable to create action");
@@ -79,9 +81,9 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param barMessage
      * @param mw
      */
-    public SingleDatasetResultAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw) {
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull MainWindow mw) {
         this(list.get(0), barMessage, mw);
-        processList = list;
+        processList.addAll(list);
         processList.remove(0); // remove the first entry
     }
 
@@ -94,7 +96,7 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(List<IAnalysisDataset> list, String barMessage, MainWindow mw, int flag) {
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull MainWindow mw, int flag) {
         this(list, barMessage, mw);
         this.downFlag = flag;
     }
@@ -107,16 +109,16 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(IAnalysisDataset dataset, String barMessage, MainWindow mw, int flag) {
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull MainWindow mw, int flag) {
         this(dataset, barMessage, mw);
         this.downFlag = flag;
     }
 
-    protected List<IAnalysisDataset> getRemainingDatasetsToProcess() {
+    protected synchronized List<IAnalysisDataset> getRemainingDatasetsToProcess() {
         return this.processList;
     }
 
-    protected boolean hasRemainingDatasetsToProcess() {
+    protected synchronized boolean hasRemainingDatasetsToProcess() {
         return processList.size() > 0;
     }
 }
