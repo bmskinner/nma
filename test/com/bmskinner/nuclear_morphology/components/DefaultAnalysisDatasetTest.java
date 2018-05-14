@@ -19,11 +19,15 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.awt.Paint;
 import java.io.File;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -31,16 +35,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Testing methods of the analysis dataset
@@ -63,9 +62,9 @@ public class DefaultAnalysisDatasetTest {
     public void loadDataset() throws Exception {
         d = SampleDatasetReader.openTestRodentDataset();
         IAnalysisDataset child1 = mock(IAnalysisDataset.class);
-		when(child1.getUUID()).thenReturn(CHILD_ID_1);
+		when(child1.getId()).thenReturn(CHILD_ID_1);
 		IAnalysisDataset child2 = mock(IAnalysisDataset.class);
-		when(child2.getUUID()).thenReturn(CHILD_ID_2);
+		when(child2.getId()).thenReturn(CHILD_ID_2);
 		d.addChildDataset(child1);
 		d.addChildDataset(child2);
     }
@@ -323,10 +322,10 @@ public class DefaultAnalysisDatasetTest {
     public void testHasChildIAnalysisDataset() {
         
         IAnalysisDataset child1 = mock(IAnalysisDataset.class);
-		when(child1.getUUID()).thenReturn(CHILD_ID_1);
+		when(child1.getId()).thenReturn(CHILD_ID_1);
 		
 		IAnalysisDataset childNull = mock(IAnalysisDataset.class);
-		when(childNull.getUUID()).thenReturn(CHILD_ID_NULL);
+		when(childNull.getId()).thenReturn(CHILD_ID_NULL);
 		
 		assertTrue(d.hasChild(child1));
 		assertFalse(d.hasChild(childNull));

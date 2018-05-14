@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -99,7 +100,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * Get the segment ID
      * @return the id
      */
-    UUID getID();
+    @NonNull UUID getID();
 
     /**
      * Get a copy of the merge source segments
@@ -126,6 +127,21 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      */
     boolean hasMergeSources();
+    
+    /**
+     * Test if this segment contains the given segment
+     * 
+     * @return true if a segment with the given id is present within this segmnet (recursive)
+     */
+    boolean hasMergeSource(@NonNull UUID id);
+    
+    /**
+     * Get the merge source with the given id
+     * 
+     * @return the merge source segment with the given id if present within this segment (recursive)
+     * @throws UnavailableComponentException if the segment does not have the requested source 
+     */
+    IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
      * Get the index at the start of the segment

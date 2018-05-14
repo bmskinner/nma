@@ -160,7 +160,7 @@ public class DefaultBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getID()
      */
     @Override
-    public UUID getID() {
+    public @NonNull UUID getID() {
         return this.uuid;
     }
 
@@ -207,11 +207,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         mergeSources[mergeSources.length - 1] = seg;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasMergeSources()
-     */
     @Override
     public boolean hasMergeSources() {
         return mergeSources.length > 0;
@@ -221,12 +216,30 @@ public class DefaultBorderSegment implements IBorderSegment {
     public void clearMergeSources() {
         mergeSources = new IBorderSegment[0];
     }
+    
+	@Override
+	public boolean hasMergeSource(@NonNull UUID id) {
+		if(this.uuid.equals(id))
+			return true;
+		for(IBorderSegment s: mergeSources) {
+			if(s.hasMergeSource(id))
+				return true;
+		}
+		return false;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getStartIndex()
-     */
+	@Override
+	public IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+		if(this.uuid.equals(id))
+			return this;
+		for(IBorderSegment s : mergeSources) {
+			if(s.hasMergeSource(id))
+				return s.getMergeSource(id);
+		}
+		throw new UnavailableComponentException("Merge source not present");
+	}
+
+
     @Override
     public int getStartIndex() {
         return this.startIndex;
@@ -872,5 +885,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
     }
+
+
 
 }

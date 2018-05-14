@@ -34,7 +34,7 @@ public class DefaultProfileTest {
 	
 
 	@Before
-	public void setUp() throws UnavailableProfileTypeException{
+	public void setUp() throws Exception {
 		comp = new DummySegmentedCellularComponent();
 		data = new float[comp.getBorderLength()];
 		for(int i=0; i<data.length; i++) {
@@ -105,8 +105,9 @@ public class DefaultProfileTest {
 	 */
 	@Test
 	public void testGetInt() {
-		double d = profile.get(4);
-		assertEquals( data[4] , d, 0);
+		for(int i=0; i<data.length; i++){
+			assertEquals( data[i] , profile.get(i), 0);
+		}
 	}
 	
 	@Test

@@ -61,7 +61,7 @@ public interface ISegmentedProfile extends IProfile {
      * 
      * @return
      */
-    List<IBorderSegment> getSegments();
+    @NonNull List<IBorderSegment> getSegments();
 
     /**
      * Fetch the segment with the given id, or null if not present. Fetches the
@@ -72,7 +72,7 @@ public interface ISegmentedProfile extends IProfile {
      * @throws UnavailableComponentException if there is no segment with the given id
      * @throws IllegalArgumentException if the id is null
      */
-    IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
+    @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException;
 
     /**
      * Test if a segment with the given id is present
