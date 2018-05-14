@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -156,7 +158,7 @@ public interface Taggable extends Profileable {
      * @param profile
      * @throws com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException
      */
-    public void setProfile(ProfileType type, Tag tag, ISegmentedProfile profile)
+    public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile profile)
             throws UnavailableBorderTagException, UnavailableProfileTypeException;
 
     /**

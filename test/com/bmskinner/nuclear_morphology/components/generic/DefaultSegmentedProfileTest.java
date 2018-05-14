@@ -39,11 +39,21 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 		fail("Not yet implemented");
 	}
 
-	@Override
 	@Test
-	public void testReverse() {
+	public void testReverseWithSingleSegment() {
 		super.testReverse();
+		int expStart = 0;
+		int expEnd = 0;
+		singleSegment.reverse();
 		List<IBorderSegment> segs = singleSegment.getSegments();
+		assertEquals(expStart, segs.get(0).getStartIndex());
+		assertEquals(expEnd, segs.get(0).getEndIndex());
+	}
+	
+	@Test
+	public void testReverseWithDoubleSegment() {
+		super.testReverse();
+		List<IBorderSegment> segs = doubleSegment.getSegments();
 		int[] old = new int[segs.size()];
 		for(int i=0; i<old.length; i++){
 			old[i] = segs.get(i).getStartIndex();
@@ -51,11 +61,11 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 		
 		int[] exp = new int[old.length];
 		for(int i=0; i<old.length; i++){
-			exp[i] = singleSegment.size()-1-old[old.length-i-1];
+			exp[i] = doubleSegment.size()-1-old[old.length-i-1];
 		}
 
-		singleSegment.reverse();
-		segs = singleSegment.getSegments();
+		doubleSegment.reverse();
+		segs = doubleSegment.getSegments();
 		for(int i=0; i<old.length; i++){
 			assertEquals(exp[i], segs.get(i).getStartIndex());
 		}

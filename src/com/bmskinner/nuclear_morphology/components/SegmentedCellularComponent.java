@@ -42,8 +42,12 @@ import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
+import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.components.generic.UnprofilableObjectException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
@@ -85,6 +89,67 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	public SegmentedCellularComponent(final CellularComponent c) throws UnprofilableObjectException {
 		super(c);
 	}
+	
+	@Override
+	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
+
+        if (!this.hasProfile(type))
+            throw new UnavailableProfileTypeException("Cannot get profile type " + type);
+
+        try {
+        	ISegmentedProfile template = profileMap.get(type);
+        	return new DefaultSegmentedProfile(template);
+        } catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
+            stack("Error getting profile " + type, e);
+            throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
+        }
+    }
+	
+	@Override
+	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
+        if (segsLocked)
+            return;
+        
+        // Replace frankenprofiles completely
+        if (type.equals(ProfileType.FRANKEN)) {
+            this.profileMap.put(type, profile);
+        } else { // Otherwise update the segment lists for all other profile types
+
+            for (ProfileType t : profileMap.keySet()) {
+                if (!t.equals(ProfileType.FRANKEN)) {
+                    this.profileMap.get(type).setSegments(profile.getSegments());
+                }
+            }
+        }
+    }
+	
+	@Override
+	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
+
+        if (segsLocked)
+            return;
+
+        if (!this.hasBorderTag(tag))
+            throw new UnavailableBorderTagException("Tag " + tag + " is not present");
+
+        if (this.getBorderLength() != p.size())
+            throw new IllegalArgumentException("Input profile does not match border length of object");
+
+        // fetch the index of the pointType (the zero of the input profile)
+        int pointIndex = this.borderTags.get(tag);
+
+        // remove the offset from the profile, by setting the profile to start from the pointIndex
+        ISegmentedProfile oldProfile = getProfile(type);
+        
+        try {
+            
+            this.setProfile(type, new DefaultSegmentedProfile(p).offset(-pointIndex));
+        } catch (ProfileException e) {
+            stack("Error setting profile " + type + " at " + tag, e);
+            setProfile(type, oldProfile);
+        }
+
+    }
 
 	/**
 	 * An implementation of a profile tied to an object
@@ -1736,32 +1801,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public void reverse() {
 			super.reverse();
 
-			// reverse the segments
-			// in a profile of 100
-			// if a segment began at 10 and ended at 20, it should begin at 80 and
-			// end at 90
+			// Reverse the segments:
+			// in a profile of 100 if a segment began at 10 and ended at 20, 
+			// it should begin at 80 and end at 90
 
-			// if is begins at 90 and ends at 10, it should begin at 10 and end at
-			// 90
-			List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
-			for (IBorderSegment seg : this.getSegments()) {
+			// if is begins at 90 and ends at 10, it should begin at 10 and end at 90
+			List<IBorderSegment> oldSegs = getSegments();
+			segments.clearMergeSources();
+			for (IBorderSegment seg : oldSegs) {
 
 				// invert the segment by swapping start and end
-				int newStart = (this.size() - 1) - seg.getEndIndex();
-				int newEnd = CellularComponent.wrapIndex(newStart + seg.length(), this.size());
-				IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, this.size(), seg.getID());
-				// newSeg.setName(seg.getName());
-				// since the order is reversed, add them to the top of the new list
-				segments.add(0, newSeg);
+				int newStart = (size() - 1) - seg.getEndIndex();
+				new BorderSegmentTree(seg.getID(), newStart, wrapIndex(newStart+seg.length()), segments);
 			}
-			try {
-				IBorderSegment.linkSegments(segments);
-			} catch (ProfileException e) {
-				warn("Error linking segments");
-				stack("Cannot link segments in reversed profile", e);
-			}
-			this.setSegments(segments);
-
 		}
 
 

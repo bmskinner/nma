@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.analysis.profiles;
 
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -81,7 +83,7 @@ public interface Profileable extends CellularComponent {
      * @param profile
      * @throws Exception
      */
-    void setProfile(ProfileType type, ISegmentedProfile profile);
+    void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile);
 
     /**
      * Get the window size for generating the specificed profile

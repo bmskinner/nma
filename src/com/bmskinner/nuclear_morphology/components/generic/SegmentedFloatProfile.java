@@ -50,10 +50,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     /**
      * Construct using a regular profile and a list of border segments
      * 
-     * @param p
-     *            the profile
-     * @param segments
-     *            the list of segments to use
+     * @param p the profile
+     * @param segments the list of segments to use
      * @throws ProfileException
      */
     public SegmentedFloatProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> segments) throws ProfileException {
@@ -116,7 +114,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         for (int i = 0; i < segments.size(); i++) {
             this.segments[i] = segments.get(i);
         }
-        // this.segments = segments;
     }
 
     /**
@@ -129,36 +126,25 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         this(new FloatProfile(values));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#hasSegments()
-     */
     @Override
     public boolean hasSegments() {
         return segments!=null && segments.length>0;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegments()
-     */
     @Override
-    public List<IBorderSegment> getSegments() {
-        List<IBorderSegment> result = null;
-        List<IBorderSegment> temp = new ArrayList<IBorderSegment>();
+    public @NonNull List<IBorderSegment> getSegments() {
+
+        List<IBorderSegment> temp = new ArrayList<>();
         for (IBorderSegment seg : segments) {
             temp.add(seg);
         }
 
         try {
-            result = IBorderSegment.copy(temp);
+           return IBorderSegment.copy(temp);
         } catch (ProfileException | IllegalArgumentException e) {
             error("Error copying segments", e);
-            return new ArrayList<IBorderSegment>();
+            return new ArrayList<>();
         }
-        return result;
     }
 
     /*
@@ -167,10 +153,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
      */
     @Override
-    public IBorderSegment getSegment(UUID id) throws UnavailableComponentException {
-        if (id == null) {
-            throw new IllegalArgumentException("Id is null");
-        }
+    public @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return seg;
@@ -186,7 +169,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#hasSegment(java.util.UUID)
      */
     @Override
-    public boolean hasSegment(UUID id) {
+    public boolean hasSegment(@NonNull UUID id) {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return true;
@@ -201,7 +184,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
      */
     @Override
-    public List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+    public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception {
         return getSegmentsFrom(getSegment(id));
     }
 
@@ -287,7 +270,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
      */
     @Override
-    public IBorderSegment getSegment(String name) throws UnavailableComponentException {
+    public IBorderSegment getSegment(@NonNull String name) throws UnavailableComponentException {
         if (name == null) {
             throw new IllegalArgumentException("Requested segment name is null");
         }
@@ -307,7 +290,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment)
      */
     @Override
-    public IBorderSegment getSegment(IBorderSegment segment) {
+    public IBorderSegment getSegment(@NonNull IBorderSegment segment) {
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Requested segment name is not present");
         }
@@ -446,7 +429,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment)
      */
     @Override
-    public double getDisplacement(IBorderSegment segment) {
+    public double getDisplacement(@NonNull IBorderSegment segment) {
         
         if (!contains(segment)) {
             throw new IllegalArgumentException("Segment is not in profile");
@@ -467,7 +450,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment)
      */
     @Override
-    public boolean contains(IBorderSegment segment) {
+    public boolean contains(@NonNull IBorderSegment segment) {
         if (segment == null) {
             return false;
         }
@@ -487,7 +470,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment, int, int)
      */
     @Override
-    public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
+    public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
@@ -528,7 +511,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * int)
      */
     @Override
-    public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException {
+    public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
         if (!hasSegment(id)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
         }
@@ -555,7 +538,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * int)
      */
     @Override
-    public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException {
+    public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
         if (!hasSegment(id)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
         }
@@ -921,7 +904,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment)
      */
     @Override
-    public void unmergeSegment(IBorderSegment segment) throws ProfileException {
+    public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -962,7 +945,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
 
     @Override
-    public boolean isSplittable(UUID id, int splitIndex) {
+    public boolean isSplittable(@NonNull UUID id, int splitIndex) {
         if (!this.hasSegment(id)) {
             throw new IllegalArgumentException("No segment with the given id");
         }
@@ -991,7 +974,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
      * IBorderSegment, int, java.util.UUID, java.util.UUID)
      */
     @Override
-    public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException {
+    public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");

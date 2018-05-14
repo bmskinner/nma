@@ -426,13 +426,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @throws Exception
      */
     static void linkSegments(@NonNull List<IBorderSegment> list) throws ProfileException {
-        if (list == null) {
-            throw new IllegalArgumentException("List of segments is null");
-        }
-
-        if (list.size() < 2) {
-            throw new IllegalArgumentException("Must have at least two segments (have " + list.size() + ")");
-        }
+//        if (list.size() < 2) 
+//            throw new IllegalArgumentException("Must have at least two segments (have " + list.size() + ")");
 
         for (int i = 0; i < list.size(); i++) {
             IBorderSegment s = list.get(i);

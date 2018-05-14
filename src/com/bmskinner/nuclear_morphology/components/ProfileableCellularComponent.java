@@ -86,7 +86,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
     protected Map<Tag, Integer> borderTags = new HashMap<Tag, Integer>(0);
 
-    private boolean segsLocked = false; // allow locking of segments and tags if
+    protected boolean segsLocked = false; // allow locking of segments and tags if
                                         // manually assigned
 
     /*
@@ -172,25 +172,23 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * default in a round nucleus is to get the longest diameter and set this as
      * the head/tail axis.
      */
-    public abstract void findPointsAroundBorder() throws ComponentCreationException;
+    @Override
+	public abstract void findPointsAroundBorder() throws ComponentCreationException;
 
-    public void initialise(double proportion) throws ComponentCreationException {
-        if (proportion <= 0 || proportion >= 1) {
+    @Override
+	public void initialise(double proportion) throws ComponentCreationException {
+        if (proportion <= 0 || proportion >= 1)
             throw new ComponentCreationException("Must have a value between 0-1");
-        }
 
-        // fine("Initialising profilable object");
-        this.angleWindowProportion = proportion;
-        // fine("Proportion is "+proportion);
-        double perimeter = this.getStatistic(PlottableStatistic.PERIMETER);
-        // fine("Perimeter is "+perimeter);
+        angleWindowProportion = proportion;
+        double perimeter = getStatistic(PlottableStatistic.PERIMETER);
+
         double angleWindow = perimeter * proportion;
         angleWindow = angleWindow < 1 ? 1 : angleWindow;
 
         // calculate profiles
         this.angleProfileWindowSize = (int) Math.ceil(angleWindow);
-        // fine("Calculating profiles with window size
-        // "+angleProfileWindowSize);
+
         try {
             calculateProfiles();
         } catch (ProfileException e) {
@@ -251,7 +249,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * @throws UnavailableBorderTagException 
      * @throws UnavailableProfileTypeException 
      */
-    public void setProfile(ProfileType type, Tag tag, ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
+    @Override
+	public void setProfile(@NonNull ProfileType type, @NonNull Tag tag, @NonNull ISegmentedProfile p) throws UnavailableBorderTagException, UnavailableProfileTypeException {
 
         if (segsLocked)
             return;
@@ -278,7 +277,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException {
+    @Override
+	public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException {
 
         IBorderPoint result = new DefaultBorderPoint(0, 0);
 
@@ -292,11 +292,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         return result;
     }
 
-    public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException {
+    @Override
+	public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException {
         return getBorderTag(tag);
     }
 
-    public Map<Tag, Integer> getBorderTags() {
+    @Override
+	public Map<Tag, Integer> getBorderTags() {
         Map<Tag, Integer> result = new HashMap<Tag, Integer>();
         for (Tag b : borderTags.keySet()) {
             result.put(b, borderTags.get(b));
@@ -311,7 +313,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         this.borderTags = m;
     }
 
-    public int getBorderIndex(Tag tag) {
+    @Override
+	public int getBorderIndex(Tag tag) {
         int result = BORDER_INDEX_NOT_FOUND;
         if (this.borderTags.containsKey(tag)) {
             result = this.borderTags.get(tag);
@@ -319,7 +322,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         return result;
     }
 
-    public void setBorderTag(Tag tag, int i) {
+    @Override
+	public void setBorderTag(Tag tag, int i) {
         if (segsLocked) {
             return;
         }
@@ -370,7 +374,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
 
-    public void setBorderTag(Tag reference, Tag tag, int i) {
+    @Override
+	public void setBorderTag(Tag reference, Tag tag, int i) {
         if (segsLocked) {
             return;
         }
@@ -378,7 +383,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         this.setBorderTag(tag, newIndex);
     }
 
-    public void replaceBorderTags(Map<Tag, Integer> tagMap) {
+    @Override
+	public void replaceBorderTags(Map<Tag, Integer> tagMap) {
 
         try {
 
@@ -412,22 +418,26 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public boolean hasBorderTag(Tag tag) {
+    @Override
+	public boolean hasBorderTag(Tag tag) {
         return this.borderTags.containsKey(tag);
     }
 
-    public boolean hasBorderTag(int index) {
+    @Override
+	public boolean hasBorderTag(int index) {
         return this.borderTags.containsValue(index);
     }
 
-    public boolean hasBorderTag(Tag tag, int index) {
+    @Override
+	public boolean hasBorderTag(Tag tag, int index) {
 
         // remove offset
         int newIndex = getOffsetBorderIndex(tag, index);
         return this.hasBorderTag(newIndex);
     }
 
-    public int getOffsetBorderIndex(Tag reference, int index) {
+    @Override
+	public int getOffsetBorderIndex(Tag reference, int index) {
         if (this.getBorderIndex(reference) > BORDER_INDEX_NOT_FOUND) {
             int newIndex = wrapIndex(index + this.getBorderIndex(reference));
 
@@ -438,12 +448,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         return BORDER_INDEX_NOT_FOUND;
     }
 
-    public Tag getBorderTag(Tag tag, int index) {
+    @Override
+	public Tag getBorderTag(Tag tag, int index) {
         int newIndex = getOffsetBorderIndex(tag, index);
         return this.getBorderTag(newIndex);
     }
 
-    public Tag getBorderTag(int index) {
+    @Override
+	public Tag getBorderTag(int index) {
 
         for (Tag b : this.borderTags.keySet()) {
             if (this.borderTags.get(b) == index) {
@@ -458,11 +470,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      * Profileable interface #############################################
      */
 
-    public boolean isLocked() {
+    @Override
+	public boolean isLocked() {
         return segsLocked;
     }
 
-    public void setLocked(boolean b) {
+    @Override
+	public void setLocked(boolean b) {
         segsLocked = b;
     }
 
@@ -482,23 +496,13 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 //        }
     }
 
-    public double getWindowProportion(ProfileType type) {
+    @Override
+	public double getWindowProportion(ProfileType type) {
         return angleWindowProportion;
-//        switch (type) {
-//        case ANGLE: {
-//            return angleWindowProportion;
-//        }
-//
-//        default: {
-//            return Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION; // Not needed
-//                                                                  // for
-//                                                                  // DIAMETER
-//                                                                  // and RADIUS
-//        }
-//        }
     }
 
-    public void setWindowProportion(ProfileType type, double d) {
+    @Override
+	public void setWindowProportion(ProfileType type, double d) {
         if (d <= 0 || d >= 1) {
             throw new IllegalArgumentException("Angle window proportion must be higher than 0 and less than 1");
         }
@@ -532,26 +536,33 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
 
-    public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
+    @Override
+	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
 
-        if (!this.hasProfile(type)) {
+        if (!this.hasProfile(type))
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
-        }
 
         try {
-            return new SegmentedFloatProfile(this.profileMap.get(type));
+        	ISegmentedProfile template = profileMap.get(type);
+        	if(template.getSegmentCount()>1) {
+        		return new SegmentedFloatProfile(template);
+        	}
+        	return new SegmentedFloatProfile( (IProfile)template);
+        	
+//            return new SegmentedFloatProfile(this.profileMap.get(type));
         } catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
             stack("Error getting profile " + type, e);
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
-
     }
 
-    public boolean hasProfile(ProfileType type) {
+    @Override
+	public boolean hasProfile(ProfileType type) {
         return this.profileMap.containsKey(type);
     }
 
-    public ISegmentedProfile getProfile(ProfileType type, Tag tag)
+    @Override
+	public ISegmentedProfile getProfile(ProfileType type, Tag tag)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException {
 
         // fetch the index of the pointType (the new zero)
@@ -566,14 +577,11 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
     }
 
-    public void setProfile(ProfileType type, ISegmentedProfile profile) {
-        if (profile == null) {
-            throw new IllegalArgumentException("Error setting nucleus profile: type " + type + " is null");
-        }
+    @Override
+	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
 
-        if (segsLocked) {
+        if (segsLocked)
             return;
-        }
 
         // Replace frankenprofiles completely
         if (type.equals(ProfileType.FRANKEN)) {
@@ -589,7 +597,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
 
-    public void calculateProfiles() throws ProfileException {
+    @Override
+	public void calculateProfiles() throws ProfileException {
 
         /*
          * All these calculations operate on the same border point order
@@ -603,7 +612,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         }
     }
 
-    public void setSegmentStartLock(boolean lock, UUID segID) {
+    @Override
+	public void setSegmentStartLock(boolean lock, UUID segID) {
         if (segID == null) {
             throw new IllegalArgumentException("Requested seg id is null");
         }
@@ -647,7 +657,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         return pathLength;
     }
 
-    public void reverse() {
+    @Override
+	public void reverse() {
 
         super.reverse();
 

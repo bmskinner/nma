@@ -228,27 +228,28 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	}
 
 	@Test
-	public void testHasNextSegment() {
+	public void testHasNextSegment() throws UnavailableComponentException {
 		assertTrue(segment.hasNextSegment());
+		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_0).hasNextSegment());
+		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).hasNextSegment());
 	}
 
 	@Test
-	public void testHasPrevSegment() {
+	public void testHasPrevSegment() throws UnavailableComponentException {
 		assertTrue(segment.hasPrevSegment());
+		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_0).hasPrevSegment());
+		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).hasPrevSegment());
 	}
 
 	@Test
-	public void testSetPosition() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetPosition() {
-		fail("Not yet implemented");
+	public void testGetPosition() throws UnavailableComponentException {
+		assertEquals(0, doubleSegment.getSegment(DOUBLE_SEG_ID_0).getPosition());
+		assertEquals(1, doubleSegment.getSegment(DOUBLE_SEG_ID_1).getPosition());
 	}
 
 	@Test
 	public void testIterator() {
+
 		fail("Not yet implemented");
 	}
 

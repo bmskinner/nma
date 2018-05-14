@@ -75,24 +75,23 @@ public class ProfileCreator implements Loggable {
     }
 
     /**
-     * Get the existing segments from the template angle profile
+     * Get the existing segments from the template angle profile. 
+     * Returns an empty list if the profile is not present
      * 
      * @return
      */
     private List<IBorderSegment> getExistingSegments() {
-        List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> segments = new ArrayList<>();
 
         ISegmentedProfile templateProfile = null;
         try {
             if (target.hasProfile(ProfileType.ANGLE)) {
-
-                if (target.getProfile(ProfileType.ANGLE).hasSegments()) {
-                    templateProfile = target.getProfile(ProfileType.ANGLE);
+            	templateProfile = target.getProfile(ProfileType.ANGLE);
+                if (templateProfile.hasSegments())
                     segments = templateProfile.getSegments();
-
-                }
             }
         } catch (UnavailableProfileTypeException e) {
+        	fine("No profile angle type");
             stack("Profile type angle not found", e);
         }
 

@@ -1044,29 +1044,12 @@ public class DefaultProfileTest {
 			
 	@Test
 	public void interpolationShouldLinearExtend() throws Exception {
-		float[] data       = { 10, 11, 12, 13, 14, 15 };
-		float[] expected   = { 10, 10.5f, 11, 11.5f, 12, 12.5f, 13, 13.5f, 14, 14.5f, 15, 12.5f };
-		
-		IProfile tester = comp.new DefaultProfile(data);
-		IProfile result = tester.interpolate(12);
-		float[] output = result.toFloatArray();	
-		
-		assertTrue( equals(expected, output) );
-		
+		fail("Not yet implemented");
 	}
 	
 	@Test
 	public void interpolationShouldShrinkWhenGivenLowerLength() throws ProfileException {
-		float[] data       = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21 };
-		float[] expected   = { 10, 12, 14, 16, 18, 20 };
-		
-		IProfile tester = comp.new DefaultProfile(data);
-		IProfile result =  tester.interpolate(6);
-		
-		float[] output = result.toFloatArray();	
-		
-		assertTrue( equals(expected, output) );
-
+		fail("Not yet implemented");
 	}
 	
 	@Test
