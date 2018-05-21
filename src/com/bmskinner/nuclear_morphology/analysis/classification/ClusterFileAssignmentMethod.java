@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -35,17 +38,20 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	
 	private File clusterFile;
 	private Map<UUID, Integer> cellMap;
+	private boolean skipFirstLine = false;
+	private static final String DELIMITER = "\t";
 	
 	public ClusterFileAssignmentMethod(@NonNull IAnalysisDataset d, @NonNull File f) {
 		super(d);
 		clusterFile = f;
+		cellMap = new HashMap<>(dataset.getCollection().size());
 	}
 
 	@Override
 	public IAnalysisResult call() throws Exception {
 		
 		if(!isFileFormatValid(clusterFile))
-			throw new ClusteringMethodException("Invalid mapping file format");
+			return null;
 		
 		log("Reading map file");
 		readMapFile();
@@ -61,32 +67,111 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 	 * All the cells in the dataset should be represented in the file.
 	 * @param file
 	 * @return true if the file meets the requirements for cluster assignment, false otherwise
+	 * @throws ClusteringMethodException 
 	 */
-	private boolean isFileFormatValid(@NonNull File file) {
-		return true;
+	private boolean isFileFormatValid(@NonNull File file) throws ClusteringMethodException {		
+		ICellCollection collection = dataset.getCollection();
+		int cells = 0;
+		List<UUID> found = new ArrayList<>(collection.size());
+		Map<Integer, UUID> notInDataset = new HashMap<>(0);
+		int lineNo = 0;
+		try {
+			FileInputStream fstream = new FileInputStream(clusterFile);
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));
+
+			String strLine;
+			while (( strLine = br.readLine()) != null) {
+				lineNo++;
+				
+
+				if(lineNo==1) { // Check for a header line
+					
+						String[] arr = strLine.split(DELIMITER);
+						UUID id;
+						try {
+							id = UUID.fromString(arr[0]);
+						} catch(IllegalArgumentException e) {
+							log("Mapping file does not have a cell ID in line 1; assuming header");
+							skipFirstLine = true;
+							continue;
+						}
+					
+						try {
+							int cluster = Integer.parseInt(arr[1]);
+						} catch(NumberFormatException e) {
+							warn("Cluster not found in line 1");
+							return false;
+						}
+						found.add(id);
+						if(collection.contains(id)) {
+							cells++;			
+						} else {
+							notInDataset.put(lineNo, id);
+						}
+					
+
+				}
+				String[] arr = strLine.split(DELIMITER);
+				UUID id = UUID.fromString(arr[0]);
+				int cluster = Integer.parseInt(arr[1]);
+				found.add(id);
+				if(collection.contains(id)) {
+					cells++;			
+				} else {
+					notInDataset.put(lineNo, id);
+				}
+			}
+			fstream.close();
+		}
+		catch (Exception e) {
+			warn("Parsing error reading mapping file");
+			return false;
+		}
+		
+		boolean ok = true;
+		if(notInDataset.size()!=0) {
+			warn(String.format("Mapping file (%d cells) has cells not in the dataset (%d cells)", cells, collection.size()));
+			for(Integer line : notInDataset.keySet()) {
+				warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
+			}
+			ok = false;
+		}
+		
+		if(collection.size()>cells) {
+			List<UUID> missing = collection.getCellIDs().stream().filter(id->!found.contains(id)).collect(Collectors.toList());
+			warn(String.format("Mapping file (%d cells) does not contain all dataset cells (%d cells)", cells, collection.size()));
+			for(UUID id : missing) {
+				warn(String.format("Cell with id %s is not in mapping file", id ));
+			}
+			ok = false;
+		}
+		
+		if(!ok)
+			warn("Unable to assign clusters; invalid mapping file");
+		
+		return ok;
 	}
 	
-	private void readMapFile() throws ClusteringMethodException{
-        
-        cellMap = new HashMap<>(12000);
+	private void readMapFile() throws ClusteringMethodException {
 
         try {
             FileInputStream fstream = new FileInputStream(clusterFile);
             BufferedReader br = new BufferedReader(
                     new InputStreamReader(fstream, Charset.forName("ISO-8859-1")));
 
-            int i = 0;
             String strLine;
+            int lineNo = 0;
             while (( strLine = br.readLine()) != null) {
-                i++;
-                if (i > 1) {
-                    String[] arr = strLine.split("\\t");
-                    UUID id = UUID.fromString(arr[0]);
-                    int cluster = Integer.parseInt(arr[1]);
-                    cellMap.put(id, cluster);
-                    fireProgressEvent();
-                }
-
+            	lineNo++;
+            	if(skipFirstLine && lineNo==1) {
+            		continue;
+            	}
+            	String[] arr = strLine.split(DELIMITER);
+            	UUID id = UUID.fromString(arr[0]);
+            	int cluster = Integer.parseInt(arr[1]);
+            	cellMap.put(id, cluster);
+            	fireProgressEvent();
             }
             fstream.close();
         }
