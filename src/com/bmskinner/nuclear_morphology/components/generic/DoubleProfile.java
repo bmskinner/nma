@@ -1012,4 +1012,13 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         System.arraycopy(array, 0, result, 0, array.length);
         return result;
     }
+
+    @Override
+	public int wrap(int index) {
+		if (index < 0)
+            return wrap(size() + index);
+        if (index < size())
+            return index;
+        return index % size();
+	}
 }

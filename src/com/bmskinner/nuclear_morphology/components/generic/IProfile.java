@@ -439,5 +439,12 @@ public interface IProfile extends Serializable, Loggable {
      * @return
      */
     double[] toDoubleArray();
+    
+    /**
+     * Wrap the given index into the current profile
+     * @param index
+     * @return
+     */
+    int wrap(int index);
 
 }

@@ -181,26 +181,37 @@ public class OpenBorderSegment implements IBorderSegment {
         mergeSources[mergeSources.length - 1] = seg;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasMergeSources()
-     */
     @Override
     public boolean hasMergeSources() {
         return mergeSources.length > 0;
     }
+    
+	@Override
+	public boolean hasMergeSource(@NonNull UUID id) {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id) || s.hasMergeSource(id))
+				return true;
+		}
+		return false;
+	}
+
+	@Override
+	public IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id))
+				return s;
+			if(s.hasMergeSource(id)) {
+				return s.getMergeSource(id);
+			}
+		}
+		throw new UnavailableComponentException(String.format("Segment %s is not present", id));
+	}
 
     @Override
     public void clearMergeSources() {
         mergeSources = new IBorderSegment[0];
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getStartIndex()
-     */
     @Override
     public int getStartIndex() {
         return this.startIndex;

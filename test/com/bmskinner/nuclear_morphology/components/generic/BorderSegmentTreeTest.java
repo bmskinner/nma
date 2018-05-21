@@ -16,13 +16,13 @@ import static org.mockito.Mockito.when;
 
 public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
-	protected IBorderSegment segment; // segment covering entire profile
+	protected IBorderSegment singleSegment; // segment covering entire profile
 	
 	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		segment = singleSegment.getSegment(comp.getID());
+		singleSegment = singleSegmentProfile.getSegment(comp.getID());
 	}
 
 	@Test
@@ -37,128 +37,142 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testGetID() {
-		assertEquals(comp.getID(), segment.getID());
+		assertEquals(comp.getID(), singleSegment.getID());
 	}
 
 	@Test
 	public void testSplitAt() throws ProfileException {
 
 		
-		((BorderSegmentTree)segment).splitAt(segment.getMidpointIndex(), UUID.randomUUID(), UUID.randomUUID());
-		List<IBorderSegment> list = segment.getMergeSources();
+		((BorderSegmentTree)singleSegment).splitAt(singleSegment.getMidpointIndex(), UUID.randomUUID(), UUID.randomUUID());
+		List<IBorderSegment> list = singleSegment.getMergeSources();
 		IBorderSegment s0 = list.get(0);
 		IBorderSegment s1 = list.get(1);
 		
 		assertEquals(0, s0.getStartIndex());
-		assertEquals(segment.getMidpointIndex(), s0.getEndIndex());
-		assertEquals(segment.getMidpointIndex(), s1.getStartIndex());
+		assertEquals(singleSegment.getMidpointIndex(), s0.getEndIndex());
+		assertEquals(singleSegment.getMidpointIndex(), s1.getStartIndex());
 		assertEquals(0, s1.getEndIndex());
 	}
 
 	@Test
 	public void testClearMergeSources() {
-		assertFalse(segment.hasMergeSources());
+		assertFalse(singleSegment.hasMergeSources());
 		IBorderSegment mock1 = mock(IBorderSegment.class);
 		when(mock1.getID()).thenReturn(UUID.randomUUID());
-		when(mock1.getStartIndex()).thenReturn(segment.getMidpointIndex());
-		when(mock1.length()).thenReturn(segment.getTotalLength()-segment.getMidpointIndex());
-		segment.addMergeSource(mock1);
-		assertTrue(segment.hasMergeSources());
-		segment.clearMergeSources();
-		assertFalse(segment.hasMergeSources());
+		when(mock1.getStartIndex()).thenReturn(singleSegment.getMidpointIndex());
+		when(mock1.length()).thenReturn(singleSegment.getTotalLength()-singleSegment.getMidpointIndex());
+		singleSegment.addMergeSource(mock1);
+		assertTrue(singleSegment.hasMergeSources());
+		singleSegment.clearMergeSources();
+		assertFalse(singleSegment.hasMergeSources());
 	}
 
 	@Test
 	public void testHasMergeSources() {
-		assertFalse(segment.hasMergeSources());
+		assertFalse(singleSegment.hasMergeSources());
 		
 		IBorderSegment mock1 = mock(IBorderSegment.class);
 		when(mock1.getID()).thenReturn(UUID.randomUUID());
-		when(mock1.getStartIndex()).thenReturn(segment.getMidpointIndex());
-		when(mock1.length()).thenReturn(segment.getTotalLength()-segment.getMidpointIndex());
-		segment.addMergeSource(mock1);
-		assertTrue(segment.hasMergeSources());
+		when(mock1.getStartIndex()).thenReturn(singleSegment.getMidpointIndex());
+		when(mock1.length()).thenReturn(singleSegment.getTotalLength()-singleSegment.getMidpointIndex());
+		singleSegment.addMergeSource(mock1);
+		assertTrue(singleSegment.hasMergeSources());
 	}
 
 	@Test
 	public void testGetStartIndex() {
-		assertEquals(0, segment.getStartIndex());
+		assertEquals(0, singleSegment.getStartIndex());
 	}
 
 	@Test
 	public void testGetEndIndex() {
-		assertEquals(0, segment.getEndIndex());
+		assertEquals(0, singleSegment.getEndIndex());
 	}
 
 	@Test
 	public void testGetProportionalIndex() {
-		assertEquals(0, segment.getProportionalIndex(0));
-		assertEquals(segment.getMidpointIndex(), segment.getProportionalIndex(0.5));
-		assertEquals(segment.getEndIndex(), segment.getProportionalIndex(1));
+		assertEquals(0, singleSegment.getProportionalIndex(0));
+		assertEquals(singleSegment.getMidpointIndex(), singleSegment.getProportionalIndex(0.5));
+		assertEquals(singleSegment.getEndIndex(), singleSegment.getProportionalIndex(1));
 	}
 	
 	@Test
 	public void testGetProportionalIndexExceptsBelowZero() {
 		exception.expect(IllegalArgumentException.class);
-		segment.getProportionalIndex(-0.1);
+		singleSegment.getProportionalIndex(-0.1);
 	}
 	
 	@Test
 	public void testGetProportionalIndexExceptsAboveOne() {
 		exception.expect(IllegalArgumentException.class);
-		segment.getProportionalIndex(1.1);
+		singleSegment.getProportionalIndex(1.1);
 	}
 
 	@Test
 	public void testGetIndexProportion() {
-		assertEquals(0, segment.getIndexProportion(segment.getStartIndex()),0);
-		assertEquals(0.5, segment.getIndexProportion(segment.getMidpointIndex()), 0);
-		double penultimate =  (double)(singleSegment.size()-1)/ (double) singleSegment.size();
-		assertEquals(penultimate, segment.getIndexProportion(segment.getEndIndex()-1),0);
+		assertEquals(0, singleSegment.getIndexProportion(singleSegment.getStartIndex()),0);
+		assertEquals(0.5, singleSegment.getIndexProportion(singleSegment.getMidpointIndex()), 0);
+		double penultimate =  (double)(singleSegmentProfile.size()-1)/ (double) singleSegmentProfile.size();
+		assertEquals(penultimate, singleSegment.getIndexProportion(singleSegment.getEndIndex()-1),0);
 	}
 
 	@Test
 	public void testGetName() {
-		assertEquals("Seg_0", segment.getName());
+		assertEquals("Seg_0", singleSegment.getName());
 	}
 
 	@Test
 	public void testGetMidpointIndex() {
-		assertEquals(segment.getTotalLength()/2, segment.getMidpointIndex());
+		assertEquals(singleSegment.getTotalLength()/2, singleSegment.getMidpointIndex());
 	}
 
 	@Test
-	public void testGetDistanceToStart() {
-		fail("Not yet implemented");
+	public void testGetDistanceToStartWithSingleSegment() {
+		
+		for(int i=0; i<singleSegment.getMidpointIndex(); i++) {
+			assertEquals(i, singleSegment.getDistanceToStart(i));
+		}
+		for(int i=singleSegment.getMidpointIndex(); i<=singleSegment.getTotalLength(); i++) {
+			assertEquals(singleSegment.getTotalLength()-i, singleSegment.getDistanceToStart(i));
+		}
+	}
+	
+	@Test
+	public void testGetDistanceToStartWithDoubleSegment() throws UnavailableComponentException {
+		IBorderSegment seg = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		for(int i=seg.getStartIndex(); i<=seg.length()+seg.getStartIndex(); i++) {
+			assertEquals(i, seg.getDistanceToStart(i));
+		}
 	}
 
 	@Test
 	public void testGetDistanceToEnd() {
-		assertEquals(comp.getBorderLength(), segment.getDistanceToEnd(0));
-		assertEquals(segment.length()/2, segment.getDistanceToEnd(segment.getMidpointIndex()));
-		assertEquals(1, segment.getDistanceToEnd(comp.getBorderLength()));
+		assertEquals(comp.getBorderLength(), singleSegment.getDistanceToEnd(0));
+		assertEquals(singleSegment.length()/2, singleSegment.getDistanceToEnd(singleSegment.getMidpointIndex()));
+		assertEquals(1, singleSegment.getDistanceToEnd(comp.getBorderLength()));
 	}
 
 	@Test
 	public void testIsLocked() {
-		assertFalse(segment.isLocked());
+		assertFalse(singleSegment.isLocked());
 	}
 
 	@Test
 	public void testSetLocked() {
-		assertFalse(segment.isLocked());
-		segment.setLocked(true);
-		assertTrue(segment.isLocked());
+		assertFalse(singleSegment.isLocked());
+		singleSegment.setLocked(true);
+		assertTrue(singleSegment.isLocked());
 	}
 
 	@Test
 	public void testGetTotalLength() {
-		assertEquals(comp.getBorderLength(), segment.getTotalLength());
+		assertEquals(comp.getBorderLength(), singleSegment.getTotalLength());
 	}
 
 	@Test
 	public void testNextSegmentWithBaseSegment() {
-		assertEquals(segment, segment.nextSegment());
+		assertEquals(singleSegment, singleSegment.nextSegment());
 	}
 	
 	@Test
@@ -168,7 +182,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testPrevSegmentWithBaseSegment() {
-		assertEquals(segment, segment.prevSegment());
+		assertEquals(singleSegment, singleSegment.prevSegment());
 	}
 	
 	@Test
@@ -178,7 +192,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testLength() {
-		assertEquals(segment.getTotalLength(), segment.length() );
+		assertEquals(singleSegment.getTotalLength(), singleSegment.length() );
 	}
 
 	@Test
@@ -193,18 +207,18 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testWraps() throws UnavailableComponentException {
-		assertTrue(segment.wraps());
+		assertTrue(singleSegment.wraps());
+		assertEquals(2, doubleSegmentProfile.getSegmentCount());
+		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).wraps());
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).wraps());
 		
-		assertEquals(2, doubleSegment.getSegments().size());
-		assertFalse(doubleSegment.getSegment(DOUBLE_SEG_ID_0).wraps());
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).wraps());
 	}
 
 	@Override
 	@Test
 	public void testContains() throws UnavailableComponentException {
-		IBorderSegment s0 = doubleSegment.getSegment(DOUBLE_SEG_ID_0);
-		IBorderSegment s1 = doubleSegment.getSegment(DOUBLE_SEG_ID_1);
+		IBorderSegment s0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IBorderSegment s1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
 		
 		
 		assertTrue(s0.contains(0));
@@ -215,7 +229,7 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 		}
 		assertTrue(s0.contains(50));
 		assertTrue(s1.contains(50));
-		for(int i=51; i<doubleSegment.size(); i++) {
+		for(int i=51; i<doubleSegmentProfile.size(); i++) {
 			assertFalse(s0.contains(i));
 			assertTrue(s1.contains(i));
 		}
@@ -229,22 +243,22 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testHasNextSegment() throws UnavailableComponentException {
-		assertTrue(segment.hasNextSegment());
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_0).hasNextSegment());
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).hasNextSegment());
+		assertTrue(singleSegment.hasNextSegment());
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).hasNextSegment());
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).hasNextSegment());
 	}
 
 	@Test
 	public void testHasPrevSegment() throws UnavailableComponentException {
-		assertTrue(segment.hasPrevSegment());
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_0).hasPrevSegment());
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).hasPrevSegment());
+		assertTrue(singleSegment.hasPrevSegment());
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).hasPrevSegment());
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).hasPrevSegment());
 	}
 
 	@Test
 	public void testGetPosition() throws UnavailableComponentException {
-		assertEquals(0, doubleSegment.getSegment(DOUBLE_SEG_ID_0).getPosition());
-		assertEquals(1, doubleSegment.getSegment(DOUBLE_SEG_ID_1).getPosition());
+		assertEquals(0, doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).getPosition());
+		assertEquals(1, doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).getPosition());
 	}
 
 	@Test
@@ -255,12 +269,12 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testOverlaps() throws UnavailableComponentException, ProfileException {
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_0).overlaps(doubleSegment.getSegment(DOUBLE_SEG_ID_1)));
-		assertTrue(doubleSegment.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegment.getSegment(DOUBLE_SEG_ID_0)));
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1)));
+		assertTrue(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0)));
 		
-		doubleSegment.splitSegment(doubleSegment.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
+		doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
 		
-		assertFalse(doubleSegment.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegment.getSegment(DOUBLE_SEG_ID_2)));
+		assertFalse(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).overlaps(doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_2)));
 		fail("Not yet implemented");
 	}
 

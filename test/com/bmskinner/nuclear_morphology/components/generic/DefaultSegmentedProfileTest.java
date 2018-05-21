@@ -16,8 +16,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	
-	protected ISegmentedProfile singleSegment;
-	protected ISegmentedProfile doubleSegment;
+	protected ISegmentedProfile singleSegmentProfile;
+	protected ISegmentedProfile doubleSegmentProfile;
 	protected final static UUID DOUBLE_SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
 	protected final static UUID DOUBLE_SEG_ID_1 = UUID.fromString("00000000-0000-0000-0000-000000000002");
 	protected final static UUID DOUBLE_SEG_ID_2 = UUID.fromString("00000000-0000-0000-0000-000000000003");
@@ -27,10 +27,10 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		singleSegment = comp.new DefaultSegmentedProfile(data);
-		doubleSegment = comp.new DefaultSegmentedProfile(data);
+		singleSegmentProfile = comp.new DefaultSegmentedProfile(data);
+		doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
 		int splitIndex = 50;
-		doubleSegment.splitSegment(doubleSegment.getSegmentContaining(1), splitIndex, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
+		doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegmentContaining(1), splitIndex, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
 	}
 
 	@Override
@@ -44,8 +44,8 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 		super.testReverse();
 		int expStart = 0;
 		int expEnd = 0;
-		singleSegment.reverse();
-		List<IBorderSegment> segs = singleSegment.getSegments();
+		singleSegmentProfile.reverse();
+		List<IBorderSegment> segs = singleSegmentProfile.getSegments();
 		assertEquals(expStart, segs.get(0).getStartIndex());
 		assertEquals(expEnd, segs.get(0).getEndIndex());
 	}
@@ -53,7 +53,7 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	@Test
 	public void testReverseWithDoubleSegment() {
 		super.testReverse();
-		List<IBorderSegment> segs = doubleSegment.getSegments();
+		List<IBorderSegment> segs = doubleSegmentProfile.getSegments();
 		int[] old = new int[segs.size()];
 		for(int i=0; i<old.length; i++){
 			old[i] = segs.get(i).getStartIndex();
@@ -61,11 +61,11 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 		
 		int[] exp = new int[old.length];
 		for(int i=0; i<old.length; i++){
-			exp[i] = doubleSegment.size()-1-old[old.length-i-1];
+			exp[i] = doubleSegmentProfile.size()-1-old[old.length-i-1];
 		}
 
-		doubleSegment.reverse();
-		segs = doubleSegment.getSegments();
+		doubleSegmentProfile.reverse();
+		segs = doubleSegmentProfile.getSegments();
 		for(int i=0; i<old.length; i++){
 			assertEquals(exp[i], segs.get(i).getStartIndex());
 		}
@@ -93,7 +93,7 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testHasSegments() {
-		assertTrue(singleSegment.hasSegments());
+		assertTrue(singleSegmentProfile.hasSegments());
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testHasSegment() {
-		assertTrue(singleSegment.hasSegment(comp.getID()));
+		assertTrue(singleSegmentProfile.hasSegment(comp.getID()));
 	}
 
 	@Test
@@ -148,9 +148,15 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testClearSegments() {
-		assertTrue(singleSegment.hasSegments());
-		singleSegment.clearSegments();
-		assertFalse(singleSegment.hasSegments());
+		assertTrue(singleSegmentProfile.hasSegments());
+		singleSegmentProfile.clearSegments();
+		assertTrue(singleSegmentProfile.hasSegments());
+		assertEquals(1, singleSegmentProfile.getSegmentCount());
+		
+		assertTrue(doubleSegmentProfile.hasSegments());
+		doubleSegmentProfile.clearSegments();
+		assertTrue(doubleSegmentProfile.hasSegments());
+		assertEquals(1, doubleSegmentProfile.getSegmentCount());
 	}
 
 	@Test
@@ -159,13 +165,22 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	}
 
 	@Test
-	public void testGetSegmentIDs() {
-		fail("Not yet implemented");
+	public void testGetSegmentIDs() {		
+		List<UUID> ssIds = singleSegmentProfile.getSegmentIDs();
+		assertEquals(1, ssIds.size());
+		assertEquals(comp.getID(), ssIds.get(0));
+		
+		List<UUID> dsIds = doubleSegmentProfile.getSegmentIDs();
+		assertEquals(2, dsIds.size());
+		assertEquals(DOUBLE_SEG_ID_0, dsIds.get(0));
+		assertEquals(DOUBLE_SEG_ID_1, dsIds.get(1));
+		
 	}
 
 	@Test
 	public void testGetSegmentCount() {
-		fail("Not yet implemented");
+		assertEquals(1, singleSegmentProfile.getSegmentCount());
+		assertEquals(2, doubleSegmentProfile.getSegmentCount());
 	}
 
 	@Test
@@ -175,7 +190,21 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testContains() throws UnavailableComponentException {
-		fail("Not yet implemented");
+		
+		IBorderSegment s = singleSegmentProfile.getSegment(comp.getID());
+
+		IBorderSegment s0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IBorderSegment s1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
+		
+		assertTrue(singleSegmentProfile.contains(s));
+		assertFalse(singleSegmentProfile.contains(s0));
+		assertFalse(singleSegmentProfile.contains(s1));
+		
+		assertTrue(doubleSegmentProfile.contains(s0));
+		assertTrue(doubleSegmentProfile.contains(s1));
+		
+		// Special case - root segment always present
+		assertTrue(doubleSegmentProfile.contains(s));
 	}
 
 	@Test
@@ -206,8 +235,8 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	@Test
 	public void testInterpolateIntLengthensSingleSegmentProfile() throws ProfileException, UnavailableComponentException {
 		
-		int newLength = singleSegment.size() * 2;
-		ISegmentedProfile interpolated = singleSegment.interpolate(newLength);
+		int newLength = singleSegmentProfile.size() * 2;
+		ISegmentedProfile interpolated = singleSegmentProfile.interpolate(newLength);
 		assertEquals(newLength, interpolated.size());
 		assertEquals(0, interpolated.getSegment(comp.getID()).getStartIndex());
 	}
@@ -229,21 +258,21 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testIsSplittable() {
-		assertTrue(singleSegment.isSplittable(singleSegment.getSegmentContaining(1).getID(), 50));
+		assertTrue(singleSegmentProfile.isSplittable(singleSegmentProfile.getSegmentContaining(1).getID(), 50));
 	}
 	
 	@Test
 	public void testIsSplittableReturnsFalseWhenTooSmall() {
-		assertFalse(singleSegment.isSplittable(singleSegment.getSegmentContaining(1).getID(), 2));
+		assertFalse(singleSegmentProfile.isSplittable(singleSegmentProfile.getSegmentContaining(1).getID(), 2));
 	}
 
 	@Test
 	public void testSplitSegmentForSingleSegmentProfile() throws ProfileException {
-		assertEquals(1, singleSegment.getSegmentCount());
-		singleSegment.splitSegment(singleSegment.getSegmentContaining(1), 50, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
-		assertEquals(2, singleSegment.getSegmentCount());
+		assertEquals(1, singleSegmentProfile.getSegmentCount());
+		singleSegmentProfile.splitSegment(singleSegmentProfile.getSegmentContaining(1), 50, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
+		assertEquals(2, singleSegmentProfile.getSegmentCount());
 		
-		List<IBorderSegment> list = singleSegment.getSegments();
+		List<IBorderSegment> list = singleSegmentProfile.getSegments();
 		assertEquals(DOUBLE_SEG_ID_0, list.get(0).getID());
 		assertEquals(DOUBLE_SEG_ID_1, list.get(1).getID());
 		
@@ -255,11 +284,11 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	
 	@Test
 	public void testSplitSegmentForDoubleSegmentProfile() throws ProfileException {
-		assertEquals(2, doubleSegment.getSegmentCount());
-		doubleSegment.splitSegment(doubleSegment.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
-		assertEquals(3, doubleSegment.getSegmentCount());
+		assertEquals(2, doubleSegmentProfile.getSegmentCount());
+		doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegmentContaining(1), 25, DOUBLE_SEG_ID_2, DOUBLE_SEG_ID_3);
+		assertEquals(3, doubleSegmentProfile.getSegmentCount());
 		
-		List<IBorderSegment> list = doubleSegment.getSegments();
+		List<IBorderSegment> list = doubleSegmentProfile.getSegments();
 		assertEquals(DOUBLE_SEG_ID_2, list.get(0).getID());
 		assertEquals(DOUBLE_SEG_ID_3, list.get(1).getID());
 		assertEquals(DOUBLE_SEG_ID_1, list.get(2).getID());
@@ -275,13 +304,13 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	@Test
 	public void testSplitSegmentFailsWhenSegmentTooShort() throws ProfileException {
 		exception.expect(IllegalArgumentException.class);
-		singleSegment.splitSegment(singleSegment.getSegmentContaining(1), 2, UUID.randomUUID(), UUID.randomUUID());
+		singleSegmentProfile.splitSegment(singleSegmentProfile.getSegmentContaining(1), 2, UUID.randomUUID(), UUID.randomUUID());
 	}
 
 	@Override
 	@Test
 	public void testCopy() {
-		ISegmentedProfile p = singleSegment.copy();
-		assertEquals(singleSegment, p);
+		ISegmentedProfile p = singleSegmentProfile.copy();
+		assertEquals(singleSegmentProfile, p);
 	}
 }

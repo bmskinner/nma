@@ -37,6 +37,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 
 @Deprecated
 public class NucleusBorderSegment implements IBorderSegment {
@@ -177,51 +178,38 @@ public class NucleusBorderSegment implements IBorderSegment {
             return true;
         }
     }
+    
+	@Override
+	public boolean hasMergeSource(@NonNull UUID id) {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id) || s.hasMergeSource(id))
+				return true;
+		}
+		return false;
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getLastFailReason()
-     */
-    // @Override
-    // public String getLastFailReason(){
-    // return this.lastFailReason;
-    // }
-    //
-    // /* (non-Javadoc)
-    // * @see
-    // components.nuclear.IBorderSegment#setLastFailReason(java.lang.String)
-    // */
-    // @Override
-    // public void setLastFailReason(String reason){
-    // this.lastFailReason = reason;
-    // }
+	@Override
+	public IBorderSegment getMergeSource(@NonNull UUID id) throws UnavailableComponentException {
+		for(IBorderSegment s : mergeSources) {
+			if(s.getID().equals(id))
+				return s;
+			if(s.hasMergeSource(id)) {
+				return s.getMergeSource(id);
+			}
+		}
+		throw new UnavailableComponentException(String.format("Segment %s is not present", id));
+	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getStartIndex()
-     */
     @Override
     public int getStartIndex() {
         return this.startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getEndIndex()
-     */
     @Override
     public int getEndIndex() {
         return this.endIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getProportionalIndex(double)
-     */
     @Override
     public int getProportionalIndex(double d) {
         if (d < 0 || d > 1) {
@@ -947,5 +935,4 @@ public class NucleusBorderSegment implements IBorderSegment {
         mergeSources.clear();
 
     }
-
 }

@@ -220,7 +220,7 @@ public class CellDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * offset relative to the positions within the consensus nucleus
      * 
      * @param dataset
-     * @param segment
+     * @param singleSegment
      * @return
      * @throws ChartDatasetCreationException
      *             if data is not available

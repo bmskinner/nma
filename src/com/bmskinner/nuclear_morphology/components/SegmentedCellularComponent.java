@@ -1286,6 +1286,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			return new DefaultProfile(combinedArray);
 		}
+		
+		public int wrap(int index) {
+			if (index < 0)
+	            return wrap(size() + index);
+	        if (index < size())
+	            return index;
+	        return index % size();
+		}
 	}
 
 
@@ -1537,7 +1545,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		@Override
 		public List<UUID> getSegmentIDs() {
-			return segments.getChildIds();
+			if(segments.hasMergeSources())
+				return segments.getChildIds();
+			List<UUID> l = new ArrayList<>();
+			l.add(segments.id);
+			return l;
 		}
 
 		@Override
@@ -1545,13 +1557,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return segments.hasMergeSources() ? segments.nChildren() : 1;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * components.generic.ISegmentedProfile#getDisplacement(components.nuclear.
-		 * IBorderSegment)
-		 */
 		@Override
 		public double getDisplacement(@NonNull final IBorderSegment segment) {
 
@@ -1567,34 +1572,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return max - min;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.ISegmentedProfile#contains(components.nuclear.
-		 * IBorderSegment)
-		 */
 		@Override
 		public boolean contains(@NonNull final IBorderSegment segment) {
 			return segments.hasMergeSource(segment.getID());
 		}
 
-//		/**
-//		 * Test if the given segment is at the given segment index
-//		 * @param i
-//		 * @param seg
-//		 * @return
-//		 */
-//		private boolean equals(int i, @NonNull IBorderSegment seg){
-//			int index = segments.getChildIds().indexOf(seg.getID());
-//			return i==index;
-//		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.ISegmentedProfile#update(components.nuclear.
-		 * IBorderSegment, int, int)
-		 */
 		@Override
 		public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
@@ -1942,8 +1925,10 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			if(segments.id.equals(segment.getID())) {
 				// splitting single segment
 				segments.clearMergeSources();
-				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), segments.getDistanceToStart(splitIndex), segments));
-				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, segments.getDistanceToEnd(splitIndex), segments));	
+				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), wrap(splitIndex-segments.getStartIndex()), segments));
+				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, wrap(segments.getStartIndex()-splitIndex), segments));	
+//				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), segments.getDistanceToStart(splitIndex), segments));
+//				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, segments.getDistanceToEnd(splitIndex), segments));	
 				return;
 			}
 			
@@ -1971,7 +1956,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			builder.append(super.toString()+System.getProperty("line.separator"));
-			for (IBorderSegment seg : this.getSegments()) {
+			for (IBorderSegment seg : getSegments()) {
 				builder.append(seg.toString() + System.getProperty("line.separator"));
 			}
 			return builder.toString();
@@ -2161,7 +2146,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int getEndIndex() {
-				return wrapIndex(startIndex+length);
+				return wrap(startIndex+length);
 			}
 
 			@Override
@@ -2171,7 +2156,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 				double targetLength = length * d;
 				int absLength = (int) Math.round(targetLength);
-				return wrapIndex(startIndex + absLength);
+				return wrap(startIndex + absLength);
 			}
 
 			@Override
@@ -2190,22 +2175,35 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int getMidpointIndex() {
-				return wrapIndex( startIndex + (length/2) );
+				return wrap( startIndex + (length/2) );
 			}
 
 			@Override
 			public int getDistanceToStart(int index) {
-				if(wraps() && index<getEndIndex())
-					return (size()-startIndex)+index;
-				return index-startIndex;
+//				if(wraps()) {
+					int d1 = wrap(index-startIndex);
+					int d2 = wrap(startIndex-index);
+					return d1<d2?d1:d2;
+//				}
+				
+				
+//				if(startIndex==getEndIndex()) // special case
+//					return size()
+//				if(wraps() && index<getEndIndex())
+//					return (size()-startIndex)+index;
+//				return index-startIndex;
 			}
 
 			@Override
 			public int getDistanceToEnd(int index) {
 				
-				if(wraps() && index>getEndIndex())
-					return (size()-index)+getEndIndex();
-				return getEndIndex()-index;
+				int d1 = wrap(index-getEndIndex());
+				int d2 = wrap(getEndIndex()-index);
+				return d1<d2?d1:d2;
+				
+//				if(wraps() && index>getEndIndex())
+//					return (size()-index)+getEndIndex();
+//				return getEndIndex()-index;
 			}
 
 			@Override
@@ -2268,7 +2266,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public boolean wraps() {
-				return getEndIndex()<=getStartIndex();
+				return getEndIndex()<=startIndex;
 			}
 
 			@Override
@@ -2337,6 +2335,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						|| seg.contains(getEndIndex()) 
 						|| contains(seg.getStartIndex()) 
 						|| contains(seg.getEndIndex());
+			}
+			
+			@Override
+			public String toString() {
+				return String.format("%d - %d of %d", startIndex, getEndIndex(), size());
 			}
 		}
 

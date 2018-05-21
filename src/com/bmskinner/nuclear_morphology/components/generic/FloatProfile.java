@@ -1174,4 +1174,13 @@ public class FloatProfile implements IProfile {
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
     }
+
+	@Override
+	public int wrap(int index) {
+		if (index < 0)
+            return wrap(size() + index);
+        if (index < size())
+            return index;
+        return index % size();
+	}
 }
