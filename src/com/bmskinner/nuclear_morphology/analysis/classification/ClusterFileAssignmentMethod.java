@@ -74,6 +74,9 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		int cells = 0;
 		List<UUID> found = new ArrayList<>(collection.size());
 		Map<Integer, UUID> notInDataset = new HashMap<>(0);
+		
+		List<Integer> idErrors = new ArrayList<>();
+		List<Integer> numErrors = new ArrayList<>();
 		int lineNo = 0;
 		try {
 			FileInputStream fstream = new FileInputStream(clusterFile);
@@ -83,44 +86,33 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 			String strLine;
 			while (( strLine = br.readLine()) != null) {
 				lineNo++;
-				
-
-				if(lineNo==1) { // Check for a header line
-					
-						String[] arr = strLine.split(DELIMITER);
-						UUID id;
-						try {
-							id = UUID.fromString(arr[0]);
-						} catch(IllegalArgumentException e) {
-							log("Mapping file does not have a cell ID in line 1; assuming header");
-							skipFirstLine = true;
-							continue;
-						}
-					
-						try {
-							int cluster = Integer.parseInt(arr[1]);
-						} catch(NumberFormatException e) {
-							warn("Cluster not found in line 1");
-							return false;
-						}
-						found.add(id);
-						if(collection.contains(id)) {
-							cells++;			
-						} else {
-							notInDataset.put(lineNo, id);
-						}
-					
-
-				}
 				String[] arr = strLine.split(DELIMITER);
-				UUID id = UUID.fromString(arr[0]);
-				int cluster = Integer.parseInt(arr[1]);
+				UUID id = null;
+				try {
+					id = UUID.fromString(arr[0]);
+				} catch(IllegalArgumentException e) {
+					if(lineNo==1) { // check for a header line
+						log("Mapping file does not have a cell ID in line 1; assuming line 1 is a header");
+						skipFirstLine = true;
+						continue;
+					}
+					idErrors.add(lineNo);
+				}
+
+				try {
+					int cluster = Integer.parseInt(arr[1]);
+				} catch(NumberFormatException e) {
+					numErrors.add(lineNo);
+				}
 				found.add(id);
 				if(collection.contains(id)) {
 					cells++;			
 				} else {
 					notInDataset.put(lineNo, id);
 				}
+
+
+
 			}
 			fstream.close();
 		}
@@ -130,25 +122,43 @@ public class ClusterFileAssignmentMethod extends SingleDatasetAnalysisMethod {
 		}
 		
 		boolean ok = true;
+		
+		if(idErrors.size()!=0) {
+			ok=false;
+			warn("Mapping file has errors in the cell id column");
+			for(Integer line : idErrors) {
+				warn(String.format("Line %d does not have a cell id", line));
+			}
+		}
+		
+		if(numErrors.size()!=0) {
+			ok=false;
+			warn("Mapping file has errors in the cluster number column");
+			for(Integer line : numErrors) {
+				warn(String.format("Line %d does not have a readable number", line));
+			}
+		}
+		
 		if(notInDataset.size()!=0) {
 			warn(String.format("Mapping file (%d cells) has cells not in the dataset (%d cells)", cells, collection.size()));
 			for(Integer line : notInDataset.keySet()) {
-				warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
+				if(notInDataset.get(line)!=null)
+					warn(String.format("Line %d: Cell with id %s is not in dataset", line, notInDataset.get(line) ));
 			}
 			ok = false;
 		}
 		
 		if(collection.size()>cells) {
 			List<UUID> missing = collection.getCellIDs().stream().filter(id->!found.contains(id)).collect(Collectors.toList());
-			warn(String.format("Mapping file (%d cells) does not contain all dataset cells (%d cells)", cells, collection.size()));
+			warn(String.format("Mapping file (%d cells) does not contain all the dataset cells (%d cells)", cells, collection.size()));
 			for(UUID id : missing) {
-				warn(String.format("Cell with id %s is not in mapping file", id ));
+				warn(String.format("Cell with id %s is not in the mapping file", id ));
 			}
 			ok = false;
 		}
 		
 		if(!ok)
-			warn("Unable to assign clusters; invalid mapping file");
+			warn("Unable to assign clusters; the mapping file is invalid. Please correct and try again.");
 		
 		return ok;
 	}
