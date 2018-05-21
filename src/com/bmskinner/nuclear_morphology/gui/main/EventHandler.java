@@ -54,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
 import com.bmskinner.nuclear_morphology.gui.actions.BuildHierarchicalTreeAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ClusterAnalysisAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ClusterFileAssignmentAction;
 import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
@@ -260,20 +261,21 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return new ClusterAnalysisAction(event.firstDataset(), mw);
 
             }
+            
+            if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
+                return new ClusterFileAssignmentAction(event.firstDataset(), mw);
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
                 log("Building a tree from dataset");
                 return new BuildHierarchicalTreeAction(event.firstDataset(), mw);
             }
 
-            if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN)) {
+            if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN))
                 return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
-            }
             
             
-            if (event.method().equals(DatasetEvent.EXTRACT_SOURCE)) {
+            if (event.method().equals(DatasetEvent.EXTRACT_SOURCE))
                 return new MergeSourceExtractionAction(event.getDatasets(), mw);
-            }
             
             if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
                 Runnable r = () -> {
@@ -284,9 +286,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return r;
 
             }
-            
-            
-
             return null;
         }
 

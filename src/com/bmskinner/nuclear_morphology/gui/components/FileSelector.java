@@ -120,6 +120,25 @@ public class FileSelector {
         defaultDir = im.get().getFolder();
         return chooseOpenFile(defaultDir, filter);
     }
+    
+    /**
+     * Choose a file from a default folder with a file extension filter.
+     * @param defaultFolder the default folder
+     * @param filter the filename extension filter
+     * @return the selected file, or null on cancel or error
+     */
+    public static @Nullable File chooseFile(File defaultFolder, FileNameExtensionFilter filter){
+        return chooseOpenFile(defaultFolder, filter);
+    }
+    
+    /**
+     * Choose a file from a default folder.
+     * @param defaultFolder the default folder
+     * @return the selected file, or null on cancel or error
+     */
+    public static @Nullable File chooseFile(File defaultFolder){
+        return chooseOpenFile(defaultFolder, null);
+    }
         
     /**
      * Choose a file from a default folder with a file extension filter.

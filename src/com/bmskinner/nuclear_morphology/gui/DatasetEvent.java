@@ -57,6 +57,7 @@ public class DatasetEvent extends EventObject {
     public static final String SELECT_ONE_DATASET = "Select single dataset";
     public static final String EXTRACT_SOURCE     = "Extract source";
     public static final String CLUSTER            = "Cluster";
+    public static final String CLUSTER_FROM_FILE  = "ClusterFromFile";
     public static final String BUILD_TREE         = "Build tree";
     public static final String TRAIN_CLASSIFIER   = "Train classifier";
     public static final String REFRESH_CACHE      = "Refresh caches"; // signal the chart cache should be refreshed for given datasets
