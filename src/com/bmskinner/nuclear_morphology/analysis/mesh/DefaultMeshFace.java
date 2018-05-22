@@ -28,7 +28,7 @@ import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class NucleusMeshFace implements Loggable, MeshFace {
+public class DefaultMeshFace implements Loggable, MeshFace {
 
     final Set<MeshEdge> edges = new HashSet<>();
 
@@ -42,7 +42,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
      * @param e2 the second edge
      * @param e3 the third edge
      */
-    public NucleusMeshFace(final MeshEdge e1, final MeshEdge e2, final MeshEdge e3) {
+    public DefaultMeshFace(final MeshEdge e1, final MeshEdge e2, final MeshEdge e3) {
 
         // Check that the edges make an enclosed space - there are only 3 unique
         // vertices
@@ -67,7 +67,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
      * @param e2 the second vertex
      * @param e3 the third vertex
      */
-    public NucleusMeshFace(final MeshVertex v1, final MeshVertex v2, final MeshVertex v3) {
+    public DefaultMeshFace(final MeshVertex v1, final MeshVertex v2, final MeshVertex v3) {
 
         if (!v1.hasEdgeTo(v2)) {
             throw new IllegalArgumentException("Vertices v1 and v2 are not linked in face constructor: " + v1.toString()
@@ -99,9 +99,9 @@ public class NucleusMeshFace implements Loggable, MeshFace {
      * 
      * @param f the face to duplicate
      */
-    public NucleusMeshFace(final MeshFace f) {
+    public DefaultMeshFace(final MeshFace f) {
         for (MeshEdge e : f.getEdges()) {
-            edges.add(new NucleusMeshEdge(e));
+            edges.add(new DefaultMeshEdge(e));
 
             vertices.add(e.getV1());
             vertices.add(e.getV2());
@@ -284,7 +284,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
         if (getClass() != obj.getClass())
             return false;
 
-        NucleusMeshFace other = (NucleusMeshFace) obj;
+        DefaultMeshFace other = (DefaultMeshFace) obj;
 
         // vertex tests for name and peripheral only
         for (MeshVertex v : vertices) {
@@ -594,7 +594,7 @@ public class NucleusMeshFace implements Loggable, MeshFace {
             warn("Point " + p + " does not have edge proportion calculated");
         }
 
-        return new NucleusMeshFaceCoordinate(p1p, p2p, i1p);
+        return new DefaultMeshFaceCoordinate(p1p, p2p, i1p);
 
     }
 }

@@ -40,7 +40,7 @@ import javax.swing.event.ChangeListener;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
@@ -245,8 +245,8 @@ public class ConsensusCompareDialog extends LoadingIconDialog implements ActionL
                 Nucleus n1 = one.getCollection().getConsensus();
                 Nucleus n2 = two.getCollection().getConsensus();
 
-                NucleusMesh mesh1 = new NucleusMesh(n1, meshSize);
-                NucleusMesh mesh2 = new NucleusMesh(n2, mesh1);
+                DefaultMesh mesh1 = new DefaultMesh(n1, meshSize);
+                DefaultMesh mesh2 = new DefaultMesh(n2, mesh1);
 
                 Mesh<Nucleus> comparison1 = mesh1.comparison(mesh2);
                 Mesh<Nucleus> comparison2 = mesh2.comparison(mesh1);

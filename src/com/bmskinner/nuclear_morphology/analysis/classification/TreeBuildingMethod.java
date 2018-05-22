@@ -27,7 +27,7 @@ import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.ClusterGroup;
@@ -170,7 +170,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         if(options.isIncludeMesh() && collection.hasConsensus()){
             try {
-				mesh = new NucleusMesh(collection.getConsensus());
+				mesh = new DefaultMesh(collection.getConsensus());
 				attributeCount += mesh.getFaces().size();
 			} catch (MeshCreationException e) {
 				e.printStackTrace();
@@ -248,7 +248,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
         Mesh<Nucleus> template = null;
         if (options.isIncludeMesh() && collection.hasConsensus()) {
             try {
-				template = new NucleusMesh(collection.getConsensus());
+				template = new DefaultMesh(collection.getConsensus());
 			} catch (MeshCreationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -321,7 +321,7 @@ public class TreeBuildingMethod extends CellClusteringMethod {
 
         if (options.isIncludeMesh() && collection.hasConsensus()) {
 
-            Mesh<Nucleus> mesh = new NucleusMesh(n, template);
+            Mesh<Nucleus> mesh = new DefaultMesh(n, template);
             for (MeshFace face : mesh.getFaces()) {
                 Attribute att = (Attribute) attributes.elementAt(attNumber++);
                 inst.setValue(att, face.getArea());

@@ -74,7 +74,7 @@ public class KeyedShellResult implements IShellResult {
     /**
      * Add shell data for the given nucleus in the given cell.
      * @param cell the cell
-     * @param nucleus the nucleus
+     * @param component the nucleus
      * @param shellData the pixel intensity counts per shell
      */
     public void addShellData(@NonNull CountType type, @NonNull ICell c, @NonNull Nucleus n, long @NonNull [] shellData){

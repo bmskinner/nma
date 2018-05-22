@@ -106,7 +106,7 @@ public class SignalWarpingDialog extends LoadingIconDialog implements PropertyCh
 
     private JTree tree;
 
-    private ImageCache cache = new ImageCache();
+    private final ImageCache cache = new ImageCache();
 
     private boolean ctrlPressed = false;
 

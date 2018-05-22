@@ -30,7 +30,7 @@ import org.jfree.data.xy.XYDataset;
 
 import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
@@ -130,12 +130,12 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         if (options.isSingleDataset()) {
             if (options.isShowMesh()) {
                 try {
-                    Mesh<Nucleus> mesh = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
+                    Mesh<Nucleus> mesh = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                             options.getMeshSize());
 
-                    if (options.isStraightenMesh()) {
-                        mesh = mesh.straighten();
-                    }
+//                    if (options.isStraightenMesh()) {
+//                        mesh = mesh.straighten();
+//                    }
 
                     return new OutlineChartFactory(options).createMeshChart(mesh, 0.5);
                 } catch (ChartCreationException e) {

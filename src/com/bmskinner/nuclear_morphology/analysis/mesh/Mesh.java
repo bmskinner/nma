@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
@@ -66,7 +68,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      *            the vertex to test
      * @return
      */
-    boolean contains(MeshVertex v);
+    boolean contains(@NonNull MeshVertex v);
 
     /**
      * Test if this mesh contains a face with the same vertex positions
@@ -74,7 +76,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param test
      * @return
      */
-    boolean contains(MeshFace test);
+    boolean contains(@NonNull MeshFace test);
 
     /**
      * Test if this mesh contains an edge with the same vertex positions
@@ -83,7 +85,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      *            the edge to test
      * @return
      */
-    boolean contains(MeshEdge e);
+    boolean contains(@NonNull MeshEdge e);
 
     /**
      * Test if the mesh contains the given point within one of its faces
@@ -91,17 +93,16 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param p
      * @return
      */
-    boolean contains(IPoint p);
+    boolean contains(@NonNull IPoint p);
 
     /**
      * Get the face containing the given point, or null if there is no face with
      * the point
      * 
-     * @param p
-     *            the point to test
+     * @param p the point to test
      * @return the face with the point or null
      */
-    MeshFace getFace(IPoint p);
+    MeshFace getFace(@NonNull IPoint p);
 
     /**
      * Get the number of segments used to construct the mesh
@@ -142,7 +143,7 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
 
     Set<MeshFace> getFaces();
 
-    boolean isComparableTo(Mesh<E> mesh);
+    boolean isComparableTo(@NonNull Mesh<E> mesh);
 
     /**
      * Find the edge and face ratios of this mesh versus the given mesh. Meshes
@@ -151,7 +152,16 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * @param mesh
      * @return
      */
-    Mesh<E> comparison(Mesh<E> mesh);
+    Mesh<E> comparison(@NonNull Mesh<E> mesh);
+    
+    /**
+     * Find the edge and face ratios of this mesh versus the mesh fit to the target object. 
+     * 
+     * @param target the object to create a mesh for and compare this mesh to
+     * @return
+     * @throws MeshCreationException if the mesh cannot be created
+     */
+    Mesh<E> comparison(@NonNull E target) throws MeshCreationException;
 
     /**
      * Reposition the vertices such that the internal skeleton vertices form a
@@ -159,25 +169,26 @@ public interface Mesh<E extends CellularComponent> extends Comparable<Mesh<E>> {
      * 
      * @return
      */
-    Mesh<E> straighten();
+//    Mesh<E> straighten();
 
     /**
      * Get the face within this mesh described by the given face
      * 
-     * @param f
-     *            the face to find
+     * @param f the face to find
      * @return the face in this mesh equivalent to the input face
      */
-    MeshFace getFace(MeshFace f);
+    MeshFace getFace(@NonNull MeshFace f);
 
     /**
      * Get the edge within this mesh described by the given edge
      * 
-     * @param e
-     *            the edge to find
+     * @param e the edge to find
      * @return the edge in this mesh equivalent to the input edge
      */
-    MeshEdge getEdge(MeshEdge e);
+    MeshEdge getEdge(@NonNull MeshEdge e);
+    
+    
+    double getMaxEdgeRatio();
 
     /**
      * Get a closed path comprising the peripheral points of the mesh

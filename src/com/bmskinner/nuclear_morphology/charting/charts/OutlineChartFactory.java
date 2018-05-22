@@ -54,8 +54,8 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshFace;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
@@ -156,16 +156,16 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new NucleusMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e1) {
             fine("Cannot make consensus mesh");
             stack("Error creating mesh", e1);
             return makeErrorChart();
         }
 
-        if (options.isStraightenMesh()) {
-            meshConsensus = meshConsensus.straighten();
-        }
+//        if (options.isStraightenMesh()) {
+//            meshConsensus = meshConsensus.straighten();
+//        }
 
         XYDataset ds;
         try {
@@ -213,9 +213,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         XYPlot plot = chart.getXYPlot();
 
         // Get consensus mesh.
-        NucleusMesh meshConsensus;
+        DefaultMesh meshConsensus;
         try {
-            meshConsensus = new NucleusMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
         } catch (MeshCreationException e) {
             stack("Error creating consensus mesh", e);
             return makeErrorChart();
@@ -245,9 +245,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
         for (ICell cell : cells) {
             fine("Drawing signals for cell " + cell.getNucleus().getNameAndNumber());
             // Get each nucleus. Make a mesh.
-            NucleusMesh cellMesh;
+            DefaultMesh cellMesh;
             try {
-                cellMesh = new NucleusMesh(cell.getNucleus(), meshConsensus);
+                cellMesh = new DefaultMesh(cell.getNucleus(), meshConsensus);
             } catch (MeshCreationException e1) {
                 fine("Cannot make mesh for " + cell.getNucleus().getNameAndNumber());
                 stack("Error creating mesh", e1);
@@ -262,7 +262,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     ip = cell.getNucleus().getSignalCollection().getImage(options.getSignalGroup());
 
                     // Create NucleusMeshImage from nucleus.
-                    MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh, ip);
+                    MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
 
                     // Draw NucleusMeshImage onto consensus mesh.
 
@@ -323,10 +323,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
                     try {
 
                         Mesh<Nucleus> mesh1 = options.getRotateMode().equals(RotationMode.ACTUAL)
-                                ? new NucleusMesh(options.getCell().getNucleus())
-                                : new NucleusMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
+                                ? new DefaultMesh(options.getCell().getNucleus())
+                                : new DefaultMesh(options.getCell().getNucleus().getVerticallyRotatedNucleus());
 
-                        Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         Mesh<Nucleus> result = mesh1.comparison(mesh2);
@@ -349,15 +349,15 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
                     try {
 
-                        Mesh<Nucleus> mesh1 = new NucleusMesh(options.getCell().getNucleus());
-                        Mesh<Nucleus> mesh2 = new NucleusMesh(options.firstDataset().getCollection().getConsensus(),
+                        Mesh<Nucleus> mesh1 = new DefaultMesh(options.getCell().getNucleus());
+                        Mesh<Nucleus> mesh2 = new DefaultMesh(options.firstDataset().getCollection().getConsensus(),
                                 mesh1);
 
                         //
                         ImageProcessor nucleusIP = options.getCell().getNucleus().getImage();
 
                         // Create a mesh image from the nucleus
-                        MeshImage<Nucleus> im = new NucleusMeshImage(mesh1, nucleusIP);
+                        MeshImage<Nucleus> im = new DefaultMeshImage(mesh1, nucleusIP);
 
                         // Draw the image onto the shape described by the
                         // consensus nucleus

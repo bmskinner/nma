@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -35,24 +36,24 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * This is an image based on NucleusMeshFace coordinates.
  * 
  * @author bms41
+ * @param <E>
  *
  */
-public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
+public class DefaultMeshImage<E extends CellularComponent> implements Loggable, MeshImage<E> {
 
-    final private Map<MeshFace, List<MeshPixel>> map = new HashMap<MeshFace, List<MeshPixel>>();
+    final private Map<MeshFace, List<MeshPixel>> map = new HashMap<>();
 
-    final private Mesh<Nucleus> template;
+    final private Mesh<E> template;
 
     /**
      * Create based on a template mesh and image. Each pixel within the nucleus
      * is converted to a mesh face coordinate.
      * 
      * @param mesh
-     * @param ip
-     *            the image to fetch pixels from
+     * @param ip the image to fetch pixels from
      * @throws MeshImageCreationException
      */
-    public NucleusMeshImage(final Mesh<Nucleus> mesh, final ImageProcessor ip) throws MeshImageCreationException {
+    public DefaultMeshImage(final Mesh<E> mesh, final ImageProcessor ip) throws MeshImageCreationException {
         template = mesh;
 
         // Create MeshPixels from the image processor for the region described
@@ -80,7 +81,7 @@ public class NucleusMeshImage implements Loggable, MeshImage<Nucleus> {
      * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
      */
     @Override
-    public ImageProcessor drawImage(Mesh<Nucleus> mesh) throws UncomparableMeshImageException {
+    public ImageProcessor drawImage(Mesh mesh) throws UncomparableMeshImageException {
 
         if (!mesh.isComparableTo(template)) {
             throw new UncomparableMeshImageException("Meshes do not match");

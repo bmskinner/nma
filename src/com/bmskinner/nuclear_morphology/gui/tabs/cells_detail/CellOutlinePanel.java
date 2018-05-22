@@ -34,10 +34,18 @@ import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageAnnotator;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageConverter;
 import com.bmskinner.nuclear_morphology.analysis.image.ImageFilterer;
+import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
+import com.bmskinner.nuclear_morphology.charting.image.MeshAnnotator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -96,7 +104,7 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
         warpMeshPanel.addActionListener(this);
         warpMeshPanel.setEnabled(false);
 
-        settingsPanel.add(rotationPanel);
+//        settingsPanel.add(rotationPanel);
         settingsPanel.add(makeMeshPanel);
         settingsPanel.add(warpMeshPanel);
 
@@ -203,8 +211,45 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
                 for(Nucleus n : cell.getNuclei()){
                     an2.annotateCroppedNucleus(n.duplicate());
                 }
+                
+                // Mesh options
+                try {
+                	
+                	if(makeMeshPanel.isSelected()) {
+                		Mesh<Nucleus> consensusMesh = new DefaultMesh(activeDataset().getCollection().getConsensus());
+                		for(Nucleus n : cell.getNuclei()) {
+                			Mesh<Nucleus> m = new DefaultMesh(n, consensusMesh);
+                			Mesh<Nucleus> compMesh = m.comparison(consensusMesh);
+                			MeshAnnotator an3 = new MeshAnnotator( an.toProcessor(), imagePanel.getWidth(), imagePanel.getHeight(), compMesh);
+                			an3.annotateNucleusMeshEdges();
+                			an2 = an3;
+                		}
+                	}
+                } catch (MeshCreationException | IllegalArgumentException e) {
+                	stack("Error making mesh or loading image", e);
+                }
+                
+                try {
+                	
+                	if(warpMeshPanel.isSelected()) {
+                		Mesh<Nucleus> consensusMesh = new DefaultMesh(activeDataset().getCollection().getConsensus());
+                		for(Nucleus n : cell.getNuclei()) {
+                			Mesh<Nucleus> m = new DefaultMesh(n, consensusMesh);
+                			MeshImage im = new DefaultMeshImage(m, ip.duplicate());
+                			ImageProcessor drawn = im.drawImage(consensusMesh);
+                			drawn.flipVertical();
+                			an2 = new ImageAnnotator(drawn, imagePanel.getWidth(), imagePanel.getHeight());
+                		}
+                	}
+                } catch (MeshCreationException | IllegalArgumentException | MeshImageCreationException | UncomparableMeshImageException e) {
+                	stack("Error making mesh or loading image", e);
+                }
+                
 
                 imageLabel.setIcon(an2.toImageIcon());
+                
+                
+                
 
         };
 

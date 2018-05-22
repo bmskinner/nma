@@ -25,7 +25,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
-public class NucleusMeshEdge implements MeshEdge {
+public class DefaultMeshEdge implements MeshEdge {
     final private MeshVertex v1;
     final private MeshVertex v2;
     private double           value;
@@ -40,7 +40,7 @@ public class NucleusMeshEdge implements MeshEdge {
      * @param v
      *            the value
      */
-    public NucleusMeshEdge(final MeshVertex v1, final MeshVertex v2, final double v) {
+    public DefaultMeshEdge(final MeshVertex v1, final MeshVertex v2, final double v) {
 
         if (v1 == v2) {
             throw new IllegalArgumentException("Vertices are identical in edge constructor");
@@ -58,9 +58,9 @@ public class NucleusMeshEdge implements MeshEdge {
      * 
      * @param e
      */
-    public NucleusMeshEdge(final MeshEdge e) {
-        this.v1 = new NucleusMeshVertex(e.getV1());
-        this.v2 = new NucleusMeshVertex(e.getV2());
+    public DefaultMeshEdge(final MeshEdge e) {
+        this.v1 = new DefaultMeshVertex(e.getV1());
+        this.v2 = new DefaultMeshVertex(e.getV2());
 
         this.value = e.getValue();
     }
@@ -92,7 +92,7 @@ public class NucleusMeshEdge implements MeshEdge {
      */
     @Override
     public MeshEdge reverse() {
-        return new NucleusMeshEdge(new NucleusMeshVertex(v2), new NucleusMeshVertex(v1), value);
+        return new DefaultMeshEdge(new DefaultMeshVertex(v2), new DefaultMeshVertex(v1), value);
     }
 
     /*
@@ -345,7 +345,7 @@ public class NucleusMeshEdge implements MeshEdge {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        NucleusMeshEdge other = (NucleusMeshEdge) obj;
+        DefaultMeshEdge other = (DefaultMeshEdge) obj;
         if (v1 == null) {
             if (other.v1 != null)
                 return false;

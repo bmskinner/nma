@@ -27,7 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -45,29 +48,28 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @author bms41
  *
  */
-public class NucleusMesh implements Loggable, Mesh<Nucleus> {
+public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
 
     private int segmentCount = 0; // the number of segments to divide on
 
     private int vertexSpacing = 10; // the default average number of border
                                     // points between vertices
 
-    // For each segment, list the proportions through the segment at which a
-    // vertex is found
-    private Map<Integer, List<Double>> segmentVertexProportions = new HashMap<Integer, List<Double>>();
+    // For each segment, list the proportions through the segment at which a vertex is found
+    private Map<Integer, List<Double>> segmentVertexProportions = new HashMap<>();
 
     // Store the vertices in the mesh. List, so we can index it.
-    private List<MeshVertex> peripheralVertices = new ArrayList<MeshVertex>();
+    private List<MeshVertex> peripheralVertices = new ArrayList<>();
 
     // Store the skeleton vertices in the mesh
-    private List<MeshVertex> internalVertices = new ArrayList<MeshVertex>();
+    private List<MeshVertex> internalVertices = new ArrayList<>();
 
-    private Set<MeshEdge> edges = new LinkedHashSet<MeshEdge>();
+    private Set<MeshEdge> edges = new LinkedHashSet<>();
 
     // Track the faces of interest in the mesh
-    private Set<MeshFace> faces = new LinkedHashSet<MeshFace>();
+    private Set<MeshFace> faces = new LinkedHashSet<>();
 
-    Nucleus nucleus;
+    E component;
 
     /**
      * Construct a mesh from the given nucleus with default vertex spacing
@@ -75,7 +77,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * @param n
      * @throws MeshCreationException
      */
-    public NucleusMesh(Nucleus n) throws MeshCreationException {
+    public DefaultMesh(@NonNull E n) throws MeshCreationException {
         this(n, DEFAULT_VERTEX_SPACING);
     }
 
@@ -85,8 +87,8 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * @param n
      * @throws MeshCreationException
      */
-    public NucleusMesh(Nucleus n, int vertexSpacing) throws MeshCreationException {
-        this.nucleus = n;
+    public DefaultMesh(@NonNull E n, int vertexSpacing) throws MeshCreationException {
+        this.component = n;
         this.vertexSpacing = vertexSpacing;
 
         try {
@@ -98,7 +100,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 
             this.createEdgesAndFaces();
         } catch (IllegalArgumentException e) {
-            throw new MeshCreationException("Unable to create mesh for nucleus " + n.getNameAndNumber(), e);
+            throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
 
@@ -106,12 +108,12 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * Create a mesh from a nucleus, using another mesh as a template for
      * proportions
      * 
-     * @param mesh
-     * @param edges
+     * @param n the object to create a mesh from
+     * @param template the mesh to use for proportions
      * @throws MeshCreationException
      */
-    public NucleusMesh(Nucleus n, Mesh<Nucleus> template) throws MeshCreationException {
-        this.nucleus = n;
+    public DefaultMesh(@NonNull E n, @NonNull Mesh<Nucleus> template) throws MeshCreationException {
+        this.component = n;
         this.segmentVertexProportions = template.getVertexProportions();
         this.vertexSpacing = template.getVertexSpacing();
         this.segmentCount = template.getSegmentCount();
@@ -123,7 +125,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 
         } catch (IllegalArgumentException e) {
             stack("Error creating mesh", e);
-            throw new MeshCreationException("Unable to create mesh for nucleus " + n.getNameAndNumber(), e);
+            throw new MeshCreationException("Unable to create mesh for component", e);
         }
     }
 
@@ -132,18 +134,18 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * 
      * @param template
      */
-    public NucleusMesh(Mesh<Nucleus> template) {
-        this.nucleus = template.getComponent();
+    public DefaultMesh(Mesh<E> template) {
+        this.component = template.getComponent();
         this.segmentVertexProportions = template.getVertexProportions();
         this.vertexSpacing = template.getVertexSpacing();
         this.segmentCount = template.getSegmentCount();
 
         for (MeshEdge e : template.getEdges()) {
-            this.edges.add(new NucleusMeshEdge(e));
+            this.edges.add(new DefaultMeshEdge(e));
         }
 
         for (MeshFace e : template.getFaces()) {
-            this.faces.add(new NucleusMeshFace(e));
+            this.faces.add(new DefaultMeshFace(e));
         }
 
         this.peripheralVertices = template.getPeripheralVertices();
@@ -152,8 +154,8 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
     }
 
     @Override
-    public Nucleus getComponent() {
-        return nucleus;
+    public E getComponent() {
+        return component;
     }
 
     @Override
@@ -168,7 +170,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      */
     @Override
     public String getComponentName() {
-        return nucleus.getNameAndNumber();
+        return component.toString();
     }
 
     /**
@@ -179,17 +181,17 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * @param peripheral
      * @return
      */
-    private int addVertex(IPoint p, boolean peripheral) {
+    private int addVertex(@NonNull IPoint p, boolean peripheral) {
 
         if (peripheral) {
             int newIndex = peripheralVertices.size();
             String name = "P" + newIndex;
-            peripheralVertices.add(new NucleusMeshVertex(p, name, peripheral));
+            peripheralVertices.add(new DefaultMeshVertex(p, name, peripheral));
             return newIndex;
         } else {
             int newIndex = internalVertices.size();
             String name = "I" + newIndex;
-            internalVertices.add(new NucleusMeshVertex(p, name, peripheral));
+            internalVertices.add(new DefaultMeshVertex(p, name, peripheral));
             return newIndex;
         }
     }
@@ -209,7 +211,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
                     return e;
                 }
             }
-            MeshEdge e = new NucleusMeshEdge(v1, v2, 1);
+            MeshEdge e = new DefaultMeshEdge(v1, v2, 1);
             edges.add(e);
             return e;
         } else {
@@ -234,7 +236,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
                     return f;
                 }
             }
-            MeshFace f = new NucleusMeshFace(v1, v2, v3);
+            MeshFace f = new DefaultMeshFace(v1, v2, v3);
             faces.add(f);
             return f;
 
@@ -404,51 +406,36 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
         return this.faces;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#isComparableTo(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
-     */
+
     @Override
-    public boolean isComparableTo(Mesh<Nucleus> mesh) {
-
-        if (this.peripheralVertices.size() != mesh.getPeripheralVertexCount()) {
+    public boolean isComparableTo(@NonNull Mesh<E> mesh) { 	
+        if (this.peripheralVertices.size() != mesh.getPeripheralVertexCount())
             return false;
-        }
-
-        if (this.internalVertices.size() != mesh.getInternalVertexCount()) {
+        if (this.internalVertices.size() != mesh.getInternalVertexCount())
             return false;
-        }
-
-        if (this.edges.size() != mesh.getEdgeCount()) {
+        if (this.edges.size() != mesh.getEdgeCount())
             return false;
-        }
-
-        if (this.faces.size() != mesh.getFaceCount()) {
+        if (this.faces.size() != mesh.getFaceCount())
             return false;
-        }
         return true;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#compareTo(com.
-     * bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh)
-     */
+    
     @Override
-    public Mesh<Nucleus> comparison(Mesh<Nucleus> mesh) {
+    public Mesh<E> comparison(@NonNull E target) throws MeshCreationException {
+    	return comparison(new DefaultMesh(target, this));
+    }
+    
 
-        if (!this.isComparableTo(mesh)) {
+    @Override
+    public Mesh<E> comparison(@NonNull Mesh<E> mesh) {
+
+        if (!this.isComparableTo(mesh))
             throw new IllegalArgumentException("Cannot compare meshes");
-        }
 
         finer("Comparing this mesh " + this.getComponentName() + " to " + mesh.getComponentName());
         finer("Mesh has " + mesh.getFaceCount() + " faces");
 
-        NucleusMesh result = new NucleusMesh(this);
+        DefaultMesh result = new DefaultMesh(this);
 
         List<MeshEdge> ourEdges = new ArrayList<MeshEdge>(edges);
         List<MeshEdge> theirEdges = new ArrayList<MeshEdge>(mesh.getEdges());
@@ -486,83 +473,83 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      * 
      * @see com.bmskinner.nuclear_morphology.analysis.mesh.Mesh#straighten()
      */
-    @Override
-    public Mesh<Nucleus> straighten() {
-        fine("Straightening mesh");
-        NucleusMesh result = new NucleusMesh(this);
-
-        result.clearEdges();
-        result.clearFaces();
-
-        float nucleusHeight = (float) result.nucleus.getBounds().getHeight();
-        float nucleusWidth = (float) result.nucleus.getBounds().getWidth();
-        float vertices = result.getInternalVertexCount();
-
-        float xStep = nucleusWidth / 2;
-        float xStart = 0;
-        float yStart = 0;
-        float yStep = nucleusHeight / vertices;
-
-        IPoint pos = IPoint.makeNew(xStart, yStart);
-
-        // Straighten internal skeleton
-
-        for (int i = 0; i < result.internalVertices.size(); i++) {
-            // for(MeshVertex v : result.internalVertices){
-            MeshVertex v = result.internalVertices.get(i);
-            v = new NucleusMeshVertex(pos, v.getName(), v.isPeripheral());
-            result.peripheralVertices.set(i, v);
-            // v.setPosition(pos);
-            // update for the next point
-            pos = IPoint.makeNew(xStart, pos.getY() + yStep);
-        }
-        finer("Set skeleton");
-
-        // Position peripheral vertices around skeleton
-
-        // Positon the first vertex under the skeleton
-        MeshVertex v = result.peripheralVertices.get(0);
-        v = new NucleusMeshVertex(IPoint.makeNew(xStart, yStart - yStep), v.getName(), v.isPeripheral());
-        result.peripheralVertices.set(0, v);
-        // v.setPosition( IPoint.makeNew(xStart, yStart-yStep) );
-
-        int halfArray = (int) Math.floor(((double) result.peripheralVertices.size() / 2));
-
-        for (int i = 1, j = result.getPeripheralVertexCount() - 1; i < halfArray; i++, j--) {
-
-            // Get the vertices either side of the skeleton
-            MeshVertex v1 = result.peripheralVertices.get(i);
-            MeshVertex v2 = result.peripheralVertices.get(j);
-
-            v1 = new NucleusMeshVertex(IPoint.makeNew(xStart - xStep, (i * yStep) - (yStep / 2)), v1.getName(),
-                    v1.isPeripheral());
-            v2 = new NucleusMeshVertex(IPoint.makeNew(xStart + xStep, (i * yStep) - (yStep / 2)), v2.getName(),
-                    v2.isPeripheral());
-
-            result.peripheralVertices.set(i, v1);
-            result.peripheralVertices.set(j, v2);
-        }
-
-        finer("Peripheral vertex count = " + result.getPeripheralVertexCount());
-
-        // if needed, adjust the final vertex above the skeleton
-        if (result.peripheralVertices.size() % 2 == 0) {
-            finer("Setting final vertex");
-            MeshVertex p1 = result.peripheralVertices.get(halfArray);
-            p1 = new NucleusMeshVertex(IPoint.makeNew(xStart, (halfArray * yStep) - (yStep / 2)), p1.getName(),
-                    p1.isPeripheral());
-            result.peripheralVertices.set(halfArray, p1);
-        }
-
-        finer("Set periphery");
-
-        result.createEdgesAndFaces();
-
-        finer("Straightened mesh");
-        finer(result.toString());
-
-        return result;
-    }
+//    @Override
+//    public Mesh<E> straighten() {
+//        fine("Straightening mesh");
+//        DefaultMesh result = new DefaultMesh(this);
+//
+//        result.clearEdges();
+//        result.clearFaces();
+//
+//        float nucleusHeight = (float) result.component.getBounds().getHeight();
+//        float nucleusWidth = (float) result.component.getBounds().getWidth();
+//        float vertices = result.getInternalVertexCount();
+//
+//        float xStep = nucleusWidth / 2;
+//        float xStart = 0;
+//        float yStart = 0;
+//        float yStep = nucleusHeight / vertices;
+//
+//        IPoint pos = IPoint.makeNew(xStart, yStart);
+//
+//        // Straighten internal skeleton
+//
+//        for (int i = 0; i < result.internalVertices.size(); i++) {
+//
+//            MeshVertex v = result.internalVertices.get(i);
+//            v = new DefaultMeshVertex(pos, v.getName(), v.isPeripheral());
+//            result.peripheralVertices.set(i, v);
+//
+//            // update for the next point
+//            pos = IPoint.makeNew(xStart, pos.getY() + yStep);
+//        }
+//        finer("Set skeleton");
+//
+//        // Position peripheral vertices around skeleton
+//
+//        // Positon the first vertex under the skeleton
+//        MeshVertex v = result.peripheralVertices.get(0);
+//        v = new DefaultMeshVertex(IPoint.makeNew(xStart, yStart - yStep), v.getName(), v.isPeripheral());
+//        result.peripheralVertices.set(0, v);
+//        // v.setPosition( IPoint.makeNew(xStart, yStart-yStep) );
+//
+//        int halfArray = (int) Math.floor(((double) result.peripheralVertices.size() / 2));
+//
+//        for (int i = 1, j = result.getPeripheralVertexCount() - 1; i < halfArray; i++, j--) {
+//
+//            // Get the vertices either side of the skeleton
+//            MeshVertex v1 = result.peripheralVertices.get(i);
+//            MeshVertex v2 = result.peripheralVertices.get(j);
+//
+//            v1 = new DefaultMeshVertex(IPoint.makeNew(xStart - xStep, (i * yStep) - (yStep / 2)), v1.getName(),
+//                    v1.isPeripheral());
+//            v2 = new DefaultMeshVertex(IPoint.makeNew(xStart + xStep, (i * yStep) - (yStep / 2)), v2.getName(),
+//                    v2.isPeripheral());
+//
+//            result.peripheralVertices.set(i, v1);
+//            result.peripheralVertices.set(j, v2);
+//        }
+//
+//        finer("Peripheral vertex count = " + result.getPeripheralVertexCount());
+//
+//        // if needed, adjust the final vertex above the skeleton
+//        if (result.peripheralVertices.size() % 2 == 0) {
+//            finer("Setting final vertex");
+//            MeshVertex p1 = result.peripheralVertices.get(halfArray);
+//            p1 = new DefaultMeshVertex(IPoint.makeNew(xStart, (halfArray * yStep) - (yStep / 2)), p1.getName(),
+//                    p1.isPeripheral());
+//            result.peripheralVertices.set(halfArray, p1);
+//        }
+//
+//        finer("Set periphery");
+//
+//        result.createEdgesAndFaces();
+//
+//        finer("Straightened mesh");
+//        finer(result.toString());
+//
+//        return result;
+//    }
 
     /*
      * (non-Javadoc)
@@ -642,7 +629,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
         List<IBorderSegment> list;
 
         try {
-            list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+            list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
         } catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e) {
             throw new MeshCreationException("Unable to get segments from template nucleus", e);
         }
@@ -698,7 +685,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
     private void createPeripheralVertices() throws MeshCreationException {
         finer("Creating peripheral vertices");
         try {
-            List<IBorderSegment> list = nucleus.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
+            List<IBorderSegment> list = component.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getOrderedSegments();
 
             Set<Integer> segs = segmentVertexProportions.keySet();
             for (int segIndex : segs) {
@@ -723,11 +710,11 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
                     // back
                     // to the actual nucleus index
                     int correctedIndex = CellularComponent
-                            .wrapIndex(index + nucleus.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
+                            .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
 
                     finest("Fetching point at index " + correctedIndex);
 
-                    addVertex(nucleus.getOriginalBorderPoint(correctedIndex), true);
+                    addVertex(component.getOriginalBorderPoint(correctedIndex), true);
                 }
 
             }
@@ -745,7 +732,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
      */
     @Override
     public MeshFace getFace(IPoint p) {
-        if (nucleus.containsOriginalPoint(p)) {
+        if (component.containsOriginalPoint(p)) {
             for (MeshFace f : faces) {
                 if (f.contains(p)) {
                     return f;
@@ -758,7 +745,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
 
     protected boolean hasFaceContaining(IPoint p) {
 
-        if (nucleus.containsOriginalPoint(p)) {
+        if (component.containsOriginalPoint(p)) {
 
             for (MeshFace f : faces) {
                 if (f.contains(p)) {
@@ -788,7 +775,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
             MeshVertex v1 = peripheralVertices.get(i);
             MeshVertex v2 = peripheralVertices.get(peripheralVertices.size() - i);
 
-            MeshEdge e = new NucleusMeshEdge(v1, v2, 1);
+            MeshEdge e = new DefaultMeshEdge(v1, v2, 1);
 
             this.addVertex(e.getMidpoint(), false);
         }
@@ -953,7 +940,7 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
     }
 
     @Override
-    public int compareTo(Mesh<Nucleus> o) {
+    public int compareTo(Mesh<E> o) {
 
         if (this.isComparableTo(o)) {
             return 0;
@@ -964,5 +951,10 @@ public class NucleusMesh implements Loggable, Mesh<Nucleus> {
         }
         return -1;
     }
+
+	@Override
+	public double getMaxEdgeRatio() {
+		return edges.stream().mapToDouble(e->e.getLog2Ratio()).max().orElse(0);
+	}
 
 }

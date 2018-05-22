@@ -62,7 +62,7 @@ import com.bmskinner.nuclear_morphology.io.ImageImporter;
  */
 public class ImageAnnotator extends AbstractImageFilterer {
     
-    double scale = 1;
+    protected double scale = 1;
 
     public ImageAnnotator(ImageProcessor ip) {
         super(ip);

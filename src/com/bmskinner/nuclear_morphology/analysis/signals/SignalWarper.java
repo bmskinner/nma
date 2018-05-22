@@ -33,8 +33,8 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.Mesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshCreationException;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.MeshImageCreationException;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMesh;
-import com.bmskinner.nuclear_morphology.analysis.mesh.NucleusMeshImage;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
+import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -238,15 +238,15 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new NucleusMesh(target);
+            meshConsensus = new DefaultMesh(target);
         } catch (MeshCreationException e2) {
             stack("Error creating mesh", e2);
             return;
         }
 
-        if (straighten) {
-            meshConsensus = meshConsensus.straighten();
-        }
+//        if (straighten) {
+//            meshConsensus = meshConsensus.straighten();
+//        }
 
         Rectangle r = meshConsensus.toPath().getBounds();
 
@@ -265,11 +265,11 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 
                 Mesh<Nucleus> cellMesh;
                 try {
-                    cellMesh = new NucleusMesh(n, meshConsensus);
+                    cellMesh = new DefaultMesh(n, meshConsensus);
 
-                    if (straighten) {
-                        cellMesh = cellMesh.straighten();
-                    }
+//                    if (straighten) {
+//                        cellMesh = cellMesh.straighten();
+//                    }
 
                     // Get the image with the signal
                     ImageProcessor ip = n.getSignalCollection().getImage(signalGroup);
@@ -279,7 +279,7 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
                     finer("Making nucleus mesh image");
                     ImageProcessor warped;
                     try {
-                        MeshImage<Nucleus> im = new NucleusMeshImage(cellMesh, ip);
+                        MeshImage<Nucleus> im = new DefaultMeshImage(cellMesh, ip);
 
                         // Draw NucleusMeshImage onto consensus mesh.
                         finer("Warping image onto consensus mesh");

@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
  * @author ben
  *
  */
-public class NucleusMeshVertex implements MeshVertex {
+public class DefaultMeshVertex implements MeshVertex {
 
     final private String  name;       // the number in the mesh - use to compare
                                       // vertexes between nuclei
@@ -51,7 +51,7 @@ public class NucleusMeshVertex implements MeshVertex {
      *            true if the vertex is on the periphery of the mesh, false
      *            otherwise
      */
-    public NucleusMeshVertex(IPoint p, String name, boolean peripheral) {
+    public DefaultMeshVertex(IPoint p, String name, boolean peripheral) {
         this.name = name;
         this.position = p;
         this.peripheral = peripheral;
@@ -63,7 +63,7 @@ public class NucleusMeshVertex implements MeshVertex {
      * @param v
      *            the vertex to duplicate
      */
-    public NucleusMeshVertex(MeshVertex v) {
+    public DefaultMeshVertex(MeshVertex v) {
         this.name = v.getName();
         this.position = IPoint.makeNew(v.getPosition());
         this.peripheral = v.isPeripheral();
@@ -242,7 +242,7 @@ public class NucleusMeshVertex implements MeshVertex {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        NucleusMeshVertex other = (NucleusMeshVertex) obj;
+        DefaultMeshVertex other = (DefaultMeshVertex) obj;
         if (name == null) {
             if (other.name != null)
                 return false;

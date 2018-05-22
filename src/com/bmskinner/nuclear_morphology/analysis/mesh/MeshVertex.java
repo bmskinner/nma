@@ -24,18 +24,43 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 
 public interface MeshVertex {
 
+    /**
+     * Test if the vertex is at the periphery of the mesh
+     * @return
+     */
     boolean isPeripheral();
 
     String getName();
 
+    /**
+     * Get the position of the vertex in cartesian coordinates
+     * @return
+     */
     IPoint getPosition();
 
+    /**
+     * Add the given edge to the vertex
+     * @param e
+     */
     void addEdge(MeshEdge e);
 
+    /**
+     * Remove the given edge to the vertex
+     * @param e
+     */
     void removeEdge(MeshEdge e);
 
+    /**
+     * Get the edges attached to the vertex
+     * @return
+     */
     Set<MeshEdge> getEdges();
 
+    /**
+     * Test if there is an edge from this vertex to the given vertex
+     * @param v
+     * @return
+     */
     boolean hasEdgeTo(MeshVertex v);
 
     /**
@@ -47,12 +72,23 @@ public interface MeshVertex {
      */
     MeshEdge getEdgeTo(MeshVertex v);
 
+    /**
+     * Get the cartesian distance from this vertex to the given vertex
+     * @param v
+     * @return
+     */
     double getLengthTo(MeshVertex v);
 
+    /**
+     * Test if this vertex and the given vertex have the same cartesian coordinates
+     * @param v
+     * @return
+     */
     boolean overlaps(MeshVertex v);
 
+    /**
+     * Get the number of the vertex within its parent mesh
+     * @return
+     */
     int getNumber();
-
-    int hashCode();
-
 }

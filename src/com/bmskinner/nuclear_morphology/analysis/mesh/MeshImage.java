@@ -36,21 +36,18 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 public interface MeshImage<E extends CellularComponent> {
 
     /**
-     * Draw the image in this object at the coordinates in the given mesh
+     * Draw the image in this object onto the coordinates in the given mesh
      * 
-     * @param mesh
-     *            the mesh to use to position pixels in cartesian space
-     * @return
-     * @throws UncomparableMeshImageException
-     *             if the mesh does not match this MeshImage
+     * @param mesh the mesh to use to position pixels in cartesian space
+     * @return an image processor with the image drawn according to the mesh
+     * @throws UncomparableMeshImageException if the mesh does not match this MeshImage
      */
     ImageProcessor drawImage(Mesh<E> mesh) throws UncomparableMeshImageException;
 
     /**
      * Get the pixels for the given face in the mesh
      * 
-     * @param f
-     *            the face
+     * @param f the face
      * @return the pixels within the face
      */
     List<MeshPixel> getMeshPixels(MeshFace f);

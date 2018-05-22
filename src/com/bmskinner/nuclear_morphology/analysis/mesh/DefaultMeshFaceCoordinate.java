@@ -31,7 +31,7 @@ import com.bmskinner.nuclear_morphology.components.generic.LineEquation;
  * @author bms41
  *
  */
-public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
+public class DefaultMeshFaceCoordinate implements MeshFaceCoordinate {
 
     // edge opposite peripheral vertex with lower number
     // Value runs from 0 at internal vertex to 1 at peripheral vertex
@@ -57,7 +57,7 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
      * @param i1
      *            edge opposite internal vertex
      */
-    public NucleusMeshFaceCoordinate(final double p1, final double p2, final double i1) {
+    public DefaultMeshFaceCoordinate(final double p1, final double p2, final double i1) {
 
         if (p1 > 1 || p2 > 1 || i1 > 1) {
             throw new IllegalArgumentException("Coordinates must be less than 1");
@@ -141,7 +141,7 @@ public class NucleusMeshFaceCoordinate implements MeshFaceCoordinate {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        NucleusMeshFaceCoordinate other = (NucleusMeshFaceCoordinate) obj;
+        DefaultMeshFaceCoordinate other = (DefaultMeshFaceCoordinate) obj;
 
         if (Double.doubleToLongBits(i1) != Double.doubleToLongBits(other.i1))
             return false;
