@@ -70,11 +70,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * Construct with an ROI, a source image and channel, and the original
 	 * position in the source image
 	 * 
-	 * @param roi
-	 * @param f
-	 * @param channel
-	 * @param position
-	 * @param centreOfMass
+	 * @param roi the region of interest defining the object
+	 * @param centreOfMass the centre of mass of the object 
+	 * @param f the image file the object was detected in
+	 * @param channel the colour channel the object was detected in
+	 * @param position the bounding box of the object in the format of {@link Imageable::getPosition }
 	 */
 	public SegmentedCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
 		super(roi, centreOfMass, f, channel, position);
@@ -2260,11 +2260,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 
 			@Override
-			public boolean wraps(int start, int end) {
-				return end<=start;
-			}
-
-			@Override
 			public boolean wraps() {
 				return getEndIndex()<=startIndex;
 			}
@@ -2318,8 +2313,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			@Override
 			public Iterator<Integer> iterator() {
 				if(wraps())
-					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, getEndIndex())).iterator();
-				return IntStream.range(startIndex, startIndex+length).iterator();
+					return IntStream.concat(IntStream.range(startIndex, size()), IntStream.range(0, getEndIndex()+1)).iterator();
+				return IntStream.range(startIndex, wrap(startIndex+length+1)).iterator();
 			}
 
 			@Override

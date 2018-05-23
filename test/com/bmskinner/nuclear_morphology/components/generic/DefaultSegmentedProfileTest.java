@@ -184,7 +184,13 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	}
 
 	@Test
-	public void testGetDisplacement() {
+	public void testGetDisplacementForSingleSegmentProfile() throws UnavailableComponentException {
+		double exp = singleSegmentProfile.getMax()-singleSegmentProfile.getMin();
+		assertEquals(exp, singleSegmentProfile.getDisplacement(singleSegmentProfile.getSegment(comp.getID())), 0);
+	}
+	
+	@Test
+	public void testGetDisplacementForDoubleSegmentProfile() throws UnavailableComponentException {
 		fail("Not yet implemented");
 	}
 

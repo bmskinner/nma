@@ -265,13 +265,13 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * Check if the segment would wrap with the given start and end points (i.e
      * contains 0)
      * 
-     * @param start
-     *            the start index
-     * @param end
-     *            the end index
+     * @param start the start index
+     * @param endthe end index
      * @return
      */
-    boolean wraps(int start, int end);
+    default boolean wraps(int start, int end) {
+    	return end<=start;
+    }
 
     /**
      * Test if the segment currently wraps

@@ -2,9 +2,12 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import static org.junit.Assert.*;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
+import org.assertj.swing.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -176,8 +179,13 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	}
 	
 	@Test
-	public void testNextSegmentWithChildSegment() {
-		fail("Not yet implemented");
+	public void testNextSegmentWithChildSegment() throws UnavailableComponentException {
+		
+		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IBorderSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
+		
+		assertEquals(seg_1, seg_0.nextSegment());
+		assertEquals(seg_0, seg_1.nextSegment());
 	}
 
 	@Test
@@ -186,8 +194,12 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	}
 	
 	@Test
-	public void testPrevSegmentWithChildSegment() {
-		fail("Not yet implemented");
+	public void testPrevSegmentWithChildSegment() throws UnavailableComponentException {
+		IBorderSegment seg_0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
+		IBorderSegment seg_1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
+		
+		assertEquals(seg_1, seg_0.prevSegment());
+		assertEquals(seg_0, seg_1.prevSegment());
 	}
 
 	@Test
@@ -197,11 +209,6 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
 	@Test
 	public void testTestLength() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testWrapsIntInt() {
 		fail("Not yet implemented");
 	}
 
@@ -262,9 +269,37 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 	}
 
 	@Test
-	public void testIterator() {
+	public void testIteratorOnSingleSegment() throws UnavailableComponentException {
 
-		fail("Not yet implemented");
+		int[] segIndexes = IntStream.range(0, singleSegmentProfile.size()).toArray();
+		
+		Iterator<Integer> it =  singleSegmentProfile.getSegment(comp.getID()).iterator();
+		
+		for(int i=0; i<segIndexes.length; i++) {
+			int index = it.next();
+			assertEquals(segIndexes[i], index);
+		}
+
+	}
+	
+	@Test
+	public void testIteratorOnDoubleSegment() throws UnavailableComponentException {
+
+		int[] segIndexes_0 = IntStream.range(0, 51).toArray();
+		int[] segIndexes_1 = IntStream.range(50, doubleSegmentProfile.size()).toArray();
+		
+		Iterator<Integer> it_0 =  doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0).iterator();
+		for(int i=0; i<segIndexes_0.length; i++) {
+			int index = it_0.next();
+			assertEquals(segIndexes_0[i], index);
+		}
+
+		
+		Iterator<Integer> it_1 =  doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1).iterator();
+		for(int i=0; i<segIndexes_1.length; i++) {
+			int index = it_1.next();
+			assertEquals(segIndexes_1[i], index);
+		}
 	}
 
 	@Test
