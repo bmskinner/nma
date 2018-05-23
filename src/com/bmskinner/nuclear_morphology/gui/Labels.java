@@ -44,20 +44,24 @@ public class Labels {
     
 
     public static class Populations {
-    	public static final String SAVE_AS_LBL = "Save nmd as...";
+    	public static final String SAVE_AS_LBL            = "Save nmd as...";
     	
-    	public static final String ADD = "Add...";
+    	public static final String ADD_TO_WORKSPACE_LBL       = "Workspace...";
+    	public static final String NEW_WORKSPACE          = "Add to new";
+    	
+    	public static final String ADD                    = "Add...";
         public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";
         public static final String ADD_NUCLEAR_SIGNAL_TIP = "Run on root datasets only";
-        public static final String POST_FISH_MAPPING_LBL = "Post-FISH mapping";
+        public static final String POST_FISH_MAPPING_LBL  = "Post-FISH mapping";
         
-        public static final String CHANGE_SCALE_LBL = "Set scale";
+        public static final String CHANGE_SCALE_LBL       = "Set scale";
+        public static final String RELOCATE_CELLS_LBL     = "Relocate cells";
         
-        public static final String EXPORT = "Export...";
-        public static final String EXPORT_STATS = "Export nuclear stats";
-        public static final String EXPORT_SIGNALS = "Export nuclear signals";
-        public static final String EXPORT_SHELLS = "Export shells";
-        public static final String EXPORT_CELL_LOCS = "Export cell locations";
+        public static final String EXPORT                 = "Export...";
+        public static final String EXPORT_STATS           = "Nuclear statistics";
+        public static final String EXPORT_SIGNALS         = "Nuclear signals";
+        public static final String EXPORT_SHELLS          = "Signal shell data";
+        public static final String EXPORT_CELL_LOCS       = "Cell locations";
     }
     
     /**
@@ -142,17 +146,17 @@ public class Labels {
         public static final String USE_SIMILARITY_MATRIX       = "<html>If selected, use the difference between each nucleus profile<br>"
                 + "and every other nucleus for clustering.<br>Otherwise, use area, circularity and aspect ratio</html>";
     	
-    	public static final String CLUSTER_GROUP = "Cluster group";
-    	public static final String CLUSTER_FOUND = "Clusters found";
-    	public static final String CLUSTER_METHOD = "Method";
-    	public static final String HC_ITERATIONS = "Iterations";
-    	public static final String HC_METHOD = "Hierarchical method";
-    	public static final String TARGET_CLUSTERS = "Target cluster number";
-    	public static final String INCLUDE_PROFILE = "Include profile";
-    	public static final String PROFILE_TYPE = "Profile type";
-    	public static final String INCLUDE_MESH = "Include mesh";
+    	public static final String CLUSTER_GROUP    = "Cluster group";
+    	public static final String CLUSTER_FOUND    = "Clusters found";
+    	public static final String CLUSTER_METHOD   = "Method";
+    	public static final String HC_ITERATIONS    = "Iterations";
+    	public static final String HC_METHOD        = "Hierarchical method";
+    	public static final String TARGET_CLUSTERS  = "Target cluster number";
+    	public static final String INCLUDE_PROFILE  = "Include profile";
+    	public static final String PROFILE_TYPE     = "Profile type";
+    	public static final String INCLUDE_MESH     = "Include mesh";
     	public static final String INCLUDE_SEGMENTS = "Include segments";
-    	public static final String TREE = "Tree";
+    	public static final String TREE             = "Tree";
     }
     
 

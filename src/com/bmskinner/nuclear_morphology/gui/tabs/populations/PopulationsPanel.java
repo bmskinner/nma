@@ -223,15 +223,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                 if (e.getButton() == MouseEvent.BUTTON3) {
 
                     if (o instanceof IAnalysisDataset) {
-                        if (((IAnalysisDataset) o).isRoot()) {
-                            populationPopup.setDeleteString("Close");
-                        } else {
-                            populationPopup.setDeleteString("Delete");
-                        }
+                    	
                     } else {
                         populationPopup.setDeleteString("Delete");
                     }
-
+                    
                     populationPopup.show(table, e.getX(), e.getY());
                 }
             }
@@ -352,36 +348,36 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     }
 
     private synchronized void deleteSelectedDatasets() {
-        final List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
-        final List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
+    	final List<IAnalysisDataset> datasets = DatasetListManager.getInstance().getSelectedDatasets();
+    	final List<PopulationTreeTableNode> nodes = treeTable.getSelectedNodes();
 
-        // Check if cluster groups need removing
-        if (nodes.size() > datasets.size()) {
-            // cluster groups are also selected, add to list
-            for (PopulationTreeTableNode n : treeTable.getSelectedNodes()) {
+    	// Check if cluster groups need removing
+    	if (nodes.size() > datasets.size()) {
+    		// cluster groups are also selected, add to list
+    		for (PopulationTreeTableNode n : treeTable.getSelectedNodes()) {
 
-                if (n.hasClusterGroup()) {
-                    IClusterGroup g = n.getGroup();
-                    for (UUID childID : g.getUUIDs()) {
-                        IAnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
-                        datasets.add(child);
-                    }
+    			if (n.hasClusterGroup()) {
+    				IClusterGroup g = n.getGroup();
+    				for (UUID childID : g.getUUIDs()) {
+    					IAnalysisDataset child = DatasetListManager.getInstance().getDataset(childID);
+    					datasets.add(child);
+    				}
 
-                }
-            }
-        }
+    			}
+    		}
+    	}
 
-        if (datasets.isEmpty())
-            return;
+    	if (datasets.isEmpty())
+    		return;
 
-        
-        DatasetDeleter deleter = new DatasetDeleter();
-        deleter.deleteDatasets(datasets);
-        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
-        update();  
-        treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
-        treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
-        getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
+
+    	DatasetDeleter deleter = new DatasetDeleter();
+    	deleter.deleteDatasets(datasets);
+    	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.CLEAR_CACHE, datasets);
+    	update();  
+    	treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue("Dataset (0)");
+    	treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue("Cells (0)");
+    	getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.UPDATE_PANELS_WITH_NULL);
     }
 
     /**
@@ -389,139 +385,132 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
      * Set the possible menu options accordingly, and call the panel updates
      */
     public class TreeSelectionHandler implements TreeSelectionListener {
-        public void valueChanged(TreeSelectionEvent e) {
-            try {
+    	public void valueChanged(TreeSelectionEvent e) {
+    		try {
 
-                if (!isCtrlPressed())
-                    datasetSelectionOrder.clear();
+    			if (!isCtrlPressed())
+    				datasetSelectionOrder.clear();
 
-                int cellTotal = 0;
+    			// Track the datasets currently selected
+    			TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
+    			int totalSelectionCount = lsm.getSelectionCount();
+    			Map<Integer, Integer> selectedIndexes = getSelectedIndexes(lsm);
 
-                // Track the datasets currently selected
-                List<IAnalysisDataset> datasets = new ArrayList<IAnalysisDataset>(8);
+    			// Moving to track selection globally
+    			DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
-                TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
-                int totalSelectionCount = lsm.getSelectionCount();
-                Map<Integer, Integer> selectedIndexes = new HashMap<Integer, Integer>(0);
+    			PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
 
-                if (!lsm.isSelectionEmpty()) {
-                    // Find out which indexes are selected.
-                    int minIndex = lsm.getMinSelectionRow();
-                    int maxIndex = lsm.getMaxSelectionRow();
-                    for (int i = minIndex; i <= maxIndex; i++) {
-                        if (lsm.isRowSelected(i)) {
+    			// Update the table headers
+    			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(rend);
+    			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
+    			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue(String.format("Cells (%d)", getCellTotal()));
 
-                            if (treeTable.isDataset(i)) {
+    			populationPopup.updateSelectionContext(totalSelectionCount);
 
-                                IAnalysisDataset d = treeTable.getDatasetAtRow(i);
-                                datasets.add(d);
-                                cellTotal += d.getCollection().size();
+    			if (datasetSelectionOrder.size() == 1) { // single dataset
+    				IAnalysisDataset d = datasetSelectionOrder.iterator().next();
+    				populationPopup.updateSingle(d);
+    			} else {
+    				if(totalSelectionCount==1)// single clustergoup or workspace
+    					populationPopup.updateClusterGroup();
+    			}
+    			getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
-                                datasetSelectionOrder.add(d);
+    		} catch (Exception ex) {
+    			warn("Error in tree selection handler");
+    			stack("Error in tree selection handler", ex);
+    		}
+    	}
+    	
+    	private int getCellTotal() {
+    		int cellTotal = 0;
+    		for(IAnalysisDataset d : datasetSelectionOrder) {
+    			cellTotal += d.getCollection().size();
+    		}
+    		return cellTotal;
+    	}
 
-                                int selectionIndex = 0;
-                                for (IAnalysisDataset an : datasetSelectionOrder) {
+    	private Map<Integer, Integer> getSelectedIndexes(TreeSelectionModel lsm){
+    		Map<Integer, Integer> selectedIndexes = new HashMap<>(0);
+    		List<IAnalysisDataset> datasets = new ArrayList<>(8);
+    		
+    		if (!lsm.isSelectionEmpty()) {
+    			// Find out which indexes are selected.
+    			int minIndex = lsm.getMinSelectionRow();
+    			int maxIndex = lsm.getMaxSelectionRow();
+    			for (int i = minIndex; i <= maxIndex; i++) {
+    				if (lsm.isRowSelected(i)) {
 
-                                    if (an == d) {
-                                        selectedIndexes.put(i, selectionIndex);
-                                        break;
-                                    }
-                                    selectionIndex++;
-                                }
+    					if (treeTable.isDataset(i)) {
 
-                            }
+    						IAnalysisDataset d = treeTable.getDatasetAtRow(i);
+    						datasets.add(d);
+    						datasetSelectionOrder.add(d);
 
-                        }
-                    }
+    						int selectionIndex = 0;
+    						for (IAnalysisDataset an : datasetSelectionOrder) {
 
-                    // Ctrl deselect happened - a dataset has been deselected
-                    // and remains in the
-                    // datasetSelectionOrder map
-                    if (datasetSelectionOrder.size() > datasets.size()) {
-                        // Go through tree table and check for deselected
-                        // dataset
-                        Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
+    							if (an == d) {
+    								selectedIndexes.put(i, selectionIndex);
+    								break;
+    							}
+    							selectionIndex++;
+    						}
 
-                        while (it.hasNext()) {
-                            IAnalysisDataset d = it.next();
-                            if (!datasets.contains(d)) {
-                                it.remove();
-                            }
-                        }
+    					}
 
-                        // Adjust the indexes of the remaining datasets
-                        fixDiscontinuousPositions(selectedIndexes);
+    				}
+    			}
 
-                    }
+    			// Ctrl deselect happened - a dataset has been deselected
+    			// and remains in the
+    			// datasetSelectionOrder map
+    			if (datasetSelectionOrder.size() > datasets.size()) {
+    				// Go through tree table and check for deselected dataset
+    				Iterator<IAnalysisDataset> it = datasetSelectionOrder.iterator();
 
-                    // Moving to track selection globally
-                    DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
+    				while (it.hasNext()) {
+    					IAnalysisDataset d = it.next();
+    					if (!datasets.contains(d)) {
+    						it.remove();
+    					}
+    				}
 
-                    PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
-                    treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_COLOUR).setCellRenderer(rend);
-                    treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME)
-                            .setHeaderValue("Dataset (" + datasets.size() + ")");
+    				// Adjust the indexes of the remaining datasets
+    				fixDiscontinuousPositions(selectedIndexes);
 
-                    treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT)
-                            .setHeaderValue("Cells (" + cellTotal + ")");
+    			}
+    		}
+    		return selectedIndexes;
+    	}
 
-                    if (datasets.isEmpty() && totalSelectionCount == 0) {
-                        populationPopup.updateNull();
-                    } else {
+    	private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes) {
+    		// Find a discontinuity in the indexes - one value is missing
+    		List<Integer> values = new ArrayList<Integer>(selectedIndexes.values());
+    		Collections.sort(values);
 
-                        if (totalSelectionCount > 1) { // multiple of datasets
-                                                       // or clusters
-                            // single dataset
-                        	populationPopup.updateMultiple();
-
-                        } else { // single population
-
-                            if (datasets.size() == 1) { // single datasets
-                                IAnalysisDataset d = datasets.get(0);
-                                populationPopup.updateSingle();
-                            	populationPopup.setAddNuclearSignalEnabled(d.isRoot());
-                            	populationPopup.setFishRemappingEnabled(d.isRoot());
-                            } else {
-                                // single clustergoup or workspace
-                                populationPopup.updateClusterGroup();
-                            }
-                        }
-
-                        getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
-                    }
-                }
-            } catch (Exception ex) {
-                warn("Error in tree selection handler");
-                stack("Error in tree selection handler", ex);
-            }
-        }
-
-        private Map<Integer, Integer> fixDiscontinuousPositions(Map<Integer, Integer> selectedIndexes) {
-            // Find a discontinuity in the indexes - one value is missing
-            List<Integer> values = new ArrayList<Integer>(selectedIndexes.values());
-            Collections.sort(values);
-
-            int prev = -1;
-            for (int i : values) {
-                if (i - prev > 1) {
-                    // a value was skipped
-                    for (int k : selectedIndexes.keySet()) {
-                        int j = selectedIndexes.get(k);
-                        if (j == i) { // this is the entry that is too high
-                            selectedIndexes.put(k, j - 1); // Move index down by
-                                                           // 1
-                        }
-                    }
-                    fixDiscontinuousPositions(selectedIndexes); // there will
-                                                                // now be a new
-                                                                // discontinuity.
-                                                                // Fix until end
-                                                                // of list
-                }
-                prev = i;
-            }
-            return selectedIndexes;
-        }
+    		int prev = -1;
+    		for (int i : values) {
+    			if (i - prev > 1) {
+    				// a value was skipped
+    				for (int k : selectedIndexes.keySet()) {
+    					int j = selectedIndexes.get(k);
+    					if (j == i) { // this is the entry that is too high
+    						selectedIndexes.put(k, j - 1); // Move index down by
+    						// 1
+    					}
+    				}
+    				fixDiscontinuousPositions(selectedIndexes); // there will
+    				// now be a new
+    				// discontinuity.
+    				// Fix until end
+    				// of list
+    			}
+    			prev = i;
+    		}
+    		return selectedIndexes;
+    	}
 
     }
 
@@ -545,6 +534,11 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         case "DeleteCollectionAction": {
             deleteSelectedDatasets();
             break;
+        }
+        
+        case SignalChangeEvent.NEW_WORKSPACE: {
+        	log("New workspace");
+        	break;//TODO
         }
 
         default: {

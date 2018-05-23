@@ -32,13 +32,16 @@ public class SignalChangeEvent extends EventObject {
     public static final String EXPORT_SHELLS               = "ExportShellsAction";
     public static final String EXPORT_CELL_LOCS            = "SaveCellLocations";
     public static final String CHANGE_SCALE                = "ChangeScaleAction";
+    public static final String RELOCATE_CELLS              = "RelocateCellsAction";
     public static final String EXPORT_WORKSPACE            = "ExportWorkspace";
+    public static final String NEW_WORKSPACE               = "NewWorkspace";
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
     public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
     public static final String MERGE_COLLECTION_ACTION     = "MergeCollectionAction";
     public static final String EXTRACT_SUBSET              = "Extract subset";
+    public static final String SAVE_DATASET_ACTION         = "SaveCollectionAction";
 
 
     private static final long serialVersionUID = 1L;

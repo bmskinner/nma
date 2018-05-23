@@ -34,8 +34,8 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
  */
 public class DefaultWorkspace implements IWorkspace {
 
-    private Set<File> datasets = new LinkedHashSet<File>();
-    private Set<BioSample> samples = new LinkedHashSet<BioSample>();
+    private Set<File> datasets = new LinkedHashSet<>();
+    private Set<BioSample> samples = new LinkedHashSet<>();
 
     private File saveFile = null;
     private String name;
@@ -55,9 +55,8 @@ public class DefaultWorkspace implements IWorkspace {
 
     @Override
     public void add(final IAnalysisDataset d) {
-        if (d.isRoot()) {
+        if (d.isRoot())
             datasets.add(d.getSavePath());
-        }
 
         // TODO: warn or get root
     }
@@ -75,6 +74,11 @@ public class DefaultWorkspace implements IWorkspace {
     @Override
     public void remove(File f) {
         datasets.remove(f);
+    }
+    
+    @Override
+    public boolean has(final IAnalysisDataset d) {
+        return datasets.contains(d.getSavePath());
     }
 
     @Override
@@ -102,9 +106,8 @@ public class DefaultWorkspace implements IWorkspace {
     @Override
     public void addBioSample(String name) {
         for(BioSample s : samples){
-            if(s.getName().equals(name)){
+            if(s.getName().equals(name))
                 return;
-            }
         }
         samples.add(new DefaultBioSample(name)); 
     }

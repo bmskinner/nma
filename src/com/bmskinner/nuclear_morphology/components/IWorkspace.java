@@ -33,16 +33,20 @@ import java.util.Set;
 public interface IWorkspace {
 
     /**
-     * Set the name of the workspace
+     * Set the display name of the workspace
      * @param s
      */
     void setName(final String s);
     
+    /**
+     * Get the display name of the workspace
+     * @return
+     */
     String getName();
     
     /**
-     * Add the given datasest to the workspace
-     * @param d
+     * Add the given dataset to the workspace
+     * @param d the dataset to add
      */
     void add(final IAnalysisDataset d);
 
@@ -55,7 +59,7 @@ public interface IWorkspace {
     
     /**
      * Remove the given dataset from the workspace
-     * @param d the dataset
+     * @param d the dataset to remove
      */
     void remove(final IAnalysisDataset d);
 
@@ -64,6 +68,13 @@ public interface IWorkspace {
      * @param f the file to remove
      */
     void remove(final File f);
+    
+    /**
+     * Test if the given dataset is in the workspace
+     * @param d
+     * @return true if the dataset is in the workspace
+     */
+    boolean has(final IAnalysisDataset d);
 
     /**
      * Save the workspace
