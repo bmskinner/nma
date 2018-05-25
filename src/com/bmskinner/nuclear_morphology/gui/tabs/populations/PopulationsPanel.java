@@ -192,6 +192,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         PopulationTreeTable table = new PopulationTreeTable(treeTableModel);
 
         table.addMouseListener(new MouseAdapter() {
+        	
+        	private static final int DOUBLE_CLICK = 2;
             @Override
             public void mouseClicked(MouseEvent e) {
 
@@ -202,42 +204,28 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
                 Object o = table.getModel().getValueAt(row, PopulationTreeTable.COLUMN_NAME);
 
-                // double click
-                if (e.getClickCount() == 2) {
-
-                    if (o instanceof IClusterGroup) {
-                        clusterGroupClicked((IClusterGroup) o);
-                    }
-
-                    if (o instanceof IAnalysisDataset) {
-                        datasetClicked((IAnalysisDataset) o, row, column);
-                    }
-                    
-                    if (o instanceof IWorkspace) {
-                        workspaceClicked((IWorkspace) o);
-                    }
+                if (e.getClickCount() == DOUBLE_CLICK) { // double click
+                    if (o instanceof IClusterGroup)
+                        clusterGroupClicked((IClusterGroup) o, row, column);
+                    if (o instanceof IAnalysisDataset)
+                        datasetClicked((IAnalysisDataset) o, row, column);                     
+                    if (o instanceof IWorkspace)
+                        workspaceClicked((IWorkspace) o, row, column);
                 }
 
-                // right click - show the popup, but change delete to close for
-                // root datasets
-                if (e.getButton() == MouseEvent.BUTTON3) {
-
-                    if (o instanceof IAnalysisDataset) {
-                    	
-                    } else {
-                        populationPopup.setDeleteString("Delete");
-                    }
-                    
+                
+                if (e.getButton() == MouseEvent.BUTTON3) // right click - show the popup
                     populationPopup.show(table, e.getX(), e.getY());
-                }
             }
 
-            private void clusterGroupClicked(IClusterGroup g) {
+            private void clusterGroupClicked(IClusterGroup g, int row, int column) {
             	cosmeticHandler.renameClusterGroup(g);
+            	table.getModel().setValueAt(g, row, column); // ensure column length supports name by triggering update
             }
             
-            private void workspaceClicked(IWorkspace w) {
+            private void workspaceClicked(IWorkspace w, int row, int column) {
                 cosmeticHandler.renameWorkspace(w);
+                table.getModel().setValueAt(w, row, column); // ensure column length supports name 
             }
 
             private void datasetClicked(IAnalysisDataset d, int row, int column) {
@@ -246,6 +234,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
                 case PopulationTreeTable.COLUMN_NAME: {
                     cosmeticHandler.renameDataset(d);
+                    table.getModel().setValueAt(d, row, column); // ensure column length supports name 
                     break;
                 }
 
@@ -254,8 +243,7 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
                     break;
                 }
 
-                default:
-                    break;
+                default: break;
 
                 }
             }
@@ -263,7 +251,6 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
         TreeSelectionModel tableSelectionModel = table.getTreeSelectionModel();
         tableSelectionModel.addTreeSelectionListener(treeListener);
-        table.setTreeSelectionListener(treeListener);
         return table;
     }
 
@@ -393,10 +380,10 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
 
     			// Track the datasets currently selected
     			TreeSelectionModel lsm = (TreeSelectionModel) e.getSource();
-    			int totalSelectionCount = lsm.getSelectionCount();
+    			
+    			// Correlate dataset index with the order it was selected in
     			Map<Integer, Integer> selectedIndexes = getSelectedIndexes(lsm);
 
-    			// Moving to track selection globally
     			DatasetListManager.getInstance().setSelectedDatasets(datasetSelectionOrder);
 
     			PopulationTableCellRenderer rend = new PopulationTableCellRenderer(selectedIndexes);
@@ -406,15 +393,15 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_NAME).setHeaderValue(String.format("Dataset (%d)", datasetSelectionOrder.size()));
     			treeTable.getColumnModel().getColumn(PopulationTreeTable.COLUMN_CELL_COUNT).setHeaderValue(String.format("Cells (%d)", getCellTotal()));
 
-    			populationPopup.updateSelectionContext(totalSelectionCount);
+    			int totalSelectionCount = lsm.getSelectionCount();
 
-    			if (datasetSelectionOrder.size() == 1) { // single dataset
-    				IAnalysisDataset d = datasetSelectionOrder.iterator().next();
-    				populationPopup.updateSingle(d);
+    			if (totalSelectionCount==1) { // single dataset, cluster or workspace
+    				int index = treeTable.getSelectedRow();
+    				populationPopup.updateSelectionContext(treeTable.getValueAt(index, PopulationTreeTable.COLUMN_NAME));
     			} else {
-    				if(totalSelectionCount==1)// single clustergoup or workspace
-    					populationPopup.updateClusterGroup();
+    				populationPopup.updateSelectionContext(totalSelectionCount);
     			}
+
     			getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
 
     		} catch (Exception ex) {
@@ -518,38 +505,16 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
     public void signalChangeReceived(SignalChangeEvent event) {
 
         switch (event.type()) {
-
-        // catch any signals that affect the datasets directly
-
-        case "MoveDatasetDownAction": {
-            moveDataset(true);
-            break;
-        }
-
-        case "MoveDatasetUpAction": {
-            moveDataset(false);
-            break;
-        }
-
-        case "DeleteCollectionAction": {
-            deleteSelectedDatasets();
-            break;
-        }
-        
-        case SignalChangeEvent.NEW_WORKSPACE: {
-        	log("New workspace");
-        	break;//TODO
-        }
-
-        default: {
-            // Pass on events from the popup menu
-            if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT)) {
-                getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
-                
-            }
-            break;
-        }
-
+	        // catch any signals that affect the datasets directly
+	        case SignalChangeEvent.MOVE_DATASET_DOWN_ACTION: moveDataset(true); break;
+	        case SignalChangeEvent.MOVE_DATASET_UP_ACTION:  moveDataset(false); break;
+	        case SignalChangeEvent.DELETE_DATASET: deleteSelectedDatasets(); break;
+	        default: {
+	            // Pass on events from the popup menu
+	            if (event.sourceName().equals(PopulationListPopupMenu.SOURCE_COMPONENT))
+	                getSignalChangeEventHandler().fireSignalChangeEvent(event.type());
+	            break;
+	        }
         }
 
     }

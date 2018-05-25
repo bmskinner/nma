@@ -44,10 +44,27 @@ public class Labels {
     
 
     public static class Populations {
+    	
+    	public static final String MOVE_UP_LBL            = "Move up";
+    	public static final String MOVE_DOWN_LBL          = "Move down";
+    	
     	public static final String SAVE_AS_LBL            = "Save nmd as...";
     	
-    	public static final String ADD_TO_WORKSPACE_LBL       = "Workspace...";
+    	public static final String MERGE_LBL              = "Merge";
+    	
+    	public static final String ARITHMETIC_LBL         = "Boolean";
+    	public static final String DELETE_LBL             = "Delete";
+    	public static final String CLOSE_LBL              = "Close";
+    	public static final String CURATE_LBL             = "Curate";
+    	
+    	public static final String CHANGE_FOLDER_LBL      = "Change folder";
+    	
+    	public static final String EXTRACT_CELLS_LBL      = "Extract cells";
+    	
+    	public static final String ADD_TO_WORKSPACE_LBL   = "Workspace...";
     	public static final String NEW_WORKSPACE          = "Add to new";
+    	public static final String ADD_TO_LBL_PREFIX      = "Add to ";
+    	public static final String REMOVE_FROM_LBL_PREFIX = "Remove from ";
     	
     	public static final String ADD                    = "Add...";
         public static final String ADD_NUCLEAR_SIGNAL_LBL = "Add nuclear signal";

@@ -20,11 +20,20 @@ package com.bmskinner.nuclear_morphology.gui;
 
 import java.util.EventObject;
 
+/**
+ * An event class to signal a UI event has been triggered
+ * @author bms41
+ *
+ */
 public class SignalChangeEvent extends EventObject {
 
     public static final String SIGNAL_COLOUR_CHANGE = "SignalColourUpdate";
     public static final String GROUP_VISIBLE_PREFIX = "GroupVisble_";
     public static final String POST_FISH_MAPPING    = "PostFISHRemappingAction";
+    
+    public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
+    public static final String UPDATE_PANELS               = "UpdatePanels";
+    public static final String UPDATE_POPULATION_PANELS    = "UpdatePopulationPanel";
 
     public static final String LOBE_DETECTION              = "LobeDetection";
     public static final String EXPORT_STATS                = "ExportStatsAction";
@@ -38,11 +47,17 @@ public class SignalChangeEvent extends EventObject {
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
-    public static final String UPDATE_PANELS_WITH_NULL     = "UpdatePanelsNull";
-    public static final String MERGE_COLLECTION_ACTION     = "MergeCollectionAction";
     public static final String EXTRACT_SUBSET              = "Extract subset";
     public static final String SAVE_DATASET_ACTION         = "SaveCollectionAction";
-
+    public static final String MERGE_DATASETS_ACTION       = "MergeCollectionAction";
+    public static final String DELETE_DATASET              = "DeleteCollectionAction";
+    public static final String CURATE_DATASET              = "CurateCollectionAction";
+    
+    public static final String MOVE_DATASET_UP_ACTION      = "MoveDatasetUpAction";
+    public static final String MOVE_DATASET_DOWN_ACTION    = "MoveDatasetDownAction";
+    
+    public static final String ADD_TO_WORKSPACE_PREFIX     = "AddToWorkspace|";
+    public static final String REMOVE_FROM_WORKSPACE_PREFIX= "RemoveFromWorkspace|";
 
     private static final long serialVersionUID = 1L;
     private String            message;

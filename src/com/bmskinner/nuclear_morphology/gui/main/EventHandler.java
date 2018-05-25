@@ -157,13 +157,41 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
                 return new LobeDetectionAction(selectedDataset, mw);
             
-            if (event.type().equals(SignalChangeEvent.MERGE_COLLECTION_ACTION))
+            if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
                 return new MergeCollectionAction(selectedDatasets, mw);
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
                 return () -> setScale(selectedDatasets);
+                
+            if (event.type().equals(SignalChangeEvent.SAVE_DATASET_ACTION))
+            	return () -> saveDataset(selectedDataset, true);
             	
-
+        	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
+        		return () -> fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
+        		
+        	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS))
+                return () -> fireDatasetUpdateEvent(selectedDatasets);
+                
+                
+            if (event.type().equals(SignalChangeEvent.CURATE_DATASET))
+            	return () ->{
+                CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
+                d.addDatasetEventListener(EventHandler.this);
+            };
+            
+            if (event.type().equals(SignalChangeEvent.UPDATE_POPULATION_PANELS))
+                return () -> mw.getPopulationsPanel().update(selectedDatasets);
+                
+            if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
+            	return () ->{
+                    log("Exporting cell locations...");
+                    if (new CellFileExporter().exportCellLocations(selectedDataset)) {
+                        log("Export complete");
+                    } else {
+                        log("Export failed");
+                    }
+                };
+            
             if (event.type().startsWith("Open|")) {
                 String s = event.type().replace("Open|", "");
                 File f = new File(s);
@@ -171,21 +199,19 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 return new PopulationImportAction(mw, f);
             }
             
-            if (event.type().startsWith("Wrk|")) {
-                String s = event.type().replace("Wrk|", "");
-                File f = new File(s);
+            if (event.type().startsWith("Wrk|"))
+            	return () -> {
+            		String s = event.type().replace("Wrk|", "");
+            		File f = new File(s);
 
-                return () -> {
+            		IWorkspace w = new WorkspaceImporter(f).importWorkspace();
 
-                    IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+            		DatasetListManager.getInstance().addWorkspace(w);
 
-                    DatasetListManager.getInstance().addWorkspace(w);
-                    
-                    for (File dataFile : w.getFiles()) {
-                        new PopulationImportAction(mw, dataFile).run();
-                    }
-                };
-            }
+            		for (File dataFile : w.getFiles()) {
+            			new PopulationImportAction(mw, dataFile).run();
+            		}
+            	};
 
             if (event.type().startsWith("New|")) {
                 String s = event.type().replace("New|", "");
@@ -193,6 +219,32 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
                 return new NewAnalysisAction(mw, f);
             }
+            
+            if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
+            	return () ->{
+            		log("New workspace created");
+            	};
+            	
+                        
+            if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
+            	return () ->{
+            		String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
+            		IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
+            				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
+            		log("Removing dataset from workspace "+workspaceName);
+            	};
+            
+        	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
+        		return () ->{
+        			String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
+        			IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
+        					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
+        			log("Adding dataset to workspace "+workspaceName);
+        		};
+            
+            
+            if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS)) 
+                return new RelocateFromFileAction(selectedDataset, mw, new CountDownLatch(1));
 
             return null;
         }
@@ -316,55 +368,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
     @Override
     public synchronized void signalChangeReceived(final SignalChangeEvent event) {
-        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
-        final IAnalysisDataset selectedDataset = selected.isEmpty() ? null
-                : selected.get(0);
-
-        // Try to launch via factory
         new ActionFactory().run(event);
-
-        if (event.type().equals("CurateCollectionAction")) {
-
-            CellCollectionOverviewDialog d = new CellCollectionOverviewDialog(selectedDataset);
-            d.addDatasetEventListener(this);
-
-        }
-
-        if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS)) {
-            log("Exporting cell locations...");
-            if (new CellFileExporter().exportCellLocations(selectedDataset)) {
-                log("Export complete");
-            } else {
-                log("Export failed");
-            }
-
-        }
-
-        if (event.type().equals("RelocateCellsAction")) {
-
-            CountDownLatch latch = new CountDownLatch(1);
-            Runnable r = new RelocateFromFileAction(selectedDataset, mw, latch);
-            r.run();
-
-        }
-
-        if (event.type().equals("UpdatePanels")) {
-            fireDatasetUpdateEvent(selected);
-        }
-
-        if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
-        	fireDatasetUpdateEvent(new ArrayList<IAnalysisDataset>());
-
-
-        if (event.type().equals("UpdatePopulationPanel")) {
-            this.mw.getPopulationsPanel().update(selected);
-        }
-
-        if (event.type().equals("SaveCollectionAction")) {
-
-            this.saveDataset(selectedDataset, true);
-        }
-
     }
 
     @Override

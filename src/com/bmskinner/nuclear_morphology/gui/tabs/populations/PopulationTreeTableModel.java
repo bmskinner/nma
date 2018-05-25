@@ -45,7 +45,7 @@ public class PopulationTreeTableModel extends DefaultTreeTableModel implements L
         super();
 
         // Populations columns
-        List<String> columns = new ArrayList<String>();
+        List<String> columns = new ArrayList<>();
         columns.add(DATASET_COLUMN_LBL);
         columns.add(CELL_COLUMN_LBL);
         columns.add(COLOUR_COLUMN_LBL);

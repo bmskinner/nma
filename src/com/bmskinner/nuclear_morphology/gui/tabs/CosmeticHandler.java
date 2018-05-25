@@ -29,6 +29,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
@@ -118,9 +119,10 @@ public class CosmeticHandler implements Loggable {
         parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
     }
     
-    private String getNewName(String oldName) {
-    	return JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename",
-                JOptionPane.INFORMATION_MESSAGE, null, null, oldName).toString();
+    private @Nullable String getNewName(@NonNull String oldName) {
+    	Object s = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename",
+                JOptionPane.INFORMATION_MESSAGE, null, null, oldName);
+    	return s==null ? null : s.toString();
     }
 
     

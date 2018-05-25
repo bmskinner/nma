@@ -15,10 +15,13 @@ import javax.swing.JPopupMenu;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenu;
+import com.bmskinner.nuclear_morphology.gui.tabs.populations.AbstractPopupMenu.MenuFactory.PopupMenuItem;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 /**
@@ -41,7 +44,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem booleanMenuItem;
     private PopupMenuItem extractMenuItem;
     
-    private JMenu addWorkspaceSubMenu;
+    private PopupMenu addWorkspaceSubMenu;
     private PopupMenuItem newWorkspaceMenuItem;
     
     private PopupMenu exportSubMenu;
@@ -53,7 +56,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem saveMenuItem;
     private PopupMenuItem relocateMenuItem;
 
-    private JMenuItem replaceFolderMenuItem;
+    private PopupMenuItem replaceFolderMenuItem;
    
     private PopupMenu addSubMenu;
     private PopupMenuItem addNuclearSignalMenuItem;
@@ -70,87 +73,15 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
      *
      */
     public interface ContextEnabled {
-    	void setContext(int nObjects);
+    	
+        /**
+         * Tell the menu items to update their state based on the number of selected items
+         * @param nItems the number of selected items
+         */
+    	void updateSelectionContext(int nObjects);
+    	
     }
     
-    /**
-     * The class for submenus in the popup menu
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    public class PopupMenu extends JMenu implements ContextEnabled {
-    	ActiveContext context;
-    	
-    	
-    	/**
-    	 * Create a new popup item
-    	 * @param title the label for the menu
-    	 * @param context the activity context under which the menu is enabled 
-    	 */
-    	public PopupMenu(String title, ActiveContext context) {
-    		super(title);
-    		this.context = context;
-    	}
-    	
-    	/**
-    	 * Update the item state based on the total number of selected items
-    	 * @param nObjects
-    	 */
-    	public void setContext(int nObjects) {
-    		if(nObjects<=0) {
-    			setEnabled(false);
-    		}
-    		
-    		if(nObjects==1) {
-    			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
-    		}
-    		
-    		if(nObjects>1) {
-    			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
-    		}
-    	}
-    }
-    
-    
-    /**
-     * The class for items in the popup menu
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    public class PopupMenuItem extends JMenuItem implements ContextEnabled {
-    	ActiveContext context;
-    	
-    	
-    	/**
-    	 * Create a new popup item
-    	 * @param title the label for the menu item
-    	 * @param event the action to call
-    	 * @param context the activity context under which the item is enabled 
-    	 */
-    	public PopupMenuItem(String title, String event, ActiveContext context) {
-    		super(title);
-    		this.context = context;
-    		addActionListener(e -> fireSignalChangeEvent(event));
-    	}
-    	
-    	/**
-    	 * Update the item state based on the total number of selected items
-    	 * @param nObjects
-    	 */
-    	public void setContext(int nObjects) {    		
-    		if(nObjects<=0) {
-    			setEnabled(false);
-    		}
-    		if(nObjects==1) {
-    			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
-    		}
-    		if(nObjects>1) {
-    			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
-    		}
-    	}
-    }
     
     /**
      * Track when a menu item should be active.
@@ -166,6 +97,157 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	SINGLE_AND_MULTIPLE_OBJECTS
     }
 
+    /**
+     * Simplify creation of menu items
+     * @author bms41
+     * @since 1.14.0
+     */
+    protected class MenuFactory {
+    	
+    	/**
+         * The class for submenus in the popup menu
+         * @author bms41
+         * @since 1.14.0
+         *
+         */
+        public class PopupMenu extends JMenu implements ContextEnabled {
+        	ActiveContext context;
+        	boolean rootOnly;
+        	
+        	
+        	/**
+        	 * Create a new popup item
+        	 * @param title the label for the menu
+        	 * @param context the activity context under which the menu is enabled 
+        	 */
+        	public PopupMenu(String title, ActiveContext context) {
+        		super(title);
+        		this.context = context;
+        	}
+        	        	
+        	/**
+        	 * Update the item state based on the total number of selected items
+        	 * @param nObjects
+        	 */
+        	public void updateSelectionContext(int nObjects) {
+        		if(nObjects<=0)
+        			setEnabled(false);
+        		if(nObjects==1)
+        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
+        		if(nObjects>1)
+        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
+        	}        	
+        }
+        
+        
+        /**
+         * The class for items in the popup menu
+         * @author bms41
+         * @since 1.14.0
+         *
+         */
+        public class PopupMenuItem extends JMenuItem implements ContextEnabled {
+        	ActiveContext context;
+        	
+        	
+        	/**
+        	 * Create a new popup item
+        	 * @param title the label for the menu item
+        	 * @param event the action to call
+        	 * @param context the activity context under which the item is enabled 
+        	 */
+        	public PopupMenuItem(String title, String event, ActiveContext context) {
+        		super(title);
+        		this.context = context;
+        		addActionListener(e -> fireSignalChangeEvent(event));
+        	}
+        	
+        	/**
+        	 * Update the item state based on the total number of selected items
+        	 * @param nObjects
+        	 */
+        	@Override
+        	public void updateSelectionContext(int nObjects) { 
+        		if(nObjects<=0)
+        			setEnabled(false);
+        		if(nObjects==1)
+        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
+        		if(nObjects>1)
+        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
+        	}
+        }
+        
+
+    	public PopupMenuItem makeItem(String label, String event, ActiveContext context) {
+    		return new PopupMenuItem(label, event, context);
+    	}
+
+    	/**
+    	 * Create a menu item that is active only when a single object is selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenuItem makeSingleMenuItem(String label, String event) {
+    		return makeItem(label, event, ActiveContext.SINGLE_OBJECT_ONLY);
+    	}
+    	
+    	/**
+    	 * Create a menu item that is active only when multiple objects are selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenuItem makeMultipleMenuItem(String label, String event) {
+    		return makeItem(label, event, ActiveContext.MULTIPLE_OBJECTS_ONLY);
+    	}
+    	
+    	/**
+    	 * Create a menu item that is active when single or multiple objects are selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenuItem makeBothMenuItem(String label, String event) {
+    		return makeItem(label, event, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
+    	}
+    	
+    	public PopupMenu makeMenu(String label, ActiveContext context) {
+    		return new PopupMenu(label, context);
+    	}
+    	
+    	/**
+    	 * Create a menu that is active only when a single object is selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenu makeSingleMenu(String label) {
+    		return new PopupMenu(label, ActiveContext.SINGLE_OBJECT_ONLY);
+    	}
+    	
+    	/**
+    	 * Create a menu that is active only when multiple objects are selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenu makeMultipleMenu(String label) {
+    		return new PopupMenu(label, ActiveContext.SINGLE_OBJECT_ONLY);
+    	}
+    	
+    	/**
+    	 * Create a menu that is active when single or multiple objects are selected
+    	 * @param label the label for the menu item
+    	 * @param event the event to be triggered when the menu item is selected
+    	 * @return
+    	 */
+    	public PopupMenu makeBothMenu(String label) {
+    		return new PopupMenu(label, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
+    	}
+    }
+    
+    
     public AbstractPopupMenu() {
 
         super("Popup");
@@ -210,13 +292,9 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	this.add(addSubMenu);
     }
 
-    public void setDeleteString(String s) {
-        deleteMenuItem.setText(s);
-    }
-    
     private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
-
-        newWorkspaceMenuItem = new PopupMenuItem(Labels.Populations.NEW_WORKSPACE, SignalChangeEvent.NEW_WORKSPACE, ActiveContext.SINGLE_OBJECT_ONLY);
+    	MenuFactory fact = new MenuFactory();
+        newWorkspaceMenuItem = fact.makeSingleMenuItem(Labels.Populations.NEW_WORKSPACE, SignalChangeEvent.NEW_WORKSPACE);
         
         addWorkspaceSubMenu.add(newWorkspaceMenuItem);
         addWorkspaceSubMenu.addSeparator();
@@ -224,58 +302,64 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         if(d!=null) {
         	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
         	for(IWorkspace w : workspaces) {
-        		if(w.has(d)) {
-        			addWorkspaceSubMenu.add(new PopupMenuItem("Remove from "+w.getName(), "RemoveFromWorkspace|"+w.getName(), ActiveContext.SINGLE_OBJECT_ONLY));
-        		} else {
-        			addWorkspaceSubMenu.add(new PopupMenuItem("Add to "+w.getName(),"AddToWorkspace|"+w.getName(), ActiveContext.SINGLE_OBJECT_ONLY));
-        		}
+        		String name   = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
+        		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
+        		addWorkspaceSubMenu.add(fact.makeSingleMenuItem(name+w.getName(), action+w.getName()));
         	}
         }
     }
 
     public void createButtons() {
     	
-    	saveMenuItem = new PopupMenuItem(Labels.Populations.SAVE_AS_LBL, SignalChangeEvent.SAVE_DATASET_ACTION, ActiveContext.SINGLE_OBJECT_ONLY);
+    	MenuFactory fact = new MenuFactory();
+    	saveMenuItem = fact.makeSingleMenuItem(Labels.Populations.SAVE_AS_LBL, SignalChangeEvent.SAVE_DATASET_ACTION);
         
-    	moveUpMenuItem   = new PopupMenuItem("Move up", "MoveDatasetUpAction", ActiveContext.SINGLE_OBJECT_ONLY);
-        moveDownMenuItem = new PopupMenuItem("Move down", "MoveDatasetDownAction", ActiveContext.SINGLE_OBJECT_ONLY);
-        
-        addWorkspaceSubMenu =  new PopupMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL, ActiveContext.SINGLE_OBJECT_ONLY);
+    	moveUpMenuItem   = fact.makeSingleMenuItem(Labels.Populations.MOVE_UP_LBL,   SignalChangeEvent.MOVE_DATASET_UP_ACTION);
+    	moveDownMenuItem = fact.makeSingleMenuItem(Labels.Populations.MOVE_DOWN_LBL, SignalChangeEvent.MOVE_DATASET_DOWN_ACTION);
+
+        addWorkspaceSubMenu =  fact.makeSingleMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL);
         createWorkspaceMenu(null);
         
-        mergeMenuItem = new PopupMenuItem("Merge", "MergeCollectionAction", ActiveContext.MULTIPLE_OBJECTS_ONLY);
-
-        curateMenuItem = new PopupMenuItem("Curate", "CurateCollectionAction", ActiveContext.SINGLE_OBJECT_ONLY);
-        deleteMenuItem = new PopupMenuItem("Delete", "DeleteCollectionAction", ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-        booleanMenuItem = new PopupMenuItem("Boolean", "DatasetArithmeticAction", ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-
-  
-        extractMenuItem = new PopupMenuItem("Extract cells", SignalChangeEvent.EXTRACT_SUBSET, ActiveContext.SINGLE_OBJECT_ONLY);
-
-        changeScaleItem = new PopupMenuItem(Labels.Populations.CHANGE_SCALE_LBL, SignalChangeEvent.CHANGE_SCALE, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-        relocateMenuItem = new PopupMenuItem(Labels.Populations.RELOCATE_CELLS_LBL, SignalChangeEvent.RELOCATE_CELLS, ActiveContext.SINGLE_OBJECT_ONLY);
+        mergeMenuItem   = fact.makeMultipleMenuItem(Labels.Populations.MERGE_LBL, SignalChangeEvent.MERGE_DATASETS_ACTION);
+        curateMenuItem  = fact.makeSingleMenuItem(Labels.Populations.CURATE_LBL, SignalChangeEvent.CURATE_DATASET);
         
-        exportSubMenu = new PopupMenu(Labels.Populations.EXPORT, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-        exportStatsMenuItem = new PopupMenuItem(Labels.Populations.EXPORT_STATS, SignalChangeEvent.EXPORT_STATS, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-        exportSignalsItem = new PopupMenuItem(Labels.Populations.EXPORT_SIGNALS, SignalChangeEvent.EXPORT_SIGNALS, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);  
-        exportShellsItem = new PopupMenuItem(Labels.Populations.EXPORT_SHELLS, SignalChangeEvent.EXPORT_SHELLS, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
-        saveCellsMenuItem = new PopupMenuItem(Labels.Populations.EXPORT_CELL_LOCS, SignalChangeEvent.EXPORT_CELL_LOCS, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
+        deleteMenuItem = fact.makeBothMenuItem(Labels.Populations.DELETE_LBL, SignalChangeEvent.DELETE_DATASET);
+        
+        booleanMenuItem = fact.makeBothMenuItem(Labels.Populations.ARITHMETIC_LBL, SignalChangeEvent.DATASET_ARITHMETIC);
+
+        extractMenuItem  = fact.makeSingleMenuItem(Labels.Populations.EXTRACT_CELLS_LBL, SignalChangeEvent.EXTRACT_SUBSET);
+        
+        changeScaleItem = fact.makeBothMenuItem(Labels.Populations.CHANGE_SCALE_LBL, SignalChangeEvent.CHANGE_SCALE);
+        relocateMenuItem = fact.makeSingleMenuItem(Labels.Populations.RELOCATE_CELLS_LBL, SignalChangeEvent.RELOCATE_CELLS);
+        
+        exportSubMenu = fact.makeBothMenu(Labels.Populations.EXPORT);
+
+        exportStatsMenuItem = fact.makeBothMenuItem(Labels.Populations.EXPORT_STATS, SignalChangeEvent.EXPORT_STATS);
+        exportSignalsItem   = fact.makeBothMenuItem(Labels.Populations.EXPORT_SIGNALS, SignalChangeEvent.EXPORT_SIGNALS);
+        exportShellsItem    = fact.makeBothMenuItem(Labels.Populations.EXPORT_SHELLS, SignalChangeEvent.EXPORT_SHELLS);
+        saveCellsMenuItem   = fact.makeBothMenuItem(Labels.Populations.EXPORT_CELL_LOCS, SignalChangeEvent.EXPORT_CELL_LOCS);
 
         exportSubMenu.add(exportStatsMenuItem);
         exportSubMenu.add(exportSignalsItem);
         exportSubMenu.add(exportShellsItem);
         exportSubMenu.add(saveCellsMenuItem);
         
-        addNuclearSignalMenuItem = new PopupMenuItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, SignalChangeEvent.ADD_NUCLEAR_SIGNAL, ActiveContext.SINGLE_OBJECT_ONLY);
+        addNuclearSignalMenuItem = fact.makeSingleMenuItem(Labels.Populations.ADD_NUCLEAR_SIGNAL_LBL, SignalChangeEvent.ADD_NUCLEAR_SIGNAL);
         addNuclearSignalMenuItem.setToolTipText(Labels.Populations.ADD_NUCLEAR_SIGNAL_TIP);
-        fishRemappinglMenuItem = new PopupMenuItem(Labels.Populations.POST_FISH_MAPPING_LBL, SignalChangeEvent.POST_FISH_MAPPING, ActiveContext.SINGLE_OBJECT_ONLY);
+        fishRemappinglMenuItem = fact.makeSingleMenuItem(Labels.Populations.POST_FISH_MAPPING_LBL, SignalChangeEvent.POST_FISH_MAPPING);
         
-        addSubMenu = new PopupMenu(Labels.Populations.ADD, ActiveContext.SINGLE_OBJECT_ONLY);
+        addSubMenu = fact.makeSingleMenu(Labels.Populations.ADD);
         addSubMenu.add(addNuclearSignalMenuItem);
         addSubMenu.add(fishRemappinglMenuItem);
         
-        replaceFolderMenuItem = new PopupMenuItem("Change folder", "ChangeNucleusFolderAction", ActiveContext.SINGLE_OBJECT_ONLY);
+        replaceFolderMenuItem = fact.makeSingleMenuItem(Labels.Populations.CHANGE_FOLDER_LBL, SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER);
 
+    }
+    
+    public void setEnabled(boolean b) {
+        for (Component c : this.getComponents()) {
+            c.setEnabled(b);
+        }
     }
     
     /**
@@ -285,34 +369,51 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     public void updateSelectionContext(int nItems) {
     	for (Component c : this.getComponents()) {
     		if(c instanceof ContextEnabled)
-    			((ContextEnabled) c).setContext(nItems);
-        }
-    }
-
-    public void setEnabled(boolean b) {
-        for (Component c : this.getComponents()) {
-            c.setEnabled(b);
+    			((ContextEnabled) c).updateSelectionContext(nItems);
         }
     }
     
-    public void updateSingle(IAnalysisDataset d) {
+    /**
+     * Tell the menu items to update their state based on the selected item class,
+     * if recognised
+     * @param o the selected object
+     */
+    public void updateSelectionContext(Object o) {
+    	if(o instanceof IAnalysisDataset)
+    		updateSelectionContext((IAnalysisDataset)o);
+    	if(o instanceof IClusterGroup)
+    		updateSelectionContext((IClusterGroup)o);
+    	if(o instanceof IWorkspace)
+    		updateSelectionContext((IWorkspace)o);
+    }
+
+    protected void updateSelectionContext(IAnalysisDataset d) {
+    	updateSelectionContext(1);
     	addWorkspaceSubMenu.removeAll(); 
     	createWorkspaceMenu(d);
     	
     	setAddNuclearSignalEnabled(d.isRoot());
     	setFishRemappingEnabled(d.isRoot());
     	
-    	if (d.isRoot()) {
-            setDeleteString("Close");
-        } else {
-            setDeleteString("Delete");
-        }
+    	setDeleteString( d.isRoot() ? Labels.Populations.CLOSE_LBL : Labels.Populations.DELETE_LBL);
     }
-    
-    public void updateClusterGroup(){
-    	setEnabled(false);
+
+    protected void updateSelectionContext(IClusterGroup group){
+    	updateSelectionContext(0);
     	moveUpMenuItem.setEnabled(true);
     	moveDownMenuItem.setEnabled(true);
+    	setDeleteString(Labels.Populations.DELETE_LBL);
+    }
+    
+    protected void updateSelectionContext(IWorkspace workspace){
+    	updateSelectionContext(0);
+    	moveUpMenuItem.setEnabled(true);
+    	moveDownMenuItem.setEnabled(true);
+    	setDeleteString(Labels.Populations.DELETE_LBL);
+    }
+    
+    protected void setDeleteString(String s) {
+        deleteMenuItem.setText(s);
     }
 
     protected void setAddNuclearSignalEnabled(boolean b) {

@@ -29,6 +29,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.TreeTableModel;
 
@@ -107,7 +108,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * 
      * @return the index
      */
-    public int getRowIndex(IAnalysisDataset dataset) {
+    public int getRowIndex(@NonNull IAnalysisDataset dataset) {
 
         for (int row = 0; row < this.getRowCount(); row++) {
 
@@ -254,10 +255,17 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      */
     public boolean isDataset(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
-        if (columnOneObject instanceof IAnalysisDataset) {
-            return true;
-        }
-        return false;
+        return columnOneObject instanceof IAnalysisDataset;
+    }
+    
+    public boolean isClusterGroup(int rowIndex) {
+        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+        return columnOneObject instanceof IClusterGroup;
+    }
+    
+    public boolean isWorkspace(int rowIndex) {
+        Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
+        return columnOneObject instanceof IWorkspace;
     }
 
     /**
@@ -266,7 +274,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IAnalysisDataset getDatasetAtRow(int rowIndex) {
+    public @Nullable IAnalysisDataset getDatasetAtRow(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof IAnalysisDataset) {
@@ -281,7 +289,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IClusterGroup getClusterGroupAtRow(int rowIndex) {
+    public @Nullable IClusterGroup getClusterGroupAtRow(int rowIndex) {
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof ClusterGroup) {
@@ -296,7 +304,7 @@ public class PopulationTreeTable extends JXTreeTable implements Loggable {
      * @param rowIndex
      * @return
      */
-    public IWorkspace getWorkspaceAtRow(int rowIndex){
+    public @Nullable IWorkspace getWorkspaceAtRow(int rowIndex){
         Object columnOneObject = getModel().getValueAt(rowIndex, PopulationTreeTable.COLUMN_NAME);
 
         if (columnOneObject instanceof IWorkspace) {
