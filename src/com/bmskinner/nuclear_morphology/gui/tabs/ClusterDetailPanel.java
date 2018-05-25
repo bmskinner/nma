@@ -316,6 +316,7 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
         clusterButton.setEnabled(b);
         buildTreeButton.setEnabled(b);
         manualClusterBtn.setEnabled(b);
+        fileClusterBtn.setEnabled(b);
         // saveClassifierButton.setEnabled(b); // not yet enabled
     }
 
@@ -374,8 +375,6 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
                 setEnabled(false);
             }
         }
-        finest("Updated cluster panel");
-
     }
 
     @Override

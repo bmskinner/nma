@@ -1,0 +1,32 @@
+package com.bmskinner.nuclear_morphology.io;
+
+import static org.junit.Assert.*;
+
+import java.io.File;
+
+import org.junit.Test;
+
+import com.bmskinner.nuclear_morphology.components.IWorkspace;
+
+public class WorkspaceImporterTest {
+	
+	public static final String SAMPLE_DATASET_PATH = "test/com/bmskinner/nuclear_morphology/samples/datasets/";
+	public static final String FILE_NAME_1_14_0 = "1.14.0/Example.wrk";
+	public static final String FILE_NAME_1_13_8 = "1.13.8/Example.wrk";
+
+	@Test
+	public void test_1_14_0_WorkspaceImported() {
+		File f = new File(SAMPLE_DATASET_PATH+FILE_NAME_1_14_0);
+		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
+
+		assertEquals("Example workspace", w.getName());
+		assertEquals(1, w.getBioSamples().size());
+	}
+	
+	@Test
+	public void test_1_13_8_WorkspaceImported() {
+		File f = new File(SAMPLE_DATASET_PATH+FILE_NAME_1_13_8);
+		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
+	}
+	
+}

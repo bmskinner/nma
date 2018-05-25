@@ -102,7 +102,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
     private void receiveWorkspaceFile(final File f) {
         finer("Opening workgroup file " + f.getAbsolutePath());
 
-        IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+        IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
         DatasetListManager.getInstance().addWorkspace(w);
 
         for (File dataFile : w.getFiles()) {

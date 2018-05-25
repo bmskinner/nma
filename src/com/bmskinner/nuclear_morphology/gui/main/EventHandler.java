@@ -204,7 +204,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             		String s = event.type().replace("Wrk|", "");
             		File f = new File(s);
 
-            		IWorkspace w = new WorkspaceImporter(f).importWorkspace();
+            		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
 
             		DatasetListManager.getInstance().addWorkspace(w);
 

@@ -22,6 +22,9 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * A workspace is a collection of nmd files that can be reopened together. This
  * interface mey be extended depending on how useful workspaces turn out to be.
@@ -36,45 +39,45 @@ public interface IWorkspace {
      * Set the display name of the workspace
      * @param s
      */
-    void setName(final String s);
+    void setName(@NonNull final String s);
     
     /**
      * Get the display name of the workspace
      * @return
      */
-    String getName();
-    
+    @NonNull String getName();
+        
     /**
      * Add the given dataset to the workspace
      * @param d the dataset to add
      */
-    void add(final IAnalysisDataset d);
+    void add(@NonNull final IAnalysisDataset d);
 
     /**
      * Add the given file to the workspace
      * @param f the file
      */
-    void add(final File f);
+    void add(@NonNull final File f);
 
     
     /**
      * Remove the given dataset from the workspace
      * @param d the dataset to remove
      */
-    void remove(final IAnalysisDataset d);
+    void remove(@NonNull final IAnalysisDataset d);
 
     /**
      * Remove the given file from the workspace
      * @param f the file to remove
      */
-    void remove(final File f);
+    void remove(@NonNull final File f);
     
     /**
      * Test if the given dataset is in the workspace
      * @param d
      * @return true if the dataset is in the workspace
      */
-    boolean has(final IAnalysisDataset d);
+    boolean has(@NonNull final IAnalysisDataset d);
 
     /**
      * Save the workspace
@@ -85,19 +88,19 @@ public interface IWorkspace {
      * Get the files in the workspace
      * @return
      */
-    Set<File> getFiles();
+    @NonNull Set<File> getFiles();
 
     /**
      * Set the save path of the workspace
      * @param f
      */
-    void setSaveFile(final File f);
+    void setSaveFile(@NonNull final File f);
 
     /**
      * Get the save file of the workspace
      * @return
      */
-    File getSaveFile();
+    @NonNull File getSaveFile();
         
     /**
      * This describes the information available for 
@@ -145,27 +148,27 @@ public interface IWorkspace {
      * Get the samples in the workspace
      * @return
      */
-    Set<BioSample> getBioSamples();
+    @NonNull Set<BioSample> getBioSamples();
     
     /**
      * Add a new sample to the workspace
      * @param name
      */
-    void addBioSample(final String name);
+    void addBioSample(@NonNull final String name);
     
     /**
      * Get the biosample associated with the given dataset
      * @param dataset
      * @return
      */
-    BioSample getBioSample(final File dataset);
+    @Nullable BioSample getBioSample(@NonNull final File dataset);
     
     /**
      * Get the biosample with the given name
      * @param dataset
      * @return
      */
-    BioSample getBioSample(final String name);
+    @Nullable BioSample getBioSample(@NonNull final String name);
 
 
 }
