@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.tabs.populations.PopulationTreeTableNode;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -58,7 +58,7 @@ public final class DatasetListManager implements Loggable {
     /**
      * The datasets currently selected in the UI. Includes child datasets
      */
-    private final List<IAnalysisDataset> selected = new ArrayList<IAnalysisDataset>();
+    private final List<IAnalysisDataset> selected = new ArrayList<>();
 
     /**
      * This map stores the UUID of a dataset as a key against the hashcode of

@@ -34,8 +34,9 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
-import com.bmskinner.nuclear_morphology.components.DefaultWorkspace;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -82,7 +83,7 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
     			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));){
 
     		String firstLine = br.readLine();
-    		if(firstLine.startsWith("<?xml version = \"1.0\"?>"))
+    		if(firstLine.startsWith("<?xml version"))
     			return VERSION_1_14_0;
 
     	} catch (Exception e) {
@@ -104,12 +105,6 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
     private static class v_1_14_0_WorkspaceImporter extends WorkspaceImporter {
     	
     	private final File  file;
-    	private static final String WORKSPACE_NAME     = "name";
-    	private static final String DATASETS_ELEMENT   = "datasets";
-    	private static final String DATASET_PATH       = "path";
-    	private static final String BIOSAMPLES_ELEMENT = "biosamples";
-    	private static final String BIOSAMPLES_NAME_KEY    = "name";
-    	private static final String BIOSAMPLES_DATASET_KEY = "dataset";
     	
     	private v_1_14_0_WorkspaceImporter(@NonNull final File f) {
     		file=f;
@@ -118,48 +113,44 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
 		@Override
 		public IWorkspace importWorkspace() {
 			
-			IWorkspace w = new DefaultWorkspace(file);
+			IWorkspace w = WorkspaceFactory.createWorkspace(file);
 			
 		    try {
 		         SAXBuilder saxBuilder = new SAXBuilder();
 		         Document document = saxBuilder.build(file);
 		         
 		         Element workspaceElement = document.getRootElement();
-		         String workspaceName =  workspaceElement.getChild(WORKSPACE_NAME).getText();
-//		         System.out.println(workspaceName);
+		         String workspaceName =  workspaceElement.getChild(IWorkspace.WORKSPACE_NAME).getText();
 		         w.setName(workspaceName);
 		         
-		         Element datasetElement =  workspaceElement.getChild(DATASETS_ELEMENT);
-		         Element sampleElement  =  workspaceElement.getChild(BIOSAMPLES_ELEMENT);
+		         Element datasetElement =  workspaceElement.getChild(IWorkspace.DATASETS_ELEMENT);
+		         Element sampleElement  =  workspaceElement.getChild(IWorkspace.BIOSAMPLES_ELEMENT);
 		         
 		         List<Element> datasets = datasetElement.getChildren();
-//		         System.out.println("----------------------------");
+
 
 		         for(Element dataset : datasets) {
-		        	 String path = dataset.getChild(DATASET_PATH).getText();
-//		        	 System.out.println("Path : "+ path);
+		        	 String path = dataset.getChild(IWorkspace.DATASET_PATH).getText();
 		        	 File f = new File(path);
 		        	 w.add(f);
 		         }
 		         
-//		         System.out.println("----------------------------");
+
 		         
 		         List<Element> biosamples = sampleElement.getChildren();
 		         for(Element sample : biosamples) {
-		        	 String name = sample.getAttributeValue(BIOSAMPLES_NAME_KEY);
-//		        	 System.out.println("Biosample name : "+name);
+		        	 String name = sample.getAttributeValue(IWorkspace.BIOSAMPLES_NAME_KEY);
+
 		        	 w.addBioSample(name);
-		        	 List<Element> sampleDatasets = sample.getChildren(BIOSAMPLES_DATASET_KEY);
+		        	 List<Element> sampleDatasets = sample.getChildren(IWorkspace.BIOSAMPLES_DATASET_KEY);
 		        	 for(Element d : sampleDatasets) {
 		        		 String datasetId =  d.getValue();
 		        		 File f = new File(datasetId);
-//		        		 System.out.println("Dataset : "+datasetId);
+
 		        		 w.getBioSample(name).addDataset(f);
 		        	 }
 		         }
-		         
-//		         System.out.println(w.toString());
-		         
+		         		         
 		      } catch(JDOMException e) {
 		         e.printStackTrace();
 		      } catch(IOException ioe) {

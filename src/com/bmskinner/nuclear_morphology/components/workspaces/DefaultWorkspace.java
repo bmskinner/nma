@@ -16,12 +16,16 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.components.workspaces;
 
 import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
+
+import com.bmskinner.nuclear_morphology.components.DefaultBioSample;
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 /**
@@ -40,9 +44,18 @@ public class DefaultWorkspace implements IWorkspace {
     private File saveFile = null;
     private String name;
 
-    public DefaultWorkspace(final File f) {
+    public DefaultWorkspace(@NonNull final File f) {
         this.saveFile = f;
         this.name = f.getName().replace(Importer.WRK_FILE_EXTENSION, "");
+    }
+    
+    public DefaultWorkspace(@NonNull final String name) {
+        this.name = name;
+    }
+    
+    public DefaultWorkspace(@NonNull final File f, @NonNull final String name) {
+    	this(f);
+        this.name = name;
     }
     
     public void setName(String s){

@@ -36,9 +36,9 @@ import javax.swing.SpinnerNumberModel;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -72,7 +72,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryA
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
-import com.bmskinner.nuclear_morphology.gui.actions.SaveWorkspaceAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
@@ -128,7 +128,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         	
 
             if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
-                return new SaveWorkspaceAction(DatasetListManager.getInstance().getRootDatasets(), mw);
+                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), mw);
 
             if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
                 return new DatasetArithmeticAction(selectedDatasets, mw);

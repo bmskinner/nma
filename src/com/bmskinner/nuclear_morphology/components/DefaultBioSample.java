@@ -23,7 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.IWorkspace.BioSample;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 
 /**
  * The default implementation of BioSamples.

@@ -19,53 +19,41 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-import com.bmskinner.nuclear_morphology.components.DefaultWorkspace;
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 
-public class SaveWorkspaceAction extends VoidResultAction {
+public class ExportWorkspaceAction extends VoidResultAction {
 
     private static final String PROGRESS_LBL = "Saving workspace";
 
-    private final List<IAnalysisDataset> datasets;
+    private final List<IWorkspace> workspaces = new ArrayList<>();
 
-    public SaveWorkspaceAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
+    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, MainWindow mw) {
         super(PROGRESS_LBL, mw);
-        this.datasets = datasets;
-
+        workspaces.add(workspace);
+    }
+    
+    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, MainWindow mw) {
+        super(PROGRESS_LBL, mw);
+        workspaces.addAll(list);
     }
 
     @Override
     public void run() {
-
-        if (datasets.size() == 0) {
-            cancel();
-            return;
-        }
-
-        File file = FileSelector.chooseWorkspaceExportFile(datasets);
-
-        if (file == null) {
-            cancel();
-            return;
-        }
-
-        // Get all datasets
-        IWorkspace w = new DefaultWorkspace(file);
-
-        for (IAnalysisDataset d : datasets) {
-            w.add(d);
-        }
-
-        WorkspaceExporter exp = new WorkspaceExporter(w);
-        exp.export();
-        log("Exported workspace file to " + file.getAbsolutePath());
-
+    	WorkspaceExporter exp = WorkspaceExporter.createExporter();
+    	for(IWorkspace w : workspaces) {    		
+    		exp.exportWorkspace(w);
+    		log("Exported workspace file to " + w.getSaveFile().getAbsolutePath());
+    	}
         this.cancel();
 
     }

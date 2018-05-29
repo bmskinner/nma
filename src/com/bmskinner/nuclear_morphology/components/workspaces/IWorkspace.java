@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.components.workspaces;
 
 import java.io.File;
 import java.util.List;
@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 
 /**
  * A workspace is a collection of nmd files that can be reopened together. This
@@ -34,6 +36,14 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  */
 public interface IWorkspace {
+	
+	static final String WORKSPACE_ELEMENT  = "workspace";
+	static final String WORKSPACE_NAME     = "name";
+	static final String DATASETS_ELEMENT   = "datasets";
+	static final String DATASET_PATH       = "path";
+	static final String BIOSAMPLES_ELEMENT = "biosamples";
+	static final String BIOSAMPLES_NAME_KEY    = "name";
+	static final String BIOSAMPLES_DATASET_KEY = "dataset";
 
     /**
      * Set the display name of the workspace

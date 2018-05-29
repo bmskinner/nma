@@ -6,7 +6,7 @@ import java.io.File;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 
 public class WorkspaceImporterTest {
 	
@@ -19,7 +19,7 @@ public class WorkspaceImporterTest {
 		File f = new File(SAMPLE_DATASET_PATH+FILE_NAME_1_14_0);
 		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
 
-		assertEquals("Example workspace", w.getName());
+		assertEquals("Testing", w.getName());
 		assertEquals(1, w.getBioSamples().size());
 	}
 	
