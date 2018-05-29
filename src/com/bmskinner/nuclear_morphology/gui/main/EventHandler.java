@@ -241,6 +241,19 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
         			log("Adding dataset to workspace "+workspaceName);
         		};
+        		
+    		
+    		if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
+            	return () ->{
+            		String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
+            		log("Removing dataset from biosample "+bsName);
+            	};
+            
+        	if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
+        		return () ->{
+        			String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
+        			log("Setting dataset to biosample "+bsName);
+        		};
             
             
             if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS)) 

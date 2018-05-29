@@ -65,9 +65,11 @@ public final class DatasetListManager implements Loggable {
      * the dataset. This is used to compare actual and saved hashcodes, and
      * detect whether a dataset has changed since the last check.
      */
-    private final Map<UUID, Integer> map = new HashMap<>();
+    private final Map<UUID, Integer> datasetHashcodeMap = new HashMap<>();
     
     private final List<IWorkspace> workspaces = new ArrayList<>();
+    
+    private final Map<UUID, Integer> workspaceHashcodeMap = new HashMap<>();
 
     protected DatasetListManager() { }
 
@@ -171,7 +173,7 @@ public final class DatasetListManager implements Loggable {
      * @return
      */
     public synchronized boolean hasDatasets() {
-        return map.size() > 0;
+        return datasetHashcodeMap.size() > 0;
     }
 
     /**
@@ -290,7 +292,7 @@ public final class DatasetListManager implements Loggable {
     public synchronized final void addDataset(@NonNull IAnalysisDataset d) {
         if (d.isRoot() && !list.contains(d)) {
             list.add(d);
-            map.put(d.getId(), d.hashCode());
+            datasetHashcodeMap.put(d.getId(), d.hashCode());
         }
     }
 
@@ -306,7 +308,7 @@ public final class DatasetListManager implements Loggable {
         	return;
 
         list.remove(d);
-        map.remove(d.getId());
+        datasetHashcodeMap.remove(d.getId());
         selected.remove(d);
     }
 
@@ -316,11 +318,11 @@ public final class DatasetListManager implements Loggable {
      * @return
      */
     public synchronized final int datasetCount() {
-        return map.size();
+        return datasetHashcodeMap.size();
     }
     
     public synchronized final int workspaceCount() {
-        return map.size();
+        return workspaceHashcodeMap.size();
     }
 
     /**
@@ -328,7 +330,8 @@ public final class DatasetListManager implements Loggable {
      */
     public void clear() {
         list.clear();
-        map.clear();
+        datasetHashcodeMap.clear();
+        workspaceHashcodeMap.clear();
         selected.clear();
     }
 
@@ -341,14 +344,31 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final boolean hashCodeChanged(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
-            if (map.containsKey(d.getId())) {
-                return d.hashCode() != map.get(d.getId());
+            if (datasetHashcodeMap.containsKey(d.getId())) {
+                return d.hashCode() != datasetHashcodeMap.get(d.getId());
             } else {
                 warn("Missing root dataset hashcode");
             }
 
         }
         return false;
+    }
+    
+    /**
+     * Check if the stored hashcode for the given workspace is different to the
+     * actual workspace hashcode
+     * 
+     * @param d
+     * @return true if the hashcode is different to the stored value
+     */
+    public synchronized final boolean hashCodeChanged(@NonNull IWorkspace w) {
+    	if (workspaceHashcodeMap.containsKey(w.getId())) {
+    		return w.hashCode() != workspaceHashcodeMap.get(w.getId());
+    	} else {
+    		warn("Missing workspace hashcode");
+    	}
+
+    	return false;
     }
 
     /**
@@ -358,11 +378,14 @@ public final class DatasetListManager implements Loggable {
      * @return
      */
     public synchronized final boolean hashCodeChanged() {
-
         for (IAnalysisDataset d : list) {
-            if (hashCodeChanged(d)) {
+            if (hashCodeChanged(d))
                 return true;
-            }
+        }
+        
+        for (IWorkspace w :workspaces) {
+            if (hashCodeChanged(w))
+                return true;
         }
         return false;
     }
@@ -375,8 +398,18 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final void updateHashCode(@NonNull IAnalysisDataset d) {
         if (d.isRoot()) {
-            map.put(d.getId(), d.hashCode());
+            datasetHashcodeMap.put(d.getId(), d.hashCode());
         }
+    }
+    
+    /**
+     * Update the stored hashcode for the given dataset to its current actual
+     * value
+     * 
+     * @param d
+     */
+    public synchronized final void updateHashCode(@NonNull IWorkspace w) {
+    	workspaceHashcodeMap.put(w.getId(), w.hashCode());
     }
 
     /**
@@ -389,6 +422,9 @@ public final class DatasetListManager implements Loggable {
         for (IAnalysisDataset d : list) {
             updateHashCode(d);
         }
+        for (IWorkspace w : workspaces) {
+            updateHashCode(w);
+        }
     }
     
     
@@ -399,6 +435,7 @@ public final class DatasetListManager implements Loggable {
      */
     public synchronized final void addWorkspace(@NonNull IWorkspace w) {
         workspaces.add(w);
+        workspaceHashcodeMap.put(w.getId(), w.hashCode());
     }
     
     /**

@@ -53,14 +53,17 @@ public class DefaultBioSample implements BioSample {
         return datasets;
 
     }
-
+    
     @Override
     public void addDataset(File dataset) {
-        if(dataset==null){
+        if(dataset==null)
             return;
-        }
         datasets.add(dataset);
+    }
 
+    @Override
+    public void addDataset(IAnalysisDataset dataset) {
+    	addDataset(dataset.getSavePath());
     }
 
     @Override

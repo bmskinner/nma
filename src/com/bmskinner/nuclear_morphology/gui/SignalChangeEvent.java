@@ -58,6 +58,9 @@ public class SignalChangeEvent extends EventObject {
     
     public static final String ADD_TO_WORKSPACE_PREFIX     = "AddToWorkspace|";
     public static final String REMOVE_FROM_WORKSPACE_PREFIX= "RemoveFromWorkspace|";
+    
+    public static final String ADD_TO_BIOSAMPLE_PREFIX     = "AddToBioSample|";
+    public static final String REMOVE_FROM_BIOSAMPLE_PREFIX= "RemoveFromBioSample|";
 
     private static final long serialVersionUID = 1L;
     private String            message;

@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.workspaces;
 import java.io.File;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -43,6 +44,7 @@ public class DefaultWorkspace implements IWorkspace {
 
     private File saveFile = null;
     private String name;
+    private UUID id = UUID.randomUUID();
 
     public DefaultWorkspace(@NonNull final File f) {
         this.saveFile = f;
@@ -56,6 +58,10 @@ public class DefaultWorkspace implements IWorkspace {
     public DefaultWorkspace(@NonNull final File f, @NonNull final String name) {
     	this(f);
         this.name = name;
+    }
+    
+    public UUID getId() {
+    	return id;
     }
     
     public void setName(String s){
@@ -126,8 +132,8 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public BioSample getBioSample(File f) {
-        return samples.stream().filter( s-> s.hasDataset(f)).findFirst().orElse(null);
+    public BioSample getBioSample(IAnalysisDataset d) {
+        return samples.stream().filter( s-> s.hasDataset(d.getSavePath())).findFirst().orElse(null);
     }
     
     @Override

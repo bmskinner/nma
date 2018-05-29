@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.components.workspaces;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -44,7 +45,13 @@ public interface IWorkspace {
 	static final String BIOSAMPLES_ELEMENT = "biosamples";
 	static final String BIOSAMPLES_NAME_KEY    = "name";
 	static final String BIOSAMPLES_DATASET_KEY = "dataset";
-
+	
+	/**
+	 * Get the UUID of the workspace
+	 * @return
+	 */
+	UUID getId();
+	
     /**
      * Set the display name of the workspace
      * @param s
@@ -137,6 +144,12 @@ public interface IWorkspace {
          * Add a dataset to the sample
          * @param dataset
          */
+       void addDataset(IAnalysisDataset dataset);
+        
+        /**
+         * Add a dataset to the sample
+         * @param dataset
+         */
        void addDataset(File dataset);
         
         /**
@@ -171,7 +184,7 @@ public interface IWorkspace {
      * @param dataset
      * @return
      */
-    @Nullable BioSample getBioSample(@NonNull final File dataset);
+    @Nullable BioSample getBioSample(@NonNull final IAnalysisDataset dataset);
     
     /**
      * Get the biosample with the given name

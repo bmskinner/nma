@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
@@ -298,6 +299,9 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         
         addWorkspaceSubMenu.add(newWorkspaceMenuItem);
         addWorkspaceSubMenu.addSeparator();
+        JMenuItem wsItem = new JMenuItem("Workspaces");
+    	wsItem.setEnabled(false);
+    	addWorkspaceSubMenu.add(wsItem);
         
         if(d!=null) {
         	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
@@ -306,7 +310,33 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
         		addWorkspaceSubMenu.add(fact.makeSingleMenuItem(name+w.getName(), action+w.getName()));
         	}
+        	
+        	addWorkspaceSubMenu.addSeparator();
+        	JMenuItem bsItem = new JMenuItem("Biosamples");
+        	bsItem.setEnabled(false);
+        	addWorkspaceSubMenu.add(bsItem);
+        	
+        	for(IWorkspace w : workspaces) {
+        		
+        		for(BioSample bs : w.getBioSamples()) {
+        			if(w.has(d)) {
+        				String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
+                		String action = bs.hasDataset(d.getSavePath()) ? SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX : SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX;
+                		addWorkspaceSubMenu.add(fact.makeSingleMenuItem(name+bs.getName(), action+bs.getName()));
+        			}
+        			
+        			
+        		}
+        		
+        		
+        	}
         }
+
+        
+        
+        
+        
+        
     }
 
     public void createButtons() {
