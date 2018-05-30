@@ -20,17 +20,22 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 import ij.io.DirectoryChooser;
 
 public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Replacing images";
 
-    public ReplaceSourceImageDirectoryAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Replacing images", mw);
+    public ReplaceSourceImageDirectoryAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         this.setProgressBarIndeterminate();
-
     }
 
     @Override
@@ -69,9 +74,8 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
     @Override
     public void finished() {
         // Do not use super.finished(), or it will trigger another save action
-        fine("Folder update complete");
         cancel();
-        getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
-        getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
+        getInterfaceEventHandler().removeInterfaceEventListener(eh);
+        getDatasetEventHandler().removeDatasetEventListener(eh);
     }
 }

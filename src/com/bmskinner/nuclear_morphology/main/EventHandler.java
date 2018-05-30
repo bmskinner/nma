@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui.main;
+package com.bmskinner.nuclear_morphology.main;
 
 import java.awt.Cursor;
 import java.io.File;
@@ -49,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.actions.AddNuclearSignalAction;
@@ -77,6 +78,8 @@ import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
+import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
@@ -84,11 +87,10 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
- * Listens to messages from the UI and launches actions
+ * Listens to messages from the UI and launches actions. This is the hub of messaging;
+ * messages are passed from the UI to here, and dispatched back to the UI or to actions.
  * 
  * @author bms41
  * @since 1.13.7
@@ -96,12 +98,70 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public class EventHandler implements Loggable, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 
-    private final MainWindow mw;
+    private ProgressBarAcceptor acceptor;
 
-    private List<Object> updateListeners = new ArrayList<Object>();
+    private List<DatasetUpdateEventListener> updateListeners = new ArrayList<>();
+    private List<InterfaceEventListener> interfaceListeners = new ArrayList<>();
+    private List<DatasetEventListener> datasetListeners = new ArrayList<>();
+    private List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
+    
+    /**
+     * Constructor 
+     */
+    public EventHandler() {}
 
-    public EventHandler(final MainWindow mw) {
-        this.mw = mw;
+
+    /**
+     * Constructor specifying a progress bar acceptor for displaying progress bars
+     * @param acceptor
+     */
+    public EventHandler(final ProgressBarAcceptor acceptor) {
+        this.acceptor = acceptor;
+    }
+    
+    /**
+     * Add the given progress bar acceptor to this handler
+     * @param p
+     */
+    public void addProgressBarAcceptor(ProgressBarAcceptor p) {
+    	acceptor = p;
+    }
+    
+    public void addInterfaceEventListener(InterfaceEventListener l) {
+    	interfaceListeners.add(l);
+    }
+    
+    private void fireInterfaceEvent(InterfaceEvent e) {
+    	for(InterfaceEventListener l : interfaceListeners) {
+    		l.interfaceEventReceived(e);
+    	}
+    }
+    
+    public void addDatasetSelectionListener(DatasetSelectionListener l) {
+    	selectionListeners.add(l);
+    }
+    
+    private void fireDatasetSelectionEvent(IAnalysisDataset d) {
+    	List<IAnalysisDataset> list = new ArrayList<>();
+    	list.add(d);
+    	fireDatasetSelectionEvent(list);
+    }
+    
+    private void fireDatasetSelectionEvent(List<IAnalysisDataset> list) {
+    	DatasetSelectionEvent e = new DatasetSelectionEvent(this, list);
+    	for(DatasetSelectionListener l : selectionListeners) {
+    		l.datasetSelectionEventReceived(e);
+    	}
+    }
+    
+    public void addDatasetEventListener(DatasetEventListener l) {
+    	datasetListeners.add(l);
+    }
+        
+    private void fireDatasetEvent(DatasetEvent event) {
+    	for(DatasetEventListener l : datasetListeners) {
+    		l.datasetEventReceived(event);
+    	}
     }
 
     /**
@@ -129,37 +189,37 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         	
 
             if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
-                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), mw);
+                return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.DATASET_ARITHMETIC))
-                return new DatasetArithmeticAction(selectedDatasets, mw);
+                return new DatasetArithmeticAction(selectedDatasets, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.EXTRACT_SUBSET))
-                return new ExtractRandomCellsAction(selectedDataset, mw);
+                return new ExtractRandomCellsAction(selectedDataset, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.CHANGE_NUCLEUS_IMAGE_FOLDER))
-                return new ReplaceSourceImageDirectoryAction(selectedDataset, mw);
+                return new ReplaceSourceImageDirectoryAction(selectedDataset, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.ADD_NUCLEAR_SIGNAL))
-                return new AddNuclearSignalAction(selectedDataset, mw);
+                return new AddNuclearSignalAction(selectedDataset, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.POST_FISH_MAPPING))
-                return new FishRemappingAction(selectedDatasets, mw);
+                return new FishRemappingAction(selectedDatasets, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.EXPORT_STATS))
-                return new ExportNuclearStatsAction(selectedDatasets, mw);
+                return new ExportNuclearStatsAction(selectedDatasets, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SIGNALS))
-            	return new ExportSignalsAction(selectedDatasets, mw);
+            	return new ExportSignalsAction(selectedDatasets, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.EXPORT_SHELLS))
-                return new ExportShellsAction(selectedDatasets, mw);
+                return new ExportShellsAction(selectedDatasets, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.LOBE_DETECTION))
-                return new LobeDetectionAction(selectedDataset, mw);
+                return new LobeDetectionAction(selectedDataset, acceptor, EventHandler.this);
             
             if (event.type().equals(SignalChangeEvent.MERGE_DATASETS_ACTION))
-                return new MergeCollectionAction(selectedDatasets, mw);
+                return new MergeCollectionAction(selectedDatasets, acceptor, EventHandler.this);
 
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
                 return () -> setScale(selectedDatasets);
@@ -180,8 +240,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 d.addDatasetEventListener(EventHandler.this);
             };
             
+            //TODO - update only populations panel
             if (event.type().equals(SignalChangeEvent.UPDATE_POPULATION_PANELS))
-                return () -> mw.getPopulationsPanel().update(selectedDatasets);
+            	return () -> fireDatasetUpdateEvent(selectedDatasets);
+//                return () -> mw.getPopulationsPanel().update(selectedDatasets);
                 
             if (event.type().equals(SignalChangeEvent.EXPORT_CELL_LOCS))
             	return () ->{
@@ -196,20 +258,20 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
                 String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
                 if(s.equals(""))
-                	return new PopulationImportAction(mw);
+                	return new PopulationImportAction(acceptor, EventHandler.this);
                 File f = new File(s);
-                return new PopulationImportAction(mw, f);
+                return new PopulationImportAction(acceptor, EventHandler.this, f);
             }
             
             if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
             	return () -> {
             		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
             		if(s.equals("")) {
-            			new WorkspaceImportAction(mw).run();
+            			new WorkspaceImportAction(acceptor, EventHandler.this).run();
             			return;
             		}
             		File f = new File(s);
-            		new WorkspaceImportAction(mw, f).run();
+            		new WorkspaceImportAction(acceptor, EventHandler.this, f).run();
             	};
 
             	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
@@ -219,7 +281,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             				return;
             			File f = new File(s);
 
-            			new NewAnalysisAction(mw, f);
+            			new NewAnalysisAction(acceptor, EventHandler.this, f);
             		};
             	}
             
@@ -260,7 +322,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             
             
             if (event.type().equals(SignalChangeEvent.RELOCATE_CELLS)) 
-                return new RelocateFromFileAction(selectedDataset, mw, new CountDownLatch(1));
+                return new RelocateFromFileAction(selectedDataset, acceptor, EventHandler.this, new CountDownLatch(1));
 
             return null;
         }
@@ -291,27 +353,27 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 	flag |= SingleDatasetResultAction.CURVE_REFOLD;
 
                 // begin a recursive morphology analysis
-                return new RunProfilingAction(selectedDatasets, flag, mw);
+                return new RunProfilingAction(selectedDatasets, flag, acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.NEW_MORPHOLOGY)) {
                 log("Running new morphology analysis");
                 final int flag = SingleDatasetResultAction.ADD_POPULATION;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, mw);
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.REFRESH_MORPHOLOGY)) {
                 final int flag = 0;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, mw);
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.REFRESH, flag, acceptor, EventHandler.this);
             }
             
             if (event.method().equals(DatasetEvent.REFPAIR_SEGMENTATION)) {
                 final int flag = 0;
-                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, mw);
+                return new RunSegmentationAction(selectedDatasets, MorphologyAnalysisMode.NEW, flag, acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.RUN_SHELL_ANALYSIS)) {
-                return new ShellAnalysisAction(event.firstDataset(), mw);
+                return new ShellAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.COPY_PROFILE_SEGMENTATION)) {
@@ -321,29 +383,29 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                     return null;
                 }
                 return new RunSegmentationAction(selectedDatasets, source, SingleDatasetResultAction.ADD_POPULATION,
-                        mw);
+                        acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.CLUSTER)) {
                 log("Clustering dataset");
-                return new ClusterAnalysisAction(event.firstDataset(), mw);
+                return new ClusterAnalysisAction(event.firstDataset(), acceptor, EventHandler.this);
 
             }
             
             if (event.method().equals(DatasetEvent.CLUSTER_FROM_FILE))
-                return new ClusterFileAssignmentAction(event.firstDataset(), mw);
+                return new ClusterFileAssignmentAction(event.firstDataset(), acceptor, EventHandler.this);
 
             if (event.method().equals(DatasetEvent.BUILD_TREE)) {
                 log("Building a tree from dataset");
-                return new BuildHierarchicalTreeAction(event.firstDataset(), mw);
+                return new BuildHierarchicalTreeAction(event.firstDataset(), acceptor, EventHandler.this);
             }
 
             if (event.method().equals(DatasetEvent.RECALCULATE_MEDIAN))
-                return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, mw);
+                return new RunProfilingAction(selectedDatasets, SingleDatasetResultAction.NO_FLAG, acceptor, EventHandler.this);
             
             
             if (event.method().equals(DatasetEvent.EXTRACT_SOURCE))
-                return new MergeSourceExtractionAction(event.getDatasets(), mw);
+                return new MergeSourceExtractionAction(event.getDatasets(), acceptor, EventHandler.this);
             
             if (event.method().equals(DatasetEvent.REFOLD_CONSENSUS)) {
                 Runnable r = () -> {
@@ -397,30 +459,25 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         final List<IAnalysisDataset> list = event.getDatasets();
         if (!list.isEmpty()) {
 
-            if (event.method().equals(DatasetEvent.SELECT_DATASETS)) {
-                mw.getPopulationsPanel().selectDatasets(event.getDatasets());
-            }
+            if (event.method().equals(DatasetEvent.SELECT_DATASETS))
+            	fireDatasetSelectionEvent(event.getDatasets());
 
-            if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET)) {
-                mw.getPopulationsPanel().selectDataset(event.firstDataset());
-            }
+            if (event.method().equals(DatasetEvent.SELECT_ONE_DATASET))
+            	fireDatasetSelectionEvent(event.firstDataset());
 
             if (event.method().equals(DatasetEvent.SAVE)) {
                 saveDataset(event.firstDataset(), false);
             }
 
-            if (event.method().equals(DatasetEvent.REFRESH_CACHE)) {
-                recacheCharts(list);
-            }
+            if (event.method().equals(DatasetEvent.REFRESH_CACHE))
+            	fireDatasetEvent(event);
 
-            if (event.method().equals(DatasetEvent.CLEAR_CACHE)) {
-
-                clearChartCache(list);
-
-            }
+            if (event.method().equals(DatasetEvent.CLEAR_CACHE))
+            	fireDatasetEvent(event);
 
             if (event.method().equals(DatasetEvent.ADD_DATASET)) {
-                addDataset(event.firstDataset());
+            	fireDatasetEvent(event);
+//                addDataset(event.firstDataset());
             }
 
         }
@@ -430,16 +487,17 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     @Override
     public synchronized void interfaceEventReceived(final InterfaceEvent event) {
 
+    	fireInterfaceEvent(event); //pass onwards to registered listeners - only MainWindow at present
         InterfaceMethod method = event.method();
         
         final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 
         switch (method) {
 
-        case REFRESH_POPULATIONS:
-            mw.getPopulationsPanel().update(selected); // ensure all child
-                                                       // datasets are included
-            break;
+//        case REFRESH_POPULATIONS:
+//        	mw.getPopulationsPanel().update(selected); // ensure all child
+//                                                       // datasets are included
+//            break;
 
         case SAVE_ROOT:
             saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL
@@ -448,14 +506,12 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             break;
 
         case UPDATE_PANELS: {
-            finer("Updating tab panels with list of " + selected.size() + " datasets");
+//            finer("Updating tab panels with list of " + selected.size() + " datasets");
             fireDatasetUpdateEvent(selected);
             break;
         }
 
-        case RECACHE_CHARTS:
-            recacheCharts();
-            break;
+       
         case LIST_SELECTED_DATASETS:
             int count = 0;
             for (IAnalysisDataset d : selected) {
@@ -464,23 +520,23 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             }
             break;
 
-        case CLEAR_LOG_WINDOW:
-            mw.getLogPanel().clear();
-            break;
-
-        case UPDATE_IN_PROGRESS:
-            for (TabPanel panel : mw.getTabPanels()) {
-                panel.setAnalysing(true);
-            }
-            mw.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-            break;
-
-        case UPDATE_COMPLETE:
-            for (TabPanel panel : mw.getTabPanels()) {
-                panel.setAnalysing(false);
-            }
-            mw.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            break;
+//        case CLEAR_LOG_WINDOW:
+//        	mw.getLogPanel().clear();
+//            break;
+//
+//        case UPDATE_IN_PROGRESS:
+//            for (TabPanel panel : mw.getTabPanels()) {
+//                panel.setAnalysing(true);
+//            }
+//            mw.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+//            break;
+//
+//        case UPDATE_COMPLETE:
+//            for (TabPanel panel : mw.getTabPanels()) {
+//                panel.setAnalysing(false);
+//            }
+//            mw.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//            break;
 
         case DUMP_LOG_INFO:
             for (IAnalysisDataset d : selected) {
@@ -534,22 +590,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 		}
     }
     
-    /**
-     * Add the given dataset and all its children to the populations panel
-     * 
-     * @param dataset
-     */
-    private synchronized void addDataset(final IAnalysisDataset dataset) {
 
-        mw.getPopulationsPanel().addDataset(dataset);
-        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
-            mw.getPopulationsPanel().addDataset(child);
-        }
-
-        // This will also trigger a dataset update event as the dataset
-        // is selected, so don't trigger another update here.
-        mw.getPopulationsPanel().update(dataset);
-    }
 
     /**
      * Begin a refolding of the consensus nucleus for the given dataset
@@ -569,16 +610,16 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
             list.add(dataset);
 
-            for (TabPanel p : mw.getTabPanels()) {
-                if (p instanceof SegmentsDetailPanel || p instanceof NuclearStatisticsPanel
-                        || p instanceof SignalsDetailPanel || p instanceof ConsensusNucleusPanel) {
-                    p.clearChartCache(list);
-                }
-            }
+//            for (TabPanel p : mw.getTabPanels()) {
+//                if (p instanceof SegmentsDetailPanel || p instanceof NuclearStatisticsPanel
+//                        || p instanceof SignalsDetailPanel || p instanceof ConsensusNucleusPanel) {
+//                    p.clearChartCache(list);
+//                }
+//            }
 
             final CountDownLatch latch = new CountDownLatch(1);
 
-            Runnable task = new RefoldNucleusAction(dataset, mw, latch);
+            Runnable task = new RefoldNucleusAction(dataset, acceptor, EventHandler.this, latch);
             task.run();
 
             try {
@@ -587,8 +628,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
             	if(op.isPresent())
             		op.get().setRefoldNucleus(true);
+            	fireDatasetUpdateEvent(list);
 
-                mw.getPopulationsPanel().selectDataset(dataset);
+//            	mw.getPopulationsPanel().selectDataset(dataset);
 
             } catch (InterruptedException e) {
                 error("Interruption to thread", e);
@@ -607,7 +649,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
                 final CountDownLatch latch = new CountDownLatch(1);
 
-                Runnable task = new SaveDatasetAction(root, mw, latch, false);
+                Runnable task = new SaveDatasetAction(root, acceptor, EventHandler.this, latch, false);
                 task.run();
                 try {
                     latch.await();
@@ -634,7 +676,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         if (d.isRoot()) {
             final CountDownLatch latch = new CountDownLatch(1);
 
-            Runnable r = new SaveDatasetAction(d, mw, latch, saveAs);
+            Runnable r = new SaveDatasetAction(d, acceptor, EventHandler.this, latch, saveAs);
             r.run();
         } else {
             IAnalysisDataset target = null;
@@ -655,53 +697,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         }
     }
 
-    /*
-     * Trigger a recache of all charts and datasets
-     */
-    private synchronized void recacheCharts() {
-
-        Runnable task = () -> {
-            for (TabPanel panel : mw.getTabPanels()) {
-                panel.refreshChartCache();
-                panel.refreshTableCache();
-            }
-        };
-        ThreadManager.getInstance().execute(task);
-    }
-
-    private synchronized void clearChartCache() {
-        for (TabPanel panel : mw.getTabPanels()) {
-            panel.clearChartCache();
-            panel.clearTableCache();
-        }
-    }
-
-    private synchronized void clearChartCache(final List<IAnalysisDataset> list) {
-
-        if (list == null || list.isEmpty()) {
-            warn("A cache clear was requested for a specific list, which was null or empty");
-            clearChartCache();
-            return;
-        }
-        for (TabPanel panel : mw.getTabPanels()) {
-            panel.clearChartCache(list);
-            panel.clearTableCache(list);
-        }
-    }
-
-
-    private synchronized void recacheCharts(final List<IAnalysisDataset> list) {
-
-        Runnable task = () -> {
-            for (TabPanel panel : mw.getTabPanels()) {
-                panel.refreshChartCache(list);
-                panel.refreshTableCache(list);
-            }
-            fireDatasetUpdateEvent(DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
-        };
-        ThreadManager.getInstance().submit(task);
-
-    }
+    
 
     public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
         updateListeners.add(l);
@@ -710,112 +706,18 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
         updateListeners.remove(l);
     }
-
-    /**
-     * Signal listeners that the given datasets should be displayed
-     * 
-     * @param list
-     */
+//
+//    /**
+//     * Signal listeners that the given datasets should be displayed
+//     * 
+//     * @param list
+//     */
     public synchronized void fireDatasetUpdateEvent(final List<IAnalysisDataset> list) {
-        PanelUpdater r = new PanelUpdater(list);
-        ThreadManager.getInstance().submit(r);
+        for(DatasetUpdateEventListener l : updateListeners) {
+        	l.datasetUpdateEventReceived(new DatasetUpdateEvent(this, list));
+        }
     }
     
-    private static final class Lock { }
-
-    public class PanelUpdater implements CancellableRunnable {
-        private final List<IAnalysisDataset> list;
-        
-        private final AtomicBoolean isCancelled = new AtomicBoolean(false);
-
-        public PanelUpdater(final List<IAnalysisDataset> list) {
-            this.list = list;
-        }
-        private final Lock lock = new Lock();
-
-        @Override
-        public synchronized void run() {
-            final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
-            try {
-
-                final Future<?> f = ThreadManager.getInstance().submit(loader);
-
-                synchronized (lock) {
-                // Wait for loading state to be set
-                	while (!f.isDone() && !isCancelled.get()) {
-                		lock.wait();
-                	}
-                }
-                
-                // Again stop if a cancel signal was heard 
-                if (isCancelled.get()) {
-                    return;
-                }
-                
-                Boolean ok = (Boolean) f.get();
-
-                if(ok!=null && !ok){
-                    warn("Error updating the UI panels");
-                }
-
-            } catch (InterruptedException e1) {
-                warn("Interrupted update");
-                error("Error setting loading state", e1);
-                error("Cause of loading state error", e1.getCause());
-                return;
-            } catch (ExecutionException e1) {
-                error("Error setting loading state", e1);
-                error("Cause of loading state error", e1.getCause());
-                return;
-            } catch (Exception e1){
-                error("Undefined error setting panel loading state", e1);
-            }
-            
-            // Now fire the update
-            DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
-            Iterator<Object> iterator = updateListeners.iterator();
-            while (iterator.hasNext()) {
-                if (isCancelled.get()) {
-                    return;
-                }
-                ((DatasetUpdateEventListener) iterator.next()).datasetUpdateEventReceived(e);
-            }
-
-        }
-
-        @Override
-        public void cancel() {
-            isCancelled.set(true);
-        }
-
-    }
-
-    public class PanelLoadingUpdater implements Callable {
-    	private final Object lock;
-    	
-    	public PanelLoadingUpdater(Lock l) {
-    		lock = l;
-    	}
-    	
-        @Override
-        public synchronized Boolean call() {
-            // Update charts and panels to loading
-            try {
-                for (TabPanel p : mw.getTabPanels()) {
-                    p.setChartsAndTablesLoading();
-                }
-            } catch(Exception e){
-                error("Error setting loading state", e);
-                return false;
-            }
-            
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-            return true;
-
-        }
-
-    }
+    
 
 }

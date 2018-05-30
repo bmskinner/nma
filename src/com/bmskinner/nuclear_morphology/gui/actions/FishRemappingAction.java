@@ -21,10 +21,14 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.FishRemappingProber;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 /**
  * Compare morphology images with post-FISH images, and select nuclei into new
@@ -36,8 +40,8 @@ public class FishRemappingAction extends SingleDatasetResultAction {
     
     private File fishDir;
 
-    public FishRemappingAction(final List<IAnalysisDataset> datasets, final MainWindow mw) {
-        super(datasets, PROGRESS_LBL, mw);
+    public FishRemappingAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_LBL, acceptor, eh);
 
     }
 
@@ -73,7 +77,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
                 log("Reapplying morphology...");
 
-                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, mw);
+                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, logPanel, eh);
                 r.run();
                 finished();
 
@@ -93,7 +97,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
         // Do not use super.finished(), or it will trigger another save action
         fine("FISH mapping complete");
         cancel();
-        getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
-        getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
+        getInterfaceEventHandler().removeInterfaceEventListener(eh);
+        getDatasetEventHandler().removeDatasetEventListener(eh);
     }
 }

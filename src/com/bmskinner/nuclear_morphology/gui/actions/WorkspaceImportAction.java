@@ -10,9 +10,11 @@ import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 public class WorkspaceImportAction extends VoidResultAction {
@@ -27,8 +29,8 @@ public class WorkspaceImportAction extends VoidResultAction {
      * 
      * @param mw the main window to which a progress bar will be attached
      */
-    public WorkspaceImportAction(@NonNull MainWindow mw) {
-        this(mw, null);
+    public WorkspaceImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        this(acceptor, eh, null);
     }
 
     /**
@@ -38,8 +40,8 @@ public class WorkspaceImportAction extends VoidResultAction {
      * @param mw the main window to which a progress bar will be attached
      * @param file the workspace file to open
      */
-    public WorkspaceImportAction(@NonNull MainWindow mw, @Nullable File file) {
-        super(PROGRESS_BAR_LABEL, mw);
+    public WorkspaceImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
+        super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.file = file;
     }
 
@@ -53,7 +55,7 @@ public class WorkspaceImportAction extends VoidResultAction {
     		DatasetListManager.getInstance().addWorkspace(w);
 
     		for (File dataFile : w.getFiles()) {
-    			new PopulationImportAction(mw, dataFile).run();
+    			new PopulationImportAction(logPanel, eh, dataFile).run();
     		}
 
             setProgressMessage(PROGRESS_BAR_LABEL);

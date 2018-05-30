@@ -18,14 +18,20 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 @Deprecated
 public class AddTailStainAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Tail detection";
 
-    public AddTailStainAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Tail detection", mw);
+    public AddTailStainAction(IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
 
     }
 

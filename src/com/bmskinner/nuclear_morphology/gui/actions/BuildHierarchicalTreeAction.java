@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.ClusterAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
@@ -29,9 +31,11 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.HierarchicalTreeSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -45,14 +49,14 @@ public class BuildHierarchicalTreeAction extends SingleDatasetResultAction
 
     private static final String PROGRESS_BAR_LABEL = "Building tree";
 
-    public BuildHierarchicalTreeAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, PROGRESS_BAR_LABEL, mw);
+    public BuildHierarchicalTreeAction(IAnalysisDataset dataset,@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
     public void run() {
 
-        SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(mw, dataset);
+        SubAnalysisSetupDialog clusterSetup = new HierarchicalTreeSetupDialog(dataset);
 
         if (clusterSetup.isReadyToRun()) { // if dialog was cancelled, skip
             IAnalysisMethod m = clusterSetup.getMethod();// new

@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
@@ -27,8 +29,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.SignalImageProber;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -43,8 +47,8 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     
     private static final String PROGRESS_BAR_LABEL = "Signal detection";
 
-    public AddNuclearSignalAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, PROGRESS_BAR_LABEL, mw);
+    public AddNuclearSignalAction(@NonNull IAnalysisDataset dataset, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override

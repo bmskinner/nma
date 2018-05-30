@@ -54,6 +54,19 @@ public abstract class SubAnalysisSetupDialog extends SettingsDialog {
         this.setTitle(title);
         this.setModal(true);
     }
+    
+    /**
+     * Construct with a main program window to listen for actions, and a dataset
+     * to operate on
+     * 
+     * @param mw
+     * @param dataset
+     */
+    public SubAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+        super(true);
+        this.dataset = dataset;
+        this.setTitle(title);
+    }
 
     protected void packAndDisplay() {
         this.pack();

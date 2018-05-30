@@ -94,10 +94,10 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
 
     protected final IMutableClusteringOptions options;
 
-    public HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
+    public HierarchicalTreeSetupDialog(final IAnalysisDataset dataset) {
 
         // modal dialog
-        this(mw, dataset, DIALOG_TITLE);
+        this(dataset, DIALOG_TITLE);
     }
 
     /**
@@ -106,8 +106,8 @@ public class HierarchicalTreeSetupDialog extends SubAnalysisSetupDialog implemen
      * @param mw
      * @param title
      */
-    protected HierarchicalTreeSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-        super(mw, dataset, title);
+    protected HierarchicalTreeSetupDialog(final IAnalysisDataset dataset, final String title) {
+        super(dataset, title);
         options = OptionsFactory.makeClusteringOptions();
         setDefaults();
         createUI();

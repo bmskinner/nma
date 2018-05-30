@@ -33,7 +33,9 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEventHandler;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.LogPanel;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 /**
  * The base of all progressible actions. Handles progress bars and workers
@@ -44,57 +46,78 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public abstract class VoidResultAction implements PropertyChangeListener, Loggable, Runnable {
 
-    private JProgressBar       progressBar = null;
+    private JProgressBar progressBar = null;
 
     protected IAnalysisWorker worker   = null;
-    protected int             downFlag = 0;   // flags for next action
+    protected int downFlag = 0;   // flags for next action
 
-    private LogPanel       logPanel;
-    protected MainWindow   mw;
+    protected ProgressBarAcceptor logPanel;
+    protected EventHandler eh;
     private CountDownLatch latch = null; // allow threads to wait
     private final DatasetEventHandler   dh = new DatasetEventHandler(this);
     private final InterfaceEventHandler ih = new InterfaceEventHandler(this);
 
     /**
-     * Constructor with no datasets - used for new analysis.
+     * Constructor
      * 
      * @param barMessage the message to display in the progress bar
      * @param mw the main window
      */
-    protected VoidResultAction(@NonNull String barMessage, @NonNull MainWindow mw) {
-
-        this.progressBar = new JProgressBar(0, 100);
-        this.progressBar.setString(barMessage);
-        this.progressBar.setStringPainted(true);
-        this.progressBar.setIndeterminate(true);
-        this.progressBar.addMouseListener( new MouseAdapter(){
+    protected VoidResultAction(@NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+    	logPanel = acceptor;
+    	
+    	progressBar = new JProgressBar(0, 100);
+        progressBar.setString(barMessage);
+        progressBar.setStringPainted(true);
+        progressBar.setIndeterminate(true);
+        progressBar.addMouseListener( new MouseAdapter(){
             
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getSource() == progressBar) {
-                    if (e.getClickCount() == 2) {
-
-                        worker.cancel(true);
-                        cleanup();
-                    }
-
-                }
-
-            }
-            
+        	@Override
+        	public void mouseClicked(MouseEvent e) {
+        		if (e.getSource() == progressBar && e.getClickCount() == 2) {
+        			worker.cancel(true);
+        			cleanup();
+        		}
+        	}
         });
-
-        this.mw = mw;
-        this.logPanel = mw.getLogPanel();
-
+        
         logPanel.addProgressBar(this.progressBar);
-        logPanel.revalidate();
-        logPanel.repaint();
-
-        ih.addInterfaceEventListener(mw.getEventHandler());
-        dh.addDatasetEventListener(mw.getEventHandler());
-
+        this.eh = eh;
+        ih.addInterfaceEventListener(eh);
+        dh.addDatasetEventListener(eh);
     }
+    
+//    /**
+//     * Constructor
+//     * 
+//     * @param barMessage the message to display in the progress bar
+//     * @param mw the main window
+//     */
+//    protected VoidResultAction(@NonNull String barMessage, @NonNull MainWindow mw) {
+//
+//        progressBar = new JProgressBar(0, 100);
+//        progressBar.setString(barMessage);
+//        progressBar.setStringPainted(true);
+//        progressBar.setIndeterminate(true);
+//        progressBar.addMouseListener( new MouseAdapter(){
+//            
+//        	@Override
+//        	public void mouseClicked(MouseEvent e) {
+//        		if (e.getSource() == progressBar && e.getClickCount() == 2) {
+//        			worker.cancel(true);
+//        			cleanup();
+//        		}
+//        	}
+//        });
+//
+//        this.mw = mw;
+//        this.logPanel = mw.getLogPanel();
+//
+//        logPanel.addProgressBar(this.progressBar);
+//        ih.addInterfaceEventListener(mw.getEventHandler());
+//        dh.addDatasetEventListener(mw.getEventHandler());
+//
+//    }
 
     protected void setLatch(CountDownLatch latch) {
         this.latch = latch;
@@ -109,8 +132,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     /**
      * Change the progress message from the default in the constructor
      * 
-     * @param messsage
-     *            the string to display
+     * @param messsage the string to display
      */
     public void setProgressMessage(String messsage) {
         this.progressBar.setString(messsage);
@@ -118,8 +140,6 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
 
     private void removeProgressBar() {
         logPanel.removeProgressBar(this.progressBar);
-        logPanel.revalidate();
-        logPanel.repaint();
     }
 
     /**
@@ -127,8 +147,8 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      */
     public void cancel() {
         removeProgressBar();
-        dh.removeDatasetEventListener(mw.getEventHandler());
-        ih.removeInterfaceEventListener(mw.getEventHandler());
+        dh.removeDatasetEventListener(eh);
+        ih.removeInterfaceEventListener(eh);
     }
 
     protected void setProgressBarVisible(boolean b) {
@@ -141,10 +161,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
     public void cleanup() {
         if (this.worker.isDone() || this.worker.isCancelled()) {
             this.worker.removePropertyChangeListener(this);
-//            finest("Removed property change listener from worker");
             this.removeProgressBar();
-//            finest("Removed progress bar");
-
         }
     }
 
@@ -186,9 +203,7 @@ public abstract class VoidResultAction implements PropertyChangeListener, Loggab
      */
     public void finished() {
         this.worker.removePropertyChangeListener(this);
-        removeProgressBar();
-        ih.removeInterfaceEventListener(mw.getEventHandler());
-        dh.removeDatasetEventListener(mw.getEventHandler());
+        cancel();
 
     }
 

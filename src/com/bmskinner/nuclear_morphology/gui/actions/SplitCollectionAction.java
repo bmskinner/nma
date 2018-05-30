@@ -23,16 +23,22 @@ import java.util.logging.Level;
 
 import javax.swing.JOptionPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.DefaultCellCollection;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 public class SplitCollectionAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Splitting collection";
 
-    public SplitCollectionAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Splitting collection", mw);
+    public SplitCollectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
@@ -71,7 +77,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                         int flag = 0;
                         IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
                         final CountDownLatch latch = new CountDownLatch(1);
-                        new RunSegmentationAction(newDataset, dataset, flag, mw, latch);
+                        new RunSegmentationAction(newDataset, dataset, flag, logPanel, eh, latch);
                     }
                 } else {
                     fine("User cancelled split");

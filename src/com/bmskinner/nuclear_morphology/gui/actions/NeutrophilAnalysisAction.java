@@ -28,6 +28,8 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFileChooser;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -37,8 +39,10 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NeutrophilImageProber;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -51,28 +55,26 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
     private File folder = null;
 
     public static final int NEW_ANALYSIS = 0;
+    private static final String PROGRESS_BAR_LABEL = "Neutrophil detection";
 
     /**
      * Create a new analysis. The folder of images to analyse will be requested
      * by a dialog.
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
+     * @param mw the main window to which a progress bar will be attached
      */
-    public NeutrophilAnalysisAction(MainWindow mw) {
-        this(mw, null);
+    public NeutrophilAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        this(acceptor, eh, null);
     }
 
     /**
      * Create a new analysis, specifying the initial directory of images
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
-     * @param folder
-     *            the folder of images to analyse
+     * @param mw the main window to which a progress bar will be attached
+     * @param folder the folder of images to analyse
      */
-    public NeutrophilAnalysisAction(MainWindow mw, final File folder) {
-        super("Neutrophil detection", mw);
+    public NeutrophilAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, final File folder) {
+        super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.folder = folder;
     }
 
@@ -82,14 +84,11 @@ public class NeutrophilAnalysisAction extends VoidResultAction {
         this.setProgressBarIndeterminate();
 
         if (folder == null) {
-            fine("No folder, getting directory");
             if (!getImageDirectory()) {
                 this.cancel();
                 return;
             }
         }
-
-        fine("Making analysis options");
 
         NeutrophilImageProber analysisSetup = new NeutrophilImageProber(folder);
 

@@ -27,7 +27,9 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.io.SaveDialog;
@@ -35,6 +37,8 @@ import ij.io.SaveDialog;
 public class SaveDatasetAction extends SingleDatasetResultAction {
 
     private File saveFile = null;
+    
+    private static final String PROGRESS_BAR_LABEL = "Saving dataset";
 
     /**
      * Constructor to save the current dataset. This gives programmatic access
@@ -46,8 +50,8 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * @param mw the main window, to access program logger
      * @param doneSignal a latch to hold threads until the save is complete
      */
-    public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, MainWindow mw, CountDownLatch doneSignal) {
-        super(dataset, "Saving dataset", mw);
+    public SaveDatasetAction(IAnalysisDataset dataset, File saveFile, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         setLatch(doneSignal);
         this.setProgressBarIndeterminate();
     }
@@ -60,11 +64,11 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
      * @param doneSignal a latch to hold threads until the save is complete
      * @param chooseSaveLocation save to the default dataset save file, or choose another location
      */
-    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull MainWindow mw, CountDownLatch doneSignal,
+    public SaveDatasetAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal,
             boolean chooseSaveLocation) {
-        super(dataset, "Saving dataset", mw);
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
         setLatch(doneSignal);
-        finest("Save dataset action created by default or manual file location");
+
         this.setProgressBarIndeterminate();
 
         if (chooseSaveLocation) {

@@ -19,32 +19,37 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
+import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
-import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
-import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowMenuBar;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
+import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
@@ -60,6 +65,8 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
+import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -71,16 +78,13 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  *
  */
 @SuppressWarnings("serial")
-public class MainWindow extends JFrame implements Loggable {
+public class MainWindow extends JFrame implements Loggable, InterfaceEventListener, DatasetSelectionListener, DatasetEventListener, DatasetUpdateEventListener {
 
     private JPanel contentPane;
 
-    private LogPanel              logPanel;              // progress and
-                                                         // messages
-    private PopulationsPanel      populationsPanel;      // holds and selects
-                                                         // open datasets
-    private ConsensusNucleusPanel consensusNucleusPanel; // show refolded nuclei
-                                                         // if present
+    private LogPanel logPanel;
+    private PopulationsPanel populationsPanel;
+    private ConsensusNucleusPanel consensusNucleusPanel;
     private static final String PROGRAM_TITLE_BAR_LBL = "Nuclear Morphology Analysis v"
             + Version.currentVersion().toString();
 
@@ -88,8 +92,11 @@ public class MainWindow extends JFrame implements Loggable {
 
     // store panels for iterating messages
     private final List<TabPanel> detailPanels = new ArrayList<>();
+    
+    private final List<InterfaceEventListener> listeners   = new ArrayList<>();
+    private List<Object> updateListeners = new ArrayList<Object>();
 
-    private final EventHandler eh = new EventHandler(this);
+    private final EventHandler eh;
 
     private boolean isStandalone = false;
 
@@ -98,15 +105,20 @@ public class MainWindow extends JFrame implements Loggable {
      * 
      * @param standalone is the frame a standalone app, or launched within ImageJ?
      */
-    public MainWindow(boolean standalone) {
+    public MainWindow(boolean standalone, EventHandler eh) {
 
         isStandalone = standalone;
 
         createWindowListeners();
 
         createUI();
-
+        this.eh = eh;
+        this.eh.addProgressBarAcceptor(logPanel);
         createEventHandling();
+        eh.addInterfaceEventListener(this);
+        eh.addDatasetSelectionListener(this);
+        eh.addDatasetEventListener(this);
+        eh.addDatasetUpdateEventListener(this);
         
         this.setJMenuBar(new MainWindowMenuBar(this));
 
@@ -181,6 +193,7 @@ public class MainWindow extends JFrame implements Loggable {
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
             Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
+            
             
             // ---------------
             // Create the consensus chart
@@ -292,7 +305,7 @@ public class MainWindow extends JFrame implements Loggable {
         logPanel.addDatasetEventListener(eh);
         logPanel.addInterfaceEventListener(eh);
         logPanel.addSignalChangeListener(eh);
-        eh.addDatasetUpdateEventListener(logPanel);
+        this.addDatasetUpdateEventListener(logPanel);
 
         populationsPanel.addSignalChangeListener(eh);
         populationsPanel.addDatasetEventListener(eh);
@@ -302,7 +315,7 @@ public class MainWindow extends JFrame implements Loggable {
             d.addDatasetEventListener(eh);
             d.addInterfaceEventListener(eh);
             d.addSignalChangeListener(eh);
-            eh.addDatasetUpdateEventListener(d);
+            this.addDatasetUpdateEventListener(d);
         }
     }
 
@@ -341,5 +354,244 @@ public class MainWindow extends JFrame implements Loggable {
     public void dispose() {
         super.dispose();
     }
+    
+    
+	@Override
+	public void interfaceEventReceived(InterfaceEvent event) {
+		if(event.getSource().equals(eh)){
+			InterfaceMethod method = event.method();
+	        
+	        final List<IAnalysisDataset> selected = DatasetListManager.getInstance().getSelectedDatasets();
 
+	        switch (method) {
+
+	        case REFRESH_POPULATIONS:
+	        	getPopulationsPanel().update(selected); // ensure all child
+	                                                       // datasets are included
+	            break;
+
+	        case CLEAR_LOG_WINDOW:
+	        	getLogPanel().clear();
+	            break;
+
+	        case UPDATE_IN_PROGRESS:
+	            for (TabPanel panel : getTabPanels()) {
+	                panel.setAnalysing(true);
+	            }
+	            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	            break;
+
+	        case UPDATE_COMPLETE:
+	            for (TabPanel panel : getTabPanels()) {
+	                panel.setAnalysing(false);
+	            }
+	            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	            break;
+	            
+	        case RECACHE_CHARTS:
+	            recacheCharts();
+	            break;
+	        }
+	        
+	        
+		}
+		
+	}
+
+	@Override
+	public void datasetSelectionEventReceived(DatasetSelectionEvent e) {
+		getPopulationsPanel().selectDatasets(e.getDatasets());
+	}
+
+	@Override
+	public void datasetEventReceived(DatasetEvent event) {
+
+		if (event.method().equals(DatasetEvent.REFRESH_CACHE))
+            recacheCharts(event.getDatasets());
+        
+
+        if (event.method().equals(DatasetEvent.CLEAR_CACHE))
+            clearChartCache(event.getDatasets());
+        
+        if (event.method().equals(DatasetEvent.ADD_DATASET))
+            addDataset(event.firstDataset());
+        
+	}
+	
+	/*
+     * Trigger a recache of all charts and datasets
+     */
+    private synchronized void recacheCharts() {
+
+        Runnable task = () -> {
+            for (TabPanel panel : getTabPanels()) {
+                panel.refreshChartCache();
+                panel.refreshTableCache();
+            }
+        };
+        ThreadManager.getInstance().execute(task);
+    }
+
+    private synchronized void clearChartCache() {
+        for (TabPanel panel : getTabPanels()) {
+            panel.clearChartCache();
+            panel.clearTableCache();
+        }
+    }
+
+    private synchronized void clearChartCache(final List<IAnalysisDataset> list) {
+
+        if (list == null || list.isEmpty()) {
+            warn("A cache clear was requested for a specific list, which was null or empty");
+            clearChartCache();
+            return;
+        }
+        for (TabPanel panel : getTabPanels()) {
+            panel.clearChartCache(list);
+            panel.clearTableCache(list);
+        }
+    }
+
+
+    private synchronized void recacheCharts(final List<IAnalysisDataset> list) {
+
+        Runnable task = () -> {
+            for (TabPanel panel : getTabPanels()) {
+                panel.refreshChartCache(list);
+                panel.refreshTableCache(list);
+            }
+            datasetUpdateEventReceived(new DatasetUpdateEvent(this, list));//DatasetListManager.getInstance().getSelectedDatasets()); // ensure all selected datasets get redrawn
+        };
+        ThreadManager.getInstance().submit(task);
+
+    }
+    
+    /**
+     * Add the given dataset and all its children to the populations panel
+     * 
+     * @param dataset
+     */
+    private synchronized void addDataset(final IAnalysisDataset dataset) {
+
+    	getPopulationsPanel().addDataset(dataset);
+        for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
+        	getPopulationsPanel().addDataset(child);
+        }
+
+        // This will also trigger a dataset update event as the dataset
+        // is selected, so don't trigger another update here.
+        getPopulationsPanel().update(dataset);
+    }
+
+	@Override
+	public void datasetUpdateEventReceived(DatasetUpdateEvent event) {
+		PanelUpdater r = new PanelUpdater(event.getDatasets());
+        ThreadManager.getInstance().submit(r);
+		
+	}
+	
+	private static final class Lock { }
+
+    public class PanelUpdater implements CancellableRunnable {
+        private final List<IAnalysisDataset> list;
+        
+        private final AtomicBoolean isCancelled = new AtomicBoolean(false);
+
+        public PanelUpdater(final List<IAnalysisDataset> list) {
+            this.list = list;
+        }
+        private final Lock lock = new Lock();
+
+        @Override
+        public synchronized void run() {
+            final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
+            try {
+
+                final Future<?> f = ThreadManager.getInstance().submit(loader);
+
+                synchronized (lock) {
+                // Wait for loading state to be set
+                	while (!f.isDone() && !isCancelled.get()) {
+                		lock.wait();
+                	}
+                }
+                
+                // Again stop if a cancel signal was heard 
+                if (isCancelled.get()) {
+                    return;
+                }
+                
+                Boolean ok = (Boolean) f.get();
+
+                if(ok!=null && !ok){
+                    warn("Error updating the UI panels");
+                }
+
+            } catch (InterruptedException e1) {
+                warn("Interrupted update");
+                error("Error setting loading state", e1);
+                error("Cause of loading state error", e1.getCause());
+                return;
+            } catch (ExecutionException e1) {
+                error("Error setting loading state", e1);
+                error("Cause of loading state error", e1.getCause());
+                return;
+            } catch (Exception e1){
+                error("Undefined error setting panel loading state", e1);
+            }
+            
+            // Now fire the update
+            DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
+            Iterator<Object> iterator = updateListeners.iterator();
+            while (iterator.hasNext()) {
+                if (isCancelled.get()) {
+                    return;
+                }
+                ((DatasetUpdateEventListener) iterator.next()).datasetUpdateEventReceived(e);
+            }
+
+        }
+
+        @Override
+        public void cancel() {
+            isCancelled.set(true);
+        }
+
+    }
+
+    public class PanelLoadingUpdater implements Callable {
+    	private final Object lock;
+    	
+    	public PanelLoadingUpdater(Lock l) {
+    		lock = l;
+    	}
+    	
+        @Override
+        public synchronized Boolean call() {
+            // Update charts and panels to loading
+            try {
+                for (TabPanel p : getTabPanels()) {
+                    p.setChartsAndTablesLoading();
+                }
+            } catch(Exception e){
+                error("Error setting loading state", e);
+                return false;
+            }
+            
+            synchronized (lock) {
+                lock.notifyAll();
+            }
+            return true;
+
+        }
+
+    }
+    
+    public synchronized void addDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+        updateListeners.add(l);
+    }
+
+    public synchronized void removeDatasetUpdateEventListener(DatasetUpdateEventListener l) {
+        updateListeners.remove(l);
+    }
 }

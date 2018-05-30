@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod;
@@ -28,7 +30,9 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -54,22 +58,22 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
      * @param downFlag
      *            the next analyses to perform
      */
-    public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, MainWindow mw,
+    public RunSegmentationAction(IAnalysisDataset dataset, MorphologyAnalysisMode mode, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
             CountDownLatch latch) {
-        super(dataset, PROGRESS_LBL, mw, downFlag);
+        super(dataset, PROGRESS_LBL, acceptor, eh, downFlag);
         this.mode = mode;
         this.latch = latch;
     }
 
     public RunSegmentationAction(List<IAnalysisDataset> list, MorphologyAnalysisMode mode, int downFlag,
-            MainWindow mw) {
-        super(list, PROGRESS_LBL, mw, downFlag);
+    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(list, PROGRESS_LBL, acceptor, eh, downFlag);
         this.mode = mode;
     }
 
-    public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, Integer downFlag, MainWindow mw,
+    public RunSegmentationAction(IAnalysisDataset dataset, IAnalysisDataset source, Integer downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh,
             CountDownLatch latch) {
-        super(dataset, "Copying morphology to " + dataset.getName(), mw);
+        super(dataset, "Copying morphology to " + dataset.getName(), acceptor, eh);
         this.downFlag = downFlag;
         this.latch = latch;
         this.mode = MorphologyAnalysisMode.COPY;
@@ -84,8 +88,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
      * @param source
      */
     public RunSegmentationAction(List<IAnalysisDataset> list, IAnalysisDataset source, Integer downFlag,
-            MainWindow mw) {
-        super(list, PROGRESS_LBL, mw);
+    		@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(list, PROGRESS_LBL, acceptor, eh);
         this.downFlag = downFlag;
         this.mode = MorphologyAnalysisMode.COPY;
         this.source = source;
@@ -182,7 +186,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 if ((downFlag & CURVE_REFOLD) == CURVE_REFOLD) {
                     finest("Preparing to hold thread while refolding datast");
                     final CountDownLatch latch = new CountDownLatch(1);
-                    Runnable r = new RefoldNucleusAction(dataset, mw, latch);
+                    Runnable r = new RefoldNucleusAction(dataset, logPanel, eh, latch);
                     r.run();
                     try {
                         latch.await();
@@ -238,30 +242,10 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                     cancel(); // remove progress bar
 
                     Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
-                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, mw)
-                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, mw);
+                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, logPanel, eh)
+                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, logPanel, eh);
 
                     task.run();
-                    // ThreadManager.getInstance().execute(task);
-                    // RunSegmentationAction.super.finished();
-
-                    // SwingUtilities.invokeLater(new Runnable(){
-                    // public void run(){
-                    //
-                    // if(mode.equals(MorphologyAnalysisMode.COPY)){
-                    //
-                    // new
-                    // RunSegmentationAction(getRemainingDatasetsToProcess(),
-                    // source, downFlag, mw);
-                    //
-                    // } else {
-                    //
-                    // new
-                    // RunSegmentationAction(getRemainingDatasetsToProcess(),
-                    // mode, downFlag, mw);
-                    // }
-                    // }});
-
                 }
             }
         };

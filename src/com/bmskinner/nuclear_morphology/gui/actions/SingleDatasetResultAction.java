@@ -25,6 +25,8 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 /**
  * Extends the VoidResultAction to include a dataset or list of datasets to be
@@ -57,15 +59,12 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * Construct with a dataset to analyse, a message to display, and the window
      * to send messages to
      * 
-     * @param dataset
-     *            the analysis dataset
-     * @param barMessage
-     *            the progress bar message
-     * @param mw
-     *            the main window for analysis
+     * @param dataset the analysis dataset
+     * @param barMessage the progress bar message
+     * @param mw the main window for analysis
      */
-    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull MainWindow mw) {
-        super(barMessage, mw);
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(barMessage, acceptor, eh);
         if (dataset == null) {
             warn("Unable to create action");
             throw new IllegalArgumentException("Must have dataset for progressable action");
@@ -81,8 +80,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param barMessage
      * @param mw
      */
-    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull MainWindow mw) {
-        this(list.get(0), barMessage, mw);
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        this(list.get(0), barMessage, acceptor, eh);
         processList.addAll(list);
         processList.remove(0); // remove the first entry
     }
@@ -96,8 +95,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull MainWindow mw, int flag) {
-        this(list, barMessage, mw);
+    public SingleDatasetResultAction(@NonNull List<IAnalysisDataset> list, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, int flag) {
+        this(list, barMessage, acceptor, eh);
         this.downFlag = flag;
     }
 
@@ -109,8 +108,8 @@ public abstract class SingleDatasetResultAction extends VoidResultAction {
      * @param mw
      * @param flag
      */
-    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull MainWindow mw, int flag) {
-        this(dataset, barMessage, mw);
+    public SingleDatasetResultAction(@NonNull IAnalysisDataset dataset, @NonNull String barMessage, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, int flag) {
+        this(dataset, barMessage, acceptor, eh);
         this.downFlag = flag;
     }
 

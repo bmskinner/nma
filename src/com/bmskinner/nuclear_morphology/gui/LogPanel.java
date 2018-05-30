@@ -80,7 +80,7 @@ import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
  *
  */
 @SuppressWarnings("serial")
-public class LogPanel extends DetailPanel implements ActionListener {
+public class LogPanel extends DetailPanel implements ActionListener, ProgressBarAcceptor {
 
     private static final String SHOW_CONSOLE_ACTION = "ShowConsole";
     private static final String NEXT_HISTORY_ACTION = "Next";
@@ -378,10 +378,14 @@ public class LogPanel extends DetailPanel implements ActionListener {
 
     public void addProgressBar(JProgressBar progressBar) {
         progressPanel.add(progressBar);
+        revalidate();
+        repaint();
     }
 
     public void removeProgressBar(JProgressBar progressBar) {
         progressPanel.remove(progressBar);
+        revalidate();
+        repaint();
     }
 
     private class ShowConsoleAction extends AbstractAction {

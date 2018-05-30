@@ -21,13 +21,17 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.CellRelocationMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -40,11 +44,10 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Relocating cells";
 
-    public RelocateFromFileAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch latch) {
-        super(dataset, PROGRESS_LBL, mw);
+    public RelocateFromFileAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+        super(dataset, PROGRESS_LBL, acceptor, eh);
         this.setLatch(latch);
         setProgressBarIndeterminate();
-
     }
 
     @Override
@@ -56,26 +59,20 @@ public class RelocateFromFileAction extends SingleDatasetResultAction {
         File file = FileSelector.chooseRemappingFile(dataset);
         if (file != null) {
 
-            /*
-             * Make the worker
-             */
             IAnalysisMethod m = new CellRelocationMethod(dataset, file);
             worker = new DefaultAnalysisWorker(m);
 
-            // worker = new CellRelocator(dataset, file);
             worker.addPropertyChangeListener(this);
 
             this.setProgressMessage("Locating cells...");
             ThreadManager.getInstance().submit(worker);
         } else {
-            fine("Cancelled");
             cancel();
         }
     }
 
     @Override
     public void finished() {
-        fine("Firing refresh of populations");
         getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.REFRESH_POPULATIONS);
         this.countdownLatch();
         super.finished();

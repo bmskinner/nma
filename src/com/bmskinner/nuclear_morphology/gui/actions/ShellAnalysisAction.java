@@ -33,6 +33,8 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.shells.ShellAnalysisMethod;
@@ -44,7 +46,9 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IShellResult.ShrinkTy
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -57,20 +61,22 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
 	private static final String CIRC_ERROR_MESSAGE = "Min nucleus circularity is too low to make shells";
 	private static final String AREA_ERROR_MESSAGE = "Min nucleus area is too small to break into shells";
 	
+	private static final String PROGRESS_BAR_LABEL = "Shell analysis";
+	
     /**
      * Construct with a dataset and main event window
      * @param dataset
      * @param mw
      */
-    public ShellAnalysisAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, "Shell analysis", mw);
+    public ShellAnalysisAction(@NonNull final IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
 
     }
 
     @Override
     public void run() {
     	
-    	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(mw, dataset);
+    	ShellAnalysisSetupDialog sd = new ShellAnalysisSetupDialog(dataset);
     	if(sd.isReadyToRun()) {
     		
     		int shellCount = sd.getShellCount();
@@ -142,8 +148,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
         protected JPanel optionsPanel;
         protected JPanel footerPanel;
 
-        public ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
-            this(mw, dataset, DIALOG_TITLE);
+        public ShellAnalysisSetupDialog(final IAnalysisDataset dataset) {
+            this(dataset, DIALOG_TITLE);
         }
         
         public int getShellCount() {
@@ -156,8 +162,8 @@ public class ShellAnalysisAction extends SingleDatasetResultAction {
          * @param mw
          * @param title
          */
-        protected ShellAnalysisSetupDialog(final MainWindow mw, final IAnalysisDataset dataset, final String title) {
-            super(mw, dataset, title);
+        protected ShellAnalysisSetupDialog(final IAnalysisDataset dataset, final String title) {
+            super(dataset, title);
             setDefaults();
             createUI();
             packAndDisplay();

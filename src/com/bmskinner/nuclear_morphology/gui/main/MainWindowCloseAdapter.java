@@ -107,7 +107,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
                 final CountDownLatch latch = new CountDownLatch(1);
 
-                Runnable task = new SaveDatasetAction(root, mw, latch, false);
+                Runnable task = new SaveDatasetAction(root, mw.getLogPanel(), mw.getEventHandler(), latch, false);
                 task.run();
                 try {
                     latch.await();

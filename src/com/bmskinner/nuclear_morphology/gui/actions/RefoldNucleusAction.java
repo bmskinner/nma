@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.nucleus.ConsensusAveragingMethod;
@@ -28,6 +30,8 @@ import com.bmskinner.nuclear_morphology.analysis.nucleus.ProfileRefoldMethod.Cur
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -43,8 +47,8 @@ public class RefoldNucleusAction extends SingleDatasetResultAction {
     /**
      * Refold the given selected dataset
      */
-    public RefoldNucleusAction(IAnalysisDataset dataset, MainWindow mw, CountDownLatch doneSignal) {
-        super(dataset, PROGRESS_LBL, mw);
+    public RefoldNucleusAction(@NonNull IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch doneSignal) {
+        super(dataset, PROGRESS_LBL, acceptor, eh);
         this.setLatch(doneSignal);
     }
 

@@ -119,13 +119,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
             popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NewAnalysisAction(mw);
+                    Runnable r = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
                     r.run();
                 }
             }));
             popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NeutrophilAnalysisAction(mw);
+                    Runnable r = new NeutrophilAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
                     r.run();
                 }
             }));
@@ -138,7 +138,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             });
         } else {
             btnNewAnalysis.addActionListener(e -> {
-                Runnable r = new NewAnalysisAction(mw);
+                Runnable r = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
                 r.run();
             });
         }
@@ -152,7 +152,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 
         btnLoadSavedDataset.addActionListener(e -> {
-            Runnable r = new PopulationImportAction(mw);
+            Runnable r = new PopulationImportAction(mw.getLogPanel(), mw.getEventHandler());
             r.run();
         });
 

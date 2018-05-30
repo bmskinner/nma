@@ -57,10 +57,8 @@ public class LobeDetectionSetupDialog extends SubAnalysisSetupDialog {
      * @param mw
      * @param dataset
      */
-    public LobeDetectionSetupDialog(final MainWindow mw, final IAnalysisDataset dataset) {
-
-        // modal dialog
-        super(mw, dataset, DIALOG_TITLE);
+    public LobeDetectionSetupDialog(final IAnalysisDataset dataset) {
+        super(dataset, DIALOG_TITLE);
         createUI();
         packAndDisplay();
 

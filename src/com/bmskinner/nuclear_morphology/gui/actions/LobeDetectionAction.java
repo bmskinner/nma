@@ -18,27 +18,31 @@
 
 package com.bmskinner.nuclear_morphology.gui.actions;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.LobeDetectionSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SubAnalysisSetupDialog;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class LobeDetectionAction extends SingleDatasetResultAction {
 
     private static final String PROGRESS_BAR_LABEL = "Detecting lobes";
 
-    public LobeDetectionAction(IAnalysisDataset dataset, MainWindow mw) {
-        super(dataset, PROGRESS_BAR_LABEL, mw);
+    public LobeDetectionAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
     public void run() {
         fine("Getting lobe detection options");
-        SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(mw, dataset);
+        SubAnalysisSetupDialog setup = new LobeDetectionSetupDialog(dataset);
 
         if (setup.isReadyToRun()) { // if dialog was cancelled, skip
 

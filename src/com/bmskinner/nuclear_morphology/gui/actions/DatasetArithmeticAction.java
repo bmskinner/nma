@@ -20,6 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -27,8 +29,10 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetArithmeticSetupDialog.DatasetArithmeticOperation;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class DatasetArithmeticAction extends MultiDatasetResultAction {
@@ -37,8 +41,8 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
 
     private static final String PROGRESS_LBL = "Dataset arithmetic";
 
-    public DatasetArithmeticAction(List<IAnalysisDataset> list, MainWindow mw) {
-        super(list, PROGRESS_LBL, mw);
+    public DatasetArithmeticAction(List<IAnalysisDataset> list, @NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        super(list, PROGRESS_LBL, acceptor, eh);
         this.setProgressBarIndeterminate();
     }
 
@@ -51,7 +55,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
              * dropdown for dataset 2
              */
 
-            DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets, mw);
+            DatasetArithmeticSetupDialog dialog = new DatasetArithmeticSetupDialog(datasets);
 
             if (dialog.isReadyToRun()) {
 
@@ -133,7 +137,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 int flag = SingleDatasetResultAction.ADD_POPULATION;
                 flag |= SingleDatasetResultAction.SAVE_DATASET;
                 flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, mw);
+                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, logPanel, eh);
                 log("Running morphology analysis...");
                 ThreadManager.getInstance().execute(pr);
             }

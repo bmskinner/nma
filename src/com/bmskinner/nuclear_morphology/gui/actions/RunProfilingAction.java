@@ -21,42 +21,43 @@ package com.bmskinner.nuclear_morphology.gui.actions;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public class RunProfilingAction extends SingleDatasetResultAction {
+	
+	private static final String PROGRESS_BAR_LABEL = "Profiling";
 
-    public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw) {
-        super(dataset, "Profiling", mw, downFlag);
-        fine("Creating new profiling analysis");
+    public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
     }
 
-    public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw) {
-        super(list, "Profiling", mw, downFlag);
-        fine("Creating new profiling analysis");
+    public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
     }
 
-    public RunProfilingAction(IAnalysisDataset dataset, int downFlag, MainWindow mw, CountDownLatch latch) {
-        super(dataset, "Profiling", mw, downFlag);
-        fine("Creating new profiling analysis");
+    public RunProfilingAction(@NonNull final IAnalysisDataset dataset, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+        super(dataset, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
         this.setLatch(latch);
 
     }
 
-    public RunProfilingAction(List<IAnalysisDataset> list, int downFlag, MainWindow mw, CountDownLatch latch) {
-        super(list, "Profiling", mw, downFlag);
-        fine("Creating new profiling analysis");
+    public RunProfilingAction(@NonNull final List<IAnalysisDataset> list, int downFlag, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, CountDownLatch latch) {
+        super(list, PROGRESS_BAR_LABEL, acceptor, eh, downFlag);
         this.setLatch(latch);
 
     }
 
     public void run() {
-        fine("Running new profiling analysis");
         runNewAnalysis();
     }
 
@@ -70,7 +71,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             worker = new DefaultAnalysisWorker(method);
 
             worker.addPropertyChangeListener(this);
-            fine("Running morphology analysis");
+
             ThreadManager.getInstance().submit(worker);
         } catch (Exception e) {
             this.cancel();
@@ -83,7 +84,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
 
         // ensure the progress bar gets hidden even if it is not removed
         this.setProgressBarVisible(false);
-        // cleanup();
+
         // The analysis takes place in a new thread to accomodate refolding.
         // See specific comment in RunSegmentationAction
         Runnable task = () -> {
@@ -93,7 +94,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
 
                 final CountDownLatch latch = new CountDownLatch(1);
-                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, mw, latch);
+                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, logPanel, eh, latch);
                 r.run();
                 try {
                     latch.await();
@@ -107,8 +108,8 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             if (!hasRemainingDatasetsToProcess()) {
 
                 cancel();
-                getInterfaceEventHandler().removeInterfaceEventListener(mw.getEventHandler());
-                getDatasetEventHandler().removeDatasetEventListener(mw.getEventHandler());
+                getInterfaceEventHandler().removeInterfaceEventListener(eh);
+                getDatasetEventHandler().removeDatasetEventListener(eh);
                 //
                 RunProfilingAction.this.countdownLatch();
 
@@ -116,14 +117,12 @@ public class RunProfilingAction extends SingleDatasetResultAction {
                 // otherwise analyse the next item in the list
                 cancel(); // remove progress bar
 
-                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, mw);
+                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, logPanel, eh);
                 p.run();
 
             }
-            // }
         };
-        // thr.start();
-        // task.run();
+
         ThreadManager.getInstance().execute(task);
 
     }

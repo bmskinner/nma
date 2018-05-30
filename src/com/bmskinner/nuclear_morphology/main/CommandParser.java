@@ -81,7 +81,7 @@ public class CommandParser {
                     e.printStackTrace();
                 }
 
-                MainWindow mw = new MainWindow(standalone);
+                MainWindow mw = new MainWindow(standalone, new EventHandler());
                 mw.setVisible(true);
         };
         java.awt.EventQueue.invokeLater( r );

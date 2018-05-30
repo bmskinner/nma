@@ -29,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -39,7 +41,9 @@ import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.prober.NucleusImageProber;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -60,7 +64,7 @@ public class NewAnalysisAction extends VoidResultAction {
 
     public static final int NEW_ANALYSIS = 0;
 
-    private static final String PROGRESS_LABEL = "Nucleus detection";
+    private static final String PROGRESS_BAR_LABEL = "Nucleus detection";
 
     /**
      * Create a new analysis. The folder of images to analyse will be requested
@@ -69,8 +73,8 @@ public class NewAnalysisAction extends VoidResultAction {
      * @param mw
      *            the main window to which a progress bar will be attached
      */
-    public NewAnalysisAction(MainWindow mw) {
-        this(mw, null);
+    public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh) {
+        this(acceptor, eh, null);
     }
 
     /**
@@ -81,8 +85,8 @@ public class NewAnalysisAction extends VoidResultAction {
      * @param folder
      *            the folder of images to analyse
      */
-    public NewAnalysisAction(MainWindow mw, final File folder) {
-        super(PROGRESS_LABEL, mw);
+    public NewAnalysisAction(@NonNull ProgressBarAcceptor acceptor, @NonNull EventHandler eh, final File folder) {
+        super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.folder = folder;
         options = OptionsFactory.makeAnalysisOptions();
         nucleusOptions = OptionsFactory.makeNucleusDetectionOptions(folder);

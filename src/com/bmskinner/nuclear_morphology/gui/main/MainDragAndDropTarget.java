@@ -95,7 +95,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
     private void receiveFolder(final File f) {
         // Pass to new analysis
-        Runnable task = new NewAnalysisAction(mw, f);
+        Runnable task = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler(), f);
         task.run();
     }
 
@@ -114,7 +114,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
     private void receiveDatasetFile(final File f) {
         fine("Opening file " + f.getAbsolutePath());
 
-        Runnable task = new PopulationImportAction(mw, f);
+        Runnable task = new PopulationImportAction(mw.getLogPanel(), mw.getEventHandler(), f);
         task.run();
     }
 }

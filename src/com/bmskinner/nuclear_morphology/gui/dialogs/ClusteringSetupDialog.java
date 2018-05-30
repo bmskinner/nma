@@ -74,9 +74,9 @@ public class ClusteringSetupDialog extends HierarchicalTreeSetupDialog implement
 
     // private final IMutableClusteringOptions options;
 
-    public ClusteringSetupDialog(MainWindow mw, IAnalysisDataset dataset) {
+    public ClusteringSetupDialog(IAnalysisDataset dataset) {
 
-        super(mw, dataset, DIALOG_TITLE);
+        super(dataset, DIALOG_TITLE);
         setDefaults();
         createUI();
         packAndDisplay();

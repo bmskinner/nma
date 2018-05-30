@@ -64,16 +64,21 @@ public abstract class SettingsDialog extends JDialog implements Loggable {
     public SettingsDialog() {
         this.setLocationRelativeTo(null);
     }
+    
+    /**
+     * Create a modal dialog with no parent frame
+     * @param modal
+     */
+    public SettingsDialog(boolean modal) {
+    	this();
+    	this.setModal(modal);
+    }
 
     /**
      * Constructor for dialogs attached to a frame
      * 
-     * @param programLogger
-     *            the logger
-     * @param owner
-     *            the frame (will be a MainWindow)
-     * @param modal
-     *            is the dialog modal
+     * @param owner the frame
+     * @param modal is the dialog modal
      */
     public SettingsDialog(Frame owner, boolean modal) {
         super(owner, modal);

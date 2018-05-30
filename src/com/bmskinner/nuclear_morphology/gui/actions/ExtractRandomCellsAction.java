@@ -15,6 +15,8 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -22,7 +24,9 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.VirtualCellCollection;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 /**
  * Allow a random subset of cells to be extracted as a child of the given dataset.
@@ -34,8 +38,8 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 
 	private static final String PROGRESS_LBL = "Extract cells";
 
-	public ExtractRandomCellsAction(IAnalysisDataset dataset, MainWindow mw) {
-		super(dataset, PROGRESS_LBL, mw);
+	public ExtractRandomCellsAction(IAnalysisDataset dataset, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(dataset, PROGRESS_LBL, acceptor, eh);
 		this.setProgressBarIndeterminate();
 	}
 
@@ -89,7 +93,7 @@ public class ExtractRandomCellsAction extends SingleDatasetResultAction {
 		
 		private JSpinner spinner;
 		public ExtractNucleiSetupDialog() {
-	        super(mw, true);
+	        super(true);
 
 	        this.setTitle("Extract cells options");
 	        setSize(450, 300);

@@ -28,8 +28,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 public class ExportWorkspaceAction extends VoidResultAction {
 
@@ -37,13 +39,13 @@ public class ExportWorkspaceAction extends VoidResultAction {
 
     private final List<IWorkspace> workspaces = new ArrayList<>();
 
-    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, MainWindow mw) {
-        super(PROGRESS_LBL, mw);
+    public ExportWorkspaceAction(@NonNull final IWorkspace workspace, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(PROGRESS_LBL, acceptor, eh);
         workspaces.add(workspace);
     }
     
-    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, MainWindow mw) {
-        super(PROGRESS_LBL, mw);
+    public ExportWorkspaceAction(@NonNull final List<IWorkspace> list, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(PROGRESS_LBL, acceptor, eh);
         workspaces.addAll(list);
     }
 

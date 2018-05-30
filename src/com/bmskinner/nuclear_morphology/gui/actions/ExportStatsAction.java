@@ -27,10 +27,12 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -42,8 +44,8 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
-    public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final MainWindow mw) {
-        super(datasets, label, mw);
+    public ExportStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final String label, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, label, acceptor, eh);
     }
     
     /**
@@ -57,8 +59,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final @NonNull String PROGRESS_LBL = "Exporting nuclear stats";
 
-        public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportNuclearStatsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override
@@ -92,8 +94,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final String PROGRESS_LBL = "Exporting shells";
 
-        public ExportShellsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportShellsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override
@@ -127,8 +129,8 @@ public abstract class ExportStatsAction extends MultiDatasetResultAction {
 
         private static final String PROGRESS_LBL = "Exporting signals";
 
-        public ExportSignalsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final MainWindow mw) {
-            super(datasets, PROGRESS_LBL, mw);
+        public ExportSignalsAction(@NonNull final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+            super(datasets, PROGRESS_LBL, acceptor, eh);
         }
 
         @Override

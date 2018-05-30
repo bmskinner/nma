@@ -35,8 +35,10 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version.UnsupportedVersionException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.io.DatasetImportMethod;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -56,8 +58,8 @@ public class PopulationImportAction extends VoidResultAction {
      * 
      * @param mw the main window to which a progress bar will be attached
      */
-    public PopulationImportAction(@NonNull MainWindow mw) {
-        this(mw, null);
+    public PopulationImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        this(acceptor, eh, null);
     }
 
     /**
@@ -67,8 +69,8 @@ public class PopulationImportAction extends VoidResultAction {
      * @param mw the main window to which a progress bar will be attached
      * @param file the dataset file to open
      */
-    public PopulationImportAction(@NonNull MainWindow mw, @Nullable File file) {
-        super(PROGRESS_BAR_LABEL, mw);
+    public PopulationImportAction(@NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh, @Nullable File file) {
+        super(PROGRESS_BAR_LABEL, acceptor, eh);
         this.file = file==null ? selectFile() : file;
     }
 

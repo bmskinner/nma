@@ -47,9 +47,9 @@ public class MainWindowMenuBar extends JMenuBar {
 		
 		JMenu newMenu = new JMenu("New analysis");
 		JMenuItem i1 = new JMenuItem("Fluorescent nuclei");
-		i1.addActionListener(e-> new NewAnalysisAction(mw).run() );
+		i1.addActionListener(e-> new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler()).run() );
 		JMenuItem i2 = new JMenuItem("H&E granulocytes");
-		i2.addActionListener(e-> new NeutrophilAnalysisAction(mw).run() );
+		i2.addActionListener(e-> new NeutrophilAnalysisAction(mw.getLogPanel(), mw.getEventHandler()).run() );
 		newMenu.add(i1);
 		newMenu.add(i2);
 		menu.add(newMenu);

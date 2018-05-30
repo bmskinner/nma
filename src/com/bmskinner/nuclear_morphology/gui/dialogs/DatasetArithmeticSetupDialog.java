@@ -62,8 +62,8 @@ public class DatasetArithmeticSetupDialog extends SettingsDialog implements Acti
         }
     }
 
-    public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list, MainWindow mw) {
-        super(mw, true);
+    public DatasetArithmeticSetupDialog(List<IAnalysisDataset> list) {
+        super(true);
 
         this.setTitle("Dataset boolean options");
         setSize(450, 300);

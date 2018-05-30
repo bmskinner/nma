@@ -25,14 +25,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DatasetMergeMethod;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.dialogs.DatasetMergingDialog;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
+import com.bmskinner.nuclear_morphology.main.EventHandler;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
@@ -47,12 +51,12 @@ import ij.io.SaveDialog;
  */
 public class MergeCollectionAction extends MultiDatasetResultAction {
 
-    private static final String PROGRESS_LBL         = "Merging";
+    private static final String PROGRESS_BAR_LABEL         = "Merging";
     private final String        SAVE_DIALOG_TITLE    = "Save merged dataset as...";
     private final String        DEFAULT_DATASET_NAME = "Merge_of_datasets";
 
-    public MergeCollectionAction(final List<IAnalysisDataset> datasets, MainWindow mw) {
-        super(datasets, PROGRESS_LBL, mw);
+    public MergeCollectionAction(final List<IAnalysisDataset> datasets, @NonNull final ProgressBarAcceptor acceptor, @NonNull final EventHandler eh) {
+        super(datasets, PROGRESS_BAR_LABEL, acceptor, eh);
     }
 
     @Override
@@ -173,7 +177,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         int flag = SingleDatasetResultAction.ADD_POPULATION;
         flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
         flag |= SingleDatasetResultAction.SAVE_DATASET;
-        RunProfilingAction pr = new RunProfilingAction(datasets, flag, mw);
+        RunProfilingAction pr = new RunProfilingAction(datasets, flag, logPanel, eh);
         ThreadManager.getInstance().execute(pr);
 
         this.cancel();
