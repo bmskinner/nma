@@ -30,6 +30,7 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -62,8 +63,9 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private MainWindow mw;
 
     public MainHeaderPanel(MainWindow mw) {
+    	
         this.mw = mw;
-
+        
         setLayout(new GridBagLayout());
         
         GridBagConstraints c = new GridBagConstraints();

@@ -75,6 +75,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
+import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
@@ -163,7 +164,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             if (event.type().equals(SignalChangeEvent.CHANGE_SCALE))
                 return () -> setScale(selectedDatasets);
                 
-            if (event.type().equals(SignalChangeEvent.SAVE_DATASET_ACTION))
+            if (event.type().equals(SignalChangeEvent.SAVE_SELECTED_DATASET))
             	return () -> saveDataset(selectedDataset, true);
             	
         	if (event.type().equals(SignalChangeEvent.UPDATE_PANELS_WITH_NULL) )
@@ -192,33 +193,35 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                     }
                 };
             
-            if (event.type().startsWith("Open|")) {
-                String s = event.type().replace("Open|", "");
+            if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
+                String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
+                if(s.equals(""))
+                	return new PopulationImportAction(mw);
                 File f = new File(s);
-
                 return new PopulationImportAction(mw, f);
             }
             
-            if (event.type().startsWith("Wrk|"))
+            if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
             	return () -> {
-            		String s = event.type().replace("Wrk|", "");
-            		File f = new File(s);
-
-            		IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
-
-            		DatasetListManager.getInstance().addWorkspace(w);
-
-            		for (File dataFile : w.getFiles()) {
-            			new PopulationImportAction(mw, dataFile).run();
+            		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
+            		if(s.equals("")) {
+            			new WorkspaceImportAction(mw).run();
+            			return;
             		}
+            		File f = new File(s);
+            		new WorkspaceImportAction(mw, f).run();
             	};
 
-            if (event.type().startsWith("New|")) {
-                String s = event.type().replace("New|", "");
-                File f = new File(s);
+            	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
+            		return () -> {
+            			String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
+            			if(s.equals(""))
+            				return;
+            			File f = new File(s);
 
-                return new NewAnalysisAction(mw, f);
-            }
+            			new NewAnalysisAction(mw, f);
+            		};
+            	}
             
             if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
             	return () ->{

@@ -42,13 +42,20 @@ public class SignalChangeEvent extends EventObject {
     public static final String EXPORT_CELL_LOCS            = "SaveCellLocations";
     public static final String CHANGE_SCALE                = "ChangeScaleAction";
     public static final String RELOCATE_CELLS              = "RelocateCellsAction";
+    
+    public static final String NEW_ANALYSIS_PREFIX         = "New|";
+    public static final String IMPORT_DATASET_PREFIX       = "Open|";
+   
+    public static final String IMPORT_WORKSPACE_PREFIX     = "Wrk|";
     public static final String EXPORT_WORKSPACE            = "ExportWorkspace";
     public static final String NEW_WORKSPACE               = "NewWorkspace";
+    
     public static final String ADD_NUCLEAR_SIGNAL          = "AddNuclearSignalAction";
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
     public static final String EXTRACT_SUBSET              = "Extract subset";
-    public static final String SAVE_DATASET_ACTION         = "SaveCollectionAction";
+    public static final String SAVE_ALL_DATASETS           = "SaveAllDatasetsAction";
+    public static final String SAVE_SELECTED_DATASET       = "SaveCollectionAction";
     public static final String MERGE_DATASETS_ACTION       = "MergeCollectionAction";
     public static final String DELETE_DATASET              = "DeleteCollectionAction";
     public static final String CURATE_DATASET              = "CurateCollectionAction";

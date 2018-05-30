@@ -342,7 +342,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     public void createButtons() {
     	
     	MenuFactory fact = new MenuFactory();
-    	saveMenuItem = fact.makeSingleMenuItem(Labels.Populations.SAVE_AS_LBL, SignalChangeEvent.SAVE_DATASET_ACTION);
+    	saveMenuItem = fact.makeSingleMenuItem(Labels.Populations.SAVE_AS_LBL, SignalChangeEvent.SAVE_SELECTED_DATASET);
         
     	moveUpMenuItem   = fact.makeSingleMenuItem(Labels.Populations.MOVE_UP_LBL,   SignalChangeEvent.MOVE_DATASET_UP_ACTION);
     	moveDownMenuItem = fact.makeSingleMenuItem(Labels.Populations.MOVE_DOWN_LBL, SignalChangeEvent.MOVE_DATASET_DOWN_ACTION);

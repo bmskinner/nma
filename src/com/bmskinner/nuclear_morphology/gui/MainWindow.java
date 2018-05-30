@@ -30,6 +30,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -40,6 +42,7 @@ import com.bmskinner.nuclear_morphology.gui.main.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
 import com.bmskinner.nuclear_morphology.gui.main.MainHeaderPanel;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindowMenuBar;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
@@ -104,6 +107,8 @@ public class MainWindow extends JFrame implements Loggable {
         createUI();
 
         createEventHandling();
+        
+        this.setJMenuBar(new MainWindowMenuBar(this));
 
     }
 
@@ -166,7 +171,7 @@ public class MainWindow extends JFrame implements Loggable {
             // ---------------
             // Create the header buttons
             // ---------------
-            contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
+//            contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
 
             // ---------------
             // Create the log panel

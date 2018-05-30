@@ -24,6 +24,9 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
+
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
@@ -51,26 +54,22 @@ public class PopulationImportAction extends VoidResultAction {
      * Create an import action for the given main window. This will create a
      * dialog asking for the file to open.
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
+     * @param mw the main window to which a progress bar will be attached
      */
-    public PopulationImportAction(MainWindow mw) {
-        super(PROGRESS_BAR_LABEL, mw);
-        file = selectFile();
+    public PopulationImportAction(@NonNull MainWindow mw) {
+        this(mw, null);
     }
 
     /**
      * Create an import action for the given main window. Specify the file to be
      * opened.
      * 
-     * @param mw
-     *            the main window to which a progress bar will be attached
-     * @param file
-     *            the dataset file to open
+     * @param mw the main window to which a progress bar will be attached
+     * @param file the dataset file to open
      */
-    public PopulationImportAction(MainWindow mw, File file) {
+    public PopulationImportAction(@NonNull MainWindow mw, @Nullable File file) {
         super(PROGRESS_BAR_LABEL, mw);
-        this.file = file;
+        this.file = file==null ? selectFile() : file;
     }
 
     @Override
