@@ -177,7 +177,7 @@ public class MergeCollectionAction extends MultiDatasetResultAction {
         int flag = SingleDatasetResultAction.ADD_POPULATION;
         flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
         flag |= SingleDatasetResultAction.SAVE_DATASET;
-        RunProfilingAction pr = new RunProfilingAction(datasets, flag, logPanel, eh);
+        RunProfilingAction pr = new RunProfilingAction(datasets, flag, progressAcceptors.get(0), eh);
         ThreadManager.getInstance().execute(pr);
 
         this.cancel();

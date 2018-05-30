@@ -137,7 +137,7 @@ public class DatasetArithmeticAction extends MultiDatasetResultAction {
                 int flag = SingleDatasetResultAction.ADD_POPULATION;
                 flag |= SingleDatasetResultAction.SAVE_DATASET;
                 flag |= SingleDatasetResultAction.ASSIGN_SEGMENTS;
-                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, logPanel, eh);
+                RunProfilingAction pr = new RunProfilingAction(newDataset, flag, progressAcceptors.get(0), eh);
                 log("Running morphology analysis...");
                 ThreadManager.getInstance().execute(pr);
             }

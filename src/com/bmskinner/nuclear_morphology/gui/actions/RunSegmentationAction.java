@@ -186,7 +186,7 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                 if ((downFlag & CURVE_REFOLD) == CURVE_REFOLD) {
                     finest("Preparing to hold thread while refolding datast");
                     final CountDownLatch latch = new CountDownLatch(1);
-                    Runnable r = new RefoldNucleusAction(dataset, logPanel, eh, latch);
+                    Runnable r = new RefoldNucleusAction(dataset, progressAcceptors.get(0), eh, latch);
                     r.run();
                     try {
                         latch.await();
@@ -242,8 +242,8 @@ public class RunSegmentationAction extends SingleDatasetResultAction {
                     cancel(); // remove progress bar
 
                     Runnable task = mode.equals(MorphologyAnalysisMode.COPY)
-                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, logPanel, eh)
-                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, logPanel, eh);
+                            ? new RunSegmentationAction(getRemainingDatasetsToProcess(), source, downFlag, progressAcceptors.get(0), eh)
+                            : new RunSegmentationAction(getRemainingDatasetsToProcess(), mode, downFlag, progressAcceptors.get(0), eh);
 
                     task.run();
                 }

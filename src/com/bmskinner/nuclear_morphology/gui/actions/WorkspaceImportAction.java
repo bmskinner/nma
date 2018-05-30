@@ -55,7 +55,7 @@ public class WorkspaceImportAction extends VoidResultAction {
     		DatasetListManager.getInstance().addWorkspace(w);
 
     		for (File dataFile : w.getFiles()) {
-    			new PopulationImportAction(logPanel, eh, dataFile).run();
+    			new PopulationImportAction(progressAcceptors.get(0), eh, dataFile).run();
     		}
 
             setProgressMessage(PROGRESS_BAR_LABEL);

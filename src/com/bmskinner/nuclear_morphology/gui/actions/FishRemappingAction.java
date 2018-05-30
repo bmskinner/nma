@@ -77,7 +77,7 @@ public class FishRemappingAction extends SingleDatasetResultAction {
 
                 log("Reapplying morphology...");
 
-                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, logPanel, eh);
+                Runnable r = new RunSegmentationAction(newList, dataset, ADD_POPULATION, progressAcceptors.get(0), eh);
                 r.run();
                 finished();
 

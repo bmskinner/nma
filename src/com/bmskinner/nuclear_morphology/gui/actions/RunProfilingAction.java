@@ -94,7 +94,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
             if ((downFlag & ASSIGN_SEGMENTS) == ASSIGN_SEGMENTS) {
 
                 final CountDownLatch latch = new CountDownLatch(1);
-                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, logPanel, eh, latch);
+                Runnable r = new RunSegmentationAction(dataset, MorphologyAnalysisMode.NEW, downFlag, progressAcceptors.get(0), eh, latch);
                 r.run();
                 try {
                     latch.await();
@@ -117,7 +117,7 @@ public class RunProfilingAction extends SingleDatasetResultAction {
                 // otherwise analyse the next item in the list
                 cancel(); // remove progress bar
 
-                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, logPanel, eh);
+                Runnable p = new RunProfilingAction(getRemainingDatasetsToProcess(), downFlag, progressAcceptors.get(0), eh);
                 p.run();
 
             }

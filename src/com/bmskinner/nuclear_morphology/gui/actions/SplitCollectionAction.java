@@ -77,7 +77,7 @@ public class SplitCollectionAction extends SingleDatasetResultAction {
                         int flag = 0;
                         IAnalysisDataset newDataset = dataset.getChildDataset(newCollection.getID());
                         final CountDownLatch latch = new CountDownLatch(1);
-                        new RunSegmentationAction(newDataset, dataset, flag, logPanel, eh, latch);
+                        new RunSegmentationAction(newDataset, dataset, flag, progressAcceptors.get(0), eh, latch);
                     }
                 } else {
                     fine("User cancelled split");
