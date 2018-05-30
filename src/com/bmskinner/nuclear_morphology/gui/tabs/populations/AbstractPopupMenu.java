@@ -18,6 +18,8 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
+import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
+import com.bmskinner.nuclear_morphology.gui.ContextEnabled.ActiveCountContext;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
@@ -65,39 +67,6 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
     private List<Object> listeners = new ArrayList<Object>();
     
-    
-    /**
-     * Interface for components that have their enabled state driven 
-     * by the number of selected objects
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    public interface ContextEnabled {
-    	
-        /**
-         * Tell the menu items to update their state based on the number of selected items
-         * @param nItems the number of selected items
-         */
-    	void updateSelectionContext(int nObjects);
-    	
-    }
-    
-    
-    /**
-     * Track when a menu item should be active.
-     * Objects can be datasets, cluster groups, workspaces,
-     * or anything else in the populations menu
-     * @author bms41
-     * @since 1.14.0
-     *
-     */
-    public enum ActiveContext {
-    	SINGLE_OBJECT_ONLY,
-    	MULTIPLE_OBJECTS_ONLY,
-    	SINGLE_AND_MULTIPLE_OBJECTS
-    }
-
     /**
      * Simplify creation of menu items
      * @author bms41
@@ -112,7 +81,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
          *
          */
         public class PopupMenu extends JMenu implements ContextEnabled {
-        	ActiveContext context;
+        	ActiveCountContext context;
         	boolean rootOnly;
         	
         	
@@ -121,7 +90,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         	 * @param title the label for the menu
         	 * @param context the activity context under which the menu is enabled 
         	 */
-        	public PopupMenu(String title, ActiveContext context) {
+        	public PopupMenu(String title, ActiveCountContext context) {
         		super(title);
         		this.context = context;
         	}
@@ -134,10 +103,16 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         		if(nObjects<=0)
         			setEnabled(false);
         		if(nObjects==1)
-        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
+        			setEnabled(context.equals(ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveCountContext.SINGLE_OBJECT_ONLY));
         		if(nObjects>1)
-        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
-        	}        	
+        			setEnabled(context.equals(ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveCountContext.MULTIPLE_OBJECTS_ONLY));
+        	}
+
+			@Override
+			public void updateSelectionContext(ActiveTypeContext type) {
+				// TODO Auto-generated method stub
+				
+			}        	
         }
         
         
@@ -148,7 +123,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
          *
          */
         public class PopupMenuItem extends JMenuItem implements ContextEnabled {
-        	ActiveContext context;
+        	ActiveCountContext context;
         	
         	
         	/**
@@ -157,7 +132,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         	 * @param event the action to call
         	 * @param context the activity context under which the item is enabled 
         	 */
-        	public PopupMenuItem(String title, String event, ActiveContext context) {
+        	public PopupMenuItem(String title, String event, ActiveCountContext context) {
         		super(title);
         		this.context = context;
         		addActionListener(e -> fireSignalChangeEvent(event));
@@ -172,14 +147,20 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
         		if(nObjects<=0)
         			setEnabled(false);
         		if(nObjects==1)
-        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.SINGLE_OBJECT_ONLY));
+        			setEnabled(context.equals(ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveCountContext.SINGLE_OBJECT_ONLY));
         		if(nObjects>1)
-        			setEnabled(context.equals(ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveContext.MULTIPLE_OBJECTS_ONLY));
+        			setEnabled(context.equals(ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS) || context.equals(ActiveCountContext.MULTIPLE_OBJECTS_ONLY));
         	}
+
+			@Override
+			public void updateSelectionContext(ActiveTypeContext type) {
+				// TODO Auto-generated method stub
+				
+			}
         }
         
 
-    	public PopupMenuItem makeItem(String label, String event, ActiveContext context) {
+    	public PopupMenuItem makeItem(String label, String event, ActiveCountContext context) {
     		return new PopupMenuItem(label, event, context);
     	}
 
@@ -190,7 +171,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenuItem makeSingleMenuItem(String label, String event) {
-    		return makeItem(label, event, ActiveContext.SINGLE_OBJECT_ONLY);
+    		return makeItem(label, event, ActiveCountContext.SINGLE_OBJECT_ONLY);
     	}
     	
     	/**
@@ -200,7 +181,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenuItem makeMultipleMenuItem(String label, String event) {
-    		return makeItem(label, event, ActiveContext.MULTIPLE_OBJECTS_ONLY);
+    		return makeItem(label, event, ActiveCountContext.MULTIPLE_OBJECTS_ONLY);
     	}
     	
     	/**
@@ -210,10 +191,10 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenuItem makeBothMenuItem(String label, String event) {
-    		return makeItem(label, event, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
+    		return makeItem(label, event, ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS);
     	}
     	
-    	public PopupMenu makeMenu(String label, ActiveContext context) {
+    	public PopupMenu makeMenu(String label, ActiveCountContext context) {
     		return new PopupMenu(label, context);
     	}
     	
@@ -224,7 +205,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenu makeSingleMenu(String label) {
-    		return new PopupMenu(label, ActiveContext.SINGLE_OBJECT_ONLY);
+    		return new PopupMenu(label, ActiveCountContext.SINGLE_OBJECT_ONLY);
     	}
     	
     	/**
@@ -234,7 +215,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenu makeMultipleMenu(String label) {
-    		return new PopupMenu(label, ActiveContext.SINGLE_OBJECT_ONLY);
+    		return new PopupMenu(label, ActiveCountContext.SINGLE_OBJECT_ONLY);
     	}
     	
     	/**
@@ -244,7 +225,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	 * @return
     	 */
     	public PopupMenu makeBothMenu(String label) {
-    		return new PopupMenu(label, ActiveContext.SINGLE_AND_MULTIPLE_OBJECTS);
+    		return new PopupMenu(label, ActiveCountContext.SINGLE_AND_MULTIPLE_OBJECTS);
     	}
     }
     
