@@ -1,7 +1,10 @@
 package com.bmskinner.nuclear_morphology.main;
 
+import java.io.File;
+
 import javax.swing.UIManager;
 
+import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 
@@ -28,49 +31,39 @@ public class CommandParser {
 	private void execute(String[] arr){
 	    
 	    boolean headless = false;
+	    File folder = null; 
 	    for(String s : arr){
-//	        System.out.println(s);
+	    	System.out.println("Argument: "+s);
+	    	if(s.startsWith("-folder=")) {
+	    		headless=true;
+	    		String path = s.replace("-folder=", "");
+	    		folder = new File(path); 
+	    	}
 	        
-	        if(s.equals("-headless")){
-	            headless = true;
-	        }
 	    }
-	    
+	    // load the config file
+	    new PropertiesReader();
 	    
 	    if(headless){
-	        launch();
+	    	System.out.println("Running on folder: "+folder.getAbsolutePath());
+	    	try {
+				new BasicAnalysisPipeline(folder);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	    } else {
-	        runStandalone();
+	        runWithGUI();
 	    }
 	    		
 	}
-	
-	public void launch(){
-	    System.out.println("Launching headless...");
-	    System.out.println("No further functionality enabled");
-	}
-	
-	
+		
 	/**
-     * Load the program as standalone
+     * Load the program user interface
      */
-    private void runStandalone(){
+    private void runWithGUI(){
         try {
-            // load the config file properties
-            new PropertiesReader();
-            loadMainWindow(true);
-        } catch(Exception e){
-            System.err.println("Error loading main window");
-            e.printStackTrace();
-        } 
-        
-            
-        
-    }
-    
-    private void loadMainWindow(boolean standalone){
-        
-        Runnable r = () -> {
+        	Runnable r = () -> {
 
                 IJ.setBackgroundColor(0, 0, 0);  // default background is black
                 try {
@@ -81,10 +74,16 @@ public class CommandParser {
                     e.printStackTrace();
                 }
 
-                MainWindow mw = new MainWindow(standalone, new EventHandler());
+                MainWindow mw = new MainWindow(true, new EventHandler());
                 mw.setVisible(true);
         };
         java.awt.EventQueue.invokeLater( r );
+        } catch(Exception e){
+            System.err.println("Error loading main window");
+            e.printStackTrace();
+        } 
+        
+            
+        
     }
-
 }
