@@ -73,7 +73,6 @@ public class Nuclear_Morphology_Analysis
 	}
 	
 	private void loadLogger(){
-		// Add a log file for program errors
 		
 		try {
 			// Get the location of the jar file

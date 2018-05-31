@@ -66,7 +66,7 @@ public interface Loggable {
         // l.setUseParentHandlers(true);
         // l.log(level, message); // will be passed upwards to root logger
         Logger.getLogger(PROGRAM_LOGGER).log(level, message);
-        System.out.println(message);
+//        System.out.println(message);
     }
 
     /**
@@ -81,7 +81,7 @@ public interface Loggable {
     default void error(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.SEVERE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(Level.SEVERE, message, t);
-        System.err.println(message);
+//        System.err.println(message);
         t.printStackTrace();
     }
 
@@ -98,7 +98,7 @@ public interface Loggable {
     default void stack(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
-        System.err.println(message);
+//        System.err.println(message);
         t.printStackTrace();
     }
 
@@ -124,7 +124,7 @@ public interface Loggable {
      */
     default void fine(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.FINE, message);
-        System.out.println(message);
+//        System.out.println(message);
     }
 
     /**
@@ -136,7 +136,7 @@ public interface Loggable {
      */
     default void fine(String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
-        System.out.println(message);
+//        System.out.println(message);
     }
 
     /**
@@ -168,7 +168,7 @@ public interface Loggable {
      */
     default void warn(String message) {
         Logger.getLogger(PROGRAM_LOGGER).log(Level.WARNING, message);
-        System.err.println(message);
+//        System.err.println(message);
     }
 
     /**
@@ -193,7 +193,7 @@ public interface Loggable {
      */
     default void log(Level level, String message, Throwable t) {
         Logger.getLogger(PROGRAM_LOGGER).log(level, message, t);
-        System.err.println(message);
+//        System.err.println(message);
         t.printStackTrace();
     }
 

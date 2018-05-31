@@ -7,6 +7,7 @@ import javax.swing.UIManager;
 import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
 
@@ -16,7 +17,7 @@ import ij.IJ;
  * @since 1.13.7
  *
  */
-public class CommandParser {
+public class CommandParser implements Loggable {
     	
 	/**
 	 * Construct with an array of parameters for the program 
@@ -33,7 +34,7 @@ public class CommandParser {
 	    boolean headless = false;
 	    File folder = null; 
 	    for(String s : arr){
-	    	System.out.println("Argument: "+s);
+	    	log("Argument: "+s);
 	    	if(s.startsWith("-folder=")) {
 	    		headless=true;
 	    		String path = s.replace("-folder=", "");
@@ -45,12 +46,11 @@ public class CommandParser {
 	    new PropertiesReader();
 	    
 	    if(headless){
-	    	System.out.println("Running on folder: "+folder.getAbsolutePath());
+	    	log("Running on folder: "+folder.getAbsolutePath());
 	    	try {
 				new BasicAnalysisPipeline(folder);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				error("Error in pipeline", e);
 			}
 	    } else {
 	        runWithGUI();
