@@ -53,6 +53,12 @@ public abstract class AbstractAnalysisMethod implements IAnalysisMethod, Progres
     public void removeProgressListener(ProgressListener l) {
         listeners.remove(l);
     }
+    
+    @Override
+    public IAnalysisMethod then(IAnalysisMethod nextMethod) throws Exception {
+    	call();
+    	return nextMethod;
+    }
 
     protected void fireProgressEvent() {
         ProgressEvent e = new ProgressEvent(this);

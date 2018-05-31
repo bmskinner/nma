@@ -52,26 +52,19 @@ public class BasicAnalysisPipeline {
      */
     private void runNewAnalysis(String folder, IAnalysisOptions op, File saveFile) throws Exception {
         
-        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists()){
+        if(!op.getDetectionOptions(CellularComponent.NUCLEUS).get().getFolder().exists())
             throw new IllegalArgumentException("Detection folder does not exist");
-        }
-        IAnalysisMethod m = new NucleusDetectionMethod(folder, op);
-        IAnalysisResult r = m.call();
-        
-        IAnalysisDataset obs = r.getFirstDataset();
-        
-        IAnalysisMethod p = new DatasetProfilingMethod(obs);
-        p.call();
-        
-        IAnalysisMethod seg = new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW);
-        seg.call();
-                
-        IAnalysisMethod m2 = new DatasetExportMethod(obs, saveFile);
-        m2.call();
         
         File statsFile = new File(saveFile.getParentFile(), saveFile.getName()+Io.TAB_FILE_EXTENSION);
-        IAnalysisMethod m3 = new DatasetStatsExporter(statsFile, obs);
-        m3.call();
+
+        IAnalysisDataset obs = new NucleusDetectionMethod(folder, op)
+        		.call().getFirstDataset();
+        
+        new DatasetProfilingMethod(obs)
+        	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
+        	.then(new DatasetExportMethod(obs, saveFile))
+        	.then(new DatasetStatsExporter(statsFile, obs))
+        	.call();
     }
 
 }

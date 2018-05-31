@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.io.DatasetExportMethod;
+import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
 import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SampleDatasetReader;
 
@@ -143,17 +144,13 @@ public class NucleusDetectionMethodTest {
         }
         IAnalysisMethod m = new NucleusDetectionMethod(folder, op);
         IAnalysisResult r = m.call();
-        
         IAnalysisDataset obs = r.getFirstDataset();
         
-        IAnalysisMethod p = new DatasetProfilingMethod(obs);
-        p.call();
-        
-        IAnalysisMethod seg = new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW);
-        seg.call();
-                
-        IAnalysisMethod m2 = new DatasetExportMethod(obs, saveFile);
-        m2.call();
+        new DatasetProfilingMethod(obs)
+	    	.then(new DatasetSegmentationMethod(obs, MorphologyAnalysisMode.NEW))
+	    	.then(new DatasetExportMethod(obs, saveFile))
+	    	.call();
+
         return obs;
     }
     
