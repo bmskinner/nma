@@ -1,57 +1,27 @@
-/*******************************************************************************
- * Copyright (C) 2017 Ben Skinner
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.\
- *******************************************************************************/
-
-
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainView;
-import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow;
-import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindowMenuBar;
+import com.bmskinner.nuclear_morphology.gui.LogPanel;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ImagesTabPanel;
@@ -71,43 +41,37 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.EventHandler;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 import com.javadocking.DockingManager;
+import com.javadocking.dock.CompositeLineDock;
 import com.javadocking.dock.Position;
-import com.javadocking.dock.SplitDock;
 import com.javadocking.dock.TabDock;
+import com.javadocking.dock.factory.TabDockFactory;
+import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
-import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.model.FloatDockModel;
 
 /**
- * This is the core of the program UI. All display panels are contained here.
- * Update requests are sent from here to display information, and requests to
- * perform analyses are relayed from sub-panels to here.
- * 
- * @author bms41
+ * An alternative main window for testing docking frameworks
+ * @author ben
+ * @since 1.14.0
  *
  */
-@SuppressWarnings("serial")
-public class MainWindow extends AbstractMainWindow {
-
-    private JPanel contentPane;
+public class DockableMainWindow extends AbstractMainWindow {
+	private JPanel contentPane;
 
     private LogPanel logPanel;
     private PopulationsPanel populationsPanel;
     private ConsensusNucleusPanel consensusNucleusPanel;
+    private TabDock tabDock; // bottom panel tabs
 
-    private JTabbedPane tabbedPane; // bottom panel tabs
-
-    // store panels for iterating messages
-//    private final List<TabPanel> detailPanels = new ArrayList<>();
-
-
+    
+    
     /**
      * Create the frame.
      * 
      * @param standalone is the frame a standalone app, or launched within ImageJ?
      */
-    public MainWindow(boolean standalone, EventHandler eh) {
+    public DockableMainWindow(boolean standalone, EventHandler eh) {
     	super(standalone, eh);
 
         createWindowListeners();
@@ -131,12 +95,13 @@ public class MainWindow extends AbstractMainWindow {
     @Override
 	protected void createUI() {
         try {
+            
 
             Dimension preferredSize = new Dimension(1012, 804);
             this.setPreferredSize(preferredSize);
             setBounds(100, 100, 1012, 804);
             contentPane = new JPanel();
-            contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+//            contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
             contentPane.setLayout(new BorderLayout(0, 0));
             setContentPane(contentPane);
 
@@ -156,51 +121,54 @@ public class MainWindow extends AbstractMainWindow {
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
             Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
-                		
+            
+            Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
+            TabDock logTabDock = new TabDock();
+            logTabDock.addDockable(dockable1, new Position(0));
+            
+            
+            CompositeLineDock lineDock1 = new CompositeLineDock(
+    				CompositeLineDock.ORIENTATION_HORIZONTAL, true, new TabDockFactory());
+
+            lineDock1.addChildDock(logTabDock, new Position(0));
+            
+            FloatDockModel dockModel = new FloatDockModel();
+    		dockModel.addOwner("frame0", this);
+    		DockingManager.setDockModel(dockModel);
+    		dockModel.addRootDock("topdock", lineDock1, this);
+    		
             // ---------------
             // Create the consensus chart
             // ---------------
             populationsPanel = new PopulationsPanel();
-                        
+            
+            Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
+            TabDock popTabDock = new TabDock();
+            popTabDock.addDockable(popDockable, new Position(0));
+            lineDock1.addChildDock(popTabDock, new Position(1));
+            
+            
+            
             consensusNucleusPanel = new ConsensusNucleusPanel();
+            
+            Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
+            TabDock consTabDock = new TabDock();
+            consTabDock.addDockable(consDockable, new Position(0));
+            lineDock1.addChildDock(consTabDock, new Position(2));
             detailPanels.add(consensusNucleusPanel);
 
-            // ---------------
-            // Create the split view
-            // ---------------
-            JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, populationsPanel);
 
             // Provide minimum sizes for the two components in the split pane
             Dimension minimumSize = new Dimension(300, 200);
             logPanel.setMinimumSize(minimumSize);
             populationsPanel.setMinimumSize(minimumSize);
 
-            // ---------------
-            // Make the top row panel
-            // ---------------
-            JPanel topRow = new JPanel();
-
-            GridBagConstraints c = new GridBagConstraints();
-            c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last element
-            c.fill = GridBagConstraints.BOTH; // fill both axes of container
-            c.weightx = 1.0; // maximum weighting
-            c.weighty = 1.0;
-
-            topRow.setLayout(new GridBagLayout());
-            topRow.add(logAndPopulations, c);
-
-            c.gridwidth = GridBagConstraints.REMAINDER; // last element in row
-            c.weightx = 0.5; // allow padding on x axis
-            c.weighty = 1.0; // max weighting on y axis
-            c.fill = GridBagConstraints.BOTH; // fill to bounds where possible
-            topRow.add(consensusNucleusPanel, c);
-
             createTabs();
-
+            dockModel.addRootDock("tabdock", tabDock, this);
             // ---------------
             // Add the top and bottom rows to the main panel
             // ---------------
-            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topRow, tabbedPane);
+            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lineDock1, tabDock);
 
             contentPane.add(panelMain, BorderLayout.CENTER);
            
@@ -216,7 +184,8 @@ public class MainWindow extends AbstractMainWindow {
      * Create the individual analysis tabs
      */
     private void createTabs() {
-        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+    	
+    	tabDock = new TabDock();
 
         // Create the top level tabs in the UI
         DetailPanel analysisDetailPanel  = new AnalysisDetailPanel();
@@ -248,12 +217,15 @@ public class MainWindow extends AbstractMainWindow {
         
         detailPanels.add(editingDetailPanel);
         
+        int i=0;
         for(TabPanel t : detailPanels){
             if(t instanceof ConsensusNucleusPanel){
                 continue;
             }
+
             DetailPanel p = (DetailPanel)t;
-            tabbedPane.addTab(p.getPanelTitle(), p);
+            Dockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null, DockingMode.ALL);
+            tabDock.addDockable(d, new Position(i++));
         }
         
         signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
@@ -283,7 +255,7 @@ public class MainWindow extends AbstractMainWindow {
         }
     }
 
-
+    
 
     public PopulationsPanel getPopulationsPanel() {
         return this.populationsPanel;
@@ -294,22 +266,6 @@ public class MainWindow extends AbstractMainWindow {
         return this.logPanel;
     }
 
-    /**
-     * Get the event handler that dispatches messages and analyses
-     * 
-     * @return
-     */
-    @Override
-	public EventHandler getEventHandler() {
-        return eh;
-    }
-
-    @Override
-    public void dispose() {
-        super.dispose();
-    }
-    
-    
 	@Override
 	public void interfaceEventReceived(InterfaceEvent event) {
 		if(event.getSource().equals(eh)){
@@ -371,7 +327,9 @@ public class MainWindow extends AbstractMainWindow {
             addDataset(event.firstDataset());
         
 	}
-	    
+	
+	
+    
     /**
      * Add the given dataset and all its children to the populations panel
      * 
@@ -387,5 +345,6 @@ public class MainWindow extends AbstractMainWindow {
         // This will also trigger a dataset update event as the dataset
         // is selected, so don't trigger another update here.
         getPopulationsPanel().update(dataset);
-    }  
+    }
+
 }

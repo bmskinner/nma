@@ -45,9 +45,9 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
  */
 public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
-    private MainWindow mw;
+    private MainView mw;
 
-    public MainWindowCloseAdapter(MainWindow mw) {
+    public MainWindowCloseAdapter(MainView mw) {
         super();
         this.mw = mw;
     }
@@ -59,7 +59,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
             Object[] options = { "Save datasets", "Exit without saving", "Cancel exit" };
-            int save = JOptionPane.showOptionDialog(mw, "Datasets have changed since last save!", "Save datasets?",
+            int save = JOptionPane.showOptionDialog(null, "Datasets have changed since last save!", "Save datasets?",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
             if (save == 0) {
@@ -107,7 +107,7 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
             for (IAnalysisDataset root : DatasetListManager.getInstance().getRootDatasets()) {
                 final CountDownLatch latch = new CountDownLatch(1);
 
-                Runnable task = new SaveDatasetAction(root, mw.getLogPanel(), mw.getEventHandler(), latch, false);
+                Runnable task = new SaveDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), latch, false);
                 task.run();
                 try {
                     latch.await();

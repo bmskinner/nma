@@ -60,9 +60,9 @@ public class MainHeaderPanel extends JPanel implements Loggable {
     private static final String TASK_QUEUE_LBL    = "Task queue:";
     private static final String MEMORY_LBL        = "Memory:";
 
-    private MainWindow mw;
+    private MainView mw;
 
-    public MainHeaderPanel(MainWindow mw) {
+    public MainHeaderPanel(MainView mw) {
     	
         this.mw = mw;
         
@@ -119,13 +119,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
             popup.add(new JMenuItem(new AbstractAction(NEW_STANDARD_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
+                    Runnable r = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                     r.run();
                 }
             }));
             popup.add(new JMenuItem(new AbstractAction(NEW_NEUTROPHIL_LBL) {
                 public void actionPerformed(ActionEvent e) {
-                    Runnable r = new NeutrophilAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
+                    Runnable r = new NeutrophilAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                     r.run();
                 }
             }));
@@ -138,7 +138,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
             });
         } else {
             btnNewAnalysis.addActionListener(e -> {
-                Runnable r = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler());
+                Runnable r = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler());
                 r.run();
             });
         }
@@ -152,7 +152,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         JButton btnLoadSavedDataset = new JButton(LOAD_DATASET_LBL);
 
         btnLoadSavedDataset.addActionListener(e -> {
-            Runnable r = new PopulationImportAction(mw.getLogPanel(), mw.getEventHandler());
+            Runnable r = new PopulationImportAction(mw.getProgressAcceptor(), mw.getEventHandler());
             r.run();
         });
 

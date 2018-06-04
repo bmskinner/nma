@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -33,11 +34,11 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	private SignalChangeEventHandler sh;
 	private InterfaceEventHandler ih;
 	private DatasetEventHandler dh;
-	private MainWindow mw;
+	private MainView mw;
 	
 	private JMenu contextMenu;
 	
-	public MainWindowMenuBar(MainWindow mw) {
+	public MainWindowMenuBar(MainView mw) {
 		super();
 		this.mw = mw;
 		sh = new SignalChangeEventHandler(this);
@@ -75,9 +76,9 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		
 		JMenu newMenu = new JMenu("New analysis");
 		JMenuItem i1 = new JMenuItem("Fluorescent nuclei");
-		i1.addActionListener(e-> new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler()).run() );
+		i1.addActionListener(e-> new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run() );
 		JMenuItem i2 = new JMenuItem("H&E granulocytes");
-		i2.addActionListener(e-> new NeutrophilAnalysisAction(mw.getLogPanel(), mw.getEventHandler()).run() );
+		i2.addActionListener(e-> new NeutrophilAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler()).run() );
 		newMenu.add(i1);
 		newMenu.add(i2);
 		menu.add(newMenu);
@@ -98,7 +99,7 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		exit.addActionListener(e-> {
 			for(WindowListener l : mw.getWindowListeners()) {
 				if(l instanceof MainWindowCloseAdapter)
-					l.windowClosing(new WindowEvent(mw, WindowEvent.WINDOW_CLOSING));
+					l.windowClosing(new WindowEvent((Window) mw, WindowEvent.WINDOW_CLOSING));
 			}
 		});
 		menu.add(exit);

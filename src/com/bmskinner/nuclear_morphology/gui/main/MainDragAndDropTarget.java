@@ -41,9 +41,9 @@ import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
-    private MainWindow mw;
+    private MainView mw;
 
-    public MainDragAndDropTarget(MainWindow target) {
+    public MainDragAndDropTarget(MainView target) {
         super();
         mw = target;
     }
@@ -95,7 +95,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
     private void receiveFolder(final File f) {
         // Pass to new analysis
-        Runnable task = new NewAnalysisAction(mw.getLogPanel(), mw.getEventHandler(), f);
+        Runnable task = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler(), f);
         task.run();
     }
 
@@ -114,7 +114,7 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
     private void receiveDatasetFile(final File f) {
         fine("Opening file " + f.getAbsolutePath());
 
-        Runnable task = new PopulationImportAction(mw.getLogPanel(), mw.getEventHandler(), f);
+        Runnable task = new PopulationImportAction(mw.getProgressAcceptor(), mw.getEventHandler(), f);
         task.run();
     }
 }

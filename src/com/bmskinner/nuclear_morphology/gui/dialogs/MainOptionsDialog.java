@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,6 +41,7 @@ import javax.swing.border.EmptyBorder;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
+import com.bmskinner.nuclear_morphology.gui.main.MainView;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
@@ -58,8 +60,8 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
                                                         // datasets be converted
                                                         // to the latest version
 
-    public MainOptionsDialog(final MainWindow mw) {
-        super(mw, false);
+    public MainOptionsDialog(final MainView mw) {
+        super((Frame) mw, false);
 
         // this.mw = mw;
         this.setLayout(new BorderLayout());
