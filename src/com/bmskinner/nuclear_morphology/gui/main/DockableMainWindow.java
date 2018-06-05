@@ -43,7 +43,9 @@ import com.bmskinner.nuclear_morphology.main.ThreadManager;
 import com.javadocking.DockingManager;
 import com.javadocking.dock.CompositeLineDock;
 import com.javadocking.dock.Position;
+import com.javadocking.dock.SingleDock;
 import com.javadocking.dock.TabDock;
+import com.javadocking.dock.factory.LeafDockFactory;
 import com.javadocking.dock.factory.TabDockFactory;
 import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.dockable.Dockable;
@@ -123,12 +125,12 @@ public class DockableMainWindow extends AbstractMainWindow {
             Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
             
             Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
-            TabDock logTabDock = new TabDock();
+            SingleDock logTabDock = new SingleDock();
             logTabDock.addDockable(dockable1, new Position(0));
             
             
             CompositeLineDock lineDock1 = new CompositeLineDock(
-    				CompositeLineDock.ORIENTATION_HORIZONTAL, true, new TabDockFactory());
+    				CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
 
             lineDock1.addChildDock(logTabDock, new Position(0));
             
@@ -143,7 +145,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             populationsPanel = new PopulationsPanel();
             
             Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
-            TabDock popTabDock = new TabDock();
+            SingleDock popTabDock = new SingleDock();
             popTabDock.addDockable(popDockable, new Position(0));
             lineDock1.addChildDock(popTabDock, new Position(1));
             
@@ -152,7 +154,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             consensusNucleusPanel = new ConsensusNucleusPanel();
             
             Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
-            TabDock consTabDock = new TabDock();
+            SingleDock consTabDock = new SingleDock();
             consTabDock.addDockable(consDockable, new Position(0));
             lineDock1.addChildDock(consTabDock, new Position(2));
             detailPanels.add(consensusNucleusPanel);
@@ -336,7 +338,7 @@ public class DockableMainWindow extends AbstractMainWindow {
      * @param dataset
      */
     private synchronized void addDataset(final IAnalysisDataset dataset) {
-
+    	fine("Adding dataset to populations panel: "+dataset.getName());
     	getPopulationsPanel().addDataset(dataset);
         for (IAnalysisDataset child : dataset.getAllChildDatasets()) {
         	getPopulationsPanel().addDataset(child);
@@ -345,6 +347,9 @@ public class DockableMainWindow extends AbstractMainWindow {
         // This will also trigger a dataset update event as the dataset
         // is selected, so don't trigger another update here.
         getPopulationsPanel().update(dataset);
+        
+        //Force all panels to update with the new datasets
+        eh.interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }
 
 }

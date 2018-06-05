@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.main;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -42,9 +43,11 @@ public class ThreadManager implements Loggable {
     public static final int corePoolSize    = 100;
     public static final int maximumPoolSize = 100;
     public static final int keepAliveTime   = 10000;
+    
+    private final BlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1024);
 
     private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(1024));
+            TimeUnit.MILLISECONDS, executorQueue);
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 
@@ -55,6 +58,7 @@ public class ThreadManager implements Loggable {
     
     public int queueLength(){
     	return queueLength.get();
+//    	return executorQueue.size();
     }
 
     /**
@@ -78,6 +82,11 @@ public class ThreadManager implements Loggable {
         }
 
     }
+    
+    @Override
+	public String toString() {
+    	return executorQueue.toString();
+    }
 
     public synchronized Future<?> submit(Runnable r) {
         queueLength.incrementAndGet(); // Increment queue when submitting task.
@@ -98,13 +107,15 @@ public class ThreadManager implements Loggable {
     	return () -> {
     		try {
 				Object o = r.call();
-				if(queueLength.decrementAndGet()==0){
-//	    			log("Queue is empty");
-	    		}
+				queueLength.decrementAndGet();
+//				if(queueLength.decrementAndGet()==0){
+////	    			log("Queue is empty");
+//	    		}
 	    		return o;
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				queueLength.decrementAndGet();
 				return null;
 			}
     		
@@ -114,9 +125,10 @@ public class ThreadManager implements Loggable {
     private synchronized Runnable makeSubmitableRunnable(Runnable r){
     	return () -> {
     		r.run();
-    		if(queueLength.decrementAndGet()==0){
-//    			log("Queue is empty");
-    		}
+    		queueLength.decrementAndGet();
+//    		if(queueLength.decrementAndGet()==0){
+////    			log("Queue is empty");
+//    		}
     		
     	};
     }

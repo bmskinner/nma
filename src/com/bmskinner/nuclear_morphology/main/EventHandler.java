@@ -609,13 +609,14 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             final List<IAnalysisDataset> list = new ArrayList<IAnalysisDataset>();
             list.add(dataset);
-
+            fireDatasetEvent(new DatasetEvent(this, DatasetEvent.CLEAR_CACHE, "EventHandler", list));
 //            for (TabPanel p : mw.getTabPanels()) {
 //                if (p instanceof SegmentsDetailPanel || p instanceof NuclearStatisticsPanel
 //                        || p instanceof SignalsDetailPanel || p instanceof ConsensusNucleusPanel) {
 //                    p.clearChartCache(list);
 //                }
 //            }
+            
 
             final CountDownLatch latch = new CountDownLatch(1);
 

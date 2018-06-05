@@ -71,6 +71,7 @@ import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
+import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The log panel is where logging messages are displayed. It also holds progress
@@ -93,6 +94,7 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
     private static final String LIST_CMD  = "list";
     private static final String KILL_CMD  = "kill";
     private static final String REPAIR_CMD  = "unfuck";
+    private static final String TASKS_CMD  = "tasks";
 
     private static final Map<String, Runnable> LOCAL_CMDS = new HashMap<>();
 
@@ -136,6 +138,10 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
             t.interrupt();
         }
 
+    }
+    
+    private void listTasks() {
+    	log(ThreadManager.getInstance().toString());
     }
     
     @Override
@@ -260,6 +266,10 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
             killAllTasks();
         });
         
+        LOCAL_CMDS.put(TASKS_CMD, () -> {
+        	listTasks();
+        });
+        
         LOCAL_CMDS.put(REPAIR_CMD, () ->{
         	getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFPAIR_SEGMENTATION, DatasetListManager.getInstance().getSelectedDatasets());
         });
@@ -365,7 +375,8 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
      * 
      * @return
      */
-    public List<JProgressBar> getProgressBars() {
+    @Override
+	public List<JProgressBar> getProgressBars() {
         List<JProgressBar> result = new ArrayList<JProgressBar>();
         for (Component c : progressPanel.getComponents()) {
             if (c.getClass().isInstance(JProgressBar.class)) {
@@ -376,13 +387,15 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
         return result;
     }
 
-    public void addProgressBar(JProgressBar progressBar) {
+    @Override
+	public void addProgressBar(JProgressBar progressBar) {
         progressPanel.add(progressBar);
         revalidate();
         repaint();
     }
 
-    public void removeProgressBar(JProgressBar progressBar) {
+    @Override
+	public void removeProgressBar(JProgressBar progressBar) {
         progressPanel.remove(progressBar);
         revalidate();
         repaint();
@@ -394,7 +407,8 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
             super("Show console");
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             finest("Button pressed: " + e.getActionCommand());
             if (console.isVisible()) {
                 console.setVisible(false);
@@ -416,7 +430,8 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
             super("Prev");
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
 
             if (history.isEmpty()) {
                 return;
@@ -438,7 +453,8 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
             super("Next");
         }
 
-        public void actionPerformed(ActionEvent e) {
+        @Override
+		public void actionPerformed(ActionEvent e) {
             if (history.isEmpty()) {
                 return;
             }
@@ -573,21 +589,25 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
 
         // Handle insertion of new text into the Document
 
-        public void insertUpdate(final DocumentEvent e) {
+        @Override
+		public void insertUpdate(final DocumentEvent e) {
             // Changes to the Document can not be done within the listener
             // so we need to add the processing to the end of the EDT
 
             SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
+                @Override
+				public void run() {
                     removeLines(e);
                 }
             });
         }
 
-        public void removeUpdate(DocumentEvent e) {
+        @Override
+		public void removeUpdate(DocumentEvent e) {
         }
 
-        public void changedUpdate(DocumentEvent e) {
+        @Override
+		public void changedUpdate(DocumentEvent e) {
         }
 
         /*
