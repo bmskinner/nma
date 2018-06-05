@@ -29,6 +29,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 public interface TabPanel extends DatasetUpdateEventListener {
 
@@ -238,5 +239,11 @@ public interface TabPanel extends DatasetUpdateEventListener {
     
 
     SignalChangeEventHandler getSignalChangeEventHandler();
+    
+    /**
+     * Get the input supplier for user interaction with this panel
+     * @return
+     */
+    InputSupplier getInputSupplier();
 
 }

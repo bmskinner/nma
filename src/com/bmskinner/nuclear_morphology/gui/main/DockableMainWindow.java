@@ -118,7 +118,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             
             
             
-            logPanel = new LogPanel();
+            logPanel = new LogPanel(eh.getInputSupplier());
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
@@ -142,7 +142,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             // ---------------
             // Create the consensus chart
             // ---------------
-            populationsPanel = new PopulationsPanel();
+            populationsPanel = new PopulationsPanel(eh.getInputSupplier());
             
             Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
             SingleDock popTabDock = new SingleDock();
@@ -151,7 +151,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             
             
             
-            consensusNucleusPanel = new ConsensusNucleusPanel();
+            consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
             
             Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
             SingleDock consTabDock = new SingleDock();
@@ -190,17 +190,17 @@ public class DockableMainWindow extends AbstractMainWindow {
     	tabDock = new TabDock();
 
         // Create the top level tabs in the UI
-        DetailPanel analysisDetailPanel  = new AnalysisDetailPanel();
-        DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(); // the angle profiles
-        DetailPanel cellsDetailPanel     = new CellsDetailPanel();
-        DetailPanel nuclearChartsPanel   = new NuclearStatisticsPanel();
-        DetailPanel signalsDetailPanel   = new SignalsDetailPanel();
-        DetailPanel clusterDetailPanel   = new ClusterDetailPanel();
-        DetailPanel mergesDetailPanel    = new MergesDetailPanel();
-        DetailPanel segmentsDetailPanel  = new SegmentsDetailPanel();
-        DetailPanel comparisonsPanel     = new ComparisonDetailPanel();
-        DetailPanel editingDetailPanel   = new EditingDetailPanel();
-        DetailPanel imagesTabPanel       = new ImagesTabPanel();
+        DetailPanel analysisDetailPanel  = new AnalysisDetailPanel(eh.getInputSupplier());
+        DetailPanel nucleusProfilesPanel = new NucleusProfilesPanel(eh.getInputSupplier()); // the angle profiles
+        DetailPanel cellsDetailPanel     = new CellsDetailPanel(eh.getInputSupplier());
+        DetailPanel nuclearChartsPanel   = new NuclearStatisticsPanel(eh.getInputSupplier());
+        DetailPanel signalsDetailPanel   = new SignalsDetailPanel(eh.getInputSupplier());
+        DetailPanel clusterDetailPanel   = new ClusterDetailPanel(eh.getInputSupplier());
+        DetailPanel mergesDetailPanel    = new MergesDetailPanel(eh.getInputSupplier());
+        DetailPanel segmentsDetailPanel  = new SegmentsDetailPanel(eh.getInputSupplier());
+        DetailPanel comparisonsPanel     = new ComparisonDetailPanel(eh.getInputSupplier());
+        DetailPanel editingDetailPanel   = new EditingDetailPanel(eh.getInputSupplier());
+        DetailPanel imagesTabPanel       = new ImagesTabPanel(eh.getInputSupplier());
 
         detailPanels.add(analysisDetailPanel);
         detailPanels.add(imagesTabPanel);

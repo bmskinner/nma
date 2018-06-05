@@ -22,22 +22,25 @@ import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NucleusProfilesPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Nuclear profiles";
 
-    public NucleusProfilesPanel() {
-        super(PANEL_TITLE_LBL);
+    public NucleusProfilesPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
         JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
         for (ProfileType type : ProfileType.displayValues()) {
 
-            DetailPanel panel = new ProfileDisplayPanel(type);
+            DetailPanel panel = new ProfileDisplayPanel(context, type);
             this.addSubPanel(panel);
             tabPanel.addTab(panel.getPanelTitle(), panel);
         }
@@ -47,7 +50,7 @@ public class NucleusProfilesPanel extends DetailPanel {
          */
 
 //        DetailPanel modalityDisplayPanel = new ModalityDisplayPanel();
-        DetailPanel variabilityChartPanel = new VariabilityDisplayPanel();
+        DetailPanel variabilityChartPanel = new VariabilityDisplayPanel(context);
 
         this.addSubPanel(variabilityChartPanel);
 //        this.addSubPanel(modalityDisplayPanel);

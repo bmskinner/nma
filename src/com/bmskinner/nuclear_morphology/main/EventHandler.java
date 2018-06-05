@@ -34,6 +34,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMethod.MorphologyAnalysisMode;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -78,6 +80,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
@@ -87,6 +90,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
 import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+import com.bmskinner.nuclear_morphology.main.InputSupplier.RequestCancelledException;
 
 /**
  * Listens to messages from the UI and launches actions. This is the hub of messaging;
@@ -98,6 +102,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  */
 public class EventHandler implements Loggable, SignalChangeListener, DatasetEventListener, InterfaceEventListener {
 
+	private final InputSupplier ic;
     private ProgressBarAcceptor acceptor;
 
     private List<DatasetUpdateEventListener> updateListeners = new ArrayList<>();
@@ -105,18 +110,31 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
     private List<DatasetEventListener> datasetListeners = new ArrayList<>();
     private List<DatasetSelectionListener> selectionListeners = new ArrayList<>();
     
+    
+    
     /**
      * Constructor 
      */
-    public EventHandler() {}
+    public EventHandler(@NonNull final InputSupplier context) {
+    	ic = context;
+    }
 
 
     /**
      * Constructor specifying a progress bar acceptor for displaying progress bars
      * @param acceptor
      */
-    public EventHandler(final ProgressBarAcceptor acceptor) {
+    public EventHandler(@NonNull final InputSupplier context, @NonNull final ProgressBarAcceptor acceptor) {
+    	this(context);
         this.acceptor = acceptor;
+    }
+    
+    /**
+     * The input context determines how the system will ask for user input
+     * @return the current context
+     */
+    public InputSupplier getInputSupplier() {
+    	return ic;
     }
     
     /**
@@ -494,11 +512,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
         switch (method) {
 
-//        case REFRESH_POPULATIONS:
-//        	mw.getPopulationsPanel().update(selected); // ensure all child
-//                                                       // datasets are included
-//            break;
-
         case SAVE_ROOT:
             saveRootDatasets(); // DO NOT WRAP IN A SEPARATE THREAD, IT WILL
                                 // LOCK THE PROGRESS BAR
@@ -519,24 +532,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 count++;
             }
             break;
-
-//        case CLEAR_LOG_WINDOW:
-//        	mw.getLogPanel().clear();
-//            break;
-//
-//        case UPDATE_IN_PROGRESS:
-//            for (TabPanel panel : mw.getTabPanels()) {
-//                panel.setAnalysing(true);
-//            }
-//            mw.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-//            break;
-//
-//        case UPDATE_COMPLETE:
-//            for (TabPanel panel : mw.getTabPanels()) {
-//                panel.setAnalysing(false);
-//            }
-//            mw.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-//            break;
 
         case DUMP_LOG_INFO:
             for (IAnalysisDataset d : selected) {
@@ -562,31 +557,18 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
     
     private synchronized void setScale(final List<IAnalysisDataset> selectedDatasets) {
+    	
     	try {
-			final String CHOOSE_NEW_SCALE_LBL      = "Pixels per micron";
-
-			SpinnerNumberModel sModel = new SpinnerNumberModel(1d, 
-					1d, 100000d, 1d);
-
-			JSpinner spinner = new JSpinner(sModel);
-
-			int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, 
-					JOptionPane.OK_CANCEL_OPTION,
-					JOptionPane.QUESTION_MESSAGE, null, null, null);
-
-			if (option == JOptionPane.OK_OPTION) {
-
-				double scale = (double) spinner.getModel().getValue();
-
-				if (scale > 0) { // don't allow a scale to cause divide by zero errors
-					selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
-					log("Updated scale to "+scale+" pixels per micron");
-					interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
-				}
+			double scale = ic.requestDouble("Pixels per micron", 1d, 1d, 100000d, 1d);
+			
+			if (scale > 0) { // don't allow a scale to cause divide by zero errors
+				selectedDatasets.stream().forEach(d->d.getCollection().setScale(scale));
+				log("Updated scale to "+scale+" pixels per micron");
+				interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.RECACHE_CHARTS, "Scale change"));
 			}
-		}catch(Exception e){
-			warn("Error updating scale");
-			stack("Error updating scale", e);
+				
+		} catch (RequestCancelledException e) {
+			return;
 		}
     }
     

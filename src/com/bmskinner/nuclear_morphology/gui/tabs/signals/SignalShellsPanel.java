@@ -33,6 +33,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -54,6 +55,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PValueTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.ShellOverviewDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Holds information on shell analysis results, and allows new shell analyses to
@@ -97,8 +99,8 @@ public class SignalShellsPanel extends DetailPanel implements ActionListener {
 
     protected ExportableTable table;
 
-    public SignalShellsPanel() {
-        super(PANEL_TITLE_LBL);
+    public SignalShellsPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();

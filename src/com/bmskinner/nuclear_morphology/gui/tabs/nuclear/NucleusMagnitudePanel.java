@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.RandomSamplingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
@@ -48,8 +49,8 @@ public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {
     
     private JButton randomSamplingButton;
 
-    public NucleusMagnitudePanel() {
-        super();
+    public NucleusMagnitudePanel(@NonNull InputSupplier context) {
+        super(context);
     }
     
     @Override

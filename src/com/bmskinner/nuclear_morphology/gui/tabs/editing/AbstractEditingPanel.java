@@ -39,14 +39,15 @@ import com.bmskinner.nuclear_morphology.gui.SegmentEventListener;
 import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.EditingTabPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public abstract class AbstractEditingPanel extends DetailPanel
         implements SegmentEventListener, BorderTagEventListener, EditingTabPanel {
     
     
-    public AbstractEditingPanel(String title){
-        super(title);
+    public AbstractEditingPanel(@NonNull InputSupplier context, String title){
+        super(context, title);
     }
 
     /**

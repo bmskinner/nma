@@ -28,6 +28,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.NuclearSignalTableCreator;
@@ -39,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 import ij.io.DirectoryChooser;
 
@@ -50,8 +53,8 @@ public class SignalsAnalysisPanel extends DetailPanel {
     private JScrollPane     scrollPane;
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
-    public SignalsAnalysisPanel() {
-        super(PANEL_TITLE_LBL);
+    public SignalsAnalysisPanel(@NonNull InputSupplier context) {
+        super(context ,PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         table = new ExportableTable(new DefaultTableModel());

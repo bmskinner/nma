@@ -22,10 +22,13 @@ import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * The top level tab panel showing information on signals at the dataset level
@@ -43,21 +46,21 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
     /**
      * Create the panel.
      */
-    public SignalsDetailPanel() {
-        super();
+    public SignalsDetailPanel(@NonNull InputSupplier context) {
+        super(context);
         try {
 
             this.setLayout(new BorderLayout());
 
             signalsTabPane = new JTabbedPane(JTabbedPane.TOP);
 
-            DetailPanel overviewPanel = new SignalsOverviewPanel();
-            DetailPanel boxplotPanel = new SignalsBoxplotPanel();
-            DetailPanel histogramPanel = new SignalsHistogramPanel();
-            DetailPanel shellsPanel = new SignalShellsPanel();
-            DetailPanel analysisPanel = new SignalsAnalysisPanel();
-            DetailPanel signalScatterChartPanel = new SignalScatterChartPanel();
-            DetailPanel colocalistionPanel = new SignalsColocalisationPanel();
+            DetailPanel overviewPanel = new SignalsOverviewPanel(context);
+            DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
+            DetailPanel histogramPanel = new SignalsHistogramPanel(context);
+            DetailPanel shellsPanel = new SignalShellsPanel(context);
+            DetailPanel analysisPanel = new SignalsAnalysisPanel(context);
+            DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
+            DetailPanel colocalistionPanel = new SignalsColocalisationPanel(context);
 
             signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
             signalsTabPane.addTab(analysisPanel.getPanelTitle(), analysisPanel);

@@ -27,6 +27,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
@@ -40,6 +41,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagDualChart
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Editing panel for the border tags of a single cell.
@@ -58,8 +60,8 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
     private JPanel buttonsPanel;
 
-    public CellBorderTagPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellBorderTagPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 

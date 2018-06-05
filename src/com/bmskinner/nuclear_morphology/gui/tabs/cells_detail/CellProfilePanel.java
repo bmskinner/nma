@@ -27,6 +27,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -47,6 +48,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptions
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellResegmentationDialog;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSetEventListener {
@@ -68,8 +70,8 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
     // loading the active cell in when needed
 //    private final CellResegmentationDialog resegDialog;
 
-    public CellProfilePanel(final CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellProfilePanel(@NonNull InputSupplier context, final CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
 
 //        resegDialog = new CellResegmentationDialog(model);
 

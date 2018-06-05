@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -64,6 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOp
 import com.bmskinner.nuclear_morphology.gui.components.panels.SegmentationDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.dialogs.AngleWindowSizeExplorer;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 @SuppressWarnings("serial")
@@ -86,8 +88,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
     private static final String STR_SET_WINDOW_SIZE   = "Set window size";
     private static final String STR_SHOW_WINDOW_SIZES = "Window sizes";
 
-    public SegmentsEditingPanel() {
-        super(PANEL_TITLE_LBL);
+    public SegmentsEditingPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         dualPanel = new SegmentationDualChartPanel();

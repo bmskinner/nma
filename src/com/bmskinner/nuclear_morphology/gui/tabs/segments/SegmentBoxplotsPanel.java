@@ -28,6 +28,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -49,14 +50,15 @@ import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SegmentBoxplotsPanel extends BoxplotsTabPanel implements ActionListener, ChartSetEventListener {
 
     private Dimension preferredSize = new Dimension(200, 300);
 
-    public SegmentBoxplotsPanel() {
-        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    public SegmentBoxplotsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
         JFreeChart boxplot = BoxplotChartFactory.makeEmptyChart();
 

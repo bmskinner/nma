@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.profiles;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
@@ -27,12 +28,13 @@ import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
-    public ProfileDisplayPanel(ProfileType type) {
-        super(type);
+    public ProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+        super(context, type);
 
         JFreeChart chart = MorphologyChartFactory.makeEmptyChart(type);
         chartPanel.setChart(chart);

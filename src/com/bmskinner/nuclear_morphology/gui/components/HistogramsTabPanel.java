@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.components.panels.GenericCheckboxPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -68,8 +70,8 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
     protected String component;
 
-    public HistogramsTabPanel(String component) {
-        super();
+    public HistogramsTabPanel(@NonNull InputSupplier context, String component) {
+        super(context);
         this.component = component;
         this.setLayout(new BorderLayout());
 

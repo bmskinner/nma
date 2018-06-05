@@ -23,10 +23,13 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Paint;
 import java.io.File;
+import java.util.List;
 import java.util.UUID;
 
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -37,11 +40,13 @@ import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.InputSupplier.RequestCancelledException;
 
 /**
  * Handle cosmetic changes in datasets. Generates the dialogs
@@ -65,19 +70,21 @@ public class CosmeticHandler implements Loggable {
      * @param row
      */
     public void changeDatasetColour(@NonNull IAnalysisDataset dataset) {
-        
-        int row = DatasetListManager.getInstance().getSelectedDatasets().indexOf(dataset);
-        Paint oldColour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(row));
-        
-        Color newColor = JColorChooser.showDialog((Component) parent, "Choose dataset colour", (Color) oldColour);
 
-        if (newColor != null) {
-            dataset.setDatasetColour(newColor);
-            parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
-        }
-        parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    	int row = DatasetListManager.getInstance().getSelectedDatasets().indexOf(dataset);
+    	Paint oldColour = dataset.getDatasetColour().orElse(ColourSelecter.getColor(row));
+
+    	try {
+    		Color newColor = parent.getInputSupplier().requestColor("Choose dataset colour", (Color) oldColour);
+    		dataset.setDatasetColour(newColor);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
+    		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
-    
+
     /**
      * Rename an existing dataset and update the population list.
      * 
@@ -85,11 +92,14 @@ public class CosmeticHandler implements Loggable {
      */
     public void renameDataset(@NonNull IAnalysisDataset dataset) {
         ICellCollection collection = dataset.getCollection();
-        String newName = getNewName(collection.getName());
-        if (newName == null || newName.isEmpty())
-            return;
-        collection.setName(newName);
-        parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+        
+        try {
+    		String newName = parent.getInputSupplier().requestString("Choose a new name", collection.getName());
+    		collection.setName(newName);
+    		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
     
     /**
@@ -98,11 +108,14 @@ public class CosmeticHandler implements Loggable {
      * @param group the group to rename
      */
     public void renameClusterGroup(@NonNull IClusterGroup group) {
-    	String newName = getNewName(group.getName());
-        if (newName == null || newName.isEmpty())
-            return;
-        group.setName(newName);
-        parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+
+    	try {
+    		String newName = parent.getInputSupplier().requestString("Choose a new name", group.getName());
+    		group.setName(newName);
+    		parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
     
     /**
@@ -112,20 +125,15 @@ public class CosmeticHandler implements Loggable {
      */
     public void renameWorkspace(@NonNull IWorkspace workspace) {
         
-    	String newName = getNewName(workspace.getName());
-        if (newName == null || newName.isEmpty())
-            return;
-        workspace.setName(newName);
-        parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    	try {
+    		String newName = parent.getInputSupplier().requestString("Choose a new name", workspace.getName());
+    		workspace.setName(newName);
+            parent.getInterfaceEventHandler().fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
-    
-    private @Nullable String getNewName(@NonNull String oldName) {
-    	Object s = JOptionPane.showInputDialog((Component) parent, "Choose a new name", "Rename",
-                JOptionPane.INFORMATION_MESSAGE, null, null, oldName);
-    	return s==null ? null : s.toString();
-    }
-
-    
+        
     /**
      * Update the colour of a signal group
      * @param d the dataset
@@ -137,13 +145,16 @@ public class CosmeticHandler implements Loggable {
     	if(!d.getCollection().hasSignalGroup(signalGroupId))
     		return;
     	
-    	Color oldColour = d.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.YELLOW); 
-        Color newColor = JColorChooser.showDialog((Component) parent, Labels.Signals.CHOOSE_SIGNAL_COLOUR, oldColour);
+    	try {
 
-		if (newColor != null) {
-		    d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
-		    parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
-		}
+    		Color oldColour = d.getCollection().getSignalGroup(signalGroupId).get().getGroupColour().orElse(Color.YELLOW); 
+    		Color newColor = parent.getInputSupplier().requestColor(Labels.Signals.CHOOSE_SIGNAL_COLOUR, (Color) oldColour);
+
+    		d.getCollection().getSignalGroup(signalGroupId).get().setGroupColour(newColor);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
     
     /**
@@ -154,17 +165,16 @@ public class CosmeticHandler implements Loggable {
     public void renameSignalGroup(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
     	if(!d.getCollection().hasSignalGroup(signalGroup))
     		return;
-
-    	String newName =getNewName(d.getCollection().getSignalGroup(signalGroup).get().getGroupName());
-//		String newName = (String) JOptionPane.showInputDialog("Enter new signal group name");
-
-		if (newName == null)
-		    return;
-
-		d.getCollection().getSignalGroup(signalGroup).get().setGroupName(newName);
-		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+    	
+    	try {
+    		String oldName = d.getCollection().getSignalGroup(signalGroup).get().getGroupName();
+    		String newName = parent.getInputSupplier().requestString("Choose a new name", oldName);
+    		d.getCollection().getSignalGroup(signalGroup).get().setGroupName(newName);
+    		parent.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, d);
+    	} catch(RequestCancelledException e) {
+    		return;
+    	}
     }
-
 }
 
 

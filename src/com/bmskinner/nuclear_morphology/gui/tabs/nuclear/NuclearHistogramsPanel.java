@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 import java.awt.Dimension;
 import java.text.DecimalFormat;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
@@ -39,12 +40,13 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NuclearHistogramsPanel extends HistogramsTabPanel implements SignalChangeListener {
 
-    public NuclearHistogramsPanel() {
-        super(CellularComponent.NUCLEUS);
+    public NuclearHistogramsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEUS);
 
         try {
 

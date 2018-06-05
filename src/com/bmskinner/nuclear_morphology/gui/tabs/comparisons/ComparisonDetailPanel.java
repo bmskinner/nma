@@ -22,22 +22,25 @@ import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class ComparisonDetailPanel extends DetailPanel {
     
     private static final String PANEL_TITLE_LBL = "Comparisons";
 
-    public ComparisonDetailPanel() {
-        super(PANEL_TITLE_LBL);
+    public ComparisonDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 
         JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
 
-        DetailPanel vennPanel = new VennDetailPanel();
-        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel();
+        DetailPanel vennPanel = new VennDetailPanel(context);
+        DetailPanel pairwiseVennPanel = new PairwiseVennDetailPanel(context);
 
         this.addSubPanel(vennPanel);
         this.addSubPanel(pairwiseVennPanel);

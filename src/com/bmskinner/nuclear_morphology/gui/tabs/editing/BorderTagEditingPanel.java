@@ -31,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
@@ -45,6 +46,7 @@ import com.bmskinner.nuclear_morphology.gui.components.BorderTagEvent;
 import com.bmskinner.nuclear_morphology.gui.components.panels.BorderTagDualChartPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class BorderTagEditingPanel extends AbstractEditingPanel implements ActionListener, BorderTagEventListener {
@@ -59,9 +61,9 @@ public class BorderTagEditingPanel extends AbstractEditingPanel implements Actio
 
     private BorderTagDualChartPanel dualPanel;
 
-    public BorderTagEditingPanel() {
+    public BorderTagEditingPanel(@NonNull InputSupplier context) {
 
-        super(PANEL_TITLE_LBL);
+        super(context, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         buttonsPanel = makeButtonPanel();

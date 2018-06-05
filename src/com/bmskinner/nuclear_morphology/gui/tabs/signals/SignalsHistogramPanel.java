@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Dimension;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.HistogramChartFactory;
@@ -30,12 +31,13 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SignalsHistogramPanel extends HistogramsTabPanel {
 
-    public SignalsHistogramPanel() throws Exception {
-        super(CellularComponent.NUCLEAR_SIGNAL);
+    public SignalsHistogramPanel(@NonNull InputSupplier context) throws Exception {
+        super(context, CellularComponent.NUCLEAR_SIGNAL);
 
         try {
 

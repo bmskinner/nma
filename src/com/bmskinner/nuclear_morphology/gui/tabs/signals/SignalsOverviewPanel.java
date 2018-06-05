@@ -36,6 +36,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
@@ -62,6 +63,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SignalsOverviewPanel extends DetailPanel implements ActionListener, ChartSetEventListener {
@@ -91,8 +93,8 @@ public class SignalsOverviewPanel extends DetailPanel implements ActionListener,
 
     private final CosmeticHandler cosmeticHandler = new CosmeticHandler(this);
 
-    public SignalsOverviewPanel() {
-        super();
+    public SignalsOverviewPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 

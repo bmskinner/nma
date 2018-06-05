@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -34,6 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class IndividualCellDetailPanel extends DetailPanel implements SignalChangeListener {
@@ -75,17 +77,17 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 
     private CellViewModel model = new CellViewModel(null, null);
 
-    public IndividualCellDetailPanel() {
+    public IndividualCellDetailPanel(@NonNull InputSupplier context) {
 
-        super();
+        super(context);
 
         try {
 
-            createSubPanels();
+            createSubPanels(context);
 
             this.setLayout(new BorderLayout());
 
-            this.add(createCellandSignalListPanels(), BorderLayout.WEST);
+            this.add(createCellandSignalListPanels(context), BorderLayout.WEST);
 
             this.addSubPanel(cellStatsPanel);
             this.addSubPanel(segmentProfilePanel);
@@ -118,14 +120,14 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
         return PANEL_TITLE_LBL;
     }
 
-    private void createSubPanels() {
-        segmentProfilePanel = new CellProfilePanel(model); // the nucleus angle
+    private void createSubPanels(@NonNull InputSupplier context) {
+        segmentProfilePanel = new CellProfilePanel(context, model); // the nucleus angle
                                                            // profile
-        cellBorderTagPanel = new CellBorderTagPanel(model);
-        outlinePanel = new CellOutlinePanel(model); // the outline of the cell
+        cellBorderTagPanel = new CellBorderTagPanel(context, model);
+        outlinePanel = new CellOutlinePanel(context, model); // the outline of the cell
                                                     // and detected objects
-        cellStatsPanel = new CellStatsPanel(model); // the stats table
-        cellsignalStatsPanel = new CellSignalStatsPanel(model);
+        cellStatsPanel = new CellStatsPanel(context, model); // the stats table
+        cellsignalStatsPanel = new CellSignalStatsPanel(context, model);
         // cellSegTablePanel = new CellSegTablePanel(model);
 
         model.addView(segmentProfilePanel);
@@ -136,7 +138,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
         // model.addView(cellSegTablePanel);
     }
 
-    private JPanel createCellandSignalListPanels() {
+    private JPanel createCellandSignalListPanels(@NonNull InputSupplier context) {
         JPanel panel = new JPanel(new GridBagLayout());
 
         GridBagConstraints constraints = new GridBagConstraints();
@@ -149,7 +151,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
         constraints.weighty = 0.6;
         constraints.anchor = GridBagConstraints.CENTER;
 
-        cellsListPanel = new CellsListPanel(model);
+        cellsListPanel = new CellsListPanel(context, model);
         model.addView(cellsListPanel);
         cellsListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         panel.add(cellsListPanel, constraints);
@@ -160,7 +162,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
         constraints.gridwidth = 1;
         constraints.weightx = 0.5;
         constraints.weighty = 0.4;
-        signalListPanel = new ComponentListPanel(model);
+        signalListPanel = new ComponentListPanel(context, model);
         model.addView(signalListPanel);
         signalListPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         panel.add(signalListPanel, constraints);

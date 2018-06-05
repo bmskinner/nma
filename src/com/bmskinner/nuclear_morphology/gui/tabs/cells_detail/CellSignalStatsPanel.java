@@ -36,6 +36,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellSignalStatsPanel extends AbstractCellDetailPanel {
@@ -48,8 +49,8 @@ public class CellSignalStatsPanel extends AbstractCellDetailPanel {
 
     private JScrollPane scrollPane;
 
-    public CellSignalStatsPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellSignalStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();

@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -35,6 +36,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Show the minimum distances between signals within a dataset
@@ -54,8 +56,8 @@ public class SignalsColocalisationPanel extends DetailPanel {
 
     private ExportableChartPanel violinChart;
 
-    public SignalsColocalisationPanel() {
-        super();
+    public SignalsColocalisationPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();

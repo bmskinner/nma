@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -38,6 +39,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
 import com.bmskinner.nuclear_morphology.gui.dialogs.KruskalTestDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class KruskalDetailPanel extends DetailPanel {
@@ -49,8 +51,8 @@ public class KruskalDetailPanel extends DetailPanel {
     private ExportableChartPanel chartPanel;
     JButton                      frankenButton = new JButton(COMPARE_FRANKENPROFILE_LBL);
 
-    public KruskalDetailPanel() {
-        super(PANEL_TITLE_LBL);
+    public KruskalDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         createUI();
 

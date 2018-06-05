@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.Range;
 
@@ -60,6 +61,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * An abstract class implementing the plottable statistic header on a detail
@@ -83,8 +85,8 @@ public abstract class AbstractScatterChartPanel extends DetailPanel implements A
 
     protected String component;
 
-    public AbstractScatterChartPanel(String component) {
-        super();
+    public AbstractScatterChartPanel(@NonNull InputSupplier context, String component) {
+        super(context);
         this.component = component;
 
         this.setLayout(new BorderLayout());

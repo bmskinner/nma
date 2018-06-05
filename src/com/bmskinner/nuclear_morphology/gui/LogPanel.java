@@ -63,6 +63,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.DatasetValidator;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
@@ -70,6 +72,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 //import com.bmskinner.nuclear_morphology.io.Importer;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
@@ -148,8 +151,8 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
     public void setChartsAndTablesLoading() {
     }
 
-    public LogPanel() {
-        super();
+    public LogPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
         this.logPanel = createLogPanel();
         makeCommandList();

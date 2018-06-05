@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.image.AbstractImageFilterer;
@@ -63,6 +64,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.RotationSelectionS
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 import ij.process.ImageProcessor;
@@ -86,8 +88,8 @@ public class CellOutlinePanel extends AbstractCellDetailPanel implements ActionL
 
 //    private CellBorderAdjustmentDialog cellBorderAdjustmentDialog;
 
-    public CellOutlinePanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellOutlinePanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         // make the chart for each nucleus
         this.setLayout(new BorderLayout());
         JFreeChart chart = ConsensusNucleusChartFactory.makeEmptyChart();

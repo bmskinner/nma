@@ -27,26 +27,29 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SegmentsDetailPanel extends DetailPanel {
 
     private static final String PANEL_TITLE_LBL = "Nuclear segments";
 
-    public SegmentsDetailPanel() {
-        super();
+    public SegmentsDetailPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         JTabbedPane tabPanel = new JTabbedPane(JTabbedPane.TOP);
         tabPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        DetailPanel segmentProfilePanel = new SegmentProfilePanel();
-        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel();
-        DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel();
-        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel();
-        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel();
-        DetailPanel segmentStatsPanel = new SegmentStatsPanel();
+        DetailPanel segmentProfilePanel = new SegmentProfilePanel(context);
+        DetailPanel segmentBoxplotsPanel = new SegmentBoxplotsPanel(context);
+        DetailPanel segmentHistogramsPanel = new SegmentHistogramsPanel(context);
+        DetailPanel segmentWilcoxonPanel = new SegmentWilcoxonPanel(context);
+        DetailPanel segmentMagnitudePanel = new SegmentMagnitudePanel(context);
+        DetailPanel segmentStatsPanel = new SegmentStatsPanel(context);
 
         Dimension minimumChartSize = new Dimension(100, 100);
 

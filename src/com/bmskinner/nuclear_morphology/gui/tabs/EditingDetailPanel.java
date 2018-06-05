@@ -22,6 +22,8 @@ import java.awt.BorderLayout;
 
 import javax.swing.JTabbedPane;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
@@ -29,6 +31,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.cells_detail.IndividualCellDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.BorderTagEditingPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.SegmentsEditingPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class EditingDetailPanel extends DetailPanel
@@ -36,17 +39,16 @@ public class EditingDetailPanel extends DetailPanel
     
     private static final String PANEL_TITLE_LBL = "Editing";
 
-    public EditingDetailPanel() {
-
-        super();
+    public EditingDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
         JTabbedPane tabPane = new JTabbedPane();
         this.add(tabPane, BorderLayout.CENTER);
 
-        DetailPanel cellDetailPanel = new IndividualCellDetailPanel();
-        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel();
-        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel();
+        DetailPanel cellDetailPanel = new IndividualCellDetailPanel(context);
+        DetailPanel segmentsEditingPanel = new SegmentsEditingPanel(context);
+        DetailPanel borderTagEditingPanel = new BorderTagEditingPanel(context);
 
         this.addSubPanel(cellDetailPanel);
         this.addSubPanel(segmentsEditingPanel);

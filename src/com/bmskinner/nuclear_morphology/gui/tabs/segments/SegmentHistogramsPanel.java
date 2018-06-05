@@ -26,6 +26,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -43,14 +44,15 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.HistogramsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SegmentHistogramsPanel extends HistogramsTabPanel {
 
     private Dimension preferredSize = new Dimension(200, 100);
 
-    public SegmentHistogramsPanel() {
-        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    public SegmentHistogramsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
         JFreeChart chart = HistogramChartFactory.createHistogram(null, "Segment", "Length");
         SelectableChartPanel panel = new SelectableChartPanel(chart, "null");

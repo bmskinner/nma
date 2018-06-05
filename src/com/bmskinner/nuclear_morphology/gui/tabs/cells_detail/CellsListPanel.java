@@ -38,12 +38,14 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelectionListener {
@@ -51,8 +53,8 @@ public class CellsListPanel extends AbstractCellDetailPanel implements TreeSelec
     private static final String PANEL_TITLE_LBL = "Cell list";
     private JTree tree;
 
-    public CellsListPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellsListPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         DefaultMutableTreeNode root = new DefaultMutableTreeNode(new NodeData("Cells", null));

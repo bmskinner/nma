@@ -27,6 +27,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
@@ -44,6 +45,7 @@ import com.bmskinner.nuclear_morphology.gui.ChartSetEvent;
 import com.bmskinner.nuclear_morphology.gui.ChartSetEventListener;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Holds a series of outline panels showing the locations of the segment starts
@@ -57,8 +59,8 @@ public class SegmentPositionsPanel extends BoxplotsTabPanel implements ChartSetE
 
     private Dimension preferredSize = new Dimension(300, 300);
 
-    public SegmentPositionsPanel() {
-        super(CellularComponent.NUCLEAR_BORDER_SEGMENT);
+    public SegmentPositionsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_BORDER_SEGMENT);
 
         try {
             this.updateNull();

@@ -25,6 +25,7 @@ import java.util.logging.Level;
 
 import javax.swing.JScrollPane;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.ViolinChartFactory;
@@ -36,12 +37,13 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SignalsBoxplotPanel extends BoxplotsTabPanel {
 
-    public SignalsBoxplotPanel() {
-        super(CellularComponent.NUCLEAR_SIGNAL);
+    public SignalsBoxplotPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_SIGNAL);
         createUI();
     }
 

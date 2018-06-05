@@ -35,6 +35,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.Cache;
@@ -64,6 +65,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
@@ -79,6 +81,8 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         InterfaceEventListener, Loggable, ChartOptionsRenderedEventListener {
 
     private final List<Object> listeners          = new CopyOnWriteArrayList<Object>();
+    
+    private final InputSupplier inputSupplier;
 
     private final TabPanel parentPanel;
     private final List<TabPanel> subPanels = new ArrayList<TabPanel>();
@@ -99,22 +103,25 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     private final DatasetUpdateEventHandler duh = new DatasetUpdateEventHandler(this);
     private final SignalChangeEventHandler  sh  = new SignalChangeEventHandler(this);
 
-    public DetailPanel() {
-        this(DEFAULT_TAB_TITLE);
+    public DetailPanel(@NonNull InputSupplier context) {
+        this(context, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(TabPanel parent) {
-    	this(parent, DEFAULT_TAB_TITLE);
+    public DetailPanel(@NonNull TabPanel parent) {
+    	this(parent.getInputSupplier(), parent, DEFAULT_TAB_TITLE);
     }
     
-    public DetailPanel(String title) {
-        this(null, title);        
+    public DetailPanel(@NonNull InputSupplier context, String title) {
+        this(context, null, title);        
     }
     
-    public DetailPanel(TabPanel parent, String title) {
+    public DetailPanel(@NonNull InputSupplier context, @Nullable TabPanel parent, @NonNull String title) {
+    	inputSupplier = context;
         parentPanel = parent;
         this.addChartOptionsRenderedEventListener(this);
         panelTabTitleLbl = title;
+        
+        this.getInputSupplier();
     }
     
     /**
@@ -124,13 +131,17 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
     public String getPanelTitle(){
         return panelTabTitleLbl;
     }
+    
+    @Override
+    public InputSupplier getInputSupplier() {
+    	return inputSupplier;
+    }
 
     /**
      * Add another detail panel as a sub panel to this. This will pass on
      * refreshes and UI updates
      * 
-     * @param panel
-     *            the panel to add
+     * @param panel the panel to add
      */
     public void addSubPanel(final TabPanel panel) {
         subPanels.add(panel);

@@ -18,14 +18,17 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NuclearScatterChartPanel extends AbstractScatterChartPanel {
 
-    public NuclearScatterChartPanel() {
-        super(CellularComponent.NUCLEUS);
+    public NuclearScatterChartPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEUS);
     }
 
 }

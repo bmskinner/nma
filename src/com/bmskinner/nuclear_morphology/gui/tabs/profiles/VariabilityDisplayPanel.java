@@ -34,6 +34,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOpti
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileTypeOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 
 /**
@@ -73,8 +75,8 @@ public class VariabilityDisplayPanel extends DetailPanel implements ActionListen
     // ProfileCollectionTypeSettingsPanel();
     private ProfileMarkersOptionsPanel profileMarkersOptionsPanel = new ProfileMarkersOptionsPanel();
 
-    public VariabilityDisplayPanel() {
-        super();
+    public VariabilityDisplayPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).build();

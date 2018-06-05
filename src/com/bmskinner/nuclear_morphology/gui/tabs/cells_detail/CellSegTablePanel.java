@@ -24,11 +24,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellSegTablePanel extends AbstractCellDetailPanel {
@@ -37,8 +40,8 @@ public class CellSegTablePanel extends AbstractCellDetailPanel {
     
     private JTable table;
 
-    public CellSegTablePanel(final CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellSegTablePanel(@NonNull InputSupplier context, final CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
         this.setBorder(null);

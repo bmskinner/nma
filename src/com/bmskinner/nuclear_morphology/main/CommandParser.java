@@ -5,7 +5,9 @@ import java.io.File;
 import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
+import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -74,7 +76,8 @@ public class CommandParser implements Loggable {
                     e.printStackTrace();
                 }
 
-                MainWindow mw = new MainWindow(true, new EventHandler());
+                
+                DockableMainWindow mw = new DockableMainWindow(true, new EventHandler(new DefaultInputSupplier()));
                 mw.setVisible(true);
         };
         java.awt.EventQueue.invokeLater( r );

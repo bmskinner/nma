@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * The populations panel holds the list of open datasets for selection by the
@@ -88,8 +89,8 @@ public class PopulationsPanel extends DetailPanel implements SignalChangeListene
         }
     }
   
-    public PopulationsPanel() {
-        super();
+    public PopulationsPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
 
         this.setMinimumSize(new Dimension(100, 100));

@@ -35,6 +35,8 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
@@ -49,6 +51,7 @@ import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class CellStatsPanel extends AbstractCellDetailPanel {
@@ -70,8 +73,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     private static final String APPLY_SCALE_ONE_CELLS_LBL = "Apply to only this cell";
     private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
 
-    public CellStatsPanel(CellViewModel model) {
-        super(model, PANEL_TITLE_LBL);
+    public CellStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
+        super(context, model, PANEL_TITLE_LBL);
         this.setLayout(new BorderLayout());
 
         scrollPane = new JScrollPane();

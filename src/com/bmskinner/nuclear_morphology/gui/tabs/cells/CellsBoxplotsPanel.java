@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JScrollPane;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
@@ -37,6 +38,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.tabs.BoxplotsTabPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Display boxplots for whole cell data
@@ -48,8 +50,8 @@ import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 @SuppressWarnings("serial")
 public class CellsBoxplotsPanel extends BoxplotsTabPanel implements ActionListener {
 
-    public CellsBoxplotsPanel() {
-        super(CellularComponent.WHOLE_CELL);
+    public CellsBoxplotsPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.WHOLE_CELL);
 
         Dimension preferredSize = new Dimension(200, 300);
 

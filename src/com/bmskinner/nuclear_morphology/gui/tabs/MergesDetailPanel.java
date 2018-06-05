@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -48,6 +49,7 @@ import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.AnalysisTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * This panel shows any merge sources for a merged dataset, and the analysis
@@ -71,8 +73,8 @@ public class MergesDetailPanel extends DetailPanel {
 
     private JPanel mainPanel;
 
-    public MergesDetailPanel() {
-        super();
+    public MergesDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         try {
             createUI();

@@ -40,6 +40,7 @@ import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPa
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * This class is extended for making a panel with multiple stats histograms
@@ -61,8 +62,8 @@ public abstract class BoxplotsTabPanel extends DetailPanel implements ActionList
 
     protected String component;
 
-    public BoxplotsTabPanel(String component) {
-        super(PANEL_TITLE_LBL);
+    public BoxplotsTabPanel(@NonNull InputSupplier context, String component) {
+        super(context, PANEL_TITLE_LBL);
         this.component = component;
         this.setLayout(new BorderLayout());
 

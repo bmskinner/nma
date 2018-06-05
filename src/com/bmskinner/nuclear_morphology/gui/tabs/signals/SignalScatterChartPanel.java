@@ -18,14 +18,17 @@
 
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SignalScatterChartPanel extends AbstractScatterChartPanel {
 
-    public SignalScatterChartPanel() {
-        super(CellularComponent.NUCLEAR_SIGNAL);
+    public SignalScatterChartPanel(@NonNull InputSupplier context) {
+        super(context, CellularComponent.NUCLEAR_SIGNAL);
         gateButton.setVisible(false); // filtering not enabled
     }
 

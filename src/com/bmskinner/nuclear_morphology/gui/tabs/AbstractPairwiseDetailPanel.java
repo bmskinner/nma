@@ -29,10 +29,12 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
@@ -40,8 +42,8 @@ public abstract class AbstractPairwiseDetailPanel extends DetailPanel {
     protected JPanel      tablePanel;
     protected JScrollPane scrollPane = new JScrollPane();
 
-    public AbstractPairwiseDetailPanel() {
-        super();
+    public AbstractPairwiseDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 

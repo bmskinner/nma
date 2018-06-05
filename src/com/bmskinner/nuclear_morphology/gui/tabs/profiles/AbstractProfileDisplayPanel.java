@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.general.DatasetUtilities;
@@ -39,6 +40,7 @@ import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileMarkersOptionsPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProfileDisplayPanel extends DetailPanel implements ActionListener {
@@ -56,8 +58,8 @@ public abstract class AbstractProfileDisplayPanel extends DetailPanel implements
 
     protected ProfileType type;
 
-    public AbstractProfileDisplayPanel(ProfileType type) {
-        super();
+    public AbstractProfileDisplayPanel(@NonNull InputSupplier context, ProfileType type) {
+        super(context);
         this.type = type;
 
         this.setLayout(new BorderLayout());

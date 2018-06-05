@@ -41,6 +41,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.AnalysisDatasetTableCreator;
@@ -58,6 +59,7 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ClusterTreeDialog;
 import com.bmskinner.nuclear_morphology.gui.dialogs.ManualClusteringDialog;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * This panel shows any cluster groups that have been created, and the
@@ -95,8 +97,8 @@ public class ClusterDetailPanel extends DetailPanel implements DatasetEventListe
 
     // private ClustersPanel clusterPanel;
 
-    public ClusterDetailPanel() {
-        super();
+    public ClusterDetailPanel(@NonNull InputSupplier context) {
+        super(context);
 
         this.setLayout(new BorderLayout());
 

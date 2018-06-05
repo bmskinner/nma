@@ -35,6 +35,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.AbstractChartFactory;
@@ -53,6 +54,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.io.Exporter;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener {
@@ -71,8 +73,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     private JCheckBox straightenMeshBox;
     private JSpinner  meshSizeSpinner;
 
-    public ConsensusNucleusPanel() {
-        super();
+    public ConsensusNucleusPanel(@NonNull InputSupplier context) {
+        super(context);
         this.setLayout(new BorderLayout());
         JFreeChart consensusChart = ConsensusNucleusChartFactory.makeEmptyChart();
         consensusChartPanel = new ConsensusNucleusChartPanel(consensusChart);

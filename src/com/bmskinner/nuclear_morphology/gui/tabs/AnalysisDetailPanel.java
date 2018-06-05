@@ -37,6 +37,7 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.gui.components.AnalysisTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * Holds the nuclear detection parameters
@@ -49,9 +50,8 @@ public class AnalysisDetailPanel extends DetailPanel {
     private static final String HEADER_LBL      = "Green rows have the same value in all columns";
     private ExportableTable tableAnalysisParameters;
 
-    public AnalysisDetailPanel() {
-
-        super(PANEL_TITLE_LBL);
+    public AnalysisDetailPanel(@NonNull InputSupplier context) {
+        super(context, PANEL_TITLE_LBL);
 
         this.setLayout(new BorderLayout());
 

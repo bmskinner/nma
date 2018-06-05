@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.BoxplotChartFactory;
@@ -43,6 +44,7 @@ import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
+import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NuclearLobesPanel extends DetailPanel {
@@ -52,8 +54,8 @@ public class NuclearLobesPanel extends DetailPanel {
     private ExportableChartPanel chartPanel;
     private ExportableTable      table;
 
-    public NuclearLobesPanel() {
-
+    public NuclearLobesPanel(@NonNull InputSupplier context) {
+    	super(context);
         this.setLayout(new BorderLayout());
 
         JPanel header = createHeader();
