@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.main;
 
 import java.awt.Color;
+import java.io.File;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -68,6 +69,14 @@ public interface InputSupplier {
 	 * @throws RequestCancelledException
 	 */
 	Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException;
+	
+	
+	/**
+	 * Request a file input.
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFile() throws RequestCancelledException;
 	
 	/**
 	 * Exception thwown when the user cancels the input request

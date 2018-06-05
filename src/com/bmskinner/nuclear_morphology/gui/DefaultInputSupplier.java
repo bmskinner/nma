@@ -2,15 +2,18 @@ package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.io.File;
 
 import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
+import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.main.InputSupplier;
 import com.bmskinner.nuclear_morphology.main.InputSupplier.RequestCancelledException;
 
@@ -75,6 +78,16 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
 		return newColor;
 	}
+
+	@Override
+	public File requestFile() throws RequestCancelledException {
+		File f = FileSelector.chooseFile(null);
+		if(f==null)
+			throw new RequestCancelledException();
+		return f;
+	}
+	
+	
 	
 	
 

@@ -54,7 +54,10 @@ public class SignalChangeEvent extends EventObject {
     public static final String DATASET_ARITHMETIC          = "DatasetArithmeticAction";
     public static final String CHANGE_NUCLEUS_IMAGE_FOLDER = "ChangeNucleusFolderAction";
     public static final String EXTRACT_SUBSET              = "Extract subset";
+    
     public static final String SAVE_ALL_DATASETS           = "SaveAllDatasetsAction";
+    public static final String SAVE_ALL_WORKSPACES         = "SaveAllWorkspacesAction";
+    
     public static final String SAVE_SELECTED_DATASET       = "SaveCollectionAction";
     public static final String MERGE_DATASETS_ACTION       = "MergeCollectionAction";
     public static final String DELETE_DATASET              = "DeleteCollectionAction";

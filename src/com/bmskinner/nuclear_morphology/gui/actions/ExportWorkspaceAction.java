@@ -32,6 +32,7 @@ import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.io.WorkspaceExporter;
 import com.bmskinner.nuclear_morphology.main.EventHandler;
+import com.bmskinner.nuclear_morphology.main.InputSupplier.RequestCancelledException;
 
 public class ExportWorkspaceAction extends VoidResultAction {
 
@@ -52,7 +53,15 @@ public class ExportWorkspaceAction extends VoidResultAction {
     @Override
     public void run() {
     	WorkspaceExporter exp = WorkspaceExporter.createExporter();
-    	for(IWorkspace w : workspaces) {    		
+    	for(IWorkspace w : workspaces) {
+    		if(w.getSaveFile()==null) {
+    			try {
+    				File f = eh.getInputSupplier().requestFile();
+    				w.setSaveFile(f);
+    			} catch(RequestCancelledException e) {
+    				continue;
+    			}
+    		}
     		exp.exportWorkspace(w);
     		log("Exported workspace file to " + w.getSaveFile().getAbsolutePath());
     	}

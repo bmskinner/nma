@@ -165,6 +165,7 @@ public abstract class WorkspaceExporter implements Loggable, Exporter {
 	            xmlOutput.setFormat(Format.getPrettyFormat());
 	            xmlOutput.output(doc, os);
 	            xmlOutput.output(doc, System.out); 
+	            os.close();
 	         } catch(IOException e) {
 	            e.printStackTrace();
 	         }

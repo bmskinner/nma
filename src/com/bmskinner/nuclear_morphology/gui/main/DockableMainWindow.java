@@ -328,6 +328,10 @@ public class DockableMainWindow extends AbstractMainWindow {
         if (event.method().equals(DatasetEvent.ADD_DATASET))
             addDataset(event.firstDataset());
         
+        if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
+        	getPopulationsPanel().update();
+ 
+        
 	}
 	
 	

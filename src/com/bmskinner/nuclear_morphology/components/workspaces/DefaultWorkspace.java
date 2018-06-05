@@ -151,4 +151,55 @@ public class DefaultWorkspace implements IWorkspace {
         return name;
     }
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((datasets == null) ? 0 : datasets.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((samples == null) ? 0 : samples.hashCode());
+		result = prime * result + ((saveFile == null) ? 0 : saveFile.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultWorkspace other = (DefaultWorkspace) obj;
+		if (datasets == null) {
+			if (other.datasets != null)
+				return false;
+		} else if (!datasets.equals(other.datasets))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (samples == null) {
+			if (other.samples != null)
+				return false;
+		} else if (!samples.equals(other.samples))
+			return false;
+		if (saveFile == null) {
+			if (other.saveFile != null)
+				return false;
+		} else if (!saveFile.equals(other.saveFile))
+			return false;
+		return true;
+	}
+    
+    
+
 }

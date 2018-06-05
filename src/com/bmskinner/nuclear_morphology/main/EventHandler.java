@@ -40,7 +40,9 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
@@ -305,7 +307,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             
             if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
             	return () ->{
-            		log("New workspace created");
+            		createWorkspace();
             	};
             	
                         
@@ -314,7 +316,11 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             		String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
             		IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
             				.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-            		log("Removing dataset from workspace "+workspaceName);
+            		for(IAnalysisDataset d : selectedDatasets) {
+        				ws.remove(d);
+        			}
+            		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
+//            		log("Removing dataset from workspace "+workspaceName);
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX))
@@ -322,7 +328,10 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         			String workspaceName = event.type().replace(SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX, "");
         			IWorkspace ws = DatasetListManager.getInstance().getWorkspaces().stream()
         					.filter(w->w.getName().equals(workspaceName)).findFirst().orElseThrow(IllegalArgumentException::new);
-        			log("Adding dataset to workspace "+workspaceName);
+        			for(IAnalysisDataset d : selectedDatasets) {
+        				ws.add(d);
+        			}
+        			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
         		};
         		
     		
@@ -495,7 +504,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 
             if (event.method().equals(DatasetEvent.ADD_DATASET)) {
             	fireDatasetEvent(event);
-//                addDataset(event.firstDataset());
             }
 
         }
@@ -623,6 +631,23 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         ThreadManager.getInstance().execute(r);
     }
 
+    
+    private void createWorkspace() {
+
+		try {
+			String workspaceName = ic.requestString("New workspace name");
+			IWorkspace w = WorkspaceFactory.createWorkspace(workspaceName);
+			DatasetListManager.getInstance().addWorkspace(w);
+    		log("New workspace created: "+workspaceName);
+    		fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
+			
+		} catch (RequestCancelledException e) {
+			return;
+		}
+    	
+    }
+    
+    
     /**
      * Save all the root datasets in the populations panel
      */
@@ -639,6 +664,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 } catch (InterruptedException e) {
                     error("Interruption to thread", e);
                 }
+                
+                Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
+                task.run();
             }
             fine("All root datasets attempted to be saved");
         };

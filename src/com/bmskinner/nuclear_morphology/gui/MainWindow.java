@@ -98,9 +98,6 @@ public class MainWindow extends AbstractMainWindow {
 
     private JTabbedPane tabbedPane; // bottom panel tabs
 
-    // store panels for iterating messages
-//    private final List<TabPanel> detailPanels = new ArrayList<>();
-
 
     /**
      * Create the frame.

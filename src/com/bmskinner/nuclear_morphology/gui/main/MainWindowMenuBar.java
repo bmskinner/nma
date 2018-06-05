@@ -83,6 +83,10 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		newMenu.add(i2);
 		menu.add(newMenu);
 		
+		JMenuItem newWorkspace = new JMenuItem("New workspace");
+		newWorkspace.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.NEW_WORKSPACE));
+		menu.add(newWorkspace);
+		
 		JMenuItem openDataset = new JMenuItem("Open dataset");
 		openDataset.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX) );
 		menu.add(openDataset);
@@ -91,9 +95,15 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 		openWorkspace.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX));
 		menu.add(openWorkspace);
 		
-		JMenuItem save = new JMenuItem("Save all");
+		
+
+		JMenuItem save = new JMenuItem("Save datasets");
 		save.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.SAVE_ALL_DATASETS));
 		menu.add(save);
+		
+		JMenuItem saveWorkspaces = new JMenuItem("Save workspaces");
+		saveWorkspaces.addActionListener(e-> sh.fireSignalChangeEvent(SignalChangeEvent.EXPORT_WORKSPACE));
+		menu.add(saveWorkspaces);
 		
 		JMenuItem exit = new JMenuItem("Exit");
 		exit.addActionListener(e-> {

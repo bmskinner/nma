@@ -48,7 +48,7 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem extractMenuItem;
     
     private PopupMenu addWorkspaceSubMenu;
-    private PopupMenuItem newWorkspaceMenuItem;
+//    private PopupMenuItem newWorkspaceMenuItem;
     
     private PopupMenu exportSubMenu;
     private PopupMenuItem exportStatsMenuItem;
@@ -276,13 +276,13 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
     private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
     	MenuFactory fact = new MenuFactory();
-        newWorkspaceMenuItem = fact.makeSingleMenuItem(Labels.Populations.NEW_WORKSPACE, SignalChangeEvent.NEW_WORKSPACE);
+//        newWorkspaceMenuItem = fact.makeSingleMenuItem(Labels.Populations.NEW_WORKSPACE, SignalChangeEvent.NEW_WORKSPACE);
         
-        addWorkspaceSubMenu.add(newWorkspaceMenuItem);
-        addWorkspaceSubMenu.addSeparator();
-        JMenuItem wsItem = new JMenuItem("Workspaces");
-    	wsItem.setEnabled(false);
-    	addWorkspaceSubMenu.add(wsItem);
+//        addWorkspaceSubMenu.add(newWorkspaceMenuItem);
+//        addWorkspaceSubMenu.addSeparator();
+//        JMenuItem wsItem = new JMenuItem("Workspaces");
+//    	wsItem.setEnabled(false);
+//    	addWorkspaceSubMenu.add(wsItem);
         
         if(d!=null) {
         	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
