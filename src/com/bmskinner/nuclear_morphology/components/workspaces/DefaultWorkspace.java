@@ -64,16 +64,16 @@ public class DefaultWorkspace implements IWorkspace {
     	return id;
     }
     
-    public void setName(String s){
+    public void setName(@NonNull String s){
         this.name = s;
     }
     
-    public String getName() {
+    public @NonNull String getName() {
     	return name;
     }
 
     @Override
-    public void add(final IAnalysisDataset d) {
+    public void add(final @NonNull IAnalysisDataset d) {
         if (d.isRoot())
             datasets.add(d.getSavePath());
 
@@ -81,38 +81,38 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public void add(final File f) {
+    public void add(final @NonNull File f) {
         datasets.add(f);
     }
 
     @Override
-    public void remove(final IAnalysisDataset d) {
+    public void remove(final @NonNull IAnalysisDataset d) {
         datasets.remove(d.getSavePath());
     }
 
     @Override
-    public void remove(File f) {
+    public void remove(@NonNull File f) {
         datasets.remove(f);
     }
     
     @Override
-    public boolean has(final IAnalysisDataset d) {
+    public boolean has(final @NonNull IAnalysisDataset d) {
         return datasets.contains(d.getSavePath());
     }
 
     @Override
-    public Set<File> getFiles() {
+    public @NonNull Set<File> getFiles() {
         return datasets;
     }
 
     @Override
-    public void setSaveFile(File f) {
+    public void setSaveFile(@NonNull File f) {
         saveFile = f;
 
     }
 
     @Override
-    public File getSaveFile() {
+    public @NonNull File getSaveFile() {
         return saveFile;
     }
 
@@ -123,7 +123,7 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public void addBioSample(String name) {
+    public void addBioSample(@NonNull String name) {
         for(BioSample s : samples){
             if(s.getName().equals(name))
                 return;
@@ -132,17 +132,17 @@ public class DefaultWorkspace implements IWorkspace {
     }
 
     @Override
-    public BioSample getBioSample(IAnalysisDataset d) {
+    public BioSample getBioSample(@NonNull IAnalysisDataset d) {
         return samples.stream().filter( s-> s.hasDataset(d.getSavePath())).findFirst().orElse(null);
     }
     
     @Override
-    public BioSample getBioSample(String name) {
+    public BioSample getBioSample(@NonNull String name) {
         return samples.stream().filter( s-> s.getName().equals(name)).findFirst().orElse(null);
     }
 
     @Override
-    public Set<BioSample> getBioSamples() {
+    public @NonNull Set<BioSample> getBioSamples() {
         return samples;
     }
     

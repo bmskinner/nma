@@ -525,22 +525,9 @@ public interface IAnalysisDataset extends Serializable, Loggable {
 
         return NucleusType.ROUND;
     }
-
-    /**
-     * Get the most recent common ancestor of the dataset save file paths
-     * 
-     * @param datasets the list of datasets.
-     * @return a file for the common directory. Check that the path exists and
-     *         is a directory before using this.
-     */
-    static File commonPathOfFiles(@NonNull List<IAnalysisDataset> datasets) {
-
-        List<File> files = new ArrayList<File>(datasets.size());
-        for (IAnalysisDataset d : datasets) {
-            files.add(d.getSavePath());
-        }
-
-        String[][] folders = new String[files.size()][];
+    
+    static File commonPathOfFiles(@NonNull Collection<File> files) {
+    	String[][] folders = new String[files.size()][];
 
         int k = 0;
 
@@ -596,6 +583,23 @@ public interface IAnalysisDataset extends Serializable, Loggable {
         }
 
         return new File(commonPath);
+    }
+
+    /**
+     * Get the most recent common ancestor of the dataset save file paths
+     * 
+     * @param datasets the list of datasets.
+     * @return a file for the common directory. Check that the path exists and
+     *         is a directory before using this.
+     */
+    static File commonPathOfFiles(@NonNull List<IAnalysisDataset> datasets) {
+
+        List<File> files = new ArrayList<>(datasets.size());
+        for (IAnalysisDataset d : datasets) {
+            files.add(d.getSavePath());
+        }
+        return commonPathOfFiles(files);
+        
     }
 
 }

@@ -56,7 +56,7 @@ public class ExportWorkspaceAction extends VoidResultAction {
     	for(IWorkspace w : workspaces) {
     		if(w.getSaveFile()==null) {
     			try {
-    				File f = eh.getInputSupplier().requestFile();
+    				File f = eh.getInputSupplier().requestFile(IAnalysisDataset.commonPathOfFiles(w.getFiles()));
     				w.setSaveFile(f);
     			} catch(RequestCancelledException e) {
     				continue;
