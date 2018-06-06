@@ -42,6 +42,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
@@ -52,7 +53,6 @@ import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEventListener;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
@@ -82,6 +82,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
@@ -333,18 +334,49 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         			}
         			fireDatasetEvent(new DatasetEvent(this, DatasetEvent.ADD_WORKSPACE, "EventHandler", new ArrayList()));
         		};
+
+    		if (event.type().startsWith(SignalChangeEvent.NEW_BIOSAMPLE_PREFIX))
+    			return () ->{
+    				fine("Creating new biosample");
+    				try {
+						String bsName = ic.requestString("New biosample name");
+						List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+						for(IWorkspace w : workspaces) {
+							w.addBioSample(bsName);
+							w.getBioSample(bsName).addDataset(selectedDataset);
+						}
+						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
+					} catch (RequestCancelledException e) {
+						fine("New biosample cancelled");
+						return;
+					}
+    			};	
         		
     		
     		if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX))
             	return () ->{
             		String bsName = event.type().replace(SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX, "");
-            		log("Removing dataset from biosample "+bsName);
+            		fine("Removing dataset from biosample "+bsName);
+            		List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+            		for(IWorkspace w : workspaces) {
+            			BioSample b = w.getBioSample(bsName);
+            			if(b!=null)
+            				b.removeDataset(selectedDataset);
+					}
+					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
             	};
             
         	if (event.type().startsWith(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX))
         		return () ->{
         			String bsName = event.type().replace(SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX, "");
-        			log("Setting dataset to biosample "+bsName);
+        			fine("Adding dataset to biosample "+bsName);
+        			List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
+					for(IWorkspace w : workspaces) {
+						BioSample b = w.getBioSample(bsName);
+            			if(b!=null)
+            				b.addDataset(selectedDataset);
+					}
+					fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
         		};
             
             

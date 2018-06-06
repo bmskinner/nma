@@ -31,6 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
@@ -311,6 +312,7 @@ public final class DatasetListManager implements Loggable {
         datasetHashcodeMap.remove(d.getId());
         selected.remove(d);
     }
+    
 
     /**
      * Get the number of datasets loaded
@@ -453,18 +455,32 @@ public final class DatasetListManager implements Loggable {
     public synchronized final boolean hasWorkspaces() {
         return workspaces.size() > 0;
     }
-    
+       
     /**
      * Test if the given dataset is in a workspace
      * @param d
      * @return
      */
     public synchronized final boolean isInWorkspace(@NonNull IAnalysisDataset d){
-        for(IWorkspace w : workspaces){  
-            if(w.getFiles().contains(d.getSavePath()))
-                return true;
-        }
-        return false;
+    	for(IWorkspace w : workspaces) {
+    		if(w.has(d))
+    			return true;
+    	}
+    	return false;
+    }
+    
+    /**
+     * Get the workspaces that the given dataset is a member of
+     * @param d the dataset
+     * @return
+     */
+    public synchronized final @NonNull List<IWorkspace> getWorkspaces(@NonNull IAnalysisDataset d) {
+    	List<IWorkspace> list = new ArrayList<>();
+    	for(IWorkspace w : workspaces) {
+    		if(w.has(d))
+    			list.add(w);
+    	}
+    	return list;
     }
 
 }

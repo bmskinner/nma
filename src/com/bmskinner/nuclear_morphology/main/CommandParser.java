@@ -6,8 +6,8 @@ import javax.swing.UIManager;
 
 import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.PropertiesReader;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 

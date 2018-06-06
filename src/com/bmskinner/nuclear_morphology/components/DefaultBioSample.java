@@ -68,16 +68,28 @@ public class DefaultBioSample implements BioSample {
 
     @Override
     public void removeDataset(File dataset) {
+        if(dataset==null)
+            return;
+       datasets.remove(dataset);
+        
+    }
+    
+    @Override
+    public void removeDataset(IAnalysisDataset dataset) {
         if(dataset==null){
             return;
         }
-       datasets.remove(dataset);
-        
+       datasets.remove(dataset.getSavePath());
     }
 
     @Override
     public boolean hasDataset(File dataset) {
         return datasets.contains(dataset);
+    }
+    
+    @Override
+    public boolean hasDataset(IAnalysisDataset dataset) {
+        return datasets.contains(dataset.getSavePath());
     }
 
 }

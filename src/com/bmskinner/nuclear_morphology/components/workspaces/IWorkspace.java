@@ -159,11 +159,24 @@ public interface IWorkspace {
         void removeDataset(File dataset);
         
         /**
+         * Remove the dataset from the sample
+         * @param dataset
+         */
+        void removeDataset(IAnalysisDataset dataset);
+        
+        /**
          * Test if the given dataset is in the sample
          * @param dataset
          * @return
          */
         boolean hasDataset(File dataset);
+        
+        /**
+         * Test if the given dataset is in the sample
+         * @param dataset
+         * @return
+         */
+        boolean hasDataset(IAnalysisDataset dataset);
         
     }
        

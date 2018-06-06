@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;

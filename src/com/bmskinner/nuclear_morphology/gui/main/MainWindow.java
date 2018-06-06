@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.gui;
+package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -43,12 +43,12 @@ import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
+import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
+import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
+import com.bmskinner.nuclear_morphology.gui.LogPanel;
+import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
-import com.bmskinner.nuclear_morphology.gui.main.MainView;
-import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow;
-import com.bmskinner.nuclear_morphology.gui.main.MainDragAndDropTarget;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindowCloseAdapter;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindowMenuBar;
 import com.bmskinner.nuclear_morphology.gui.tabs.AnalysisDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.ClusterDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;

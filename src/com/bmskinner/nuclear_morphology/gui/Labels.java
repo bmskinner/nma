@@ -62,7 +62,8 @@ public class Labels {
     	public static final String EXTRACT_CELLS_LBL      = "Extract cells";
     	
     	public static final String ADD_TO_WORKSPACE_LBL   = "Workspace...";
-    	public static final String NEW_WORKSPACE          = "Add to new";
+    	public static final String ADD_TO_BIOSAMPLE_LBL   = "Biosample...";
+    	public static final String ADD_TO_NEW_LBL         = "Add to new";
     	public static final String ADD_TO_LBL_PREFIX      = "Add to ";
     	public static final String REMOVE_FROM_LBL_PREFIX = "Remove from ";
     	

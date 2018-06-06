@@ -88,11 +88,13 @@ public class DefaultWorkspace implements IWorkspace {
     @Override
     public void remove(final @NonNull IAnalysisDataset d) {
         datasets.remove(d.getSavePath());
+        samples.stream().forEach(b->b.removeDataset(d));
     }
 
     @Override
     public void remove(@NonNull File f) {
         datasets.remove(f);
+        samples.stream().forEach(b->b.removeDataset(f));
     }
     
     @Override

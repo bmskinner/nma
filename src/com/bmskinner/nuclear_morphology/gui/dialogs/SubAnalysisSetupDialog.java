@@ -22,7 +22,7 @@ import javax.swing.JPanel;
 
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.gui.MainWindow;
+import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
 /**
  * A base class for the sub analyses setup options. It contains a reference to

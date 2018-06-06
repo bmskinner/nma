@@ -47,8 +47,9 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     private PopupMenuItem booleanMenuItem;
     private PopupMenuItem extractMenuItem;
     
-    private PopupMenu addWorkspaceSubMenu;
-//    private PopupMenuItem newWorkspaceMenuItem;
+    private PopupMenu workspaceSubMenu;
+    private PopupMenu biosampleSubMenu;
+
     
     private PopupMenu exportSubMenu;
     private PopupMenuItem exportStatsMenuItem;
@@ -246,35 +247,40 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
     	addMoveMenuItems();
 
-    	this.addSeparator();
-    	this.add(addWorkspaceSubMenu);
-    	this.addSeparator();
+    	addSeparator();
+    	
+    	add(workspaceSubMenu);
+    	add(biosampleSubMenu);
+    	
+    	addSeparator();
 
-    	this.add(mergeMenuItem);
-    	this.add(deleteMenuItem);
-    	this.add(booleanMenuItem);
-    	this.add(curateMenuItem);
+    	add(mergeMenuItem);
+    	add(deleteMenuItem);
+    	add(booleanMenuItem);
+    	add(curateMenuItem);
 
-    	this.addSeparator();
+    	addSeparator();
 
-    	this.add(saveMenuItem);
+    	add(saveMenuItem);
 
-    	this.addSeparator();
+    	addSeparator();
 
-    	this.add(relocateMenuItem);
+    	add(relocateMenuItem);
 
-    	this.addSeparator();
+    	addSeparator();
 
-    	this.add(replaceFolderMenuItem);
-    	this.add(exportSubMenu);
-    	this.add(changeScaleItem);
+    	add(replaceFolderMenuItem);
+    	add(exportSubMenu);
+    	add(changeScaleItem);
 
-    	this.addSeparator();
+    	addSeparator();
 
-    	this.add(addSubMenu);
+    	add(addSubMenu);
     }
 
     private void createWorkspaceMenu(@Nullable IAnalysisDataset d) {
+    	if(d==null)
+    		return;
     	MenuFactory fact = new MenuFactory();
 //        newWorkspaceMenuItem = fact.makeSingleMenuItem(Labels.Populations.NEW_WORKSPACE, SignalChangeEvent.NEW_WORKSPACE);
         
@@ -284,40 +290,34 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 //    	wsItem.setEnabled(false);
 //    	addWorkspaceSubMenu.add(wsItem);
         
-        if(d!=null) {
-        	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
-        	for(IWorkspace w : workspaces) {
-        		String name   = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
-        		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
-        		addWorkspaceSubMenu.add(fact.makeSingleMenuItem(name+w.getName(), action+w.getName()));
-        	}
-        	
-        	addWorkspaceSubMenu.addSeparator();
-        	JMenuItem bsItem = new JMenuItem("Biosamples");
-        	bsItem.setEnabled(false);
-        	addWorkspaceSubMenu.add(bsItem);
-        	
-        	for(IWorkspace w : workspaces) {
-        		
-        		for(BioSample bs : w.getBioSamples()) {
-        			if(w.has(d)) {
-        				String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
-                		String action = bs.hasDataset(d.getSavePath()) ? SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX : SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX;
-                		addWorkspaceSubMenu.add(fact.makeSingleMenuItem(name+bs.getName(), action+bs.getName()));
-        			}
-        			
-        			
-        		}
-        		
-        		
-        	}
-        }
+    	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces();
+    	for(IWorkspace w : workspaces) {
+    		String name   = w.has(d) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
+    		String action = w.has(d) ? SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX : SignalChangeEvent.ADD_TO_WORKSPACE_PREFIX;
+    		workspaceSubMenu.add(fact.makeSingleMenuItem(name+w.getName(), action+w.getName()));
+    	}    	
+    }
+    
+    private void createBiosampleMenu(@Nullable IAnalysisDataset d) {
+    	if(d==null || !DatasetListManager.getInstance().isInWorkspace(d)) {
+    		biosampleSubMenu.setEnabled(false);
+    		return;
+    	}
+    	
+    	List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(d);
+    	    	
+    	MenuFactory fact = new MenuFactory();
 
-        
-        
-        
-        
-        
+    	biosampleSubMenu.add(fact.makeSingleMenuItem(Labels.Populations.ADD_TO_NEW_LBL, SignalChangeEvent.NEW_BIOSAMPLE_PREFIX));
+    	biosampleSubMenu.addSeparator();
+
+    	for(IWorkspace w : workspaces) {
+    		for(BioSample bs : w.getBioSamples()) {
+    			String name = bs.hasDataset(d.getSavePath()) ? Labels.Populations.REMOVE_FROM_LBL_PREFIX : Labels.Populations.ADD_TO_LBL_PREFIX;
+    			String action = bs.hasDataset(d.getSavePath()) ? SignalChangeEvent.REMOVE_FROM_BIOSAMPLE_PREFIX : SignalChangeEvent.ADD_TO_BIOSAMPLE_PREFIX;
+    			biosampleSubMenu.add(fact.makeSingleMenuItem(name+bs.getName(), action+bs.getName()));
+    		}
+    	}  
     }
 
     public void createButtons() {
@@ -328,8 +328,10 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
     	moveUpMenuItem   = fact.makeSingleMenuItem(Labels.Populations.MOVE_UP_LBL,   SignalChangeEvent.MOVE_DATASET_UP_ACTION);
     	moveDownMenuItem = fact.makeSingleMenuItem(Labels.Populations.MOVE_DOWN_LBL, SignalChangeEvent.MOVE_DATASET_DOWN_ACTION);
 
-        addWorkspaceSubMenu =  fact.makeSingleMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL);
+        workspaceSubMenu =  fact.makeSingleMenu(Labels.Populations.ADD_TO_WORKSPACE_LBL);
         createWorkspaceMenu(null);
+        biosampleSubMenu =  fact.makeSingleMenu(Labels.Populations.ADD_TO_BIOSAMPLE_LBL);
+        createBiosampleMenu(null);
         
         mergeMenuItem   = fact.makeMultipleMenuItem(Labels.Populations.MERGE_LBL, SignalChangeEvent.MERGE_DATASETS_ACTION);
         curateMenuItem  = fact.makeSingleMenuItem(Labels.Populations.CURATE_LBL, SignalChangeEvent.CURATE_DATASET);
@@ -400,8 +402,11 @@ public abstract class AbstractPopupMenu extends JPopupMenu {
 
     protected void updateSelectionContext(IAnalysisDataset d) {
     	updateSelectionContext(1);
-    	addWorkspaceSubMenu.removeAll(); 
+    	workspaceSubMenu.removeAll(); 
     	createWorkspaceMenu(d);
+    	
+    	biosampleSubMenu.removeAll(); 
+    	createBiosampleMenu(d);
     	
     	setAddNuclearSignalEnabled(d.isRoot());
     	setFishRemappingEnabled(d.isRoot());
