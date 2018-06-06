@@ -76,9 +76,15 @@ public class CommandParser implements Loggable {
                     e.printStackTrace();
                 }
 
+                if(GlobalOptions.getInstance().isUseDockableInterface()) {
+                	DockableMainWindow mw = new DockableMainWindow(true, new EventHandler(new DefaultInputSupplier()));
+                    mw.setVisible(true);
+                } else {
+                	MainWindow mw = new MainWindow(true, new EventHandler(new DefaultInputSupplier()));
+                    mw.setVisible(true);
+                }
                 
-                DockableMainWindow mw = new DockableMainWindow(true, new EventHandler(new DefaultInputSupplier()));
-                mw.setVisible(true);
+                
         };
         java.awt.EventQueue.invokeLater( r );
         } catch(Exception e){

@@ -56,7 +56,7 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
 
             DetailPanel overviewPanel = new SignalsOverviewPanel(context);
             DetailPanel boxplotPanel = new SignalsBoxplotPanel(context);
-            DetailPanel histogramPanel = new SignalsHistogramPanel(context);
+//            DetailPanel histogramPanel = new SignalsHistogramPanel(context);
             DetailPanel shellsPanel = new SignalShellsPanel(context);
             DetailPanel analysisPanel = new SignalsAnalysisPanel(context);
             DetailPanel signalScatterChartPanel = new SignalScatterChartPanel(context);
@@ -65,14 +65,14 @@ public class SignalsDetailPanel extends DetailPanel implements SignalChangeListe
             signalsTabPane.addTab(overviewPanel.getPanelTitle(), overviewPanel);
             signalsTabPane.addTab(analysisPanel.getPanelTitle(), analysisPanel);
             signalsTabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-            signalsTabPane.addTab(histogramPanel.getPanelTitle(), histogramPanel);
+//            signalsTabPane.addTab(histogramPanel.getPanelTitle(), histogramPanel);
             signalsTabPane.addTab(signalScatterChartPanel.getPanelTitle(), signalScatterChartPanel);
             signalsTabPane.addTab(shellsPanel.getPanelTitle(), shellsPanel);
             signalsTabPane.addTab(colocalistionPanel.getPanelTitle(), colocalistionPanel);
 
             this.addSubPanel(overviewPanel);
             this.addSubPanel(boxplotPanel);
-            this.addSubPanel(histogramPanel);
+//            this.addSubPanel(histogramPanel);
             this.addSubPanel(shellsPanel);
             this.addSubPanel(analysisPanel);
             this.addSubPanel(signalScatterChartPanel);

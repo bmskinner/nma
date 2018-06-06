@@ -19,7 +19,9 @@
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -89,6 +91,9 @@ public abstract class HistogramsTabPanel extends DetailPanel implements ActionLi
 
             // add the scroll pane to the tab
             scrollPane = new JScrollPane(mainPanel);
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
+            scrollPane.setPreferredSize(preferredFloatingDimension);
             this.add(scrollPane, BorderLayout.CENTER);
 
             this.setEnabled(false);

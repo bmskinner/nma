@@ -117,9 +117,6 @@ public class MainWindow extends AbstractMainWindow {
         eh.addDatasetSelectionListener(this);
         eh.addDatasetEventListener(this);
         eh.addDatasetUpdateEventListener(this);
-        
-        this.setJMenuBar(new MainWindowMenuBar(this));
-
     }
 
     /**
@@ -140,7 +137,7 @@ public class MainWindow extends AbstractMainWindow {
             // ---------------
             // Create the header buttons
             // ---------------
-//            contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
+            contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
 
             // ---------------
             // Create the log panel
@@ -367,6 +364,9 @@ public class MainWindow extends AbstractMainWindow {
         if (event.method().equals(DatasetEvent.ADD_DATASET))
             addDataset(event.firstDataset());
         
+        if (event.method().equals(DatasetEvent.ADD_WORKSPACE))
+        	getPopulationsPanel().update();
+        
 	}
 	    
     /**
@@ -384,5 +384,8 @@ public class MainWindow extends AbstractMainWindow {
         // This will also trigger a dataset update event as the dataset
         // is selected, so don't trigger another update here.
         getPopulationsPanel().update(dataset);
+        
+      //Force all panels to update with the new datasets
+       eh.interfaceEventReceived(new InterfaceEvent(this, InterfaceMethod.UPDATE_PANELS, "MainWindow"));
     }  
 }

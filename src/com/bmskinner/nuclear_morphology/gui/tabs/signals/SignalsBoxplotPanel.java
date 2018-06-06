@@ -72,7 +72,7 @@ public class SignalsBoxplotPanel extends BoxplotsTabPanel {
         }
 
         // add the scroll pane to the tab
-        scrollPane = new JScrollPane(mainPanel);
+//        scrollPane = new JScrollPane(mainPanel);
         this.add(scrollPane, BorderLayout.CENTER);
 
     }

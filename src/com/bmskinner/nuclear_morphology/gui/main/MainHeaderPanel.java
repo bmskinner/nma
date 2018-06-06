@@ -53,7 +53,7 @@ public class MainHeaderPanel extends JPanel implements Loggable {
 
     private static final String LOAD_DATASET_LBL   = "Open dataset";
     private static final String SAVE_ALL_LBL       = "Save all";
-//    private static final String SAVE_WORKSPACE_LBL = "Save workspace";
+    private static final String SAVE_WORKSPACE_LBL = "Save workspace";
     private static final String OPTIONS_LBL        = "Options";
     
     private static final String TASK_QUEUE_LBL    = "Task queue:";
@@ -173,13 +173,13 @@ public class MainHeaderPanel extends JPanel implements Loggable {
         // save workspace button
         // ---------------
 
-//        JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
-//        btnSaveWorkspace.addActionListener(e -> {
-//            mw.getEventHandler().signalChangeReceived(
-//                    new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
-//        });
+        JButton btnSaveWorkspace = new JButton(SAVE_WORKSPACE_LBL);
+        btnSaveWorkspace.addActionListener(e -> {
+            mw.getEventHandler().signalChangeReceived(
+                    new SignalChangeEvent(this, SignalChangeEvent.EXPORT_WORKSPACE, this.getClass().getName()));
+        });
 
-//        panel.add(btnSaveWorkspace);
+        panel.add(btnSaveWorkspace);
 
         JButton optionsButton = new JButton(OPTIONS_LBL);
         optionsButton.addActionListener( e -> {

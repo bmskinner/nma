@@ -68,8 +68,9 @@ public class ColourSelecter {
      *
      */
     public enum ColourSwatch {
-        REGULAR_SWATCH("Regular"), NO_SWATCH("No colours"), ACCESSIBLE_SWATCH(
-                "Acessible colours");
+        REGULAR_SWATCH("Regular"), 
+        NO_SWATCH("No colours"), 
+        ACCESSIBLE_SWATCH("Accessible colours");
 
         private final String name;
 
@@ -86,8 +87,7 @@ public class ColourSelecter {
      * Get an appropriate segment colour for the given number, and the current
      * swatch
      * 
-     * @param i
-     *            the number of the colour to return
+     * @param i the number of the colour to return
      * @return a colour
      */
     public static Color getColor(int i) {

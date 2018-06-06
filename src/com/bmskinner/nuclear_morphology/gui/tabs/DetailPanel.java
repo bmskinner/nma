@@ -120,8 +120,6 @@ public abstract class DetailPanel extends JPanel implements TabPanel, SignalChan
         parentPanel = parent;
         this.addChartOptionsRenderedEventListener(this);
         panelTabTitleLbl = title;
-        
-        this.getInputSupplier();
     }
     
     /**

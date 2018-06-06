@@ -1,6 +1,7 @@
 package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
@@ -8,10 +9,12 @@ import java.awt.event.WindowListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
@@ -25,15 +28,18 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEventHandler;
 import com.bmskinner.nuclear_morphology.gui.actions.NeutrophilAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
+import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
 import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	
-	private SignalChangeEventHandler sh;
-	private InterfaceEventHandler ih;
-	private DatasetEventHandler dh;
-	private MainView mw;
+	final private SignalChangeEventHandler sh;
+	final private InterfaceEventHandler ih;
+	final private DatasetEventHandler dh;
+	final private MainView mw;
+	
+	final private JPanel monitorPanel;
 	
 	private JMenu contextMenu;
 	
@@ -55,19 +61,27 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
         contextMenu = createDatasetMenu();
 
         add(Box.createGlue());
-        add(new JLabel("Task queue:"));
-        add(Box.createHorizontalStrut(10));
+        monitorPanel = createMonitorPanel();
+        add(monitorPanel);
+	}
+	
+	private JPanel createMonitorPanel() {
+		JPanel monitorPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		monitorPanel.add(new JLabel("Task queue:"));
+        monitorPanel.add(Box.createHorizontalStrut(5));
         TaskListMonitor t = new TaskListMonitor();
         t.setPreferredSize(new Dimension(100, t.getPreferredSize().height));
         t.setBorder(BorderFactory.createBevelBorder(1));
-        add(t);
-        add(Box.createHorizontalStrut(50));
-        add(new JLabel("Memory:"));
-        add(Box.createHorizontalStrut(10));
+        monitorPanel.add(t);
+        monitorPanel.add(Box.createHorizontalStrut(10));
+        monitorPanel.add(new JLabel("Memory:"));
+        monitorPanel.add(Box.createHorizontalStrut(5));
         MemoryIndicator m = new MemoryIndicator();
         m.setPreferredSize(new Dimension(100, m.getPreferredSize().height));
         m.setBorder(BorderFactory.createBevelBorder(1));
-        add(m);
+        monitorPanel.add(m);
+        monitorPanel.setVisible(false);
+        return monitorPanel;
 	}
 	
 	private JMenu createFileMenu() {
@@ -147,6 +161,35 @@ public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 			
 		}
 		menu.add(scaleMenu);
+		
+		JMenu swatchMenu = new JMenu("Swatch");
+		ButtonGroup swatchGroup = new ButtonGroup();
+		for(ColourSwatch c : ColourSwatch.values()) {
+			JMenuItem j = new JRadioButtonMenuItem(c.toString());
+			swatchGroup.add(j);
+			if(c.equals(GlobalOptions.getInstance().getSwatch())) // default config file scale
+				j.setSelected(true);
+			j.addActionListener( e -> {
+				GlobalOptions.getInstance().setSwatch(c);;
+				ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+			});
+			swatchMenu.add(j);
+			
+		}
+		menu.add(swatchMenu);
+		
+		
+		JCheckBoxMenuItem fillConsensusItem = new JCheckBoxMenuItem("Fill consensus", GlobalOptions.getInstance().isFillConsensus());
+		fillConsensusItem.addActionListener( e -> {
+			GlobalOptions.getInstance().setFillConsensus(fillConsensusItem.isSelected());
+			ih.fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
+		});
+		menu.add(fillConsensusItem);
+		
+		JCheckBoxMenuItem monitorItem = new JCheckBoxMenuItem("Task monitor", false);
+		monitorItem.addActionListener( e -> monitorPanel.setVisible(!monitorPanel.isVisible()));
+		menu.add(monitorItem);
+		
 		return menu;
 	}
 	

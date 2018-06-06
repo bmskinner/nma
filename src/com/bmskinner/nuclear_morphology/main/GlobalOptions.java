@@ -37,6 +37,11 @@ public class GlobalOptions extends AbstractHashOptions {
 
     private static volatile GlobalOptions instance;
     private static final Object           lockObject = new Object(); // synchronisation
+    
+    public static final String DEFAULT_DIR_KEY              = "DEFAULT_DIR";
+    public static final String DEFAULT_DISPLAY_SCALE_KEY    = "DEFAULT_DISPLAY_SCALE";
+    public static final String DEFAULT_SWATCH_KEY           = "DEFAULT_COLOUR_SWATCH";
+    public static final String DEFAULT_NUCLEUS_TYPE_KEY     = "DEFAULT_NUCLEUS_TYPE";
 
     public static final String DEFAULT_IMAGE_SCALE_KEY      = "DEFAULT_IMAGE_SCALE";
     
@@ -50,6 +55,8 @@ public class GlobalOptions extends AbstractHashOptions {
     public static final String IS_USE_ANTIALIASING          = "USE_ANTIALIASING";
     
     public static final String IS_CONVERT_DATASETS_KEY      = "CONVERT_DATASETS";
+    
+    public static final String IS_DOCKABLE_INTERFACE_KEY    = "DOCKABLE_INTERFACE";
 
     private File defaultDir; // where to fall back to for finding images or
                              // saving files
@@ -103,6 +110,7 @@ public class GlobalOptions extends AbstractHashOptions {
         this.defaultType = NucleusType.RODENT_SPERM;
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
+        setBoolean(IS_DOCKABLE_INTERFACE_KEY, false);
     }
 
     public NucleusType getDefaultType() {
@@ -184,6 +192,14 @@ public class GlobalOptions extends AbstractHashOptions {
 
     public synchronized void setConvertDatasets(boolean convertDatasets) {
     	setBoolean(IS_CONVERT_DATASETS_KEY, convertDatasets);
+    }
+    
+    public synchronized boolean isUseDockableInterface() {
+    	return getBoolean(IS_DOCKABLE_INTERFACE_KEY);
+    }
+
+    public synchronized void setUseDockableInterface(boolean b) {
+    	setBoolean(IS_DOCKABLE_INTERFACE_KEY, b);
     }
 
     /**

@@ -42,15 +42,6 @@ public class PropertiesReader implements Loggable {
 
     public static final String INI_FILE = "config.ini";
 
-    private static final String DEFAULT_DIR_KEY              = "DEFAULT_DIR";
-    private static final String DEFAULT_IMAGE_SCALE_KEY      = "DEFAULT_IMAGE_SCALE";
-    private static final String DEFAULT_DISPLAY_SCALE_KEY    = "DEFAULT_DISPLAY_SCALE";
-    private static final String DEFAULT_FILL_CONSENSUS_KEY   = "FILL_CONSENSUS";
-    private static final String DEFAULT_USE_ANTIALIASING_KEY = "USE_ANTIALIASING";
-    private static final String DEFAULT_SWATCH_KEY           = "DEFAULT_COLOUR_SWATCH";
-    private static final String DEFAULT_NUCLEUS_TYPE_KEY     = "DEFAULT_NUCLEUS_TYPE";
-    private static final String REFOLD_OVERRIDE_KEY          = "REFOLD_OVERRIDE";
-
     public PropertiesReader() {
         try {
 
@@ -58,7 +49,7 @@ public class PropertiesReader implements Loggable {
             File dir = Importer.getProgramDir();
 
             File ini = new File(dir, INI_FILE);
-            fine("ini: " + ini.getAbsolutePath());
+            log("ini: " + ini.getAbsolutePath());
 
             if (ini.exists()) {
                 // Read the properties
@@ -84,14 +75,15 @@ public class PropertiesReader implements Loggable {
 
         GlobalOptions op = GlobalOptions.getInstance();
 
-        properties.setProperty(DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
-        properties.setProperty(DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
-        properties.setProperty(DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
-        properties.setProperty(DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
-        properties.setProperty(DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
-        properties.setProperty(DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
-        properties.setProperty(DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
-        properties.setProperty(REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
+        properties.setProperty(GlobalOptions.DEFAULT_DIR_KEY, op.getDefaultDir().getAbsolutePath());
+        properties.setProperty(GlobalOptions.DEFAULT_IMAGE_SCALE_KEY, String.valueOf(op.getImageScale()));
+        properties.setProperty(GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY, String.valueOf(op.getScale().name()));
+        properties.setProperty(GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY, String.valueOf(op.isFillConsensus()));
+        properties.setProperty(GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY, String.valueOf(op.isAntiAlias()));
+        properties.setProperty(GlobalOptions.DEFAULT_SWATCH_KEY, String.valueOf(op.getSwatch().name()));
+        properties.setProperty(GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY, String.valueOf(op.getDefaultType().name()));
+        properties.setProperty(GlobalOptions.REFOLD_OVERRIDE_KEY, String.valueOf(op.getBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY)));
+        properties.setProperty(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, String.valueOf(op.isUseDockableInterface()));
 
         return properties;
 
@@ -105,37 +97,32 @@ public class PropertiesReader implements Loggable {
 
             String value = properties.getProperty(key);
 
-            if (DEFAULT_DIR_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_DIR_KEY.equals(key))
                 op.setDefaultDir(new File(value));
-            }
 
-            if (DEFAULT_IMAGE_SCALE_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_IMAGE_SCALE_KEY.equals(key))
                 op.setImageScale(Double.valueOf(value));
-            }
 
-            if (DEFAULT_DISPLAY_SCALE_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_DISPLAY_SCALE_KEY.equals(key))
                 op.setScale(MeasurementScale.valueOf(value));
-            }
 
-            if (DEFAULT_FILL_CONSENSUS_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_FILL_CONSENSUS_KEY.equals(key))
                 op.setFillConsensus(Boolean.valueOf(value));
-            }
 
-            if (DEFAULT_USE_ANTIALIASING_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_USE_ANTIALIASING_KEY.equals(key))
                 op.setAntiAlias(Boolean.valueOf(value));
-            }
 
-            if (DEFAULT_SWATCH_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_SWATCH_KEY.equals(key))
                 op.setSwatch(ColourSwatch.valueOf(value));
-            }
 
-            if (DEFAULT_NUCLEUS_TYPE_KEY.equals(key)) {
+            if (GlobalOptions.DEFAULT_NUCLEUS_TYPE_KEY.equals(key))
                 op.setDefaultType(NucleusType.valueOf(value));
-            }
 
-            if (REFOLD_OVERRIDE_KEY.equals(key)) {
+            if (GlobalOptions.REFOLD_OVERRIDE_KEY.equals(key))
                 op.setBoolean(GlobalOptions.REFOLD_OVERRIDE_KEY, Boolean.valueOf(value));
-            }
+            
+            if (GlobalOptions.IS_DOCKABLE_INTERFACE_KEY.equals(key))
+                op.setBoolean(GlobalOptions.IS_DOCKABLE_INTERFACE_KEY, Boolean.valueOf(value));
 
         }
     }

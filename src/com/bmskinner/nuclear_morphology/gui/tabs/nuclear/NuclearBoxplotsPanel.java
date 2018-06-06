@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.gui.tabs.nuclear;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -47,6 +48,9 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
         super(context, CellularComponent.NUCLEUS);
 
         Dimension preferredSize = new Dimension(200, 300);
+        
+        int values = PlottableStatistic.getNucleusStats().size();
+
 
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
@@ -56,11 +60,15 @@ public class NuclearBoxplotsPanel extends BoxplotsTabPanel implements ActionList
             panel.setPreferredSize(preferredSize);
             chartPanels.put(stat.toString(), panel);
             mainPanel.add(panel);
-
         }
 
         // add the scroll pane to the tab
-        scrollPane = new JScrollPane(mainPanel);
+//        scrollPane = new JScrollPane(mainPanel);
+        
+//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//        Dimension preferredFloatingDimension = new Dimension( (int) (screenSize.getWidth()*0.25), (int) (screenSize.getHeight()*0.25) );
+//        scrollPane.setPreferredSize(preferredFloatingDimension);
+        
         this.add(scrollPane, BorderLayout.CENTER);
     }
 

@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.List;
@@ -46,6 +47,7 @@ import com.javadocking.dock.Position;
 import com.javadocking.dock.SingleDock;
 import com.javadocking.dock.TabDock;
 import com.javadocking.dock.factory.LeafDockFactory;
+import com.javadocking.dock.factory.SingleDockFactory;
 import com.javadocking.dock.factory.TabDockFactory;
 import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.dockable.Dockable;
@@ -116,7 +118,11 @@ public class DockableMainWindow extends AbstractMainWindow {
             // Create the log panel
             // ---------------
             
-            
+            FloatDockModel dockModel = new FloatDockModel();
+    		dockModel.addOwner("frame0", this);
+    		DockingManager.setDockModel(dockModel);
+    		SingleDockFactory floatFactory = new SingleDockFactory();
+    		dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted to tab docks
             
             logPanel = new LogPanel(eh.getInputSupplier());
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
@@ -134,9 +140,7 @@ public class DockableMainWindow extends AbstractMainWindow {
 
             lineDock1.addChildDock(logTabDock, new Position(0));
             
-            FloatDockModel dockModel = new FloatDockModel();
-    		dockModel.addOwner("frame0", this);
-    		DockingManager.setDockModel(dockModel);
+            
     		dockModel.addRootDock("topdock", lineDock1, this);
     		
             // ---------------
@@ -226,13 +230,15 @@ public class DockableMainWindow extends AbstractMainWindow {
             }
 
             DetailPanel p = (DetailPanel)t;
+            p.setMaximumSize(Toolkit.getDefaultToolkit().getScreenSize());
             Dockable d = new DefaultDockable(p.getPanelTitle(), p, p.getPanelTitle(), null, DockingMode.ALL);
             tabDock.addDockable(d, new Position(i++));
         }
         
         signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
         editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
-
+        
+        tabDock.setSelectedDockable(tabDock.getDockable(0));
     }
 
     /**

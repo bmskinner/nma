@@ -182,12 +182,6 @@ public class MainOptionsDialog extends SettingsDialog implements ActionListener 
             fireInterfaceEvent(InterfaceMethod.UPDATE_PANELS);
         }
 
-//        boolean useViolins = violinBox.isSelected();
-//        if (GlobalOptions.getInstance().isViolinPlots() != useViolins) {
-//            GlobalOptions.getInstance().setViolinPlots(useViolins);
-//            fireInterfaceEvent(InterfaceMethod.RECACHE_CHARTS);
-//        }
-
         boolean fillConsensus = fillConsensusBox.isSelected();
         if (GlobalOptions.getInstance().isFillConsensus() != fillConsensus) {
             GlobalOptions.getInstance().setFillConsensus(fillConsensus);

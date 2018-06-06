@@ -42,7 +42,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
         DetailPanel nuclearStatsPanel = new NuclearStatsPanel(context);
         DetailPanel boxplotPanel = new NuclearBoxplotsPanel(context);
-        DetailPanel histogramsPanel = new NuclearHistogramsPanel(context);
+//        DetailPanel histogramsPanel = new NuclearHistogramsPanel(context);
         DetailPanel wilcoxonPanel = new WilcoxonDetailPanel(context);
         DetailPanel nucleusMagnitudePanel = new NucleusMagnitudePanel(context);
 
@@ -51,7 +51,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
         this.addSubPanel(nuclearStatsPanel);
         this.addSubPanel(boxplotPanel);
-        this.addSubPanel(histogramsPanel);
+//        this.addSubPanel(histogramsPanel);
         this.addSubPanel(wilcoxonPanel);
         this.addSubPanel(nucleusMagnitudePanel);
 
@@ -60,7 +60,7 @@ public class NuclearStatisticsPanel extends DetailPanel {
 
         tabPane.addTab(nuclearStatsPanel.getPanelTitle(), nuclearStatsPanel);
         tabPane.addTab(boxplotPanel.getPanelTitle(), boxplotPanel);
-        tabPane.addTab(histogramsPanel.getPanelTitle(), histogramsPanel);
+//        tabPane.addTab(histogramsPanel.getPanelTitle(), histogramsPanel);
         tabPane.addTab(wilcoxonPanel.getPanelTitle(), wilcoxonPanel);
         tabPane.addTab(nucleusMagnitudePanel.getPanelTitle(), null, nucleusMagnitudePanel, "Pop, pop");
         tabPane.addTab(nuclearScatterChartPanel.getPanelTitle(), nuclearScatterChartPanel);
