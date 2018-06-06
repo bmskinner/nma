@@ -7,11 +7,14 @@ import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.StreamHandler;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.border.EmptyBorder;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
@@ -105,14 +108,9 @@ public class DockableMainWindow extends AbstractMainWindow {
             this.setPreferredSize(preferredSize);
             setBounds(100, 100, 1012, 804);
             contentPane = new JPanel();
-//            contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-            contentPane.setLayout(new BorderLayout(0, 0));
+            contentPane.setBorder(new EmptyBorder(2, 2, 2, 2));
+            contentPane.setLayout(new BorderLayout(2, 2));
             setContentPane(contentPane);
-
-            // ---------------
-            // Create the header buttons
-            // ---------------
-//            contentPane.add(new MainHeaderPanel(this), BorderLayout.NORTH);
 
             // ---------------
             // Create the log panel
@@ -135,8 +133,7 @@ public class DockableMainWindow extends AbstractMainWindow {
             logTabDock.addDockable(dockable1, new Position(0));
             
             
-            CompositeLineDock lineDock1 = new CompositeLineDock(
-    				CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
+            CompositeLineDock lineDock1 = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
 
             lineDock1.addChildDock(logTabDock, new Position(0));
             

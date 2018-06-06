@@ -39,7 +39,7 @@ public class FishRemappingProber extends IntegratedImageProber {
     private static final String PROCEED_LBL          = "Finished selection";
 
     final IAnalysisDataset       dataset;
-    final List<IAnalysisDataset> newList = new ArrayList<IAnalysisDataset>();
+    final List<IAnalysisDataset> newList = new ArrayList<>();
 
     /**
      * Create with a dataset (from which nuclei will be drawn) and a folder of
@@ -57,6 +57,8 @@ public class FishRemappingProber extends IntegratedImageProber {
             Finder<?> finder = new FishRemappingFinder(dataset.getAnalysisOptions().get(), fishImageDir);
 
             imageProberPanel = new FishRemappingProberPanel(dataset, finder, this);
+            
+            imageProberPanel.setSize(imageProberPanel.getPreferredSize());
 
             JPanel footerPanel = createFooter();
             this.setOkButtonText(PROCEED_LBL);

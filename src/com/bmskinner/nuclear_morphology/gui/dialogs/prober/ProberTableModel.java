@@ -32,21 +32,38 @@ import ij.process.ImageProcessor;
 public class ProberTableModel extends DefaultTableModel implements DetectionEventListener {
 
     private static final long serialVersionUID = 1L;
+    
+    private final int maxDimension;
+    
+    public static final int DEFAULT_MAX_DIMENSION = 200;
+    
+    /**
+     * Default constructor with two columns. Images will be drawn at the size best
+     * fitting {@link DEFAULT_MAX_DIMENSION}
+     */
+    public ProberTableModel() {
+        this(DEFAULT_MAX_DIMENSION);
+    }
 
     /**
      * Default constructor with two columns 
+     * @param maxDimension the maximum width or height an image in the table will be drawn
      */
-    public ProberTableModel() {
+    public ProberTableModel(int maxDimension) {
         super();
+        this.maxDimension = maxDimension;
         this.setColumnCount(2);
-        // this.setColumnIdentifiers(new Object[]{ "Process", "Preview"});
+    }
+    
+    public int getMaxDimension() {
+    	return maxDimension;
     }
 
     @Override
     public void detectionEventReceived(DetectionEvent e) {
         ProberTableCell cell = makeIconCell(e.getProcessor(), e.getMessage(), true);
-
-        ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(200, 200), "", true);
+        System.out.println(e.getMessage()+": Resizing to "+maxDimension);
+        ProberTableCell blank = makeIconCell(ImageConverter.createBlankImage(maxDimension, maxDimension), "", true);
 
         if (getRowCount() == 0) {
             addRow(new ProberTableCell[] { cell, blank });
@@ -77,7 +94,7 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
         ImageFilterer filt = new ImageFilterer(ip);
         ImageIcon ic = filt.toImageIcon();
         ProberTableCell iconCell = new ProberTableCell(ic, label, enabled);
-        filt.resize((int) 200, (int) 200);
+        filt.resize(maxDimension, maxDimension);
         ImageIcon small = filt.toImageIcon();
 
         iconCell.setSmallIcon(small);

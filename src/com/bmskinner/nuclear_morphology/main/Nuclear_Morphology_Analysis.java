@@ -3,7 +3,10 @@ package com.bmskinner.nuclear_morphology.main;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -13,6 +16,7 @@ import javax.swing.SwingConstants;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
 import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
@@ -84,7 +88,11 @@ public class Nuclear_Morphology_Analysis
 			DebugFileHandler errorHandler = new DebugFileHandler(errorFile);
 			errorHandler.setFormatter(new DebugFileFormatter());
 			errorLogger.addHandler(errorHandler);
+			errorLogger.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
 			errorLogger.setLevel(Loggable.TRACE);
+			
+			programLogger.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
+			programLogger.setLevel(Level.INFO);
 			
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);

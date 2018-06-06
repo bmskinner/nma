@@ -25,6 +25,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
@@ -42,6 +43,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
@@ -68,7 +70,8 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;
-    private static final double PANEL_SCREEN_WIDTH_PROP = 0.7;
+    private static final double PANEL_SCREEN_WIDTH_PROP = 0.8;
+    private static final int    CELL_LABEL_HEIGHT_PIXELS = 30;
     
     private static final String HEADER_LBL = "Unselected nuclei are blue. Use left and right mouse buttons to select nuclei.";
 
@@ -101,12 +104,20 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         Dimension minPanelSize = getPreferredSize();
         minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth()
                 * PANEL_SCREEN_WIDTH_PROP);
+        minPanelSize.height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2.5);
         setPreferredSize(minPanelSize);
     }
 
     @Override
     protected JTable createTable(TableModel model) {
-        JTable table = super.createTable(model);
+    	// Model will not be used - we substitute a new model with more usable image size
+//    	ProberTableModel m = new ProberTableModel(500);
+    	ProberTableModel m = new ProberTableModel((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2.5));
+        JTable table = super.createTable(m);
+        finder.addDetectionEventListener(m);
+        table.setRowHeight(m.getMaxDimension());
+
+//        table = super.createTable(model);
 
         for (MouseListener l : table.getMouseListeners()) {
             table.removeMouseListener(l);
@@ -165,18 +176,20 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         if (dataset.getCollection().hasCells(imageFile)) {
             openCells = dataset.getCollection().getCells(imageFile);
 
-            ProberTableCell infoCell = (ProberTableCell) table.getModel().getValueAt(ORIGINAL_IMG_COL,
+            ProberTableModel model = (ProberTableModel) table.getModel();
+            ProberTableCell infoCell = (ProberTableCell) model.getValueAt(ORIGINAL_IMG_COL,
                     ORIGINAL_IMG_ROW);
-
+            
+            // Get the full size original image
             Image largeImage = infoCell.getLargeIcon().getImage();
 
-            // Get the cells matching the imageFile
+            // Draw the cells on the full size image
             for (ICell c : openCells) {
                 drawNucleus(c, largeImage);
             }
 
-            // Update the small icon
-            infoCell.setSmallIcon(new ImageIcon(scaleImage(infoCell.getLargeIcon())));
+            // Rescale and redraw the small image icon from the full size image
+            infoCell.setSmallIcon(new ImageIcon(scaleImage(infoCell.getLargeIcon(), model.getMaxDimension())));
             table.repaint();
         }
 
@@ -185,6 +198,10 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
     private void smallImageClicked(MouseEvent e, Point pnt) {
 
         IPoint p = getPointInOriginalImage(pnt);
+        if(p==null) {
+        	warn("Cannot convert to point in original image");
+        	return;
+        }
 
         // See if the clicked position is in a nucleus
 
@@ -195,7 +212,9 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         Rectangle cellRectangle = table.getCellRect(row, col, false);
 
         // Get the icon cell at the clicked row and column
-        ProberTableCell selectedData = (ProberTableCell) table.getModel().getValueAt(row, col);
+        ProberTableModel model = (ProberTableModel) table.getModel();
+        ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
+        
 
         for (ICell c : openCells) {
 
@@ -205,7 +224,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
                     updateSelectedNuclei(e, c);
                     drawNucleus(c, selectedData.getLargeIcon().getImage());
                     // Update the small icon
-                    selectedData.setSmallIcon(new ImageIcon(scaleImage(selectedData.getLargeIcon())));
+                    selectedData.setSmallIcon(new ImageIcon(scaleImage(selectedData.getLargeIcon(), model.getMaxDimension())));
                     table.repaint(cellRectangle); // repaint the affected cell
                                                   // only
                     return; // don't keep searching
@@ -224,7 +243,7 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
      * @param pnt
      * @return
      */
-    private IPoint getPointInOriginalImage(Point pnt) {
+    private @Nullable IPoint getPointInOriginalImage(Point pnt) {
         // Get the data model for this table
         TableModel model = (TableModel) table.getModel();
 
@@ -247,9 +266,14 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
          * horizontally, so the difference in width between the IconCell and the
          * table cell can be used as an offset
          * 
-         * The imageprober has vertical alignment to the top of the cell, so y
-         * coordinates should also be correct
+         * The image prober has vertical alignment to the top of the cell, so y
+         * coordinates should also be correct. 
          * 
+         * TODO: When the row height changes from 200, there may be issues getting the correct position.
+         * The row height is assumed to be fixed. We will need to adjust the y offset based on the row height
+         * and the icon height as we do with the widths.
+         * Despite what is written in the paragraph above, the icon is vertically centre aligned, hence we can't assume 
+         * y position. 
          * 
          */
 
@@ -260,18 +284,22 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         ProberTableCell selectedData = (ProberTableCell) model.getValueAt(row, col);
 
         // Get the width of the icon in the icon cell
-        int iconWidth = selectedData.getSmallIcon().getIconWidth();
+        int iconWidth  = selectedData.getSmallIcon().getIconWidth();
+        int iconHeight = selectedData.getSmallIcon().getIconHeight();
 
         // // Get the width of the column of interest
         int columnWidth = cellRectangle.width;
+        int rowHeight = cellRectangle.height;
 
         finer("Column width is " + columnWidth);
         finer("IconCell width is " + iconWidth);
 
         // Split the difference
-        int offset = (columnWidth - iconWidth) >> 1;
+        int xOffset = (columnWidth - iconWidth) >> 1;
+        int yOffset = (rowHeight - iconHeight - CELL_LABEL_HEIGHT_PIXELS) >> 1;
 
-        x = x - offset;
+        x -= xOffset;
+        y -= yOffset;
 
         finer("Clicked in small image " + x + " : " + y);
 
@@ -345,11 +373,11 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
      * @param ip
      * @return
      */
-    protected Image scaleImage(ImageIcon ic) {
+    protected Image scaleImage(ImageIcon ic, int width) {
 
         double aspect = (double) ic.getIconWidth() / (double) ic.getIconHeight();
 
-        Dimension smallDimension = new Dimension(500, table.getRowHeight() - 30);
+        Dimension smallDimension = new Dimension(width, table.getRowHeight() - CELL_LABEL_HEIGHT_PIXELS);
 
         double finalWidth = smallDimension.getHeight() * aspect; // fix height
         finalWidth = finalWidth > smallDimension.getWidth() ? smallDimension.getWidth() : finalWidth; // but

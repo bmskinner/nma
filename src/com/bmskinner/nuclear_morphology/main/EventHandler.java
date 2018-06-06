@@ -559,7 +559,6 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             break;
 
         case UPDATE_PANELS: {
-//            finer("Updating tab panels with list of " + selected.size() + " datasets");
             fireDatasetUpdateEvent(selected);
             break;
         }

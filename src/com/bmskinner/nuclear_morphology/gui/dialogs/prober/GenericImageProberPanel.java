@@ -136,9 +136,9 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
      * @param imageFile the image to search
      */
     protected void importAndDisplayImage(File imageFile) {
-        if (imageFile == null) {
+        if (imageFile == null)
             throw new IllegalArgumentException(NULL_FILE_ERROR);
-        }
+        
         try {
             finer("Firing panel updating event");
             int imageNumber = fileIndex+1;
@@ -364,7 +364,12 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
     protected JTable createTable(TableModel model) {
         JTable table = new JTable(model);
-        table.setRowHeight(200);
+        
+        int maxDimension = 200;
+        if(model instanceof ProberTableModel)
+        	maxDimension = ((ProberTableModel) model).getMaxDimension();
+        
+        table.setRowHeight(maxDimension);
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setCellRenderer(new IconCellRenderer());
         }
