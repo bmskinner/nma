@@ -374,7 +374,7 @@ public final class DatasetListManager implements Loggable {
     }
 
     /**
-     * Check if any of the root datasets have a different hashcode to their last
+     * Check if any of the root datasets or workspaces have a different hashcode to their last
      * save
      * 
      * @return

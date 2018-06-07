@@ -27,9 +27,11 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -57,8 +59,8 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
         if (DatasetListManager.getInstance().hashCodeChanged()) {
             fine("Found changed hashcode");
-            Object[] options = { "Save datasets", "Exit without saving", "Cancel exit" };
-            int save = JOptionPane.showOptionDialog(null, "Datasets have changed since last save!", "Save datasets?",
+            Object[] options = { "Save datasets and workspaces", "Exit without saving", "Cancel exit" };
+            int save = JOptionPane.showOptionDialog(null, "Datasets or workspaces have changed since last save!", "Save datasets and workspaces?",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
             if (save == 0) {
@@ -108,13 +110,23 @@ public class MainWindowCloseAdapter extends WindowAdapter implements Loggable {
 
                 Runnable task = new SaveDatasetAction(root, mw.getProgressAcceptor(), mw.getEventHandler(), latch, false);
                 task.run();
+
                 try {
                     latch.await();
                 } catch (InterruptedException e) {
                     error("Interruption to thread", e);
                 }
             }
+            
             log("All root datasets saved");
+            
+            for (IWorkspace w : DatasetListManager.getInstance().getWorkspaces()) {
+
+            	Runnable wrkTask = new ExportWorkspaceAction(w, mw.getProgressAcceptor(), mw.getEventHandler());
+            	wrkTask.run();
+            }
+            log("All workspaces saved");
+            
             close();
         };
 

@@ -8,6 +8,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -87,6 +88,16 @@ public class DefaultInputSupplier implements InputSupplier {
 	@Override
 	public File requestFile(@Nullable File defaultFolder) throws RequestCancelledException {
 		File f = FileSelector.chooseFile(defaultFolder);
+		if(f==null)
+			throw new RequestCancelledException();
+		return f;
+	}
+
+	@Override
+	public File requestFileSave(@Nullable File defaultFolder, String name, String extension)
+			throws RequestCancelledException {
+		FileNameExtensionFilter filter = new FileNameExtensionFilter(extension, extension);
+		File f = FileSelector.chooseSaveFile(defaultFolder, filter, name+"."+extension);
 		if(f==null)
 			throw new RequestCancelledException();
 		return f;

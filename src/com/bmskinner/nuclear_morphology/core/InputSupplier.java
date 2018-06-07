@@ -87,6 +87,15 @@ public interface InputSupplier {
 	File requestFile(@Nullable File defaultFolder) throws RequestCancelledException;
 	
 	/**
+	 * Request a file to save to, with the default name and extension.
+	 * @param defaultFolder the default folder
+	 * 
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFileSave(@Nullable File defaultFolder, String name, String extension) throws RequestCancelledException;
+	
+	/**
 	 * Exception thwown when the user cancels the input request
 	 * @author bms41
 	 * @since 1.14.0
