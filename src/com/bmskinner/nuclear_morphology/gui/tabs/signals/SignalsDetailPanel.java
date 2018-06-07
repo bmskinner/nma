@@ -24,11 +24,11 @@ import javax.swing.JTabbedPane;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 /**
  * The top level tab panel showing information on signals at the dataset level

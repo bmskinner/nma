@@ -21,8 +21,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractScatterChartPanel;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class SignalScatterChartPanel extends AbstractScatterChartPanel {

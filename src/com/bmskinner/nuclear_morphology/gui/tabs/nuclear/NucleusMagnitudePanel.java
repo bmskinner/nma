@@ -35,12 +35,12 @@ import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.components.PairwiseTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.dialogs.RandomSamplingDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.AbstractPairwiseDetailPanel;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public class NucleusMagnitudePanel extends AbstractPairwiseDetailPanel {

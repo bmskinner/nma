@@ -26,14 +26,14 @@ import org.eclipse.jdt.annotation.NonNull;
 import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 import com.bmskinner.nuclear_morphology.io.DatasetShellsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetSignalsExporter;
 import com.bmskinner.nuclear_morphology.io.DatasetStatsExporter;
-import com.bmskinner.nuclear_morphology.main.EventHandler;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The base action for exporting stats from datasets

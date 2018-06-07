@@ -41,8 +41,8 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.NeutrophilFinder;
 import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.options.OptionsFactory;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.dialogs.SettingsDialog;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * This test class demostrates using the DetectionEventListener interface to

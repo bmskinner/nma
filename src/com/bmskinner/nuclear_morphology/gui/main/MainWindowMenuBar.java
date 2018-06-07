@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
 import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.ContextEnabled;
@@ -30,7 +31,6 @@ import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.dialogs.MainOptionsDialog;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 public class MainWindowMenuBar extends JMenuBar implements ContextEnabled {
 	

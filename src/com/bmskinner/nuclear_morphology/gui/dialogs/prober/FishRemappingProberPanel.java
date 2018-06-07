@@ -54,8 +54,8 @@ import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 /**
  * The image panel for FISH remapping. Stores the cells selected for remapping
@@ -70,14 +70,13 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
 
     private static final int    ORIGINAL_IMG_COL        = 0;
     private static final int    ORIGINAL_IMG_ROW        = 0;
-    private static final double PANEL_SCREEN_WIDTH_PROP = 0.8;
+    private static final double IMAGE_SCREEN_WIDTH_PROP = 0.4;
+    private static final double PANEL_SCREEN_WIDTH_PROP = 0.9;
     private static final int    CELL_LABEL_HEIGHT_PIXELS = 30;
     
     private static final String HEADER_LBL = "Unselected nuclei are blue. Use left and right mouse buttons to select nuclei.";
 
     private final IAnalysisDataset dataset;
-
-
     
     /**
      * Nuclei selected with the left button
@@ -100,24 +99,22 @@ public class FishRemappingProberPanel extends GenericImageProberPanel {
         this.dataset = dataset;
 
 
-        // // Make sure the images fit in the table
+        // // Make sure the table is large enought for the images
         Dimension minPanelSize = getPreferredSize();
         minPanelSize.width = (int) (java.awt.Toolkit.getDefaultToolkit().getScreenSize().getWidth()
-                * PANEL_SCREEN_WIDTH_PROP);
-        minPanelSize.height = (int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2.5);
+                * (PANEL_SCREEN_WIDTH_PROP));
+        minPanelSize.height = (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()*PANEL_SCREEN_WIDTH_PROP));
         setPreferredSize(minPanelSize);
     }
 
     @Override
     protected JTable createTable(TableModel model) {
     	// Model will not be used - we substitute a new model with more usable image size
-//    	ProberTableModel m = new ProberTableModel(500);
-    	ProberTableModel m = new ProberTableModel((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2.5));
+    	// This is because the image prober is designed to show lots of small images, and this fish remapper is cobbled on top
+    	ProberTableModel m = new ProberTableModel((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()*IMAGE_SCREEN_WIDTH_PROP));
         JTable table = super.createTable(m);
         finder.addDetectionEventListener(m);
         table.setRowHeight(m.getMaxDimension());
-
-//        table = super.createTable(model);
 
         for (MouseListener l : table.getMouseListeners()) {
             table.removeMouseListener(l);

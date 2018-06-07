@@ -12,10 +12,10 @@ import javax.swing.SpinnerNumberModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
-import com.bmskinner.nuclear_morphology.main.InputSupplier.RequestCancelledException;
 
 /**
  * Implements the input supplier for the default UI

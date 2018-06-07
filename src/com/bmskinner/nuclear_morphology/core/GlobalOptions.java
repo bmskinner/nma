@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.main;
+package com.bmskinner.nuclear_morphology.core;
 
 import java.io.File;
 import java.util.logging.Level;

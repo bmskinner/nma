@@ -32,7 +32,7 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 
 /**
  * Export the dataset to an nmd file

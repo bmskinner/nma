@@ -34,7 +34,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCreator;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 
 @SuppressWarnings("serial")
 public abstract class AbstractPairwiseDetailPanel extends DetailPanel {

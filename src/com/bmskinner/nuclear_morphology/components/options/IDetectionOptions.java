@@ -23,8 +23,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.GlobalOptions;
 
 /**
  * This interface defines the detection options available for detecting an

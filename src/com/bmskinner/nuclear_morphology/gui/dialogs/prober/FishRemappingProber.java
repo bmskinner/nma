@@ -35,7 +35,7 @@ import com.bmskinner.nuclear_morphology.components.ICellCollection;
 @SuppressWarnings("serial")
 public class FishRemappingProber extends IntegratedImageProber {
 
-    private static final String DIALOG_TITLE_BAR_LBL = "FISH remapping";
+    private static final String DIALOG_TITLE_BAR_LBL = "Post-FISH mapping";
     private static final String PROCEED_LBL          = "Finished selection";
 
     final IAnalysisDataset       dataset;

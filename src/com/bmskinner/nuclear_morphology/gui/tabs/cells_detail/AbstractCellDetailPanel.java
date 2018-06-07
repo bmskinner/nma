@@ -20,8 +20,8 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.tabs.editing.AbstractEditingPanel;
-import com.bmskinner.nuclear_morphology.main.InputSupplier;
 
 @SuppressWarnings("serial")
 public abstract class AbstractCellDetailPanel extends AbstractEditingPanel implements CellEditingTabPanel {

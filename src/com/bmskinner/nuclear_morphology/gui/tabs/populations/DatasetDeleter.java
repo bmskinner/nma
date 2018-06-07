@@ -28,8 +28,8 @@ import java.util.UUID;
 import javax.swing.JOptionPane;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.DatasetListManager;
 
 /**
  * Handle the deletion of selected datasets in the populations panel

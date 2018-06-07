@@ -14,6 +14,8 @@ import javax.swing.JFrame;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.Version;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
@@ -22,8 +24,6 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEventListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.main.EventHandler;
-import com.bmskinner.nuclear_morphology.main.ThreadManager;
 
 public abstract class AbstractMainWindow extends JFrame implements Loggable, MainView, InterfaceEventListener, DatasetSelectionListener, DatasetEventListener, DatasetUpdateEventListener {
 	

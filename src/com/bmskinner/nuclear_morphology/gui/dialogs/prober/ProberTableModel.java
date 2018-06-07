@@ -47,7 +47,7 @@ public class ProberTableModel extends DefaultTableModel implements DetectionEven
 
     /**
      * Default constructor with two columns 
-     * @param maxDimension the maximum width or height an image in the table will be drawn
+     * @param maxDimension the maximum width or height an image in the table will be drawn, preserving aspect ratio
      */
     public ProberTableModel(int maxDimension) {
         super();

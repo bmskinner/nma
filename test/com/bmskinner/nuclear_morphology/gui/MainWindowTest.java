@@ -34,10 +34,10 @@ import org.assertj.swing.image.ScreenshotTakerIF;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis;
+
 import static org.assertj.core.util.Files.currentFolder;
-
-import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
-
 import static org.assertj.swing.launcher.ApplicationLauncher.application;
 import static org.assertj.swing.finder.WindowFinder.findFrame;
 /**

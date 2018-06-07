@@ -16,7 +16,7 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.main;
+package com.bmskinner.nuclear_morphology.core;
 
 import java.util.ArrayList;
 import java.util.Collection;

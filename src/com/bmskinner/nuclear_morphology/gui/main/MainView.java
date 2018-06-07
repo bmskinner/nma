@@ -2,8 +2,8 @@ package com.bmskinner.nuclear_morphology.gui.main;
 
 import java.awt.event.WindowListener;
 
+import com.bmskinner.nuclear_morphology.core.EventHandler;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
-import com.bmskinner.nuclear_morphology.main.EventHandler;
 
 /**
  * Interface for the main frame of the program. Used while debugging the dockable framework

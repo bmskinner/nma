@@ -1,4 +1,4 @@
-import com.bmskinner.nuclear_morphology.main.Nuclear_Morphology_Analysis;
+import com.bmskinner.nuclear_morphology.core.Nuclear_Morphology_Analysis;
 
 import ij.IJ;
 import ij.plugin.PlugIn;
