@@ -47,8 +47,13 @@ import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGrou
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 import com.bmskinner.nuclear_morphology.components.stats.StatisticDimension;
+import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
+
+import ij.process.ImageProcessor;
 
 /**
  * This class is designed to simplify operations on CellCollections
@@ -81,7 +86,7 @@ public class SignalManager implements Loggable {
      */
     public Set<ICell> getCellsWithNuclearSignals(@NonNull final UUID signalGroupId, boolean hasSignal) {
         return collection.streamCells()
-                .filter( c->c.hasNuclearSignals(signalGroupId))
+                .filter( c->c.hasNuclearSignals(signalGroupId)==hasSignal)
                 .collect(Collectors.toSet());
     }
     
@@ -176,6 +181,33 @@ public class SignalManager implements Loggable {
     public String getSignalSourceFolder(@NonNull final UUID signalGroupId) {
     	Optional<ISignalGroup> g = collection.getSignalGroup(signalGroupId);
         return g.isPresent() ? g.get().getFolder().getAbsolutePath() : "";
+    }
+    
+    /**
+     * Get the source image for the given signal group and cell. This will return the appropriate
+     * image even if no signals were detected in the cell. This allows the method to be a more robust alternative
+     * to {@link com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection::getImage}
+     * @param signalGroupId the signal group id
+     * @param cell the cell whose signal image to fetch
+     * @return the image processor for the image
+     * @throws UnloadableImageException if the image cannot be found or opened
+     */
+    public ImageProcessor getSignalSourceImage(@NonNull final UUID signalGroupId, @NonNull final ICell cell) throws UnloadableImageException {
+    	Nucleus n = cell.getNuclei().get(0);
+    	if(n.getSignalCollection().hasSignal(signalGroupId))
+    		return n.getSignalCollection().getImage(signalGroupId);
+    	File expectedFile = new File(getSignalSourceFolder(signalGroupId), n.getSourceFile().getName());
+    	if(!expectedFile.exists())
+    		throw new UnloadableImageException("File "+expectedFile+" does not exist");
+    	
+    	try {
+    		return new ImageImporter(expectedFile).importImage(getSignalChannel(signalGroupId));
+        } catch (ImageImportException e) {
+            stack("Error importing image source file " +expectedFile.getAbsolutePath(), e);
+            throw new UnloadableImageException("Unable to load signal image", e);
+        }
+    	
+    	
     }
 
     /**

@@ -372,9 +372,8 @@ public class DefaultSignalCollection implements ISignalCollection {
     @Override
     public ImageProcessor getImage(@NonNull final UUID signalGroup) throws UnloadableImageException {
 
-        if (signalGroup == null) {
+        if (signalGroup == null)
             throw new UnloadableImageException("Signal group is null");
-        }
 
         File f = this.getSourceFile(signalGroup);
 

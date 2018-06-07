@@ -272,8 +272,14 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
 //                    }
 
                     // Get the image with the signal
-                    ImageProcessor ip = n.getSignalCollection().getImage(signalGroup);
-                    finest("Image for " + n.getNameAndNumber() + " is " + ip.getWidth() + "x" + ip.getHeight());
+                    ImageProcessor ip;
+                    if(n.getSignalCollection().hasSignal(signalGroup)){ // if there is no signal, getImage will be null
+                    	ip = n.getSignalCollection().getImage(signalGroup);
+                    	finest("Image for " + n.getNameAndNumber() + " is " + ip.getWidth() + "x" + ip.getHeight());
+                    } else {
+//                    	 we need to get the file in which no signals were detected
+                    	ip = sourceDataset.getCollection().getSignalManager().getSignalSourceImage(signalGroup, cell);
+                    }
 
                     // Create NucleusMeshImage from nucleus.
                     finer("Making nucleus mesh image");

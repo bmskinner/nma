@@ -199,7 +199,7 @@ public interface ISignalCollection extends Serializable, Loggable {
      * 
      * @param signalGroup the signal group ID
      * @return an image processor
-     * @throws UnloadableImageException if the image cannot be loaded from file
+     * @throws UnloadableImageException if the image cannot be loaded from file, or there is no signal with the given id in the collection
      */
     ImageProcessor getImage(@NonNull UUID signalGroup) throws UnloadableImageException;
 
