@@ -126,7 +126,6 @@ public class DockableMainWindow extends AbstractMainWindow {
             TextAreaHandler textHandler = new TextAreaHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
-            Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
             
             Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
             SingleDock logTabDock = new SingleDock();

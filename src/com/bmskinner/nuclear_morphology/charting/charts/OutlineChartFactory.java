@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.annotations.XYAnnotation;
@@ -57,6 +58,7 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
+import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.CellDataset;
@@ -143,33 +145,27 @@ public class OutlineChartFactory extends AbstractChartFactory {
     /**
      * Draw the given images onto a consensus outline nucleus.
      * 
-     * @param image
-     *            the image processor to be drawn
+     * @param image the image processor to be drawn
      * @return
      */
     public JFreeChart makeSignalWarpChart(ImageProcessor image) {
 
-        IAnalysisDataset dataset = options.firstDataset();
         JFreeChart chart = new ConsensusNucleusChartFactory(options).makeNucleusOutlineChart();
 
         XYPlot plot = chart.getXYPlot();
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new DefaultMesh(dataset.getCollection().getConsensus());
+            meshConsensus = new DefaultMesh((@NonNull Taggable) options.getComponent());
         } catch (MeshCreationException e1) {
             fine("Cannot make consensus mesh");
             stack("Error creating mesh", e1);
             return makeErrorChart();
         }
 
-//        if (options.isStraightenMesh()) {
-//            meshConsensus = meshConsensus.straighten();
-//        }
-
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(options.getComponent());
         } catch (ChartDatasetCreationException e) {
             stack("Error creating outline", e);
             return makeErrorChart();

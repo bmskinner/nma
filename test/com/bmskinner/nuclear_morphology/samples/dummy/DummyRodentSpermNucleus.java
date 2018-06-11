@@ -157,13 +157,6 @@ public class DummyRodentSpermNucleus extends DummyCellularComponent implements N
 		return nucleus.isClockwiseRP();
 	}
 
-	
-
-	@Override
-	public boolean equals(CellularComponent c) {
-		return nucleus.equals(c);
-	}
-
 	@Override
 	public boolean hasProfile(ProfileType type) {
 		return nucleus.hasProfile(type);

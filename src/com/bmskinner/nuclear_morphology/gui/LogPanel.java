@@ -340,6 +340,10 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
         return d;
     }
 
+    /**
+     * Print the given string
+     * @param s
+     */
     public void print(String s) {
         StyledDocument doc = textArea.getStyledDocument();
 
@@ -354,6 +358,14 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
         };
         SwingUtilities.invokeLater(r);
 
+    }
+    
+    /**
+     * Print the given string with a new line
+     * @param s
+     */
+    public void println(String s) {
+    	print(s+System.getProperty("line.separator"));
     }
 
     /**

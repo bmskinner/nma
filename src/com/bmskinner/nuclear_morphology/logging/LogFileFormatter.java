@@ -24,7 +24,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
-public class DebugFileFormatter extends Formatter {
+public class LogFileFormatter extends Formatter {
 
     private static final String NEWLINE   = System.getProperty("line.separator");
     private static final String SEPARATOR = "\t";

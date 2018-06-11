@@ -625,10 +625,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         this.scale = scale;
     }
 
-    @Override
-    public boolean equals(CellularComponent c) {
-        return false;
-    }
+
 
     @Override
 	public synchronized boolean hasStatistic(PlottableStatistic stat) {
@@ -1216,6 +1213,9 @@ public abstract class DefaultCellularComponent implements CellularComponent {
                 .min(Comparator.comparing(point->point.getLengthTo(p) ))
                 .get();
     }
+    
+    
+    
 
     /*
      * 
@@ -1223,7 +1223,73 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * 
      */
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((centreOfMass == null) ? 0 : centreOfMass.hashCode());
+		result = prime * result + channel;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((originalCentreOfMass == null) ? 0 : originalCentreOfMass.hashCode());
+		result = prime * result + Arrays.hashCode(position);
+		long temp;
+		temp = Double.doubleToLongBits(scale);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
+		result = prime * result + ((statistics == null) ? 0 : statistics.hashCode());
+		result = prime * result + Arrays.hashCode(xpoints);
+		result = prime * result + Arrays.hashCode(ypoints);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefaultCellularComponent other = (DefaultCellularComponent) obj;
+		if (centreOfMass == null) {
+			if (other.centreOfMass != null)
+				return false;
+		} else if (!centreOfMass.equals(other.centreOfMass))
+			return false;
+		if (channel != other.channel)
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (originalCentreOfMass == null) {
+			if (other.originalCentreOfMass != null)
+				return false;
+		} else if (!originalCentreOfMass.equals(other.originalCentreOfMass))
+			return false;
+		if (!Arrays.equals(position, other.position))
+			return false;
+		if (Double.doubleToLongBits(scale) != Double.doubleToLongBits(other.scale))
+			return false;
+		if (sourceFile == null) {
+			if (other.sourceFile != null)
+				return false;
+		} else if (!sourceFile.equals(other.sourceFile))
+			return false;
+		if (statistics == null) {
+			if (other.statistics != null)
+				return false;
+		} else if (!statistics.equals(other.statistics))
+			return false;
+		if (!Arrays.equals(xpoints, other.xpoints))
+			return false;
+		if (!Arrays.equals(ypoints, other.ypoints))
+			return false;
+		return true;
+	}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
         in.defaultReadObject();
 

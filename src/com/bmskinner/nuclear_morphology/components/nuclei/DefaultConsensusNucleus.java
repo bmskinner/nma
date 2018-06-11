@@ -131,6 +131,26 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
         // There is no original position for a consensus
         return toShape();
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if(!super.equals(obj))
+    		return false;
+    	if(!(obj instanceof DefaultConsensusNucleus))
+    		return false;
+    	DefaultConsensusNucleus other = (DefaultConsensusNucleus)obj;
+    	if(!type.equals(other.type))
+    		return false;
+    	return true;
+    }
+    
+    @Override
+    public int hashCode() {
+    	final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        return result;
+    }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 

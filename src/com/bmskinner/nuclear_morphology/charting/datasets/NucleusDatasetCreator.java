@@ -1198,7 +1198,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
      * @param dataset
      * @return
      */
-    public XYDataset createBareNucleusOutline(@NonNull Nucleus n) throws ChartDatasetCreationException {
+    public XYDataset createBareNucleusOutline(@NonNull CellularComponent n) throws ChartDatasetCreationException {
         ComponentOutlineDataset ds = new ComponentOutlineDataset();
 
         double[] xpoints = new double[n.getBorderLength() + 1];

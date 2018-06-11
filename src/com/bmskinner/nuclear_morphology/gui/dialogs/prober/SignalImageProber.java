@@ -135,11 +135,10 @@ public class SignalImageProber extends IntegratedImageProber {
 
         // get the group name
 
-        SignalGroup group = new SignalGroup();
+        SignalGroup group = new SignalGroup(name);
 
         group.setChannel(options.getChannel());
         group.setFolder(options.getFolder());
-        group.setGroupName(name);
 
         dataset.getCollection().addSignalGroup(signalGroup, group);
 

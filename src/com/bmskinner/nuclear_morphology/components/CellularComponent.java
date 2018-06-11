@@ -63,14 +63,6 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     @NonNull UUID getID();
 
     /**
-     * An equality check that relies solely on the component ids.
-     * 
-     * @param c
-     * @return true if the components have the same ID
-     */
-    boolean equals(CellularComponent c);
-
-    /**
      * Create a defensive copy of this object
      * 
      * @return

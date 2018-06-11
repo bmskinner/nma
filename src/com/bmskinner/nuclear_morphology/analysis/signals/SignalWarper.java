@@ -54,6 +54,10 @@ import ij.process.ImageProcessor;
  *
  */
 public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implements Loggable {
+	
+	public static final boolean STRAIGHTEN_MESH = true;
+	public static final boolean REGULAR_MESH = false;
+	
 
     private IAnalysisDataset sourceDataset;
     private Nucleus          target;
@@ -163,7 +167,6 @@ public class SignalWarper extends SwingWorker<ImageProcessor, Integer> implement
     public void done() {
 
         finest("Worker completed task");
-        // updateChart();
         try {
             if (this.get() != null) {
                 finest("Firing trigger for sucessful task");

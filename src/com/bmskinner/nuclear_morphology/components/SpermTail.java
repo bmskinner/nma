@@ -122,15 +122,6 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
         return this.length;
     }
 
-    @Override
-    public boolean equals(CellularComponent c) {
-        if (c.getClass() == SpermTail.class) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         finest("\tWriting sperm tail");
         out.defaultWriteObject();

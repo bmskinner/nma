@@ -247,5 +247,12 @@ public interface IPoint {
      *            the y offset
      */
     void offset(double x, double y);
+    
+    /**
+     * Test strict equality
+     * @param obj
+     * @return
+     */
+    boolean equals(Object obj);
 
 }

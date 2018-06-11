@@ -14,8 +14,9 @@ import javax.swing.JWindow;
 import javax.swing.SwingConstants;
 
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
-import com.bmskinner.nuclear_morphology.logging.DebugFileFormatter;
-import com.bmskinner.nuclear_morphology.logging.DebugFileHandler;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogFileFormatter;
+import com.bmskinner.nuclear_morphology.logging.LogFileHandler;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -46,6 +47,7 @@ public class Nuclear_Morphology_Analysis
 	
 	
 	private Nuclear_Morphology_Analysis(String[] args){
+		loadLogger();
 	    this.parser = new CommandParser(args);
 	}
 	
@@ -83,16 +85,15 @@ public class Nuclear_Morphology_Analysis
 			File dir =  Importer.getProgramDir();
 			
 			File errorFile = new File(dir, "error.log");
-			System.out.println(errorFile.getAbsolutePath());
+//			System.out.println(errorFile.getAbsolutePath());
 
-			DebugFileHandler errorHandler = new DebugFileHandler(errorFile);
-			errorHandler.setFormatter(new DebugFileFormatter());
-			errorLogger.addHandler(errorHandler);
-			errorLogger.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
-			errorLogger.setLevel(Loggable.TRACE);
+			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
+			Logger.getLogger(ERROR_LOGGER).addHandler(errorHandler);
+//			Logger.getLogger(ERROR_LOGGER).addHandler(new StreamHandler(System.out, new SimpleFormatter()));
+			Logger.getLogger(ERROR_LOGGER).setLevel(Loggable.TRACE);
 			
-			programLogger.addHandler(new StreamHandler(System.out, new SimpleFormatter()));
-			programLogger.setLevel(Level.INFO);
+			Logger.getLogger(PROGRAM_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));
+			Logger.getLogger(PROGRAM_LOGGER).setLevel(Level.FINE);
 			
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);

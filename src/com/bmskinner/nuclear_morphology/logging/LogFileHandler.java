@@ -21,15 +21,23 @@ package com.bmskinner.nuclear_morphology.logging;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
 
-public class DebugFileHandler extends FileHandler {
+import org.eclipse.jdt.annotation.NonNull;
+
+public class LogFileHandler extends FileHandler {
 
     private static boolean APPEND = true;
     private static int     LIMIT  = 10000000;
     private static int     COUNT  = 1;
 
-    public DebugFileHandler(File logFile) throws SecurityException, IOException {
+    public LogFileHandler(@NonNull File logFile) throws SecurityException, IOException {
         super(logFile.getAbsolutePath(), LIMIT, COUNT, APPEND);
+    }
+    
+    public LogFileHandler(@NonNull File logFile, @NonNull Formatter formatter) throws SecurityException, IOException {
+    	super(logFile.getAbsolutePath(),LIMIT, COUNT, APPEND);
+    	this.setFormatter(formatter);
     }
 
 }

@@ -35,6 +35,20 @@ import org.eclipse.jdt.annotation.NonNull;
  *
  */
 public interface ISignalGroup extends Serializable {
+	
+	/**
+     * Get the warped signals for the group, if present
+     * 
+     * @return
+     */
+    Optional<IWarpedSignal> getWarpedSignals();
+
+    /**
+     * Set the group warped signals
+     * 
+     * @param result
+     */
+    void setWarpedSignals(@NonNull IWarpedSignal result);
 
     /**
      * Get the shell result for the group, if present
@@ -133,7 +147,5 @@ public interface ISignalGroup extends Serializable {
      * @param folder
      */
     void setFolder(@NonNull File folder);
-
-    String toString();
 
 }

@@ -49,16 +49,14 @@ public interface IAnalysisWorker extends RunnableFuture<IAnalysisResult>, Progre
     /**
      * Add a listener for changes to the analysis progress.
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
     void addPropertyChangeListener(PropertyChangeListener l);
 
     /**
      * Remove a listener for changes to the analysis progress.
      * 
-     * @param l
-     *            the listener
+     * @param l the listener
      */
     void removePropertyChangeListener(PropertyChangeListener l);
 

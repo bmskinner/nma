@@ -64,7 +64,7 @@ public class LogPanelFormatter extends Formatter {
             }
         }
 
-        buffer.append(NEWLINE);
+//        buffer.append(NEWLINE);
 
         return buffer.toString();
     }

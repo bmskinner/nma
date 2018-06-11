@@ -41,8 +41,7 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
      * Construct with a method. The progress bar total will be set to -1 - i.e.
      * the bar will remain indeterminate until the method completes
      * 
-     * @param m
-     *            the method to run
+     * @param m the method to run
      */
     public DefaultAnalysisWorker(IAnalysisMethod m) {
         this(m, -1);
@@ -51,10 +50,8 @@ public class DefaultAnalysisWorker extends SwingWorker<IAnalysisResult, Long> im
     /**
      * Construct with a method and a total for the progress bar.
      * 
-     * @param m
-     *            the method to run
-     * @param progress
-     *            the length of the progress bar
+     * @param m the method to run
+     * @param progress the length of the progress bar
      */
     public DefaultAnalysisWorker(IAnalysisMethod m, long progress) {
         method = m;

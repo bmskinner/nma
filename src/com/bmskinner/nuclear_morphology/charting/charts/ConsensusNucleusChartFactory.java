@@ -35,6 +35,7 @@ import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.ChartDatasetCreationException;
 import com.bmskinner.nuclear_morphology.charting.datasets.NucleusDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
@@ -180,22 +181,27 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeNucleusOutlineChart() {
 
-        IAnalysisDataset dataset = options.firstDataset();
+    	CellularComponent component = options.hasComponent() ? options.getComponent() : null;
+    	
+    	if(component==null) {
+    		IAnalysisDataset dataset = options.firstDataset();
 
-        if (!dataset.getCollection().hasConsensus()) {
-            return makeEmptyChart();
-        }
+    		if (!dataset.getCollection().hasConsensus()) {
+    			return makeEmptyChart();
+    		}
+    		component = dataset.getCollection().getConsensus();
+    	}
 
         XYDataset ds;
         try {
-            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(dataset);
+            ds = new NucleusDatasetCreator(options).createBareNucleusOutline(component);
         } catch (ChartDatasetCreationException e) {
             fine("Error creating boxplot", e);
             return makeErrorChart();
         }
         JFreeChart chart = makeConsensusChart(ds);
 
-        double max = getconsensusChartRange(dataset);
+        double max = getConsensusChartRange(component);
 
         XYPlot plot = chart.getXYPlot();
 
@@ -212,6 +218,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         return chart;
     }
 
+    
     /**
      * Get the maximum absolute range of the axes of the chart for
      * the given dataset.
@@ -219,12 +226,11 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
      * @param dataset the dataset to range test
      * @return the maximum range value
      */
-    private double getconsensusChartRange(IAnalysisDataset dataset) {
-        ICellCollection collection = dataset.getCollection();
-        double maxX = Math.max(Math.abs(collection.getConsensus().getMinX()),
-                Math.abs(collection.getConsensus().getMaxX()));
-        double maxY = Math.max(Math.abs(collection.getConsensus().getMinY()),
-                Math.abs(collection.getConsensus().getMaxY()));
+    private double getConsensusChartRange(CellularComponent component) {
+        double maxX = Math.max(Math.abs(component.getMinX()),
+                Math.abs(component.getMaxX()));
+        double maxY = Math.max(Math.abs(component.getMinY()),
+                Math.abs(component.getMaxY()));
 
         // ensure that the scales for each axis are the same
         double max = Math.max(maxX, maxY);
@@ -233,7 +239,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         max *= 1.25;
         return max;
     }
-
+    
     /**
      * Get the maximum absolute range of the axes of the chart. The minimum
      * returned value will be 1.
@@ -245,7 +251,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         double max = 1;
         for (IAnalysisDataset dataset : options.getDatasets()) {
             if (dataset.getCollection().hasConsensus()) {
-                double datasetMax = getconsensusChartRange(dataset);
+                double datasetMax = getConsensusChartRange(dataset.getCollection().getConsensus());
                 max = datasetMax > max ? datasetMax : max;
             }
         }
@@ -276,7 +282,7 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
         }
 
         JFreeChart chart = makeConsensusChart(ds);
-        double max = getconsensusChartRange(dataset);
+        double max = getConsensusChartRange(dataset.getCollection().getConsensus());
 
         XYPlot plot = chart.getXYPlot();
         plot.setDataset(0, ds);

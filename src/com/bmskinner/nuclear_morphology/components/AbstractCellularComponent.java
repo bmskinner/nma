@@ -416,11 +416,6 @@ public abstract class AbstractCellularComponent implements CellularComponent, Ro
         this.scale = scale;
     }
 
-    @Override
-    public boolean equals(CellularComponent c) {
-        return false;
-    }
-
     public synchronized boolean hasStatistic(PlottableStatistic stat) {
         return this.statistics.containsKey(stat);
     }

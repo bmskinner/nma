@@ -348,11 +348,6 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public boolean equals(CellularComponent c) {
-		return component.equals(c);
-	}
-
-	@Override
 	public CellularComponent duplicate() {
 		return component.duplicate();
 	}

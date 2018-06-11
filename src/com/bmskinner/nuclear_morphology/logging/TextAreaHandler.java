@@ -42,7 +42,7 @@ public class TextAreaHandler extends StreamHandler {
         flush();
 
         if (logPanel != null) {
-            logPanel.print(getFormatter().format(record));
+            logPanel.println(getFormatter().format(record));
         }
     }
 }

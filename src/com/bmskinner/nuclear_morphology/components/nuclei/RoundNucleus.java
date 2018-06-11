@@ -1206,29 +1206,6 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
     }
 
     @Override
-    public boolean equals(CellularComponent c) {
-
-        if (this == c) {
-            return true;
-        }
-
-        if (c == null) {
-            return false;
-        }
-
-        if (this.getClass() != c.getClass()) {
-            return false;
-        }
-
-        if (!this.getID().equals(c.getID())) {
-            return false;
-        }
-
-        return true;
-
-    }
-
-    @Override
     public int compareTo(Nucleus n) {
 
         int number = this.getNucleusNumber();

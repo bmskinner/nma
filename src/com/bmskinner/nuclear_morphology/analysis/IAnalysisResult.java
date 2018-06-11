@@ -50,8 +50,7 @@ public interface IAnalysisResult {
      * Get the boolean value stored at the given index. The index keys are found
      * in each IAnalysisMethod
      * 
-     * @param i
-     *            the index to fetch
+     * @param i the index to fetch
      * @return the boolean at that index
      */
     boolean getBoolean(int i);
