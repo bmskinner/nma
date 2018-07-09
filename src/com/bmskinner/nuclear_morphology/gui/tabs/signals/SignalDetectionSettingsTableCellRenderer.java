@@ -19,8 +19,10 @@
 package com.bmskinner.nuclear_morphology.gui.tabs.signals;
 
 import java.awt.Color;
+import java.io.File;
 
 import javax.swing.JLabel;
+import javax.swing.JTable;
 
 import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.gui.Labels;
@@ -34,27 +36,39 @@ import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRen
 @SuppressWarnings("serial")
 public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTableCellRenderer {
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+    public java.awt.Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
+    	JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    	
         // default cell colour is white
-        Color colour = Color.WHITE;
-
+        Color bg = Color.WHITE;
+        Color fg = Color.BLACK;
+        
+        
+        String header = getFirstColumnText(row, table);
+        
+        
+        // Highlight consistent rows
+        if (isRowConsistentAcrossColumns(table, row))
+        	bg = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
+        
+        if(header.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
+        	File signalFolder = new File(value.toString());
+        	if(!signalFolder.exists())
+        		fg = Color.RED;
+        }
+        
+        
         try {
-
-            // Highlight consistent rows
-            if (isRowConsistentAcrossColumns(table, row)) {
-
-                colour = ConsistentRowTableCellRenderer.CONSISTENT_CELL_COLOUR;
-
-            }
 
             // Set colour of signal groups
 
             if (row < table.getModel().getRowCount() - 1) {
 
                 // get the value in the first column of the row below
-                String nextRowHeader = table.getModel().getValueAt(row + 1, 0).toString();
+            	 String nextRowHeader = getFirstColumnText(row+1, table);
+//                String nextRowHeader = table.getModel().getValueAt(row + 1, 0).toString();
 
                 int signalGroupCount = Integer.valueOf(table.getModel().getValueAt(0, column).toString());
 
@@ -67,11 +81,11 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
                         if (!nextRowValue.equals("")) {
                             SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, column);
 
-                            colour = cell.getColor();
+                            bg = cell.getColor();
                         }
 
                     } else {
-                        colour = Color.WHITE; // don't allow consitentcy colours
+                    	bg = Color.WHITE; // don't allow consitentcy colours
                                               // in the signal group line
                     }
 
@@ -84,10 +98,12 @@ public class SignalDetectionSettingsTableCellRenderer extends ConsistentRowTable
         }
 
         // Cells are by default rendered as a JLabel.
-        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        l.setBackground(colour);
-
+        
+        l.setBackground(bg);
+        l.setForeground(fg);
         // Return the JLabel which renders the cell.
         return l;
     }
+    
+
 }

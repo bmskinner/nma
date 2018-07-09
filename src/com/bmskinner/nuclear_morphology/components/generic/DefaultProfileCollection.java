@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -517,16 +519,13 @@ public class DefaultProfileCollection implements IProfileCollection {
      * CellCollection, components.generic.ProfileType, int)
      */
     @Override
-    public void createProfileAggregate(ICellCollection collection, int length) {
+    public void createProfileAggregate(@NonNull ICellCollection collection, int length) {
         if (length <= 0)
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
-        if (collection == null) {
-            throw new IllegalArgumentException("CellCollection is null");
-        }
-
-        if (collection.size() == 0) {
+        if (collection == null)
+            throw new IllegalArgumentException("Cell collection is null");
+        if (collection.size() == 0)
             throw new IllegalArgumentException("Cell collection is empty");
-        }
 
         this.length = length;
 
@@ -573,15 +572,12 @@ public class DefaultProfileCollection implements IProfileCollection {
      * components.generic.IProfileCollection#createProfileAggregate(components.
      * CellCollection, components.generic.ProfileType)
      */
-    // @Override
-    public void createProfileAggregate(ICellCollection collection) {
-
+    public void createProfileAggregate(@NonNull ICellCollection collection) {
         createProfileAggregate(collection, collection.getMedianArrayLength());
-
     }
 
     @Override
-    public void createAndRestoreProfileAggregate(ICellCollection collection) {
+    public void createAndRestoreProfileAggregate(@NonNull ICellCollection collection) {
 
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());

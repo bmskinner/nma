@@ -34,6 +34,7 @@ import javax.swing.SpinnerNumberModel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
@@ -47,6 +48,8 @@ import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
+
+import ij.io.DirectoryChooser;
 
 /**
  * Handle cosmetic changes in datasets. Generates the dialogs
@@ -174,6 +177,27 @@ public class CosmeticHandler implements Loggable {
     	} catch(RequestCancelledException e) {
     		return;
     	}
+    }
+
+    /**
+     * Update the source image folder for the given signal group
+     * @param d
+     * @param signalGroup
+     */
+    public void updateSignalSource(@NonNull IAnalysisDataset d, @NonNull UUID signalGroup) {
+
+    	finest("Updating signal source for signal group " + signalGroup);
+
+    	try {
+    		File folder = parent.getInputSupplier().requestFolder();
+
+    		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
+    		finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
+
+    	} catch (RequestCancelledException e) {
+    		return;
+    	}           
+
     }
 }
 

@@ -383,17 +383,23 @@ public abstract class AbstractHashDetectionOptions extends AbstractHashOptions i
 
         if (isNormaliseContrast() != other.isNormaliseContrast())
             return false;
+        
+        if(hasCannyOptions()!=other.hasCannyOptions())
+    		return false;
 
-        try {
-            if (!getCannyOptions().equals(other.getCannyOptions())) {
-                finer("Inequality in canny options");
-                finer("This Canny options class is: "+getCannyOptions().getClass().getName());
-                finer("The compared Canny options class is: "+other.getCannyOptions().getClass().getName());
-                return false;
-            }
-        } catch (MissingOptionException e) {
-            error("Canny options missing in comparison", e);
-            return false;
+        if(hasCannyOptions()) {
+        	try {
+
+        		if (!getCannyOptions().equals(other.getCannyOptions())) {
+        			finer("Inequality in canny options");
+        			finer("This Canny options class is: "+getCannyOptions().getClass().getName());
+        			finer("The compared Canny options class is: "+other.getCannyOptions().getClass().getName());
+        			return false;
+        		}
+        	} catch (MissingOptionException e) {
+        		warn("Canny options missing in comparison");
+        		return false;
+        	}
         }
 
         return true;

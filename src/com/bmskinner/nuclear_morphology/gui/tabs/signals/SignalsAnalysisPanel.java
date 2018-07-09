@@ -76,10 +76,15 @@ public class SignalsAnalysisPanel extends DetailPanel {
 
                     String rowName = table.getModel().getValueAt(row, 0).toString();
 
-                    if (rowName.equals("Source")) {
+                    if (rowName.equals(Labels.Signals.SIGNAL_SOURCE_LABEL)) {
 
                         SignalTableCell signalGroup = getSignalGroupFromTable(table, row - 2, column);
-                        updateSignalSource(signalGroup);
+                        cosmeticHandler.updateSignalSource(d, signalGroup.getID());
+                        SignalTableCell newValue = new SignalTableCell(signalGroup.getID(), 
+                        		d.getCollection().getSignalGroup(signalGroup.getID()).get().getFolder().toString(), 
+                        		signalGroup.getColor());
+                        table.getModel().setValueAt(newValue, row, column);
+                        table.repaint();
                     }
 
                     if (rowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
@@ -108,35 +113,36 @@ public class SignalsAnalysisPanel extends DetailPanel {
         return (SignalTableCell) table.getModel().getValueAt(row, column);
     }
 
-    private void updateSignalSource(SignalTableCell signalGroup) {
-        if (isSingleDataset()) {
-            finest("Updating signal source for signal group " + signalGroup);
-
-            DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
-            String folderName = openDialog.getDirectory();
-
-            if (folderName == null) {
-                finest("Folder name null");
-                return;
-            }
-
-            File folder = new File(folderName);
-
-            if (!folder.isDirectory()) {
-                finest("Folder is not directory");
-                return;
-            }
-            if (!folder.exists()) {
-                finest("Folder does not exist");
-                return;
-            }
-
-            activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
-            // SignalsDetailPanel.this.update(getDatasets());
-            refreshTableCache();
-            finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
-        }
-    }
+//    private void updateSignalSource(SignalTableCell signalGroup) {
+//        if (isSingleDataset()) {
+//            finest("Updating signal source for signal group " + signalGroup);
+//
+//            DirectoryChooser openDialog = new DirectoryChooser("Select directory of signal images...");
+//            String folderName = openDialog.getDirectory();
+//
+//            if (folderName == null) {
+//                finest("Folder name null");
+//                return;
+//            }
+//
+//            File folder = new File(folderName);
+//
+//            if (!folder.isDirectory()) {
+//                finest("Folder is not directory");
+//                return;
+//            }
+//            if (!folder.exists()) {
+//                finest("Folder does not exist");
+//                return;
+//            }
+//
+//            activeDataset().getCollection().getSignalManager().updateSignalSourceFolder(signalGroup.getID(), folder);
+//            // SignalsDetailPanel.this.update(getDatasets());
+//            refreshTableCache();
+//            finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
+//            table.repaint();
+//        }
+//    }
 
     @Override
     protected void updateSingle() {

@@ -93,13 +93,11 @@ public class DefaultBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Segment start and end indexes cannot be above total length");
 
         // ensure that the segment meets minimum length requirements
-        if (!IBorderSegment.isLongEnough(startIndex, endIndex, total)) {
-            throw new IllegalArgumentException("Cannot create segment from " + startIndex + " to " + endIndex
-                    + ": shorter than " + MINIMUM_SEGMENT_LENGTH);
-        }
+        if (!IBorderSegment.isLongEnough(startIndex, endIndex, total))
+            throw new IllegalArgumentException(String.format("Cannot create segment %s - %s: shorter than %s", startIndex, endIndex, MINIMUM_SEGMENT_LENGTH));
         
         if (!IBorderSegment.isShortEnough(startIndex, endIndex, total))
-            throw new IllegalArgumentException("Segment is too long for the profile");
+            throw new IllegalArgumentException(String.format("Segment is too long for the profile: %s - %s of %s", startIndex, endIndex, total));
         
         if(IBorderSegment.calculateSegmentLength(startIndex, endIndex, total)==total)
             throw new IllegalArgumentException("Segment cannot occupy entire profile");

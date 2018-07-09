@@ -49,6 +49,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
 
     /**
      * The smallest number of indexes in a segment. 
+     * Setting greater than 1 to allow space for interpolation
      */
     static final int    MINIMUM_SEGMENT_LENGTH       = 3;
     /**

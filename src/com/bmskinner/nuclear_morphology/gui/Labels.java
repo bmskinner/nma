@@ -96,6 +96,8 @@ public class Labels {
     	public static final String AVERAGE_POSITION        = "Average shell";
     	public static final String NO_SIGNAL_GROUPS        = "No signal groups in datasets";
     	public static final String CHOOSE_SIGNAL_COLOUR    = "Choose signal color";
+    	public static final String SIGNAL_SOURCE_LABEL     = "Source (double click to change)";
+    	public static final String SIGNAL_CHANNEL_LABEL    = "Channel";
     	
         /*
          * signal detection

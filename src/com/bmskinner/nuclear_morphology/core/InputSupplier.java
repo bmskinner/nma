@@ -79,6 +79,20 @@ public interface InputSupplier {
 	File requestFile() throws RequestCancelledException;
 	
 	/**
+	 * Request a folder input.
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFolder() throws RequestCancelledException;
+	
+	/**
+	 * Request a folder input.
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFolder(@Nullable File defaultFolder) throws RequestCancelledException;
+	
+	/**
 	 * Request a file input.
 	 * @param defaultFolder the default folder
 	 * @return

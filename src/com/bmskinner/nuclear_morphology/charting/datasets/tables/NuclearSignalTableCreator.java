@@ -73,28 +73,27 @@ public class NuclearSignalTableCreator extends AbstractTableCreator {
      */
     public TableModel createSignalDetectionParametersTable() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return createBlankTable();
-        }
 
         List<IAnalysisDataset> list = options.getDatasets();
         DefaultTableModel model = new DefaultTableModel();
 
-        List<Object> fieldNames = new ArrayList<Object>(0);
+        
 
         // find the collection with the most channels
         // this defines the number of rows
         int maxChannels = list.stream().mapToInt(d -> d.getCollection().getSignalManager().getSignalGroupCount()).max()
                 .orElse(0);
 
-        if (maxChannels == 0) {
+        if (maxChannels == 0)
             return createBlankTable();
-        }
 
-        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, "Channel", "Source", "Threshold", "Min size",
+        Object[] rowNameBlock = { "", Labels.Signals.SIGNAL_GROUP_LABEL, Labels.Signals.SIGNAL_CHANNEL_LABEL, Labels.Signals.SIGNAL_SOURCE_LABEL, "Threshold", "Min size",
                 "Max fraction", "Min circ", "Max circ", "Detection mode" };
 
         // create the row names
+        List<Object> fieldNames = new ArrayList<Object>(0);
         fieldNames.add(Labels.Signals.NUMBER_OF_SIGNAL_GROUPS);
 
         for (int i = 0; i < maxChannels; i++) {

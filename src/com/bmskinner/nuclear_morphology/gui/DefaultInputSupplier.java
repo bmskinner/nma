@@ -102,6 +102,19 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
 		return f;
 	}
+
+	@Override
+	public File requestFolder() throws RequestCancelledException {
+		return requestFolder(null);
+	}
+
+	@Override
+	public File requestFolder(@Nullable File defaultFolder) throws RequestCancelledException {
+		File f = FileSelector.chooseFolder(defaultFolder);
+		if(f==null)
+			throw new RequestCancelledException();
+		return f;
+	}
 	
 	
 	

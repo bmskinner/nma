@@ -66,4 +66,14 @@ public abstract class ConsistentRowTableCellRenderer extends javax.swing.table.D
         }
         return ok;
     }
+    
+    /**
+     * Get the text representation of the value in the first column of the row
+     * @param row
+     * @param table
+     * @return
+     */
+    protected String getFirstColumnText(int row, JTable table) {
+    	return table.getValueAt(row, 0).toString();    	
+    }
 }
