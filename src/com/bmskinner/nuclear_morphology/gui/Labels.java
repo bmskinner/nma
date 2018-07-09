@@ -28,6 +28,7 @@ public class Labels {
 	
     public static final String DATASET     = "Dataset";
     public static final String NA          = "N/A";
+    public static final String NA_MERGE = "N/A - merge";
     public static final String NUCLEI      = "nuclei";
 
     public static final String REQUIRES_CONSENSUS_LBL = "Requires consensus nucleus";
@@ -180,4 +181,27 @@ public class Labels {
     }
     
 
+    public static class Cells {
+    	public static final String SOURCE_FILE_LABEL = "Source image file";
+    	public static final String SOURCE_FILE_NAME_LABEL = "Source image name";
+    	public static final String SOURCE_CHANNEL_LABEL = "Source channel";
+    	public static final String ANGLE_WINDOW_PROP_LABEL = "Angle window prop.";
+    	public static final String ANGLE_WINDOW_SIZE_LABEL = "Angle window size";
+    	public static final String SCALE_LABEL = "Scale (pixels/um)";
+    	
+    	public static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
+    	
+    }
+    
+    public static class AnalysisParameters {
+    	public static final String COLLECTION_SOURCE = "Collection source";
+    	
+    }
+    
+    public static class Merges {
+    	public static final String NO_MERGE_SOURCES = "No merge sources";
+    	public static final String MERGE_SOURCE = "Merge sources";
+    	
+    	
+    }
 }

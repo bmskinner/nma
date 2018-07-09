@@ -20,36 +20,26 @@
 package com.bmskinner.nuclear_morphology.gui.tabs;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Paint;
 import java.io.File;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import javax.swing.JColorChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 
-import com.bmskinner.nuclear_morphology.charting.datasets.SignalTableCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
-import com.bmskinner.nuclear_morphology.components.nuclear.UnavailableSignalGroupException;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
 import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent;
 import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.Labels;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-
-import ij.io.DirectoryChooser;
 
 /**
  * Handle cosmetic changes in datasets. Generates the dialogs
@@ -64,6 +54,40 @@ public class CosmeticHandler implements Loggable {
     
     public CosmeticHandler(@NonNull TabPanel p){
         parent = p;
+    }
+    
+    /**
+     * Choose a new scale for the dataset and apply it to all cells
+     * 
+     * @param dataset
+     * @param row
+     */
+    public void changeDatasetScale(@NonNull IAnalysisDataset dataset) {
+    	
+    	try {
+    		double initialScale = 1;
+    		Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+    		if(op.isPresent()){
+    			Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+    			if(nOp.isPresent())
+    				initialScale = nOp.get().getScale();
+    		}
+    		
+			double scale = parent.getInputSupplier().requestDouble(Labels.Cells.CHOOSE_NEW_SCALE_LBL, initialScale, 1, 100000, 1);
+			
+			if(scale<=0) // don't allow a scale to cause divide by zero errors
+				return;
+
+			dataset.getCollection().setScale(scale);
+
+			if(op.isPresent()){
+				Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+				if(nOp.isPresent())
+					nOp.get().setScale(scale);
+			}
+		} catch (RequestCancelledException e) {
+			return;
+		}
     }
     
     /**

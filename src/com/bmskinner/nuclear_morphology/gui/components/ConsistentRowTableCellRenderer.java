@@ -21,11 +21,12 @@ package com.bmskinner.nuclear_morphology.gui.components;
 import java.awt.Color;
 
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 @SuppressWarnings("serial")
-public abstract class ConsistentRowTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer
+public abstract class ConsistentRowTableCellRenderer extends DefaultTableCellRenderer
         implements Loggable {
 
     public static final Color CONSISTENT_CELL_COLOUR = new Color(178, 255, 102);

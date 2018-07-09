@@ -28,12 +28,12 @@ public class DefaultInputSupplier implements InputSupplier {
 
 
 	@Override
-	public String requestString(String message) throws RequestCancelledException {
+	public String requestString(@NonNull String message) throws RequestCancelledException {
 		return requestString(message, null);
 	}
 	
 	@Override
-	public String requestString(String message, String existingValue) throws RequestCancelledException {
+	public String requestString(@NonNull String message, @Nullable String existingValue) throws RequestCancelledException {
 		Object s = JOptionPane.showInputDialog(null, message, message,
                 JOptionPane.INFORMATION_MESSAGE, null, null, existingValue);
 		
@@ -43,7 +43,7 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public double requestDouble(String message, double start, double min, double max, double step) throws RequestCancelledException {
+	public double requestDouble(@NonNull String message, double start, double min, double max, double step) throws RequestCancelledException {
 
 		SpinnerNumberModel sModel = new SpinnerNumberModel(start, 
 				min, max, step);
@@ -61,19 +61,19 @@ public class DefaultInputSupplier implements InputSupplier {
 	}
 
 	@Override
-	public int requestInt(String messsage) throws RequestCancelledException {
+	public int requestInt(@NonNull String messsage) throws RequestCancelledException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public double requestDouble(String message) throws RequestCancelledException {
+	public double requestDouble(@NonNull String message) throws RequestCancelledException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public Color requestColor(String message, @Nullable Color oldColor) throws RequestCancelledException {
+	public Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException {
 		Color newColor = JColorChooser.showDialog(null, message, oldColor);
 		if(newColor==null)
 			throw new RequestCancelledException();

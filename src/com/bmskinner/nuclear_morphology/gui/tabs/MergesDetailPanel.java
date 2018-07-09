@@ -223,8 +223,10 @@ public class MergesDetailPanel extends DetailPanel {
         List<IAnalysisDataset> mergeSources = new ArrayList<IAnalysisDataset>(activeDataset().getAllMergeSources());
 
         TableOptions options = new TableOptionsBuilder().setDatasets(mergeSources)
-                .setType(TableType.ANALYSIS_PARAMETERS).setTarget(sourceParametersTable)
-                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer()).build();
+                .setType(TableType.ANALYSIS_PARAMETERS)
+                .setTarget(sourceParametersTable)
+                .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new AnalysisTableCellRenderer())
+                .build();
 
         setTable(options);
 
@@ -241,7 +243,9 @@ public class MergesDetailPanel extends DetailPanel {
         headerLabel.setText(Labels.NULL_DATASETS);
         sourceButtonPanel.setVisible(false);
 
-        TableOptions options = new TableOptionsBuilder().setDatasets(null).setType(TableType.ANALYSIS_PARAMETERS)
+        TableOptions options = new TableOptionsBuilder()
+        		.setDatasets(null)
+        		.setType(TableType.ANALYSIS_PARAMETERS)
                 .setTarget(sourceParametersTable).build();
 
         setTable(options);

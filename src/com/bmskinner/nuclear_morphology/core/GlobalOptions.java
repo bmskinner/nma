@@ -110,7 +110,7 @@ public class GlobalOptions extends AbstractHashOptions {
         this.defaultType = NucleusType.RODENT_SPERM;
         setBoolean(REFOLD_OVERRIDE_KEY, false);
         setBoolean(IS_CONVERT_DATASETS_KEY, true);
-        setBoolean(IS_DOCKABLE_INTERFACE_KEY, false);
+        setBoolean(IS_DOCKABLE_INTERFACE_KEY, true);
     }
 
     public NucleusType getDefaultType() {

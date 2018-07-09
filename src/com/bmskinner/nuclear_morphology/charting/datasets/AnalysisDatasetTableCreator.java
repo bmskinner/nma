@@ -74,14 +74,11 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
-    private static final String NA_MERGE = "N/A - merge";
-    private static final String NA       = "N/A";
-
     private static final Object[] ANALYSIS_PARAMETERS_ROWS = { "Profile window", "Nucleus detection method",
             "Nucleus threshold", "Kuwahara filter radius", "Chromocentre flattening threshold", "Canny auto threshold",
             "Canny low threshold", "Canny high threshold", "Canny kernel radius", "Canny kernel width",
             "Closing radius", "Nucleus min size", "Nucleus max size", "Nucleus min circ", "Nucleus max circ",
-            "Run date", "Run time", "Collection source", "Type",
+            "Run date", "Run time", Labels.AnalysisParameters.COLLECTION_SOURCE, "Type",
             "Created in" };
 
     /**
@@ -116,10 +113,10 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             Vector<Object> names = new Vector<Object>();
             Vector<Object> nuclei = new Vector<Object>();
 
-            names.add("No merge sources");
+            names.add(Labels.Merges.NO_MERGE_SOURCES);
             nuclei.add(EMPTY_STRING);
 
-            model.addColumn("Merge source", names);
+            model.addColumn(Labels.Merges.MERGE_SOURCE, names);
             model.addColumn("Nuclei", nuclei);
             return model;
         }
@@ -402,7 +399,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                 	
             } else {
                 // Merge sources have different options
-                Arrays.fill(data, NA_MERGE);
+                Arrays.fill(data, Labels.NA_MERGE);
             }
         } else {
         	// if this is a child of merged datasets, get the root.
@@ -414,7 +411,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         		}
         		
         	} else {
-        		Arrays.fill(data, NA); // there are no options to use; fill blank
+        		Arrays.fill(data, Labels.NA); // there are no options to use; fill blank
         	}
         }
         return data;
@@ -449,14 +446,14 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         	fine("No nucleus options in dataset "+dataset.getName());
         
         if (dataset.hasMergeSources()) {
-            date = NA_MERGE;
-            time = NA_MERGE;
-            folder = NA_MERGE;
+            date = Labels.NA_MERGE;
+            time = Labels.NA_MERGE;
+            folder = Labels.NA_MERGE;
 
         } else {
             if (dataset.getCollection().getOutputFolderName() == null) {
-                date = NA;
-                time = NA;
+                date = Labels.NA;
+                time = Labels.NA;
             } else {
                 String[] times = dataset.getCollection().getOutputFolderName().split("_");
                 date = times[0];
@@ -481,30 +478,30 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
         String detectionMethod = nucleusCannyOptions.isUseCanny() ? "Canny edge detection" : "Thresholding";
 
-        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? NA : String.valueOf(nO.get().getThreshold());
+        String nucleusThreshold = nucleusCannyOptions.isUseCanny() ? Labels.NA : String.valueOf(nO.get().getThreshold());
 
         String kuwaharaRadius = nucleusCannyOptions.isUseKuwahara()
-                ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKuwaharaKernel()) : Labels.NA;
 
         String chromocentreThreshold = nucleusCannyOptions.isUseFlattenImage()
-                ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getFlattenThreshold()) : Labels.NA;
                 
         if(nucleusCannyOptions.isUseCanny()) {
         	
         }
 
         String cannyAutoThreshold = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : NA;
+                ? String.valueOf(nucleusCannyOptions.isCannyAutoThreshold()) : Labels.NA;
         String cannyLowThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
                 ? String.valueOf(nucleusCannyOptions.getLowThreshold()) : Labels.NA;
         String cannyHighThreshold = nucleusCannyOptions.isUseCanny() && !nucleusCannyOptions.isCannyAutoThreshold()
                 ? String.valueOf(nucleusCannyOptions.getHighThreshold()) : Labels.NA;
         String cannyKernelRadius = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKernelRadius()) : Labels.NA;
         String cannyKernelWidth = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getKernelWidth()) : Labels.NA;
         String cannyClosingRadius = nucleusCannyOptions.isUseCanny()
-                ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : NA;
+                ? String.valueOf(nucleusCannyOptions.getClosingObjectRadius()) : Labels.NA;
 
         DecimalFormat df = new DecimalFormat(DEFAULT_DECIMAL_FORMAT);
         collectionData = new Object[] { 

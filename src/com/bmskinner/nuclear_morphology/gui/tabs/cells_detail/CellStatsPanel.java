@@ -20,19 +20,16 @@ package com.bmskinner.nuclear_morphology.gui.tabs.cells_detail;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.File;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableModel;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -43,12 +40,11 @@ import com.bmskinner.nuclear_morphology.charting.datasets.tables.AbstractTableCr
 import com.bmskinner.nuclear_morphology.charting.datasets.tables.CellTableDatasetCreator;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptionsBuilder;
-import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.Labels;
+import com.bmskinner.nuclear_morphology.gui.components.ConsistentRowTableCellRenderer;
 import com.bmskinner.nuclear_morphology.gui.components.ExportableTable;
 import com.bmskinner.nuclear_morphology.gui.dialogs.CellImageDialog;
 import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
@@ -67,11 +63,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
     
     private CosmeticHandler ch = new CosmeticHandler(this);
 
-    private static final String APPLY_SCALE_ALL_MESSAGE   = "Apply this scale to all cells in the dataset?";
-    private static final String APPLY_SCALE_ALL_HEADER    = "Apply to all?";
-    private static final String APPLY_SCALE_ALL_CELLS_LBL = "Apply to all cells";
-    private static final String APPLY_SCALE_ONE_CELLS_LBL = "Apply to only this cell";
-    private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
+//    private static final String APPLY_SCALE_ALL_MESSAGE   = "Apply this scale to all cells in the dataset?";
+//    private static final String APPLY_SCALE_ALL_HEADER    = "Apply to all?";
+//    private static final String APPLY_SCALE_ALL_CELLS_LBL = "Apply to all cells";
+//    private static final String APPLY_SCALE_ONE_CELLS_LBL = "Apply to only this cell";
+//    private static final String CHOOSE_NEW_SCALE_LBL      = "Choose the new scale: pixels per micron";
 
     public CellStatsPanel(@NonNull InputSupplier context, CellViewModel model) {
         super(context, model, PANEL_TITLE_LBL);
@@ -101,9 +97,7 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
                         if (nextRowName.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
 
                             SignalTableCell cell = (SignalTableCell) table.getModel().getValueAt(row + 1, 1);
-
-                            changeSignalGroupColour(cell);
-
+                            ch.changeSignalColour(activeDataset(), cell.getID());
                         }
                     }
                 }
@@ -150,57 +144,55 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         new CellImageDialog(this.getCellModel().getCell());
     }
 
-    private void changeSignalGroupColour(SignalTableCell signalGroup) {
-
-        UUID id = signalGroup.getID();
-        ch.changeSignalColour(activeDataset(), id);
-    }
-
     private void updateScale() {
-        SpinnerNumberModel sModel = new SpinnerNumberModel(getCellModel().getCell().getNucleus().getScale(), 
-                1, 100000, 1);
+//        SpinnerNumberModel sModel = new SpinnerNumberModel(getCellModel().getCell().getNucleus().getScale(), 
+//                1, 100000, 1);
+//        
+//        JSpinner spinner = new JSpinner(sModel);
+//
+//        int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, JOptionPane.OK_CANCEL_OPTION,
+//                JOptionPane.QUESTION_MESSAGE, null, null, null);
+//        if (option == JOptionPane.OK_OPTION) {
+//
+//            Object[] options = { APPLY_SCALE_ALL_CELLS_LBL, APPLY_SCALE_ONE_CELLS_LBL, };
+//            int applyAllOption = JOptionPane.showOptionDialog(null, APPLY_SCALE_ALL_MESSAGE, APPLY_SCALE_ALL_HEADER,
+//
+//                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+//
+//                    null, options, options[1]);
+//
+//            double scale = (double) spinner.getModel().getValue();
+//
+//            if (scale > 0) { // don't allow a scale to cause divide by zero errors
+//
+//                if (applyAllOption == 0) { // button at index 1
+//
+//                	activeDataset().getCollection().setScale(scale);
+//                	Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
+//                	if(op.isPresent()){
+//                		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+//                		if(nOp.isPresent())
+//                			nOp.get().setScale(scale);
+//                	}
+//
+//
+//                } else {
+//                    finest("Updating scale for single cell");
+//                    this.getCellModel().getCell().getNuclei().stream().forEach( n-> {  n.setScale(scale);  } );
+//
+//                }
+//                finest("Refreshing cache");
+//                this.refreshTableCache();
+//                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
+//
+//            } else {
+//                warn("Cannot set a scale to zero");
+//            }
+//        }
         
-        JSpinner spinner = new JSpinner(sModel);
-
-        int option = JOptionPane.showOptionDialog(null, spinner, CHOOSE_NEW_SCALE_LBL, JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.QUESTION_MESSAGE, null, null, null);
-        if (option == JOptionPane.OK_OPTION) {
-
-            Object[] options = { APPLY_SCALE_ALL_CELLS_LBL, APPLY_SCALE_ONE_CELLS_LBL, };
-            int applyAllOption = JOptionPane.showOptionDialog(null, APPLY_SCALE_ALL_MESSAGE, APPLY_SCALE_ALL_HEADER,
-
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
-
-                    null, options, options[1]);
-
-            double scale = (double) spinner.getModel().getValue();
-
-            if (scale > 0) { // don't allow a scale to cause divide by zero errors
-
-                if (applyAllOption == 0) { // button at index 1
-
-                	activeDataset().getCollection().setScale(scale);
-                	Optional<IAnalysisOptions> op = activeDataset().getAnalysisOptions();
-                	if(op.isPresent()){
-                		Optional<IDetectionOptions> nOp = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
-                		if(nOp.isPresent())
-                			nOp.get().setScale(scale);
-                	}
-
-
-                } else {
-                    finest("Updating scale for single cell");
-                    this.getCellModel().getCell().getNuclei().stream().forEach( n-> {  n.setScale(scale);  } );
-
-                }
-                finest("Refreshing cache");
-                this.refreshTableCache();
-                this.getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
-
-            } else {
-                warn("Cannot set a scale to zero");
-            }
-        }
+    	ch.changeDatasetScale(activeDataset());
+        refreshTableCache();
+        getDatasetEventHandler().fireDatasetEvent(DatasetEvent.REFRESH_CACHE, getDatasets());
     }
 
     @Override
@@ -211,7 +203,8 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         this.update();
     }
 
-    public synchronized void update() {
+    @Override
+	public synchronized void update() {
 
         if (this.isMultipleDatasets() || !this.hasDatasets()) {
             table.setModel(AbstractTableCreator.createBlankTable());
@@ -219,8 +212,11 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
         }
 
         TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets())
-                .setCell(this.getCellModel().getCell()).setScale(GlobalOptions.getInstance().getScale())
-                .setTarget(table).setRenderer(TableOptions.FIRST_COLUMN, new StatsTableCellRenderer()).build();
+                .setCell(this.getCellModel().getCell())
+                .setScale(GlobalOptions.getInstance().getScale())
+                .setTarget(table)
+                .setRenderer(TableOptions.ALL_COLUMNS, new StatsTableCellRenderer())
+                .build();
 
         try {
 
@@ -256,12 +252,9 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
 
     @Override
     protected TableModel createPanelTableType(TableOptions options) {
-
-        if (getCellModel().hasCell()) {
+        if (getCellModel().hasCell())
             return new CellTableDatasetCreator(options, getCellModel().getCell()).createCellInfoTable();
-        } else {
-            return AbstractTableCreator.createBlankTable();
-        }
+        return AbstractTableCreator.createBlankTable();
     }
 
     /**
@@ -269,38 +262,44 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
      * Used to colour the signal stats list
      *
      */
-    private class StatsTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+    private class StatsTableCellRenderer extends ConsistentRowTableCellRenderer {
 
         private static final long serialVersionUID = 1L;
 
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+        @Override
+		public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
+        	
+        	Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            // default cell colour is white
-            Color colour = Color.WHITE;
-
-            // get the value in the first column of the row below
-            if (row < table.getModel().getRowCount() - 1) {
+            Color bg = Color.WHITE;
+            Color fg = Color.BLACK;
+            
+            // Highlight missing images
+            String header = getFirstColumnText(row, table);
+            if(header.equals(Labels.Cells.SOURCE_FILE_LABEL) && column>0) {
+            	File f = new File(header);
+            	if(!f.exists())
+            		fg = Color.RED;
+            }
+            
+            // Colour signal groups
+            if (row < table.getModel().getRowCount() - 1 && column==0) {
 
                 int nextRow = row + 1;
-                String nextRowHeader = table.getModel().getValueAt(nextRow, 0).toString();
+                String nextRowHeader = getFirstColumnText(nextRow, table);
 
-                if (nextRowHeader.equals("Signal group")) {
-                    // we want to colour this cell preemptively
-                    // get the signal group from the table
-
+                if (nextRowHeader.equals(Labels.Signals.SIGNAL_GROUP_LABEL)) {
+                    // colour this cell preemptively based on the signal group in the next row
                     SignalTableCell tableCell = (SignalTableCell) table.getModel().getValueAt(nextRow, 1);
-
-                    colour = tableCell.getColor();
-
+                    bg = tableCell.getColor();
                 }
             }
             // Cells are by default rendered as a JLabel.
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            setBackground(colour);
-
-            // Return the JLabel which renders the cell.
-            return this;
+            
+            c.setBackground(bg);
+            c.setForeground(fg);
+            return c;
         }
     }
 

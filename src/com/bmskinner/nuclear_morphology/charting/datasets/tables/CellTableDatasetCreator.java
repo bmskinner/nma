@@ -261,22 +261,22 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
 
     private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) {
 
-        fieldNames.add("Source image file");
+        fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
         rowData.add(n.getPathAndNumber());
 
-        fieldNames.add("Source image name");
+        fieldNames.add(Labels.Cells.SOURCE_FILE_NAME_LABEL);
         rowData.add(n.getSourceFileName());
 
-        fieldNames.add("Source channel");
+        fieldNames.add(Labels.Cells.SOURCE_CHANNEL_LABEL);
         rowData.add(n.getChannel());
 
-        fieldNames.add("Angle window prop.");
+        fieldNames.add(Labels.Cells.ANGLE_WINDOW_PROP_LABEL);
         rowData.add(n.getWindowProportion(ProfileType.ANGLE));
 
-        fieldNames.add("Angle window size");
+        fieldNames.add(Labels.Cells.ANGLE_WINDOW_SIZE_LABEL);
         rowData.add(n.getWindowSize(ProfileType.ANGLE));
 
-        fieldNames.add("Scale (pixels/um)");
+        fieldNames.add(Labels.Cells.SCALE_LABEL);
         rowData.add(n.getScale());
 
         addNuclearStatisticsToTable(fieldNames, rowData, n);
