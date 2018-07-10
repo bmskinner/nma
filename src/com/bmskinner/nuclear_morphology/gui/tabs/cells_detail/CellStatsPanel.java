@@ -278,9 +278,10 @@ public class CellStatsPanel extends AbstractCellDetailPanel {
             // Highlight missing images
             String header = getFirstColumnText(row, table);
             if(header.equals(Labels.Cells.SOURCE_FILE_LABEL) && column>0) {
-            	File f = new File(header);
-            	if(!f.exists())
+            	File f = new File(value.toString());
+            	if(!f.exists()) {
             		fg = Color.RED;
+            	}
             }
             
             // Colour signal groups

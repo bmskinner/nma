@@ -262,7 +262,7 @@ public class CellTableDatasetCreator extends AbstractCellDatasetCreator {
     private void addNuclearDataToTable(List<Object> fieldNames, List<Object> rowData, Nucleus n, IAnalysisDataset d) {
 
         fieldNames.add(Labels.Cells.SOURCE_FILE_LABEL);
-        rowData.add(n.getPathAndNumber());
+        rowData.add(n.getSourceFile());
 
         fieldNames.add(Labels.Cells.SOURCE_FILE_NAME_LABEL);
         rowData.add(n.getSourceFileName());

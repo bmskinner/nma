@@ -23,6 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableModel;
@@ -42,12 +43,6 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
 
     private JTabbedPane tabPane;
 
-//    private static final String CELL_INFO_LBL     = "Info";
-//    private static final String CELL_SEGS_LBL     = "Segments";
-//    private static final String CELL_TAGS_LBL     = "Tags";
-//    private static final String CELL_OUTLINE_LBL  = "Outline";
-//    private static final String CELL_SIGNALS_LBL  = "Signals";
-//    private static final String CELL_SEGTABLE_LBL = "Segtable";
     private static final String PANEL_TITLE_LBL = "Cells";
 
     protected CellsListPanel       cellsListPanel;       // the list of cells in
@@ -86,9 +81,7 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
             createSubPanels(context);
 
             this.setLayout(new BorderLayout());
-
-            this.add(createCellandSignalListPanels(context), BorderLayout.WEST);
-
+            JPanel westPanel = createCellandSignalListPanels(context);
             this.addSubPanel(cellStatsPanel);
             this.addSubPanel(segmentProfilePanel);
             this.addSubPanel(cellBorderTagPanel);
@@ -97,16 +90,19 @@ public class IndividualCellDetailPanel extends DetailPanel implements SignalChan
             this.addSubPanel(signalListPanel);
             this.addSubPanel(cellsignalStatsPanel);
 
+            
             tabPane = new JTabbedPane(JTabbedPane.LEFT);
-            this.add(tabPane, BorderLayout.CENTER);
-
             tabPane.add(cellStatsPanel.getPanelTitle(), cellStatsPanel);
             tabPane.add(segmentProfilePanel.getPanelTitle(), segmentProfilePanel);
             tabPane.add(cellBorderTagPanel.getPanelTitle(), cellBorderTagPanel);
             tabPane.add(outlinePanel.getPanelTitle(), outlinePanel);
             tabPane.add(cellsignalStatsPanel.getPanelTitle(), cellsignalStatsPanel);
+            
+            JSplitPane sp = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+            sp.setLeftComponent(westPanel);
+            sp.setRightComponent(tabPane);
+            add(sp, BorderLayout.CENTER);
 
-            this.validate();
         } catch (Exception e) {
             warn("Error creating cell detail panel");
             stack("Error creating cell detail panel", e);

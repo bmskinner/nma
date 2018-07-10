@@ -48,7 +48,7 @@ public class AnalysisTableCellRenderer extends ConsistentRowTableCellRenderer {
         String header = getFirstColumnText(row, table);
         if(header.equals(Labels.AnalysisParameters.COLLECTION_SOURCE) && column>0) {
         	if(!header.equals(Labels.NA_MERGE)) {
-        		File f = new File(header);
+        		File f = new File(value.toString());
         		if(!f.exists())
         			fg = Color.RED;
         	}
