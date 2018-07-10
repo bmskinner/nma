@@ -19,31 +19,34 @@
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.JLabel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 /**
  * Colour a table cell grey if it is null or empty. Use for diagonals in
  * pairwise tables
  */
-public class PairwiseTableCellRenderer extends javax.swing.table.DefaultTableCellRenderer {
+public class PairwiseTableCellRenderer extends DefaultTableCellRenderer {
 
     private static final long serialVersionUID = 1L;
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+    @Override
+    public Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         // Cells are by default rendered as a JLabel.
-        JLabel l = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+    	Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        String cellContents = l.getText();
+        String cellContents = value.toString();
         if (cellContents == null || cellContents.equals("")) {
-            l.setBackground(Color.LIGHT_GRAY);
+            c.setBackground(Color.LIGHT_GRAY);
         } else {
-            l.setBackground(Color.WHITE);
+            c.setBackground(Color.WHITE);
         }
 
         // Return the JLabel which renders the cell.
-        return l;
+        return c;
     }
 }

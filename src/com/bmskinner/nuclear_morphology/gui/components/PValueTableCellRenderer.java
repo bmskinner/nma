@@ -19,9 +19,11 @@
 package com.bmskinner.nuclear_morphology.gui.components;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
@@ -29,13 +31,14 @@ import com.bmskinner.nuclear_morphology.stats.SignificanceTest;
 @SuppressWarnings("serial")
 public class PValueTableCellRenderer extends DefaultTableCellRenderer {
 
-    public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, java.lang.Object value,
+	@Override
+    public Component getTableCellRendererComponent(JTable table, Object value,
             boolean isSelected, boolean hasFocus, int row, int column) {
 
         // Cells are by default rendered as a JLabel.
-        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        Color colour = Color.WHITE;
+        Color bg = Color.WHITE;
 
         NumberFormat nf = NumberFormat.getInstance();
         double pvalue = 1;
@@ -44,19 +47,19 @@ public class PValueTableCellRenderer extends DefaultTableCellRenderer {
             pvalue = nf.parse(value.toString()).doubleValue();
 
             if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
-                colour = Color.YELLOW;
+            	bg = Color.YELLOW;
             }
 
             if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL) {
-                colour = Color.GREEN;
+            	bg = Color.GREEN;
             }
         } catch (ParseException e) {
-            colour = Color.WHITE;
+        	bg = Color.WHITE;
         }
 
-        setBackground(colour);
+        c.setBackground(bg);
 
-        return this;
+        return c;
     }
 
 }

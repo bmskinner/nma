@@ -18,6 +18,11 @@
 
 package com.bmskinner.nuclear_morphology.stats;
 
+/**
+ * This interface holds values for significance testing, but no methods
+ * @author bms41
+ *
+ */
 public interface SignificanceTest {
 
     public static final double TEN_PERCENT_SIGNIFICANCE_LEVEL  = 0.1;
