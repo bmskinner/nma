@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -130,42 +132,30 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      */
     @Override
     public boolean hasSegments() {
-        if (this.segments == null || this.segments.isEmpty()) {
+        if (this.segments == null || this.segments.isEmpty())
             return false;
-        } else {
-            return true;
-        }
+		return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegments()
-     */
+
     @Override
-    public List<IBorderSegment> getSegments() {
-        List<IBorderSegment> result = null;
+    public @NonNull List<IBorderSegment> getSegments() {
         try {
-            result = IBorderSegment.copy(this.segments);
+            return IBorderSegment.copy(this.segments);
         } catch (ProfileException e) {
             error("Error copying segments", e);
         }
-        return result;
+        return new ArrayList<>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#getSegment(java.util.UUID)
-     */
     @Override
-    public IBorderSegment getSegment(UUID id) {
+    public @NonNull IBorderSegment getSegment(@NonNull UUID id) throws UnavailableComponentException {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return seg;
             }
         }
-        return null;
+        throw new UnavailableComponentException("Segment with id "+id.toString()+" is not present");
     }
 
     /*
@@ -174,7 +164,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * @see components.generic.ISegmentedProfile#hasSegment(java.util.UUID)
      */
     @Override
-    public boolean hasSegment(UUID id) {
+    public boolean hasSegment(@NonNull UUID id) {
         for (IBorderSegment seg : this.segments) {
             if (seg.getID().equals(id)) {
                 return true;
@@ -189,7 +179,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
      */
     @Override
-    public List<IBorderSegment> getSegmentsFrom(UUID id) throws Exception {
+    public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception {
         return getSegmentsFrom(getSegment(id));
     }
 
@@ -276,7 +266,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * @see components.generic.ISegmentedProfile#getSegment(java.lang.String)
      */
     @Override
-    public IBorderSegment getSegment(String name) {
+    public IBorderSegment getSegment(@NonNull String name) {
         if (name == null) {
             throw new IllegalArgumentException("Requested segment name is null");
         }
@@ -296,7 +286,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment)
      */
     @Override
-    public IBorderSegment getSegment(IBorderSegment segment) {
+    public IBorderSegment getSegment(@NonNull IBorderSegment segment) {
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Requested segment name is not present");
         }
@@ -350,7 +340,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * @see components.generic.ISegmentedProfile#setSegments(java.util.List)
      */
     @Override
-    public void setSegments(List<IBorderSegment> segments) {
+    public void setSegments(@NonNull List<IBorderSegment> segments) {
         if (segments == null || segments.isEmpty()) {
             throw new IllegalArgumentException("Segment list is null or empty");
         }
@@ -440,7 +430,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment)
      */
     @Override
-    public double getDisplacement(IBorderSegment segment) {
+    public double getDisplacement(@NonNull IBorderSegment segment) {
         if (this.contains(segment)) {
 
             double start = this.get(segment.getStartIndex());
@@ -463,7 +453,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment)
      */
     @Override
-    public boolean contains(IBorderSegment segment) {
+    public boolean contains(@NonNull IBorderSegment segment) {
         if (segment == null) {
             return false;
         }
@@ -486,7 +476,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment, int, int)
      */
     @Override
-    public boolean update(IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
+    public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
@@ -556,17 +546,24 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * int)
      */
     @Override
-    public boolean adjustSegmentStart(UUID id, int amount) throws SegmentUpdateException {
+    public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
         if (!this.getSegmentIDs().contains(id)) {
             throw new IllegalArgumentException("Segment is not part of this profile");
         }
 
         // get the segment within this profile, not a copy
-        IBorderSegment segmentToUpdate = this.getSegment(id);
+		try {
+			IBorderSegment segmentToUpdate = this.getSegment(id);
+		
 
         int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
                 segmentToUpdate.getTotalLength());
         return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
+        
+		} catch (UnavailableComponentException e) {
+			stack("Error adjusting segment start", e);
+			throw new SegmentUpdateException(e);
+		}
     }
 
     /*
@@ -577,18 +574,23 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * int)
      */
     @Override
-    public boolean adjustSegmentEnd(UUID id, int amount) throws SegmentUpdateException {
+    public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
 
-        if (!this.getSegmentIDs().contains(id)) {
-            throw new IllegalArgumentException("Segment is not part of this profile");
-        }
+    	if (!this.getSegmentIDs().contains(id)) {
+    		throw new IllegalArgumentException("Segment is not part of this profile");
+    	}
 
-        // get the segment within this profile, not a copy
-        IBorderSegment segmentToUpdate = this.getSegment(id);
+    	// get the segment within this profile, not a copy
+    	try {
+    		IBorderSegment segmentToUpdate = this.getSegment(id);
 
-        int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-                segmentToUpdate.getTotalLength());
-        return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
+    		int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
+    				segmentToUpdate.getTotalLength());
+    		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
+    	} catch (UnavailableComponentException e) {
+    		stack("Error adjusting segment start", e);
+    		throw new SegmentUpdateException(e);
+    	}
     }
 
     /*
@@ -655,7 +657,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * .generic.ISegmentedProfile)
      */
     @Override
-    public ISegmentedProfile frankenNormaliseToProfile(ISegmentedProfile template) throws ProfileException {
+    public ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException {
 
         if (this.getSegmentCount() != template.getSegmentCount()) {
             throw new IllegalArgumentException("Segment counts are different in profile and template");
@@ -777,7 +779,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * java.util.UUID)
      */
     @Override
-    public void mergeSegments(IBorderSegment segment1, IBorderSegment segment2, UUID id) throws ProfileException {
+    public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
 
         // Check the segments belong to the profile
         if (!this.contains(segment1) || !this.contains(segment2)) {
@@ -836,7 +838,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment)
      */
     @Override
-    public void unmergeSegment(IBorderSegment segment) throws ProfileException {
+    public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -883,7 +885,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * NucleusBorderSegment, int, java.util.UUID, java.util.UUID)
      */
     @Override
-    public void splitSegment(IBorderSegment segment, int splitIndex, UUID id1, UUID id2) throws ProfileException {
+    public void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException {
         // Check the segments belong to the profile
         if (!this.contains(segment)) {
             throw new IllegalArgumentException("Input segment is not part of this profile");
@@ -1003,7 +1005,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
     }
 
     @Override
-    public boolean isSplittable(UUID id, int splitIndex) {
+    public boolean isSplittable(@NonNull UUID id, int splitIndex) {
         // TODO Auto-generated method stub
         return false;
     }

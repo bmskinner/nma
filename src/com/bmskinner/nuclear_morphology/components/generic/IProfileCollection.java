@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
@@ -249,7 +251,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @param length
      *            the length of the aggregate
      */
-    void createProfileAggregate(ICellCollection collection, int length);
+    void createProfileAggregate(@NonNull ICellCollection collection, int length);
 
     /**
      * Create profile aggregates from the given collection, with a length set by
@@ -259,7 +261,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @param collection
      *            the CellCollection
      */
-    void createAndRestoreProfileAggregate(ICellCollection collection);
+    void createAndRestoreProfileAggregate(@NonNull ICellCollection collection);
 
     /**
      * Create the profile aggregate from the given collection, using the
@@ -277,8 +279,6 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @return a string with the points
      */
     String tagString();
-
-    String toString();
 
     /**
      * Turn the IQR (difference between Q25, Q75) of the median into a

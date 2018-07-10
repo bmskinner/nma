@@ -1,15 +1,11 @@
 package com.bmskinner.nuclear_morphology.io;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.DefaultBioSample;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
-import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 
 public class WorkspaceExporterTest {

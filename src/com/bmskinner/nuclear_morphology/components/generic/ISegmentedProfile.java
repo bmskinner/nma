@@ -251,7 +251,8 @@ public interface ISegmentedProfile extends IProfile {
      * @see no.components.Profile#offset(int) Offset the segment by the given
      * amount. Returns a copy of the profile.
      */
-    ISegmentedProfile offset(int newStartIndex) throws ProfileException;
+    @Override
+	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
 
     /**
      * Interpolate the segments of this profile to the proportional lengths of

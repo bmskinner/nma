@@ -1,21 +1,23 @@
 package com.bmskinner.nuclear_morphology.components.generic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import org.assertj.swing.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 
 public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 
@@ -28,15 +30,6 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 		singleSegment = singleSegmentProfile.getSegment(comp.getID());
 	}
 
-	@Test
-	public void testBorderSegmentTreeUUIDIntInt() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testBorderSegmentTreeUUIDIntIntBorderSegmentTree() {
-		fail("Not yet implemented");
-	}
 
 	@Test
 	public void testGetID() {

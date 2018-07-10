@@ -134,7 +134,7 @@ public class OpenBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getID()
      */
     @Override
-    public UUID getID() {
+    public @NonNull UUID getID() {
         return this.uuid;
     }
 

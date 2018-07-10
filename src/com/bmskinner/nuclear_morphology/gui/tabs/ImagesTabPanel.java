@@ -293,17 +293,15 @@ public class ImagesTabPanel extends DetailPanel {
     	TreeSelectionListener l = (TreeSelectionEvent e) -> {
     		ImageTreeNode data = (ImageTreeNode) e.getPath().getLastPathComponent();
 
-//    		ImageNode data = (ImageNode) node.getUserObject();
-    		System.out.println(data.getFile());
-    		
-    		if (data.getFile() == null || data.getFile().isDirectory()) {
+    		File f = data.getFile();
+    		if (f==null || f.isDirectory()) {
     			label.setIcon(null);
     			return;
     		}
 
     		Runnable r = () -> {
     			try {
-    				ImageProcessor ip = data.getFile().exists() ? new ImageImporter(data.getFile()).importToColorProcessor()
+    				ImageProcessor ip = f.exists() ? new ImageImporter(data.getFile()).importToColorProcessor()
     						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells
     				
     				// If an 8bit image was read in, make it colour greyscale
@@ -321,7 +319,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     			} catch (Exception e1) {
     				label.setIcon(null);
-    				fine("Error fetching image "+data.getFile().getAbsolutePath(), e1);
+    				fine("Error fetching image "+f.getAbsolutePath(), e1);
     			}
     		};
 
@@ -367,8 +365,9 @@ public class ImagesTabPanel extends DetailPanel {
     	        	Enumeration<ImageTreeNode> children = data.children();
     	        	while(children.hasMoreElements()){
     	        		ImageTreeNode imageData = children.nextElement(); 	        
-//    	        		ImageNode imageData = (ImageNode) imageNode.getUserObject();
     	        		File imageFile = imageData.getFile();
+    	        		if(imageFile==null)
+    	        			continue;
     	        		for(IAnalysisDataset d : getDatasets()){
     	        			Set<ICell> cells = d.getCollection().getCells(imageFile);
     	        			cells.stream().forEach(c->{
@@ -422,7 +421,8 @@ public class ImagesTabPanel extends DetailPanel {
     		
         }
     	
-    	public String toString() {
+    	@Override
+		public String toString() {
     		File f = new File(name);
     		if(f.isDirectory())
     			return f.getAbsolutePath();
@@ -440,16 +440,17 @@ public class ImagesTabPanel extends DetailPanel {
     	
     	@Override
         public Component getTreeCellRendererComponent(JTree tree, Object value,
-                boolean sel, boolean expanded, boolean leaf, int row,
-                boolean hasFocus) {
-        	Component c = super.getTreeCellRendererComponent(tree, value, sel,
+                boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+        	
+    		Component c = super.getTreeCellRendererComponent(tree, value, sel,
                     expanded, leaf, row, hasFocus);
             setToolTipText(value.toString());
             
             Color fg = Color.BLACK;
             ImageTreeNode n = (ImageTreeNode) value;
             if(n.isFile()) {
-            	if(!n.getFile().exists())
+            	File f = n.getFile();
+            	if(f==null || !f.exists())
             		fg = Color.RED;
             }
             c.setForeground(fg);

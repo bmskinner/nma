@@ -72,33 +72,20 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 	}
 
 	@Test
-	public void testDefaultSegmentedProfileIProfileListOfIBorderSegment() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDefaultSegmentedProfileISegmentedProfile() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDefaultSegmentedProfileIProfile() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testDefaultSegmentedProfileFloatArray() {
-		fail("Not yet implemented");
-	}
-
-	@Test
 	public void testHasSegments() {
 		assertTrue(singleSegmentProfile.hasSegments());
 	}
 
 	@Test
-	public void testGetSegments() {
-		fail("Not yet implemented");
+	public void testGetSegmentsForSingleSegmentProfile() {
+		List<IBorderSegment> list = singleSegmentProfile.getSegments();
+		assertEquals(1, list.size());
+	}
+	
+	@Test
+	public void testGetSegmentsForDoubleSegmentProfile() {
+		List<IBorderSegment> list = doubleSegmentProfile.getSegments();
+		assertEquals(2, list.size());
 	}
 
 	@Test

@@ -522,8 +522,6 @@ public class DefaultProfileCollection implements IProfileCollection {
     public void createProfileAggregate(@NonNull ICellCollection collection, int length) {
         if (length <= 0)
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");
-        if (collection == null)
-            throw new IllegalArgumentException("Cell collection is null");
         if (collection.size() == 0)
             throw new IllegalArgumentException("Cell collection is empty");
 
