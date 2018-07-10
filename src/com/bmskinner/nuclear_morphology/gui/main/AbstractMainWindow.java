@@ -90,7 +90,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
             }
         });
 
-        this.setDropTarget(new MainDragAndDropTarget(this));
+        this.setDropTarget(new MainDragAndDropTarget(eh));
     }
 
     protected abstract void createUI();

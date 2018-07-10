@@ -150,6 +150,7 @@ public class MainWindow extends AbstractMainWindow {
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
             Logger.getLogger(Loggable.PROGRAM_LOGGER).setLevel(Level.INFO);
+            
                 		
             // ---------------
             // Create the consensus chart
@@ -249,7 +250,7 @@ public class MainWindow extends AbstractMainWindow {
             DetailPanel p = (DetailPanel)t;
             tabbedPane.addTab(p.getPanelTitle(), p);
         }
-        
+ 
         signalsDetailPanel.addSignalChangeListener(editingDetailPanel);
         editingDetailPanel.addSignalChangeListener(signalsDetailPanel);
 
@@ -260,6 +261,7 @@ public class MainWindow extends AbstractMainWindow {
      */
     @Override
 	protected void createEventHandling() {
+
         logPanel.addDatasetEventListener(eh);
         logPanel.addInterfaceEventListener(eh);
         logPanel.addSignalChangeListener(eh);

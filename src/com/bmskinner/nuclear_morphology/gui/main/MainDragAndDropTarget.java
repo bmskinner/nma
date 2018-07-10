@@ -31,6 +31,9 @@ import java.util.List;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.core.DatasetListManager;
+import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEvent;
+import com.bmskinner.nuclear_morphology.gui.SignalChangeEventHandler;
 import com.bmskinner.nuclear_morphology.gui.actions.NewAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.PopulationImportAction;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
@@ -40,11 +43,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 @SuppressWarnings("serial")
 public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
-    private MainView mw;
+	SignalChangeEventHandler sh = new SignalChangeEventHandler(this);
 
-    public MainDragAndDropTarget(MainView target) {
+    public MainDragAndDropTarget(EventHandler eh) {
         super();
-        mw = target;
+        sh.addSignalChangeListener(eh);
     }
 
     @Override
@@ -69,17 +72,24 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
                 }
 
                 // Open the files - we process *.nmd, *.bak and *.wrk files
-
+                
                 for (File f : fileList) {
+                    fine("Checking dropped file");
                     if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
-                            || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION))
-                        receiveDatasetFile(f);
+                            || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION)) {
+                        sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
 
-                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION))
-                        receiveWorkspaceFile(f);
+                    }
+                    
+                    if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
+                    	sh.fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
 
-                    if (f.isDirectory())
-                        receiveFolder(f);
+                    }
+
+                    if (f.isDirectory()) {
+                    	sh.fireSignalChangeEvent(SignalChangeEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
+
+                    }
 
                 }
             }
@@ -92,28 +102,4 @@ public class MainDragAndDropTarget extends DropTarget implements Loggable {
 
     }
 
-    private void receiveFolder(final File f) {
-        // Pass to new analysis
-        Runnable task = new NewAnalysisAction(mw.getProgressAcceptor(), mw.getEventHandler(), f);
-        task.run();
-    }
-
-    private void receiveWorkspaceFile(final File f) {
-        finer("Opening workgroup file " + f.getAbsolutePath());
-
-        IWorkspace w = WorkspaceImporter.createImporter(f).importWorkspace();
-        DatasetListManager.getInstance().addWorkspace(w);
-
-        for (File dataFile : w.getFiles()) {
-            receiveDatasetFile(dataFile);
-        }
-
-    }
-
-    private void receiveDatasetFile(final File f) {
-        fine("Opening file " + f.getAbsolutePath());
-
-        Runnable task = new PopulationImportAction(mw.getProgressAcceptor(), mw.getEventHandler(), f);
-        task.run();
-    }
 }
