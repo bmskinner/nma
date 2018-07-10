@@ -164,7 +164,7 @@ public class RuleSetCollection implements Serializable, Loggable {
         RuleSetCollection r = new RuleSetCollection();
 
         r.addRuleSet(Tag.REFERENCE_POINT, RuleSet.pigSpermRPRuleSet());
-        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermRPRuleSet());
+        r.addRuleSet(Tag.ORIENTATION_POINT, RuleSet.pigSpermOPRuleSet());
         return r;
     }
 

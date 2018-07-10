@@ -30,10 +30,12 @@ import java.util.List;
  */
 public enum BorderTag {
 
-    REFERENCE_POINT("Reference point", BorderTagType.CORE), ORIENTATION_POINT("Orientation point",
-            BorderTagType.EXTENDED), INTERSECTION_POINT("Intersection point", BorderTagType.EXTENDED), TOP_VERTICAL(
-                    "Top vertical point", BorderTagType.EXTENDED), BOTTOM_VERTICAL("Bottom vertical point",
-                            BorderTagType.EXTENDED), CUSTOM("Custom point", BorderTagType.EXTENDED);
+    REFERENCE_POINT("Reference point", BorderTagType.CORE), 
+    ORIENTATION_POINT("Orientation point", BorderTagType.EXTENDED), 
+    INTERSECTION_POINT("Intersection point", BorderTagType.EXTENDED), 
+    TOP_VERTICAL("Top vertical point", BorderTagType.EXTENDED), 
+    BOTTOM_VERTICAL("Bottom vertical point", BorderTagType.EXTENDED), 
+    CUSTOM("Custom point", BorderTagType.EXTENDED);
 
     private final String                  name;
     private final BorderTag.BorderTagType type;

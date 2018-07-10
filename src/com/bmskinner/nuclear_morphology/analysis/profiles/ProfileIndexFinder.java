@@ -207,9 +207,8 @@ public class ProfileIndexFinder implements Loggable {
 
         List<RuleSet> list = collection.getRuleSetCollection().getRuleSets(tag);
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
         return identifyIndex(collection, list);
 
     }
@@ -226,9 +225,8 @@ public class ProfileIndexFinder implements Loggable {
     public int identifyIndex(final ICellCollection collection, final List<RuleSet> list)
             throws NoDetectedIndexException {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
 
         BooleanProfile indexes = getMatchingProfile(collection, list);
 
@@ -245,9 +243,8 @@ public class ProfileIndexFinder implements Loggable {
 
     public BooleanProfile getMatchingProfile(final ICellCollection collection, final List<RuleSet> list) {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException(RULESET_EMPTY_ERROR);
-        }
 
         // Make a 'true' profile
         BooleanProfile indexes;
@@ -290,9 +287,7 @@ public class ProfileIndexFinder implements Loggable {
 
         BooleanProfile result = new BooleanProfile(p, true);
         for (Rule rule : r.getRules()) {
-            // BooleanProfile b = isApplicable(p, rule, result);
             result = isApplicable(p, rule, result);
-            // result = result.and(b);
         }
         return result;
     }
@@ -300,12 +295,9 @@ public class ProfileIndexFinder implements Loggable {
     /**
      * Test a profile for the applicability of a rule in a ruleset
      * 
-     * @param p
-     *            the profile to test
-     * @param r
-     *            the rule to test
-     * @param existing
-     *            the existing profile of valid indexes on which the rule will
+     * @param p the profile to test
+     * @param r the rule to test
+     * @param existing the existing profile of valid indexes on which the rule will
      *            be applied
      * @return
      */
@@ -314,6 +306,9 @@ public class ProfileIndexFinder implements Loggable {
         RuleType type = r.getType();
 
         switch (type) {
+        
+        case IS_ZERO_INDEX:
+        	return  findZeroIndex(p);
 
         case IS_LOCAL_MINIMUM:
             return findLocalMinima(p, limits, r.getBooleanValue(), r.getValue(1));
@@ -759,6 +754,20 @@ public class ProfileIndexFinder implements Loggable {
             }
         }
         result = result.and(limits);
+        return result;
+
+    }
+    
+    /**
+     * Make a boolean profile where only the first index is true
+     * 
+     * @param p
+     * @return
+     */
+    private BooleanProfile findZeroIndex(final IProfile p) {
+
+        BooleanProfile result = new BooleanProfile(p, false);
+        result.set(0, true);
         return result;
 
     }

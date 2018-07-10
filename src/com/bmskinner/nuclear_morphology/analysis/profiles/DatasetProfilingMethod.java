@@ -24,6 +24,7 @@ import com.bmskinner.nuclear_morphology.analysis.SingleDatasetAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
+import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
@@ -164,8 +165,7 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
                 } catch (NoDetectedIndexException e) {
                     warn("Unable to detect " + tag + " using default ruleset");
 
-                    if (tag.type()
-                            .equals(com.bmskinner.nuclear_morphology.components.generic.BorderTag.BorderTagType.CORE)) {
+                    if (tag.type().equals(BorderTag.BorderTagType.CORE)) {
                         warn("Falling back on reference point");
                     }
                     continue;

@@ -139,6 +139,12 @@ public class RuleSet implements Serializable {
                 .isLocalMaximum() // Select the first local max point to avoid shoulders
                 .build();
     }
+    
+    public static RuleSet pigSpermOPRuleSet() {
+        return new RuleSetBuilder(ProfileType.ANGLE)
+        		.isZeroIndex()
+                .build();
+    }
 
     /**
      * Create a RuleSet that describes how to find the RP in round nucleus

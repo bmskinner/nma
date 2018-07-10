@@ -59,6 +59,19 @@ public class RuleSetBuilder implements Loggable {
         rules.add(r);
         return this;
     }
+    
+    /**
+     * Get the first index in the test profile. This is used to match
+     * the reference point; the input profile is assumed to have the RP
+     * at index zero.
+     * 
+     * @return
+     */
+    public RuleSetBuilder isZeroIndex() {
+        Rule r = new Rule(RuleType.IS_ZERO_INDEX, true);
+        rules.add(r);
+        return this;
+    }
 
     /**
      * Will find the lowest remaining value in the profile after previous rules

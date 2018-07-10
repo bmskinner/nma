@@ -101,6 +101,8 @@ public class Rule implements Serializable {
      *
      */
     public enum RuleType {
+    	
+    	IS_ZERO_INDEX,
 
         IS_MINIMUM, IS_MAXIMUM,
 
@@ -117,6 +119,7 @@ public class Rule implements Serializable {
         INDEX_IS_WITHIN_FRACTION_OF, INDEX_IS_OUTSIDE_FRACTION_OF,
 
         INVERT;
+    	
 
     }
 }

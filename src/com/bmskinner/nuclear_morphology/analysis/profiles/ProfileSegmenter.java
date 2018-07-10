@@ -123,7 +123,8 @@ public class ProfileSegmenter implements Loggable {
          * Prepare segment start index
          */
         int segmentStart = 0;
-
+        log("Profile length "+profile.size());
+        
         /*
          * Iterate through the profile, looking for breakpoints The reference
          * point is at index 0, as defined by the calling method.
@@ -252,12 +253,9 @@ public class ProfileSegmenter implements Loggable {
     }
 
     /**
-     * @param index
-     *            the current index being tested
-     * @param segmentStart
-     *            the start of the current segment being built
-     * @return
-     * @throws Exception
+     * @param index the current index being tested
+     * @param segmentStart the start of the current segment being built
+     * @return true if a segment end can be called at this index
      */
     private boolean testSegmentEndFound(int index, int segmentStart) {
 
@@ -265,6 +263,7 @@ public class ProfileSegmenter implements Loggable {
          * The first segment must meet the length limit
          */
         if (index < MIN_SEGMENT_SIZE) {
+        	log(index+" is to close to zero");
             return false;
         }
 
@@ -272,13 +271,11 @@ public class ProfileSegmenter implements Loggable {
          * If the index is a forced BorderTagObject boundary, must segment
          */
         for (Tag tag : tagsToSplitOn.keySet()) {
-
             Integer test = tagsToSplitOn.get(tag);
             if (test.intValue() == index) {
-                finest("Forcing segment for " + test);
+            	log("Forcing segment for " + test +" at "+tag);
                 return true;
             }
-
         }
 
         /*
@@ -289,9 +286,9 @@ public class ProfileSegmenter implements Loggable {
 
             Integer test = tagsToSplitOn.get(tag);
             if (Math.abs(test.intValue() - index) < MIN_SEGMENT_SIZE) {
-                return false;
+            	log(index+" is to close to a border tag");
+                return false; 
             }
-
         }
 
         /*
@@ -300,6 +297,7 @@ public class ProfileSegmenter implements Loggable {
         int potentialSegLength = index - segmentStart;
 
         if (potentialSegLength < MIN_SEGMENT_SIZE) {
+        	log(index+" is to close to previous segment");
             return false;
         }
 
@@ -308,7 +306,8 @@ public class ProfileSegmenter implements Loggable {
          * cannot be called, even at a really nice infection point, because it
          * would be too close to the reference point
          */
-        if (index > profile.size() - MIN_SEGMENT_SIZE) {
+        if (index > (profile.size()-1)-MIN_SEGMENT_SIZE) {
+        	log(index+" is too close to "+profile.size());
             return false;
         }
 
@@ -320,9 +319,9 @@ public class ProfileSegmenter implements Loggable {
          * surroundings.
          */
 
-        if ((inflectionPoints.get(index) == true && Math.abs(deltaProfile.get(index)) > minRateOfChange
+        if ((inflectionPoints.get(index) && Math.abs(deltaProfile.get(index)) > minRateOfChange
                 && potentialSegLength >= MIN_SEGMENT_SIZE)) {
-
+        	log(index+" is valid in profile of size "+profile.size());
             return true;
 
         }
