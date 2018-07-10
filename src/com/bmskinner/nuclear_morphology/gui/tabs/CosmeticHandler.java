@@ -23,11 +23,13 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.io.File;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.ICell;
 import com.bmskinner.nuclear_morphology.components.ICellCollection;
 import com.bmskinner.nuclear_morphology.components.IClusterGroup;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
@@ -217,6 +219,48 @@ public class CosmeticHandler implements Loggable {
 
     		d.getCollection().getSignalManager().updateSignalSourceFolder(signalGroup, folder);
     		finest("Updated signal source for signal group " + signalGroup + " to " + folder.getAbsolutePath());
+
+    	} catch (RequestCancelledException e) {
+    		return;
+    	}           
+
+    }
+    
+    /**
+     * Update the nucleus folder for nuclei in the given image
+     * @param d
+     * @param image
+     */
+    public void updateNucleusSource(@NonNull IAnalysisDataset d, File image) {
+
+    	try {
+    		File folder = parent.getInputSupplier().requestFolder();
+
+
+    		Set<ICell> cells = d.getCollection().getCells(image);
+    		cells.stream().forEach(c->{
+    			c.getNuclei().stream().forEach(n->{
+    				n.setSourceFolder(folder);
+    			});
+    		});
+
+    	} catch (RequestCancelledException e) {
+    		return;
+    	}           
+
+    }
+    
+    /**
+     * Update the source image folder for the given signal group
+     * @param d
+     * @param signalGroup
+     */
+    public void updateNucleusSource(@NonNull IAnalysisDataset d) {
+
+    	try {
+    		File folder = parent.getInputSupplier().requestFolder();
+    		    		
+    		d.getCollection().updateSourceFolder(folder);
 
     	} catch (RequestCancelledException e) {
     		return;

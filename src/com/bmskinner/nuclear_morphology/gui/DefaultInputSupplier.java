@@ -41,7 +41,12 @@ public class DefaultInputSupplier implements InputSupplier {
 			throw new RequestCancelledException();
     	return s.toString();
 	}
-
+	
+	@Override
+	public double requestDouble(@NonNull String message) throws RequestCancelledException {
+		return requestDouble(message, 0, -Double.MAX_VALUE, Double.MAX_VALUE, 1);
+	}
+	
 	@Override
 	public double requestDouble(@NonNull String message, double start, double min, double max, double step) throws RequestCancelledException {
 
@@ -54,23 +59,33 @@ public class DefaultInputSupplier implements InputSupplier {
 				JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 
-		if (option == JOptionPane.OK_OPTION) {
+		if (option == JOptionPane.OK_OPTION)
 			return (double) spinner.getModel().getValue();
-		} 
+		throw new RequestCancelledException();
+	}
+	
+	@Override
+	public int requestInt(@NonNull String message) throws RequestCancelledException {
+		return requestInt(message, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+	}
+
+	@Override
+	public int requestInt(@NonNull String message, int start, int min, int max, int step) throws RequestCancelledException {
+		SpinnerNumberModel sModel = new SpinnerNumberModel(start, 
+				min, max, step);
+
+		JSpinner spinner = new JSpinner(sModel);
+
+		int option = JOptionPane.showOptionDialog(null, spinner, message, 
+				JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+		if (option == JOptionPane.OK_OPTION)
+			return (int) spinner.getModel().getValue();
 		throw new RequestCancelledException();
 	}
 
-	@Override
-	public int requestInt(@NonNull String messsage) throws RequestCancelledException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public double requestDouble(@NonNull String message) throws RequestCancelledException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
 
 	@Override
 	public Color requestColor(@NonNull String message, @Nullable Color oldColor) throws RequestCancelledException {

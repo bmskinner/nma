@@ -39,6 +39,18 @@ public interface InputSupplier {
 	 * @throws RequestCancelledException
 	 */
 	int requestInt(@NonNull String messsage) throws RequestCancelledException;
+	
+	/**
+	 * Request an int input
+	 * @param message the message to provide to the user
+	 * @param start the initial value (if using a spinner)
+	 * @param min the min value (if using a spinner)
+	 * @param max the max value (if using a spinner)
+	 * @param step the step size  (if using a spinner)
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	int requestInt(@NonNull String messsage, int start, int min, int max, int step) throws RequestCancelledException;
 
 	/**
 	 * Request a double input

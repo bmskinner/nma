@@ -311,17 +311,17 @@ public class LogPanel extends DetailPanel implements ActionListener, ProgressBar
                             fine("Checking dropped file");
                             if (f.getName().endsWith(Importer.SAVE_FILE_EXTENSION) 
                                     || f.getName().endsWith(Importer.BACKUP_FILE_EXTENSION)) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent("Open|" + f.getAbsolutePath());
+                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.IMPORT_DATASET_PREFIX + f.getAbsolutePath());
 
                             }
                             
                             if (f.getName().endsWith(Importer.WRK_FILE_EXTENSION)) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent("Wrk|" + f.getAbsolutePath());
+                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX+f.getAbsolutePath());
 
                             }
 
                             if (f.isDirectory()) {
-                                getSignalChangeEventHandler().fireSignalChangeEvent("New|" + f.getAbsolutePath());
+                                getSignalChangeEventHandler().fireSignalChangeEvent(SignalChangeEvent.NEW_ANALYSIS_PREFIX+f.getAbsolutePath());
 
                             }
 

@@ -93,7 +93,7 @@ public class Nuclear_Morphology_Analysis
 			Logger.getLogger(ERROR_LOGGER).setLevel(Loggable.TRACE);
 			
 			Logger.getLogger(PROGRAM_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));
-			Logger.getLogger(PROGRAM_LOGGER).setLevel(Level.INFO);
+			Logger.getLogger(PROGRAM_LOGGER).setLevel(Level.FINER);
 			
 		} catch (SecurityException e) {
 			logToImageJ("Error initialising", e);

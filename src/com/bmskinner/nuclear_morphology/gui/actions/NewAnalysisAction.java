@@ -56,7 +56,6 @@ import net.samuelcampos.usbdrivedetector.USBStorageDevice;
 public class NewAnalysisAction extends VoidResultAction {
 
     private IAnalysisOptions options;
-    private Date                    startTime;
     private String                  outputFolderName;
     IDetectionOptions nucleusOptions;
 
@@ -101,7 +100,7 @@ public class NewAnalysisAction extends VoidResultAction {
         if (folder == null) {
             if (!getImageDirectory()) {
                 fine("Could not get image directory");
-                this.cancel();
+                cancel();
                 return;
             }
         }
@@ -112,8 +111,8 @@ public class NewAnalysisAction extends VoidResultAction {
         for(USBStorageDevice u : usb.getRemovableDevices()) {
         	if(folder.getAbsolutePath().startsWith(u.getRootDirectory().getName())) {
         		warn("Unable to comply. Folder is on a USB stick. Copy images to hard disk.");
-        		 this.cancel();
-                 return;
+        		cancel();
+        		return;
         	}
         }
 
@@ -131,27 +130,21 @@ public class NewAnalysisAction extends VoidResultAction {
 
             File directory = op.get().getFolder();
             if (directory == null) {
-                this.cancel();
+                cancel();
                 return;
             }
 
             log("Directory: " + directory.getName());
 
-            this.startTime = Calendar.getInstance().getTime();
-            this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(this.startTime);
+            Date startTime = Calendar.getInstance().getTime();
+            this.outputFolderName = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(startTime);
 
-            // craete the analysis folder early. Did not before in case folder
-            // had no images
             File analysisFolder = new File(directory, outputFolderName);
-            if (!analysisFolder.exists()) {
+            if (!analysisFolder.exists())
                 analysisFolder.mkdir();
-            }
-            //
-//            File logFile = new File(analysisFolder, directory.getName() + Importer.LOG_FILE_EXTENSION);
 
             IAnalysisMethod m = new NucleusDetectionMethod(outputFolderName, options);
-            // Calculate the number of files to process
-
+            
             worker = new DefaultAnalysisWorker(m);
             worker.addPropertyChangeListener(this);
             ThreadManager.getInstance().submit(worker);

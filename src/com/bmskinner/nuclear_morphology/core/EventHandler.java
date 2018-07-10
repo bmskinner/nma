@@ -302,7 +302,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
             				return;
             			File f = new File(s);
 
-            			new NewAnalysisAction(acceptor, EventHandler.this, f);
+            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();;
             		};
             	}
             
