@@ -82,7 +82,6 @@ public class SaveDatasetAction extends SingleDatasetResultAction {
             } else {
                 this.finished();
             }
-
         } else {
             saveFile = dataset.getSavePath();
         }

@@ -82,7 +82,6 @@ public class PopulationImportAction extends VoidResultAction {
 
             try{
                 IAnalysisMethod m = new DatasetImportMethod(file);
-                System.out.println("File size: "+file.length());
                 worker = new DefaultAnalysisWorker(m, file.length()){
                     @Override
                     public void done() {

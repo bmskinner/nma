@@ -140,8 +140,6 @@ public class ImagesTabPanel extends DetailPanel {
         sp.setRightComponent(imagePanel);
         
         this.add(sp, BorderLayout.CENTER);
-//        this.add(scrollPane, BorderLayout.WEST);
-
     }
 
     /**
@@ -156,7 +154,6 @@ public class ImagesTabPanel extends DetailPanel {
     @Override
     protected synchronized void updateMultiple() {
     	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
-//        DefaultMutableTreeNode root = new DefaultMutableTreeNode(new ImageNode(IMAGES_LBL, null));
 
         for(IAnalysisDataset d : getDatasets()){
             createNodes(root, d);
@@ -180,10 +177,7 @@ public class ImagesTabPanel extends DetailPanel {
     	ImageTreeNode root = new ImageTreeNode(IMAGES_LBL);
     	TreeModel model = new DefaultTreeModel(root);
     	tree.setModel(model);
-//      DefaultMutableTreeNode root = new ImageTreeNode(new ImageNode(IMAGES_LBL, null));
-
         tree.setEnabled(false);
-
         label.setText(Labels.NULL_DATASETS);
         label.setIcon(null);
     }
@@ -205,8 +199,6 @@ public class ImagesTabPanel extends DetailPanel {
     			.collect(Collectors.toList());
     	
     	ImageTreeNode datasetRoot = new ImageTreeNode(dataset.getName()+" ("+files.size()+")");
-//    	ImageNode r = new ImageNode(dataset.getName()+" ("+files.size()+")", null);
-//        DefaultMutableTreeNode datasetRoot = new DefaultMutableTreeNode(r);
                 
         // The only pattern to recognise for now is eg. "s12.tiff"
         Pattern p = Pattern.compile("^.?(\\d+)\\.tiff?$");
@@ -251,13 +243,10 @@ public class ImagesTabPanel extends DetailPanel {
         		inParent.sort(defaultComp);
         	}
         	ImageTreeNode parentNode = new ImageTreeNode(parent);
-//        	DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode(new ImageNode(parent.getAbsolutePath(), parent));
         	
         	for (File f : inParent) {
-
                 String name = f.getName();
                 parentNode.add(new ImageTreeNode(f));
-//                parentNode.add(new DefaultMutableTreeNode(new ImageNode(name, f)));
             }
             datasetRoot.add(parentNode);
         }
@@ -273,19 +262,14 @@ public class ImagesTabPanel extends DetailPanel {
      * @return
      */
     private Optional<IAnalysisDataset> getDataset(ImageTreeNode node){
-    	
-//    	ImageTreeNode n = (ImageTreeNode) node.getPath()[1];
+    	for(IAnalysisDataset d : getDatasets()){
+    		if(node.toString().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")"))
+    			return Optional.of(d);
+    	}
+    	if(node.isRoot())
+    		return Optional.empty();
+    	return getDataset((ImageTreeNode) node.getParent());
 
-//    	if(n.getUserObject() instanceof ImageNode){
-//    		ImageNode im = (ImageNode) n.getUserObject();
-    		for(IAnalysisDataset d : getDatasets()){
-    			if(node.toString().equals(d.getName()+" ("+d.getCollection().getImageFiles().size()+")")){
-    				return Optional.of(d);
-    			}
-    		}
-
-//    	}
-    	return Optional.empty();
     }
 
     private TreeSelectionListener makeListener() {
@@ -301,7 +285,7 @@ public class ImagesTabPanel extends DetailPanel {
 
     		Runnable r = () -> {
     			try {
-    				ImageProcessor ip = f.exists() ? new ImageImporter(data.getFile()).importToColorProcessor()
+    				ImageProcessor ip = f.exists() ? new ImageImporter(f).importToColorProcessor()
     						: ImageAnnotator.createBlankColorProcessor(1500, 1500); //TODO - check space needed by cells
     				
     				// If an 8bit image was read in, make it colour greyscale
@@ -311,7 +295,7 @@ public class ImagesTabPanel extends DetailPanel {
     				ImageAnnotator an = cn.toAnnotator();
 
     				Optional<IAnalysisDataset> dataset = getDataset(data);
-    				dataset.ifPresent( d -> d.getCollection().getCells(data.getFile()).stream().forEach( c-> an.annotateCellBorders(c)) );
+    				dataset.ifPresent( d -> d.getCollection().getCells(f).stream().forEach( c-> an.annotateCellBorders(c)) );
 
     				ImageFilterer ic = new ImageFilterer(an.toProcessor());
     				ic.resize(imagePanel.getWidth(), imagePanel.getHeight());
@@ -346,36 +330,36 @@ public class ImagesTabPanel extends DetailPanel {
     	        	return;
 
     	        TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
-    	        ImageTreeNode data = (ImageTreeNode) selPath.getLastPathComponent();
+    	        ImageTreeNode node = (ImageTreeNode) selPath.getLastPathComponent();
 
-    	        if(data==null)
+    	        if(node==null)
     	        	return;
     	        
-    	        File oldFolder = data.getFile();
+    	        if(node.isLeaf())
+    	        	return; // folders only can be double clicked
     	        
-    	        if(oldFolder==null || oldFolder.getName().endsWith(".tiff"))
+    	        File oldFolder = node.getFile();
+    	        
+    	        if(oldFolder==null)
     	        	return;
 
 
     	        try {
     	        	File newFolder = getInputSupplier().requestFolder(oldFolder);
-    	        	data.setFile(newFolder);
-//    	        	data.setName(newFolder.getAbsolutePath());
+    	        	node.setFile(newFolder); // update node
 
-    	        	Enumeration<ImageTreeNode> children = data.children();
+    	        	Enumeration<ImageTreeNode> children = node.children();
     	        	while(children.hasMoreElements()){
     	        		ImageTreeNode imageData = children.nextElement(); 	        
     	        		File imageFile = imageData.getFile();
     	        		if(imageFile==null)
     	        			continue;
-    	        		for(IAnalysisDataset d : getDatasets()){
-    	        			Set<ICell> cells = d.getCollection().getCells(imageFile);
-    	        			cells.stream().forEach(c->{
-    	        				c.getNuclei().stream().forEach(n->{
-    	        					n.setSourceFolder(newFolder);
-    	        				});
-    	        			});
-    	        		}
+
+    	        		// Replace the source folder for all nuclei in the current image
+    	        		getDatasets().stream()
+	    	        		.flatMap(d->d.getCollection().getCells(imageFile).stream())
+	    	        		.flatMap(c->c.getNuclei().stream())
+	    	        		.forEach(n->n.setSourceFile(newFolder));
     	        		imageData.setFile( new File(newFolder, imageFile.getName()));
     	        	}
     	        } catch (RequestCancelledException e1) {
@@ -409,6 +393,10 @@ public class ImagesTabPanel extends DetailPanel {
     		return isFile;
     	}
     	
+    	/**
+    	 * Get the file in this node, if present. Otherwise return null.
+    	 * @return
+    	 */
     	public @Nullable File getFile() {
     		if(isFile)
     			return new File(name);

@@ -169,12 +169,6 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
         return null;
     }
 
-    @Override
-    public void updateSourceFolder(File newFolder) {
-        // TODO Auto-generated method stub
-
-    }
-
 	@Override
 	public IPoint getBase() {
 		// TODO Auto-generated method stub

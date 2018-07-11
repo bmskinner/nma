@@ -68,14 +68,16 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
     protected void updateMultiple() {
         scrollPane.setColumnHeaderView(null);
         tablePanel = createTablePanel();
-        // NucleusType type =
-        // IAnalysisDataset.getBroadestNucleusType(getDatasets());
+
         for (PlottableStatistic stat : PlottableStatistic.getNucleusStats()) {
 
             ExportableTable table = new ExportableTable(AbstractTableCreator.createLoadingTable());
 
-            TableOptions options = new TableOptionsBuilder().setDatasets(getDatasets()).addStatistic(stat)
-                    .setTarget(table).setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
+            TableOptions options = new TableOptionsBuilder()
+            		.setDatasets(getDatasets())
+            		.addStatistic(stat)
+                    .setTarget(table)
+                    .setRenderer(TableOptions.ALL_EXCEPT_FIRST_COLUMN, new WilcoxonTableCellRenderer())
                     .build();
 
             addWilconxonTable(tablePanel, table, stat.toString());
@@ -85,7 +87,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
         }
         tablePanel.revalidate();
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
 
     }
@@ -99,7 +100,6 @@ public class WilcoxonDetailPanel extends AbstractPairwiseDetailPanel {
         panel.add(new JLabel(Labels.NO_DATA_LOADED, JLabel.CENTER));
         tablePanel.add(panel);
         scrollPane.setViewportView(tablePanel);
-        ;
         tablePanel.repaint();
     }
 

@@ -38,23 +38,21 @@ public class PValueTableCellRenderer extends DefaultTableCellRenderer {
         // Cells are by default rendered as a JLabel.
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-        Color bg = Color.WHITE;
+        Color bg = c.getBackground();
 
         NumberFormat nf = NumberFormat.getInstance();
-        double pvalue = 1;
 
         try {
-            pvalue = nf.parse(value.toString()).doubleValue();
+        	double pvalue = nf.parse(value.toString()).doubleValue();
 
-            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL) {
+            if (pvalue <= SignificanceTest.FIVE_PERCENT_SIGNIFICANCE_LEVEL)
             	bg = Color.YELLOW;
-            }
 
-            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL) {
+            if (pvalue <= SignificanceTest.ONE_PERCENT_SIGNIFICANCE_LEVEL)
             	bg = Color.GREEN;
-            }
         } catch (ParseException e) {
         	bg = Color.WHITE;
+        	e.printStackTrace();
         }
 
         c.setBackground(bg);

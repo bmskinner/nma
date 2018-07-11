@@ -260,7 +260,7 @@ public class CosmeticHandler implements Loggable {
     	try {
     		File folder = parent.getInputSupplier().requestFolder();
     		    		
-    		d.getCollection().updateSourceFolder(folder);
+    		d.getCollection().setSourceFolder(folder);
 
     	} catch (RequestCancelledException e) {
     		return;

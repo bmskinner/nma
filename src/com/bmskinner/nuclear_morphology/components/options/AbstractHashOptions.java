@@ -197,6 +197,53 @@ public abstract class AbstractHashOptions implements Serializable, HashOptions {
             target.put(s, source.get(s));
         }
     }
+    
+    @Override
+    public int hashCode() {
+    	 final int prime = 31;
+         int result = super.hashCode();
+
+         result = prime * result + intMap.hashCode();
+         result = prime * result + dblMap.hashCode();
+         result = prime * result + boolMap.hashCode();
+         result = prime * result + fltMap.hashCode();
+         return result;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+    	if(this==o)
+    		return true;
+    	if(o==null)
+    		return false;
+    	if(!(o instanceof AbstractHashOptions))
+    		return false;
+    	AbstractHashOptions other = (AbstractHashOptions)o;
+    	List<String> keys = getKeys();
+    	if(!other.getKeys().equals(keys))
+    		return false;
+    	
+    	for(String key : getBooleanKeys()) {
+    		if(getBoolean(key)!=other.getBoolean(key))
+    			return false;
+    	}
+    	
+    	for(String key : getIntegerKeys()) {
+    		if(getInt(key)!=other.getInt(key))
+    			return false;
+    	}
+    	
+    	for(String key : getDoubleKeys()) {
+    		if(Double.doubleToLongBits(getDouble(key))!=Double.doubleToLongBits(other.getDouble(key)))
+    			return false;
+    	}
+    	
+    	for(String key : getFloatKeys()) {
+    		if(Double.doubleToLongBits(getFloat(key))!=Double.doubleToLongBits(other.getFloat(key)))
+    			return false;
+    	}
+    	return true;
+    }
       
     
     @Override

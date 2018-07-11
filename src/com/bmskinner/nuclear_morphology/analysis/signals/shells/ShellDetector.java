@@ -576,10 +576,6 @@ public class ShellDetector extends Detector {
 		}
 
 		@Override
-		public void updateSourceFolder(File newFolder) {		
-		}
-
-		@Override
 		public void setSourceFile(File sourceFile) {			
 		}
 

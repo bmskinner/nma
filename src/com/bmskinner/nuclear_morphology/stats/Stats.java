@@ -225,14 +225,15 @@ public class Stats implements Loggable {
 
 
     /**
-     * Run a Wilcoxon test on the given arrays.
+     * Run a Wilcoxon test on the given arrays and return a Bonnferroni corrected p-value based on the total number of comparisons.
      * 
-     * @param values0
-     * @param values1
-     * @param isGetPValue
+     * @param values0 the first array of values
+     * @param values1 the second array of values
+     * @param isGetPValue if true, return the p-value; if false, return the U statistic
+     * @param nComparisons the number of simultaneous comparisons being made; the number of invokations to this method
      * @return
      */
-    public static double runWilcoxonTest(double[] values0, double[] values1, boolean isGetPValue) {
+    public static double runWilcoxonTest(double[] values0, double[] values1, boolean isGetPValue, int nComparisons) {
 
         double result = 0;
         MannWhitneyUTest test = new MannWhitneyUTest(); // default, NaN's are
@@ -242,6 +243,8 @@ public class Stats implements Loggable {
 
         if (isGetPValue) { // above diagonal, p-value
             result = test.mannWhitneyUTest(values0, values1);
+            result *= nComparisons; // Bonferroni correction
+            result = result>SignificanceTest.ONE?SignificanceTest.ONE:result; // limit p to 1
 
         } else { // below diagonal, U statistic
             result = test.mannWhitneyU(values0, values1);

@@ -1479,9 +1479,8 @@ public class CellCollection implements ICellCollection {
 
     }
 
-    public boolean updateSourceFolder(File newFolder) {
+    public void setSourceFolder(File newFolder) {
         File oldFile = this.getFolder();
-        boolean ok = false;
 
         if (newFolder.exists()) {
 
@@ -1489,9 +1488,8 @@ public class CellCollection implements ICellCollection {
                 this.folder = newFolder;
 
                 for (Nucleus n : this.getNuclei()) {
-                    n.updateSourceFolder(newFolder);
+                    n.setSourceFolder(newFolder);
                 }
-                ok = true;
 
             } catch (IllegalArgumentException e) {
                 // one of the nuclei failed to update
@@ -1500,12 +1498,10 @@ public class CellCollection implements ICellCollection {
 
                 for (Nucleus n : this.getNuclei()) {
 
-                    n.updateSourceFolder(oldFile);
+                    n.setSourceFolder(oldFile);
                 }
-                ok = false;
             }
         }
-        return ok;
     }
 
     public synchronized boolean isRefolding() {

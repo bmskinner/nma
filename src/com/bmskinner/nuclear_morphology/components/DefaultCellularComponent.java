@@ -397,11 +397,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
     public Rectangle2D getBounds() {
-
-        // return new Rectangle( (int) bounds.getX(), (int)bounds.getY(),
-        // (int)bounds.getWidth(), (int)bounds.getHeight());
         return bounds;
-        // return this.toShape().getBounds();
     }
 
     /**
@@ -411,21 +407,13 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     @Override
     public File getSourceFolder() {
-        return this.sourceFile.getParentFile();
+        return sourceFile.getParentFile();
     }
-
+    
     @Override
-    public void updateSourceFolder(File newFolder) {
-        File oldFile = sourceFile;
-        String oldName = oldFile.getName();
-        File newFile = new File(newFolder + File.separator + oldName);
-        if (newFile.exists()) {
-            this.setSourceFile(newFile);
-        } else {
-            throw new IllegalArgumentException(
-                    "Cannot find file " + oldName + " in folder " + newFolder.getAbsolutePath());
-        }
-
+	public void setSourceFolder(@NonNull File sourceFolder) {
+        File newFile = new File(sourceFolder, sourceFile.getName());
+        sourceFile = newFile;
     }
 
     /**
@@ -438,6 +426,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public File getSourceFile() {
         return sourceFile;
     }
+    
+    @Override
+   	public void setSourceFile(@NonNull File sourceFile) {
+           this.sourceFile = sourceFile;
+       }
 
     @Override
     public String getSourceFileName() {
@@ -588,22 +581,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         return ip;
     }
 
-    // public void setSourceFileName(String name) {
-    // this.sourceFileName = name;
-    // }
 
-    @Override
-	public void setSourceFolder(File sourceFolder) {
-
-        File newFile = new File(sourceFolder + File.separator + sourceFile.getName());
-
-        this.sourceFile = newFile;
-    }
-
-    @Override
-	public void setSourceFile(File sourceFile) {
-        this.sourceFile = sourceFile;
-    }
 
     @Override
 	public int getChannel() {

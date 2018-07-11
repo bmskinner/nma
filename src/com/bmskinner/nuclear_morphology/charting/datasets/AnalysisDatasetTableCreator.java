@@ -837,6 +837,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
+        int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
         // add columns
         DecimalFormat df = new DecimalFormat("#0.0000");
         for (IAnalysisDataset dataset : options.getDatasets()) {
@@ -858,7 +859,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                     double[] d2Values = dataset2.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
                     		scale);
 
-                    double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal);
+                    double pValue = Stats.runWilcoxonTest(d1Values, d2Values, isGetPVal, nComparisons );
 
                     popData[i] = df.format(pValue);
                 }
@@ -889,7 +890,8 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         DefaultTableModel model = makeEmptyWilcoxonTable(options.getDatasets());
 
         // add columns
-        DecimalFormat df = new DecimalFormat("#0.0000");
+        DecimalFormat df = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
+        int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
             Object[] popData = new Object[options.datasetCount()];
@@ -907,6 +909,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
 
             int i = 0;
             boolean getPValue = false;
+            
             for (IAnalysisDataset dataset2 : options.getDatasets()) {
 
                 if (dataset2.getId().equals(dataset.getId())) {
@@ -933,7 +936,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
                                     CellularComponent.NUCLEAR_BORDER_SEGMENT, MeasurementScale.PIXELS,
                                     medianSeg2.getID()),
 
-                            getPValue));
+                            getPValue, nComparisons));
                 }
                 i++;
             }

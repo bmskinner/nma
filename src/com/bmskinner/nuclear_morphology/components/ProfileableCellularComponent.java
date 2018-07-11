@@ -218,14 +218,12 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         double result = super.calculateStatistic(stat);
 
-        if (PlottableStatistic.MIN_DIAMETER.equals(stat)) {
+        if (PlottableStatistic.MIN_DIAMETER.equals(stat))
             return this.getNarrowestDiameter();
-        }
 
-        if (PlottableStatistic.PATH_LENGTH.equals(stat)) {
+        if (PlottableStatistic.PATH_LENGTH.equals(stat))
             return this.getPathLength(ProfileType.ANGLE);
-        }
-        
+
         if (PlottableStatistic.PERIMETER.equals(stat)) {
             double perimeter=0;
             for(IBorderPoint p : getBorderList()){

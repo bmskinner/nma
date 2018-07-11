@@ -40,32 +40,21 @@ public abstract class ConsistentRowTableCellRenderer extends DefaultTableCellRen
      */
     protected boolean isRowConsistentAcrossColumns(JTable table, int row) {
 
-        boolean ok = true;
-        if (table.getColumnCount() > 2) { // don't colour single datasets
+        if (table.getColumnCount() <= 2) // don't colour single datasets
+        	return false;
 
-            Object test = table.getModel().getValueAt(row, 1);
-            for (int col = 1; col < table.getColumnCount(); col++) {
-                Object value = table.getModel().getValueAt(row, col);
+        Object test = table.getModel().getValueAt(row, 1);
+        for (int col = 1; col < table.getColumnCount(); col++) {
+        	Object value = table.getModel().getValueAt(row, col);
 
-                // Ignore empty cells
-                if (value == null) {
-                    //
-                    ok = false;
-                } else {
-                    if (value.toString().equals("")) {
-                        ok = false;
-                    }
-                }
+        	// Ignore empty cells
+        	if(value==null || value.toString().equals(""))
+        		return false;
 
-                if (!test.equals(value)) {
-                    ok = false;
-                }
-            }
-
-        } else {
-            ok = false;
+        	if (!test.equals(value))
+        		return false;
         }
-        return ok;
+        return true;
     }
     
     /**

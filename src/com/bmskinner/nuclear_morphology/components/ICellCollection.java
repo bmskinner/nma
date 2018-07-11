@@ -26,6 +26,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
@@ -57,7 +59,7 @@ public interface ICellCollection
      * 
      * @param s
      */
-    void setName(String s);
+    void setName(@NonNull String s);
 
     /**
      * Check if the collection has real cells, or is a virtual collection with
@@ -108,7 +110,7 @@ public interface ICellCollection
      * 
      * @return
      */
-    Set<ICell> getCells(File f);
+    Set<ICell> getCells(@NonNull File f);
 
     /**
      * Test if the collection contains cells from the given source file
@@ -116,7 +118,7 @@ public interface ICellCollection
      * @param imageFile
      * @return
      */
-    boolean hasCells(File imageFile);
+    boolean hasCells(@NonNull File imageFile);
 
     /**
      * Get the UUIDs of all the cells in the collection
@@ -139,7 +141,7 @@ public interface ICellCollection
      *            the file to search
      * @return the nuclei, or an empty collection if no nuclei are present
      */
-    Set<Nucleus> getNuclei(File imageFile);
+    Set<Nucleus> getNuclei(@NonNull File imageFile);
 
     /**
      * Test if the collection contains nuclei from the given source file
@@ -147,14 +149,14 @@ public interface ICellCollection
      * @param imageFile
      * @return
      */
-    boolean hasNuclei(File imageFile);
+    boolean hasNuclei(@NonNull File imageFile);
 
     /**
      * Add the given cell to the collection
      * 
      * @param r
      */
-    void addCell(ICell c);
+    void addCell(@NonNull ICell c);
 
     /**
      * Replace the cell with the same ID as the given cell with the new copy
@@ -162,7 +164,7 @@ public interface ICellCollection
      * @param c
      *            the replacement cell
      */
-    void replaceCell(ICell c);
+    void replaceCell(@NonNull ICell c);
 
     /**
      * Get the cell with the given UUID
@@ -170,7 +172,7 @@ public interface ICellCollection
      * @param id
      * @return
      */
-    ICell getCell(UUID id);
+    ICell getCell(@NonNull UUID id);
 
     /**
      * Get the type of nucleus this collection should contain
@@ -186,7 +188,7 @@ public interface ICellCollection
      * @param c
      *            the cell to remove
      */
-    void removeCell(ICell c);
+    void removeCell(@NonNull ICell c);
 
     /**
      * Get the number of cells in the collection
@@ -215,9 +217,15 @@ public interface ICellCollection
      * @param cell
      * @return
      */
-    boolean contains(ICell cell);
+    boolean contains(@NonNull ICell cell);
 
-    boolean contains(UUID cellID);
+    /**
+     * Test if a cell with the given id is present in the collection
+     * 
+     * @param cellID the id of the cell
+     * @return
+     */
+    boolean contains(@NonNull UUID cellID);
 
     /**
      * Test if the given cell object is present (== test)
@@ -225,7 +233,7 @@ public interface ICellCollection
      * @param cell
      * @return
      */
-    boolean containsExact(ICell cell);
+    boolean containsExact(@NonNull ICell cell);
 
     /**
      * Check if the collection contains cells locked from editing
@@ -280,7 +288,7 @@ public interface ICellCollection
     /**
      * Set the output folder of the collection
      */
-    void setOutputFolder(File folder);
+    void setOutputFolder(@NonNull File folder);
 
     /**
      * Get the distinct source image file list for all nuclei in the collection
@@ -305,7 +313,7 @@ public interface ICellCollection
      * 
      * @param id
      */
-    void removeSignalGroup(UUID id);
+    void removeSignalGroup(@NonNull UUID id);
 
     /**
      * Get the signal group with the given ID, if present
@@ -313,7 +321,7 @@ public interface ICellCollection
      * @param signalGroup
      * @return the signal group, or null if not present
      */
-    Optional<ISignalGroup> getSignalGroup(UUID signalGroup);
+    Optional<ISignalGroup> getSignalGroup(@NonNull UUID signalGroup);
 
     /**
      * Test if the collection has a signal group with the given ID
@@ -321,7 +329,7 @@ public interface ICellCollection
      * @param signalGroup
      * @return
      */
-    boolean hasSignalGroup(UUID signalGroup);
+    boolean hasSignalGroup(@NonNull UUID signalGroup);
 
     /**
      * Get the signal groups in this collection
@@ -336,7 +344,7 @@ public interface ICellCollection
      * @param newID
      * @param newGroup
      */
-    void addSignalGroup(UUID newID, ISignalGroup newGroup);
+    void addSignalGroup(@NonNull UUID newID, @NonNull ISignalGroup newGroup);
 
     /**
      * Get the signal manager for the collection
@@ -362,12 +370,11 @@ public interface ICellCollection
     void updateVerticalNuclei();
 
     /**
-     * Attempt to update the source image folder to the given directory
+     * Update the source image folder to the given directory for each cell
      * 
      * @param expectedImageDirectory
-     * @return true on success
      */
-    boolean updateSourceFolder(File expectedImageDirectory);
+    void setSourceFolder(@NonNull File expectedImageDirectory);
 
     /**
      * Get the nucleus in the collection most similar to the median profile
@@ -396,7 +403,7 @@ public interface ICellCollection
      * @param d2
      * @return
      */
-    int countShared(IAnalysisDataset d2);
+    int countShared(@NonNull IAnalysisDataset d2);
 
     /**
      * Count the number of cells shared between this collection and another
@@ -405,7 +412,7 @@ public interface ICellCollection
      * @param d2
      * @return
      */
-    int countShared(ICellCollection d2);
+    int countShared(@NonNull ICellCollection d2);
 
     /**
      * Set the number of cells in the collection that are shared with another
@@ -416,7 +423,7 @@ public interface ICellCollection
      * @param i
      *            the number of shared nuclei
      */
-    void setSharedCount(ICellCollection d2, int i);
+    void setSharedCount(@NonNull ICellCollection d2, int i);
 
     /*
      * METHODS FOR GETTING COLLECTION STATISTICS

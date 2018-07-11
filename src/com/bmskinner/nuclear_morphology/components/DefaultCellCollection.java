@@ -1237,32 +1237,16 @@ public class DefaultCellCollection implements ICellCollection {
 
     }
 
-    public boolean updateSourceFolder(File newFolder) {
-        File oldFile = this.getFolder();
-        boolean ok = false;
-        if (newFolder.exists()) {
+    @Override
+    public void setSourceFolder(File newFolder) {
+        File oldFile = getFolder();
+        if(!newFolder.exists())
+        	return;   
+        folder = newFolder;
+        getCells().stream()
+	        .flatMap(c->c.getNuclei().stream())
+	        .forEach(n->n.setSourceFolder(newFolder));
 
-            try {
-                this.folder = newFolder;
-
-                for (Nucleus n : this.getNuclei()) {
-                    n.updateSourceFolder(newFolder);
-                }
-                ok = true;
-
-            } catch (IllegalArgumentException e) {
-                // one of the nuclei failed to update
-                // reset all to previous
-                warn("At least one nucleus did not update folder location properly");
-                this.folder = oldFile;
-
-                for (Nucleus n : this.getNuclei()) {
-                    n.updateSourceFolder(oldFile); 
-                }
-                ok = false;
-            }
-        }
-        return ok;
     }
 
     /**

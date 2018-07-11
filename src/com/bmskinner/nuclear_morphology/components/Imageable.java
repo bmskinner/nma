@@ -25,6 +25,8 @@ import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
 
@@ -203,36 +205,27 @@ public interface Imageable {
      */
     String getSourceFileNameWithoutExtension();
 
-    /**
-     * Update the image source folder to the given new folder
-     * 
-     * @param newFolder
-     */
-    void updateSourceFolder(File newFolder);
 
     /**
      * Set the image file the component was found in
      * 
-     * @param sourceFile
-     *            the file
+     * @param sourceFile the file
      */
-    void setSourceFile(File sourceFile);
+    void setSourceFile(@NonNull File sourceFile);
 
     /**
      * Set the RGB channel the component was detected in
      * 
-     * @param channel
-     *            the channel
+     * @param channel the channel
      */
     void setChannel(int channel);
 
     /**
      * Set the folder the source image file belongs to
      * 
-     * @param sourceFolder
-     *            the folder
+     * @param sourceFolder the folder
      */
-    void setSourceFolder(File sourceFolder);
+    void setSourceFolder(@NonNull File sourceFolder);
 
     /**
      * Translate the given coordinate from the template component image into the

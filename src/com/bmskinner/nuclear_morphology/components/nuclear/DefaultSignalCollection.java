@@ -55,6 +55,11 @@ public class DefaultSignalCollection implements ISignalCollection {
      */
     private Map<UUID, List<INuclearSignal>> collection = new LinkedHashMap<UUID, List<INuclearSignal>>();
 
+    /**
+     * Create an empty signal collection
+     * 
+     * @param s
+     */
     public DefaultSignalCollection() {
     }
 

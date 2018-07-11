@@ -96,8 +96,7 @@ public class DefaultNucleus extends ProfileableCellularComponent implements Nucl
     /**
      * Construct from a template Nucleus
      * 
-     * @param n
-     *            the template
+     * @param n the template
      * @throws UnprofilableObjectException
      */
     protected DefaultNucleus(Nucleus n) throws UnprofilableObjectException {

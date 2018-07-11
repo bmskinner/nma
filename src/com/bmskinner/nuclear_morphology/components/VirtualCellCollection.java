@@ -495,8 +495,8 @@ public class VirtualCellCollection implements ICellCollection {
     }
 
     @Override
-    public boolean updateSourceFolder(File expectedImageDirectory) {
-        return parent.getCollection().updateSourceFolder(expectedImageDirectory);
+    public void setSourceFolder(File expectedImageDirectory) {
+        parent.getCollection().setSourceFolder(expectedImageDirectory);
     }
 
     @Override

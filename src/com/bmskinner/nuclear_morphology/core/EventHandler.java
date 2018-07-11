@@ -697,7 +697,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                 }
                 
                 Runnable wrk = new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
-                task.run();
+                wrk.run();
             }
             fine("All root datasets attempted to be saved");
         };

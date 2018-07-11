@@ -927,17 +927,11 @@ public class AnalysisDataset implements IAnalysisDataset {
         fine("Target folder contains at least one image");
 
         fine("Updating dataset image paths");
-        boolean ok = this.getCollection().updateSourceFolder(expectedImageDirectory);
-        if (!ok) {
-            warn("Error updating dataset image paths; update cancelled");
-        }
+        this.getCollection().setSourceFolder(expectedImageDirectory);
 
         fine("Updating child dataset image paths");
         for (IAnalysisDataset child : this.getAllChildDatasets()) {
-            ok = child.getCollection().updateSourceFolder(expectedImageDirectory);
-            if (!ok) {
-                warn("Error updating child dataset image paths; update cancelled");
-            }
+             child.getCollection().setSourceFolder(expectedImageDirectory);
         }
 
         log("Updated image paths to new folder location");
