@@ -838,8 +838,9 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
         MeasurementScale scale = GlobalOptions.getInstance().getScale();
 
         int nComparisons = (options.datasetCount()*(options.datasetCount()-1))/2;
+        nComparisons *= PlottableStatistic.getNucleusStats().size(); // correct for each set of analyses also
         // add columns
-        DecimalFormat df = new DecimalFormat("#0.0000");
+        DecimalFormat df = new DecimalFormat(DEFAULT_PROBABILITY_FORMAT);
         for (IAnalysisDataset dataset : options.getDatasets()) {
 
             double[] d1Values = dataset.getCollection().getRawValues(stat, CellularComponent.NUCLEUS,
