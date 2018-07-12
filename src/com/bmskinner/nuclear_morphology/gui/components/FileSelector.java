@@ -191,13 +191,13 @@ public class FileSelector {
      * @param defaultFolder the default folder for the file chooser
      * @return the selected folder, or null if cancelled or error
      */
-    public static @Nullable File chooseFolder(@Nullable File defaultFolder){
+    public static @Nullable File chooseFolder(@Nullable String title, @Nullable File defaultFolder){
         
     	if(defaultFolder!=null && !defaultFolder.exists())
     		defaultFolder=null;
     	
         JFileChooser fc = new JFileChooser(defaultFolder); // if null, will be home
-
+        fc.setDialogTitle(title);
         fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         int returnVal = fc.showOpenDialog(fc);
@@ -269,7 +269,7 @@ public class FileSelector {
         	return null;
 
         File defaultDir = im.get().getFolder();
-        return chooseFolder(defaultDir);
+        return chooseFolder(null, defaultDir);
     }
     
     
@@ -289,7 +289,7 @@ public class FileSelector {
         	return null;
         
         File defaultDir =  im.get().getFolder();
-        return chooseFolder(defaultDir);
+        return chooseFolder(null, defaultDir);
     }
     
     /**

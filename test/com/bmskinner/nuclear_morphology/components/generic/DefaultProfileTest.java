@@ -1044,12 +1044,14 @@ public class DefaultProfileTest {
 			
 	@Test
 	public void interpolationShouldLinearExtend() throws Exception {
-		fail("Not yet implemented");
+		IProfile test = profile.interpolate(profile.size()*2);
+		assertEquals(profile.size()*2, test.size());
 	}
 	
 	@Test
 	public void interpolationShouldShrinkWhenGivenLowerLength() throws ProfileException {
-		fail("Not yet implemented");
+		IProfile test = profile.interpolate(profile.size()/2);
+		assertEquals(profile.size()/2, test.size());
 	}
 	
 	@Test

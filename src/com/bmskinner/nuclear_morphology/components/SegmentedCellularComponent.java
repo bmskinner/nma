@@ -165,7 +165,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @author ben
 	 * @since 1.13.8
 	 */
-	private class DefaultProfile implements IProfile {
+	public class DefaultProfile implements IProfile {
 
 		private static final long serialVersionUID = 1L;
 		protected final float[] array;
@@ -175,7 +175,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param values the array to use
 		 */
-		protected DefaultProfile(final float[] values) {
+		public DefaultProfile(final float[] values) {
 
 			if(values==null)
 				throw new IllegalArgumentException("Array is null");
@@ -190,7 +190,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param p the profile to copy
 		 */
-		protected DefaultProfile(@NonNull final IProfile p) {
+		public DefaultProfile(@NonNull final IProfile p) {
 			if (p==null)
 				throw new IllegalArgumentException("Profile is null");
 			if(p.size()!=getBorderLength())
@@ -207,7 +207,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param value the value for the profile to hold at each index
 		 */
-		protected DefaultProfile(final float value) {
+		public DefaultProfile(final float value) {
 			this.array = new float[getBorderLength()];
 			for (int i = 0; i < this.array.length; i++) {
 				array[i] = value;
@@ -1106,7 +1106,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @since 1.13.8
 	 *
 	 */
-	private class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
+	public class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
 
 		private static final long serialVersionUID = 1L;
 		private final BorderSegmentTree segments;
@@ -1154,7 +1154,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @param values
 		 * @throws Exception
 		 */
-		protected DefaultSegmentedProfile(float[] values) {
+		public DefaultSegmentedProfile(float[] values) {
 			super(values);
 			segments = new BorderSegmentTree(getID());
 		}
@@ -1879,7 +1879,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @author bms41
 		 *
 		 */
-		private class BorderSegmentTree implements IBorderSegment {
+		public class BorderSegmentTree implements IBorderSegment {
 			private static final long serialVersionUID = 1L;
 			protected final BorderSegmentTree parent;
 			private final List<BorderSegmentTree> leaves = new LinkedList<>();
@@ -1949,7 +1949,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return leaves.stream().collect(Collectors.toList());
 			}
 			
-			private void splitAt(int index, @NonNull UUID a, @NonNull UUID b) throws ProfileException {
+			public void splitAt(int index, @NonNull UUID a, @NonNull UUID b) throws ProfileException {
 				if(!contains(index))
 					throw new IllegalArgumentException("Index is outside segment bounds");
 				

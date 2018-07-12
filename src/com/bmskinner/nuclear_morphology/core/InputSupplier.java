@@ -99,10 +99,28 @@ public interface InputSupplier {
 	
 	/**
 	 * Request a folder input.
+	 * @param defaultFolder the default folder
 	 * @return
 	 * @throws RequestCancelledException
 	 */
 	File requestFolder(@Nullable File defaultFolder) throws RequestCancelledException;
+	
+	/**
+	 * Request a folder input.
+	 * @param message the title bar message
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFolder(@Nullable String message) throws RequestCancelledException;
+	
+	/**
+	 * Request a folder input.
+	 * @param message the title bar message
+	 * @param defaultFolder the default folder
+	 * @return
+	 * @throws RequestCancelledException
+	 */
+	File requestFolder(@Nullable String message, @Nullable File defaultFolder) throws RequestCancelledException;
 	
 	/**
 	 * Request a file input.
@@ -128,5 +146,7 @@ public interface InputSupplier {
 	 *
 	 */
 	public class RequestCancelledException extends Exception {	}
+
+	
 
 }

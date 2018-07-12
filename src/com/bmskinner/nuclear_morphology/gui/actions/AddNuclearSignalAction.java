@@ -19,6 +19,7 @@
 package com.bmskinner.nuclear_morphology.gui.actions;
 
 import java.io.File;
+import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -26,8 +27,11 @@ import com.bmskinner.nuclear_morphology.analysis.DefaultAnalysisWorker;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalDetectionMethod;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
+import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
+import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.components.options.INuclearSignalOptions;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
@@ -54,12 +58,21 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     @Override
     public void run() {
         try {
+        	File defaultDir = null;
+        	Optional<IAnalysisOptions> op = dataset.getAnalysisOptions();
+        	if(op.isPresent()) {
+        		Optional<IDetectionOptions> im = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
+        		if(im.isPresent())
+        			defaultDir = im.get().getFolder();
+        	}
+        	
+        	try {
+        		folder = eh.getInputSupplier().requestFolder("Choose FISH signal image folder", defaultDir);
+        	} catch(RequestCancelledException e) {
+        		cancel();
+        		return;
+        	}
 
-            folder = FileSelector.chooseFISHDirectory(dataset);
-            if (folder==null) {
-                cancel();
-                return;
-            }
             // add dialog for non-default detection options
             SignalImageProber analysisSetup = new SignalImageProber(dataset, folder);
 
@@ -91,13 +104,9 @@ public class AddNuclearSignalAction extends SingleDatasetResultAction {
     @Override
     public void finished() {
         finer("Finished signal detection");
-        this.cleanup(); // remove the property change listener
-//        fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-        
+        cleanup(); // remove the property change listener
         getDatasetEventHandler().fireDatasetEvent(DatasetEvent.ADD_DATASET, dataset);
-
         cancel();
-
     }
 
 }

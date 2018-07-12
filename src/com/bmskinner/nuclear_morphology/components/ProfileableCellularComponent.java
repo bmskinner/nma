@@ -651,7 +651,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
             ISegmentedProfile profile = profileMap.get(type);
             profile.reverse();
-            profileMap.put(type, profile);
+            assignProfile(type, profile);
         }
 
         // replace the tag positions also

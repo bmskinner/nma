@@ -338,11 +338,6 @@ public class DummyCellularComponent implements CellularComponent {
 	}
 
 	@Override
-	public void updateSourceFolder(File newFolder) {
-	    component.updateSourceFolder(newFolder);
-	}
-
-	@Override
 	public void alignVertically() {
 		component.alignVertically();
 	}
@@ -376,6 +371,12 @@ public class DummyCellularComponent implements CellularComponent {
 	
 	public String toString(){
 	    return component.toString();
+	}
+
+	@Override
+	public double wrapIndex(double d) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

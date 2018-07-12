@@ -24,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.core.EventHandler;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.ProgressBarAcceptor;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
 
@@ -40,35 +41,25 @@ public class ReplaceSourceImageDirectoryAction extends SingleDatasetResultAction
 
     @Override
     public void run() {
-        try {
 
-            if (!dataset.hasMergeSources()) {
+    	if (!dataset.hasMergeSources()) {
 
-                DirectoryChooser localOpenDialog = new DirectoryChooser("Select new directory of images...");
-                String folderName = localOpenDialog.getDirectory();
+    		try {
+    			File folder = eh.getInputSupplier().requestFolder("Select new directory of images...");
+    			log("Updating folder to " + folder.getAbsolutePath());
 
-                if (folderName != null) {
+    			dataset.updateSourceImageDirectory(folder);
 
-                    File newFolder = new File(folderName);
+    			finished();
 
-                    log("Updating folder to " + folderName);
+    		} catch (RequestCancelledException e) {
+    			cancel();
+    		}
+    	} else {
+    		warn("Dataset is a merge; cancelling");
+    		cancel();
+    	}
 
-                    dataset.updateSourceImageDirectory(newFolder);
-
-                    finished();
-
-                } else {
-                    log("Update cancelled");
-                    cancel();
-                }
-            } else {
-                warn("Dataset is a merge; cancelling");
-                cancel();
-            }
-
-        } catch (Exception e) {
-            error("Error in folder update: " + e.getMessage(), e);
-        }
     }
 
     @Override
