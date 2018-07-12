@@ -97,11 +97,15 @@ public class FluorescentNucleusFinder extends CellFinder {
                     list.add(CellFactory.buildInstance(n));
                 }
             }
-        } catch (Exception e) {
-            warn("Error searching in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
+        } catch (MissingOptionException e) {
+        	warn("No options for nucleus creation in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
+        } finally {
+        	fireProgressEvent();
         }
+//            warn("Error searching in image " + imageFile.getAbsolutePath()+": "+e.getMessage());
+//        }
 
-        fireProgressEvent();
+        
         return list;
 
     }
@@ -168,9 +172,17 @@ public class FluorescentNucleusFinder extends CellFinder {
         int i=0;
         for (Roi r: rois.keySet()) {
             StatsMap s = rois.get(r);
-            Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
-            list.add(n);
-            i++;
+
+            try {
+            	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
+            	list.add(n);
+            } catch(ComponentCreationException e) {
+            	fine("Unable to create nucleus from roi", e);
+            } finally {
+            	i++;
+            }
+            
+            
         }
         return list;
 
@@ -178,11 +190,8 @@ public class FluorescentNucleusFinder extends CellFinder {
 
     private Nucleus makeNucleus(final Roi roi, final File f, final IDetectionOptions nuclOptions, int objectNumber,
             final StatsMap values) throws ComponentCreationException {
-
-        // measure the area, density etc within the nucleus
-//        StatsMap values = gd.measure(roi, ip);
         
-        fine("Roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
+        fine("Creating nucleus from roi "+f.getName()+" area: "+values.get(StatsMap.AREA));
 
         // save the position of the roi, for later use
         int xbase = (int) roi.getXBase();

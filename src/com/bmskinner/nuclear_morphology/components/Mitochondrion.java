@@ -108,4 +108,9 @@ public class Mitochondrion extends AbstractCellularComponent implements IMitocho
 		return null;
 	}
 
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
+	}
+
 }

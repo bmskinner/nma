@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -76,7 +77,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @param channel the colour channel the object was detected in
 	 * @param position the bounding box of the object in the format of {@link Imageable::getPosition }
 	 */
-	public SegmentedCellularComponent(Roi roi, IPoint centreOfMass, File f, int channel, int[] position) {
+	public SegmentedCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position) {
 		super(roi, centreOfMass, f, channel, position);
 	}
 
@@ -86,20 +87,19 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @param c
 	 * @throws UnprofilableObjectException
 	 */
-	public SegmentedCellularComponent(final CellularComponent c) throws UnprofilableObjectException {
+	public SegmentedCellularComponent(@NonNull final CellularComponent c) throws UnprofilableObjectException {
 		super(c);
 	}
 	
 	@Override
-	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
 
         if (!this.hasProfile(type))
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
         try {
-        	ISegmentedProfile template = profileMap.get(type);
-        	return new DefaultSegmentedProfile(template);
-        } catch (java.lang.IndexOutOfBoundsException | ProfileException e) {
+        	return new DefaultSegmentedProfile(super.getProfile(type));
+        } catch (IndexOutOfBoundsException | ProfileException e) {
             stack("Error getting profile " + type, e);
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
@@ -109,18 +109,30 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	public void setProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
         if (segsLocked)
             return;
+
+        if (this.getBorderLength() != profile.size())
+            throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
+        
+
+        try {
+    		assignProfile(type, new DefaultSegmentedProfile(profile));
+		} catch (IndexOutOfBoundsException | ProfileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
         // Replace frankenprofiles completely
-        if (type.equals(ProfileType.FRANKEN)) {
-            this.profileMap.put(type, profile);
-        } else { // Otherwise update the segment lists for all other profile types
-
-            for (ProfileType t : profileMap.keySet()) {
-                if (!t.equals(ProfileType.FRANKEN)) {
-                    this.profileMap.get(type).setSegments(profile.getSegments());
-                }
-            }
-        }
+//        if (type.equals(ProfileType.FRANKEN)) {
+//
+//            assignProfile(type, new DefaultSegmentedProfile(profile));
+//        } else { // Otherwise replace the profile
+//        	try {
+//        		assignProfile(type, new DefaultSegmentedProfile(profile));
+//			} catch (IndexOutOfBoundsException | ProfileException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//        }
     }
 	
 	@Override
@@ -132,9 +144,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         if (!this.hasBorderTag(tag))
             throw new UnavailableBorderTagException("Tag " + tag + " is not present");
 
-        if (this.getBorderLength() != p.size())
-            throw new IllegalArgumentException("Input profile does not match border length of object");
-
         // fetch the index of the pointType (the zero of the input profile)
         int pointIndex = this.borderTags.get(tag);
 
@@ -143,8 +152,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         
         try {
             
-            this.setProfile(type, new DefaultSegmentedProfile(p).offset(-pointIndex));
-        } catch (ProfileException e) {
+            setProfile(type, (p).offset(-pointIndex));
+        } catch (ProfileException e) { // restore the old profile
             stack("Error setting profile " + type + " at " + tag, e);
             setProfile(type, oldProfile);
         }
@@ -156,10 +165,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @author ben
 	 * @since 1.13.8
 	 */
-	public class DefaultProfile implements IProfile {
+	private class DefaultProfile implements IProfile {
 
 		private static final long serialVersionUID = 1L;
-
 		protected final float[] array;
 
 		/**
@@ -167,12 +175,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param values the array to use
 		 */
-		public DefaultProfile(final float[] values) {
+		protected DefaultProfile(final float[] values) {
 
 			if(values==null)
 				throw new IllegalArgumentException("Array is null");
 			if (values.length!=SegmentedCellularComponent.this.getBorderLength())
-				throw new IllegalArgumentException("Input array does not match object border length");
+				throw new IllegalArgumentException(String.format("Input array length (%d) does not match border length (%d) in DefaultProfile constructor", values.length, getBorderLength()));
 			this.array = values;
 		}
 
@@ -182,11 +190,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param p the profile to copy
 		 */
-		public DefaultProfile(@NonNull final IProfile p) {
+		protected DefaultProfile(@NonNull final IProfile p) {
 			if (p==null)
 				throw new IllegalArgumentException("Profile is null");
 			if(p.size()!=getBorderLength())
-				throw new IllegalArgumentException("Profile does not match object border length");
+				throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) in DefaultProfile constructor", p.size(), getBorderLength()));
 
 			this.array = new float[p.size()];
 			for (int i = 0; i < p.size(); i++) {
@@ -199,7 +207,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param value the value for the profile to hold at each index
 		 */
-		public DefaultProfile(final float value) {
+		protected DefaultProfile(final float value) {
 			this.array = new float[getBorderLength()];
 			for (int i = 0; i < this.array.length; i++) {
 				array[i] = value;
@@ -251,11 +259,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return array[index];
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getMax()
-		 */
 		@Override
 		public double getMax() {
 			double max = -Double.MAX_VALUE;
@@ -266,12 +269,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return max;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getIndexOfMax(components.generic.
-		 * BooleanProfile)
-		 */
 		@Override
 		public int getIndexOfMax(@NonNull BooleanProfile limits) throws ProfileException {
 			if ( limits.size() != array.length)
@@ -291,21 +288,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						return maxIndex;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getIndexOfMax()
-		 */
 		@Override
 		public int getIndexOfMax() throws ProfileException {
 			return getIndexOfMax( new BooleanProfile(this, true) );
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getProportionalIndex(double)
-		 */
 		@Override
 		public int getIndexOfFraction(double d) {
 			if (d < 0 || d > 1)
@@ -318,11 +305,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return target;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getIndexProportion(int)
-		 */
 		@Override
 		public double getFractionOfIndex(int index) {
 			if (index < 0 || index >= array.length)
@@ -330,11 +312,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return (double) index / (double) array.length;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getMin()
-		 */
 		@Override
 		public double getMin() {
 			double min = Double.MAX_VALUE;
@@ -346,12 +323,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return min;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getIndexOfMin(components.generic.
-		 * BooleanProfile)
-		 */
 		@Override
 		public int getIndexOfMin(@NonNull BooleanProfile limits) throws ProfileException {
 
@@ -371,12 +342,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				throw new ProfileException("No valid index for minimum value");
 						return minIndex;
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getIndexOfMin()
-		 */
+		
 		@Override
 		public int getIndexOfMin() throws ProfileException {
 			return getIndexOfMin(new BooleanProfile(this, true));
@@ -414,14 +380,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return profile1.interpolate(profile2.size()); // profile 1 is smaller; interpolate to profile 2 length
 		}
 
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * components.generic.IProfile#absoluteSquareDifference(components.generic.
-		 * IProfile)
-		 */
 		@Override
 		public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
 
@@ -456,21 +414,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return difference;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#copy()
-		 */
 		@Override
 		public IProfile copy() {
 			return new DefaultProfile(array);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#offset(int)
-		 */
 		@Override
 		public IProfile offset(int j) throws ProfileException {	
 			return new DefaultProfile(offset(array, j));
@@ -491,11 +439,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return newArray;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#smooth(int)
-		 */
 		@Override
 		public IProfile smooth(int windowSize) {
 			if(windowSize<2)
@@ -533,11 +476,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return values;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#reverse()
-		 */
 		@Override
 		public void reverse() {
 
@@ -549,11 +487,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#interpolate(int)
-		 */
 		@Override
 		public IProfile interpolate(int newLength) throws ProfileException {
 
@@ -566,23 +499,22 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			for (int i = 0; i < newLength; i++) {
 				// we have a point in the new curve.
 				// we want to know which points it lay between in the old curve
-				float oldIndex = ((float) i / (float) newLength) * array.length; // get
-				// the
-				// fractional
-				// index
-				// position
-				// needed
+				float oldIndex = ((float) i / (float) newLength) * array.length;
 
 				// get the value in the old profile at the given fractional index
 				// position
 				newArray[i] = interpolateValue(oldIndex);
 			}
+			
+			// We can't use a DefaultProfile for this because the length is tied to the component border
 			return new FloatProfile(newArray);
 		}
 
 		/**
 		 * Interpolate the array to the given length, and return as a new array
 		 * 
+		 * @param arr the array to interpolate
+		 * @param length the new length
 		 * @return
 		 */
 		private float[] interpolate(float[] arr, int length) {
@@ -642,68 +574,33 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		/**
-		 * Take an index position from a non-normalised profile. Normalise it Find
-		 * the corresponding angle in the median curve. Interpolate as needed
+		 * Find a value in the profile via linear interpolation.
+		 * For example interpolateValue(12.4) will return the value 40%
+		 * between the values at indexes 12 and 13.
 		 * 
-		 * @param normIndex
-		 *            the fractional index position to find within this profile
+		 * @param normIndex the fractional index position to find within this profile.
 		 * @return an interpolated value
 		 */
 		private float interpolateValue(float normIndex) {
 
-			// convert index to 1 window boundaries
-			// This allows us to see the array indexes above and below the desired
-			// fractional index. From these, we can interpolate the fractional
-			// component.
-			// NOTE: this does not account for curves. Interpolation is linear.
-			int index1 = Math.round(normIndex);
-			int index2 = index1 > normIndex ? index1 - 1 : index1 + 1;
-
-			// Decide which of the two indexes is the higher, and which is the lower
-			int indexLower = index1 < index2 ? index1 : index2;
-
-			int indexHigher = index2 > index1 ? index2 : index1;
-
-			// System.out.println("Set indexes "+normIndex+":
-			// "+indexLower+"-"+indexHigher);
-
-			// wrap the arrays
-			indexLower = CellularComponent.wrapIndex(indexLower, array.length);
-			indexHigher = CellularComponent.wrapIndex(indexHigher, array.length);
-			// System.out.println("Wrapped indexes "+normIndex+":
-			// "+indexLower+"-"+indexHigher);
+			// Find the indexes to interpolate between
+			int indexLower = wrapIndex( (int) Math.floor(normIndex));
+			int indexUpper = wrapIndex( (int) Math.ceil(normIndex));
 
 			// get the values at these indexes
-			float valueHigher = array[indexHigher];
 			float valueLower = array[indexLower];
-			// System.out.println("Wrapped values "+normIndex+": "+valueLower+" and
-			// "+valueHigher);
+			float valueUpper = array[indexUpper];
 
-			// calculate the difference between values
-			// this can be negative
-			float valueDifference = valueHigher - valueLower;
-			// System.out.println("Difference "+normIndex+": "+valueDifference);
+			// calculate the difference between values; this can be negative
+			float valueDifference = valueUpper - valueLower;
 
-			// calculate the distance into the region to go
+			// calculate the fractional distance
 			float offset = normIndex - indexLower;
-			// System.out.println("Offset "+normIndex+": "+offset);
-
-			// add the offset to the lower index
-			float positionToFind = indexLower + offset;
-			positionToFind = (float) CellularComponent.wrapIndex(positionToFind, array.length);
-			// System.out.println("Position to find "+normIndex+":
-			// "+positionToFind);
 
 			// calculate the value to be added to the lower index value
-			float newValue = valueDifference * offset; // 0 for 0, full difference
-			// for 1
-			// System.out.println("New value "+normIndex+": "+newValue);
+			float newValue = valueDifference * offset;
 
-			float linearInterpolatedValue = newValue + valueLower;
-			// System.out.println("Interpolated "+normIndex+":
-			// "+linearInterpolatedValue);
-
-			return linearInterpolatedValue;
+			return valueLower+ newValue;
 		}
 
 
@@ -749,11 +646,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * points <minimaLookupDistance> ahead and behind are checked. Each should
 		 * be greater than the value before. One exception is allowed, to account
 		 * for noisy data. Returns the indexes of minima
-		 */
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getLocalMinima(int)
 		 */
 		@Override
 		public BooleanProfile getLocalMinima(int windowSize) {
@@ -831,11 +723,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return minimaProfile;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getLocalMinima(int, double)
-		 */
 		@Override
 		public BooleanProfile getLocalMinima(int windowSize, double threshold) {
 			BooleanProfile minima = getLocalMinima(windowSize);
@@ -853,11 +740,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new BooleanProfile(values);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getLocalMaxima(int)
-		 */
 		@Override
 		public BooleanProfile getLocalMaxima(int windowSize) {
 
@@ -902,11 +784,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new BooleanProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getLocalMaxima(int, double)
-		 */
 		@Override
 		public BooleanProfile getLocalMaxima(int windowSize, double threshold) {
 			BooleanProfile maxima = getLocalMaxima(windowSize);
@@ -934,10 +811,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			float[] result = new float[windowSize * 2 + 1];
 
-			float[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE); // slots
-			// for
-			// previous
-			// angles
+			float[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE);
 			float[] nextValues = getValues(index, windowSize, IProfile.ARRAY_AFTER);
 
 			// need to reverse the previous array
@@ -952,11 +826,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new FloatProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getSubregion(int, int)
-		 */
 		@Override
 		public IProfile getSubregion(int indexStart, int indexEnd) {
 
@@ -997,12 +866,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#getSubregion(components.nuclear.
-		 * NucleusBorderSegment)
-		 */
+
 		@Override
 		public IProfile getSubregion(@NonNull IBorderSegment segment) {
 
@@ -1015,11 +879,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return getSubregion(segment.getStartIndex(), segment.getEndIndex());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#calculateDeltas(int)
-		 */
 		@Override
 		public IProfile calculateDeltas(int windowSize) {
 			if(windowSize<=0)
@@ -1049,11 +908,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(deltas);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#power(double)
-		 */
 		@Override
 		public IProfile power(double exponent) {
 			float[] values = new float[this.size()];
@@ -1064,11 +918,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(values);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#absolute()
-		 */
 		@Override
 		public IProfile absolute() {
 			float[] values = new float[this.size()];
@@ -1079,11 +928,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(values);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#cumulativeSum()
-		 */
 		@Override
 		public IProfile cumulativeSum() {
 			float[] values = new float[array.length];
@@ -1096,11 +940,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(values);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#multiply(double)
-		 */
 		@Override
 		public IProfile multiply(double multiplier) {
 
@@ -1116,11 +955,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#multiply(components.generic.IProfile)
-		 */
 		@Override
 		public IProfile multiply(@NonNull IProfile multiplier) {
 			if (this.size() != multiplier.size()) {
@@ -1134,11 +968,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#divide(double)
-		 */
 		@Override
 		public IProfile divide(double divider) {
 
@@ -1154,11 +983,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#divide(components.generic.IProfile)
-		 */
 		@Override
 		public IProfile divide(@NonNull IProfile divider) {
 			if (this.size() != divider.size()) {
@@ -1172,11 +996,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#add(components.generic.IProfile)
-		 */
 		@Override
 		public IProfile add(@NonNull IProfile adder) {
 			if (this.size() != adder.size()) {
@@ -1190,11 +1009,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#add(double)
-		 */
 		@Override
 		public IProfile add(double value) {
 
@@ -1210,11 +1024,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#subtract(components.generic.IProfile)
-		 */
 		@Override
 		public IProfile subtract(@NonNull IProfile sub) {
 			if (this.size() != sub.size()) {
@@ -1241,11 +1050,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return new DefaultProfile(result);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.IProfile#toString()
-		 */
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
@@ -1259,25 +1063,24 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		/**
 		 * Given a list of ordered profiles, merge them into one contiguous profile
 		 * 
-		 * @param list
-		 *            the list of profiles to merge
+		 * @param profiles the profiles to merge
 		 * @return the merged profile
 		 */
-		public IProfile merge(List<IProfile> list) {
-			if (list == null || list.size() == 0) {
+		public IProfile merge(List<IProfile> profiles) {
+			if (profiles == null || profiles.size() == 0) {
 				throw new IllegalArgumentException("Profile list is null or empty");
 			}
 
 			int totalLength = 0;
-			for (IProfile p : list) {
+			for (IProfile p : profiles) {
 				totalLength += p.size();
 			}
 
 			float[] combinedArray = new float[totalLength];
 
 			int i = 0;
-
-			for (IProfile p : list) {
+			
+			for (IProfile p : profiles) {
 
 				for (int j = 0; j < p.size(); j++) {
 					combinedArray[i++] = (float) p.get(j);
@@ -1303,7 +1106,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	 * @since 1.13.8
 	 *
 	 */
-	public class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
+	private class DefaultSegmentedProfile extends DefaultProfile implements ISegmentedProfile {
 
 		private static final long serialVersionUID = 1L;
 		private final BorderSegmentTree segments;
@@ -1315,9 +1118,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @param list the list of segments to use
 		 * @throws ProfileException
 		 */
-		public DefaultSegmentedProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> list) throws ProfileException {
+		protected DefaultSegmentedProfile(@NonNull final IProfile p, @NonNull final List<IBorderSegment> list) throws ProfileException {
 			super(p);
-			// Default is one segment covering the whole profile. See single spotted pigs.
+			// The root segment is one segment covering the whole profile. See single spotted pigs.
 			segments = new BorderSegmentTree(getID());
 			for(IBorderSegment s : list){
 				segments.addMergeSource(s);
@@ -1331,7 +1134,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @throws ProfileException
 		 * @throws IndexOutOfBoundsException
 		 */
-		public DefaultSegmentedProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
+		protected DefaultSegmentedProfile(@NonNull final ISegmentedProfile profile) throws IndexOutOfBoundsException, ProfileException {
 			this(profile, profile.getSegments());
 		}
 
@@ -1341,7 +1144,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * 
 		 * @param profile
 		 */
-		public DefaultSegmentedProfile(@NonNull final IProfile profile) {
+		protected DefaultSegmentedProfile(@NonNull final IProfile profile) {
 			this(profile.toFloatArray());
 		}
 
@@ -1351,7 +1154,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @param values
 		 * @throws Exception
 		 */
-		public DefaultSegmentedProfile(float[] values) {
+		protected DefaultSegmentedProfile(float[] values) {
 			super(values);
 			segments = new BorderSegmentTree(getID());
 		}
@@ -1392,7 +1195,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * Get the index of the segment with the given id
 		 * @param id
 		 * @return
-		 * @throws UnavailableComponentException if the id is not present
+		 * @throws UnavailableComponentException if a segment with the id is not present
 		 */
 		private int getIndexOfSegment(@NonNull final UUID id) throws UnavailableComponentException {
 			if(!segments.hasMergeSource(id))
@@ -1404,8 +1207,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * Get the segments in order from the given segment
 		 * 
 		 * @param firstSeg the first segment in the profile
-		 * @return
-		 * @throws UnavailableComponentException 
+		 * @return the segments ordered from the desired first segment
+		 * @throws UnavailableComponentException if the desired first segment is not present in the profile
 		 */
 		private List<IBorderSegment> getSegmentsFrom(@NonNull IBorderSegment firstSeg) throws UnavailableComponentException {
 			
@@ -1423,11 +1226,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return result;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.ISegmentedProfile#getOrderedSegments()
-		 */
 		@Override
 		public List<IBorderSegment> getOrderedSegments() {
 
@@ -1691,21 +1489,45 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			IProfile newProfile = super.interpolate(length);
 			
 			List<IBorderSegment> newSegs = new ArrayList<>();
-
-			for (IBorderSegment s : getSegments()) {
-				
+			
+			// Interpolate the segments
+			
+			// single segment
+			if(!segments.hasMergeSources()) {
+				newSegs.add(new DefaultBorderSegment(0, length, length, segments.getID()));
+				return new SegmentedFloatProfile(newProfile, newSegs);
+			}
+			
+			// multiple child segments
+			
+			// Need to ensure the start and end indexes match for consecutive segments
+			// after the interpolation
+			
+			List<Integer> putativeStartPoints = new ArrayList<>();
+			
+			for (BorderSegmentTree s : segments.leaves) {
 				double prop = this.getFractionOfIndex(s.getStartIndex());
 				int newStart  = (int) Math.round((prop * length));
 				
-				double lengthProp = (double)s.length()/(double)size();
-				int newLength = (int) Math.round((lengthProp * s.length()));
+				putativeStartPoints.add(newStart);
+			}
+			
+			
+			// With the new start points, create the segments
+			
+			for(int i=0; i<putativeStartPoints.size(); i++) {
+
+				int newStart = putativeStartPoints.get(i);
+				int newEnd   = i==putativeStartPoints.size()-1 ? putativeStartPoints.get(0) : putativeStartPoints.get(i+1);
+				
+				int newLength = newStart<newEnd ? newEnd-newStart : newEnd + length-newStart;
 				
 				if(newLength<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
 					throw new ProfileException(String.format("Cannot interpolate to %d: segment length %d would be too short", length, newLength));
 				
-				newSegs.add(new DefaultBorderSegment(newStart, CellularComponent.wrapIndex(newStart+newLength, length), length, s.getID()));
-				
+				newSegs.add(new DefaultBorderSegment(newStart, newEnd, length, segments.leaves.get(i).getID()));
 			}
+
 			// assign new segments
 			return new SegmentedFloatProfile(newProfile, newSegs);
 		}
@@ -1783,19 +1605,53 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		@Override
 		public void reverse() {
 			super.reverse();
+			
+			if(!segments.hasMergeSources())
+				return;
+			
+			/*  
+			 *  Reverse the segments:
+			 *  
+			 *      0     10                   30   0
+			 *      |------|--------------------|---|
+			 *      
+			 *      s0->   s1->                 s2->
+			 *      
+			 *      becomes
+			 *      
+			 *      0   5                   25      0
+			 *      |---|--------------------|------|
+			 *      
+			 *      s2->s1->                 s0->
+			 *      
+			 *      
+			 *  It is a mirror image, but the start and end indexes swap because segments always 
+			 *  progress small index to large index:
+			 *      
+			 *      0   5                   25      0     10                   30   0
+			 *      |---|--------------------|------|------|--------------------|---|
+			 *      
+			 *      s2->s1->                 s0->   s0->   s1->                 s2->
+			 *      
+			 *      
+			 *      Hence we can subtract 2x the end index to get the new wrapped start 
+			 * 
+			 */
+					
+			
+			List<BorderSegmentTree> newSegs = new ArrayList<>();
+			for (BorderSegmentTree seg : segments.leaves) {
 
-			// Reverse the segments:
-			// in a profile of 100 if a segment began at 10 and ended at 20, 
-			// it should begin at 80 and end at 90
+				// mirror image
+				int newStart = wrapIndex(getBorderLength() - (2*seg.getEndIndex()));
 
-			// if is begins at 90 and ends at 10, it should begin at 10 and end at 90
-			List<IBorderSegment> oldSegs = getSegments();
+				newSegs.add(new BorderSegmentTree(seg.getID(), newStart, wrapIndex(newStart+seg.length()), segments));
+			}
+			
 			segments.clearMergeSources();
-			for (IBorderSegment seg : oldSegs) {
-
-				// invert the segment by swapping start and end
-				int newStart = (size() - 1) - seg.getEndIndex();
-				new BorderSegmentTree(seg.getID(), newStart, wrapIndex(newStart+seg.length()), segments);
+			Collections.reverse(newSegs);
+			for (BorderSegmentTree seg : newSegs) {
+				segments.addMergeSource(seg);
 			}
 		}
 
@@ -1816,77 +1672,64 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			IBorderSegment firstSegment = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
 			IBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
 			
-			
-			BorderSegmentTree oldSegs = segments;
+			List<BorderSegmentTree> newSegs = new ArrayList<>();
+
 			
 			// Create the new segment
 			int startIndex = firstSegment.getStartIndex();
 			int endIndex   = secondSegment.getEndIndex();
-			IBorderSegment mergedSegment = new BorderSegmentTree(id, startIndex, endIndex, segments);
+			BorderSegmentTree mergedSegment = new BorderSegmentTree(id, startIndex, endIndex, segments);
 			
 			mergedSegment.addMergeSource(firstSegment);
 			mergedSegment.addMergeSource(secondSegment);
 			
 			segments.clearMergeSources();
 			// Replace the two segments in this profile
-			for (IBorderSegment oldSegment : oldSegs.getMergeSources()) {
+			for (BorderSegmentTree oldSegment : segments.leaves) {
 
 				if (oldSegment.equals(firstSegment)) {
-					segments.addMergeSource(mergedSegment);
+					newSegs.add(mergedSegment);
 				} else if (oldSegment.equals(secondSegment)) {
 					// do nothing
 				} else {
 					// add the original segments
-					segments.addMergeSource(oldSegment);
+					newSegs.add(oldSegment);
 				}
 			}
+			
+			for (BorderSegmentTree seg : newSegs) {
+				segments.addMergeSource(seg);
+			}
 		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * components.generic.ISegmentedProfile#unmergeSegment(components.nuclear.
-		 * IBorderSegment)
-		 */
+		
 		@Override
 		public void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException {
 			// Check the segments belong to the profile
-			if (!this.contains(segment)) {
+			if (!this.contains(segment))
 				throw new IllegalArgumentException("Input segment is not part of this profile");
-			}
 
-			if (!segment.hasMergeSources()) {
+			if (!segment.hasMergeSources())
 				return;
-				//          throw new IllegalArgumentException("Segment does not have merge sources");
-			}
 
-			// Replace the two segments in this profile
-			List<IBorderSegment> oldSegs = this.getSegments();
-			List<IBorderSegment> newSegs = new ArrayList<IBorderSegment>();
+			List<BorderSegmentTree> newSegs = new ArrayList<>();
+			
+			for (BorderSegmentTree oldSegment : segments.leaves) {
 
-			int position = 0;
-			for (IBorderSegment oldSegment : oldSegs) {
+				if (oldSegment.equals(segment)) { // segment to unmerge
 
-				if (oldSegment.equals(segment)) {
-
-					// add each of the old segments
-					for (IBorderSegment mergedSegment : segment.getMergeSources()) {
-						mergedSegment.setPosition(position);
+					for (BorderSegmentTree mergedSegment : oldSegment.leaves) {
 						newSegs.add(mergedSegment);
-						position++;
 					}
 
-				} else {
-
-					// add the original segments
-					oldSegment.setPosition(position);
+				} else { // all other segments
 					newSegs.add(oldSegment);
 				}
-				position++;
 			}
-			IBorderSegment.linkSegments(newSegs);
-			this.setSegments(newSegs);
+
+			segments.clearMergeSources();
+			for (BorderSegmentTree seg : newSegs) {
+				segments.addMergeSource(seg);
+			}
 
 		}
 
@@ -1923,35 +1766,35 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			
 			if(segments.id.equals(segment.getID())) {
-				// splitting single segment
+				// splitting the single root segment
 				segments.clearMergeSources();
 				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), wrap(splitIndex-segments.getStartIndex()), segments));
 				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, wrap(segments.getStartIndex()-splitIndex), segments));	
-//				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), segments.getDistanceToStart(splitIndex), segments));
-//				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, segments.getDistanceToEnd(splitIndex), segments));	
 				return;
 			}
 			
-			List<IBorderSegment> oldSegs = segments.getMergeSources();
+			// Otherwise we are splitting one of the child segments
+			
+			List<BorderSegmentTree> newSegs = new ArrayList<>();
 
-			segments.clearMergeSources();
 			// Replace the two segments in this profile
-			for (IBorderSegment oldSegment : oldSegs) {
-
+			for (BorderSegmentTree oldSegment : segments.leaves) {
 				if (oldSegment.equals(segment)) {
-					segments.addMergeSource(new BorderSegmentTree(id1, oldSegment.getStartIndex(), oldSegment.getDistanceToStart(splitIndex), segments));
-					segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, oldSegment.getDistanceToEnd(splitIndex), segments));	
+					//TODO check this works with very long segments > 50% of the profile - distance to end
+					newSegs.add(new BorderSegmentTree(id1, oldSegment.getStartIndex(), oldSegment.getDistanceToStart(splitIndex), segments));
+					newSegs.add(new BorderSegmentTree(id2, splitIndex, oldSegment.getDistanceToEnd(splitIndex), segments));	
 				} else {
-					segments.addMergeSource(oldSegment);
+					newSegs.add(oldSegment);
 				}
+			}
+			
+			// Clear the old segments and replace with the split segments
+			segments.clearMergeSources();
+			for (BorderSegmentTree seg : newSegs) {
+				segments.addMergeSource(seg);
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see components.generic.ISegmentedProfile#toString()
-		 */
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
@@ -1968,7 +1811,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		@Override
-		public ISegmentedProfile copy() {
+		public ISegmentedProfile copy(){
 			try {
 				return new DefaultSegmentedProfile(this);
 			} catch (IndexOutOfBoundsException | ProfileException e) {
@@ -2004,7 +1847,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 		/**
 		 * Wrap the segment index to allow incrementing of segment indices in loops
-		 * @param i the index to wrap
+		 * @param i the segment index to wrap
 		 * @return the wrapped index
 		 */
 		protected int wrapSegmentIndex(int i){
@@ -2015,7 +1858,28 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			return i % segments.nChildren();
 		}
 
-		public class BorderSegmentTree implements IBorderSegment {
+		/**
+		 * Store segments of the profile in a hierarchical tree. When segments are split,
+		 * new nodes are created. When segments are merged, a new node is created, with child nodes
+		 * for the original segment.
+		 * 
+		 * 		Root                          Root                         Root
+		 * 		/  \     -> split a          / |  \    -> merge a1 & a2    /  \
+		 *     a    b                       a1 a2  b                      a3   b
+		 *                                                               /  \
+		 *                                                             a1    a2
+		 *                                                             
+		 * Splitting a segment is destructive: the original segment ID will not be recovered
+		 * upon merging, even if the segment bounds are identical.
+		 * 
+		 * Requesting the list of segments will return the segments which are direct children of the 
+		 * root node. 
+		 * 
+		 * The root node is a single segment covering the profile.
+		 * @author bms41
+		 *
+		 */
+		private class BorderSegmentTree implements IBorderSegment {
 			private static final long serialVersionUID = 1L;
 			protected final BorderSegmentTree parent;
 			private final List<BorderSegmentTree> leaves = new LinkedList<>();
@@ -2029,7 +1893,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * Construct a segment covering the entire profile
 			 * @param id
 			 */
-			public BorderSegmentTree(@NonNull UUID id){
+			protected BorderSegmentTree(@NonNull UUID id){
 				this(id, 0, size(), null);
 			}
 			
@@ -2039,7 +1903,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param start the start index
 			 * @param length the segment length
 			 */
-			public BorderSegmentTree(@NonNull UUID id, int start, int length){
+			protected BorderSegmentTree(@NonNull UUID id, int start, int length){
 				this(id, start, length, null);
 			}
 			
@@ -2050,14 +1914,14 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param length the segment length
 			 * @param parent the parent segment (can be null)
 			 */
-			public BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
-				
+			protected BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
+//				System.out.println("Creating segment from "+start+" of length "+length+" in profile of "+getBorderLength());
 				if(start<0 || start > size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(length<0 || length > size())
 					throw new IllegalArgumentException(String.format("Segment length %d is outside profile bounds", length));
 				if(length<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
-					throw new IllegalArgumentException(String.format("Segment length %d is below minimum", length));
+					throw new IllegalArgumentException(String.format("Segment length %d is below minimum %d", length, MINIMUM_SEGMENT_LENGTH));
 
 				this.id = id;
 				this.startIndex = start;
@@ -2085,20 +1949,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return leaves.stream().collect(Collectors.toList());
 			}
 			
-			public void splitAt(int index, @NonNull UUID a, @NonNull UUID b) throws ProfileException {
+			private void splitAt(int index, @NonNull UUID a, @NonNull UUID b) throws ProfileException {
 				if(!contains(index))
 					throw new IllegalArgumentException("Index is outside segment bounds");
 				
 				DefaultSegmentedProfile.this.splitSegment(this, index, a, b);
-//				
-//				if(parent==null) {
-//					// add as merge sources directly
-//					//TODO
-//				}
-//				
-//				int currentIndex = parent.leaves.indexOf(this);
-//				parent.leaves.set(currentIndex, new BorderSegmentTree(a, startIndex, getDistanceToStart(index),this));
-//				parent.leaves.add(currentIndex+1, new BorderSegmentTree(b, index, getDistanceToEnd(index),this));
 			}
 
 			@Override
@@ -2180,18 +2035,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int getDistanceToStart(int index) {
-//				if(wraps()) {
-					int d1 = wrap(index-startIndex);
-					int d2 = wrap(startIndex-index);
-					return d1<d2?d1:d2;
-//				}
-				
-				
-//				if(startIndex==getEndIndex()) // special case
-//					return size()
-//				if(wraps() && index<getEndIndex())
-//					return (size()-startIndex)+index;
-//				return index-startIndex;
+				int d1 = wrap(index-startIndex);
+				int d2 = wrap(startIndex-index);
+				return d1<d2?d1:d2;
 			}
 
 			@Override
@@ -2200,10 +2046,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				int d1 = wrap(index-getEndIndex());
 				int d2 = wrap(getEndIndex()-index);
 				return d1<d2?d1:d2;
-				
-//				if(wraps() && index>getEndIndex())
-//					return (size()-index)+getEndIndex();
-//				return getEndIndex()-index;
 			}
 
 			@Override
@@ -2272,8 +2114,30 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
-				// TODO Auto-generated method stub
-				return false;
+				
+				startIndex = wrapIndex(startIndex);
+				endIndex   = wrapIndex(endIndex);
+				
+				// Ensure segments cannot be jumped over
+				if( startIndex < getStartIndex() && !prevSegment().contains(startIndex))
+					return false;
+				if( endIndex > getEndIndex() && !nextSegment().contains(endIndex))
+					return false;
+				
+				// Ensure surrounding segments will not become too short
+				if(prevSegment().getDistanceToStart(startIndex)<MINIMUM_SEGMENT_LENGTH)
+					return false;
+				if(nextSegment().getDistanceToEnd(endIndex)<MINIMUM_SEGMENT_LENGTH)
+					return false;
+				
+				// Ensure the segment will not become too short
+				if(testLength(startIndex, endIndex)<MINIMUM_SEGMENT_LENGTH)
+					return false;
+				
+				// All checks passed
+				this.startIndex = startIndex;
+				this.length = testLength(startIndex, endIndex);
+				return true;
 			}
 
 			@Override

@@ -116,7 +116,7 @@ public class DefaultConsensusNucleus extends DefaultNucleus {
 
         ISegmentedProfile profile = creator.createProfile(ProfileType.ANGLE);
 
-        profileMap.put(ProfileType.ANGLE, profile);
+        assignProfile(ProfileType.ANGLE, profile);
 
     }
 

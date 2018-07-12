@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.DoubleEquation;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -46,9 +48,9 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  */
 public class ProfileCreator implements Loggable {
 
-    Taggable target;
+    private Taggable target;
 
-    public ProfileCreator(Taggable target) {
+    public ProfileCreator(@NonNull Taggable target) {
         this.target = target;
     }
 
@@ -59,7 +61,7 @@ public class ProfileCreator implements Loggable {
      * @return a segmented profile of the requested type.
      * @throws ProfileException
      */
-    public ISegmentedProfile createProfile(ProfileType type) throws ProfileException {
+    public ISegmentedProfile createProfile(@NonNull ProfileType type) throws ProfileException {
         try {
             switch (type) {
 	            case ANGLE:        return calculateAngleProfile();
@@ -69,8 +71,9 @@ public class ProfileCreator implements Loggable {
 	            default:           return calculateAngleProfile();
             }
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
-            stack("Cannot create profile", e);
-            throw new ProfileException("Cannot make profile " + type, e);
+            throw new ProfileException("Cannot create profile " + type, e);
+        } catch(Exception e) {
+        	throw new ProfileException("Unexpected exception creating profile " + type, e);
         }
     }
 
@@ -92,7 +95,6 @@ public class ProfileCreator implements Loggable {
             }
         } catch (UnavailableProfileTypeException e) {
         	fine("No profile angle type");
-            stack("Profile type angle not found", e);
         }
 
         return segments;

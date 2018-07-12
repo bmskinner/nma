@@ -89,7 +89,6 @@ public class Nuclear_Morphology_Analysis
 
 			LogFileHandler errorHandler = new LogFileHandler(errorFile, new LogFileFormatter());
 			Logger.getLogger(ERROR_LOGGER).addHandler(errorHandler);
-//			Logger.getLogger(ERROR_LOGGER).addHandler(new StreamHandler(System.out, new SimpleFormatter()));
 			Logger.getLogger(ERROR_LOGGER).setLevel(Loggable.TRACE);
 			
 			Logger.getLogger(PROGRAM_LOGGER).addHandler(new ConsoleHandler(new LogPanelFormatter()));

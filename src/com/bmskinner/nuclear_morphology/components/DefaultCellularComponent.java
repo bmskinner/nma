@@ -1065,6 +1065,11 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     public int wrapIndex(int i) {
         return CellularComponent.wrapIndex(i, this.getBorderLength());
     }
+    
+    @Override
+    public double wrapIndex(double d) {
+        return CellularComponent.wrapIndex(d, this.getBorderLength());
+    }
 
     /**
      * Create a boolean mask, in which 1 is within the nucleus and 0 is outside

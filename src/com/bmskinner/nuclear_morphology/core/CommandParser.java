@@ -75,12 +75,21 @@ public class CommandParser implements Loggable {
                 	System.err.println("Error setting UI look and feel");
                     e.printStackTrace();
                 }
+                
+                boolean useStandalone = true;
+                
+                InputSupplier is = new DefaultInputSupplier();
+                EventHandler eh = new EventHandler(is);
 
-                if(GlobalOptions.getInstance().isUseDockableInterface()) {
-                	DockableMainWindow mw = new DockableMainWindow(true, new EventHandler(new DefaultInputSupplier()));
+                boolean useDockable = GlobalOptions.getInstance().isUseDockableInterface();
+                
+                System.out.println("Dockable: "+useDockable);
+                
+                if(useDockable) {
+                	DockableMainWindow mw = new DockableMainWindow(useStandalone,eh);
                     mw.setVisible(true);
                 } else {
-                	MainWindow mw = new MainWindow(true, new EventHandler(new DefaultInputSupplier()));
+                	MainWindow mw = new MainWindow(useStandalone, eh);
                     mw.setVisible(true);
                 }
                 

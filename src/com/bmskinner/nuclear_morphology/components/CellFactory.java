@@ -19,6 +19,8 @@
 
 package com.bmskinner.nuclear_morphology.components;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -34,7 +36,7 @@ public class CellFactory {
      * @param n the nucleus of the cell
      * @return a cell
      */
-    public static ICell buildInstance(Nucleus n){
+    public static ICell buildInstance(@NonNull Nucleus n){
 
         if (n == null) {
             throw new IllegalArgumentException("Nucleus cannot be null in factory");

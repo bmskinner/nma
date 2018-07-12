@@ -50,7 +50,7 @@ public interface Taggable extends Profileable {
      *            the tag
      * @return the index of the border in borderList
      */
-    public int getBorderIndex(Tag tag);
+    public int getBorderIndex(@NonNull Tag tag);
 
     /**
      * Get the tag at a given index, given the zero index is set at the given
@@ -62,7 +62,7 @@ public interface Taggable extends Profileable {
      *            the index to fetch
      * @return the border tag at the index
      */
-    public Tag getBorderTag(Tag tag, int index);
+    public Tag getBorderTag(@NonNull Tag tag, int index);
 
     /**
      * Get the tag at the given raw index in the border list
@@ -81,7 +81,7 @@ public interface Taggable extends Profileable {
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      */
-    public IBorderPoint getBorderTag(Tag tag) throws UnavailableBorderTagException;
+    public IBorderPoint getBorderTag(@NonNull Tag tag) throws UnavailableBorderTagException;
 
     /**
      * Check if the nucleus has the given border tag
@@ -89,7 +89,7 @@ public interface Taggable extends Profileable {
      * @param tag
      * @return
      */
-    public boolean hasBorderTag(Tag tag);
+    public boolean hasBorderTag(@NonNull Tag tag);
 
     /**
      * Check if the nucleus has any border tag at the given index (offset from
@@ -101,7 +101,7 @@ public interface Taggable extends Profileable {
      *            the index to be tested
      * @return true if a tag is present at the index
      */
-    public boolean hasBorderTag(Tag tag, int i) throws IndexOutOfBoundsException;
+    public boolean hasBorderTag(@NonNull Tag tag, int i) throws IndexOutOfBoundsException;
 
     /**
      * Check if the nucleus has any border tag at the given index in the raw
@@ -122,7 +122,7 @@ public interface Taggable extends Profileable {
      *            the index of the border point
      */
 
-    public void setBorderTag(Tag tag, int i) throws IndexOutOfBoundsException;
+    public void setBorderTag(@NonNull Tag tag, int i) throws IndexOutOfBoundsException;
 
     /**
      * Set or update a border tag based on an index from a reference tag
@@ -134,7 +134,7 @@ public interface Taggable extends Profileable {
      * @param i
      *            the index of the border point relative to the reference
      */
-    public void setBorderTag(Tag reference, Tag tag, int i) throws IndexOutOfBoundsException;
+    public void setBorderTag(@NonNull Tag reference, @NonNull Tag tag, int i) throws IndexOutOfBoundsException;
 
     /**
      * Get a copy of the profile offset to start at the given point
@@ -148,7 +148,7 @@ public interface Taggable extends Profileable {
      * @throws UnavailableBorderTagException
      * @throws UnavailableProfileTypeException
      */
-    public ISegmentedProfile getProfile(ProfileType type, Tag tag)
+    public ISegmentedProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag)
             throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException;
 
     /**
@@ -177,7 +177,7 @@ public interface Taggable extends Profileable {
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      */
-    public IBorderPoint getBorderPoint(Tag tag) throws UnavailableBorderTagException;
+    public IBorderPoint getBorderPoint(@NonNull Tag tag) throws UnavailableBorderTagException;
 
     /**
      * Get the border index of point in the border list, removing offset to a
@@ -189,7 +189,7 @@ public interface Taggable extends Profileable {
      *            the index to offset. Should be counting from the reference tag
      * @return the offset index, or -1 if the reference tag is not present
      */
-    public int getOffsetBorderIndex(Tag reference, int index);
+    public int getOffsetBorderIndex(@NonNull Tag reference, int index);
 
     /**
      * This will completely replace the map of border tags with new positions,
@@ -198,6 +198,6 @@ public interface Taggable extends Profileable {
      * 
      * @param tagMap
      */
-    public void replaceBorderTags(Map<Tag, Integer> tagMap);
+    public void replaceBorderTags(@NonNull Map<Tag, Integer> tagMap);
 
 }

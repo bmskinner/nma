@@ -243,21 +243,11 @@ public class DefaultBorderSegment implements IBorderSegment {
         return this.startIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getEndIndex()
-     */
     @Override
     public int getEndIndex() {
         return this.endIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getProportionalIndex(double)
-     */
     @Override
     public int getProportionalIndex(double d) {
         if (d < 0 || d > 1) {
@@ -282,11 +272,6 @@ public class DefaultBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getIndexProportion(int)
-     */
     @Override
     public double getIndexProportion(int index) {
         if (!this.contains(index)) {
@@ -307,22 +292,11 @@ public class DefaultBorderSegment implements IBorderSegment {
         throw new IllegalArgumentException("Cannot get proportion for " + index);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getName()
-     */
     @Override
     public String getName() {
         return "Seg_" + this.positionInProfile;
     }
 
-    // when using this, use wrapIndex()!
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getMidpointIndex()
-     */
     @Override
     public int getMidpointIndex() {
         if (this.wraps()) {
@@ -339,11 +313,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToStart(int)
-     */
     @Override
     public int getDistanceToStart(int index) {
         if (index < 0 || index >= totalLength) {
@@ -358,11 +327,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         return Math.min(abs, alt);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getDistanceToEnd(int)
-     */
     @Override
     public int getDistanceToEnd(int index) {
         if (index < 0 || index >= totalLength) {
@@ -375,71 +339,36 @@ public class DefaultBorderSegment implements IBorderSegment {
         return Math.min(abs, alt);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#isStartPositionLocked()
-     */
     @Override
     public boolean isLocked() {
         return isLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setStartPositionLocked(boolean)
-     */
     @Override
     public void setLocked(boolean startPositionLocked) {
         this.isLocked = startPositionLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getTotalLength()
-     */
     @Override
     public int getTotalLength() {
         return this.totalLength;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#nextSegment()
-     */
     @Override
     public IBorderSegment nextSegment() {
         return this.nextSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#prevSegment()
-     */
     @Override
     public IBorderSegment prevSegment() {
         return this.prevSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#length()
-     */
     @Override
     public int length() {
         return testLength(this.getStartIndex(), this.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -450,11 +379,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -473,11 +397,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testLength(int, int)
-     */
     @Override
     public int testLength(int start, int end) {
         if (wraps(start, end)) { // the segment wraps
@@ -487,11 +406,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps(int, int)
-     */
     @Override
     public boolean wraps(int start, int end) {
         if ((start < 0 || start > totalLength) || (end < 0 || end > totalLength)) {
@@ -500,44 +414,17 @@ public class DefaultBorderSegment implements IBorderSegment {
         return (end <= start);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#wraps()
-     */
     @Override
     public boolean wraps() {
         return wraps(startIndex, endIndex);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#contains(int)
-     */
+
     @Override
     public boolean contains(int index) {
         return IBorderSegment.contains(startIndex, endIndex, index, totalLength);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#testContains(int, int, int)
-     */
-//    @Override
-//    public boolean testContains(int start, int end, int index) {
-//        if (index < 0 || index > totalLength) {
-//            return false;
-//        }
-//
-//        if (wraps(start, end)) { // wrapped
-//            return (index <= end || index >= start);
-//        } else { // regular
-//            return (index >= start && index <= end);
-//        }
-//
-//    }
 
     /**
      * Test if a proposed update affects this segment
@@ -564,9 +451,8 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         // Check that the new positions will not make this segment too small
         int testLength = testLength(startIndex, endIndex);
-        if (testLength < MINIMUM_SEGMENT_LENGTH) {
+        if (testLength < MINIMUM_SEGMENT_LENGTH)
             return false;
-        }
 
         // Check that next and previous segments are not invalidated by length
         // change
@@ -575,17 +461,13 @@ public class DefaultBorderSegment implements IBorderSegment {
         // previous segment, and the max length increase forwards is up to the
         // MIN_SEG_LENGTH of the next segment
 
-        if (this.hasPrevSegment()) {
-            int prevTestLength = prevSegment.testLength(prevSegment.getStartIndex(), startIndex);
-            if (prevTestLength < MINIMUM_SEGMENT_LENGTH) {
+        if (hasPrevSegment()) {
+            if(prevSegment.testLength(prevSegment.getStartIndex(), startIndex)< MINIMUM_SEGMENT_LENGTH)
                 return false;
-            }
         }
         if (this.hasNextSegment()) {
-            int nextTestLength = nextSegment.testLength(endIndex, nextSegment.getEndIndex());
-            if (nextTestLength < MINIMUM_SEGMENT_LENGTH) {
+            if (nextSegment.testLength(endIndex, nextSegment.getEndIndex()) < MINIMUM_SEGMENT_LENGTH)
                 return false;
-            }
         }
 
         // check that updating will not cause segments to overlap or invert
@@ -593,25 +475,21 @@ public class DefaultBorderSegment implements IBorderSegment {
         // an array wrap
         if (startIndex > endIndex) {
 
-            if (!IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
+            if (!IBorderSegment.contains(startIndex, endIndex, 0, totalLength))
                 return false;
-            }
-
         }
 
         // also test the effect on the next and previous segments
         if (this.hasPrevSegment()) {
             if (this.prevSegment().getStartIndex() > startIndex) {
 
-                if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex)) {
+                if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex))
                     return false;
-                }
 
                 // another wrapping test - if the new positions induce a wrap,
                 // the segment should contain 0
-                if (prevSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
+                if (prevSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength))
                     return false;
-                }
             }
         }
 
@@ -636,11 +514,6 @@ public class DefaultBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#update(int, int)
-     */
     @Override
     public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
         // Check the incoming data
@@ -683,117 +556,57 @@ public class DefaultBorderSegment implements IBorderSegment {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setNextSegment(components.nuclear.
-     * NucleusBorderSegment)
-     */
     @Override
-    public void setNextSegment(IBorderSegment s) {
-        if (s == null) {
+    public void setNextSegment(@NonNull IBorderSegment s) {
+        if (s == null)
             throw new IllegalArgumentException("Segment cannot be null");
-        }
+        if (s.getTotalLength() != this.getTotalLength())
+            throw new IllegalArgumentException("Segment has a different profile length");
+        if (s.getStartIndex() != this.getEndIndex())
+            throw new IllegalArgumentException(String.format("Segment start (%d) does not overlap this end (%d)", s.getStartIndex(), getEndIndex()));
 
-        if (s.getTotalLength() != this.getTotalLength()) {
-            throw new IllegalArgumentException("Segment has a different total length");
-        }
-        if (s.getStartIndex() != this.getEndIndex()) {
-            throw new IllegalArgumentException("Segment start (" + s.getStartIndex()
-                    + ") does not overlap the end of this segment: " + this.getEndIndex());
-        }
-
-        this.nextSegment = s;
+        nextSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPrevSegment(components.nuclear.
-     * IBorderSegment)
-     */
     @Override
-    public void setPrevSegment(IBorderSegment s) {
+    public void setPrevSegment(@NonNull IBorderSegment s) {
 
-        if (s == null) {
+        if (s == null)
             throw new IllegalArgumentException("Segment cannot be null");
-        }
 
-        if (s.getTotalLength() != this.getTotalLength()) {
-            throw new IllegalArgumentException("Segment has a different total length");
-        }
-        if (s.getEndIndex() != this.getStartIndex()) {
-            throw new IllegalArgumentException(
-                    "Segment end (" + s.getEndIndex() + ") does not overlap start: " + this.getStartIndex());
-        }
+        if (s.getTotalLength() != getTotalLength())
+            throw new IllegalArgumentException("Segment has a different profile length");
+        if (s.getEndIndex() != getStartIndex())
+            throw new IllegalArgumentException(String.format("Segment end (%d) does not overlap this start (%d)", s.getEndIndex(), getStartIndex()));
 
-        this.prevSegment = s;
+        prevSegment = s;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasNextSegment()
-     */
     @Override
     public boolean hasNextSegment() {
-        if (this.nextSegment() != null) {
-            return true;
-        } else {
-            return false;
-        }
+    	return nextSegment()!=null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#hasPrevSegment()
-     */
     @Override
     public boolean hasPrevSegment() {
-        if (this.prevSegment() != null) {
-            return true;
-        } else {
-            return false;
-        }
+    	return prevSegment()!=null;
     }
 
-    // public void setName(String s){
-    // this.name = s;
-    // }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setPosition(int)
-     */
     @Override
     public void setPosition(int i) {
-        if (i < 0) {
+        if (i < 0)
             throw new IllegalArgumentException("Position must be a positve integer");
-        }
-        this.positionInProfile = (short) i;
+        positionInProfile = (short) i;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getPosition()
-     */
     @Override
     public int getPosition() {
-        return this.positionInProfile;
+        return positionInProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#toString()
-     */
     @Override
     public String toString() {
-
-        return this.getName();
+        return getName();
     }
 
     public String getDetail() {
@@ -820,11 +633,6 @@ public class DefaultBorderSegment implements IBorderSegment {
         return builder.toString();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#iterator()
-     */
     @Override
     public Iterator<Integer> iterator() {
 
@@ -875,15 +683,4 @@ public class DefaultBorderSegment implements IBorderSegment {
         }
         return false;
     }
-
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-    }
-
-
-
 }

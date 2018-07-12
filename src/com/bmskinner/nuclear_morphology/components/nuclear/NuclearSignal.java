@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.MeasurementScale;
 import com.bmskinner.nuclear_morphology.io.UnloadableImageException;
@@ -147,9 +148,8 @@ public class NuclearSignal extends AbstractCellularComponent implements INuclear
 		return null;
 	}
 
-    // @Override
-    // public void setPositionWithin(CellularComponent c) {
-    // // TODO Auto-generated method stub
-    //
-    // }
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
+	}
 }

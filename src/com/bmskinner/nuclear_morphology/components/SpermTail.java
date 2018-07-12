@@ -175,4 +175,9 @@ public class SpermTail extends AbstractCellularComponent implements Serializable
 		return null;
 	}
 
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
+	}
+
 }

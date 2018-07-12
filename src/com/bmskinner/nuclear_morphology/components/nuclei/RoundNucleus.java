@@ -1347,4 +1347,9 @@ public class RoundNucleus extends AbstractCellularComponent implements Nucleus {
 		return null;
 	}
 
+	@Override
+	public double wrapIndex(double d) {
+		return CellularComponent.wrapIndex(d, getBorderLength());
+	}
+
 }

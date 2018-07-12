@@ -63,7 +63,7 @@ public interface Profileable extends CellularComponent {
      * @param type
      * @return
      */
-    boolean hasProfile(ProfileType type);
+    boolean hasProfile(@NonNull ProfileType type);
 
     /**
      * Get a copy of the angle profile. The first index of the profile is the
@@ -71,7 +71,7 @@ public interface Profileable extends CellularComponent {
      * to the order of values across multiple nuclei. If consistency is needed,
      * specify a pointType @return @throws
      */
-    ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException;
+    ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException;
 
     /**
      * Update the profile of the given type. Since only franken profiles are not
@@ -91,7 +91,7 @@ public interface Profileable extends CellularComponent {
      * @param type
      * @return
      */
-    int getWindowSize(ProfileType type);
+    int getWindowSize(@NonNull ProfileType type);
 
     /**
      * Get the fraction of the perimeter to use for calculating the window size
@@ -100,7 +100,7 @@ public interface Profileable extends CellularComponent {
      * @return a fraction between 0 and 1
      * @throws UnavailableProfileTypeException
      */
-    double getWindowProportion(ProfileType type);
+    double getWindowProportion(@NonNull ProfileType type);
 
     /**
      * Set the fraction of the perimeter to use for calculating the window size
@@ -111,7 +111,7 @@ public interface Profileable extends CellularComponent {
      *            Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION if not
      *            previously set
      */
-    public void setWindowProportion(ProfileType type, double d);
+    public void setWindowProportion(@NonNull ProfileType type, double d);
 
     /**
      * Check if the segments and tags are able to be modified
@@ -133,7 +133,7 @@ public interface Profileable extends CellularComponent {
      * @param lock
      * @param segID
      */
-    void setSegmentStartLock(boolean lock, UUID segID);
+    void setSegmentStartLock(boolean lock, @NonNull UUID segID);
 
     /**
      * Reverse the angle profile of the object. Also reverses the distance
@@ -146,18 +146,9 @@ public interface Profileable extends CellularComponent {
      * the internal window size - change this with
      * setWindowSize(ProfileType.ANGLE). It will replace the existing profiles.
      * 
-     * @throws Exception
+     * @throws ProfileException if there was an error in calculating the profiles
      */
     void calculateProfiles() throws ProfileException;
-
-    /**
-     * Calculate the distance from point to point around the periphery of the
-     * nucleus.
-     * 
-     * @return
-     */
-    // double getPathLength(ProfileType type) throws
-    // UnavailableProfileTypeException;
 
     /**
      * Go around the border of the object, measuring the angle to the OP. If the

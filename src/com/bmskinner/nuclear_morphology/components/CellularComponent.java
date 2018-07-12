@@ -280,14 +280,22 @@ public interface CellularComponent extends Imageable, Serializable, Loggable, Ro
     void offset(double xOffset, double yOffset);
 
     /**
-     * Wrap arrays. If an index falls of the end, it is returned to the start
+     * Wrap border indexes. If an index falls of the end, it is returned to the start
      * and vice versa
      * 
-     * @param i
-     *            the index
+     * @param i the index
      * @return the index within the border list
      */
     int wrapIndex(int i);
+    
+    /**
+     * Wrap border indexes. If an index falls of the end, it is returned to the start
+     * and vice versa
+     * 
+     * @param i the index
+     * @return the index within the border list
+     */
+    double wrapIndex(double d);
 
     /**
      * Turn a list of border points into a polygon. These have the

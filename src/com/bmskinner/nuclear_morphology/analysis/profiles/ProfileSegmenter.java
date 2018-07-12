@@ -231,13 +231,7 @@ public class ProfileSegmenter implements Loggable {
         /*
          * Find second derivative rates of change
          */
-        IProfile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // minima
-                                                                                            // and
-                                                                                            // maxima
-                                                                                            // should
-                                                                                            // be
-                                                                                            // near
-                                                                                            // 0
+        IProfile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW);
         deltaProfile = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second
                                                                                    // differential
 
@@ -262,33 +256,28 @@ public class ProfileSegmenter implements Loggable {
         /*
          * The first segment must meet the length limit
          */
-        if (index < MIN_SEGMENT_SIZE) {
-        	log(index+" is to close to zero");
+        if (index < MIN_SEGMENT_SIZE)
             return false;
+        
+        //What happens if a forced split conflicts with a minimum segment size rule?
+        // Priority is to not create segments that are too short. A border tag will
+        // not be segmented.
+        
+        /*
+         * If the index is within MIN_SEGMENT_SIZE of a forced BorderTagObject
+         * boundary, must not segment
+         */
+        for (Tag tag : tagsToSplitOn.keySet()) {
+            if (Math.abs(tagsToSplitOn.get(tag).intValue() - index) < MIN_SEGMENT_SIZE)
+                return false; 
         }
 
         /*
          * If the index is a forced BorderTagObject boundary, must segment
          */
         for (Tag tag : tagsToSplitOn.keySet()) {
-            Integer test = tagsToSplitOn.get(tag);
-            if (test.intValue() == index) {
-            	log("Forcing segment for " + test +" at "+tag);
+            if (tagsToSplitOn.get(tag).intValue() == index)
                 return true;
-            }
-        }
-
-        /*
-         * If the index is within MIN_SEGMENT_SIZE of a forced BorderTagObject
-         * boundary, must not segment
-         */
-        for (Tag tag : tagsToSplitOn.keySet()) {
-
-            Integer test = tagsToSplitOn.get(tag);
-            if (Math.abs(test.intValue() - index) < MIN_SEGMENT_SIZE) {
-            	log(index+" is to close to a border tag");
-                return false; 
-            }
         }
 
         /*
@@ -296,20 +285,16 @@ public class ProfileSegmenter implements Loggable {
          */
         int potentialSegLength = index - segmentStart;
 
-        if (potentialSegLength < MIN_SEGMENT_SIZE) {
-        	log(index+" is to close to previous segment");
+        if (potentialSegLength < MIN_SEGMENT_SIZE)
             return false;
-        }
 
         /*
          * Once the index has got close to the end of the profile, a new segmnet
          * cannot be called, even at a really nice infection point, because it
          * would be too close to the reference point
          */
-        if (index > (profile.size()-1)-MIN_SEGMENT_SIZE) {
-        	log(index+" is too close to "+profile.size());
+        if (index > (profile.size()-1)-MIN_SEGMENT_SIZE)
             return false;
-        }
 
         /*
          * All length and position checks are passed. Now test for a good
@@ -320,11 +305,9 @@ public class ProfileSegmenter implements Loggable {
          */
 
         if ((inflectionPoints.get(index) && Math.abs(deltaProfile.get(index)) > minRateOfChange
-                && potentialSegLength >= MIN_SEGMENT_SIZE)) {
-        	log(index+" is valid in profile of size "+profile.size());
+                && potentialSegLength >= MIN_SEGMENT_SIZE))
             return true;
 
-        }
         return false;
     }
 

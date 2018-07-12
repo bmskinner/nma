@@ -21,6 +21,8 @@ package com.bmskinner.nuclear_morphology.components.generic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
@@ -44,12 +46,10 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
     private int counter = 0; // track the number of profiles added to the
                              // aggregate
 
-    // private AggregateCache cache = new AggregateCache();
 
     public DefaultProfileAggregate(final int length, final int profileCount) {
-        if (profileCount == 0) {
+        if (profileCount <= 0)
             throw new IllegalArgumentException("Cannot have zero profiles in aggregate");
-        }
         this.length = length;
         this.profileCount = profileCount;
 
@@ -57,11 +57,10 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
     }
 
-    public void addValues(final IProfile profile) throws ProfileException {
+    public void addValues(@NonNull final IProfile profile) throws ProfileException {
 
-        if (counter >= profileCount) {
+        if (counter >= profileCount)
             throw new ProfileException("Aggregate is full");
-        }
 
         /*
          * Make the profile the desired length, sample each point and add it to
