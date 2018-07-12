@@ -887,22 +887,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			float[] deltas = new float[this.size()];
 
 			for (int i = 0; i < array.length; i++) {
-
-				float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE);
-				float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
-
+				
+				IProfile window = getWindow(i, windowSize);
 				float delta = 0;
-				for (int k = 0; k < prevValues.length; k++) {
-
-					if (k == 0) {
-						delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
-
-					} else {
-						delta += (prevValues[k] - prevValues[k - 1]) + (nextValues[k] - nextValues[k - 1]);
-					}
-
+				for(int j=1; j<window.size(); j++) {
+					delta += (window.get(j)-window.get(j-1));
 				}
-
 				deltas[i] = delta;
 			}
 			return new DefaultProfile(deltas);

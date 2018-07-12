@@ -717,8 +717,8 @@ public class DefaultProfileTest {
 	public void testCalculateDeltasSucceedsWithWindowSizeTwo() {
 
 		IProfile res = profile.calculateDeltas(2);
-	    
-	    double expAt0 = (data[data.length-1] - data[data.length-2]) 
+
+		double expAt0 = (data[data.length-1] - data[data.length-2]) 
 	    		+ (data[0] - data[data.length-1]) 
 	    		+ (data[1] - data[0])
 	    		+ (data[2] - data[1]);
@@ -727,9 +727,15 @@ public class DefaultProfileTest {
 	    		+ (data[1] - data[0])
 	    		+ (data[2] - data[1])
 	    		+ (data[3] - data[2]);
-	    		
-	    assertEquals(expAt0, res.get(0),0);
+	    
+	    double expAt2 = (data[1] - data[0]) 
+	    		+ (data[2] - data[1])
+	    		+ (data[3] - data[2])
+	    		+ (data[4] - data[3]);
+	    
+	    assertEquals(expAt0, res.get(0),0);		
 	    assertEquals(expAt1, res.get(1),0);
+	    assertEquals(expAt2, res.get(2),0);
 	}
 	
 	@Test

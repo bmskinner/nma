@@ -287,12 +287,13 @@ public interface IProfile extends Serializable, Loggable {
     BooleanProfile getLocalMaxima(int windowSize, double threshold);
 
     /**
-     * Get the windowSize points around a point of interest
+     * Get the windowSize points around a point of interest.
      * 
-     * @param index
-     *            the index position to centre on
-     * @param windowSize
-     *            the number of points either side
+     * For example, requesting getWindow(5, 2) would return the 
+     * indexes up to 2 away from 5 : 3, 4, 5, 6, 7
+     * 
+     * @param index the index position to centre on
+     * @param windowSize the number of points either side
      * @return a profile with the window
      */
     IProfile getWindow(int index, int windowSize);
