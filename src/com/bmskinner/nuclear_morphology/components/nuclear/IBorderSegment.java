@@ -40,7 +40,47 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * contain. It is possible for the start position to be higher than the end
  * position if the segment spans the end of the profile and wraps back to the
  * beginning.
+ * <p>
+ * The precise definition of indexes and lengths for a segment are as follows:
+ * <p>
+ * A profile has a length n:
+ * <p>
+ * <pre>0        9<br>----------</pre>
+ * <p>
+ * This is the number of unique indexes in the profile. In the profile above, there are
+ * 10 unique indexes, and the profile length is thus 10.
  * 
+ * A segment is a contiguous set of indices in a profile. Each segment has a start index 
+ * and an end index. For example:
+ * <p>
+ * <pre>0  3   7 9<br>---|---|--<br>    s0    </pre>
+ * <p>
+ * In the profile above, a segment boundary has been drawn at index 3 and index 7.
+ * This results in two segments. Segment s0 has a start index of 3, and an end index of 7.
+ * The length of the segment is calculated at the number of profile indexes contained within
+ * the segment. For s0, this is 3-4-5-6-7, for a length of 5.
+ * <p>
+ * A second feature of segments is that they can <i>wrap</i>. The profile has a second 
+ * segment, s1.
+ * <p>
+ * <pre>0  3   7 9<br>---|---|--<br>s1  s0  s1</pre>
+ * <p>
+ * Segment s1 begins at the breakpoint at index 7, and continues to the end of the
+ * profile. It then resumes at index 0 - wrapping around the end of the profile - 
+ * and continues to index 3. It therefore has a start index of 7 and an end index 
+ * of 3. The length of the segment is 7-8-9-0-1-2-3, for a length of 7.
+ * <p>
+ * Note that the total length of the segments in the profile is longer than the profile
+ * itself. The profile with length 10 has segments with combined length 12 (5+7). The 
+ * combined segment length is profileLength + nSegments. This is because adjacent segments 
+ * must share at least one breakpoint index. When implementing this interface, it is 
+ * important to bear this in mind, and <b>not</b> allow patterns such as:
+ * <p>
+ * <pre>0  34  789<br>---||--||-<br>s1   s0  s1</pre>
+ * <p>
+ * In the example above, segments have adjacent endpoints, not overlapping endpoints,
+ * and segmentation in the program will not be calculated properly. 
+ * <p>
  * @author ben
  * @since 1.13.3
  *
@@ -159,21 +199,23 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     int getEndIndex();
 
     /**
-     * Get the index closest to the fraction of the way through the segment
+     * Get the index closest to the fraction of the way through the segment.
+     * For example in the segment below, requesting proportion 0.5 will return index 3:
+     * <pre>0 0.5 1<br>|-----|<br>0  3  6</pre>
      * 
-     * @param d
-     *            a fraction between 0 (start) and 1 (end)
+     * @param d a fraction between 0 (start) and 1 (end)
      * @return the nearest index, or -1 on error
      */
     int getProportionalIndex(double d);
 
     /**
      * Get the proportion of the given index along the segment from zero to one.
-     * Returns -1 if the index was not found
+     * For example in the segment below, requesting index 3 will return 0.5:
+     * <pre>0  3  6<br>|-----|<br>0 0.5 1</pre>
      * 
-     * @param index
-     *            the index to test
+     * @param index the index
      * @return
+     * @throws IllegalArgumentException if the index is not within the segment
      */
     double getIndexProportion(int index);
 
@@ -185,24 +227,53 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     String getName();
 
-    // when using this, use wrapIndex()!
+    
+    /**
+     * Gets the index closest to the middle of the segment.
+     * If the segment length is odd, this will be the exact midpoint.
+     * If the segment length is even, this will be the lower of the two possible
+     * midpoint indexes. For example:
+     * <p>
+     * <pre>Length 8   Length 7<br>0      7   0     6<br>|------|   |-----|<br>   4          3</pre>
+     * @return
+     */
     int getMidpointIndex();
 
     /**
-     * Get the shortest distance of the given index to the start of the segment
+     * Get the shortest distance of the given index to the start of the segment.
+     * Since profiles wrap, this may return the distance within the segment, or it may 
+     * return the distance passing outside the segment.
      * 
      * @param index
      * @return
      */
-    int getDistanceToStart(int index);
+    int getShortestDistanceToStart(int index);
+    
+    /**
+     * Get the distance within the segment of the given index to the start of the segment
+     * 
+     * @param index
+     * @return
+     */
+    int getInternalDistanceToStart(int index);
 
     /**
-     * Get the shortest distance of the given index to the end of the segment
+     * Get the shortest distance of the given index to the end of the segment. 
+     * Since profiles wrap, this may return the distance within the segment, or it may 
+     * return the distance passing outside the segment.
      * 
      * @param index
      * @return
      */
-    int getDistanceToEnd(int index);
+    int getShortestDistanceToEnd(int index);
+    
+    /**
+     * Get the distance within the segment of the given index to the end of the segment
+     * 
+     * @param index
+     * @return
+     */
+    int getInternalDistanceToEnd(int index);
 
     /**
      * Test if the segment is locked from editing
@@ -212,7 +283,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     boolean isLocked();
 
     /**
-     * Set the segment lock state
+     * Set the segment editing lock state
      * 
      * @param b
      */
@@ -223,10 +294,10 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * 
      * @return
      */
-    int getTotalLength();
+    int getProfileLength();
 
     /**
-     * Get the next segment. That is, the segment whose start index is the end
+     * Get the next segment in the profile. That is, the segment whose start index is the end
      * index of this segment
      * 
      * @return the segment
@@ -234,7 +305,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     IBorderSegment nextSegment();
 
     /**
-     * Get the previous segment. That is, the segment whose end index is the
+     * Get the previous segment in the profile. That is, the segment whose end index is the
      * start index of this segment
      * 
      * @return the segment
@@ -242,22 +313,22 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     IBorderSegment prevSegment();
 
     /**
-     * Get the length of this segment. Accounts for array wrapping
+     * Get the length of this segment. This is the number of profile indexes present
+     * within the segment. For example the following segment:
+     * <pre>   4      11   <br>---|######|---<br></pre>
+     * wiil have a length of 8: 4-5-6-7-8-9-10-11
      * 
-     * @return
+     * @return the number of profile indexes in the segment
      */
     int length();
 
 
     /**
      * Test the effect of new start and end indexes on the length of the
-     * segment. Use for validating updates. Also called by length() using real
-     * values
+     * segment. Use for validating updates.
      * 
-     * @param start
-     *            the new start index
-     * @param end
-     *            the new end index
+     * @param start the new start index
+     * @param end the new end index
      * @return the new segment length
      */
     int testLength(int start, int end);
@@ -275,7 +346,18 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     }
 
     /**
-     * Test if the segment currently wraps
+     * Test if the segment wraps (i.e contains index 0 as anything other than a start index).
+     * For example:
+     * <p>
+     * <pre>    4      11   <br>####|------|###<br> s1         s1</pre>
+     * The segment s1 above starts at 11 and ends at 4. It wraps because it contains 0.
+     * <p>
+     * <pre>0              <br>|###########<br>      s1     </pre>
+     * The segment s1 above starts at 0 and ends at 0. It wraps because the start and end points are the same.
+     * <p>
+     * <pre>0   4          <br>|###|---------<br> s1     </pre>
+     * The segment s1 above starts at 0 and ends at 4. It does not wrap because it only has a start point of 0.
+     * 
      * 
      * @return
      */
@@ -284,61 +366,48 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Test if the segment contains the given index
      * 
-     * @param index
-     *            the index to test
+     * @param index the index to test
      * @return
      */
     boolean contains(int index);
-
-    /**
-     * Test if the segment would contain the given index if it had the specified
-     * start and end indexes. Acts as a wrapper for the real contains()
-     * 
-     * @param start
-     *            the start to test
-     * @param end
-     *            the end to test
-     * @param index
-     *            the index to test
-     * @return
-     */
-//    boolean testContains(int start, int end, int index);
 
     /**
      * Update the segment to the given position. Also updates the previous and
      * next segments. Error if the values cause any segment to become negative
      * length
      * 
-     * @param start
-     *            the new start index
-     * @param end
-     *            the new end index
+     * @param start the new start index
+     * @param end the new end index
      */
     boolean update(int startIndex, int endIndex) throws SegmentUpdateException;
 
     /**
-     * Set the next segment in the profile from this
+     * Set the next segment in the profile. The segment must have a
+     * start index that is equal to the end index of this segment.
      * 
      * @param s
+     * @throws IllegalArgumentException if the segment start does not overlap this segment end
      */
     void setNextSegment(@NonNull IBorderSegment s);
 
     /**
-     * Set the previous segment in the profile from this
+     * Set the previous segment in the profile. The segment must have an
+     * end index that is equal to the start index of this segment.
      * 
      * @param s
+     * @throws IllegalArgumentException if the segment end does not overlap this segment start
      */
     void setPrevSegment(@NonNull IBorderSegment s);
 
     /**
-     * Check if a next segment has been added
+     * Check if a next segment has been defined
      * 
      * @return
      */
     boolean hasNextSegment();
 
     /**
-     * Check if a previous segment has been added
+     * Check if a previous segment has been defined
      * 
      * @return
      */
@@ -378,19 +447,15 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     /**
      * Given a list of segments, link them together into a circle.
      * 
-     * @param list
-     *            the segments to link
-     * @throws ProfileException
-     *             if updating the first segment indexes fails
+     * @param list the segments to link
+     * @throws ProfileException if updating the first segment indexes fails
      */
     static void linkSegments(@NonNull IBorderSegment[] list) throws ProfileException {
-        if (list == null) {
+        if (list == null)
             throw new IllegalArgumentException("List of segments is null");
-        }
 
-        if (list.length < 2) {
-            throw new IllegalArgumentException("Must have at least two segments (have " + list.length + ")");
-        }
+        if (list.length < 2)
+            throw new IllegalArgumentException(String.format("Must have at least two segments (have %d)",list.length));
 
         for (int i = 0; i < list.length; i++) {
             IBorderSegment s = list[i];
@@ -427,8 +492,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @throws Exception
      */
     static void linkSegments(@NonNull List<IBorderSegment> list) throws ProfileException {
-//        if (list.size() < 2) 
-//            throw new IllegalArgumentException("Must have at least two segments (have " + list.size() + ")");
 
         for (int i = 0; i < list.size(); i++) {
             IBorderSegment s = list.get(i);
@@ -468,18 +531,17 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     static List<IBorderSegment> nudgeUnlinked(@NonNull List<IBorderSegment> list, int value) {
 
-        if (list == null) {
+        if (list == null)
             throw new IllegalArgumentException("Input list cannot be null");
-        }
 
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
+        List<IBorderSegment> result = new ArrayList<>(list.size());
 
         for (IBorderSegment segment : list) {
 
             IBorderSegment newSeg = IBorderSegment.newSegment(
-                    CellularComponent.wrapIndex(segment.getStartIndex() + value, segment.getTotalLength()),
-                    CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getTotalLength()),
-                    segment.getTotalLength(), segment.getID());
+                    CellularComponent.wrapIndex(segment.getStartIndex() + value, segment.getProfileLength()),
+                    CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength()),
+                    segment.getProfileLength(), segment.getID());
 
             // adjust merge sources also and readd
             if (segment.hasMergeSources()) {
@@ -519,17 +581,17 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
 
             int toWrap = segment.getStartIndex() + value;
 
-            int newStart = CellularComponent.wrapIndex(toWrap, segment.getTotalLength());
+            int newStart = CellularComponent.wrapIndex(toWrap, segment.getProfileLength());
 
-            int newEnd = CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getTotalLength());
+            int newEnd = CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength());
 
-            if (newStart < 0 || newStart >= segment.getTotalLength()) {
+            if (newStart < 0 || newStart >= segment.getProfileLength()) {
                 throw new ProfileException("Index wrapping failed for segment: Index " + segment.getStartIndex()
-                        + " wrapped to " + newStart + " given total length " + segment.getTotalLength()
+                        + " wrapped to " + newStart + " given total length " + segment.getProfileLength()
                         + " an offset value of " + value + " and the input index to wrap was " + toWrap);
             }
 
-            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, segment.getTotalLength(),
+            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, segment.getProfileLength(),
                     segment.getID());
 
             newSeg.setPosition(segment.getPosition());
@@ -566,13 +628,13 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         List<IBorderSegment> result = new ArrayList<>();
 
         int segStart = list.get(0).getStartIndex();
-        double segStartProportion = (double) segStart / (double) list.get(0).getTotalLength();
+        double segStartProportion = (double) segStart / (double) list.get(0).getProfileLength();
         
         segStart = (int) (((double) segStart) * segStartProportion);
         
         for (IBorderSegment segment : list) {
         	
-            double proportion = (double) segment.length() / (double) segment.getTotalLength();
+            double proportion = (double) segment.length() / (double) segment.getProfileLength();
 
             int newSegLength = (int) ((double) newLength * proportion);
 
@@ -617,11 +679,10 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      */
     static List<IBorderSegment> copyWithoutLinking(@NonNull List<IBorderSegment> list) throws ProfileException {
 
-        if (list == null || list.isEmpty()) {
+        if (list == null || list.isEmpty())
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
-        }
 
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>();
+        List<IBorderSegment> result = new ArrayList<>();
 
         for (IBorderSegment segment : list) {
 
@@ -730,12 +791,9 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * Test if a segment would contain the given index if it had the specified
      * start and end indexes.
      * 
-     * @param start
-     *            the start to test
-     * @param end
-     *            the end to test
-     * @param index
-     *            the index to test
+     * @param start the start to test
+     * @param end the end to test
+     * @param index the index to test
      * @return
      */
     static boolean contains(int start, int end, int index, int total){

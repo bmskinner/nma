@@ -112,7 +112,7 @@ public abstract class AbstractProfile implements IProfile {
             throw new IllegalArgumentException("Segment is null");
         }
 
-        if (segment.getTotalLength() != this.size()) {
+        if (segment.getProfileLength() != this.size()) {
             throw new ProfileException("Segment comes from a different length profile");
         }
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());

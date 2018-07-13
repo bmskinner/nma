@@ -63,8 +63,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
             throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
         }
 
-        if (p.size() != segments.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + segments.get(0).getTotalLength()
+        if (p.size() != segments.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + segments.get(0).getProfileLength()
                     + ") does not fit profile (" + +p.size() + ")");
         }
 
@@ -345,7 +345,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
             throw new IllegalArgumentException("Segment list is null or empty");
         }
 
-        if (segments.get(0).getTotalLength() != this.size()) {
+        if (segments.get(0).getProfileLength() != this.size()) {
             throw new IllegalArgumentException("Segment list is from a different total length");
         }
 
@@ -460,7 +460,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         boolean result = false;
         for (IBorderSegment seg : this.segments) {
             if (seg.getStartIndex() == segment.getStartIndex() && seg.getEndIndex() == segment.getEndIndex()
-                    && seg.getTotalLength() == this.size()
+                    && seg.getProfileLength() == this.size()
 
             ) {
                 return true;
@@ -557,7 +557,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 		
 
         int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
-                segmentToUpdate.getTotalLength());
+                segmentToUpdate.getProfileLength());
         return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
         
 		} catch (UnavailableComponentException e) {
@@ -585,7 +585,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
     		IBorderSegment segmentToUpdate = this.getSegment(id);
 
     		int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-    				segmentToUpdate.getTotalLength());
+    				segmentToUpdate.getProfileLength());
     		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
     	} catch (UnavailableComponentException e) {
     		stack("Error adjusting segment start", e);
@@ -719,7 +719,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         // Exclude the last index of each segment to avoid duplication
         // the first index is kept, because the first index is used for border
         // tags
-        int lastIndex = AbstractCellularComponent.wrapIndex(testSeg.getEndIndex() - 1, testSeg.getTotalLength());
+        int lastIndex = AbstractCellularComponent.wrapIndex(testSeg.getEndIndex() - 1, testSeg.getProfileLength());
 
         IProfile testSegProfile = this.getSubregion(testSeg.getStartIndex(), lastIndex);
 
@@ -901,8 +901,8 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
 
         // Add the new segments to a list
         List<IBorderSegment> splitSegments = new ArrayList<IBorderSegment>();
-        splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getTotalLength(), id1));
-        splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getTotalLength(), id2));
+        splitSegments.add(new NucleusBorderSegment(segment.getStartIndex(), splitIndex, segment.getProfileLength(), id1));
+        splitSegments.add(new NucleusBorderSegment(splitIndex, segment.getEndIndex(), segment.getProfileLength(), id2));
 
         segment.addMergeSource(splitSegments.get(0));
         segment.addMergeSource(splitSegments.get(1));

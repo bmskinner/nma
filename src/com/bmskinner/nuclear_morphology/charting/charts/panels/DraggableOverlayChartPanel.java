@@ -112,7 +112,7 @@ public class DraggableOverlayChartPanel extends ExportableChartPanel {
     }
     
     private static double getRescaledIndex(IBorderSegment seg, int newLength) {
-        return (float) seg.getStartIndex() / (float) (seg.getTotalLength()) * (float) newLength;
+        return (float) seg.getStartIndex() / (float) (seg.getProfileLength()) * (float) newLength;
     }
 
     private synchronized void updateOverlays() {

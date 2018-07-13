@@ -1054,7 +1054,7 @@ public class DefaultCellCollection implements ICellCollection {
     			double perimeterLength = 0;
     			if (segment != null) {
     				int indexLength = segment.length();
-    				double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+    				double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
     				perimeterLength = fractionOfPerimeter * n.getStatistic(PlottableStatistic.PERIMETER, scale);
     			}
     			return perimeterLength;

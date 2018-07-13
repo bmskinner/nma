@@ -261,8 +261,10 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 
 	@Test
 	public void testSplitSegmentForSingleSegmentProfile() throws ProfileException {
+		
+		int splitIndex = 50;
 		assertEquals(1, singleSegmentProfile.getSegmentCount());
-		singleSegmentProfile.splitSegment(singleSegmentProfile.getSegmentContaining(1), 50, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
+		singleSegmentProfile.splitSegment(singleSegmentProfile.getSegmentContaining(1), splitIndex, DOUBLE_SEG_ID_0, DOUBLE_SEG_ID_1);
 		assertEquals(2, singleSegmentProfile.getSegmentCount());
 		
 		List<IBorderSegment> list = singleSegmentProfile.getSegments();
@@ -270,8 +272,8 @@ public class DefaultSegmentedProfileTest extends DefaultProfileTest {
 		assertEquals(DOUBLE_SEG_ID_1, list.get(1).getID());
 		
 		assertEquals(0, list.get(0).getStartIndex());
-		assertEquals(50, list.get(0).getEndIndex());
-		assertEquals(50, list.get(1).getStartIndex());
+		assertEquals(splitIndex, list.get(0).getEndIndex());
+		assertEquals(splitIndex, list.get(1).getStartIndex());
 		assertEquals(0, list.get(1).getEndIndex());
 	}
 	

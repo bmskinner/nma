@@ -65,7 +65,7 @@ import com.bmskinner.nuclear_morphology.utility.AngleTools;
  * @since 1.13.3
  *
  */
-public class DefaultNucleus extends ProfileableCellularComponent implements Nucleus {
+public class DefaultNucleus extends SegmentedCellularComponent implements Nucleus {
 
     private static final long serialVersionUID = 1L;
 

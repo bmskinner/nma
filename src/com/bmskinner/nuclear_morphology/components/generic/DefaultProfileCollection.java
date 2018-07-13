@@ -438,8 +438,8 @@ public class DefaultProfileCollection implements IProfileCollection {
             throw new IllegalArgumentException("Segment list is null or empty");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -463,8 +463,8 @@ public class DefaultProfileCollection implements IProfileCollection {
             throw new IllegalArgumentException("String or segment list is null or empty");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -527,7 +527,7 @@ public class DefaultProfileCollection implements IProfileCollection {
 
         this.length = length;
 
-        if (segments != null && length != segments[0].getTotalLength()) {
+        if (segments != null && length != segments[0].getProfileLength()) {
 
             Exception e = new Exception("Creating profile aggregate will invalidate segments");
             stack("Segments exist at different length to created aggregate", e);
@@ -580,7 +580,7 @@ public class DefaultProfileCollection implements IProfileCollection {
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());
         } else {
-            int length = segments[0].getTotalLength();
+            int length = segments[0].getProfileLength();
             createProfileAggregate(collection, length);
         }
     }

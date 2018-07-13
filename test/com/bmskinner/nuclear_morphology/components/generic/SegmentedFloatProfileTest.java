@@ -572,7 +572,7 @@ public class SegmentedFloatProfileTest {
 	 */
 	private boolean segmentHasOffset(IBorderSegment input, IBorderSegment result, int offset){
 	    
-	    if(input.getTotalLength()!=result.getTotalLength())
+	    if(input.getProfileLength()!=result.getProfileLength())
 	        return false;
 	    
 	    if(input.length()!=result.length())
@@ -581,8 +581,8 @@ public class SegmentedFloatProfileTest {
 	    int start = input.getStartIndex();
 	    int end   = input.getEndIndex();
 	    
-	    int startOffset = CellularComponent.wrapIndex(start+offset, input.getTotalLength());
-	    int endOffset   = CellularComponent.wrapIndex(end+offset, input.getTotalLength());
+	    int startOffset = CellularComponent.wrapIndex(start+offset, input.getProfileLength());
+	    int endOffset   = CellularComponent.wrapIndex(end+offset, input.getProfileLength());
 	    
 	    if(startOffset!=result.getStartIndex())
 	        return false;

@@ -288,7 +288,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
                     double length = 0;
                     if (seg != null) {
                         int indexLength = seg.length();
-                        double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+                        double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
                         length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
 
                     }

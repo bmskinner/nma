@@ -405,8 +405,8 @@ public class ProfileCollection implements IProfileCollection {
             throw new NullPointerException("String or segment list is null or empty");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -430,8 +430,8 @@ public class ProfileCollection implements IProfileCollection {
             throw new UnavailableBorderTagException("Tag " + tag + " not present");
         }
 
-        if (this.length() != n.get(0).getTotalLength()) {
-            throw new IllegalArgumentException("Segments total length (" + n.get(0).getTotalLength()
+        if (this.length() != n.get(0).getProfileLength()) {
+            throw new IllegalArgumentException("Segments total length (" + n.get(0).getProfileLength()
                     + ") does not fit aggregate (" + +this.length() + ")");
         }
 
@@ -884,7 +884,7 @@ public class ProfileCollection implements IProfileCollection {
         if (segments == null) {
             createProfileAggregate(collection, collection.getMedianArrayLength());
         } else {
-            int length = segments.get(0).getTotalLength();
+            int length = segments.get(0).getProfileLength();
             createProfileAggregate(collection, length);
         }
     }

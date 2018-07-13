@@ -1146,6 +1146,35 @@ public class DefaultProfileTest {
         assertFalse(profile.equals(p));
     }
 	
+	@Test
+	public void testWrapsDoesNotAffectIndexWhenWithinProfile(){
+		for(int i=0; i<profile.size(); i++){
+			assertEquals(i, profile.wrap(i));
+		}
+	}
+	
+	@Test
+	public void testWrapsAssignsNegativeIndexesToCorrectProfileIndex(){
+		for(int i=-1; i>-profile.size(); i--){
+			assertEquals("Testing "+i+" against profile size "+profile.size(), profile.size()+i, profile.wrap(i));
+		}
+	}
+	
+	@Test
+	public void testWrapsAssignsPositiveIndexesToCorrectProfileIndex(){
+		for(int i=profile.size(); i<profile.size()*2; i++){
+			assertEquals("Testing "+i+" against profile size "+profile.size(), i-profile.size(), profile.wrap(i));
+		}
+	}
+	
+	@Test
+	public void testWrapsHasContigouousRange(){
+		for(int i=-profile.size(); i<profile.size()*2; i++){
+			System.out.println(i+"\t"+profile.wrap(i));
+//			assertEquals("Testing "+i+" against profile size "+profile.size(), i-profile.size(), profile.wrap(i));
+		}
+	}
+	
 	
 	/**
 	 * Test float array equality. Not in junit.

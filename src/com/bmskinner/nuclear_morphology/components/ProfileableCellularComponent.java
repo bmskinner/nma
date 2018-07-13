@@ -191,6 +191,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         try {
             calculateProfiles();
         } catch (ProfileException | IllegalArgumentException e) {
+        	
             throw new ComponentCreationException("Could not calculate profiles", e);
         }
 

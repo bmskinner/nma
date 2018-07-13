@@ -913,7 +913,7 @@ public class FloatProfile implements IProfile {
         if (segment == null)
             throw new IllegalArgumentException("Segment is null");
 
-        if (segment.getTotalLength() != array.length)
+        if (segment.getProfileLength() != array.length)
             throw new IllegalArgumentException("Segment comes from a different length profile");
         
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());

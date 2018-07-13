@@ -710,7 +710,7 @@ public class DefaultMesh<E extends Taggable> implements Loggable, Mesh<E> {
                     // back
                     // to the actual nucleus index
                     int correctedIndex = CellularComponent
-                            .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getTotalLength());
+                            .wrapIndex(index + component.getBorderIndex(Tag.REFERENCE_POINT), segment.getProfileLength());
 
                     finest("Fetching point at index " + correctedIndex);
 

@@ -262,7 +262,7 @@ public class DatasetStatsExporter extends StatsExporter implements Exporter, Log
             double perimeterLength = 0;
             if (segment != null) {
                 int indexLength = segment.length();
-                double fractionOfPerimeter = (double) indexLength / (double) segment.getTotalLength();
+                double fractionOfPerimeter = (double) indexLength / (double) segment.getProfileLength();
                 varP = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.PIXELS);
                 varM = fractionOfPerimeter * c.getStatistic(PlottableStatistic.PERIMETER, MeasurementScale.MICRONS);
                 outLine.append(varP + TAB);

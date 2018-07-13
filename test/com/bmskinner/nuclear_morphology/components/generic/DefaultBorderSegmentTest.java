@@ -116,48 +116,6 @@ public class DefaultBorderSegmentTest {
 		}
 	}
 
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#addMergeSource(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
-	 */
-	@Test
-	public void testAddMergeSource() {
-		// proper merge source
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0, 10, 100);
-		test.addMergeSource(s1);
-		
-		assertEquals(s1, test.getMergeSources().get(0));
-	}
-	
-	@Test
-	public void testAddMergeSourceOutOfRangeArg0() {
-		// invalid merge source - out of range
-		DefaultBorderSegment s2 = new DefaultBorderSegment(10, 30, 100);
-
-		exception.expect(IllegalArgumentException.class);
-		test.addMergeSource(s2);
-	}
-	
-	@Test
-	public void testAddMergeSourceExceptsOnOutOfRangeArg1() {	
-		// invalid merge source - out of range
-		exception.expect(IllegalArgumentException.class);
-		DefaultBorderSegment s4 = new DefaultBorderSegment(-1, 20, 100);
-	}
-	
-	@Test
-	public void testAddMergeSourceWrongLength() {
-		// invalid merge source - wrong length
-		DefaultBorderSegment s = new DefaultBorderSegment(10, 20, 200);
-		exception.expect(IllegalArgumentException.class);
-		test.addMergeSource(s);
-	}
-	
-	@Test
-	public void testAddMergeSourceNull() {
-		// invalid merge source - null
-		exception.expect(IllegalArgumentException.class);
-		test.addMergeSource(null);
-	}
 
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#hasMergeSources()}.
@@ -178,39 +136,7 @@ public class DefaultBorderSegmentTest {
 		assertTrue(test.hasMergeSources());
 	}
 
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getStartIndex()}.
-	 */
-	@Test
-	public void testGetStartIndex() {
-		assertEquals(0, test.getStartIndex());
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getEndIndex()}.
-	 */
-	@Test
-	public void testGetEndIndex() {
-		assertEquals(20, test.getEndIndex());
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getProportionalIndex(double)}.
-	 */
-	@Test
-	public void testGetProportionalIndex() {
-		assertEquals(10, test.getProportionalIndex(0.5));
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getIndexProportion(int)}.
-	 */
-	@Test
-	public void testGetIndexProportion() {
-		assertEquals(0.5, test.getIndexProportion(10), 0);
-	}
-
+	
 	/**
 	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getName()}.
 	 */
@@ -223,40 +149,26 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getMidpointIndex()}.
-	 */
-	@Test
-	public void testGetMidpointIndex() {
-		assertEquals(10, test.getMidpointIndex());
-		
-		/*
-		 * Wrapping segment
-		 */
-		test = new DefaultBorderSegment(90, 10, 100);
-		assertEquals(0, test.getMidpointIndex());
-	}
-
-	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getDistanceToStart(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getShortestDistanceToStart(int)}.
 	 */
 	@Test
 	public void testGetDistanceToStart() {
-		assertEquals(5, test.getDistanceToStart(5));
+		assertEquals(5, test.getShortestDistanceToStart(5));
 		
 		/*
 		 * Outside segment
 		 */
-		assertEquals(10, test.getDistanceToStart(90));
+		assertEquals(10, test.getShortestDistanceToStart(90));
 		
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getDistanceToEnd(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getShortestDistanceToEnd(int)}.
 	 */
 	@Test
 	public void testGetDistanceToEnd() {
-		assertEquals("Within segment", 15, test.getDistanceToEnd(5));
-		assertEquals("Outside segment", 30, test.getDistanceToEnd(90));
+		assertEquals("Within segment", 15, test.getShortestDistanceToEnd(5));
+		assertEquals("Outside segment", 30, test.getShortestDistanceToEnd(90));
 	}
 
 	/**
@@ -274,11 +186,11 @@ public class DefaultBorderSegmentTest {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getTotalLength()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment#getProfileLength()}.
 	 */
 	@Test
 	public void testGetTotalLength() {
-		assertEquals(100, test.getTotalLength());
+		assertEquals(100, test.getProfileLength());
 	}
 
 	/**
@@ -392,78 +304,78 @@ public class DefaultBorderSegmentTest {
 
 		// Non wrapping segment
 		for(int i=0; i<=25; i++) {
-			assertTrue(IBorderSegment.contains(0, 25, i, s1.getTotalLength()));
+			assertTrue(IBorderSegment.contains(0, 25, i, s1.getProfileLength()));
 		}
 		
 		for(int i=26; i<s1.length(); i++) {
-			assertFalse(IBorderSegment.contains(0, 25, i, s1.getTotalLength()));
+			assertFalse(IBorderSegment.contains(0, 25, i, s1.getProfileLength()));
 		}
 		
 		// Wrapping segment
-		for(int i=90; i<s1.getTotalLength(); i++) {
-			assertTrue(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+		for(int i=90; i<s1.getProfileLength(); i++) {
+			assertTrue(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 		for(int i=0; i<=25; i++) {
-			assertTrue(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+			assertTrue(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 		for(int i=26; i<90; i++) {
-			assertFalse(IBorderSegment.contains(90, 25, i, s1.getTotalLength()));
+			assertFalse(IBorderSegment.contains(90, 25, i, s1.getProfileLength()));
 		}
 	}
 	
 	
-	@Test
-	public void testUpdateLoneSegment() throws SegmentUpdateException {
-		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
-		assertTrue(s1.update(0, 25));
-		assertEquals(0, s1.getStartIndex());
-		assertEquals(25, s1.getEndIndex());
-
-		assertTrue(s1.update(90, 20));
-		assertEquals(90, s1.getStartIndex());
-		assertEquals(20, s1.getEndIndex());
-
-		assertTrue(s1.update(0, 25));
-		assertEquals(0, s1.getStartIndex());
-		assertEquals(25, s1.getEndIndex());
-	}
-	
-	@Test
-	public void testUpdateLoneSegmentFailsWhenLocked() throws SegmentUpdateException {
-		test.setLocked(true);
-		assertFalse(test.update(10, 20));
-	}
-	
-	@Test
-	public void testUpdateLoneSegmentFailsWhenTooShort() throws SegmentUpdateException {
-		assertFalse(test.update(0, 2));
-		assertTrue(test.update(0,  3));
-	}
-	
-	
-	@Test
-	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		test.update(-1, 20);
-	}
-	
-	@Test
-	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsHigh() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		test.update(101, 20);
-	}
-	
-	@Test
-	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsLow() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		test.update(0, -1);
-	}
-	
-	@Test
-	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsHigh() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		test.update(0, 101);
-	}
+//	@Test
+//	public void testUpdateLoneSegment() throws SegmentUpdateException {
+//		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  20, 100);
+//		assertTrue(s1.update(0, 25));
+//		assertEquals(0, s1.getStartIndex());
+//		assertEquals(25, s1.getEndIndex());
+//
+//		assertTrue(s1.update(90, 20));
+//		assertEquals(90, s1.getStartIndex());
+//		assertEquals(20, s1.getEndIndex());
+//
+//		assertTrue(s1.update(0, 25));
+//		assertEquals(0, s1.getStartIndex());
+//		assertEquals(25, s1.getEndIndex());
+//	}
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsWhenLocked() throws SegmentUpdateException {
+//		test.setLocked(true);
+//		assertFalse(test.update(10, 20));
+//	}
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsWhenTooShort() throws SegmentUpdateException {
+//		assertFalse(test.update(0, 2));
+//		assertTrue(test.update(0,  3));
+//	}
+//	
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
+//		exception.expect(IllegalArgumentException.class);
+//		test.update(-1, 20);
+//	}
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsHigh() throws SegmentUpdateException {
+//		exception.expect(IllegalArgumentException.class);
+//		test.update(101, 20);
+//	}
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsLow() throws SegmentUpdateException {
+//		exception.expect(IllegalArgumentException.class);
+//		test.update(0, -1);
+//	}
+//	
+//	@Test
+//	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsHigh() throws SegmentUpdateException {
+//		exception.expect(IllegalArgumentException.class);
+//		test.update(0, 101);
+//	}
 	
 	private List<IBorderSegment> createLinkedList() throws ProfileException{
 		DefaultBorderSegment s1 = new DefaultBorderSegment(0,  25, 100);

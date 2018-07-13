@@ -45,6 +45,7 @@ public enum BorderTag {
         this.type = type;
     }
 
+    @Override
     public String toString() {
         return this.name;
     }

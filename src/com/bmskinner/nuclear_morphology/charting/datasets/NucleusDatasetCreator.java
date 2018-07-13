@@ -1066,7 +1066,7 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
                     if (seg != null) {
                         int indexLength = seg.length();
-                        double proportionPerimeter = (double) indexLength / (double) seg.getTotalLength();
+                        double proportionPerimeter = (double) indexLength / (double) seg.getProfileLength();
                         length = n.getStatistic(PlottableStatistic.PERIMETER, scale) * proportionPerimeter;
 
                     }

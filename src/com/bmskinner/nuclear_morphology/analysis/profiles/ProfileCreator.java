@@ -73,7 +73,7 @@ public class ProfileCreator implements Loggable {
         } catch (UnavailableBorderPointException | UnavailableBorderTagException e) {
             throw new ProfileException("Cannot create profile " + type, e);
         } catch(Exception e) {
-        	throw new ProfileException("Unexpected exception creating profile " + type, e);
+        	throw new ProfileException("Unexpected exception creating profile " + type+" due to "+e.getMessage(), e);
         }
     }
 
@@ -86,15 +86,17 @@ public class ProfileCreator implements Loggable {
     private List<IBorderSegment> getExistingSegments() {
         List<IBorderSegment> segments = new ArrayList<>();
 
-        ISegmentedProfile templateProfile = null;
+        if(!target.hasProfile(ProfileType.ANGLE))
+        	return segments;
+
         try {
-            if (target.hasProfile(ProfileType.ANGLE)) {
-            	templateProfile = target.getProfile(ProfileType.ANGLE);
-                if (templateProfile.hasSegments())
-                    segments = templateProfile.getSegments();
-            }
+
+        	ISegmentedProfile templateProfile = target.getProfile(ProfileType.ANGLE);
+        	if (templateProfile.hasSegments())
+        		segments = templateProfile.getSegments();
+
         } catch (UnavailableProfileTypeException e) {
-        	fine("No profile angle type");
+        	fine("No profile angle type", e);
         }
 
         return segments;
@@ -163,7 +165,7 @@ public class ProfileCreator implements Loggable {
     private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile) {
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
-        if (segments.get(0).getTotalLength() != target.getBorderLength()) {
+        if (segments.get(0).getProfileLength() != target.getBorderLength()) {
 
             try {
                 segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());

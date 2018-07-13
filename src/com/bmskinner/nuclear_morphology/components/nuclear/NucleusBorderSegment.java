@@ -119,7 +119,7 @@ public class NucleusBorderSegment implements IBorderSegment {
         this.uuid = n.getID();
         this.startIndex = n.getStartIndex();
         this.endIndex = n.getEndIndex();
-        this.totalLength = n.getTotalLength();
+        this.totalLength = n.getProfileLength();
         this.nextSegment = n.nextSegment();
         this.prevSegment = n.prevSegment();
         this.mergeSources = n.getMergeSources();
@@ -296,7 +296,7 @@ public class NucleusBorderSegment implements IBorderSegment {
         if (this.wraps()) {
 
             int midLength = this.length() >> 1;
-            if (midLength + startIndex < this.getTotalLength()) {
+            if (midLength + startIndex < this.getProfileLength()) {
                 return midLength + startIndex;
             } else {
                 return endIndex - midLength;
@@ -313,7 +313,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getDistanceToStart(int)
      */
     @Override
-    public int getDistanceToStart(int index) {
+    public int getShortestDistanceToStart(int index) {
 
         int startIndex = this.getStartIndex();
 
@@ -330,7 +330,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getDistanceToEnd(int)
      */
     @Override
-    public int getDistanceToEnd(int index) {
+    public int getShortestDistanceToEnd(int index) {
 
         int endIndex = this.getEndIndex();
 
@@ -340,6 +340,20 @@ public class NucleusBorderSegment implements IBorderSegment {
         int result = Math.min(distForwards, distBackwards);
         return result;
     }
+    
+    @Override
+	public int getInternalDistanceToStart(int index) {
+		if(wraps() && startIndex>index)
+			return index + (getProfileLength()-startIndex);
+		return index-startIndex;
+	}
+
+	@Override
+	public int getInternalDistanceToEnd(int index) {
+		if(wraps() && getEndIndex()<index)
+			return getEndIndex() + (getProfileLength()-index);
+		return index-getEndIndex();
+	}
 
     /*
      * (non-Javadoc)
@@ -367,7 +381,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getTotalLength()
      */
     @Override
-    public int getTotalLength() {
+    public int getProfileLength() {
         return this.totalLength;
     }
 
@@ -517,7 +531,7 @@ public class NucleusBorderSegment implements IBorderSegment {
     @Override
     public int testLength(int start, int end) {
         if (wraps(start, end)) { // the segment wraps
-            return end + (this.getTotalLength() - start);
+            return end + (this.getProfileLength() - start);
         } else {
             return end - start;
         }
@@ -610,10 +624,10 @@ public class NucleusBorderSegment implements IBorderSegment {
 
         this.lastFailReason = "No fail";
         // Check the incoming data
-        if (startIndex < 0 || startIndex > this.getTotalLength()) {
+        if (startIndex < 0 || startIndex > this.getProfileLength()) {
             throw new IllegalArgumentException("Start index is outside the profile range: " + startIndex);
         }
-        if (endIndex < 0 || endIndex > this.getTotalLength()) {
+        if (endIndex < 0 || endIndex > this.getProfileLength()) {
             throw new IllegalArgumentException("End index is outside the profile range: " + endIndex);
         }
 
@@ -751,7 +765,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      */
     @Override
     public void setNextSegment(IBorderSegment s) {
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getStartIndex() != this.getEndIndex()) {
@@ -770,7 +784,7 @@ public class NucleusBorderSegment implements IBorderSegment {
      */
     @Override
     public void setPrevSegment(IBorderSegment s) {
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getEndIndex() != this.getStartIndex()) {
@@ -856,7 +870,7 @@ public class NucleusBorderSegment implements IBorderSegment {
         builder.append(" | ");
         builder.append(this.length());
         builder.append(" of ");
-        builder.append(this.getTotalLength() - 1);
+        builder.append(this.getProfileLength() - 1);
         builder.append(" | ");
         builder.append(this.wraps());
 
@@ -875,7 +889,7 @@ public class NucleusBorderSegment implements IBorderSegment {
 
         if (this.wraps()) {
 
-            for (int i = this.getStartIndex(); i < this.getTotalLength(); i++) {
+            for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
             for (int i = 0; i < this.getEndIndex(); i++) {

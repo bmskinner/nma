@@ -129,7 +129,7 @@ public class DefaultBorderSegment implements IBorderSegment {
         this.uuid        = n.getID();
         this.startIndex  = n.getStartIndex();
         this.endIndex    = n.getEndIndex();
-        this.totalLength = n.getTotalLength();
+        this.totalLength = n.getProfileLength();
         this.nextSegment = n.nextSegment();
         this.prevSegment = n.prevSegment();
 
@@ -148,25 +148,11 @@ public class DefaultBorderSegment implements IBorderSegment {
         this.isLocked = n.isLocked();
     }
 
-    /*
-     * ---------------- Getters ----------------
-     */
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getID()
-     */
     @Override
     public @NonNull UUID getID() {
         return this.uuid;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getMergeSources()
-     */
     @Override
     public List<IBorderSegment> getMergeSources() {
         List<IBorderSegment> result = new ArrayList<IBorderSegment>();
@@ -176,30 +162,20 @@ public class DefaultBorderSegment implements IBorderSegment {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#addMergeSource(components.nuclear.
-     * NucleusBorderSegment)
-     */
     @Override
-    public void addMergeSource(IBorderSegment seg) {
-
-        if (seg == null) {
+    public void addMergeSource(@NonNull IBorderSegment seg) {
+        if (seg == null)
             throw new IllegalArgumentException("Merge source segment is null");
-        }
 
-        if (seg.getTotalLength() != totalLength) {
+        if (seg.getProfileLength() != totalLength)
             throw new IllegalArgumentException("Merge source length does not match");
-        }
 
-        if (!this.contains(seg.getStartIndex())) {
+        if (!this.contains(seg.getStartIndex()))
             throw new IllegalArgumentException("Start index of source is not in this segment");
-        }
 
-        if (!this.contains(seg.getEndIndex())) {
-            throw new IllegalArgumentException(String.format("End index of source (%d) from segment %s is not in this segment: %s", seg.getEndIndex(), seg.getDetail(), this.getDetail()));
-        }
+        if (!this.contains(seg.getEndIndex()))
+            throw new IllegalArgumentException(String.format("End index of source (%d) from segment %s is not in this segment: %s", 
+            		seg.getEndIndex(), seg.getDetail(), this.getDetail()));
 
         mergeSources = Arrays.copyOf(mergeSources, mergeSources.length + 1);
         mergeSources[mergeSources.length - 1] = seg;
@@ -314,7 +290,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     }
 
     @Override
-    public int getDistanceToStart(int index) {
+    public int getShortestDistanceToStart(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -328,7 +304,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     }
 
     @Override
-    public int getDistanceToEnd(int index) {
+    public int getShortestDistanceToEnd(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -338,6 +314,20 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         return Math.min(abs, alt);
     }
+    
+	@Override
+	public int getInternalDistanceToStart(int index) {
+		if(wraps() && startIndex>index)
+			return index + (getProfileLength()-startIndex);
+		return index-startIndex;
+	}
+
+	@Override
+	public int getInternalDistanceToEnd(int index) {
+		if(wraps() && getEndIndex()<index)
+			return getEndIndex() + (getProfileLength()-index);
+		return index-getEndIndex();
+	}
 
     @Override
     public boolean isLocked() {
@@ -350,7 +340,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     }
 
     @Override
-    public int getTotalLength() {
+    public int getProfileLength() {
         return this.totalLength;
     }
 
@@ -560,7 +550,7 @@ public class DefaultBorderSegment implements IBorderSegment {
     public void setNextSegment(@NonNull IBorderSegment s) {
         if (s == null)
             throw new IllegalArgumentException("Segment cannot be null");
-        if (s.getTotalLength() != this.getTotalLength())
+        if (s.getProfileLength() != this.getProfileLength())
             throw new IllegalArgumentException("Segment has a different profile length");
         if (s.getStartIndex() != this.getEndIndex())
             throw new IllegalArgumentException(String.format("Segment start (%d) does not overlap this end (%d)", s.getStartIndex(), getEndIndex()));
@@ -574,9 +564,11 @@ public class DefaultBorderSegment implements IBorderSegment {
         if (s == null)
             throw new IllegalArgumentException("Segment cannot be null");
 
-        if (s.getTotalLength() != getTotalLength())
+        if (s.getProfileLength() != getProfileLength())
             throw new IllegalArgumentException("Segment has a different profile length");
+        
         if (s.getEndIndex() != getStartIndex())
+        	
             throw new IllegalArgumentException(String.format("Segment end (%d) does not overlap this start (%d)", s.getEndIndex(), getStartIndex()));
 
         prevSegment = s;
@@ -626,7 +618,7 @@ public class DefaultBorderSegment implements IBorderSegment {
         builder.append(" | ");
         builder.append(this.length());
         builder.append(" of ");
-        builder.append(this.getTotalLength() - 1);
+        builder.append(this.getProfileLength() - 1);
         builder.append(" | ");
         builder.append(this.wraps());
 
@@ -640,7 +632,7 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         if (this.wraps()) {
 
-            for (int i = this.getStartIndex(); i < this.getTotalLength(); i++) {
+            for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
             for (int i = 0; i < this.getEndIndex(); i++) {

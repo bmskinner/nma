@@ -201,7 +201,7 @@ public interface IProfile extends Serializable, Loggable {
     /**
      * Create a profile offset to start from the given index. For example, a
      * profile { 1, 2, 3, 4} offset by 1 will become { 2, 3, 4, 1 }
-     * 
+
      * @param j
      *            the index to start from
      * @return a new offset profile
@@ -443,7 +443,23 @@ public interface IProfile extends Serializable, Loggable {
     
     /**
      * Wrap the given index into the current profile
-     * @param index
+     * For example, here is a profile of length 10 (indexes 0-9),
+     * with some indexes to be accessed beyond each end of the profile:
+     * <p>
+     * <pre>     0        9  <br> ----|--------|----<br>-4                13</pre>
+     * <p>
+     * These indexes need to be wrapped to their appropriate index in the profile, preserving the number of
+     * index steps.
+     * <p>
+     * Starting with index -4, the wrapped index is 6:
+     * <p>
+     * <pre> 67890     6789  <br> ----|--------|<br>     |     ----</pre>
+     * For with index 13, the wrapped index is 3:
+     * <p>
+     * <pre>     0123     90123  <br>     |--------|----<br>     ----     |</pre>
+     * 
+     * 
+     * @param index the index to wrap
      * @return
      */
     int wrap(int index);

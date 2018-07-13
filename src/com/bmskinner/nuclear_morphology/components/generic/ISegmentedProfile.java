@@ -245,11 +245,26 @@ public interface ISegmentedProfile extends IProfile {
      */
     void nudgeSegments(int amount) throws ProfileException;
 
+
     /*
-     * (non-Javadoc)
+     * The segmented profile starts like this:
      * 
-     * @see no.components.Profile#offset(int) Offset the segment by the given
-     * amount. Returns a copy of the profile.
+     * 0 5 15 35 |-----|----------|--------------------|
+     * 
+     * After applying offset=5, the profile looks like this:
+     * 
+     * 0 10 30 35 |----------|--------------------|-----|
+     * 
+     * The new profile starts at index 'offset' in the original profile This
+     * means that we must subtract 'offset' from the segment positions to
+     * make them line up.
+     * 
+     * The nudge function in IBorderSegment moves endpoints by a specified
+     * amount
+     * 
+     * @param newStartIndex the index from which the profile should start
+     * @see no.components.Profile#offset(int)
+     * 
      */
     @Override
 	ISegmentedProfile offset(int newStartIndex) throws ProfileException;
@@ -287,14 +302,16 @@ public interface ISegmentedProfile extends IProfile {
     void unmergeSegment(@NonNull IBorderSegment segment) throws ProfileException;
 
     /**
-     * Split a segment at the given index into two new segments. Splits the
-     * segments, adds the split as merge sources to the old segment, then
-     * unmerges
+     * Split the segment containing at the given index into two new segments.
+     *  The new segments will have the split index as their end and start indexes
+     * respectively.
      * 
-     * @param segment the segment to split
+     * @param segment the segment to be split
      * @param splitIndex the index to split at
      * @param id1 the id for the first new segment
      * @param id2 the id for the second new segment
+     * @throws ProfileException if the split would cause a segment to become too short
+     * @throws IllegalArgumentException if the segment does not contain the splitting index or the segment is not part of the profile
      */
     void splitSegment(@NonNull IBorderSegment segment, int splitIndex, @NonNull UUID id1, @NonNull UUID id2) throws ProfileException;
 

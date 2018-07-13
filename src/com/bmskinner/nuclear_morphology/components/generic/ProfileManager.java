@@ -803,7 +803,7 @@ public class ProfileManager implements Loggable {
             // totalLength+difference for the reference point
             int difference = offset - offsetForOp;
 
-            if (seg2.getStartIndex() == seg2.getTotalLength() + difference || seg2.getStartIndex() == difference) {
+            if (seg2.getStartIndex() == seg2.getProfileLength() + difference || seg2.getStartIndex() == difference) {
                 ok = false;
             }
 

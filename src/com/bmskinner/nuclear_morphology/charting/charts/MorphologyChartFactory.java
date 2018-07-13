@@ -249,7 +249,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
                     double x = midPoint;
                     if (options.isNormalised()) {
-                        x = ((double) midPoint / (double) seg.getTotalLength()) * 100;
+                        x = ((double) midPoint / (double) seg.getProfileLength()) * 100;
                     }
                     XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), x, 320);
 
@@ -490,7 +490,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                         int midPoint = seg.getMidpointIndex();
                         double xToDraw = midPoint;
                         if (options.isNormalised()) {
-                            xToDraw = ((double) midPoint / (double) seg.getTotalLength()) * 100;
+                            xToDraw = ((double) midPoint / (double) seg.getProfileLength()) * 100;
                         }
 
                         XYTextAnnotation segmentAnnotation = new XYTextAnnotation(seg.getName(), xToDraw, 320);

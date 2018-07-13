@@ -105,7 +105,7 @@ public class OpenBorderSegment implements IBorderSegment {
         this.uuid = n.getID();
         this.startIndex = n.getStartIndex();
         this.endIndex = n.getEndIndex();
-        this.totalLength = n.getTotalLength();
+        this.totalLength = n.getProfileLength();
         this.nextSegment = n.nextSegment();
         this.prevSegment = n.prevSegment();
 
@@ -165,7 +165,7 @@ public class OpenBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Merge source segment is null");
         }
 
-        if (seg.getTotalLength() != totalLength) {
+        if (seg.getProfileLength() != totalLength) {
             throw new IllegalArgumentException("Merge source length does not match");
         }
 
@@ -319,7 +319,7 @@ public class OpenBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getDistanceToStart(int)
      */
     @Override
-    public int getDistanceToStart(int index) {
+    public int getShortestDistanceToStart(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -338,7 +338,7 @@ public class OpenBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getDistanceToEnd(int)
      */
     @Override
-    public int getDistanceToEnd(int index) {
+    public int getShortestDistanceToEnd(int index) {
         if (index < 0 || index >= totalLength) {
             throw new IllegalArgumentException("Index is not in profile: " + index + "; total " + totalLength);
         }
@@ -348,6 +348,20 @@ public class OpenBorderSegment implements IBorderSegment {
 
         return Math.min(abs, alt);
     }
+    
+    @Override
+	public int getInternalDistanceToStart(int index) {
+		if(wraps() && startIndex>index)
+			return index + (getProfileLength()-startIndex);
+		return index-startIndex;
+	}
+
+	@Override
+	public int getInternalDistanceToEnd(int index) {
+		if(wraps() && getEndIndex()<index)
+			return getEndIndex() + (getProfileLength()-index);
+		return index-getEndIndex();
+	}
 
     /*
      * (non-Javadoc)
@@ -375,7 +389,7 @@ public class OpenBorderSegment implements IBorderSegment {
      * @see components.nuclear.IBorderSegment#getTotalLength()
      */
     @Override
-    public int getTotalLength() {
+    public int getProfileLength() {
         return this.totalLength;
     }
 
@@ -669,7 +683,7 @@ public class OpenBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Segment cannot be null");
         }
 
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getStartIndex() != this.getEndIndex()) {
@@ -693,7 +707,7 @@ public class OpenBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Segment cannot be null");
         }
 
-        if (s.getTotalLength() != this.getTotalLength()) {
+        if (s.getProfileLength() != this.getProfileLength()) {
             throw new IllegalArgumentException("Segment has a different total length");
         }
         if (s.getEndIndex() != this.getStartIndex()) {
@@ -787,7 +801,7 @@ public class OpenBorderSegment implements IBorderSegment {
         builder.append(" | ");
         builder.append(this.length());
         builder.append(" of ");
-        builder.append(this.getTotalLength() - 1);
+        builder.append(this.getProfileLength() - 1);
         builder.append(" | ");
         builder.append(this.wraps());
 
@@ -806,7 +820,7 @@ public class OpenBorderSegment implements IBorderSegment {
 
         if (this.wraps()) {
 
-            for (int i = this.getStartIndex(); i < this.getTotalLength(); i++) {
+            for (int i = this.getStartIndex(); i < this.getProfileLength(); i++) {
                 indexes.add(i);
             }
             for (int i = 0; i < this.getEndIndex(); i++) {
