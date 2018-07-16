@@ -29,6 +29,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
  * A border segment without the length restrictions of the DefaultBorderSegment.
@@ -632,16 +633,13 @@ public class OpenBorderSegment implements IBorderSegment {
     @Override
     public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
         // Check the incoming data
-        if (startIndex < 0 || startIndex > totalLength) {
-            throw new IllegalArgumentException("Start index is outside the profile range: " + startIndex);
-        }
-        if (endIndex < 0 || endIndex > totalLength) {
-            throw new IllegalArgumentException("End index is outside the profile range: " + endIndex);
-        }
+        if (startIndex < 0 || startIndex > totalLength)
+            throw new SegmentUpdateException("Start index is outside the profile range: " + startIndex);
+        if (endIndex < 0 || endIndex > totalLength)
+            throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
 
-        if (!canUpdateSegment(startIndex, endIndex)) {
-            return false;
-        }
+        if (!canUpdateSegment(startIndex, endIndex))
+        	throw new SegmentUpdateException("Unable to update segment");
 
         // All checks have been passed; the update can proceed
 

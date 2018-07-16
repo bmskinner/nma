@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -27,10 +28,11 @@ import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.De
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
+import com.bmskinner.nuclear_morphology.components.nuclear.NucleusBorderSegment;
 import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComponent;
 
 /**
- * Test the common methods for segment classes
+ * Test the common methods for segment classes implementing the IBorderSegment interface.
  * @author bms41
  * @since 1.14.0
  *
@@ -60,27 +62,34 @@ public class IBorderSegmentTester {
     }
 
 	/**
-	 * Create an instance of the class under test, using the default index parameters
+	 * Create an instance of the class under test, using the default index parameters.
+	 * The segment is part of a 3-segment profile
 	 * @param source the class to create
 	 * @return
 	 */
 	public static IBorderSegment createInstance(Class source) {
+		
+		int middleSegmentStart = endIndex;
+		int middleSegmentEnd = endIndex+30;
+		
+		// Make a 3 segment profile, so that updating can be properly tested with segment locking
+		UUID tempId          = UUID.fromString("00000000-0000-0000-0000-000000000002");
+		UUID middleSegmentId = UUID.fromString("00000000-0000-0000-0000-000000000004");
+		UUID finalSegmentId  = UUID.fromString("00000000-0000-0000-0000-000000000005");
+		
+		// The component from which profiles will be generated
+		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
+		float[] data = new float[comp.getBorderLength()];
+		Arrays.fill(data, 1);
+		
 		if(source==BorderSegmentTree.class){
-			// Create the border tree segment
-			DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
-			float[] data = new float[comp.getBorderLength()];
-			Arrays.fill(data, 1);
 
 			DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
 			
 			IBorderSegment borderSegmentTree = null;
 			try {
-				
-				// Make a 3 segment profile, so that updating can be properly tested with segment locking
-				UUID split1Id = UUID.fromString("00000000-0000-0000-0000-000000000002");
-				
-				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(comp.getID()), endIndex+30, split1Id, UUID.randomUUID());
-				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(split1Id), endIndex, SEG_ID_0, UUID.randomUUID());
+				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(comp.getID()), middleSegmentEnd, tempId, finalSegmentId);
+				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(tempId), endIndex, SEG_ID_0, middleSegmentId);
 				
 				borderSegmentTree = doubleSegmentProfile.getSegment(SEG_ID_0);
 			} catch (UnavailableComponentException | ProfileException e) {
@@ -90,15 +99,36 @@ public class IBorderSegmentTester {
 			return borderSegmentTree;
 		}
 		
+		// Older classes use the same approach to linking segments
+		List<IBorderSegment> list = new ArrayList<>();
 		if(source==DefaultBorderSegment.class) {
-			return new DefaultBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IBorderSegment s0 = new DefaultBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IBorderSegment s1 = new DefaultBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
+			IBorderSegment s2 = new DefaultBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		
 		if(source==OpenBorderSegment.class) {
-			return new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IBorderSegment s0 = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IBorderSegment s1 = new OpenBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
+			IBorderSegment s2 = new OpenBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+			list.add(s0); list.add(s1); list.add(s2); 
+		}
+
+		if(source==NucleusBorderSegment.class) {
+			IBorderSegment s0 = new NucleusBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+			IBorderSegment s1 = new NucleusBorderSegment(middleSegmentStart, middleSegmentEnd, profileLength, middleSegmentId);
+			IBorderSegment s2 = new NucleusBorderSegment(middleSegmentEnd, startIndex, profileLength, finalSegmentId);
+			list.add(s0); list.add(s1); list.add(s2); 
 		}
 		
-		return null;
+		try {
+			IBorderSegment.linkSegments(list);
+		} catch (ProfileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list.get(0);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -111,7 +141,8 @@ public class IBorderSegmentTester {
 		return Arrays.asList(
 				BorderSegmentTree.class,
 				DefaultBorderSegment.class,
-				OpenBorderSegment.class);
+				OpenBorderSegment.class,
+				NucleusBorderSegment.class);
 	}
 	
 	@Test
@@ -389,7 +420,7 @@ public class IBorderSegmentTester {
 	
 	@Test
 	public void testUpdateToEndOfSegmentSucceedsWhenPreviousSegmentIsLocked() throws SegmentUpdateException {
-		segment.nextSegment().setLocked(true);
+		segment.prevSegment().setLocked(true);
 		segment.update(startIndex, endIndex-1);
 	}
 	
@@ -409,7 +440,8 @@ public class IBorderSegmentTester {
 	@Test
 	public void testUpdateSegmentFailsWhenTooShort() throws SegmentUpdateException {
 		exception.expect(SegmentUpdateException.class);
-		segment.update(startIndex, startIndex+2);
+		// We need to subtract 2 rather than 1 because we are specifying the end index, not the length
+		segment.update(startIndex, startIndex+IBorderSegment.MINIMUM_SEGMENT_LENGTH-2);
 	}
 
 	@Test

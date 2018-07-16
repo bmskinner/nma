@@ -2163,9 +2163,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new SegmentUpdateException(String.format("Next segment %s does not contain end index %d when increasing", nextSegment().getDetail(), endIndex));
 
 				 // Ensure previous and next segments are not locked
-		        if( prevSegment().contains(startIndex) && startIndex!=prevSegment().getEndIndex()  && prevSegment().isLocked())
+		        if(startIndex!=this.startIndex && prevSegment().isLocked())
 		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects previous segment (%s), which is locked", getDetail(), startIndex, endIndex, prevSegment().getDetail()));
-		        if( nextSegment().contains(endIndex) && endIndex!= nextSegment().getStartIndex() && nextSegment().isLocked())
+		        if(endIndex!=this.getEndIndex() && nextSegment().isLocked())
 		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects next segment (%s), which is locked", getDetail(), startIndex, endIndex, nextSegment().getDetail()));
 				
 				// Ensure next and previous segments will not become too short
