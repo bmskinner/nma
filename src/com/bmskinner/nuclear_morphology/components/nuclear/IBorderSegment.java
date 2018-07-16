@@ -373,11 +373,11 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
 
     /**
      * Update the segment to the given position. Also updates the previous and
-     * next segments. Error if the values cause any segment to become negative
-     * length
+     * next segments.
      * 
-     * @param start the new start index
-     * @param end the new end index
+     * @param startIndex the new start index
+     * @param endIndex the new end index
+     * @throws SegmentUpdateException if the update cannot proceed. The exception message gives detail on why the update failed
      */
     boolean update(int startIndex, int endIndex) throws SegmentUpdateException;
 

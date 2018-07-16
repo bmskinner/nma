@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+import org.jfree.ui.LengthAdjustmentType;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,42 +38,80 @@ import com.bmskinner.nuclear_morphology.samples.dummy.DummySegmentedCellularComp
 @RunWith(Parameterized.class)
 public class IBorderSegmentTester {
 	
+	public final static int startIndex = 0;
+	public final static int endIndex = 49;
+	public final static int segmentLength = 50;
+	public final static int profileLength = 330;
+	
+	protected final static UUID SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
+	
+	private IBorderSegment segment;
+
+	
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 	
 	@Parameter(0)
-	public IBorderSegment segment;
-	
-	public static int startIndex = 0;
-	public static int endIndex = 49;
-	public static int segmentLength = 50;
-	public static int profileLength = 330;
-	
-	protected final static UUID SEG_ID_0 = UUID.fromString("00000000-0000-0000-0000-000000000001");
+	public Class<? extends IBorderSegment> source;
+
+	@Before
+    public void setUp() throws Exception {
+        this.segment = createInstance(source);
+    }
+
+	/**
+	 * Create an instance of the class under test, using the default index parameters
+	 * @param source the class to create
+	 * @return
+	 */
+	public static IBorderSegment createInstance(Class source) {
+		if(source==BorderSegmentTree.class){
+			// Create the border tree segment
+			DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
+			float[] data = new float[comp.getBorderLength()];
+			Arrays.fill(data, 1);
+
+			DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
+			
+			IBorderSegment borderSegmentTree = null;
+			try {
+				
+				// Make a 3 segment profile, so that updating can be properly tested with segment locking
+				UUID split1Id = UUID.fromString("00000000-0000-0000-0000-000000000002");
+				
+				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(comp.getID()), endIndex+30, split1Id, UUID.randomUUID());
+				doubleSegmentProfile.splitSegment(doubleSegmentProfile.getSegment(split1Id), endIndex, SEG_ID_0, UUID.randomUUID());
+				
+				borderSegmentTree = doubleSegmentProfile.getSegment(SEG_ID_0);
+			} catch (UnavailableComponentException | ProfileException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return borderSegmentTree;
+		}
+		
+		if(source==DefaultBorderSegment.class) {
+			return new DefaultBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+		}
+		
+		if(source==OpenBorderSegment.class) {
+			return new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
+		}
+		
+		return null;
+	}
 	
 	@SuppressWarnings("unchecked")
     @Parameters
-    public static Iterable<IBorderSegment> arguments() {
-		
-		// Create the border tree segment
-		DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
-		float[] data = new float[comp.getBorderLength()];
-		for(int i=0; i<data.length; i++) {
-			data[i] = (float) ((Math.sin(Math.toRadians(i))+1)*180);
-		}
+    public static Iterable<Class> arguments() {
 
-		DefaultSegmentedProfile doubleSegmentProfile = comp.new DefaultSegmentedProfile(data);
-		IBorderSegment borderSegmentTree = doubleSegmentProfile.new BorderSegmentTree(SEG_ID_0, startIndex, segmentLength); 
-
-		// Create the default border segment with the same length
-		IBorderSegment defaultBorderSegment = new DefaultBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-		
-		IBorderSegment openBorderSegment = new OpenBorderSegment(startIndex, endIndex, profileLength, SEG_ID_0);
-
+		// Since the objects created here persist throughout all tests,
+		// we're making class references. The actual objects under test
+		// are created fresh from the appropriate class.
 		return Arrays.asList(
-				borderSegmentTree,
-				defaultBorderSegment,
-				openBorderSegment);
+				BorderSegmentTree.class,
+				DefaultBorderSegment.class,
+				OpenBorderSegment.class);
 	}
 	
 	@Test
@@ -124,7 +164,6 @@ public class IBorderSegmentTester {
 	public void testAddMergeSourceExceptsOnOutOfRangeArg0() {
 		// invalid merge source - out of range
 		DefaultBorderSegment s2 = new DefaultBorderSegment(endIndex, endIndex+20, profileLength);
-
 		exception.expect(IllegalArgumentException.class);
 		segment.addMergeSource(s2);
 	}
@@ -151,12 +190,12 @@ public class IBorderSegmentTester {
 	}
 
 	@Test
-	public void testGetStartIndex() {
+	public void testGetStartIndex() throws SegmentUpdateException {
 		assertEquals(startIndex, segment.getStartIndex());
 	}
 
 	@Test
-	public void testGetEndIndex() {
+	public void testGetEndIndex() throws SegmentUpdateException {
 		assertEquals(endIndex, segment.getEndIndex());
 	}
 
@@ -196,32 +235,48 @@ public class IBorderSegmentTester {
 
 	@Test
 	public void testGetMidpointIndex() {
-		assertEquals("Midpoint index",endIndex/2, segment.getMidpointIndex());
+
+		// Segment starts at 0, ends at 49. Length 50.
+		// Midpoint should be at 25+0 = 25
+		
+		assertEquals("Midpoint index", segmentLength/2, segment.getMidpointIndex());
 	}
 
 	@Test
-	public void testGetDistanceToStart() {
-		
-		for(int i=0; i<segment.getMidpointIndex(); i++) {
-			assertEquals(i, segment.getShortestDistanceToStart(i));
-		}
-		for(int i=segment.getMidpointIndex(); i<=segment.getProfileLength(); i++) {
-			assertEquals(segment.getProfileLength()-i, segment.getShortestDistanceToStart(i));
+	public void testGetShortestDistanceToStart() {
+				
+		int startIndex = segment.getStartIndex();
+		int profileLength = segment.getProfileLength();	
+		for(int i=0; i<segment.getProfileLength(); i++) {
+			
+			int d1 = Math.abs(i-startIndex);
+			int d2 = profileLength - d1;
+			
+			int dist = Math.min(d1, d2);
+			assertEquals("Testing "+i, dist, segment.getShortestDistanceToStart(i));
 		}
 	}
 	
 
 	@Test
 	public void testGetShortestDistanceToEnd() {
+		int endIndex = segment.getEndIndex();
+		int profileLength = segment.getProfileLength();	
+		
+		
+		// Profile is 330. Shortest distance is always <165
+		// If end is 0, shortest distances are 0, 1, 2 ... 164, 165, 164 ... 1
+		
+		// Shortest distance between two indexes in a wrapped profile
+				
 		for(int i=0; i<segment.getProfileLength(); i++) {
-			int dist = Math.abs(i-segment.getEndIndex());
+			
+			int d1 = Math.abs(i-endIndex);
+			int d2 = profileLength - d1;
+			
+			int dist = Math.min(d1, d2);
 			assertEquals("Testing "+i, dist, segment.getShortestDistanceToEnd(i));
 		}
-	}
-
-	@Test
-	public void testIsLocked() {
-		assertFalse(segment.isLocked());
 	}
 
 	@Test
@@ -291,7 +346,6 @@ public class IBorderSegmentTester {
 	
 	@Test
 	public void testHasNextSegment() throws UnavailableComponentException {
-		assertFalse(segment.hasNextSegment());
 		IBorderSegment overlappingEnd = new DefaultBorderSegment(endIndex, profileLength, profileLength);
 		segment.setNextSegment(overlappingEnd);
 		assertTrue(segment.hasNextSegment());
@@ -299,7 +353,6 @@ public class IBorderSegmentTester {
 
 	@Test
 	public void testHasPrevSegment() throws UnavailableComponentException {
-		assertFalse(segment.hasPrevSegment());
 		IBorderSegment overlappingStart = new DefaultBorderSegment(endIndex+1, startIndex, profileLength);
 		segment.setPrevSegment(overlappingStart);
 		assertTrue(segment.hasPrevSegment());
@@ -307,53 +360,80 @@ public class IBorderSegmentTester {
 	
 	@Test
 	public void testUpdateSegmentEndIndex() throws SegmentUpdateException {
-
 		assertTrue(segment.update(startIndex, endIndex+5));
 		assertEquals(startIndex, segment.getStartIndex());
 		assertEquals(endIndex+5, segment.getEndIndex());
 	}
 	
 	@Test
-	public void testUpdateSegmentStartndex() throws SegmentUpdateException {
-
-		assertTrue(segment.update(startIndex+5, endIndex));
-		assertEquals(startIndex+5, segment.getStartIndex());
+	public void testUpdateSegmentStartIndex() throws SegmentUpdateException {
+		int newStart = startIndex+5;
+		assertTrue(segment.update(newStart, endIndex));
+		assertEquals(newStart, segment.getStartIndex());
 		assertEquals(endIndex, segment.getEndIndex());
 	}
 	
 	@Test
-	public void testUpdateLoneSegmentFailsWhenLocked() throws SegmentUpdateException {
+	public void testUpdateSegmentFailsWhenLocked() throws SegmentUpdateException {
 		segment.setLocked(true);
-		assertFalse(segment.update(10, 20));
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex, endIndex);
 	}
 	
 	@Test
-	public void testUpdateLoneSegmentFailsWhenTooShort() throws SegmentUpdateException {
-		assertFalse(segment.update(startIndex, startIndex+2));
+	public void testUpdateToStartOfSegmentFailsWhenPreviousSegmentIsLocked() throws SegmentUpdateException {
+		segment.prevSegment().setLocked(true);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex+1, endIndex);
+	}
+	
+	@Test
+	public void testUpdateToEndOfSegmentSucceedsWhenPreviousSegmentIsLocked() throws SegmentUpdateException {
+		segment.nextSegment().setLocked(true);
+		segment.update(startIndex, endIndex-1);
+	}
+	
+	@Test
+	public void testUpdateToEndOfSegmentFailsWhenNextSegmentIsLocked() throws SegmentUpdateException {
+		segment.nextSegment().setLocked(true);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex, endIndex-1);
+	}
+	
+	@Test
+	public void testUpdateToStartfSegmentSucceedsWhenNextSegmentIsLocked() throws SegmentUpdateException {
+		segment.nextSegment().setLocked(true);
+		segment.update(startIndex+1, endIndex);
+	}
+	
+	@Test
+	public void testUpdateSegmentFailsWhenTooShort() throws SegmentUpdateException {
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex, startIndex+2);
 	}
 
 	@Test
 	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsLow() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		segment.update(-1, 20);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(-1, endIndex);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnStartOutOfBoundsHigh() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		segment.update(101, 20);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(profileLength+1, endIndex);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsLow() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		segment.update(0, -1);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex, -1);
 	}
 	
 	@Test
 	public void testUpdateLoneSegmentFailsOnEndOutOfBoundsHigh() throws SegmentUpdateException {
-		exception.expect(IllegalArgumentException.class);
-		segment.update(0, profileLength+1);
+		exception.expect(SegmentUpdateException.class);
+		segment.update(startIndex, profileLength+1);
 	}
 	
 }

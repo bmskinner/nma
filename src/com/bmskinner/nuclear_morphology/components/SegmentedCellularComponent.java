@@ -1758,8 +1758,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			if(segments.id.equals(segment.getID())) {
 				// splitting the single root segment, clean the slate
 				segments.clearMergeSources();
-				segments.addMergeSource(new BorderSegmentTree(id1, segments.getStartIndex(), wrap(splitIndex-segments.getStartIndex()), segments));
-				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, wrap(segments.getStartIndex()-splitIndex), segments));	
+				
+				int length1 = segments.testLength(segments.startIndex, splitIndex);
+				int length2 = segments.testLength(splitIndex, segments.getEndIndex());
+				
+				segments.addMergeSource(new BorderSegmentTree(id1, segments.startIndex, length1, segments));
+				segments.addMergeSource(new BorderSegmentTree(id2, splitIndex, length2, segments));	
 				return;
 			}
 			
@@ -1770,9 +1774,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			// Replace the two segments in this profile
 			for (BorderSegmentTree oldSegment : segments.leaves) {
 				if (oldSegment.equals(segment)) {
-					//TODO check this works with very long segments > 50% of the profile - distance to end
-					newSegs.add(new BorderSegmentTree(id1, oldSegment.getStartIndex(), oldSegment.getShortestDistanceToStart(splitIndex), segments));
-					newSegs.add(new BorderSegmentTree(id2, splitIndex, oldSegment.getShortestDistanceToEnd(splitIndex), segments));	
+					
+					int length1 = segments.testLength(oldSegment.startIndex, splitIndex);
+					int length2 = segments.testLength(splitIndex, oldSegment.getEndIndex());
+					
+					newSegs.add(new BorderSegmentTree(id1, oldSegment.getStartIndex(), length1, segments));
+					newSegs.add(new BorderSegmentTree(id2, splitIndex, length2, segments));	
 				} else {
 					newSegs.add(oldSegment);
 				}
@@ -1893,7 +1900,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param start the start index
 			 * @param length the segment length
 			 */
-			public BorderSegmentTree(@NonNull UUID id, int start, int length){
+			protected BorderSegmentTree(@NonNull UUID id, int start, int length){
 				this(id, start, length, null);
 			}
 			
@@ -1905,7 +1912,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param parent the parent segment (can be null)
 			 */
 			protected BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
-//				System.out.println("Creating segment from "+start+" of length "+length+" in profile of "+getBorderLength());
 				if(start<0 || start > size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(length<0 || length > size()+1)
@@ -1944,12 +1950,23 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if(!contains(index))
 					throw new IllegalArgumentException("Index is outside segment bounds");
 				
-				DefaultSegmentedProfile.this.splitSegment(this, index, a, b);
+				splitSegment(this, index, a, b);
+			}
+			
+			private void addMergeSource(BorderSegmentTree mergeSource) {
+				leaves.add(mergeSource);
 			}
 
 			@Override
 			public void addMergeSource(@NonNull IBorderSegment seg) {
-				leaves.add(new BorderSegmentTree(seg.getID(), seg.getStartIndex(), seg.length(),this));
+				if(seg==null)
+					throw new IllegalArgumentException("Segment is null");
+				if(seg.getProfileLength()!=size())
+					throw new IllegalArgumentException("Segment does not come from the same profile");
+				if(!contains(seg.getStartIndex()) || !contains(seg.getEndIndex()))
+					throw new IllegalArgumentException(String.format("Potential merge source (%s) is not contained within this segment (%s)", seg.getDetail(), getDetail()));
+				int mgeLength = testLength(seg.getStartIndex(), seg.getEndIndex()); 
+				leaves.add(new BorderSegmentTree(seg.getID(), seg.getStartIndex(), mgeLength, this));
 			}
 
 			@Override
@@ -2122,35 +2139,62 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public boolean contains(int index) {
+				if(startIndex==getEndIndex())
+					return true;
 				return wraps() ? index<=getEndIndex() || index>=getStartIndex() 
 						: index>=getStartIndex() && index <=getEndIndex();
 			}
 
 			@Override
 			public boolean update(int startIndex, int endIndex) throws SegmentUpdateException {
-				
-				startIndex = wrapIndex(startIndex);
-				endIndex   = wrapIndex(endIndex);
-				
-				// Ensure segments cannot be jumped over
+				if(isLocked())
+					throw new SegmentUpdateException("Segment is locked");
+								
+				// Check the incoming data
+		        if (startIndex < 0 || startIndex > size()-1)
+		            throw new SegmentUpdateException("Start index is outside the profile range: " + startIndex);
+		        if (endIndex < 0 || endIndex > size()-1)
+		            throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
+
+				// Ensure next and prev segments cannot be 'jumped over'
 				if( startIndex < getStartIndex() && !prevSegment().contains(startIndex))
-					return false;
+					throw new SegmentUpdateException(String.format("Previous segment %s does not contain start index %d when decreasing", prevSegment().getDetail(), startIndex));
 				if( endIndex > getEndIndex() && !nextSegment().contains(endIndex))
-					return false;
+					throw new SegmentUpdateException(String.format("Next segment %s does not contain end index %d when increasing", nextSegment().getDetail(), endIndex));
+
+				 // Ensure previous and next segments are not locked
+		        if( prevSegment().contains(startIndex) && startIndex!=prevSegment().getEndIndex()  && prevSegment().isLocked())
+		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects previous segment (%s), which is locked", getDetail(), startIndex, endIndex, prevSegment().getDetail()));
+		        if( nextSegment().contains(endIndex) && endIndex!= nextSegment().getStartIndex() && nextSegment().isLocked())
+		        	throw new SegmentUpdateException(String.format("Update from %s to %d-%d affects next segment (%s), which is locked", getDetail(), startIndex, endIndex, nextSegment().getDetail()));
 				
-				// Ensure surrounding segments will not become too short
+				// Ensure next and previous segments will not become too short
 				if(prevSegment().getShortestDistanceToStart(startIndex)<MINIMUM_SEGMENT_LENGTH)
-					return false;
+					throw new SegmentUpdateException(String.format("Cannot update start to %d; previous segment (%s) will become too short", startIndex, prevSegment().getDetail()));
 				if(nextSegment().getShortestDistanceToEnd(endIndex)<MINIMUM_SEGMENT_LENGTH)
-					return false;
+					throw new SegmentUpdateException(String.format("Cannot update end to %d; next segment (%s) will become too short", endIndex, nextSegment().getDetail()));
 				
-				// Ensure the segment will not become too short
-				if(testLength(startIndex, endIndex)<MINIMUM_SEGMENT_LENGTH)
-					return false;
+				// Ensure this segment will not become too short
+				int newLength = testLength(startIndex, endIndex);
+				if(newLength<MINIMUM_SEGMENT_LENGTH)
+					throw new SegmentUpdateException(String.format("Segment will become too short (%d)", newLength));
 				
 				// All checks passed
+				
+				fine(String.format("Updating segment to %d to %d", startIndex, endIndex));
 				this.startIndex = startIndex;
-				this.length = testLength(startIndex, endIndex);
+				this.length = newLength;
+				
+				// Pass on the updated positions to the surrounding segments
+				int segIndex = segments.leaves.indexOf(this);
+				
+				BorderSegmentTree nextSeg = segments.leaves.get(wrapSegmentIndex(segIndex+1));
+				nextSeg.startIndex = getEndIndex();
+				nextSeg.length = testLength(endIndex, nextSeg.getEndIndex());
+				
+				BorderSegmentTree prevSeg = segments.leaves.get(wrapSegmentIndex(segIndex-1));
+				prevSeg.length = testLength(prevSeg.getStartIndex(), endIndex);
+				
 				return true;
 			}
 
