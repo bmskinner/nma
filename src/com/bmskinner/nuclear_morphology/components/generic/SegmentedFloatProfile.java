@@ -717,30 +717,20 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return revisedProfile;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.ISegmentedProfile#reverse()
-     */
+
     @Override
     public void reverse() {
         super.reverse();
 
         // reverse the segments
-        // in a profile of 100
-        // if a segment began at 10 and ended at 20, it should begin at 80 and
-        // end at 90
-
-        // if is begins at 90 and ends at 10, it should begin at 10 and end at
-        // 90
         List<IBorderSegment> segments = new ArrayList<IBorderSegment>();
         for (IBorderSegment seg : this.getSegments()) {
 
             // invert the segment by swapping start and end
-            int newStart = (this.size() - 1) - seg.getEndIndex();
-            int newEnd = CellularComponent.wrapIndex(newStart + seg.length(), this.size());
-            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, this.size(), seg.getID());
-
+            int newStart = size() - 1 - seg.getEndIndex();
+            int newEnd   = size() - 1 - seg.getStartIndex();
+            
+            IBorderSegment newSeg = new DefaultBorderSegment(newStart, newEnd, size(), seg.getID());
             segments.add(0, newSeg);
         }
         try {
@@ -750,7 +740,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
             stack("Cannot link segments in reversed profile", e);
         }
         this.setSegments(segments);
-
     }
     
     @Override

@@ -505,9 +505,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
                 boolean lockState = list.get(0).isLocked();
                 s.setLocked(false);
                 try {
-
                     s.update(list.get(p).getEndIndex(), s.getEndIndex());
-
                 } catch (IllegalArgumentException | SegmentUpdateException e) {
                     throw new ProfileException("Error linking final segment: " + e.getMessage(), e);
                 }

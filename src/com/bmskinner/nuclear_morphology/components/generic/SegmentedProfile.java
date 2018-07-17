@@ -1019,4 +1019,11 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         }
         return null;
     }
+
+	@Override
+	public void mergeSegments(@NonNull UUID segment1, @NonNull UUID segment2, @NonNull UUID mergedId)
+			throws ProfileException {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -141,8 +141,7 @@ public class IBorderSegmentTester {
 		return Arrays.asList(
 				BorderSegmentTree.class,
 				DefaultBorderSegment.class,
-				OpenBorderSegment.class,
-				NucleusBorderSegment.class);
+				OpenBorderSegment.class);
 	}
 	
 	@Test

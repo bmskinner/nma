@@ -85,6 +85,7 @@ public class ISegmentedProfileTester {
 				e.printStackTrace();
 			}
 		}
+		
 		throw new Exception("Unable to create instance of "+source);
 
 	}
@@ -115,13 +116,22 @@ public class ISegmentedProfileTester {
 	public void testReverse() throws Exception {
 	    ISegmentedProfile testProfile = createInstance(source);
 	    profile.reverse();
-	    
-	    for(int i=0, j=profile.getSegmentCount()-1; i<profile.getSegmentCount(); i++, j--){
-	        IBorderSegment test   = testProfile.getSegmentAt(i);
-	        IBorderSegment result = profile.getSegmentAt(j);
-	        assertEquals("Position "+i, test.getID(), result.getID());
-	        assertEquals("Position "+i, test.length(), result.length()); 
-	    } 
+//	    
+//	    System.out.println(testProfile.toString());
+//	    System.out.println(profile.toString());
+	    	    
+	    for(UUID id : profile.getSegmentIDs()) {
+	    	IBorderSegment fwd = testProfile.getSegment(id);
+	    	IBorderSegment rev = profile.getSegment(id);
+	    	
+	    	assertEquals("Segment length",fwd.length(), rev.length());
+	    	
+	    	int expStart = profile.size()-1-fwd.getEndIndex();
+	    	int expEnd  =  profile.size()-1-fwd.getStartIndex();
+	    	
+	    	assertEquals("Start index",expStart, rev.getStartIndex());
+	    	assertEquals("End index",expEnd, rev.getEndIndex());
+	    }
 	}
 	
 	@Test
@@ -532,30 +542,35 @@ public class ISegmentedProfileTester {
 	}
 	
 	@Test
-	public void testOffsetInt() throws Exception {
-
-		for(int offset=-profile.size(); offset<profile.size(); offset++) {
+	public void testPositiveAndNegativeOffsets() throws Exception {
+		for(int offset=-profile.size()*2; offset<profile.size()*2; offset++) {
 			ISegmentedProfile originalProfile = createInstance(source);
-			int expStart = getExpectedOffsetStartIndex(originalProfile, offset, UUID.fromString(SEG_0));
-			int expEnd   = getExpectedOffsetEndIndex(originalProfile, offset, UUID.fromString(SEG_0));
-			profile = originalProfile.offset(offset);
-			int newStart = profile.getSegment(UUID.fromString(SEG_0)).getStartIndex();
-			int newEnd   = profile.getSegment(UUID.fromString(SEG_0)).getEndIndex();
-			assertEquals("Start "+offset, expStart, newStart);
-			assertEquals("End "+offset, expEnd, newEnd);
+			for(UUID id : profile.getSegmentIDs()) {
+				testSegmentOffset(id, offset, originalProfile);
+			}
 		}
 	}
-	
-	private int getExpectedOffsetStartIndex(ISegmentedProfile p, int offset, UUID segId) throws UnavailableComponentException {
-		int old = profile.getSegment(segId).getStartIndex();
-	    return profile.wrap(old+offset);
+		
+	/**
+	 * Test a segment offset.
+	 * 
+	 * When profiles are offset, the segments must take a negative offset. 
+	 * @param segId
+	 * @param offset
+	 * @throws Exception
+	 */
+	private void testSegmentOffset(UUID segId, int offset, ISegmentedProfile p) throws Exception {
+		int oldStart = p.getSegment(segId).getStartIndex();
+		int oldEnd   = p.getSegment(segId).getEndIndex();
+		int expStart = p.wrap(oldStart-offset);
+		int expEnd   = p.wrap(oldEnd-offset);
+		ISegmentedProfile offsetProfile = p.offset(offset);
+		int newStart = offsetProfile.getSegment(segId).getStartIndex();
+		int newEnd   = offsetProfile.getSegment(segId).getEndIndex();
+		assertEquals("Old start "+oldStart+" + "+offset, expStart, newStart);
+		assertEquals("Old end "+oldEnd+" + "+offset, expEnd, newEnd);
 	}
-	
-	private int getExpectedOffsetEndIndex(ISegmentedProfile p, int offset, UUID segId) throws UnavailableComponentException {
-		int old = profile.getSegment(segId).getEndIndex();
-	    return profile.wrap(old+offset);
-	}
-
+			
 	@Test
 	public void testFrankenNormaliseToProfileWorksWhenProfilesAreSameLength() throws ProfileException, UnavailableComponentException {
 	    

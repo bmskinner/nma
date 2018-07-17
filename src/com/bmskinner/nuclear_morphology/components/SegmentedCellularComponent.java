@@ -1382,74 +1382,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			} catch (UnavailableComponentException e) {
 				throw new SegmentUpdateException(String.format("Segment %s is available in this profile", segment.toString()));
 			}
-
-			// test effect on all segments in list: the update should
-			// not allow the endpoints to move within a segment other than
-			// next or prev
-//			IBorderSegment nextSegment = segment.nextSegment();
-//			IBorderSegment prevSegment = segment.prevSegment();
-//
-//			for (IBorderSegment testSeg : this.getSegments()) {
-//
-//				// if the proposed start or end index is found in another segment
-//				// that is not next or prev, do not proceed
-//				if (testSeg.contains(startIndex) || testSeg.contains(endIndex)) {
-//
-//					if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
-//							&& !testSeg.getName().equals(prevSegment.getName())) {
-//						return false;
-//					}
-//				}
-//			}
-
-			//TODO: check this works with the new indexing 
-
-			// the basic checks have been passed; the update will not damage linkage
-			// Allow the segment to determine if the update is valid and apply it
-			
-//			BorderSegmentTree seg = segments.leaves.size()==0 ? segments : 
-//			segments.leaves.get(index)
-//			return segment.update(startIndex, endIndex);
 		}
-
-
-//		@Override
-//		public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
-//			if (!hasSegment(id))
-//				throw new IllegalArgumentException("Segment is not part of this profile");
-//
-//			// get the segment within this profile, not a copy
-//			IBorderSegment segmentToUpdate;
-//			try {
-//				segmentToUpdate = this.getSegment(id);
-//			} catch (UnavailableComponentException e) {
-//				stack(e);
-//				throw new SegmentUpdateException("Error getting segment", e);
-//			}
-//
-//			int newValue = wrapIndex(segmentToUpdate.getStartIndex() + amount);
-//			return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
-//		}
-//
-//
-//		@Override
-//		public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
-//			if (!hasSegment(id))
-//				throw new IllegalArgumentException("Segment is not part of this profile");
-//
-//			// get the segment within this profile, not a copy
-//			
-//			try {
-//				IBorderSegment segmentToUpdate = this.getSegment(id);
-//				int newValue = wrap(segmentToUpdate.getEndIndex() + amount);
-//				update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
-//				
-//			} catch (UnavailableComponentException e) {
-//				throw new SegmentUpdateException("Error getting segment", e);
-//			}
-//
-//			return true;
-//		}
 
 		@Override
 		public void nudgeSegments(int amount) {
@@ -1479,11 +1412,22 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * amount
 			 * 
 			 */
+			
+			/*
+			 * Apply the offset to each of the segments. TODO Only covering first layer of merges sources
+			 */
 
-			List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
-
-			//Ensure that the first segment in the list is at index zero
-			return new DefaultSegmentedProfile(offsetProfile, segments);
+			DefaultSegmentedProfile result = new DefaultSegmentedProfile(offsetProfile);
+			for(BorderSegmentTree s : segments.leaves) {
+				result.segments.addMergeSource(s);
+			}
+			
+			// root segment update
+			result.segments.startIndex = wrap(result.segments.startIndex-offset);
+			for(BorderSegmentTree s : result.segments.leaves) {				
+				s.startIndex = wrap(s.startIndex-offset);
+			}
+			return result;
 		}
 
 		@Override
@@ -1620,46 +1564,35 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public void reverse() {
 			super.reverse();
 			
+			// Update the root segment
+			int oldRootSegmentStart = segments.startIndex;
+			segments.startIndex = size()-1-oldRootSegmentStart;
+			
 			if(!segments.hasMergeSources())
 				return;
 			
-			/*  
-			 *  Reverse the segments:
-			 *  
-			 *      0     10                   30   0
-			 *      |------|--------------------|---|
-			 *      
-			 *      s0->   s1->                 s2->
-			 *      
-			 *      becomes
-			 *      
-			 *      0   5                   25      0
-			 *      |---|--------------------|------|
-			 *      
-			 *      s2->s1->                 s0->
-			 *      
-			 *      
-			 *  It is a mirror image, but the start and end indexes swap because segments always 
-			 *  progress small index to large index:
-			 *      
-			 *      0   5                   25      0     10                   30   0
-			 *      |---|--------------------|------|------|--------------------|---|
-			 *      
-			 *      s2->s1->                 s0->   s0->   s1->                 s2->
-			 *      
-			 *      
-			 *      Hence we can subtract 2x the end index to get the new wrapped start 
+			/*
+			 * A profile is shown with indexes 0-5, and values a-f.
+			 * There are 3 segments, 2-4; 4-5; 5-2.
 			 * 
+			 *  s1         s2         
+			 *   s2        a      s2
+			 *      f      0    b
+			 *       5        \
+			 *                 1
+			 *       |          | 
+			 *       4          2
+			 *      e      3     c
+			 *    s1       d      s2
+			 *   s0                  s0
+			 *            s0          
+			 *                      
+			 *                      
 			 */
-					
-			
+
 			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			for (BorderSegmentTree seg : segments.leaves) {
-
-				// mirror image
-				int newStart = wrapIndex(getBorderLength() - (2*seg.getEndIndex()));
-
-				newSegs.add(new BorderSegmentTree(seg.getID(), newStart, wrapIndex(newStart+seg.length()), segments));
+				newSegs.add(seg.reverse(segments));
 			}
 			
 			segments.clearMergeSources();
@@ -1989,6 +1922,21 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				return leaves.size();
 			}
 			
+			/**
+			 * Reverse the segment within the profile. This returns a new segment with 
+			 * the start and end indexes in the appropriate positions for profile reversal
+			 * @return
+			 */
+			private BorderSegmentTree reverse(BorderSegmentTree parent) {
+				int oldEnd = getEndIndex();
+				int newStart = size()-1-oldEnd;
+				BorderSegmentTree reversed = new BorderSegmentTree(id, newStart, length, parent);
+				for(BorderSegmentTree s : leaves) {
+					reversed.addMergeSource(s.reverse(reversed));
+				}
+				return reversed;
+			}
+			
 			public List<UUID> getChildIds(){
 				return leaves.stream().map(s->s.getID()).collect(Collectors.toList());
 			}
@@ -2232,7 +2180,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				if(prevSegment().getShortestDistanceToStart(startIndex)<MINIMUM_SEGMENT_LENGTH)
 					throw new SegmentUpdateException(String.format("Cannot update start to %d; previous segment (%s) will become too short", startIndex, prevSegment().getDetail()));
 				if(nextSegment().getShortestDistanceToEnd(endIndex)<MINIMUM_SEGMENT_LENGTH)
-					throw new SegmentUpdateException(String.format("Cannot update end to %d; next segment (%s) will become too short", endIndex, nextSegment().getDetail()));
+					throw new SegmentUpdateException(String.format("Cannot update end to %d in profile of length %d; next segment (%s) will become too short", endIndex, size(), nextSegment().getDetail()));
 				
 				// Ensure this segment will not become too short
 				int newLength = testLength(startIndex, endIndex);

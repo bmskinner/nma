@@ -365,61 +365,31 @@ public class OpenBorderSegment implements IBorderSegment {
 		return index-getEndIndex();
 	}
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#isStartPositionLocked()
-     */
     @Override
     public boolean isLocked() {
         return isLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#setStartPositionLocked(boolean)
-     */
     @Override
     public void setLocked(boolean startPositionLocked) {
         this.isLocked = startPositionLocked;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#getTotalLength()
-     */
     @Override
     public int getProfileLength() {
         return this.totalLength;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#nextSegment()
-     */
     @Override
     public IBorderSegment nextSegment() {
         return this.nextSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#prevSegment()
-     */
     @Override
     public IBorderSegment prevSegment() {
         return this.prevSegment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#length()
-     */
     @Override
     public int length() {
         return testLength(this.getStartIndex(), this.getEndIndex());
@@ -470,11 +440,9 @@ public class OpenBorderSegment implements IBorderSegment {
      */
     @Override
     public int testLength(int start, int end) {
-        if (wraps(start, end)) { // the segment wraps
-            return end + (totalLength - start);
-        } else {
-            return end - start;
-        }
+    	if(wraps(start, end))
+			return end+totalLength+1-start+1; // add total of 2; one for index 0 and one for segment end
+		return end-start+1; // add one for segment end
     }
 
     /*
