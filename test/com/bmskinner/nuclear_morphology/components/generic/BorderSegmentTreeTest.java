@@ -108,33 +108,6 @@ public class BorderSegmentTreeTest extends DefaultSegmentedProfileTest {
 		
 	}
 
-	@Override
-	@Test
-	public void testContains() throws UnavailableComponentException {
-		IBorderSegment s0 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_0);
-		IBorderSegment s1 = doubleSegmentProfile.getSegment(DOUBLE_SEG_ID_1);
-		
-		
-		assertTrue(s0.contains(0));
-		assertTrue(s1.contains(0));
-		for(int i=1; i<50; i++) {
-			assertTrue(s0.contains(i));
-			assertFalse(s1.contains(i));
-		}
-		assertTrue(s0.contains(50));
-		assertTrue(s1.contains(50));
-		for(int i=51; i<doubleSegmentProfile.size(); i++) {
-			assertFalse(s0.contains(i));
-			assertTrue(s1.contains(i));
-		}
-	}
-
-	@Override
-	@Test
-	public void testUpdate() {
-		fail("Not yet implemented");
-	}
-
 	@Test
 	public void testHasNextSegment() throws UnavailableComponentException {
 		assertTrue(singleSegment.hasNextSegment());

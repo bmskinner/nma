@@ -350,33 +350,42 @@ public class SegmentFitter implements Loggable {
      */
     private ISegmentedProfile testChange(ISegmentedProfile profile, UUID id, int changeValue) throws Exception {
 
-        if (profile == null) {
+        if (profile == null)
             throw new IllegalArgumentException(
                     "Input profile is null for segment " + id.toString() + " change " + changeValue);
-        }
 
         double bestScore = compareSegmentationPatterns(medianProfile, profile);
 
         // apply all changes to a fresh copy of the profile
         ISegmentedProfile testProfile = new SegmentedFloatProfile(profile);
 
-        // not permitted if it violates length constraint
-        if (testProfile.adjustSegmentStart(id, changeValue)) {
+        // not permitted if it violates length constraints
+        IBorderSegment seg = testProfile.getSegment(id);
+        int newStart = testProfile.wrap(seg.getStartIndex()+changeValue);
+        
+        testProfile.getSegment(id).update(newStart, seg.getEndIndex());
+        
+        double score = compareSegmentationPatterns(medianProfile, testProfile);
 
-            ISegmentedProfile result = testProfile;
-
-            // anything that gets in here should be valid
-
-            double score = compareSegmentationPatterns(medianProfile, testProfile);
-
-            if (score < bestScore) {
-                bestScore = score;
-                result = new SegmentedFloatProfile(testProfile);
-            }
-            return result;
-        }
-
+        if (score < bestScore)
+            return new SegmentedFloatProfile(testProfile);
         return profile;
+        
+        
+//        if (testProfile.adjustSegmentStart(id, changeValue)) {
+//
+//            ISegmentedProfile result = testProfile;
+//
+//            double score = compareSegmentationPatterns(medianProfile, testProfile);
+//
+//            if (score < bestScore) {
+//                bestScore = score;
+//                result = new SegmentedFloatProfile(testProfile);
+//            }
+//            return result;
+//        }
+
+//        return profile;
     }
 
     /**

@@ -179,7 +179,7 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      * @see components.generic.ISegmentedProfile#getSegmentsFrom(java.util.UUID)
      */
     @Override
-    public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception {
+    public List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws ProfileException, UnavailableComponentException {
         return getSegmentsFrom(getSegment(id));
     }
 
@@ -538,60 +538,60 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID,
-     * int)
-     */
-    @Override
-    public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
-        if (!this.getSegmentIDs().contains(id)) {
-            throw new IllegalArgumentException("Segment is not part of this profile");
-        }
-
-        // get the segment within this profile, not a copy
-		try {
-			IBorderSegment segmentToUpdate = this.getSegment(id);
-		
-
-        int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
-                segmentToUpdate.getProfileLength());
-        return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
-        
-		} catch (UnavailableComponentException e) {
-			stack("Error adjusting segment start", e);
-			throw new SegmentUpdateException(e);
-		}
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.ISegmentedProfile#adjustSegmentEnd(java.util.UUID,
-     * int)
-     */
-    @Override
-    public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
-
-    	if (!this.getSegmentIDs().contains(id)) {
-    		throw new IllegalArgumentException("Segment is not part of this profile");
-    	}
-
-    	// get the segment within this profile, not a copy
-    	try {
-    		IBorderSegment segmentToUpdate = this.getSegment(id);
-
-    		int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-    				segmentToUpdate.getProfileLength());
-    		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
-    	} catch (UnavailableComponentException e) {
-    		stack("Error adjusting segment start", e);
-    		throw new SegmentUpdateException(e);
-    	}
-    }
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see
+//     * components.generic.ISegmentedProfile#adjustSegmentStart(java.util.UUID,
+//     * int)
+//     */
+//    @Override
+//    public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
+//        if (!this.getSegmentIDs().contains(id)) {
+//            throw new IllegalArgumentException("Segment is not part of this profile");
+//        }
+//
+//        // get the segment within this profile, not a copy
+//		try {
+//			IBorderSegment segmentToUpdate = this.getSegment(id);
+//		
+//
+//        int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
+//                segmentToUpdate.getProfileLength());
+//        return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
+//        
+//		} catch (UnavailableComponentException e) {
+//			stack("Error adjusting segment start", e);
+//			throw new SegmentUpdateException(e);
+//		}
+//    }
+//
+//    /*
+//     * (non-Javadoc)
+//     * 
+//     * @see
+//     * components.generic.ISegmentedProfile#adjustSegmentEnd(java.util.UUID,
+//     * int)
+//     */
+//    @Override
+//    public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
+//
+//    	if (!this.getSegmentIDs().contains(id)) {
+//    		throw new IllegalArgumentException("Segment is not part of this profile");
+//    	}
+//
+//    	// get the segment within this profile, not a copy
+//    	try {
+//    		IBorderSegment segmentToUpdate = this.getSegment(id);
+//
+//    		int newValue = AbstractCellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
+//    				segmentToUpdate.getProfileLength());
+//    		return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
+//    	} catch (UnavailableComponentException e) {
+//    		stack("Error adjusting segment start", e);
+//    		throw new SegmentUpdateException(e);
+//    	}
+//    }
 
     /*
      * (non-Javadoc)

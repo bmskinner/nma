@@ -31,6 +31,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
+import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -443,7 +444,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return true if an index other than the start and end index is shared
      */
     boolean overlaps(@NonNull IBorderSegment seg);
-
+    
     /**
      * Given a list of segments, link them together into a circle.
      * 
@@ -508,7 +509,7 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
                     s.update(list.get(p).getEndIndex(), s.getEndIndex());
 
                 } catch (IllegalArgumentException | SegmentUpdateException e) {
-                    throw new ProfileException("Error linking final segment: " + e.getMessage());
+                    throw new ProfileException("Error linking final segment: " + e.getMessage(), e);
                 }
                 s.setLocked(lockState);
             }
@@ -661,7 +662,8 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @throws Exception
      */
     static List<IBorderSegment> copy(@NonNull List<IBorderSegment> list) throws ProfileException {
-
+    	if (list == null || list.isEmpty())
+            throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         List<IBorderSegment> result = copyWithoutLinking(list);
 
         linkSegments(result);
@@ -672,18 +674,16 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * Make a copy of the given list of linked segments, but do not link the
      * segments
      * 
-     * @param list
-     *            the segments to copy
+     * @param list the segments to copy
      * @return a new list
      * @throws Exception
      */
     static List<IBorderSegment> copyWithoutLinking(@NonNull List<IBorderSegment> list) throws ProfileException {
-
+    	
         if (list == null || list.isEmpty())
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
-
+        
         List<IBorderSegment> result = new ArrayList<>();
-
         for (IBorderSegment segment : list) {
 
             result.add(IBorderSegment.newSegment(segment));

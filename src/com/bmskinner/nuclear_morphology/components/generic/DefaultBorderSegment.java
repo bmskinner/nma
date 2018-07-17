@@ -82,7 +82,7 @@ public class DefaultBorderSegment implements IBorderSegment {
      * @param id
      */
     public DefaultBorderSegment(int startIndex, int endIndex, int total, UUID id) {
-
+    
         if (id == null)
             throw new IllegalArgumentException("Segment ID cannot be null");
         
@@ -389,11 +389,14 @@ public class DefaultBorderSegment implements IBorderSegment {
 
     @Override
     public int testLength(int start, int end) {
-        if (wraps(start, end)) { // the segment wraps
-            return end + (totalLength - start);
-        } else {
-            return end - start;
-        }
+//        if (wraps(start, end)) { // the segment wraps
+//            return end + (totalLength - start);
+//        } else {
+//            return end - start;
+//        }
+        if(wraps(start, end))
+			return end+totalLength+1-start+1; // add total of 2; one for index 0 and one for segment end
+		return end-start+1; // add one for segment end
     }
 
     @Override
@@ -564,7 +567,6 @@ public class DefaultBorderSegment implements IBorderSegment {
             throw new IllegalArgumentException("Segment has a different profile length");
         
         if (s.getEndIndex() != getStartIndex())
-        	
             throw new IllegalArgumentException(String.format("Segment end (%d) does not overlap this start (%d)", s.getEndIndex(), getStartIndex()));
 
         prevSegment = s;
@@ -594,7 +596,7 @@ public class DefaultBorderSegment implements IBorderSegment {
 
     @Override
     public String toString() {
-        return getName();
+    	return String.format("%d - %d of %d", startIndex, getEndIndex(), totalLength);
     }
 
     public String getDetail() {
@@ -648,27 +650,13 @@ public class DefaultBorderSegment implements IBorderSegment {
     
     @Override
     public boolean overlaps(@NonNull IBorderSegment seg){
-        if(seg==null)
-            throw new IllegalArgumentException("Segment is null");
-        
-        if(startIndex==seg.getStartIndex())
-            return true;
-        
-        if(endIndex==seg.getEndIndex())
-            return true;
-                
-        Iterator<Integer> it = seg.iterator();
-        while(it.hasNext()){
-            Integer i = it.next();
-            if(i==seg.getStartIndex() && i==getEndIndex())
-                continue;
-            
-            if(i==getStartIndex() && i==seg.getEndIndex())
-                continue;
-            
-            if(contains(i))
-                return true;
-        }
-        return false;
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+		return seg.contains(startIndex) 
+				|| seg.contains(getEndIndex()) 
+				|| contains(seg.getStartIndex()) 
+				|| contains(seg.getEndIndex());
     }
 }

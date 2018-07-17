@@ -33,7 +33,8 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
 
 /**
  * A border segment without the length restrictions of the DefaultBorderSegment.
- * This allows 
+ * This allows segments smaller than the minimum to be created if needed. This class should
+ * not be generally used.
  * @author bms41
  * @since 1.13.8
  *
@@ -838,43 +839,22 @@ public class OpenBorderSegment implements IBorderSegment {
     
     @Override
     public boolean overlaps(@NonNull IBorderSegment seg){
-        if(seg==null)
-            throw new IllegalArgumentException("Segment is null");
-        
-        if(startIndex==seg.getStartIndex())
-            return true;
-        
-        if(endIndex==seg.getEndIndex())
-            return true;
-        
-        if(startIndex==seg.getEndIndex())
-            return false;
-        
-        if(endIndex==seg.getStartIndex())
-            return false;
-        
-        Iterator<Integer> it = seg.iterator();
-        while(it.hasNext()){
-            Integer i = it.next();
-            if(i==seg.getStartIndex() || i==seg.getEndIndex())
-                continue;
-            
-            if(seg.contains(i))
-                return true;
-        }
-        return false;
+    	if(seg==null)
+    		return false;
+    	if(seg.getProfileLength()!=getProfileLength())
+			return false;
+		return seg.contains(startIndex) 
+				|| seg.contains(getEndIndex()) 
+				|| contains(seg.getStartIndex()) 
+				|| contains(seg.getEndIndex());
     }
 
     private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-        // finest("\t\tReading nucleus border segment");
         in.defaultReadObject();
-        // finest("\t\tRead nucleus border segment");
     }
 
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
-        // finest("\t\tWriting nucleus border segment");
         out.defaultWriteObject();
-        // finest("\t\tWrote nucleus border segment");
     }
 
 }

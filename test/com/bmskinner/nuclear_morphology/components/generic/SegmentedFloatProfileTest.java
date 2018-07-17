@@ -158,7 +158,35 @@ public class SegmentedFloatProfileTest {
 	    exception.expect(IllegalArgumentException.class);
         new SegmentedFloatProfile( (float[]) null);
     }
+	
+	@Test
+    public void testGetSegmentIDsReturnsEmptyListWhenNoSegments() throws ProfileException {
+		sp.clearSegments();
+        List<UUID> result = sp.getSegmentIDs();
+        assertTrue(result.isEmpty());
+    }
+	
+	@Test
+    public void testGetSegmentsReturnsEmptyListAfterClearing() throws ProfileException {
+		sp.clearSegments();
+        List<IBorderSegment> result = sp.getSegments();
+        assertTrue(result.isEmpty());
+    }
+	
+	@Test
+	public void testClearSegments() {
+	    assertTrue(sp.hasSegments());
+	    sp.clearSegments();
+        assertFalse(sp.hasSegments());
+	}
 
+	@Test
+	public void testHasSegments() {
+		assertTrue(sp.hasSegments());
+		sp.clearSegments();
+		assertFalse(sp.hasSegments());
+	}
+	
 
 	
 	@Test

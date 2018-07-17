@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.components.generic.FloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
+import com.bmskinner.nuclear_morphology.components.generic.OpenBorderSegment;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
@@ -1178,7 +1179,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		@Override
-		public List<IBorderSegment> getSegmentsFrom(@NonNull final UUID id) throws Exception {
+		public List<IBorderSegment> getSegmentsFrom(@NonNull final UUID id) throws UnavailableComponentException {
 			return getSegmentsFrom(getSegment(id));
 		}
 
@@ -1371,72 +1372,84 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
 			if (!this.contains(segment))
-				throw new IllegalArgumentException("Segment is not part of this profile");
+				throw new SegmentUpdateException(String.format("Segment %s is not part of this profile", segment.toString()));
+			
+			try {
+				IBorderSegment testSeg = getSegment(segment.getID());
+				
+				return testSeg.update(startIndex, endIndex);
+				
+			} catch (UnavailableComponentException e) {
+				throw new SegmentUpdateException(String.format("Segment %s is available in this profile", segment.toString()));
+			}
 
 			// test effect on all segments in list: the update should
 			// not allow the endpoints to move within a segment other than
 			// next or prev
-			IBorderSegment nextSegment = segment.nextSegment();
-			IBorderSegment prevSegment = segment.prevSegment();
-
-			for (IBorderSegment testSeg : this.getSegments()) {
-
-				// if the proposed start or end index is found in another segment
-				// that is not next or prev, do not proceed
-				if (testSeg.contains(startIndex) || testSeg.contains(endIndex)) {
-
-					if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
-							&& !testSeg.getName().equals(prevSegment.getName())) {
-						return false;
-					}
-				}
-			}
+//			IBorderSegment nextSegment = segment.nextSegment();
+//			IBorderSegment prevSegment = segment.prevSegment();
+//
+//			for (IBorderSegment testSeg : this.getSegments()) {
+//
+//				// if the proposed start or end index is found in another segment
+//				// that is not next or prev, do not proceed
+//				if (testSeg.contains(startIndex) || testSeg.contains(endIndex)) {
+//
+//					if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
+//							&& !testSeg.getName().equals(prevSegment.getName())) {
+//						return false;
+//					}
+//				}
+//			}
 
 			//TODO: check this works with the new indexing 
 
 			// the basic checks have been passed; the update will not damage linkage
 			// Allow the segment to determine if the update is valid and apply it
-
-			return segment.update(startIndex, endIndex);
+			
+//			BorderSegmentTree seg = segments.leaves.size()==0 ? segments : 
+//			segments.leaves.get(index)
+//			return segment.update(startIndex, endIndex);
 		}
 
 
-		@Override
-		public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
-			if (!hasSegment(id))
-				throw new IllegalArgumentException("Segment is not part of this profile");
-
-			// get the segment within this profile, not a copy
-			IBorderSegment segmentToUpdate;
-			try {
-				segmentToUpdate = this.getSegment(id);
-			} catch (UnavailableComponentException e) {
-				stack(e);
-				throw new SegmentUpdateException("Error getting segment", e);
-			}
-
-			int newValue = wrapIndex(segmentToUpdate.getStartIndex() + amount);
-			return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
-		}
-
-
-		@Override
-		public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
-			if (!hasSegment(id))
-				throw new IllegalArgumentException("Segment is not part of this profile");
-
-			// get the segment within this profile, not a copy
-			IBorderSegment segmentToUpdate;
-			try {
-				segmentToUpdate = this.getSegment(id);
-			} catch (UnavailableComponentException e) {
-				stack(e);
-				throw new SegmentUpdateException("Error getting segment");
-			}
-
-			int newValue = wrapIndex(segmentToUpdate.getEndIndex() + amount);
-			return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
-		}
+//		@Override
+//		public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
+//			if (!hasSegment(id))
+//				throw new IllegalArgumentException("Segment is not part of this profile");
+//
+//			// get the segment within this profile, not a copy
+//			IBorderSegment segmentToUpdate;
+//			try {
+//				segmentToUpdate = this.getSegment(id);
+//			} catch (UnavailableComponentException e) {
+//				stack(e);
+//				throw new SegmentUpdateException("Error getting segment", e);
+//			}
+//
+//			int newValue = wrapIndex(segmentToUpdate.getStartIndex() + amount);
+//			return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
+//		}
+//
+//
+//		@Override
+//		public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
+//			if (!hasSegment(id))
+//				throw new IllegalArgumentException("Segment is not part of this profile");
+//
+//			// get the segment within this profile, not a copy
+//			
+//			try {
+//				IBorderSegment segmentToUpdate = this.getSegment(id);
+//				int newValue = wrap(segmentToUpdate.getEndIndex() + amount);
+//				update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
+//				
+//			} catch (UnavailableComponentException e) {
+//				throw new SegmentUpdateException("Error getting segment", e);
+//			}
+//
+//			return true;
+//		}
 
 		@Override
 		public void nudgeSegments(int amount) {
@@ -1544,16 +1557,21 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			try {
 
-				for (UUID segID : template.getSegmentIDs()) {
-					// Get the corresponding segment in this profile, by segment position
-					IBorderSegment testSeg = this.getSegment(segID);
-					IBorderSegment templateSeg = template.getSegment(segID);
+				int counter = 0;
+	            for (UUID segID : template.getSegmentIDs()) {
+	                IBorderSegment thisSeg = this.getSegment(segID);
+	                IBorderSegment templateSeg = template.getSegment(segID);
+	                
+	                // For each segment, 1 must be subtracted from the length because the
+	                // segment lengths include the overlapping end and start indexes.
+	                // The final segment has 2 subtracted to account for the overlapping start index of the profile.
+	                int newLength = counter==template.getSegmentCount()-1 ? templateSeg.length()-2 : templateSeg.length()-1;
 
-
-					// Interpolate the segment region to the new length
-					IProfile revisedProfile = interpolateSegment(testSeg, templateSeg.length());
-					finalSegmentProfiles.add(revisedProfile);
-				}
+	                // Interpolate the segment region to the new length
+	                IProfile revisedProfile = interpolateSegment(thisSeg, newLength);
+	                finalSegmentProfiles.add(revisedProfile);
+	                counter++;
+	            }
 
 			} catch (UnavailableComponentException e) {
 				stack(e);
@@ -1562,7 +1580,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			// Recombine the segment profiles
 			IProfile mergedProfile = new DefaultProfile(IProfile.merge(finalSegmentProfiles));
-
+	        if(mergedProfile.size()!=size())
+	        	throw new ProfileException(String.format("Frankenprofile has a different length (%d) to source profile (%d)", mergedProfile.size(), size()));
+	        
 			ISegmentedProfile result = new DefaultSegmentedProfile(mergedProfile, template.getSegments());
 			return result;
 		}
@@ -1578,6 +1598,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @throws ProfileException
 		 */
 		private IProfile interpolateSegment(IBorderSegment testSeg, int newLength) throws ProfileException {
+			
+			
+			
 
 			// get the region within the segment as a new profile
 			// Exclude the last index of each segment to avoid duplication
@@ -1646,35 +1669,50 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			}
 		}
 
-
 		@Override
-		public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
+		public void mergeSegments(@NonNull UUID segment1, @NonNull UUID segment2, @NonNull UUID id) throws ProfileException {
 
 			// Check the segments belong to the profile
-			if (!this.contains(segment1) || !this.contains(segment2))
+			if (!this.hasSegment(segment1) || !this.hasSegment(segment2))
 				throw new IllegalArgumentException("An input segment is not part of this profile");
 
+			IBorderSegment seg1;
+			IBorderSegment seg2;
+			try {
+				seg1 = getSegment(segment1);
+				seg2 = getSegment(segment2);
+			} catch (UnavailableComponentException e) {
+				throw new IllegalArgumentException("An input segment is not part of this profile");
+			}
+			
 			// Check the segments are linked
-			if (!segment1.nextSegment().equals(segment2) && !segment1.prevSegment().equals(segment2))
-				throw new IllegalArgumentException("Input segments are identical");
+			if(! (seg1.hasNextSegment() && seg1.hasPrevSegment() && seg2.hasNextSegment() && seg2.hasPrevSegment()))
+				throw new IllegalArgumentException("Input segments do not have next and previous segments set; cannot validate merge");
+			
+			if (!seg1.nextSegment().equals(seg2) && !seg1.prevSegment().equals(seg2))
+				throw new IllegalArgumentException(String.format("Input segment 1 (%s) is not linked to segment 2 (%s)",seg1.toString(), seg2.toString() ));
 
 			
 			// Ensure we have the segments in the correct order
-			IBorderSegment firstSegment = segment1.nextSegment().equals(segment2) ? segment1 : segment2;
-			IBorderSegment secondSegment = segment2.nextSegment().equals(segment1) ? segment1 : segment2;
+			IBorderSegment firstSegment  = seg1.nextSegment().equals(seg2) ? seg1 : seg2;
+			IBorderSegment secondSegment = seg2.nextSegment().equals(seg1) ? seg1 : seg2;
 			
-			List<BorderSegmentTree> newSegs = new ArrayList<>();
+			
+//			System.out.println(String.format("Atttempting to merge segment 1 (%s) with segment 2 (%s)",seg1.toString(), seg2.toString() ));
+			
 
-			
 			// Create the new segment
 			int startIndex = firstSegment.getStartIndex();
 			int endIndex   = secondSegment.getEndIndex();
-			BorderSegmentTree mergedSegment = new BorderSegmentTree(id, startIndex, endIndex, segments);
+			
+			int newLength = firstSegment.testLength(startIndex, endIndex);
+			BorderSegmentTree mergedSegment = new BorderSegmentTree(id, startIndex, newLength, segments);
 			
 			mergedSegment.addMergeSource(firstSegment);
 			mergedSegment.addMergeSource(secondSegment);
 			
-			segments.clearMergeSources();
+			// Clear the old segments
+			List<BorderSegmentTree> newSegs = new ArrayList<>();
 			// Replace the two segments in this profile
 			for (BorderSegmentTree oldSegment : segments.leaves) {
 
@@ -1687,10 +1725,15 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					newSegs.add(oldSegment);
 				}
 			}
-			
+			segments.clearMergeSources();
 			for (BorderSegmentTree seg : newSegs) {
 				segments.addMergeSource(seg);
 			}
+		}
+		
+		@Override
+		public void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException {
+			mergeSegments(segment1.getID(), segment2.getID(), id);
 		}
 		
 		@Override
@@ -1918,13 +1961,24 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new IllegalArgumentException(String.format("Segment length %d is outside profile bounds", length));
 				if(length<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
 					throw new IllegalArgumentException(String.format("Segment length %d is below minimum %d", length, MINIMUM_SEGMENT_LENGTH));
-
+				
 				this.id = id;
 				this.startIndex = start;
 				this.length = length;
 				this.parent = parent;
 				leaves.clear();
+//				System.out.println(String.format("Creating segment starting at %d with length %d ending at %d", start, length, getEndIndex() ));
 			}
+			
+			
+			/**
+			 * Construct by copying existing segments
+			 * @param seg
+			 * @param parent
+			 */
+			protected BorderSegmentTree(@NonNull IBorderSegment seg, @Nullable BorderSegmentTree parent) {
+				this(seg.getID(), seg.getStartIndex(), seg.wraps()?seg.length()-1:seg.length(), parent);
+			}			
 
 			@Override
 			public @NonNull UUID getID() {
@@ -1953,7 +2007,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				splitSegment(this, index, a, b);
 			}
 			
-			private void addMergeSource(BorderSegmentTree mergeSource) {
+			private void addMergeSource(@NonNull BorderSegmentTree mergeSource) {
 				leaves.add(mergeSource);
 			}
 
@@ -1965,8 +2019,16 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new IllegalArgumentException("Segment does not come from the same profile");
 				if(!contains(seg.getStartIndex()) || !contains(seg.getEndIndex()))
 					throw new IllegalArgumentException(String.format("Potential merge source (%s) is not contained within this segment (%s)", seg.getDetail(), getDetail()));
-				int mgeLength = testLength(seg.getStartIndex(), seg.getEndIndex()); 
-				leaves.add(new BorderSegmentTree(seg.getID(), seg.getStartIndex(), mgeLength, this));
+				
+				if(!leaves.isEmpty()) {
+					BorderSegmentTree prevSegment = leaves.get(leaves.size()-1);
+
+					if(prevSegment.getEndIndex()!=seg.getStartIndex())
+						throw new IllegalArgumentException(String.format("Potential merge source start (%d) does not overlap previous merge source end (%d)", seg.getStartIndex(), prevSegment.getEndIndex()));
+					
+				}
+//				System.out.println("Adding segment "+seg.toString());
+				leaves.add(new BorderSegmentTree(seg, this));
 			}
 
 			@Override
@@ -1983,7 +2045,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			public boolean hasMergeSource(@NonNull UUID uuid) {
 				if(this.id.equals(uuid))
 					return true;
-				for(IBorderSegment s : leaves) {
+				for(BorderSegmentTree s : leaves) {
 					if(s.hasMergeSource(uuid))
 						return true;
 				}
@@ -1995,7 +2057,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				if(this.id.equals(uuid))
 					return this;
-				for(IBorderSegment s : leaves) {
+				for(BorderSegmentTree s : leaves) {
 					if(s.hasMergeSource(uuid))
 						return s.getMergeSource(uuid);
 				}
@@ -2009,9 +2071,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			@Override
 			public int getEndIndex() {
-//				if(wraps())
-					return wrap(startIndex+length-1);
-//				return startIndex+length;
+				return wrap(startIndex+length-1);
 			}
 
 			@Override

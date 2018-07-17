@@ -362,17 +362,17 @@ public class IBorderSegmentTester {
 	@Test
 	public void testOverlaps() {
 		IBorderSegment overlappingEnd = new DefaultBorderSegment(endIndex, endIndex+10, profileLength);
-		assertTrue(overlappingEnd.overlaps(segment));
+		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingEnd.toString(), segment.overlaps(overlappingEnd));
 		
 		IBorderSegment overlappingStart = new DefaultBorderSegment(endIndex+10, startIndex, profileLength);
-		assertTrue(overlappingEnd.overlaps(segment));
+		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingStart.toString(), segment.overlaps(overlappingStart));
 		
 		IBorderSegment overlappingBoth = new DefaultBorderSegment(endIndex, startIndex, profileLength);
-		assertTrue(overlappingEnd.overlaps(segment));
+		assertTrue("Testing overlap of "+segment.toString()+" and "+overlappingBoth.toString(), segment.overlaps(overlappingBoth));
 		
 		
 		IBorderSegment nonoverlapping = new DefaultBorderSegment(endIndex+10, profileLength-10, profileLength);
-		assertFalse(nonoverlapping.overlaps(segment));
+		assertFalse("Testing overlap of "+segment.toString()+" and "+nonoverlapping.toString(), segment.overlaps(nonoverlapping));
 	}
 	
 	@Test

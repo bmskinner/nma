@@ -84,12 +84,12 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Make this profile the length specified. Segments will be adjusted to the
-     * closest proportional index
+     * closest proportional index that preserves minimum segment lengths. If segments
+     * cannot be properly interpolated, a profile exception will be thrown.
      * 
-     * @param newLength
-     *            the new array length
-     * @return an interpolated profile
-     * @throws ProfileException
+     * @param newLength the new profile length
+     * @return the interpolated profile
+     * @throws ProfileException if the interpolation fails
      */
     @Override
     ISegmentedProfile interpolate(int newLength) throws ProfileException;
@@ -98,11 +98,11 @@ public interface ISegmentedProfile extends IProfile {
      * Fetch the segment list ordered to start from the segment with the given
      * id
      * 
-     * @param id
+     * @param id the segment id
      * @return
      * @throws Exception
      */
-    List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws Exception;
+    List<IBorderSegment> getSegmentsFrom(@NonNull UUID id) throws UnavailableComponentException, ProfileException;
 
     /**
      * Get a copy of the segments in this profile, ordered from the zero index
@@ -191,7 +191,7 @@ public interface ISegmentedProfile extends IProfile {
 
     /**
      * Test if the profile contains the given segment. Copies are ok, it checks
-     * position, length and name
+     * position, length and name.
      * 
      * @param segment
      * @return
@@ -203,40 +203,12 @@ public interface ISegmentedProfile extends IProfile {
      * positions. Checks the validity of the operation, and returns false if it
      * is not possible to perform the update
      * 
-     * @param segment
-     *            the segment to update
-     * @param startIndex
-     *            the new start
-     * @param endIndex
-     *            the new end
-     * @return did the update succeed
-     * @throws SegmentUpdateException
+     * @param segment the segment to update
+     * @param startIndex the new start
+     * @param endIndex the new end
+     * @throws SegmentUpdateException the update failed
      */
     boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException;
-
-    /**
-     * Adjust the start position of the given segment by the given amount.
-     * 
-     * @param segment
-     *            the segment to apply the change to
-     * @param amount
-     *            the number of indexes to move
-     * @return did the update succeed
-     * @throws SegmentUpdateException
-     */
-    boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException;
-
-    /**
-     * Adjust the end position of the given segment by the given amount.
-     * 
-     * @param segment
-     *            the segment to apply the change to
-     * @param amount
-     *            the number of indexes to move
-     * @return did the update succeed
-     * @throws SegmentUpdateException
-     */
-    boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException;
 
     /**
      * Move the positions of all segments by the given amount
@@ -275,21 +247,32 @@ public interface ISegmentedProfile extends IProfile {
      * segments. Both this and the template must be already offset to start at
      * equivalent positions. The two profiles must have the same segment ids
      * 
-     * @param template
-     *            the profile with segments to copy.
+     * @param template the profile with segment proportions to copy.
      * @return a new profile with normalised segments
      * @throws Exception
      */
     ISegmentedProfile frankenNormaliseToProfile(@NonNull ISegmentedProfile template) throws ProfileException;
 
+    
+    /**
+     * Attempt to merge the given segments into one segment. The segments must
+     * belong to the profile, and be adjacent
+     * 
+     * @param segment1 the id of the first segment to be merged
+     * @param segment2 the id of the first segment to be merged
+     * @param mergedId the new id to give the segment
+     * @return
+     */
+    void mergeSegments(@NonNull UUID segment1, @NonNull UUID segment2, @NonNull UUID mergedId) throws ProfileException;
+
+    
     /**
      * Attempt to merge the given segments into one segment. The segments must
      * belong to the profile, and be adjacent
      * 
      * @param segment1
      * @param segment2
-     * @param id
-     *            the new id to give the segment
+     * @param id the new id to give the segment
      * @return
      */
     void mergeSegments(@NonNull IBorderSegment segment1, @NonNull IBorderSegment segment2, @NonNull UUID id) throws ProfileException;
