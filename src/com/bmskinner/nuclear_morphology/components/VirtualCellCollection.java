@@ -376,8 +376,9 @@ public class VirtualCellCollection implements ICellCollection {
      * same length at the parent collection after this update
      * 
      * @return
+     * @throws ProfileException 
      */
-    public void createProfileCollection() {
+    public void createProfileCollection() throws ProfileException {
         profileCollection.createProfileAggregate(this, parent.getCollection().getMedianArrayLength());
     }
 

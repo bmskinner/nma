@@ -88,7 +88,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
         Set<UUID> newDatasets;
         try {
             newDatasets = parsePathList();
-        } catch (CellRelocationException e) {
+        } catch (CellRelocationException | ProfileException e) {
             stack("Error relocating cells", e);
             return;
         }
@@ -115,7 +115,7 @@ public class CellRelocationMethod extends SingleDatasetAnalysisMethod {
 
     }
 
-    private Set<UUID> parsePathList() throws CellRelocationException {
+    private Set<UUID> parsePathList() throws CellRelocationException, ProfileException {
         Scanner scanner;
         try {
             scanner = new Scanner(inputFile);

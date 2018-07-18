@@ -30,6 +30,7 @@ import javax.swing.JPanel;
 import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -214,7 +215,12 @@ public class CellBorderTagPanel extends AbstractCellDetailPanel {
 
         if (tag.equals(Tag.REFERENCE_POINT)) {
             // Update the profile aggregate to use the new RP
-            activeDataset().getCollection().createProfileCollection();
+            try {
+            	activeDataset().getCollection().createProfileCollection();
+			} catch (ProfileException e) {
+				warn("Unable to profile cell collection");
+				stack(e);
+			}
         }
         this.setAnalysing(false);
         this.refreshChartCache();

@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
@@ -781,6 +782,8 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
             warn("No cell collection could be read in dataset");
 
         IProfileCollection pc = cellCollection.getProfileCollection();
+        
+        try {
         if (pc == null) {
             warn("Missing profile collection");
         } else {
@@ -798,6 +801,10 @@ public class DefaultAnalysisDataset extends AbstractAnalysisDataset implements I
                      child.getCollection().getProfileCollection().createAndRestoreProfileAggregate(child.getCollection());
                  }
              }
+        }
+        } catch(ProfileException e) {
+        	 warn("Unable to update profile aggregates in child datasets");
+        	 stack(e);
         }
 
     }

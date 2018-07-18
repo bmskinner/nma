@@ -585,9 +585,9 @@ public class DefaultCellCollection implements ICellCollection {
      *            when recalculating the profile aggregate, should the previous
      *            length be kept
      * @return
-     * @throws Exception
+     * @throws ProfileException 
      */
-    public void createProfileCollection() {
+    public void createProfileCollection() throws ProfileException {
 
         /*
          * Build a set of profile aggregates Default is to make profile
@@ -597,7 +597,7 @@ public class DefaultCellCollection implements ICellCollection {
         createProfileCollection(this.getMedianArrayLength());
     }
 
-    public void createProfileCollection(int length) {
+    public void createProfileCollection(int length) throws ProfileException {
 
         /*
          * Build a set of profile aggregates Default is to make profile
@@ -1461,7 +1461,12 @@ public class DefaultCellCollection implements ICellCollection {
         profileManager = new ProfileManager(this);
 
         // Make sure any profile aggregates match the length of saved segments
-        this.profileCollection.createAndRestoreProfileAggregate(this);
+        try {
+        	this.profileCollection.createAndRestoreProfileAggregate(this);
+        }catch(ProfileException e) {
+        	warn("Unable to restore profile aggregate");
+        	stack(e);
+        }
 
     }
 

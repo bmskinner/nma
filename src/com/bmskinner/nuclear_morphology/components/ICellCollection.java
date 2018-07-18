@@ -260,8 +260,9 @@ public interface ICellCollection
     /**
      * Generate the profile collection and aggregates based on the profile
      * length of the population.
+     * @throws ProfileException 
      */
-    void createProfileCollection();
+    void createProfileCollection() throws ProfileException;
 
     /**
      * Get the folder the nuclei in the collection were imaged from

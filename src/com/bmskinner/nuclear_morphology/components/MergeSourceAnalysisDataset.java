@@ -71,8 +71,9 @@ public class MergeSourceAnalysisDataset extends AbstractAnalysisDataset implemen
 
         this.datasetColour = mergeSource.getDatasetColour().orElse(null);
 
-        this.getCollection().createProfileCollection();
+        
         try {
+        	getCollection().createProfileCollection();
             mergeSource.getCollection().getProfileManager().copyCollectionOffsets(this.getCollection());
         } catch (ProfileException e) {
             warn("Unable to create merge source dataset");

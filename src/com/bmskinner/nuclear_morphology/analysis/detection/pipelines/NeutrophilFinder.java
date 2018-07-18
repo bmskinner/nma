@@ -408,8 +408,8 @@ public class NeutrophilFinder extends CellFinder {
         int i=0;
         for (Roi r : rois.keySet()) {
         	StatsMap m = rois.get(r);
-        	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, m);
-        	list.add(n);
+//        	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, m);
+//        	list.add(n);
         	i++;
 
         }
@@ -432,7 +432,7 @@ public class NeutrophilFinder extends CellFinder {
         }
 
         if (options.getNucleusType().equals(NucleusType.NEUTROPHIL)) {
-        	detectLobesViaWatershed(ip, result);
+//        	detectLobesViaWatershed(ip, result);
 
         	ImageAnnotator an = new ImageAnnotator(ann.duplicate());
         	for (Nucleus c : list) {

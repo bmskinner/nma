@@ -227,22 +227,16 @@ public class DatasetConverter implements Loggable, Importer {
 
         for (IAnalysisDataset child : template.getChildDatasets()) {
 
-            // log("\tConverting: "+child.getName());
-
             ICellCollection oldCollection = child.getCollection();
             // make a virtual collection for the cells
             ICellCollection newCollection = new VirtualCellCollection(dest, child.getName(), child.getId());
 
             
-            child.getCollection().getCells().forEach(c->newCollection.addCell(c));
-//            for (ICell c : child.getCollection().getCells()) {
-//                newCollection.addCell(c);
-//            }
-
-            newCollection.createProfileCollection();
+            child.getCollection().getCells().forEach(c->newCollection.addCell(c));            
 
             // Copy segmentation patterns over
             try {
+            	newCollection.createProfileCollection();
                 oldCollection.getProfileManager().copyCollectionOffsets(newCollection);
             } catch (ProfileException e) {
                 warn("Unable to copy profile offsets");

@@ -471,8 +471,9 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * 
      * @param collection
      * @param pointType
+     * @throws ProfileException 
      */
-    private void reviseSegments(ICellCollection collection, Tag pointType) {
+    private void reviseSegments(ICellCollection collection, Tag pointType) throws ProfileException {
 
         IProfileCollection pc = collection.getProfileCollection();
 
@@ -517,6 +518,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
          * stored frankenprofiles from each nucleus in the collection
          */
         pc.createProfileAggregate(collection, pc.length());
+
 
         if (!checkRPmatchesSegments(collection))
             warn("Segments do not all start on reference point after recombining");

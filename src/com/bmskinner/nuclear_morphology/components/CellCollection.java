@@ -393,7 +393,7 @@ public class CellCollection implements ICellCollection {
         this.profileCollections.put(type, (ProfileCollection) p);
     }
 
-    public void createProfileCollection() {
+    public void createProfileCollection() throws ProfileException {
         /*
          * Build a first set of profile aggregates Default is to make profile
          * aggregate from reference point Do not build an aggregate for the

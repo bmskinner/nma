@@ -162,23 +162,15 @@ public class ProfileManager implements Loggable {
         try {
             median = collection.getProfileCollection()
                     .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).offset(index);
+            
+            
+            offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+
+            collection.createProfileCollection();
         } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
             fine("Error updating the RP", e);
             return;
         }
-
-//        finer("Fetched median from new offset of RP to " + index);
-
-//        finest("New median from " + Tag.REFERENCE_POINT + ":");
-//        finest(median.toString());
-//
-//        finest("Offsetting individual nucleus indexes");
-        offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
-
-//        finer("Nucleus indexes for " + Tag.REFERENCE_POINT + " updated");
-        collection.createProfileCollection();
-        // createProfileCollections(false);
-//        finer("Rebuilt the profile collcctions");
     }
 
     /**
@@ -503,10 +495,11 @@ public class ProfileManager implements Loggable {
     /**
      * Regenerate the profile aggregate in each of the profile types of the
      * collection. The length is set to the angle profile length
+     * @throws ProfileException 
      * 
      * @throws Exception
      */
-    public void recalculateProfileAggregates() {
+    public void recalculateProfileAggregates() throws ProfileException {
 
         // use the same array length as the source collection to avoid segment
         // slippage

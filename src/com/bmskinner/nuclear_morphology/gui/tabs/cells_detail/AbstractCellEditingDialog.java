@@ -23,6 +23,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JOptionPane;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
@@ -132,7 +133,12 @@ public abstract class AbstractCellEditingDialog extends MessagingDialog {
             dataset.getCollection().replaceCell(workingCell);
 
             // Trigger a dataset update and reprofiling
-            dataset.getCollection().createProfileCollection();
+            try {
+				dataset.getCollection().createProfileCollection();
+			} catch (ProfileException e) {
+				warn("Unable to profile cell collection");
+				stack(e);
+			}
             cellModel.swapCell(workingCell);
 
             fireDatasetEvent(DatasetEvent.REFRESH_CACHE, dataset);
