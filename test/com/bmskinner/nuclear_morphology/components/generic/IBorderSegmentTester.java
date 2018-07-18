@@ -231,9 +231,12 @@ public class IBorderSegmentTester {
 
 	@Test
 	public void testGetProportionalIndex() {
-		for(double d=0; d<=1; d+=0.01) {
-			int exp =  (int)Math.round(((double)segmentLength*d)+startIndex);
-			assertEquals("Testing "+d,exp, segment.getProportionalIndex(d));
+		
+		for(int i=0; i<=100; i++) {
+			double d = (double)i/200d;
+			double dist = segmentLength*d;
+			double exp  = Math.round(CellularComponent.wrapIndex(startIndex+dist, segment.getProfileLength()));
+			assertEquals("Testing "+d+": "+dist,  (int)exp, segment.getProportionalIndex(d));
 		}
 	}
 	
@@ -267,9 +270,12 @@ public class IBorderSegmentTester {
 	public void testGetMidpointIndex() {
 
 		// Segment starts at 0, ends at 49. Length 50.
-		// Midpoint should be at 25+0 = 25
+		// When length is even, there are two midpoints.
+		// Method should return the lower, i.e. 24
 		
-		assertEquals("Midpoint index", segmentLength/2, segment.getMidpointIndex());
+		int exp = 24;
+		
+		assertEquals("Midpoint index", exp, segment.getMidpointIndex());
 	}
 
 	@Test

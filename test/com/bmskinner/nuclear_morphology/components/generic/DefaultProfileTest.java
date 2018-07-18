@@ -91,6 +91,16 @@ public class DefaultProfileTest {
 		IProfile p3 = comp.new DefaultProfile(data);
 		assertTrue(p3.equals(p2));
 	}
+	
+	@Test
+    public void testEqualsFalseWithSameDataInDifferentProfileType(){
+	    float[] d = new float[data.length];
+	    for(int i=0; i<data.length; i++){
+	        d[i] = data[i];
+	    }
+	    IProfile p = new FloatProfile(d);
+        assertFalse(profile.equals(p));
+    }
 
 
 	/**

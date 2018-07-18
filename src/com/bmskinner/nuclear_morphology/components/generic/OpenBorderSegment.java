@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
@@ -236,26 +237,10 @@ public class OpenBorderSegment implements IBorderSegment {
      */
     @Override
     public int getProportionalIndex(double d) {
-        if (d < 0 || d > 1) {
-            throw new IllegalArgumentException("Value must be between 0 and 1");
-        }
-
-        double desiredDistanceFromStart = (double) this.length() * d;
-
-        int target = (int) desiredDistanceFromStart;
-
-        int counter = 0;
-        Iterator<Integer> it = this.iterator();
-        while (it.hasNext()) {
-            int index = it.next();
-
-            if (counter == target) {
-                return index;
-            }
-            counter++;
-        }
-        return -1;
-
+    	if (d < 0 || d > 1)
+			throw new IllegalArgumentException("Proportion must be between 0-1: " + d);
+		double targetLength = length() * d;
+		return (int) Math.round(CellularComponent.wrapIndex(startIndex+targetLength, getProfileLength()));
     }
 
     /*

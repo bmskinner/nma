@@ -180,21 +180,36 @@ public interface IProfile extends Serializable, Loggable {
     int getIndexOfMin() throws ProfileException;
 
     /**
-     * Calculate the square differences between this profile and a given
-     * profile. The shorter profile is interpolated. The testProfile must have
-     * been offset appropriately to avoid spurious differences.
+     * Calculate the sum-of-squares difference between this profile and a given
+     * profile. The shorter profile is interpolated. The testProfile is assumed to
+     * be offset appropriately to avoid spurious differences.
      * 
-     * @param testProfile
-     *            the profile to compare to
+     * For example:
+     * 
+     * <pre>Profile A    compared to    Profile B</pre>
+     * <pre>111222111                   111242110</pre>
+     * <pre>    *   *                       *   *</pre>
+     * 
+     * has a difference at one index of 2, and at another of 1. The sum of squares difference
+     * is 2^2 + 1^2 = 5.
+     * <br>
+     * The order of comparisons does not matter when profiles are different lengths, since the
+     * shorter profile is interpolated. That is, {@code shortProfile.absoluteSquareDifference(longProfile)}
+     * will yield the same result as {@code longProfile.absoluteSquareDifference(shortProfile)}.
+     * <p>
+     * However, when comparing multiple profiles it is advisable to normalise their lengths <b>before</b>
+     * running the square difference calculation. 
+     * 
+     * @param testProfile the profile to compare to this profile
      * @return the sum-of-squares difference
-     * @throws ProfileException
+     * @throws ProfileException if interpolation cannot be performed
      */
     double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException;
 
     /**
      * Alternative to the constructor from profile
      * 
-     * @return a new profile with the same values as this
+     * @return a new profile of the same class with the same values as this profile
      */
     IProfile copy();
 
@@ -202,8 +217,7 @@ public interface IProfile extends Serializable, Loggable {
      * Create a profile offset to start from the given index. For example, a
      * profile { 1, 2, 3, 4} offset by 1 will become { 2, 3, 4, 1 }
 
-     * @param j
-     *            the index to start from
+     * @param j the index to set as index zero
      * @return a new offset profile
      * @throws ProfileException
      */

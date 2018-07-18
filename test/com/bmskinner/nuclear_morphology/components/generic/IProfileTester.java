@@ -22,6 +22,7 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultProfile;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.SegmentedCellularComponent.DefaultSegmentedProfile.BorderSegmentTree;
@@ -55,14 +56,24 @@ public class IProfileTester {
 		}
         profile = createInstance(source);
     }
+	
+	/**
+	 * Create an instance of the class under test, using the default data.
+	 * @param source
+	 * @return
+	 * @throws Exception
+	 */
+	private static IProfile createInstance(Class source) throws Exception {
+		return createInstance(source, data);
+	}
 
 	/**
-	 * Create an instance of the class under test, using the default index parameters.
+	 * Create an instance of the class under test, using the given data.
 	 * @param source the class to create
 	 * @return
 	 * @throws Exception 
 	 */
-	public static IProfile createInstance(Class source) throws Exception {
+	private static IProfile createInstance(Class source, float[] data) throws Exception {
 
 		if(source==DefaultProfile.class) {
 			DummySegmentedCellularComponent comp = new DummySegmentedCellularComponent();
@@ -315,13 +326,13 @@ public class IProfileTester {
 	private void testAbsoluteSquareDifferenceOnSameLengthProfiles(IProfile template, float diff) throws Exception{
 	    float[] test =  Arrays.copyOf(template.toFloatArray(), template.size());
         
-        test[0] = test[0]+diff;
-        
-        IProfile p = createInstance(source);
-        
+        test[0] = test[0]+diff;   
+        IProfile p = createInstance(source, test);
         double expDiff = diff*diff;
         
+        // Check both directions give the same result
         assertEquals(expDiff, template.absoluteSquareDifference(p), 0);
+        assertEquals(expDiff, p.absoluteSquareDifference(template), 0);
 	}
 	
 	@Test
@@ -334,27 +345,47 @@ public class IProfileTester {
 	    testAbsoluteSquareDifferenceOnSameLengthProfiles(profile, -2);
     }
 	
-	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template, int newLength, float diff) throws ProfileException{
+	@Test
+	public void testInterpolatedProfileHasNoSquareDifferenceToSourceProfile() throws Exception {
+		testAbsoluteSquareDifferenceOnSameLengthProfiles(profile, 0);
+	}
+	
+	private void testAbsoluteSquareDifferenceOnDifferentLengthProfiles(IProfile template, int newLength, float diff) throws Exception{
 
-	    IProfile t = template.interpolate(newLength);
+	    IProfile interpolated = template.interpolate(newLength);
 	    
-	    float[] arr = t.toFloatArray();
+	    float[] arr = interpolated.toFloatArray();
 	    arr[0] = arr[0]+diff;
-        
-	    IProfile p = new FloatProfile(arr);        
+	            
+	    IProfile p = new FloatProfile(arr);       
         double expDiff = diff*diff;
-        
         assertEquals(expDiff, template.absoluteSquareDifference(p), 0);
+        assertEquals(expDiff, p.absoluteSquareDifference(template), 0);
 	}
 	
 	@Test
-    public void testAbsoluteSquareDifferenceOnLongerProfilesPositive() throws ProfileException {
+    public void testAbsoluteSquareDifferenceOnLongerProfilesPositive() throws Exception {
 	    testAbsoluteSquareDifferenceOnDifferentLengthProfiles(profile, profile.size()*2, 2);
     }
 	
 	@Test
-    public void testAbsoluteSquareDifferenceOnShorterProfilesPositive() throws ProfileException {
-        testAbsoluteSquareDifferenceOnDifferentLengthProfiles(profile, profile.size()/2, 2);
+    public void testAbsoluteSquareDifferenceOnShorterProfilesPositive() throws Exception {
+
+		// We can't directly compare because there is loss of precision after interpolation
+		// Check that the profiles are being interpolated properly instead, and subsitute values
+        int diff = 2;
+		IProfile shortened  = profile.interpolate(profile.size()/2);
+		IProfile lengthened = shortened.interpolate(profile.size());
+	    
+	    float[] arr = lengthened.toFloatArray();
+	    arr[0] = arr[0]+diff;
+	            
+	    IProfile differenced = new FloatProfile(arr);       
+        double expDiff = diff*diff;
+
+        
+        assertEquals(expDiff, differenced.absoluteSquareDifference(lengthened), 0);
+        assertEquals(expDiff, lengthened.absoluteSquareDifference(differenced), 0);
     }
 
 	/**
@@ -1059,17 +1090,18 @@ public class IProfileTester {
 	
 	
 	@Test
-	public void squareDiffsAreCalculatedCorrectly() throws Exception{
+	public void squareDiffsAreCalculatedCorrectlyForEqualLengthProfiles() throws Exception{
 		
 		IProfile dataProfile = createInstance(source);
 		
 		float[] arr = dataProfile.toFloatArray();
 		arr[0] = arr[0]+2;
-		IProfile templateProfile = createInstance(source);
-				
-		double expectedDiff = 4;
+		arr[1] = arr[1]-3;
+		int expDiff = 4+9;
+		IProfile templateProfile = createInstance(source, arr);
+
 		double value = dataProfile.absoluteSquareDifference(templateProfile);		
-		assertEquals(expectedDiff, value,0);
+		assertEquals(expDiff, value,0);
 	}
 	
 	@Test
@@ -1115,22 +1147,12 @@ public class IProfileTester {
     public void testEqualsFalseWithDifferentData() throws Exception{
         float[] d = new float[data.length];
         for(int i=0; i<data.length; i++){
-            d[i] = data[i]+1;
+            d[i] = data[i]*2;
         }
-        IProfile p = createInstance(source);
+        IProfile p = createInstance(source, d);
         assertFalse(profile.equals(p));
     }
-	
-	@Test
-    public void testEqualsFalseWithSameDataInDifferentProfileType(){
-	    double[] d = new double[data.length];
-	    for(int i=0; i<data.length; i++){
-	        d[i] = data[i];
-	    }
-	    IProfile p = new DoubleProfile(d);
-        assertFalse(profile.equals(p));
-    }
-	
+		
 	@Test
 	public void testWrapsDoesNotAffectIndexWhenWithinProfile(){
 		for(int i=0; i<profile.size(); i++){
@@ -1154,9 +1176,17 @@ public class IProfileTester {
 	
 	@Test
 	public void testWrapsHasContigouousRange(){
-		for(int i=-profile.size(); i<profile.size()*2; i++){
-			System.out.println(i+"\t"+profile.wrap(i));
-//			assertEquals("Testing "+i+" against profile size "+profile.size(), i-profile.size(), profile.wrap(i));
+		// Ensure that wrapping profile indexes does not 'skip'
+		int prev = Integer.MIN_VALUE;
+		for(int i=-profile.size()*2; i<profile.size()*3; i++){
+			
+			int current = profile.wrap(i);
+			
+			if(prev>Integer.MIN_VALUE) {
+				int exp = CellularComponent.wrapIndex(prev+1, profile.size());
+				assertEquals("Testing "+i+" against profile size "+profile.size(), exp, current);
+			}
+			prev = current;
 		}
 	}
 	

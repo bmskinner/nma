@@ -16,7 +16,7 @@
  *     You should have received a copy of the GNU General Public License
  *     along with Nuclear Morphology Analysis. If not, see <http://www.gnu.org/licenses/>.
  *******************************************************************************/
-package com.bmskinner.nuclear_morphology.components;
+package com.bmskinner.nuclear_morphology.components.nuclei;
 
 import static org.junit.Assert.assertEquals;
 import ij.gui.PolygonRoi;
@@ -27,6 +27,7 @@ import java.io.File;
 
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.components.ComponentFactory;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;

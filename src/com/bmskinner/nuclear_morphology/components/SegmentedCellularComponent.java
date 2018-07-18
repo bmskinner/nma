@@ -1089,6 +1089,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	            return index;
 	        return index % size();
 		}
+		
+		
+		
 	}
 
 
@@ -2051,10 +2054,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				// If a segment is length 3 covering 0-1-2, the midpoint is 1
 				// If a segment is length 4 covering 0-1-2-3, the midpoint is 1 (lower of the two possible indices)
 				
-				int mid = length%2==0 ? (length/2) : (length-1)/2;
+				int mid = length%2==0 ? ((length-1)/2) : length/2;
 				return wrap(startIndex+mid); 
-				
-//				return wrap( startIndex + (length/2) );
 			}
 
 			@Override
