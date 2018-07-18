@@ -365,7 +365,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
             // segments
             ISegmentedProfile frankenProfile = fitter.recombine(n, Tag.REFERENCE_POINT);
 
-            n.setProfile(ProfileType.FRANKEN, ISegmentedProfile.makeNew(frankenProfile));
+            n.setProfile(ProfileType.FRANKEN, frankenProfile.copy());
 
         }
 

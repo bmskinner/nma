@@ -36,6 +36,7 @@ import java.util.stream.IntStream;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;
@@ -93,16 +94,38 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 	}
 	
 	@Override
+    public void calculateProfiles() throws ProfileException {
+
+    	ProfileCreator creator = new ProfileCreator(this);
+
+    	for (ProfileType type : ProfileType.values()) {
+    		finest("Attempting to create profile "+type);
+    		ISegmentedProfile profile = creator.createProfile(type);
+    		finest("Assigning profile "+type);
+    		setProfile(type, profile);
+    	}
+    }
+	
+	@Override
 	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
 
         if (!this.hasProfile(type))
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
         try {
-        	fine("Fetching profile from ProfileableCellularComponent profile store");
-        	return new DefaultSegmentedProfile(super.getProfile(type));
+        	ISegmentedProfile p = profileMap.get(type);
+        	
+        	if(! (p instanceof DefaultSegmentedProfile)) {
+        		finer("Existing profile is not an internal profile class, is "+p.getClass().getSimpleName()+", converting");
+        		// When reading old datasets, sometimes the profile length does not match the border list length.
+        		// If this happens, the conversion will fail due to the new length constraints.
+        		// As a stopgap, interpolate profiles as needed.
+        		if(p.size()!=getBorderLength())
+        			p = p.interpolate(getBorderLength());
+        		assignProfile(type, new DefaultSegmentedProfile(p));
+        	}
+        	return profileMap.get(type);
         } catch (IndexOutOfBoundsException | ProfileException e) {
-            stack("Error getting profile " + type, e);
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
     }
@@ -115,26 +138,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
         if (this.getBorderLength() != profile.size())
             throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) for %s", profile.size(), getBorderLength(), type));
         
-
         try {
+        	finest("Setting profile of type "+type);
     		assignProfile(type, new DefaultSegmentedProfile(profile));
 		} catch (IndexOutOfBoundsException | ProfileException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			stack("Unable to create copy of profile of type "+type+"; "+e.getMessage(), e);
 		}
-        
-        // Replace frankenprofiles completely
-//        if (type.equals(ProfileType.FRANKEN)) {
-//
-//            assignProfile(type, new DefaultSegmentedProfile(profile));
-//        } else { // Otherwise replace the profile
-//        	try {
-//        		assignProfile(type, new DefaultSegmentedProfile(profile));
-//			} catch (IndexOutOfBoundsException | ProfileException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//        }
     }
 	
 	@Override
@@ -178,10 +187,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		 * @param values the array to use
 		 */
 		public DefaultProfile(final float[] values) {
-
 			if(values==null)
 				throw new IllegalArgumentException("Array is null");
-			if (values.length!=SegmentedCellularComponent.this.getBorderLength())
+			if (values.length!=getBorderLength())
 				throw new IllegalArgumentException(String.format("Input array length (%d) does not match border length (%d) in DefaultProfile constructor", values.length, getBorderLength()));
 			this.array = values;
 		}
@@ -195,6 +203,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		public DefaultProfile(@NonNull final IProfile p) {
 			if (p==null)
 				throw new IllegalArgumentException("Profile is null");
+			
 			if(p.size()!=getBorderLength())
 				throw new IllegalArgumentException(String.format("Input profile length (%d) does not match border length (%d) in DefaultProfile constructor", p.size(), getBorderLength()));
 
@@ -417,7 +426,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		@Override
-		public IProfile copy() {
+		public IProfile copy() throws ProfileException {
 			return new DefaultProfile(array);
 		}
 
@@ -1415,7 +1424,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 */
 			
 			/*
-			 * Apply the offset to each of the segments. TODO Only covering first layer of merges sources
+			 * Apply the offset to each of the segments.
 			 */
 
 			DefaultSegmentedProfile result = new DefaultSegmentedProfile(offsetProfile);
@@ -1425,8 +1434,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			
 			// root segment update
 			result.segments.startIndex = wrap(result.segments.startIndex-offset);
-			for(BorderSegmentTree s : result.segments.leaves) {				
-				s.startIndex = wrap(s.startIndex-offset);
+			for(BorderSegmentTree s : result.segments.leaves) {		
+				s.offset(-offset);
 			}
 			return result;
 		}
@@ -1473,11 +1482,11 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				
 				if(newLength<IBorderSegment.MINIMUM_SEGMENT_LENGTH)
 					throw new ProfileException(String.format("Cannot interpolate to %d: segment length %d would be too short", length, newLength));
-				
 				newSegs.add(new DefaultBorderSegment(newStart, newEnd, length, segments.leaves.get(i).getID()));
 			}
 
 			// assign new segments
+			finer("Creating new SegmentedFloatProfile to pass interpolated profile out of component");
 			return new SegmentedFloatProfile(newProfile, newSegs);
 		}
 
@@ -1492,8 +1501,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 					throw new IllegalArgumentException("Segment ids do not match between profile and template");
 			}
 			
-			
-
 			/*
 			 * The final frankenprofile is made of stitched together profiles from
 			 * each segment
@@ -1520,7 +1527,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 
 			} catch (UnavailableComponentException e) {
 				stack(e);
-				throw new ProfileException("Error getting segment for normalising");
+				throw new ProfileException("Error getting segment for normalising", e);
 			}
 
 			// Recombine the segment profiles
@@ -1772,9 +1779,8 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append(super.toString()+System.getProperty("line.separator"));
 			for (IBorderSegment seg : getSegments()) {
-				builder.append(seg.toString() + System.getProperty("line.separator"));
+				builder.append(seg.toString() + " | ");
 			}
 			return builder.toString();
 		}
@@ -1785,13 +1791,9 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		}
 
 		@Override
-		public ISegmentedProfile copy(){
-			try {
-				return new DefaultSegmentedProfile(this);
-			} catch (IndexOutOfBoundsException | ProfileException e) {
-				stack(e);
-			}
-			return null;
+		public ISegmentedProfile copy() throws ProfileException{
+			finer("Copying profile "+toString());
+			return new DefaultSegmentedProfile(this);
 		}
 
 		@Override
@@ -1889,6 +1891,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 			 * @param parent the parent segment (can be null)
 			 */
 			protected BorderSegmentTree(@NonNull UUID id, int start, int length, @Nullable BorderSegmentTree parent){
+				finer(String.format("Creating new segment at %d of length %d with parent %s", start, length, parent));
 				if(start<0 || start > size())
 					throw new IllegalArgumentException(String.format("Start index %d is outside profile bounds", start));
 				if(length<0 || length > size()+1)
@@ -1901,7 +1904,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				this.length = length;
 				this.parent = parent;
 				leaves.clear();
-//				System.out.println(String.format("Creating segment starting at %d with length %d ending at %d", start, length, getEndIndex() ));
 			}
 			
 			
@@ -1976,7 +1978,6 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 						throw new IllegalArgumentException(String.format("Potential merge source start (%d) does not overlap previous merge source end (%d)", seg.getStartIndex(), prevSegment.getEndIndex()));
 					
 				}
-//				System.out.println("Adding segment "+seg.toString());
 				leaves.add(new BorderSegmentTree(seg, this));
 			}
 
@@ -2095,6 +2096,7 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 				isLocked=b;
 			}
 			
+			@Override
 			public void offset(int amount) {
 				this.startIndex = wrapIndex(startIndex+amount);
 				for(BorderSegmentTree s : leaves) {

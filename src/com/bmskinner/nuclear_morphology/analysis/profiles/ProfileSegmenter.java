@@ -101,9 +101,8 @@ public class ProfileSegmenter implements Loggable {
     public ProfileSegmenter(final IProfile p, final Map<Tag, Integer> map) {
 
         this(p);
-        if (map == null) {
+        if (map == null)
             throw new IllegalArgumentException("Index map is null");
-        }
         tagsToSplitOn = map;
         validateBorderTagMap();
         fine("Added map of BorderTagObject indexes to force segmentation");
@@ -113,8 +112,7 @@ public class ProfileSegmenter implements Loggable {
     /**
      * Get the deltas and find minima and maxima. These switch between segments
      * 
-     * @param splitIndex
-     *            an index point that must be segmented on
+     * @param splitIndex an index point that must be segmented on
      * @return a list of segments
      */
     public List<IBorderSegment> segment() throws UnsegmentableProfileException {
@@ -317,7 +315,7 @@ public class ProfileSegmenter implements Loggable {
         StringBuilder b = new StringBuilder();
         for (IBorderSegment s : segments) {
             b.append(s.toString());
-            b.append("\n");
+            b.append(" | ");
         }
         return b.toString();
     }

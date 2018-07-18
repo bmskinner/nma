@@ -205,13 +205,7 @@ public class ProfileCollection implements IProfileCollection {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegments(components.generic.
-     * BorderTagObject)
-     */
+
     @Override
     public List<IBorderSegment> getSegments(Tag tag) throws ProfileException {
         if (tag == null) {
@@ -222,8 +216,13 @@ public class ProfileCollection implements IProfileCollection {
         // since we are moving the pointIndex back to the beginning
         // of the array
         int offset = -getIndex(tag);
+        
+        List<IBorderSegment> result = IBorderSegment.copy(segments);
+        for(IBorderSegment s : result) {
+        	s.offset(offset);
+        }
 
-        List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
+//        List<IBorderSegment> result = IBorderSegment.nudge(segments, offset);
 
         return result;
     }
@@ -442,8 +441,11 @@ public class ProfileCollection implements IProfileCollection {
          */
         int offset = getIndex(tag);
 
-        List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
-
+//        List<IBorderSegment> result = IBorderSegment.nudge(n, offset);
+        List<IBorderSegment> result = IBorderSegment.copy(segments);
+        for(IBorderSegment s : result) {
+        	s.offset(offset);
+        }
         this.segments = result;
     }
 

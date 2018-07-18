@@ -79,7 +79,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
      */
     protected double angleWindowProportion = IAnalysisOptions.DEFAULT_WINDOW_PROPORTION;
 
-    private Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>(5);
+    protected Map<ProfileType, ISegmentedProfile> profileMap = new HashMap<>(5);
 
     /**
      * The indexes of tags in the profiles and border list
@@ -132,7 +132,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
                 try {
                     ISegmentedProfile oldProfile = comp.getProfile(type);
-                    ISegmentedProfile newProfile = ISegmentedProfile.makeNew(oldProfile);
+                    ISegmentedProfile newProfile = oldProfile.copy();
                     
                     List<UUID> oldIds = oldProfile.getSegmentIDs();
                     List<UUID> newIds = newProfile.getSegmentIDs();
@@ -190,9 +190,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         try {
             calculateProfiles();
-        } catch (ProfileException | IllegalArgumentException e) {
-        	
-            throw new ComponentCreationException("Could not calculate profiles", e);
+        } catch (ProfileException e) {
+            throw new ComponentCreationException("Could not calculate profiles due to "+e.getMessage(), e);
         }
 
     }
@@ -495,13 +494,14 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);
 
         try {
+        	fine("Getting profile: "+type);
         	ISegmentedProfile template = profileMap.get(type);
-        	if(template.getSegmentCount()>1)
-        		return new SegmentedFloatProfile(template);
-        	return new SegmentedFloatProfile( (IProfile)template);
+        	return template.copy();
+//        	if(template.getSegmentCount()>1)
+//        		return new SegmentedFloatProfile(template);
+//        	return new SegmentedFloatProfile( (IProfile)template);
         	
-        } catch (IndexOutOfBoundsException | ProfileException e) {
-            stack("Error getting profile " + type, e);
+        } catch (ProfileException e) {
             throw new UnavailableProfileTypeException("Cannot get profile type " + type, e);
         }
     }
@@ -569,11 +569,6 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
 
         // Replace frankenprofiles completely
         assignProfile(type, profile);
-//        if (type.equals(ProfileType.FRANKEN)) {
-//        	assignProfile(type, profile);
-//        } else { 
-//        	profileMap.get(type).setSegments(profile.getSegments());
-//        }
     }
     
     protected void assignProfile(@NonNull ProfileType type, @NonNull ISegmentedProfile profile) {
@@ -581,18 +576,16 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public void calculateProfiles() throws ProfileException {
+    public void calculateProfiles() throws ProfileException {
 
-        ProfileCreator creator = new ProfileCreator(this);
+    	ProfileCreator creator = new ProfileCreator(this);
 
-        for (ProfileType type : ProfileType.values()) {
-        	try {
-        		ISegmentedProfile profile = creator.createProfile(type);
-        		assignProfile(type, profile);
-        	} catch(Exception e) {
-        		throw new ProfileException("Error calculating profiles",e);
-        	}
-        }
+    	for (ProfileType type : ProfileType.values()) {
+    		finest("Attempting to create profile "+type);
+    		ISegmentedProfile profile = creator.createProfile(type);
+    		finest("Assigning profile "+type);
+    		assignProfile(type, profile);
+    	}
     }
 
     @Override

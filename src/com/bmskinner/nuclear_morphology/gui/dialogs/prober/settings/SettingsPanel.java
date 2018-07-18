@@ -243,7 +243,7 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void setEnabled(boolean b) {
-        finer(this.getClass().getSimpleName() + ": Setting updating " + b);
+        finest(this.getClass().getSimpleName() + ": Setting updating " + b);
         for (Component c : this.getComponents()) {
             c.setEnabled(b);
         }
@@ -254,7 +254,7 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-        finer("Panel updating event heard");
+        finest("Panel updating event heard");
         if (e.getType() == PanelUpdatingEvent.UPDATING) {
             this.setEnabled(false);
         }

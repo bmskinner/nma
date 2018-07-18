@@ -681,29 +681,20 @@ public class DatasetConverter implements Loggable, Importer {
             if (template.hasProfile(type)) {
                 try {
                     ISegmentedProfile profile = template.getProfile(type, Tag.REFERENCE_POINT);
-                    ISegmentedProfile target = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
+                    ISegmentedProfile target  = newNucleus.getProfile(type, Tag.REFERENCE_POINT);
 
                     ISegmentedProfile newProfile;
 
                     if (profile.size() != target.size()) {
-                        // log("Interpolating profile");
-                        // fine("\tNew nucleus profile length of
-                        // "+target.size()+" : original nucleus was
-                        // "+profile.size());
                         newProfile = profile.interpolate(target.size());
-                        // fine("\tInterpolated profile has length
-                        // "+target.size()+" with segment total length
-                        // "+target.getSegments().get(0).getTotalLength());
                     } else {
-                        // log("Not interpolating profile");
-                        newProfile = ISegmentedProfile.makeNew(profile);
+                        newProfile = profile.copy();//ISegmentedProfile.makeNew(profile);
                     }
 
                     if (newProfile.getSegmentCount() != profile.getSegmentCount()) {
                         warn("Segment count mismatch: new has " + newProfile.getSegmentCount() + ", target has "
                                 + profile.getSegmentCount());
-                        throw new DatasetConversionException(
-                                "Error copying segments for nucleus " + template.getNameAndNumber());
+                        throw new DatasetConversionException( "Error copying segments for nucleus " + template.getNameAndNumber());
                     }
 
                     fine("\tSetting the profile " + type + " in the new nucleus");

@@ -66,7 +66,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     }
 
     @Override
-    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInImage(@NonNull final File imageFile) throws ImageImportException {
         List<ICell> list = new ArrayList<>();
 
         try {
@@ -111,7 +111,7 @@ public class FluorescentNucleusFinder extends CellFinder {
     }
 
     private List<Nucleus> detectNucleus(@NonNull File imageFile)
-            throws ImageImportException, ComponentCreationException, MissingOptionException {
+            throws ImageImportException, MissingOptionException {
 
         List<Nucleus> list = new ArrayList<>();
 
@@ -177,7 +177,7 @@ public class FluorescentNucleusFinder extends CellFinder {
             	Nucleus n = makeNucleus(r, imageFile, nuclOptions, i, s);
             	list.add(n);
             } catch(ComponentCreationException e) {
-            	fine("Unable to create nucleus from roi", e);
+            	stack("Unable to create nucleus from roi: "+e.getMessage()+"; skipping", e);
             } finally {
             	i++;
             }

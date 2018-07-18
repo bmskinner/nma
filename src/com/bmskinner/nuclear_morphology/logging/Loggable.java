@@ -99,7 +99,7 @@ public interface Loggable {
         Logger.getLogger(PROGRAM_LOGGER).log(TRACE, message, t);
         Logger.getLogger(ERROR_LOGGER).log(TRACE, message, t);
 //        System.err.println(message);
-        t.printStackTrace();
+//        t.printStackTrace();
     }
 
     /**

@@ -53,6 +53,7 @@ import com.bmskinner.nuclear_morphology.analysis.detection.pipelines.Finder;
 import com.bmskinner.nuclear_morphology.components.options.MissingOptionException;
 import com.bmskinner.nuclear_morphology.core.ThreadManager;
 import com.bmskinner.nuclear_morphology.io.ImageImporter;
+import com.bmskinner.nuclear_morphology.io.ImageImporter.ImageImportException;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -150,8 +151,7 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
 
             finder.findInImage(imageFile);
 
-        } catch (Exception e) { // end try
-            warn(e.getMessage());
+        } catch (ImageImportException e) { // end try
             stack(e.getMessage(), e);
             setImageLabel("Error probing " + imageFile.getAbsolutePath());
 
@@ -199,7 +199,8 @@ public class GenericImageProberPanel extends JPanel implements Loggable, ProberR
             try {
                 importAndDisplayImage(openImage);
             } catch (Exception e) {
-                error("Error in prober", e);
+            	warn("Error in prober");
+                stack("Error in prober", e);
             }
         };
         ThreadManager.getInstance().submit(r);

@@ -41,7 +41,7 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
     }
 
     @Override
-    public Void findInFolder(File folder) throws ImageImportException, ComponentCreationException {
+    public Void findInFolder(File folder) throws ImageImportException {
 
         File[] arr = folder.listFiles();
         if (arr == null) {
@@ -54,7 +54,7 @@ public abstract class VoidFinder extends AbstractFinder<Void> {
                 if (ImageImporter.fileIsImportable(f)) {
                     try {
                         findInImage(f);
-                    } catch (ImageImportException | ComponentCreationException e) {
+                    } catch (ImageImportException e) {
                         stack("Error searching image", e);
                     }
                 }

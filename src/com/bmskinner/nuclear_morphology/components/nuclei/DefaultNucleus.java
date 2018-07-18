@@ -342,6 +342,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
             return verticalNucleus;
 
         // Make an exact copy of the nucleus
+        finer("Creating vertical nucleus");
         verticalNucleus = this.duplicate();
 
         // At this point the new nucleus was created at the original image

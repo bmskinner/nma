@@ -20,6 +20,7 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -237,46 +238,34 @@ public class DefaultProfileCollection implements IProfileCollection {
         return length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#getSegments(components.generic.
-     * BorderTagObject)
-     */
+
     @Override
     public synchronized List<IBorderSegment> getSegments(Tag tag) {
-        if (tag == null) {
+        if (tag == null)
             throw new IllegalArgumentException("The requested segment key is null: " + tag);
-        }
 
         // this must be negative offset for segments
         // since we are moving the pointIndex back to the beginning
         // of the array
         int offset = -getIndex(tag);
 
-        List<IBorderSegment> result;
-        if (segments == null) {
-            return new ArrayList<IBorderSegment>(0);
-        }
+        if (segments == null) 
+        	return new ArrayList<>(0);
 
         try {
-            result = IBorderSegment.nudge(segments, offset);
+        	IBorderSegment[] result = IBorderSegment.copy(segments);
+        	for(IBorderSegment s : result) {
+        		s.offset(offset);
+        	}
+        	return Arrays.asList(result);
         } catch (ProfileException e) {
-            stack("Error offsetting segments", e);
-            return new ArrayList<IBorderSegment>(0);
+        	// TODO Auto-generated catch block
+        	e.printStackTrace();
         }
-
-        return result;
+        return new ArrayList<>(0);        
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfileCollection#hasSegmentStartingWith(components.
-     * generic.BorderTagObject)
-     */
+
     @Override
     public boolean hasSegmentStartingWith(Tag tag) throws UnsegmentedProfileException {
 
@@ -475,18 +464,23 @@ public class DefaultProfileCollection implements IProfileCollection {
          */
         int offset = getIndex(tag);
 
-        List<IBorderSegment> result;
-        try {
-            result = IBorderSegment.nudge(n, offset);
-        } catch (ProfileException e) {
-            stack("Error offsetting segments", e);
-            return;
-        }
+
+    	for(IBorderSegment s : n) {
+    		s.offset(offset);
+    	}
+    	
+//        List<IBorderSegment> result;
+//        try {
+//            result = IBorderSegment.nudge(n, offset);
+//        } catch (ProfileException e) {
+//            stack("Error offsetting segments", e);
+//            return;
+//        }
 
         this.segments = new IBorderSegment[n.size()];
 
         for (int i = 0; i < segments.length; i++) {
-            segments[i] = result.get(i);
+            segments[i] = n.get(i);
         }
     }
 

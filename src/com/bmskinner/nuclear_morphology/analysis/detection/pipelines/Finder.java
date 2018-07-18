@@ -60,7 +60,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInFolder(@NonNull File folder) throws ImageImportException, ComponentCreationException;
+    public E findInFolder(@NonNull File folder) throws ImageImportException;
 
     /**
      * Find cells using the options given in the setup in the given image
@@ -70,7 +70,7 @@ public interface Finder<E> {
      * @throws ImageImportException
      * @throws ComponentCreationException
      */
-    public E findInImage(@NonNull File imageFile) throws ImageImportException, ComponentCreationException;
+    public E findInImage(@NonNull File imageFile) throws ImageImportException;
 
     /**
      * Add a listener for progress through the detection.

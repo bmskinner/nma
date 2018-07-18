@@ -59,10 +59,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         if (segments == null || segments.isEmpty())
             throw new IllegalArgumentException("Segment list is null or empty in segmented profile contructor");
 
-        if (p.size() != segments.get(0).getProfileLength()) {
+        if (p.size() != segments.get(0).getProfileLength())
             throw new IllegalArgumentException(String.format("Cannot construct new profile; segment profile length (%d) does not fit this profile (%d)", segments.get(0).getProfileLength(), p.size()));
-        }
 
+        // Link and add the segments into this profile
+        
+        
+        
         IBorderSegment.linkSegments(segments);
 
         this.segments = new IBorderSegment[segments.size()];
@@ -74,8 +77,7 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     /**
      * Construct using an existing profile. Copies the data and segments
      * 
-     * @param profile
-     *            the segmented profile to copy
+     * @param profile the segmented profile to copy
      * @throws ProfileException
      * @throws IndexOutOfBoundsException
      */
@@ -434,9 +436,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     @Override
     public boolean update(@NonNull IBorderSegment segment, int startIndex, int endIndex) throws SegmentUpdateException {
 
-        if (!this.contains(segment)) {
+        if (!this.contains(segment))
             throw new IllegalArgumentException("Segment is not part of this profile");
-        }
 
         // test effect on all segments in list: the update should
         // not allow the endpoints to move within a segment other than
@@ -452,8 +453,6 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
 
                 if (!testSeg.getName().equals(segment.getName()) && !testSeg.getName().equals(nextSegment.getName())
                         && !testSeg.getName().equals(prevSegment.getName())) {
-                    // segment.setLastFailReason("Index out of bounds of next
-                    // and prev");
                     return false;
                 }
             }
@@ -465,56 +464,19 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
         return segment.update(startIndex, endIndex);
     }
 
-//    @Override
-//    public boolean adjustSegmentStart(@NonNull UUID id, int amount) throws SegmentUpdateException {
-//        if (!hasSegment(id)) {
-//            throw new IllegalArgumentException("Segment is not part of this profile");
-//        }
-//
-//        // get the segment within this profile, not a copy
-//        IBorderSegment segmentToUpdate;
-//        try {
-//            segmentToUpdate = this.getSegment(id);
-//        } catch (UnavailableComponentException e) {
-//            stack(e);
-//            throw new SegmentUpdateException("Error getting segment", e);
-//        }
-//
-//        int newValue = CellularComponent.wrapIndex(segmentToUpdate.getStartIndex() + amount,
-//                segmentToUpdate.getProfileLength());
-//        return this.update(segmentToUpdate, newValue, segmentToUpdate.getEndIndex());
-//    }
-//
-//    @Override
-//    public boolean adjustSegmentEnd(@NonNull UUID id, int amount) throws SegmentUpdateException {
-//        if (!hasSegment(id)) {
-//            throw new IllegalArgumentException("Segment is not part of this profile");
-//        }
-//
-//        // get the segment within this profile, not a copy
-//        IBorderSegment segmentToUpdate;
-//        try {
-//            segmentToUpdate = this.getSegment(id);
-//        } catch (UnavailableComponentException e) {
-//            stack(e);
-//            throw new SegmentUpdateException("Error getting segment");
-//        }
-//
-//        int newValue = CellularComponent.wrapIndex(segmentToUpdate.getEndIndex() + amount,
-//                segmentToUpdate.getProfileLength());
-//        return this.update(segmentToUpdate, segmentToUpdate.getStartIndex(), newValue);
-//    }
-
     @Override
     public void nudgeSegments(int amount) {
 
-        List<IBorderSegment> result;
-        try {
-            result = IBorderSegment.nudge(getSegments(), amount);
-        } catch (ProfileException e) {
-            fine("Error offsetting segments", e);
-            return;
+        List<IBorderSegment> result = getSegments();
+        for(IBorderSegment s: result) {
+        	s.offset(amount);
         }
+//        try {
+//            result = IBorderSegment.nudge(getSegments(), amount);
+//        } catch (ProfileException e) {
+//            fine("Error offsetting segments", e);
+//            return;
+//        }
         this.segments = new IBorderSegment[segments.length];
         for (int i = 0; i < segments.length; i++) {
             this.segments[i] = result.get(i);
@@ -545,7 +507,13 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
          * amount
          * 
          */
-        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
+        
+        List<IBorderSegment> segments = getSegments();
+        for(IBorderSegment s: segments) {
+        	s.offset(-offset);
+        }
+                
+//        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -offset);
         return new SegmentedFloatProfile(offsetProfile, segments);
     }
 
@@ -971,13 +939,8 @@ public class SegmentedFloatProfile extends FloatProfile implements ISegmentedPro
     }
     
     @Override
-    public ISegmentedProfile copy() {
-        try {
-            return new SegmentedFloatProfile(this);
-        } catch (IndexOutOfBoundsException | ProfileException e) {
-            stack(e);
-        }
-        return null;
+    public ISegmentedProfile copy() throws ProfileException {
+    	return new SegmentedFloatProfile(this);
     }
 
     /*

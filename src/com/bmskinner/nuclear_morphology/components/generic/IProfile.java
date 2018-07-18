@@ -210,8 +210,9 @@ public interface IProfile extends Serializable, Loggable {
      * Alternative to the constructor from profile
      * 
      * @return a new profile of the same class with the same values as this profile
+     * @throws ProfileException if the copy failed
      */
-    IProfile copy();
+    IProfile copy() throws ProfileException;
 
     /**
      * Create a profile offset to start from the given index. For example, a

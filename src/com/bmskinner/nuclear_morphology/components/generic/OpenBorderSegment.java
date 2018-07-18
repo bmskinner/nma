@@ -389,17 +389,14 @@ public class OpenBorderSegment implements IBorderSegment {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + uuid.hashCode();
         result = prime * result + endIndex;
         result = prime * result + startIndex;
         result = prime * result + totalLength;
+        result = prime * result + mergeSources.hashCode();
         return result;
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.nuclear.IBorderSegment#equals(java.lang.Object)
-     */
+    
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -409,6 +406,8 @@ public class OpenBorderSegment implements IBorderSegment {
         if (getClass() != obj.getClass())
             return false;
         OpenBorderSegment other = (OpenBorderSegment) obj;
+        if(!uuid.equals(other.uuid))
+        	return false;
         if (endIndex != other.endIndex)
             return false;
         if (startIndex != other.startIndex)
@@ -417,6 +416,16 @@ public class OpenBorderSegment implements IBorderSegment {
             return false;
         return true;
     }
+    
+    @Override
+    public void offset(int offset) {
+    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+    	for(IBorderSegment s : mergeSources) {
+    		s.offset(offset);
+    	}
+    }
+
 
     /*
      * (non-Javadoc)

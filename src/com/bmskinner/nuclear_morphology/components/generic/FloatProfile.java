@@ -362,7 +362,7 @@ public class FloatProfile implements IProfile {
      * @see components.generic.IProfile#copy()
      */
     @Override
-    public IProfile copy() {
+    public IProfile copy() throws ProfileException {
         return new FloatProfile(this.array);
     }
 

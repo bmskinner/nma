@@ -29,6 +29,10 @@ import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.SegmentedFloatProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 
 /**
@@ -49,7 +53,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
     private final IProfileCollection pc;
 
     private SegmentRecombiningTask(ISegmentedProfile medianProfile, IProfileCollection pc, Nucleus[] nuclei, int low,
-            int high) throws Exception {
+            int high) throws ProfileException {
 
         this.fitter = new SegmentFitter(medianProfile);
         this.low = low;
@@ -105,7 +109,7 @@ public class SegmentRecombiningTask extends AbstractProgressAction {
         }
     }
 
-    private void processNucleus(Nucleus n) throws Exception {
+    private void processNucleus(Nucleus n) throws ProfileException, IndexOutOfBoundsException, UnavailableComponentException, UnsegmentedProfileException {
 
         if (n.isLocked()) {
             finest(n.getNameAndNumber() + " is locked, skipping");

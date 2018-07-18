@@ -350,7 +350,7 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
             if (!cells.isEmpty()) {
                 makeFolder(folder);
             }
-        } catch (ImageImportException | ComponentCreationException e) {
+        } catch (ImageImportException e) {
             stack("Error searching folder", e);
         }
 

@@ -94,9 +94,8 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
             ICellCollection collection = dataset.getCollection();
 
-            // Build the ProfileCollections for each ProfileType
+
             collection.createProfileCollection();
-            // collection.getProfileManager().createProfileCollections(false);
             finest("Created profile collections");
 
             // Create a median from the current reference points in the nuclei
@@ -113,13 +112,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
             // Update the nucleus profiles to best fit the median
             collection.getProfileManager().offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
 
-            // fine("Current median profile:");
-            // fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG,
-            // 50).toString());
-            // Now each nucleus should be at the best fit to the median profile
-            // from the RP
-            // Rebuilding the median may cause the RP index to change in the
-            // median
 
             int coercionCounter = 0;
             while (rpIndex != 0) {
@@ -216,9 +208,6 @@ public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
             finer("Checking RP index again");
             rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
             fine("RP in median is now located at index " + rpIndex);
-            // fine("Current median profile:");
-            // fine(collection.getProfileCollection(ProfileType.ANGLE).getProfile(DEFAULT_BORDER_TAG,
-            // Constants.MEDIAN).toString());
 
             fine("Current state of profile collection:");
             fine(collection.getProfileCollection().tagString());

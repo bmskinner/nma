@@ -39,6 +39,7 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
+import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 
 /**
  * The default implementation of the {@link IBorderSegment} interface.
@@ -97,11 +98,11 @@ public class DefaultBorderSegment implements IBorderSegment {
         if (!IBorderSegment.isLongEnough(startIndex, endIndex, total))
             throw new IllegalArgumentException(String.format("Cannot create segment %s - %s: shorter than %s", startIndex, endIndex, MINIMUM_SEGMENT_LENGTH));
                 
-        if (!IBorderSegment.isShortEnough(startIndex, endIndex, total))
+        if (startIndex!=endIndex && !IBorderSegment.isShortEnough(startIndex, endIndex, total))
             throw new IllegalArgumentException(String.format("Segment is too long for the profile: %s - %s of %s", startIndex, endIndex, total));
         
-        if(IBorderSegment.calculateSegmentLength(startIndex, endIndex, total)==total)
-            throw new IllegalArgumentException("Segment cannot occupy entire profile");
+//        if(IBorderSegment.calculateSegmentLength(startIndex, endIndex, total)==total)
+//            throw new IllegalArgumentException("Segment cannot occupy entire profile");
 
         this.startIndex = startIndex;
         this.endIndex = endIndex;
@@ -348,9 +349,11 @@ public class DefaultBorderSegment implements IBorderSegment {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + uuid.hashCode();
         result = prime * result + endIndex;
         result = prime * result + startIndex;
         result = prime * result + totalLength;
+        result = prime * result + mergeSources.hashCode();
         return result;
     }
 
@@ -363,6 +366,8 @@ public class DefaultBorderSegment implements IBorderSegment {
         if (getClass() != obj.getClass())
             return false;
         DefaultBorderSegment other = (DefaultBorderSegment) obj;
+        if(!uuid.equals(other.uuid))
+        	return false;
         if (endIndex != other.endIndex)
             return false;
         if (startIndex != other.startIndex)
@@ -370,6 +375,15 @@ public class DefaultBorderSegment implements IBorderSegment {
         if (totalLength != other.totalLength)
             return false;
         return true;
+    }
+    
+    @Override
+    public void offset(int offset) {
+    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+    	for(IBorderSegment s : mergeSources) {
+    		s.offset(offset);
+    	}
     }
 
     @Override
@@ -410,46 +424,42 @@ public class DefaultBorderSegment implements IBorderSegment {
         return (startIndex != this.startIndex || endIndex != this.endIndex);
     }
 
-    private boolean canUpdateSegment(int startIndex, int endIndex) {
-        if (this.isLocked) { // don't allow locked segments to update
-            return false;
-        }
+    private boolean canUpdateSegment(int startIndex, int endIndex) throws SegmentUpdateException {
+        if (this.isLocked)
+        	throw new SegmentUpdateException("Segment is locked");
+
 
         // only run an update and checks if the update will actually
         // cause changes to the segment. If not, return true so as not
         // to interfere with other linked segments
-        if (!updateAffectsThisSegment(startIndex, endIndex)) {
+        if (!updateAffectsThisSegment(startIndex, endIndex))
             return true;
-        }
 
         // Check that the new positions will not make this segment too small
         int testLength = testLength(startIndex, endIndex);
         if (testLength < MINIMUM_SEGMENT_LENGTH)
-            return false;
+        	throw new SegmentUpdateException(String.format("Segment will become too short (%d)", testLength));
 
         // Check that next and previous segments are not invalidated by length
-        // change
-        // i.e the max length increase backwards is up to the MIN_SEG_LENGTH of
-        // the
-        // previous segment, and the max length increase forwards is up to the
+        // change i.e the max length increase backwards is up to the MIN_SEG_LENGTH of
+        // the previous segment, and the max length increase forwards is up to the
         // MIN_SEG_LENGTH of the next segment
 
         if (hasPrevSegment()) {
             if(prevSegment.testLength(prevSegment.getStartIndex(), startIndex)< MINIMUM_SEGMENT_LENGTH)
-                return false;
+            	throw new SegmentUpdateException(String.format("Previous segment (%s) will become too short with start index %d", prevSegment.toString(), startIndex));
         }
         if (this.hasNextSegment()) {
             if (nextSegment.testLength(endIndex, nextSegment.getEndIndex()) < MINIMUM_SEGMENT_LENGTH)
-                return false;
+            	throw new SegmentUpdateException(String.format("Next segment (%s) will become too short with start index %d", nextSegment.toString(), endIndex));
         }
 
         // check that updating will not cause segments to overlap or invert
         // i.e. where a start becomes greater than an end without begin part of
         // an array wrap
         if (startIndex > endIndex) {
-
             if (!IBorderSegment.contains(startIndex, endIndex, 0, totalLength))
-                return false;
+            	throw new SegmentUpdateException(String.format("Segment would invert (%d - %d)", startIndex, endIndex));
         }
 
         // also test the effect on the next and previous segments
@@ -457,12 +467,12 @@ public class DefaultBorderSegment implements IBorderSegment {
             if (this.prevSegment().getStartIndex() > startIndex) {
 
                 if (!prevSegment.wraps() && prevSegment.wraps(startIndex, endIndex))
-                    return false;
+                	throw new SegmentUpdateException(String.format("Previous segment would convert to wrapping"));
 
                 // another wrapping test - if the new positions induce a wrap,
                 // the segment should contain 0
                 if (prevSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength))
-                    return false;
+                	throw new SegmentUpdateException(String.format("Segment would convert to wrapping but does not contain zero"));
             }
         }
 
@@ -473,13 +483,13 @@ public class DefaultBorderSegment implements IBorderSegment {
                 // this segment is altered,
                 // an inversion must have occurred. Prevent.
                 if (!nextSegment.wraps() && nextSegment.wraps(startIndex, endIndex)) {
-                    return false;
+                	throw new SegmentUpdateException(String.format("Next segment would convert to wrapping"));
                 }
 
                 // another wrapping test - if the new positions induce a wrap,
                 // the segment should contain 0
                 if (nextSegment.wraps(startIndex, endIndex) && !IBorderSegment.contains(startIndex, endIndex, 0, totalLength)) {
-                    return false;
+                	throw new SegmentUpdateException(String.format("Segment would convert to wrapping but does not contain zero"));
                 }
             }
         }
@@ -495,6 +505,8 @@ public class DefaultBorderSegment implements IBorderSegment {
 
         if (endIndex < 0 || endIndex > totalLength)
             throw new SegmentUpdateException("End index is outside the profile range: " + endIndex);
+        
+		// Ensure next and prev segments cannot be 'jumped over'
 
         if (!canUpdateSegment(startIndex, endIndex))
             throw new SegmentUpdateException("Unable to update segment");
@@ -639,4 +651,5 @@ public class DefaultBorderSegment implements IBorderSegment {
 				|| contains(seg.getStartIndex()) 
 				|| contains(seg.getEndIndex());
     }
+    
 }

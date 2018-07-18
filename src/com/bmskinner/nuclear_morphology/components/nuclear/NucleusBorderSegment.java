@@ -37,6 +37,7 @@ import java.util.UUID;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.components.AbstractCellularComponent;
+import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 
 @Deprecated
@@ -403,6 +404,15 @@ public class NucleusBorderSegment implements IBorderSegment {
     @Override
     public IBorderSegment prevSegment() {
         return this.prevSegment;
+    }
+    
+    @Override
+    public void offset(int offset) {
+    	startIndex = CellularComponent.wrapIndex(startIndex+offset, totalLength);
+    	endIndex  = CellularComponent.wrapIndex(endIndex+offset, totalLength);
+    	for(IBorderSegment s : mergeSources) {
+    		s.offset(offset);
+    	}
     }
 
     /*

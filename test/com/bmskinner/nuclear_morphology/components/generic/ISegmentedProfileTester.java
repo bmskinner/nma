@@ -787,7 +787,7 @@ public class ISegmentedProfileTester {
 	}
 
 	@Test
-	public void testCopy() {
+	public void testCopy() throws ProfileException {
 	    ISegmentedProfile copy = profile.copy();
 		assertEquals(profile.toString(), copy.toString());
 	}

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -322,6 +323,13 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return the number of profile indexes in the segment
      */
     int length();
+    
+    
+    /**
+     * Offset the segment and its merge sources by the given amount
+     * @param offset
+     */
+    void offset(int offset);
 
 
     /**
@@ -490,17 +498,17 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * and end properly. Does not copy the segments.
      * 
      * @param list
-     * @throws Exception
+     * @throws ProfileException
      */
     static void linkSegments(@NonNull List<IBorderSegment> list) throws ProfileException {
-
+    	Logger.getLogger(PROGRAM_LOGGER).fine("Linking list of "+list.size()+" segments");
         for (int i = 0; i < list.size(); i++) {
             IBorderSegment s = list.get(i);
             // Wrap indices
             int p = i == 0 ? list.size() - 1 : i - 1;
             int n = i == list.size() - 1 ? 0 : i + 1;
 
-            if (i == 0) {
+            if (i == 0) { // first segment
 
                 boolean lockState = list.get(0).isLocked();
                 s.setLocked(false);
@@ -528,38 +536,37 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return
      * @throws Exception
      */
-    static List<IBorderSegment> nudgeUnlinked(@NonNull List<IBorderSegment> list, int value) {
+//    static List<IBorderSegment> nudgeUnlinked(@NonNull List<IBorderSegment> list, int value) {
+//        if (list == null)
+//            throw new IllegalArgumentException("Input list cannot be null");
+//        Logger.getLogger(PROGRAM_LOGGER).fine("Nudging list of "+list.size()+" segments");
+//
+//        List<IBorderSegment> result = new ArrayList<>(list.size());
+//
+//        for (IBorderSegment segment : list) {
+//            IBorderSegment newSeg = IBorderSegment.newSegment(
+//                    CellularComponent.wrapIndex(segment.getStartIndex() + value, segment.getProfileLength()),
+//                    CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength()),
+//                    segment.getProfileLength(), segment.getID());
+//
+//            // adjust merge sources also and readd
+//            if (segment.hasMergeSources()) {
+//
+//                List<IBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
+//                for (IBorderSegment newMergeSource : adjustedMergeSources) {
+//                    newSeg.addMergeSource(newMergeSource);
+//                }
+//
+//            }
+//
+//            result.add(newSeg);
+//        }
+//        return result;
+//    }
 
-        if (list == null)
-            throw new IllegalArgumentException("Input list cannot be null");
-
-        List<IBorderSegment> result = new ArrayList<>(list.size());
-
-        for (IBorderSegment segment : list) {
-
-            IBorderSegment newSeg = IBorderSegment.newSegment(
-                    CellularComponent.wrapIndex(segment.getStartIndex() + value, segment.getProfileLength()),
-                    CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength()),
-                    segment.getProfileLength(), segment.getID());
-
-            // adjust merge sources also and readd
-            if (segment.hasMergeSources()) {
-
-                List<IBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
-                for (IBorderSegment newMergeSource : adjustedMergeSources) {
-                    newSeg.addMergeSource(newMergeSource);
-                }
-
-            }
-
-            result.add(newSeg);
-        }
-        return result;
-    }
-
-    static List<IBorderSegment> nudge(@NonNull IBorderSegment[] list, int value) throws ProfileException {
-        return nudge(Arrays.asList(list), value);
-    }
+//    static List<IBorderSegment> nudge(@NonNull IBorderSegment[] list, int value) throws ProfileException {
+//        return nudge(Arrays.asList(list), value);
+//    }
 
     /**
      * Move the segments by the given amount along the profile, without
@@ -572,46 +579,46 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
      * @return a new list of segments
      * @throws ProfileException
      */
-    static List<IBorderSegment> nudge(@NonNull List<IBorderSegment> list, int value) throws ProfileException {
-
-        List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
-
-        for (IBorderSegment segment : list) {
-
-            int toWrap = segment.getStartIndex() + value;
-
-            int newStart = CellularComponent.wrapIndex(toWrap, segment.getProfileLength());
-
-            int newEnd = CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength());
-
-            if (newStart < 0 || newStart >= segment.getProfileLength()) {
-                throw new ProfileException("Index wrapping failed for segment: Index " + segment.getStartIndex()
-                        + " wrapped to " + newStart + " given total length " + segment.getProfileLength()
-                        + " an offset value of " + value + " and the input index to wrap was " + toWrap);
-            }
-
-            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, segment.getProfileLength(),
-                    segment.getID());
-
-            newSeg.setPosition(segment.getPosition());
-
-            // adjust merge sources also and read
-            if (segment.hasMergeSources()) {
-
-                //
-                List<IBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
-                for (IBorderSegment newMergeSource : adjustedMergeSources) {
-                    newSeg.addMergeSource(newMergeSource);
-                }
-            }
-
-            result.add(newSeg);
-        }
-
-        linkSegments(result);
-
-        return result;
-    }
+//    static List<IBorderSegment> nudge(@NonNull List<IBorderSegment> list, int value) throws ProfileException {
+//
+//        List<IBorderSegment> result = new ArrayList<IBorderSegment>(list.size());
+//
+//        for (IBorderSegment segment : list) {
+//
+//            int toWrap = segment.getStartIndex() + value;
+//
+//            int newStart = CellularComponent.wrapIndex(toWrap, segment.getProfileLength());
+//
+//            int newEnd = CellularComponent.wrapIndex(segment.getEndIndex() + value, segment.getProfileLength());
+//
+//            if (newStart < 0 || newStart >= segment.getProfileLength()) {
+//                throw new ProfileException("Index wrapping failed for segment: Index " + segment.getStartIndex()
+//                        + " wrapped to " + newStart + " given total length " + segment.getProfileLength()
+//                        + " an offset value of " + value + " and the input index to wrap was " + toWrap);
+//            }
+//
+//            IBorderSegment newSeg = IBorderSegment.newSegment(newStart, newEnd, segment.getProfileLength(),
+//                    segment.getID());
+//
+//            newSeg.setPosition(segment.getPosition());
+//
+//            // adjust merge sources also and read
+//            if (segment.hasMergeSources()) {
+//
+//                //
+//                List<IBorderSegment> adjustedMergeSources = nudgeUnlinked(segment.getMergeSources(), value);
+//                for (IBorderSegment newMergeSource : adjustedMergeSources) {
+//                    newSeg.addMergeSource(newMergeSource);
+//                }
+//            }
+//
+//            result.add(newSeg);
+//        }
+//
+//        linkSegments(result);
+//
+//        return result;
+//    }
 
     /**
      * Scale the segments in the list to a new total length, preserving segment
@@ -663,11 +670,19 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
     	if (list == null || list.isEmpty())
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         List<IBorderSegment> result = copyWithoutLinking(list);
-
         linkSegments(result);
         return result;
     }
 
+    
+    static IBorderSegment[] copy(@NonNull IBorderSegment[] segments) throws ProfileException {
+    	if (segments == null || segments.length == 0)
+            throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
+    	IBorderSegment[] result = copyWithoutLinking(segments);
+        linkSegments(result);
+        return result;
+    }
+    
     /**
      * Make a copy of the given list of linked segments, but do not link the
      * segments
@@ -700,7 +715,6 @@ public interface IBorderSegment extends Serializable, Iterable<Integer>, Loggabl
         if (list == null || list.length == 0) {
             throw new IllegalArgumentException("Cannot copy segments: segment list is null or empty");
         }
-
         return Arrays.copyOf(list, list.length);
 
     }

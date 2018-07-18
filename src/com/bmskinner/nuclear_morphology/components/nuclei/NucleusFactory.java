@@ -61,18 +61,14 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     /**
      * Create a nucleus from the given list of points
      * 
-     * @param points
-     *            the border points of the nucleus
-     * @param imageFile
-     *            the image file the nucleus came from
-     * @param channel
-     *            the image channel of the nucleus
-     * @param centreOfMass
-     *            the centre of mass of the nucleus
+     * @param points the border points of the nucleus
+     * @param imageFile the image file the nucleus came from
+     * @param channel the image channel of the nucleus
+     * @param centreOfMass the centre of mass of the nucleus
      * @return a new nucleus of the factory NucleusType
      * @throws ComponentCreationException
      */
-    public Nucleus buildInstance(List<IPoint> points, File imageFile, int channel, IPoint centreOfMass)
+    public Nucleus buildInstance(@NonNull List<IPoint> points, File imageFile, int channel, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
         Roi roi = makRoi(points);
         Rectangle bounds = roi.getBounds();
@@ -98,11 +94,12 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
     }
 
     @Override
-    public Nucleus buildInstance(Roi roi, File imageFile, int channel, int[] originalPosition, IPoint centreOfMass)
+    public Nucleus buildInstance(@NonNull Roi roi, File imageFile, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException {
-
-        if (roi == null || centreOfMass == null)
-            throw new IllegalArgumentException("Argument cannot be null in nucleus factory");
+    	if (roi == null)
+    		throw new IllegalArgumentException("Roi cannot be null in nucleus factory");
+        if (centreOfMass == null)
+            throw new IllegalArgumentException("Centre of mass cannot be null in nucleus factory");
 
         Nucleus n = null;
 
@@ -130,9 +127,9 @@ public class NucleusFactory implements ComponentFactory<Nucleus> {
             throw new ComponentCreationException("Error making nucleus:" + e.getMessage(), e);
         }
 
-        if (n == null) {
-            throw new ComponentCreationException("Error making nucleus");
-        }
+        if (n == null)
+            throw new ComponentCreationException("Error making nucleus; contstucted object is null");
+        finer("Created nucleus with border length "+n.getBorderLength());
         return n;
     }
 

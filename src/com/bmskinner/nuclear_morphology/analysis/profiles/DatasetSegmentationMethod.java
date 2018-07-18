@@ -36,8 +36,10 @@ import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableComponentException;
 import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
+import com.bmskinner.nuclear_morphology.components.generic.UnsegmentedProfileException;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.SegmentUpdateException;
 import com.bmskinner.nuclear_morphology.components.nuclear.NucleusType;
@@ -230,7 +232,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @throws Exception
      */
     private void assignMedianSegmentsToNuclei(ICellCollection collection, Tag pointType) throws Exception {
-
+    	fine("Applying segments from median profile to nuclei");
         // map the segments from the median directly onto the nuclei
         assignMedianSegmentsToNuclei(collection);
         
@@ -240,12 +242,13 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         }
 
         // adjust the segments to better fit each nucleus
-        try {
+        fine("Frankenprofiling for improved segment fitting");
+//        try {
             reviseSegments(collection, pointType);
-        } catch (Exception e) {
-            warn("Error revising segments");
-            stack("Error revising segments", e);
-        }
+//        } catch (Exception e) {
+//            warn("Error revising segments");
+//            stack("Error revising segments", e);
+//        }
         
         error = collection.getProfileManager().countNucleiNotMatchingMedianSegmentation();
         if(error>0){
@@ -285,9 +288,8 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
             }
         });
 
-        if (!checkRPmatchesSegments(collection)) {
+        if (!checkRPmatchesSegments(collection))
             warn("Segments do not all start on reference point after offsetting");
-        }
 
     }
 
@@ -378,29 +380,46 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @return
      */
     private boolean checkRPmatchesSegments(ICellCollection collection) {
+    	finer("Checking RP is at a segment boundary in all nuclei");
         return collection.getNuclei().stream().allMatch(n -> {
             try {
-
-                boolean hit = false;
-                for (IBorderSegment s : n.getProfile(ProfileType.ANGLE).getSegments()) {
-                    if (s.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT)) {
-                        hit = true;
-                    }
+            	
+            	// Profile with RP at zero
+            	ISegmentedProfile profile = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+            	boolean hit = false;
+                for (IBorderSegment s : profile.getSegments()) {
+                	hit |= s.getStartIndex()==0;
                 }
+                
                 if (!hit) {
+                	finer("Moving RP to segment boundary");
                     // The RP is not at the start of a segment
-                    // Update the segment boundary closest to the RP
-                    int end = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getEndIndex();
-
-                    ISegmentedProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-
-                    p.getSegmentAt(0).update(0, end);
-
-                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, p);
+                    // Update the segment start to zero
+                	IBorderSegment seg = profile.getSegmentContaining(0);
+                	seg.update(0, seg.getEndIndex());
+                	finer("Applying profile with updated RP: "+profile.toString());
+                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
                 }
+            	
+//                boolean hit = false;
+//                for (IBorderSegment s : n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegments()) {
+//                	hit |= s.getStartIndex() == n.getBorderIndex(Tag.REFERENCE_POINT);
+//                }
+//                
+//                if (!hit) {
+//                    // The RP is not at the start of a segment
+//                    // Update the segment boundary closest to the zero index RP
+//                    int end = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentContaining(0).getSegmentAt(0).getEndIndex();
+//
+//                    ISegmentedProfile p = n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+//
+//                    p.getSegmentAt(0).update(0, end);
+//
+//                    n.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, p);
+//                }
                 return n.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT).getSegmentAt(0).getStartIndex() == 0;
             } catch (UnavailableComponentException | ProfileException | SegmentUpdateException e) {
-                warn("Error checking profile offsets");
+                warn("Error updating nucleus segment to RP ");
                 stack(e);
                 return false;
             }
@@ -415,6 +434,7 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      */
     private void createSegmentsInMedian(ICellCollection collection) throws Exception {
 
+    	fine("Creating segments in median profile");
         IProfileCollection pc = collection.getProfileCollection();
 
         // the reference point is always index 0, so the segments will match
@@ -452,35 +472,45 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
      * @param collection
      * @param pointType
      */
-    private void reviseSegments(ICellCollection collection, Tag pointType) throws Exception {
+    private void reviseSegments(ICellCollection collection, Tag pointType) {
 
         IProfileCollection pc = collection.getProfileCollection();
 
-        List<IBorderSegment> segments = pc.getSegments(pointType);
-
-        /*
-         * At this point, the FrankenCollection is identical to the
-         * ProfileCollection, but has no ProfileAggregate. We need to add the
-         * individual recombined frankenProfiles to the internal profile list,
-         * and build a ProfileAggregate
-         */
-
-        // Get the median profile for the population
-        ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
-
-        /*
-         * Split the recombining task into chunks for multithreading
-         */
-
-        SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
-                collection.getNuclei().toArray(new Nucleus[0]));
-        task.addProgressListener(this);
-
         try {
+        	List<IBorderSegment> segments = pc.getSegments(pointType);
+
+        	/*
+        	 * At this point, the FrankenCollection is identical to the
+        	 * ProfileCollection, but has no ProfileAggregate. We need to add the
+        	 * individual recombined frankenProfiles to the internal profile list,
+        	 * and build a ProfileAggregate
+        	 */
+
+        	// Get the median profile for the population
+        	ISegmentedProfile medianProfile = pc.getSegmentedProfile(ProfileType.ANGLE, pointType, Stats.MEDIAN);
+
+        	/*
+        	 * Split the recombining task into chunks for multithreading
+        	 */
+
+        	SegmentRecombiningTask task = new SegmentRecombiningTask(medianProfile, pc,
+        			collection.getNuclei().toArray(new Nucleus[0]));
+        	task.addProgressListener(this);
+
             task.invoke();
         } catch (RejectedExecutionException e) {
             error("Fork task rejected: " + e.getMessage(), e);
-        }
+        } catch (UnavailableBorderTagException e1) {
+        	error("Unavailable border tag in segment recombining task: " + e1.getMessage(), e1);
+		} catch (ProfileException e1) {
+			error("Profile error in segment recombining task: " + e1.getMessage(), e1);
+		} catch (UnavailableProfileTypeException e1) {
+			error("Unavailable profile type in segment recombining task: " + e1.getMessage(), e1);
+		} catch (UnsegmentedProfileException e1) {
+			error("Unsegmented profile in segment recombining task: " + e1.getMessage(), e1);
+		} catch (Exception e) {
+			error("Unknown exception in segment recombining task: " + e.getMessage(), e);
+		}
 
         /*
          * Build a profile aggregate in the new frankencollection by taking the

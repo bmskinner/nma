@@ -154,25 +154,17 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      * mass, and the mutable current centre of mass. It also assigns a random ID
      * to the component.
      * 
-     * @param roi
-     *            the roi of the object
-     * @param centerOfMass
-     *            the original centre of mass of the component
-     * @param source
-     *            the image file the component was found in
-     * @param channel
-     *            the RGB channel the component was found in
-     * @param position
-     *            the bounding position of the component in the original image
+     * @param roi the roi of the object
+     * @param centerOfMass the original centre of mass of the component
+     * @param source the image file the component was found in
+     * @param channel the RGB channel the component was found in
+     * @param position the bounding position of the component in the original image
      */
-    public DefaultCellularComponent(Roi roi, IPoint centreOfMass, File source, int channel, int[] position) {
-        if (centreOfMass == null) {
+    public DefaultCellularComponent(@NonNull Roi roi, @NonNull IPoint centreOfMass, File source, int channel, int[] position) {
+        if (centreOfMass == null)
             throw new IllegalArgumentException("Centre of mass cannot be null");
-        }
-
-        if (roi == null) {
-            throw new IllegalArgumentException("Roi cannot be null");
-        }
+        if (roi == null)
+            throw new IllegalArgumentException("Roi cannot be null in cellular component");
 
         this.originalCentreOfMass = IPoint.makeNew(centreOfMass);
         this.centreOfMass = IPoint.makeNew(centreOfMass);
@@ -198,8 +190,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         maxX += epsilon;
 
         if (centreOfMass.getX() < minX || centreOfMass.getX() > maxX) {
-            throw new IllegalArgumentException("The centre of mass X (" + centreOfMass.getX() + ")"
-                    + ") must be within the roi bounds (x = " + minX + "-" + maxX + ")");
+            throw new IllegalArgumentException(String.format("The centre of mass X (%d)"
+                    + " must be within the roi x bounds (x = %d-%d)", centreOfMass.getX(), minX, maxX));
         }
 
         double minY = bounds.getY();
@@ -223,13 +215,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         for (int i = 0; i < polygon.npoints; i++) {
             this.xpoints[i] = polygon.xpoints[i];
             this.ypoints[i] = polygon.ypoints[i];
-            // log("\tPoint at "+i+": "+this.xpoints[i]+", "+this.ypoints[i]);
         }
 
-        // convert the roi positions to a list of nucleus border points
-        // Only smooth the points for large objects like nuclei
-        // log("Int array in constructor : "+this.xpoints[0]+",
-        // "+this.ypoints[0]);
         makeBorderList();
 
     }
@@ -242,6 +229,8 @@ public abstract class DefaultCellularComponent implements CellularComponent {
      */
     private void makeBorderList() {
 
+    	finest("Creating border list from "+xpoints.length+" integer points");
+    	
         // Make a copy of the int[] points otherwise creating a polygon roi
         // will reset them to 0,0 coordinates
         int[] xcopy = Arrays.copyOf(xpoints, xpoints.length);
@@ -254,13 +243,15 @@ public abstract class DefaultCellularComponent implements CellularComponent {
         IPoint oldCoM = IPoint.makeNew(centreOfMass);
         centreOfMass = IPoint.makeNew(originalCentreOfMass);
 
-        borderList = new ArrayList<IBorderPoint>(0);
+        borderList = new ArrayList<>(0);
 
         // convert the roi positions to a list of border points
         // Each object decides whether it should be smoothed.
         boolean isSmooth = isSmoothByDefault();
+        roi.fitSplineForStraightening(); // this prevents the resulting border differing in length between invokations
         FloatPolygon smoothed = roi.getInterpolatedPolygon(1, isSmooth);
 
+        finest("Interpolated integer list to smoothed list of "+smoothed.npoints);
         for (int i = 0; i < smoothed.npoints; i++) {
             IBorderPoint point = IBorderPoint.makeNew(smoothed.xpoints[i], smoothed.ypoints[i]);
 
@@ -276,6 +267,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
         moveCentreOfMass(oldCoM);
         calculateBounds();
+        finest("Component has "+getBorderLength()+" border points");
 
     }
 
@@ -305,10 +297,10 @@ public abstract class DefaultCellularComponent implements CellularComponent {
     /**
      * Duplicate a component. The ID is kept consistent.
      * 
-     * @param a
-     *            the template component
+     * @param a the template component
      */
     protected DefaultCellularComponent(CellularComponent a) {
+    	finer("Constructing a new component from existing template component");
         this.id = a.getID();
         this.position = a.getPosition();
         this.originalCentreOfMass = a.getOriginalCentreOfMass();
@@ -343,6 +335,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     private void duplicateBorderList(CellularComponent c) {
         // Duplicate the border points
+    	finest("Duplicating border list from template component");
         this.borderList = new ArrayList<IBorderPoint>(c.getBorderLength());
 
         for (IBorderPoint p : c.getBorderList()) {
@@ -920,7 +913,7 @@ public abstract class DefaultCellularComponent implements CellularComponent {
 
     @Override
 	public void reverse() {
-
+    	fine("Reversing component border list");
         int[] newXpoints = new int[xpoints.length], newYpoints = new int[xpoints.length];
 
         for (int i = xpoints.length - 1, j = 0; j < xpoints.length; i--, j++) {

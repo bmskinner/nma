@@ -37,17 +37,6 @@ import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment.Segmen
 public interface ISegmentedProfile extends IProfile {
 
     /**
-     * Create a new profile of the default type
-     * 
-     * @param profile
-     * @return
-     * @throws ProfileException
-     */
-    static ISegmentedProfile makeNew(@NonNull ISegmentedProfile profile) throws ProfileException {
-        return new SegmentedFloatProfile(profile);
-    }
-
-    /**
      * Check if this profile contains segments
      * 
      * @return
@@ -320,5 +309,5 @@ public interface ISegmentedProfile extends IProfile {
      * @return
      */
     @Override
-    ISegmentedProfile copy();
+    ISegmentedProfile copy() throws ProfileException;
 }

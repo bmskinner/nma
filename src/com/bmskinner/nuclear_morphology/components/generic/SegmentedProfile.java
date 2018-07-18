@@ -600,7 +600,13 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
      */
     @Override
     public void nudgeSegments(int amount) throws ProfileException {
-        this.segments = IBorderSegment.nudge(getSegments(), amount);
+//        this.segments = IBorderSegment.nudge(getSegments(), amount);
+        
+        List<IBorderSegment> result = getSegments();
+        for(IBorderSegment s: result) {
+        	s.offset(amount);
+        }
+        segments = result;
     }
 
     /*
@@ -640,8 +646,11 @@ public class SegmentedProfile extends Profile implements ISegmentedProfile {
         // IJ.log("Offsetting segments to begin at "+newStartIndex );
         // IJ.log(NucleusBorderSegment.toString(getSegments()));
 
-        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -newStartIndex);
-
+//        List<IBorderSegment> segments = IBorderSegment.nudge(getSegments(), -newStartIndex);
+        List<IBorderSegment> segments = getSegments();
+        for(IBorderSegment s: segments) {
+        	s.offset(-newStartIndex);
+        }
         /*
          * Ensure that the first segment in the list is at index zero
          */

@@ -51,7 +51,7 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
     }
 
     @Override
-    public List<ICell> findInFolder(@NonNull final File folder) throws ImageImportException, ComponentCreationException {
+    public List<ICell> findInFolder(@NonNull final File folder) throws ImageImportException {
 
         List<ICell> list = new ArrayList<>();
         File[] arr = folder.listFiles();
@@ -70,7 +70,7 @@ public abstract class CellFinder extends AbstractFinder<List<ICell>> {
                 if (ImageImporter.fileIsImportable(f)) {
                     try {
                         list.addAll(findInImage(f));
-                    } catch (ImageImportException | ComponentCreationException e) {
+                    } catch (ImageImportException e) {
                         stack("Error searching image", e);
                     }
                 }
