@@ -297,11 +297,6 @@ public class FloatProfile implements IProfile {
         return minIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMin()
-     */
     @Override
     public int getIndexOfMin() throws ProfileException {
         return getIndexOfMin(new BooleanProfile(this, true));
@@ -323,21 +318,12 @@ public class FloatProfile implements IProfile {
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * components.generic.IProfile#absoluteSquareDifference(components.generic.
-     * IProfile)
-     */
     @Override
     public double absoluteSquareDifference(@NonNull IProfile testProfile) throws ProfileException {
 
         float[] arr2 = testProfile.toFloatArray();
-
-        if (array.length == arr2.length) {
+        if (array.length == arr2.length) 
             return squareDifference(array, arr2);
-        }
 
         // Lengthen the shorter profile
         if (array.length > arr2.length) {
@@ -773,18 +759,12 @@ public class FloatProfile implements IProfile {
         
         if (windowSize < 1)
             throw new IllegalArgumentException("Window size must be a positive integer greater than 0");
-        // go through array
-        // look at points ahead and behind.
-        // if all lower, local maximum
 
         boolean[] result = new boolean[this.size()];
 
-        for (int i = 0; i < array.length; i++) { // for each position
+        for (int i = 0; i < array.length; i++) {
 
-            float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE); // slots
-                                                                                  // for
-                                                                                  // previous
-                                                                                  // angles
+            float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE);
             float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
 
             // with the lookup positions, see if maximum at i
@@ -862,31 +842,22 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getSubregion(int, int)
-     */
     @Override
     public IProfile getSubregion(int indexStart, int indexEnd){
 
         if (indexStart >= array.length)
-            throw new IllegalArgumentException("Start index (" + indexStart + ") is beyond array length (" + array.length + ")");
-
+            throw new IllegalArgumentException(String.format("Start index (%d) is beyond array length (%d)", indexStart, array.length));
         if (indexEnd >= array.length)
-            throw new IllegalArgumentException("End index (" + indexEnd + ") is beyond array length (" + array.length + ")");
-        
+            throw new IllegalArgumentException(String.format("End index (%d) is beyond array length (%d)", indexEnd, array.length));
         if(indexStart < 0 || indexEnd < 0)
             throw new IllegalArgumentException(String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
-
         if (indexStart < indexEnd) {
-
-            return new FloatProfile( Arrays.copyOfRange(array, indexStart, indexEnd) );
+            return new FloatProfile( Arrays.copyOfRange(array, indexStart, indexEnd+1) );
 
         } else { // case when array wraps
 
             float[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
-            float[] resultB = Arrays.copyOfRange(array, 0, indexEnd);
+            float[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
             float[] result = new float[resultA.length + resultB.length];
             int index = 0;
             for (float d : resultA) {
@@ -919,11 +890,7 @@ public class FloatProfile implements IProfile {
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#calculateDeltas(int)
-     */
+
     @Override
     public IProfile calculateDeltas(int windowSize) {
         
@@ -936,11 +903,6 @@ public class FloatProfile implements IProfile {
 
             float[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE);
             float[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
-//            System.out.println("Index "+i);
-//            System.out.println("Prev");
-//            System.out.println(Arrays.toString(prevValues));
-//            System.out.println("Next");
-//            System.out.println(Arrays.toString(nextValues));
 
             float delta = 0;
             for (int k = 0; k < prevValues.length; k++) {
@@ -959,11 +921,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(deltas);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#power(double)
-     */
     @Override
     public IProfile power(double exponent) {
         float[] values = new float[this.size()];
@@ -974,11 +931,6 @@ public class FloatProfile implements IProfile {
         return new FloatProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#absolute()
-     */
     @Override
     public IProfile absolute() {
         float[] values = new float[this.size()];
@@ -1107,10 +1059,8 @@ public class FloatProfile implements IProfile {
      */
     @Override
     public IProfile add(double value) {
-
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
+        if (Double.isNaN(value) || Double.isInfinite(value))
             throw new IllegalArgumentException("Cannot add NaN or infinity");
-        }
 
         float[] result = new float[array.length];
 

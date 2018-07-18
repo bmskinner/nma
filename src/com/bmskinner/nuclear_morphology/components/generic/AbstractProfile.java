@@ -113,7 +113,7 @@ public abstract class AbstractProfile implements IProfile {
         }
 
         if (segment.getProfileLength() != this.size()) {
-            throw new ProfileException("Segment comes from a different length profile");
+            throw new IllegalArgumentException("Segment comes from a different length profile");
         }
         return getSubregion(segment.getStartIndex(), segment.getEndIndex());
     }

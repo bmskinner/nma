@@ -180,64 +180,42 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return max;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMax(components.generic.
-     * BooleanProfile)
-     */
     @Override
-    public int getIndexOfMax(BooleanProfile limits) {
+    public int getIndexOfMax(BooleanProfile limits) throws ProfileException {
+    	if(limits==null)
+            throw new IllegalArgumentException("Limits are cannot be null");
+        if ( limits.size() != array.length)
+            throw new IllegalArgumentException("Limits are wrong size for this profile");
         double max = 0;
-        int maxIndex = 0;
+        int maxIndex = -1;
         for (int i = 0; i < array.length; i++) {
             if (limits.get(i) && array[i] > max) {
                 max = array[i];
                 maxIndex = i;
             }
         }
+        if (maxIndex == -1) {
+            throw new ProfileException("No valid index for maximum value");
+        }
         return maxIndex;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getProportionalIndex(double)
-     */
     @Override
     public int getIndexOfFraction(double d) {
-        if (d < 0 || d > 1) {
+        if (d < 0 || d > 1)
             throw new IllegalArgumentException("Proportion must be between 0-1: " + d);
-        }
-
         double desiredDistanceFromStart = (double) array.length * d;
 
-        int target = (int) desiredDistanceFromStart;
-
-        return target;
+        return (int) desiredDistanceFromStart;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexProportion(int)
-     */
     @Override
     public double getFractionOfIndex(int index) {
-        if (index < 0 || index >= this.size()) {
+        if (index < 0 || index >= this.size())
             throw new IllegalArgumentException("Index out of bounds: " + index);
-        }
-
-        double fractionalDistance = (double) index / (double) array.length;
-
-        return fractionalDistance;
+        return (double) index / (double) array.length;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getMin()
-     */
     @Override
     public double getMin() {
         double min = this.getMax();
@@ -249,17 +227,16 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return min;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getIndexOfMin(components.generic.
-     * BooleanProfile)
-     */
+
     @Override
-    public int getIndexOfMin(BooleanProfile limits) {
+    public int getIndexOfMin(BooleanProfile limits) throws ProfileException {
+    	if(limits==null)
+            throw new IllegalArgumentException("Limits are cannot be null");
+        if ( limits.size() != array.length)
+            throw new IllegalArgumentException("Limits are wrong size for this profile");
         double min = this.getMax();
 
-        int minIndex = 0;
+        int minIndex = -1;
 
         for (int i = 0; i < array.length; i++) {
             if (limits.get(i) && array[i] < min) {
@@ -267,7 +244,9 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
                 minIndex = i;
             }
         }
-
+        if (minIndex == -1) {
+            throw new ProfileException("No valid index for min value");
+        }
         return minIndex;
     }
 
@@ -332,15 +311,12 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(newArray);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#smooth(int)
-     */
     @Override
     public IProfile smooth(int windowSize) {
-
-        double[] result = new double[this.size()];
+        if(windowSize < 1)
+            throw new IllegalArgumentException("Window size must be a positive integer");
+        
+        double[] result = new double[size()];
 
         for (int i = 0; i < array.length; i++) { // for each position
 
@@ -406,10 +382,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
      */
     @Override
     public IProfile interpolate(int newLength) throws ProfileException {
-
-        if (newLength < this.size()) {
-            // finer("Interpolating to a smaller array!");
-        }
+        if(newLength < 1)
+            throw new IllegalArgumentException("New length must be longer than 1");
 
         double[] newArray = new double[newLength];
 
@@ -417,12 +391,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         for (int i = 0; i < newLength; i++) {
             // we have a point in the new curve.
             // we want to know which points it lay between in the old curve
-            double oldIndex = ((double) i / (double) newLength) * (double) array.length; // get
-                                                                                         // the
-                                                                                         // fractional
-                                                                                         // index
-                                                                                         // position
-                                                                                         // needed
+            double oldIndex = ((double) i / (double) newLength) * (double) array.length;
 
             // get the value in the old profile at the given fractional index
             // position
@@ -454,8 +423,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
 
         int indexHigher = index2 > index1 ? index2 : index1;
 
-        // System.out.println("Set indexes "+normIndex+":
-        // "+indexLower+"-"+indexHigher);
 
         // wrap the arrays
         indexLower = CellularComponent.wrapIndex(indexLower, array.length);
@@ -466,32 +433,23 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         // get the values at these indexes
         double valueHigher = array[indexHigher];
         double valueLower = array[indexLower];
-        // System.out.println("Wrapped values "+normIndex+": "+valueLower+" and
-        // "+valueHigher);
-
         // calculate the difference between values
         // this can be negative
         double valueDifference = valueHigher - valueLower;
-        // System.out.println("Difference "+normIndex+": "+valueDifference);
 
         // calculate the distance into the region to go
         double offset = normIndex - indexLower;
-        // System.out.println("Offset "+normIndex+": "+offset);
 
         // add the offset to the lower index
         double positionToFind = indexLower + offset;
         positionToFind = (double) CellularComponent.wrapIndex(positionToFind, array.length);
-        // System.out.println("Position to find "+normIndex+":
-        // "+positionToFind);
 
         // calculate the value to be added to the lower index value
         double newValue = valueDifference * offset; // 0 for 0, full difference
                                                     // for 1
-        // System.out.println("New value "+normIndex+": "+newValue);
 
         double linearInterpolatedValue = newValue + valueLower;
-        // System.out.println("Interpolated "+normIndex+":
-        // "+linearInterpolatedValue);
+
 
         return linearInterpolatedValue;
     }
@@ -514,15 +472,14 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
      */
     @Override
     public BooleanProfile getLocalMinima(int windowSize) {
+        if (windowSize < 1)
+            throw new IllegalArgumentException("Window size must be a positive integer greater than 0");
         // go through angle array (with tip at start)
         // look at 1-2-3-4-5 points ahead and behind.
         // if all greater, local minimum
-        double[] prevValues = new double[windowSize]; // slots for previous
-                                                      // angles
-        double[] nextValues = new double[windowSize]; // slots for next angles
+        double[] prevValues = new double[windowSize];
+        double[] nextValues = new double[windowSize];
 
-        // int count = 0;
-        // List<Integer> result = new ArrayList<Integer>(0);
 
         boolean[] minima = new boolean[this.size()];
 
@@ -531,16 +488,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
             // go through each lookup position and get the appropriate angles
             for (int j = 0; j < prevValues.length; j++) {
 
-                int prev_i = CellularComponent.wrapIndex(i - (j + 1), this.size()); // the
-                                                                                    // index
-                                                                                    // j+1
-                                                                                    // before
-                                                                                    // i
-                int next_i = CellularComponent.wrapIndex(i + (j + 1), this.size()); // the
-                                                                                    // index
-                                                                                    // j+1
-                                                                                    // after
-                                                                                    // i
+                int prev_i = CellularComponent.wrapIndex(i - (j + 1), this.size());
+                int next_i = CellularComponent.wrapIndex(i + (j + 1), this.size());
 
                 // fill the lookup array
                 prevValues[j] = array[prev_i];
@@ -606,16 +555,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new BooleanProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMaxima(int)
-     */
     @Override
     public BooleanProfile getLocalMaxima(int windowSize) {
-        // go through array
-        // look at points ahead and behind.
-        // if all lower, local maximum
+        if (windowSize < 1)
+            throw new IllegalArgumentException("Window size must be a positive integer greater than 0");
 
         boolean[] result = new boolean[this.size()];
 
@@ -652,11 +595,7 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new BooleanProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getLocalMaxima(int, double)
-     */
+
     @Override
     public BooleanProfile getLocalMaxima(int windowSize, double threshold) {
         BooleanProfile maxima = getLocalMaxima(windowSize);
@@ -674,20 +613,12 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new BooleanProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getWindow(int, int)
-     */
     @Override
     public IProfile getWindow(int index, int windowSize) {
 
         double[] result = new double[windowSize * 2 + 1];
 
-        double[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE); // slots
-                                                                                   // for
-                                                                                   // previous
-                                                                                   // angles
+        double[] prevValues = getValues(index, windowSize, IProfile.ARRAY_BEFORE);
         double[] nextValues = getValues(index, windowSize, IProfile.ARRAY_AFTER);
 
         // need to reverse the previous array
@@ -702,69 +633,57 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#getSubregion(int, int)
-     */
     @Override
     public IProfile getSubregion(int indexStart, int indexEnd) {
+    	 if (indexStart >= array.length)
+             throw new IllegalArgumentException(String.format("Start index (%d) is beyond array length (%d)", indexStart, array.length));
+
+         if (indexEnd >= array.length)
+             throw new IllegalArgumentException(String.format("End index (%d) is beyond array length (%d)", indexEnd, array.length));
+         
+         if(indexStart < 0 || indexEnd < 0)
+             throw new IllegalArgumentException(String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
 
         if (indexStart < indexEnd) {
-
-            double[] result = Arrays.copyOfRange(array, indexStart, indexEnd);
-            return new DoubleProfile(result);
+            return new DoubleProfile(Arrays.copyOfRange(array, indexStart, indexEnd+1));
 
         } else { // case when array wraps
 
-            double[] resultA = Arrays.copyOfRange(array, indexStart, array.length - 1);
-            double[] resultB = Arrays.copyOfRange(array, 0, indexEnd);
-            double[] result = new double[resultA.length + resultB.length];
+        	double[] resultA = Arrays.copyOfRange(array, indexStart, array.length);
+        	double[] resultB = Arrays.copyOfRange(array, 0, indexEnd+1);
+        	double[] result = new double[resultA.length + resultB.length];
             int index = 0;
             for (double d : resultA) {
-                result[index] = d;
-                index++;
+                result[index++] = d;
             }
+            
             for (double d : resultB) {
-                result[index] = d;
-                index++;
-            }
-
-            if (result.length == 0) {
-                log(Level.SEVERE, "Subregion length zero: " + indexStart + " - " + indexEnd);
+                result[index++] = d;
             }
             return new DoubleProfile(result);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#calculateDeltas(int)
-     */
     @Override
     public IProfile calculateDeltas(int windowSize) {
+    	
+        if (windowSize<1)
+            throw new IllegalArgumentException("Window size must be a positive integer");   	
 
-        double[] deltas = new double[this.size()];
+        double[] deltas = new double[array.length];
 
-        for (int i = 0; i < array.length; i++) { // for each position in sperm
+        for (int i = 0; i < array.length; i++) {
 
-            double[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE); // slots
-                                                                                   // for
-                                                                                   // previous
-                                                                                   // angles
+            double[] prevValues = getValues(i, windowSize, IProfile.ARRAY_BEFORE);
             double[] nextValues = getValues(i, windowSize, IProfile.ARRAY_AFTER);
 
             double delta = 0;
             for (int k = 0; k < prevValues.length; k++) {
-
                 if (k == 0) {
                     delta += (array[i] - prevValues[k]) + (nextValues[k] - array[i]);
-
                 } else {
-                    delta += (prevValues[k] - prevValues[k - 1]) + (nextValues[k] - nextValues[k - 1]);
+                    delta += (prevValues[k - 1] - prevValues[k]) + (nextValues[k] - nextValues[k - 1]);
                 }
-
             }
 
             deltas[i] = delta;
@@ -772,11 +691,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(deltas);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#power(double)
-     */
     @Override
     public IProfile power(double exponent) {
         double[] values = new double[this.size()];
@@ -787,11 +701,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#absolute()
-     */
     @Override
     public IProfile absolute() {
         double[] values = new double[this.size()];
@@ -802,16 +711,12 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#cumulativeSum()
-     */
     @Override
     public IProfile cumulativeSum() {
-        double[] values = new double[this.size()];
+    	
+    	double[] values = new double[size()];
 
-        double total = 0;
+    	double total = 0;
         for (int i = 0; i < array.length; i++) {
             total += array[i];
             values[i] = total;
@@ -819,13 +724,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(values);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#multiply(double)
-     */
     @Override
     public IProfile multiply(double multiplier) {
+    	if (Double.isNaN(multiplier) || Double.isInfinite(multiplier))
+            throw new IllegalArgumentException("Cannot add NaN or infinity");
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -834,16 +736,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#multiply(components.generic.IProfile)
-     */
     @Override
     public IProfile multiply(IProfile multiplier) {
-        if (this.size() != multiplier.size()) {
+        if (this.size() != multiplier.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -852,13 +748,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#divide(double)
-     */
     @Override
     public IProfile divide(double divider) {
+    	if (Double.isNaN(divider) || Double.isInfinite(divider))
+            throw new IllegalArgumentException("Cannot add NaN or infinity");
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -867,16 +760,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#divide(components.generic.IProfile)
-     */
     @Override
     public IProfile divide(IProfile divider) {
-        if (this.size() != divider.size()) {
+        if (this.size() != divider.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -892,9 +779,8 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
      */
     @Override
     public IProfile add(IProfile adder) {
-        if (this.size() != adder.size()) {
+        if (this.size() != adder.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -903,15 +789,11 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#add(double)
-     */
     @Override
     public IProfile add(double value) {
-
-        double[] result = new double[this.size()];
+    	if (Double.isNaN(value) || Double.isInfinite(value))
+            throw new IllegalArgumentException("Cannot add NaN or infinity");
+        double[] result = new double[size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
             result[i] = (double) (array[i] + value);
@@ -919,16 +801,10 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#subtract(components.generic.IProfile)
-     */
     @Override
     public IProfile subtract(IProfile sub) {
-        if (this.size() != sub.size()) {
+        if (this.size() != sub.size())
             throw new IllegalArgumentException("Profile sizes do not match");
-        }
         double[] result = new double[this.size()];
 
         for (int i = 0; i < array.length; i++) { // for each position in sperm
@@ -951,11 +827,6 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
         return new DoubleProfile(result);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IProfile#toString()
-     */
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -969,14 +840,12 @@ public class DoubleProfile extends AbstractProfile implements IProfile {
     /**
      * Given a list of ordered profiles, merge them into one contiguous profile
      * 
-     * @param list
-     *            the list of profiles to merge
+     * @param list the list of profiles to merge
      * @return the merged profile
      */
     public static DoubleProfile merge(List<IProfile> list) {
-        if (list == null || list.size() == 0) {
+        if (list == null || list.size() == 0)
             throw new IllegalArgumentException("Profile list is null or empty");
-        }
 
         int totalLength = 0;
         for (IProfile p : list) {

@@ -221,7 +221,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getFractionOfIndex(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getFractionOfIndex(int)}.
 	 */
 	@Test
 	public void testGetFractionOfIndex() {
@@ -244,7 +244,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getMin()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getMin()}.
 	 */
 	@Test
 	public void testGetMin() {
@@ -254,7 +254,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getIndexOfMin(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getIndexOfMin(com.bmskinner.nuclear_morphology.components.generic.BooleanProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -286,7 +286,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getIndexOfMin()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getIndexOfMin()}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -300,7 +300,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#toDoubleArray()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#toDoubleArray()}.
 	 */
 	@Test
 	public void testToDoubleArray() {
@@ -316,7 +316,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#absoluteSquareDifference(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#absoluteSquareDifference(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
 	public void testAbsoluteSquareDifferenceIsZeroWhenSameProfile() throws ProfileException {
@@ -359,8 +359,8 @@ public class IProfileTester {
 	            
 	    IProfile p = new FloatProfile(arr);       
         double expDiff = diff*diff;
-        assertEquals(expDiff, template.absoluteSquareDifference(p), 0);
-        assertEquals(expDiff, p.absoluteSquareDifference(template), 0);
+        assertEquals(expDiff, template.absoluteSquareDifference(p), 0.001);
+        assertEquals(expDiff, p.absoluteSquareDifference(template), 0.001);
 	}
 	
 	@Test
@@ -384,12 +384,12 @@ public class IProfileTester {
         double expDiff = diff*diff;
 
         
-        assertEquals(expDiff, differenced.absoluteSquareDifference(lengthened), 0);
-        assertEquals(expDiff, lengthened.absoluteSquareDifference(differenced), 0);
+        assertEquals(expDiff, differenced.absoluteSquareDifference(lengthened), 0.001);
+        assertEquals(expDiff, lengthened.absoluteSquareDifference(differenced), 0.001);
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#copy()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#copy()}.
 	 * @throws Exception 
 	 */
 	@Test
@@ -401,7 +401,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#offset(int)}.
 	 */
 	@Test
 	public void testOffsetByOne() throws ProfileException {
@@ -416,7 +416,7 @@ public class IProfileTester {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#offset(int)}.
 	 */
 	@Test
 	public void testOffsetByFive() throws ProfileException {
@@ -435,7 +435,7 @@ public class IProfileTester {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#offset(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#offset(int)}.
 	 */
 	@Test
 	public void testOffsetByNegativeOne() throws ProfileException {
@@ -451,7 +451,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#smooth(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#smooth(int)}.
 	 */
 	@Test
 	public void testSmooth() {
@@ -493,7 +493,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#reverse()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#reverse()}.
 	 */
 	@Test
 	public void testReverse() {
@@ -523,7 +523,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -539,7 +539,7 @@ public class IProfileTester {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -557,7 +557,7 @@ public class IProfileTester {
 	}
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSlidingWindowOffset(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -570,7 +570,7 @@ public class IProfileTester {
 
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getLocalMinima(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMinima(int)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -590,7 +590,7 @@ public class IProfileTester {
     }
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getLocalMinima(int, double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMinima(int, double)}.
 	 */
 	@Test
 	public void testGetLocalMinimaIntDouble() {
@@ -609,7 +609,7 @@ public class IProfileTester {
 	
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getLocalMaxima(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getLocalMaxima(int)}.
 	 */
 	@Test
     public void testGetLocalMaximaInt() {
@@ -644,7 +644,7 @@ public class IProfileTester {
     }
     
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSubregion(int, int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSubregion(int, int)}.
 	 */
 	@Test
 	public void testGetSubregionIntInt() {		
@@ -654,7 +654,7 @@ public class IProfileTester {
 		
 		assertEquals(4, p.size());
 		
-		for(int i=start; i<stop; i++){
+		for(int i=start; i<=stop; i++){
 		    assertEquals(data[i], p.get(i), 0);
 		}
 	}
@@ -692,7 +692,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#getSubregion(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#getSubregion(com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment)}.
 	 * @throws ProfileException 
 	 */
 	@Test
@@ -715,7 +715,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#calculateDeltas(int)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#calculateDeltas(int)}.
 	 */
 	@Test
 	public void testCalculateDeltasSucceedsWithWindowSizeOne() {
@@ -748,9 +748,9 @@ public class IProfileTester {
 	    		+ (data[3] - data[2])
 	    		+ (data[4] - data[3]);
 	    
-	    assertEquals(expAt0, res.get(0),0);		
-	    assertEquals(expAt1, res.get(1),0);
-	    assertEquals(expAt2, res.get(2),0);
+	    assertEquals(expAt0, res.get(0),0.00001);		
+	    assertEquals(expAt1, res.get(1),0.00001);
+	    assertEquals(expAt2, res.get(2),0.00001);
 	}
 	
 	@Test
@@ -761,7 +761,7 @@ public class IProfileTester {
 
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#power(double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#power(double)}.
 	 */
 	@Test
 	public void testPower() {
@@ -778,7 +778,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#absolute()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#absolute()}.
 	 */
 	@Test
 	public void testAbsolute() {
@@ -794,7 +794,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#cumulativeSum()}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#cumulativeSum()}.
 	 */
 	@Test
 	public void testCumulativeSum() {
@@ -803,14 +803,13 @@ public class IProfileTester {
 		for(int i=0, j=1; j<data.length; i++, j++){
 			exp[j] = data[j]+exp[i];
 		}
-				
 		float[] result = profile.cumulativeSum().toFloatArray();
 		
-		assertTrue( equals(exp, result) );
+		assertTrue( equals(exp, result, 0.1f) );
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#multiply(double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#multiply(double)}.
 	 */
 	@Test
 	public void testMultiplyDouble() {
@@ -846,7 +845,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#multiply(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#multiply(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
 	public void testMultiplyIProfile() {
@@ -870,7 +869,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#divide(double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#divide(double)}.
 	 */
 	@Test
 	public void testDivideDouble() {
@@ -918,7 +917,7 @@ public class IProfileTester {
     }
 	
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#divide(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#divide(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
 	public void testDivideIProfile() {
@@ -950,7 +949,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#add(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#add(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 * @throws Exception 
 	 */
 	@Test
@@ -979,7 +978,7 @@ public class IProfileTester {
 	}
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#add(double)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#add(double)}.
 	 */
 	@Test
 	public void testAddDouble() {
@@ -1014,7 +1013,7 @@ public class IProfileTester {
     }
 
 	/**
-	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.DefaultProfile#subtract(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
+	 * Test method for {@link com.bmskinner.nuclear_morphology.components.generic.IProfile#subtract(com.bmskinner.nuclear_morphology.components.generic.IProfile)}.
 	 */
 	@Test
 	public void testSubtract() {
@@ -1190,14 +1189,31 @@ public class IProfileTester {
 		}
 	}
 	
-	
 	/**
 	 * Test float array equality. Not in junit.
 	 * @param exp
 	 * @param obs
 	 */
-	public static boolean equals(float[] exp, float[] obs){
-	    float epsilon = 0.0001f;
+	public static boolean equals(double[] exp, double[] obs){
+		double epsilon = 0.001;
+	    boolean equal = true;
+	    equal &= obs.length==exp.length;
+	    assertEquals(exp.length, obs.length);
+        
+        for(int i=0; i<exp.length; i++){
+            equal &= (Double.isNaN(exp[i]) && Double.isNaN(obs[i])) || Math.abs(exp[i] - obs[i])<=epsilon;
+            assertEquals("Index "+i, exp[i], obs[i], epsilon);
+        }
+        return equal;
+	}
+	
+	/**
+	 * Test float array equality. Not in junit.
+	 * @param exp
+	 * @param obs
+	 * @param epsilon
+	 */
+	public static boolean equals(float[] exp, float[] obs, float epsilon){
 	    boolean equal = true;
 	    equal &= obs.length==exp.length;
 	    assertEquals(exp.length, obs.length);
@@ -1207,6 +1223,16 @@ public class IProfileTester {
             assertEquals("Index "+i, exp[i], obs[i], epsilon);
         }
         return equal;
+	}
+	
+	
+	/**
+	 * Test float array equality. Not in junit. Uses the default epsilon.
+	 * @param exp
+	 * @param obs
+	 */
+	public static boolean equals(float[] exp, float[] obs){
+	 return equals(exp, obs, 0.001f);
 	}
 
 }

@@ -831,14 +831,12 @@ public abstract class SegmentedCellularComponent extends ProfileableCellularComp
 		@Override
 		public IProfile getSubregion(int indexStart, int indexEnd) {
 
-			if(indexStart<0 || indexEnd < 0)
-				throw new IllegalArgumentException("Start or end index is below zero");
-
-			if (indexStart >= array.length)
-				throw new IllegalArgumentException("Start index (" + indexStart + ") is beyond array length (" + array.length + ")");
-
-			if (indexEnd >= array.length)
-				throw new IllegalArgumentException("End index (" + indexEnd + ") is beyond array length (" + array.length + ")");
+	        if (indexStart >= array.length)
+	            throw new IllegalArgumentException(String.format("Start index (%d) is beyond array length (%d)", indexStart, array.length));
+	        if (indexEnd >= array.length)
+	            throw new IllegalArgumentException(String.format("End index (%d) is beyond array length (%d)", indexEnd, array.length));
+	        if(indexStart < 0 || indexEnd < 0)
+	            throw new IllegalArgumentException(String.format("Start (%d) or end index (%d) is below zero", indexStart, indexEnd));
 
 			if (indexStart < indexEnd) {
 				float[] result = Arrays.copyOfRange(array, indexStart, indexEnd+1);
