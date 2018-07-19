@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
@@ -89,7 +91,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
      * @param position
      * @param centreOfMass
      */
-    public DefaultNucleus(Roi roi, IPoint centreOfMass, File f, int channel, int[] position, int number) {
+    public DefaultNucleus(@NonNull Roi roi, @NonNull IPoint centreOfMass, @NonNull File f, int channel, int[] position, int number) {
         super(roi, centreOfMass, f, channel, position);
         this.nucleusNumber = number;
     }

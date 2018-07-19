@@ -139,9 +139,8 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
                     
                     
                     for(int i=0; i<oldIds.size(); i++){
-                        if(!oldIds.get(i).equals(newIds.get(i))){
+                        if(!oldIds.get(i).equals(newIds.get(i)))
                             throw new UnprofilableObjectException("Segment ID lists did not copy correctly for "+type);
-                        }
                     }
 
                     this.profileMap.put(type, newProfile);
@@ -162,7 +161,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
         } else {
             throw new UnprofilableObjectException("Object is not a profileable object");
         }
-
+        
     }
 
     /*

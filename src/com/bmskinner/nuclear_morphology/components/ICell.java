@@ -29,7 +29,7 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
- * All cell types implement this interface. A cell can have a nucleus, and zero,
+ * All cell types implement this interface. A cell can have multiple nuclei, and zero,
  * one or many acrosomes, flagella and mitochondria.
  * 
  * @author bms41
@@ -48,9 +48,11 @@ public interface ICell extends Serializable, Loggable, Statistical, Comparable<I
     /**
      * Get the first nucleus of the cell. Use {@link #getNuclei()} instead to
      * ensure cells with multiple nuclei are handled correctly
+     * Was deprecated from 1.13.5 to 1.14.0, but reenabled because it is a useful
+     * shortcut 
      * 
      * @return
-     * @deprecated from 1.13.5
+     * 
      */
     Nucleus getNucleus();
 

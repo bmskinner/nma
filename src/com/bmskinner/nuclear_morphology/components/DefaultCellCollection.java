@@ -145,15 +145,11 @@ public class DefaultCellCollection implements ICellCollection {
     /**
      * Constructor.
      * 
-     * @param folder
-     *            the folder of images
-     * @param outputFolder
-     *            a name for the outputs (usually the analysis date). Can be
+     * @param folder the folder of images
+     * @param outputFolder a name for the outputs (usually the analysis date). Can be
      *            null
-     * @param name
-     *            the name of the collection
-     * @param nucleusClass
-     *            the class of nucleus to be held
+     * @param name the name of the collection
+     * @param nucleusType the class of nucleus to be held
      */
     public DefaultCellCollection(File folder, @Nullable String outputFolder, @Nullable String name, NucleusType nucleusType) {
         this(folder, outputFolder, name, nucleusType, java.util.UUID.randomUUID());

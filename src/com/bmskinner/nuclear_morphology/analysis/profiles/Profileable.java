@@ -49,11 +49,13 @@ public interface Profileable extends CellularComponent {
      */
     void initialise(double proportion) throws ComponentCreationException;
 
-    /*
-     * Finds the key points of interest around the border of the Nucleus. Can
+
+    /**
+     * Finds the key points of interest around the border of the object. Can
      * use several different methods, and take a best-fit, or just use one. The
      * default in a round nucleus is to get the longest diameter and set this as
      * the head/tail axis.
+     * @throws ComponentCreationException
      */
     public void findPointsAroundBorder() throws ComponentCreationException;
 

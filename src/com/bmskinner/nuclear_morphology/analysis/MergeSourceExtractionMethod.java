@@ -70,30 +70,32 @@ public class MergeSourceExtractionMethod extends MultipleDatasetAnalysisMethod {
 
             IAnalysisDataset newDataset = new DefaultAnalysisDataset(newCollection);
             newDataset.setRoot(true);
+            try {
+            	// Copy over the profile collections
+            	newDataset.getCollection().createProfileCollection();
 
-            // Copy over the profile collections
-            newDataset.getCollection().createProfileCollection();
+            	// Copy the merged dataset segmentation into the new dataset.
+            	// This wil match cell segmentations by default, since the cells
+            	// have been copied from the merged dataset.
+            	if (virtualMergeSource instanceof MergeSourceAnalysisDataset) {
 
-            // Copy the merged dataset segmentation into the new dataset.
-            // This wil match cell segmentations by default, since the cells
-            // have been copied from the merged dataset.
-            if (virtualMergeSource instanceof MergeSourceAnalysisDataset) {
+            		MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
 
-                MergeSourceAnalysisDataset d = (MergeSourceAnalysisDataset) virtualMergeSource;
 
-                try {                    
-                    IAnalysisDataset parent =  d.getParent();
-                    // When the parent is also a virtual cell collection, recurse up to the root dataset
-                    while (parent instanceof MergeSourceAnalysisDataset) {
-                        parent = ((MergeSourceAnalysisDataset) parent).getParent();
-                    }
+            		IAnalysisDataset parent =  d.getParent();
+            		// When the parent is also a virtual cell collection, recurse up to the root dataset
+            		while (parent instanceof MergeSourceAnalysisDataset) {
+            			parent = ((MergeSourceAnalysisDataset) parent).getParent();
+            		}
 
-                   parent.getCollection().getProfileManager()
-                            .copyCollectionOffsets(newDataset.getCollection());
+            		parent.getCollection().getProfileManager()
+            		.copyCollectionOffsets(newDataset.getCollection());
 
-                } catch (ProfileException e) {
-                    error("Cannot copy profile offsets to recovered merge source", e);
-                }
+
+            	}
+
+            } catch (ProfileException e) {
+            	error("Cannot copy profile offsets to recovered merge source", e);
             }
 
             // Copy over the signal collections where appropriate

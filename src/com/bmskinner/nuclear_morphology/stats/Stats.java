@@ -51,6 +51,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import ij.gui.Roi;
 import ij.process.FloatPolygon;
 
+/**
+ * Provides quick implementations of basic stats methods
+ * @author bms41
+ *
+ */
 public class Stats implements Loggable {
 
     public static final double LOG2                      = Math.log(2);
@@ -58,6 +63,10 @@ public class Stats implements Loggable {
     
     public static final int LOWER_QUARTILE = 25;
     public static final int UPPER_QUARTILE = 75;
+    
+    /**
+     * The median value (q50)
+     */
     public static final int MEDIAN         = 50;
     public static final int ONE_HUNDRED_PERCENT = 100;
 
