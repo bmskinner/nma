@@ -118,7 +118,7 @@ public class DatasetProfilingMethodTest {
 			for(int yBase = -10; yBase<10; yBase++) {
 				
 				System.out.println("xBase "+xBase+"; yBase "+yBase);
-				IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase);
+				IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, 0);
 //				System.out.println("Created dataset");
 				
 				Nucleus loopCell = null;
@@ -154,13 +154,47 @@ public class DatasetProfilingMethodTest {
 				assertTrue(equals(globalMedian.toFloatArray(), median.toFloatArray(), 0.001f));
 
 			}
-			
 		}
-		
-		
 	}
 	
-	
+	@Test
+	public void testProfilingIsIndependentOfCellRotation() throws Exception {
+		// create cells with different x and y bases and no variation. 
+		// Check they all generate the same profiles
+		
+		IProfile globalMedian = null;
+		
+		int xBase = 10;
+		int yBase = 10;
+
+		// Allow variation in angles from none to 90 degrees
+		for(int angle=0; angle<90; angle++) {
+
+			IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, angle);
+
+			IAnalysisMethod m = new DatasetProfilingMethod(dataset);
+			m.call();
+			
+//			for(ICell cell : dataset.getCollection().getCells()) {
+//				System.out.println("Cell\n");
+//				for(IBorderPoint b : cell.getNucleus().getBorderList()) {
+//					System.out.println(b.toString());
+//				}
+//			}
+
+			// Check the collection
+			IProfile median = dataset.getCollection()
+					.getProfileCollection()
+					.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+			assertTrue(median!=null);
+
+			if(globalMedian==null)
+				globalMedian = median;
+
+			// We can't expect full precision equality due to cumulative single precision interpolation
+			assertTrue(equals(globalMedian.toFloatArray(), median.toFloatArray(), 0.001f));
+		}
+	}
 	
 	/**
 	 * Test float array equality. Not in junit.

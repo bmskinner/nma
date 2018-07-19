@@ -224,14 +224,10 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return (this.getX() == a.getX() && this.getY() == a.getY());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#toString()
-     */
+
     @Override
     public String toString() {
-        return String.format("%d - %d", getXAsInt(), getYAsInt());
+    	return getX() + " - " + getY();
     }
 
     @Override
@@ -239,12 +235,6 @@ public class FloatPoint extends Point2D.Float implements IPoint {
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see components.generic.IPoint#findAngle(components.generic.IPoint,
-     * components.generic.IPoint)
-     */
     @Override
     public double findAngle(@NonNull IPoint a, @NonNull IPoint c) {
 

@@ -55,8 +55,8 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException
 	 */
-	public static ICell rectangularCell(int w, int h, int xBase, int yBase) throws ComponentCreationException {
-		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase));
+	public static ICell rectangularCell(int w, int h, int xBase, int yBase, double rotation) throws ComponentCreationException {
+		return new DefaultCell(rectangularNucleus(w, h, xBase, yBase, rotation));
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class TestComponentFactory {
 	}
 	
 	public static Nucleus rectangularNucleus(int w,int h) throws ComponentCreationException {
-		return rectangularNucleus(w, h, DEFAULT_X_BASE, DEFAULT_Y_BASE);
+		return rectangularNucleus(w, h, DEFAULT_X_BASE, DEFAULT_Y_BASE, 0);
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class TestComponentFactory {
 	 * @return
 	 * @throws ComponentCreationException 
 	 */
-	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase) throws ComponentCreationException {
+	public static Nucleus rectangularNucleus(int w, int h, int xBase, int yBase, double rotation) throws ComponentCreationException {
 
 		int[] xpoints = new int[(w+h)*2];
 		int[] ypoints = new int[(w+h)*2];
@@ -104,6 +104,8 @@ public class TestComponentFactory {
 		int[] position = {xBase, yBase, w, h};		
 		File f = new File("empty file");
 		Nucleus n = new DefaultNucleus(roi, com, f, 0, position, 0);
+		
+		n.rotate(rotation);
 		
 		// The roi interpolation will smooth corners
 		
