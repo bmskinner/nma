@@ -28,6 +28,8 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.bmskinner.nuclear_morphology.io.Io.Exporter;
+
 import ij.IJ;
 
 // this will take columns of data, and write them out to a specified folder

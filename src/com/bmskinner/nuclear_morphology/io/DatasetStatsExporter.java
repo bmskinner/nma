@@ -47,7 +47,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class DatasetStatsExporter extends StatsExporter implements Exporter, Loggable {
+public class DatasetStatsExporter extends StatsExporter implements Loggable {
 
 //    private static final String EXPORT_MESSAGE          = "Exporting stats...";
 //    private File                exportFile;

@@ -36,11 +36,10 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * This is a testbed for rule based identification of indexes in a profile.
- * Ideally, the rules can be saved in the description of a nucleus, saving
- * hard-coding of identification for new nucleus types
+ * Allows rule based identification of indexes in a profile.
  * 
  * @author bms41
+ * @since 1.13.0
  *
  */
 public class ProfileIndexFinder implements Loggable {
@@ -185,11 +184,11 @@ public class ProfileIndexFinder implements Loggable {
     }
 
     /**
-     * Identify the index for the median profile of the collection based on the
-     * internal RuleSets for the given border tag
+     * Identify the index in the median profile of the collection matching the
+     * internal RuleSets for the border tag
      * 
-     * @param collection
-     * @param tag
+     * @param collection the cell collection
+     * @param tag the border tag to find
      * @return the index in the profile corresponding to the tag
      * @throws NoDetectedIndexException if the index is not found
      */

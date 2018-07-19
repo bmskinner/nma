@@ -21,7 +21,6 @@ package com.bmskinner.nuclear_morphology.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 
-import javax.swing.JLabel;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**

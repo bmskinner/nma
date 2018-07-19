@@ -34,7 +34,7 @@ import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
 import com.bmskinner.nuclear_morphology.components.options.IDetectionOptions;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 
 
@@ -56,8 +56,8 @@ public class FileSelector {
         if(file==null)
             return null;
 
-        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        if (!file.getAbsolutePath().endsWith(Io.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Io.TAB_FILE_EXTENSION);
         }
 
         return file;
@@ -76,12 +76,12 @@ public class FileSelector {
         String defaultName = "";
         if (datasets.size() == 1) {
             dir = datasets.get(0).getSavePath().getParentFile();
-            defaultName = datasets.get(0).getName()+"_"+suffix+Exporter.TAB_FILE_EXTENSION;
+            defaultName = datasets.get(0).getName()+"_"+suffix+Io.TAB_FILE_EXTENSION;
         } else {
             dir = IAnalysisDataset.commonPathOfFiles(datasets);
             if (!dir.exists() || !dir.isDirectory()) {
                 dir = GlobalOptions.getInstance().getDefaultDir();
-                defaultName = "Multiple_"+suffix+"_export"+Exporter.TAB_FILE_EXTENSION;
+                defaultName = "Multiple_"+suffix+"_export"+Io.TAB_FILE_EXTENSION;
             }
         }
         FileNameExtensionFilter filter = new FileNameExtensionFilter("Table export file", "txt");
@@ -91,8 +91,8 @@ public class FileSelector {
             return null;
 
         // Add extension if needed
-        if (!file.getAbsolutePath().endsWith(Exporter.TAB_FILE_EXTENSION)) {
-            file = new File(file.getAbsolutePath() + Exporter.TAB_FILE_EXTENSION);
+        if (!file.getAbsolutePath().endsWith(Io.TAB_FILE_EXTENSION)) {
+            file = new File(file.getAbsolutePath() + Io.TAB_FILE_EXTENSION);
         }
 
         return file;

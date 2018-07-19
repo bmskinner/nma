@@ -43,7 +43,7 @@ import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
 import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
-import com.bmskinner.nuclear_morphology.logging.TextAreaHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelHandler;
 import com.javadocking.DockingManager;
 import com.javadocking.dock.CompositeLineDock;
 import com.javadocking.dock.Position;
@@ -123,7 +123,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     		dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted to tab docks
             
             logPanel = new LogPanel(eh.getInputSupplier());
-            TextAreaHandler textHandler = new TextAreaHandler(logPanel);
+            LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
             

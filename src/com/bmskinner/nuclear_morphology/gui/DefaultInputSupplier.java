@@ -1,7 +1,6 @@
 package com.bmskinner.nuclear_morphology.gui;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.io.File;
 
 import javax.swing.JColorChooser;
@@ -14,8 +13,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
-import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
-import com.bmskinner.nuclear_morphology.gui.InterfaceEvent.InterfaceMethod;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 
 /**

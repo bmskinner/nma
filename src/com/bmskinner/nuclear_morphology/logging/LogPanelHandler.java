@@ -16,38 +16,33 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.io;
+package com.bmskinner.nuclear_morphology.logging;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
+import java.util.logging.LogRecord;
+import java.util.logging.StreamHandler;
 
-/**
- * Interface for all export classes. Defines file extensions.
- * 
- * @author ben
- *
- */
-public interface Exporter {
-    static final String TAB_FILE_EXTENSION = ".txt";
-    static final String SVG_FILE_EXTENSION = ".svg";
+import com.bmskinner.nuclear_morphology.gui.LogPanel;
 
-    static final String NEWLINE = System.getProperty("line.separator");
-    
-    static final String TAB = "\t";
-    
-    static void writeString(final String s, final File f){
+public class LogPanelHandler extends StreamHandler {
 
-        if(f==null){
-            throw new IllegalArgumentException("File cannot be null");
-        }
-        
-        try (PrintWriter out = new PrintWriter(f)){
+    // JTextArea textArea = null;
+    LogPanel logPanel; // the log panel to log to
 
-            out.println(s);
+    public LogPanelHandler(LogPanel logPanel) {
+        this.logPanel = logPanel;
+    }
 
-        } catch (FileNotFoundException e) {
-            return;
+    public void setTextArea(LogPanel logPanel) {
+        this.logPanel = logPanel;
+    }
+
+    @Override
+    public void publish(LogRecord record) {
+        super.publish(record);
+        flush();
+
+        if (logPanel != null) {
+            logPanel.println(getFormatter().format(record));
         }
     }
 }

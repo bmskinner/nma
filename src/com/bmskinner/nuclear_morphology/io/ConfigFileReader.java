@@ -38,11 +38,11 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.4
  *
  */
-public class PropertiesReader implements Loggable {
+public class ConfigFileReader implements Loggable {
 
     public static final String INI_FILE = "config.ini";
 
-    public PropertiesReader() {
+    public ConfigFileReader() {
         try {
 
             // Get the location of the jar file

@@ -20,7 +20,7 @@ import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.stats.PlottableStatistic;
 
-public class DatasetSignalsExporter extends StatsExporter implements Exporter {
+public class DatasetSignalsExporter extends StatsExporter {
 
     /**
      * Create specifying the folder stats will be exported into

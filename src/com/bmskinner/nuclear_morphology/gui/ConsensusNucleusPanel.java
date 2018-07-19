@@ -53,7 +53,7 @@ import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
 import com.bmskinner.nuclear_morphology.gui.components.FileSelector;
 import com.bmskinner.nuclear_morphology.gui.tabs.DetailPanel;
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 import com.bmskinner.nuclear_morphology.io.SVGWriter;
 
 @SuppressWarnings("serial")
@@ -543,8 +543,8 @@ public class ConsensusNucleusPanel extends DetailPanel implements ChangeListener
     	if(exportFile==null)
     		return;
     	
-    	if(!exportFile.getName().endsWith(Exporter.SVG_FILE_EXTENSION))
-    		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Exporter.SVG_FILE_EXTENSION);
+    	if(!exportFile.getName().endsWith(Io.SVG_FILE_EXTENSION))
+    		exportFile = new File(exportFile.getParentFile(), exportFile.getName()+Io.SVG_FILE_EXTENSION);
 
     	if(exportFile!=null){
     		SVGWriter wr = new SVGWriter(exportFile);

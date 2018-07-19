@@ -27,7 +27,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 @SuppressWarnings("serial")
 public class ExportableTable extends JTable {
@@ -73,7 +73,7 @@ public class ExportableTable extends JTable {
             if(saveFile!=null){
 
                 String string = makeExportString();
-                Exporter.writeString(string,saveFile);
+                Io.Exporter.writeString(string,saveFile);
             }
 
         }
@@ -82,17 +82,17 @@ public class ExportableTable extends JTable {
             StringBuilder builder = new StringBuilder();
             TableModel model = table.getModel();
             for (int col = 0; col < model.getColumnCount(); col++) {
-                builder.append(model.getColumnName(col) + Exporter.TAB);
+                builder.append(model.getColumnName(col) + Io.TAB);
                 ;
             }
-            builder.append(Exporter.NEWLINE);
+            builder.append(Io.NEWLINE);
             for (int row = 0; row < model.getRowCount(); row++) {
 
                 for (int col = 0; col < model.getColumnCount(); col++) {
                     Object value = model.getValueAt(row, col);
-                    builder.append(value + Exporter.TAB);
+                    builder.append(value + Io.TAB);
                 }
-                builder.append(Exporter.NEWLINE);
+                builder.append(Io.NEWLINE);
             }
             return builder.toString();
         }

@@ -8,7 +8,7 @@ import com.bmskinner.nuclear_morphology.api.BasicAnalysisPipeline;
 import com.bmskinner.nuclear_morphology.gui.DefaultInputSupplier;
 import com.bmskinner.nuclear_morphology.gui.main.DockableMainWindow;
 import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
-import com.bmskinner.nuclear_morphology.io.PropertiesReader;
+import com.bmskinner.nuclear_morphology.io.ConfigFileReader;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 import ij.IJ;
@@ -45,7 +45,7 @@ public class CommandParser implements Loggable {
 	        
 	    }
 	    // load the config file
-	    new PropertiesReader();
+	    new ConfigFileReader();
 	    
 	    if(headless){
 	    	log("Running on folder: "+folder.getAbsolutePath());

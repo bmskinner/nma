@@ -30,7 +30,7 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
  * @since 1.13.8
  *
  */
-public class DatasetShellsExporter extends StatsExporter implements Exporter, Loggable {
+public class DatasetShellsExporter extends StatsExporter implements Loggable {
 
 //    private static final String EXPORT_MESSAGE          = "Exporting shells...";
 //    private static final String DEFAULT_MULTI_FILE_NAME = "Shell_stats_export" + Exporter.TAB_FILE_EXTENSION;

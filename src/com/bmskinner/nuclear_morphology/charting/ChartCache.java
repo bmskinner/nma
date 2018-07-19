@@ -33,7 +33,7 @@ import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.TableOptions;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
-import com.bmskinner.nuclear_morphology.io.Exporter;
+import com.bmskinner.nuclear_morphology.io.Io;
 
 /*
  * Store rendered charts in a cache, to avoid slowdowns when reselecting datasets
@@ -48,11 +48,11 @@ public class ChartCache implements Cache {
         StringBuilder b = new StringBuilder();
         b.append("Chart cache:\n");
         for (ChartOptions op : chartMap.keySet()) {
-            b.append(op.hashCode() + Exporter.TAB);
+            b.append(op.hashCode() + Io.TAB);
             for (ChartOptions op2 : chartMap.keySet()) {
-                b.append(op.equals(op2) + Exporter.TAB);
+                b.append(op.equals(op2) + Io.TAB);
             }
-            b.append(Exporter.NEWLINE);
+            b.append(Io.NEWLINE);
         }
         return b.toString();
     }
