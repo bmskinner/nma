@@ -441,9 +441,11 @@ public class DatasetSegmentationMethod extends SingleDatasetAnalysisMethod {
         // the profile
         IProfile median = pc.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
-        Map<Tag, Integer> map = new HashMap<Tag, Integer>();
+        List<Integer> map = new ArrayList<>();
+
         int opIndex = pc.getIndex(Tag.ORIENTATION_POINT);
-        map.put(Tag.ORIENTATION_POINT, opIndex);
+        map.add(pc.getIndex(Tag.ORIENTATION_POINT));
+
 
         List<IBorderSegment> segments;
         if (!collection.getNucleusType().equals(NucleusType.ROUND)

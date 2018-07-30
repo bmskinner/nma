@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.bmskinner.nuclear_morphology.analysis.FloatArrayTester;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisMethod;
 import com.bmskinner.nuclear_morphology.analysis.IAnalysisResult;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
@@ -35,7 +36,7 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  * @since 1.14.0
  *
  */
-public class DatasetProfilingMethodTest {
+public class DatasetProfilingMethodTest extends FloatArrayTester {
 	
 	@Before
 	public void setUp(){
@@ -196,21 +197,4 @@ public class DatasetProfilingMethodTest {
 		}
 	}
 	
-	/**
-	 * Test float array equality. Not in junit.
-	 * @param exp
-	 * @param obs
-	 * @param epsilon
-	 */
-	public static boolean equals(float[] exp, float[] obs, float epsilon){
-	    boolean equal = true;
-	    equal &= obs.length==exp.length;
-	    assertEquals(exp.length, obs.length);
-        
-        for(int i=0; i<exp.length; i++){
-            equal &= (Float.isNaN(exp[i]) && Float.isNaN(obs[i])) || Math.abs(exp[i] - obs[i])<=epsilon;
-            assertEquals("Index "+i, exp[i], obs[i], epsilon);
-        }
-        return equal;
-	}
 }

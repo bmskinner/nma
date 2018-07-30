@@ -23,8 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
+import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderSegment;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -40,75 +43,77 @@ public class ProfileSegmenter implements Loggable {
      */
     public static final int MIN_SEGMENT_SIZE = 10;
 
-    private static final int SMOOTH_WINDOW   = 2;   // the window size for
-                                                    // smoothing profiles
-    private static final int MAXIMA_WINDOW   = 5;   // the window size for
-                                                    // calculating minima and
-                                                    // maxima
-    private static final int DELTA_WINDOW    = 2;   // the window size for
-                                                    // calculating deltas
-    private static final int ANGLE_THRESHOLD = 180; // a maximum must be above
-                                                    // this, a minimum below it
+    /**
+     * Window size for smoothing profiles prior to minima and maxima testing
+     */
+    private static final int SMOOTH_WINDOW   = 2;
+    
+    
+    /**
+     * Window size for calculating minima and maxima
+     */
+    private static final int MAXIMA_WINDOW   = 5;
+    
+    /**
+     * Window size for calculating deltas
+     */
+    private static final int DELTA_WINDOW    = 2;
+    
+    /**
+     * Threshold for calling minima and maxima; a maximum must be above
+     * this value, a minimum must be below it
+     */
+    private static final int ANGLE_THRESHOLD = 180;
 
-    private static final double MIN_RATE_OF_CHANGE = 0.02; // a potential
-                                                           // inflection cannot
-                                                           // vary by more than
-                                                           // this
+    /**
+     * The minimum rate of change required in the profile (first differential)
+     * as a proportion of the total differential within the profile.
+     */
+    private static final double MIN_RATE_OF_CHANGE = 0.02;
 
-    private final IProfile             profile;                                    // the
-                                                                                   // profile
-                                                                                   // to
-                                                                                   // segment
-    private final List<IBorderSegment> segments = new ArrayList<IBorderSegment>(0);
+    private final IProfile profile; // the profile to segment
+    private final List<IBorderSegment> segments = new ArrayList<>(8);
 
-    private BooleanProfile inflectionPoints = null;
-    private IProfile       deltaProfile     = null;
+    private BooleanProfile minOrMax = null;
+    private BooleanProfile secondDifferentialMinOrMax = null;
+//    private IProfile       deltaProfile     = null;
     private double         minRateOfChange  = 1;
 
-    // These are points at which a segment boundary must be called.
-    // Specifying indexes here will suppress automatic segmentation at points
-    // within
-    // MIN_SEGMENT_SIZE of the index. If two BorderTagObject indexes in this
-    // list are within
-    // MIN_SEGMENT_SIZE of each other, only the first will be assigned.
-    private Map<Tag, Integer> tagsToSplitOn = new HashMap<Tag, Integer>();
+    /**
+     * These are points at which a segment boundary must be called.
+     * Specifying indexes here will suppress automatic segmentation at points
+     * within MIN_SEGMENT_SIZE of the index. If two Tag indexes in this 
+     * list are within MIN_SEGMENT_SIZE of each other, only the first will 
+     * be assigned.
+     */
+    private int[] mustSplit = null;
 
     /**
      * Constructed from a profile
      * 
      * @param p
      */
-    public ProfileSegmenter(final IProfile p) {
-        if (p == null) {
+    public ProfileSegmenter(@NonNull final IProfile p) {
+        if (p == null)
             throw new IllegalArgumentException("Profile is null");
-        }
-        this.profile = p;
-
-        this.initialise();
-
-        fine("Created profile segmenter");
+        profile = p;
+        initialise();
     }
 
     /**
-     * Construct from a profile, and a map specifying BorderTags which must be
+     * Construct from a profile, and indexes which must be
      * segmented upon.
      * 
-     * @param p
-     *            the profile
-     * @param map
-     *            the border tags to segment at (RP is automatic)
+     * @param p the profile
+     * @param map the indexes to segment at (RP is automatic)
      */
-    public ProfileSegmenter(final IProfile p, final Map<Tag, Integer> map) {
-
+    public ProfileSegmenter(@NonNull final IProfile p, @NonNull final List<Integer> map) {
         this(p);
         if (map == null)
             throw new IllegalArgumentException("Index map is null");
-        tagsToSplitOn = map;
-        validateBorderTagMap();
-        fine("Added map of BorderTagObject indexes to force segmentation");
-
+        mustSplit = validateBorderTagMap(map);
     }
-
+    
     /**
      * Get the deltas and find minima and maxima. These switch between segments
      * 
@@ -131,7 +136,7 @@ public class ProfileSegmenter implements Loggable {
          */
         for (int index = 0; index < profile.size(); index++) {
 
-            if (testSegmentEndFound(index, segmentStart)) {
+            if (isValidSegmentEnd(index, segmentStart)) {
 
                 // we've hit a new segment
                 IBorderSegment seg = IBorderSegment.newSegment(segmentStart, index, profile.size());
@@ -165,82 +170,78 @@ public class ProfileSegmenter implements Loggable {
             throw new UnsegmentableProfileException("Error making final profile", e);
         }
 
-        fine("Segments linked");
+        finer("Segments linked");
 
-        fine(this.toString());
-
+        finer(this.toString());
         return segments;
     }
 
+    
+    
     /**
      * Check that the given map is suitable for segmentation. If two
      * BorderTagObject indexes in this list are within MIN_SEGMENT_SIZE of each
      * other, the second will be silently removed.
      */
-    private void validateBorderTagMap() {
+    private int[] validateBorderTagMap(List<Integer> initialMap) {
 
-        List<Tag> toRemove = new ArrayList<Tag>();
+    	List<Integer> toRemove = new ArrayList<>(initialMap.size());
+        for (int index1 : initialMap) {
 
-        for (Tag tag : tagsToSplitOn.keySet()) {
-
-            Integer index = tagsToSplitOn.get(tag);
-
-            for (Tag test : tagsToSplitOn.keySet()) {
-                if (test.equals(tag)) {
-                    continue;
-                }
-
+            for (int index2 : initialMap) {
+            	if(index1>=index2)
+            		continue;
                 // Check if the test is within MIN_SEGMENT_SIZE of tag
-                Integer testIndex = tagsToSplitOn.get(test);
-
-                if (testIndex >= index) {
-
-                    if (testIndex - index < MIN_SEGMENT_SIZE) {
-                        toRemove.add(test); // Remove whichever has larger index
-                        fine("Removing " + test + ": too close to " + tag);
-                    }
-
-                } else {
-                    if (index - testIndex < MIN_SEGMENT_SIZE) {
-                        toRemove.add(tag);
-                    }
-                }
-
+            	if (index2 - index1 < MIN_SEGMENT_SIZE) {
+            		toRemove.add(index2);
+//            		fine("Removing " + index2 + ": too close to " + index1);
+            	}
             }
-
         }
-
+        
         // Remove the unsuitable tags from the map
-        for (Tag tag : toRemove) {
-            tagsToSplitOn.remove(tag);
-        }
-
+        return initialMap.stream()
+        		.filter(i->!toRemove.contains(i))
+        		.mapToInt(i->i.intValue())
+        		.toArray();
     }
-
+    
     private void initialise() {
 
         /*
          * Find minima and maxima, to set the inflection points in the profile
          */
-        BooleanProfile maxima = this.profile.smooth(SMOOTH_WINDOW).getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-        BooleanProfile minima = this.profile.smooth(SMOOTH_WINDOW).getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD);
-        inflectionPoints = minima.or(maxima);
+    	
+    	IProfile smoothed = profile.smooth(SMOOTH_WINDOW);
+    	
+    	minOrMax = smoothed.getLocalMaxima(MAXIMA_WINDOW, ANGLE_THRESHOLD)
+        		.or(smoothed.getLocalMinima(MAXIMA_WINDOW, ANGLE_THRESHOLD));
 
-        /*
-         * Find second derivative rates of change
-         */
-        IProfile deltas = this.profile.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW);
-        deltaProfile = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW); // second
-                                                                                   // differential
-
-        /*
-         * Find levels of variation within the complete profile
-         */
-        double dMax = deltaProfile.getMax();
-        double dMin = deltaProfile.getMin();
-        double variationRange = Math.abs(dMax - dMin);
-
-        minRateOfChange = variationRange * MIN_RATE_OF_CHANGE;
+        
+    	// Find first derivative rates of change
+        IProfile firstDiff  = smoothed.calculateDeltas(DELTA_WINDOW);
+        
+        // Find second derivative rates of change
+        IProfile secondDiff = firstDiff.calculateDeltas(DELTA_WINDOW);
+        secondDifferentialMinOrMax = secondDiff.getLocalMaxima(MAXIMA_WINDOW, 0)
+        		.or(secondDiff.getLocalMinima(MAXIMA_WINDOW, 0));
+        
+//        fine("First diff: " + secondDifferentialMinOrMax.toString());
+        
+//        deltaProfile =  deltas.calculateDeltas(DELTA_WINDOW);
+//        deltaProfile = deltas.smooth(SMOOTH_WINDOW).calculateDeltas(DELTA_WINDOW).absolute(); // second
+//        deltaProfile.absolute();                                                                       // differential
+//        fine("Deltas: " + deltas.toString());
+////        fine("Second diff: " + deltaProfile.toString());
+//        /*
+//         * Find levels of variation within the complete profile
+//         */
+//        double dMax = deltaProfile.getMax();
+//        double dMin = deltaProfile.getMin();
+//        double variationRange = Math.abs(dMax - dMin);
+//
+//        minRateOfChange = variationRange * MIN_RATE_OF_CHANGE;
+//        deltaProfile = deltaProfile.absolute();     
 
     }
 
@@ -249,7 +250,7 @@ public class ProfileSegmenter implements Loggable {
      * @param segmentStart the start of the current segment being built
      * @return true if a segment end can be called at this index
      */
-    private boolean testSegmentEndFound(int index, int segmentStart) {
+    private boolean isValidSegmentEnd(int index, int segmentStart) {
 
         /*
          * The first segment must meet the length limit
@@ -261,29 +262,24 @@ public class ProfileSegmenter implements Loggable {
         // Priority is to not create segments that are too short. A border tag will
         // not be segmented.
         
-        /*
-         * If the index is within MIN_SEGMENT_SIZE of a forced BorderTagObject
-         * boundary, must not segment
-         */
-        for (Tag tag : tagsToSplitOn.keySet()) {
-            if (Math.abs(tagsToSplitOn.get(tag).intValue() - index) < MIN_SEGMENT_SIZE)
-                return false; 
+        // If the index is within MIN_SEGMENT_SIZE of a forced boundary, must not segment        
+        if(mustSplit!=null) {
+        	for(int mustSplitIndex : mustSplit) {
+        		if (Math.abs(mustSplitIndex-index) < MIN_SEGMENT_SIZE)
+        			return false; 
+        	}
         }
 
-        /*
-         * If the index is a forced BorderTagObject boundary, must segment
-         */
-        for (Tag tag : tagsToSplitOn.keySet()) {
-            if (tagsToSplitOn.get(tag).intValue() == index)
-                return true;
+        // If the index is a forced index boundary, must segment
+        if(mustSplit!=null) {
+        	for(int mustSplitIndex : mustSplit) {
+        		if (mustSplitIndex==index)
+        			return true; 
+        	}
         }
 
-        /*
-         * Segment must be long enough
-         */
-        int potentialSegLength = index - segmentStart;
-
-        if (potentialSegLength < MIN_SEGMENT_SIZE)
+        // Segment must be long enough
+        if (index - segmentStart < MIN_SEGMENT_SIZE)
             return false;
 
         /*
@@ -294,19 +290,17 @@ public class ProfileSegmenter implements Loggable {
         if (index > (profile.size()-1)-MIN_SEGMENT_SIZE)
             return false;
 
-        /*
-         * All length and position checks are passed. Now test for a good
-         * inflection point.
-         * 
-         * We want a minima or maxima, and the value must be distinct from its
-         * surroundings.
-         */
+        // Must be a minima or maxima        
+        if(!minOrMax.get(index))
+        	return false;
 
-        if ((inflectionPoints.get(index) && Math.abs(deltaProfile.get(index)) > minRateOfChange
-                && potentialSegLength >= MIN_SEGMENT_SIZE))
-            return true;
-
-        return false;
+        
+        //the value must be distinct from its surroundings.
+        if(!secondDifferentialMinOrMax.get(index))
+        	return false;
+//        if(deltaProfile.get(index) < minRateOfChange)
+//            return false;
+        return true;
     }
 
     @Override

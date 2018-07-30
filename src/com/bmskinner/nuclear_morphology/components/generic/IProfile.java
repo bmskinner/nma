@@ -276,7 +276,7 @@ public interface IProfile extends Serializable, Loggable {
     BooleanProfile getLocalMinima(int windowSize);
 
     /**
-     * Get the local minima that are beloe a threshold value
+     * Get the local minima that are below a threshold value
      * 
      * @param windowSize the minima window size
      * @param threshold the threshold value which minima must be below
@@ -353,7 +353,7 @@ public interface IProfile extends Serializable, Loggable {
     IProfile power(double exponent);
 
     /**
-     * Get the absolute values from a profile
+     * Get the absolute values from a profile.
      * 
      * @return
      */

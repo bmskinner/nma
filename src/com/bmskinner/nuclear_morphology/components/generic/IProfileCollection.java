@@ -65,18 +65,13 @@ public interface IProfileCollection extends Serializable, Loggable {
      * Get the requested profile from the cached profiles, or generate it from
      * the ProfileAggregate if it is not cached.
      * 
-     * @param type
-     *            the type of profile to fetch
-     * @param tag
-     *            the Tag to use as index zero
-     * @param quartile
-     *            the collection quartile to return (0-100)
+     * @param type the type of profile to fetch
+     * @param tag the Tag to use as index zero
+     * @param quartile the collection quartile to return (0-100)
      * @return the quartile profile from the given tag
-     * @throws UnavailableBorderTagException
-     *             when the tag is not present
+     * @throws UnavailableBorderTagException when the tag is not present
      * @throws ProfileException
-     * @throws UnavailableProfileTypeException
-     *             when the profile type does not have an associated aggregate
+     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
      */
     IProfile getProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException;
@@ -85,8 +80,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * Get the requested segmented profile. Generates it dynamically from the
      * appropriate ProfileAggregate.
      * 
-     * @param s
-     *            the pointType of the profile to find
+     * @param  s the pointType of the profile to find
      * @return the profile
      * @throws ProfileException
      * @throws UnavailableBorderTagException
@@ -99,20 +93,6 @@ public interface IProfileCollection extends Serializable, Loggable {
     ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
             UnsegmentedProfileException;
-
-    /**
-     * Get the profile aggregate for this collection
-     * 
-     * @return the aggregate
-     */
-    // IProfileAggregate getAggregate();
-
-    /**
-     * Test if the profile aggregate has been created
-     * 
-     * @return
-     */
-    // boolean hasAggregate();
 
     /**
      * Get the length of the profile aggregate (this is the integer value of the
@@ -233,10 +213,8 @@ public interface IProfileCollection extends Serializable, Loggable {
      * the given point type. The indexes will be corrected for storage. I
      * previously disabled this - unknown why.
      * 
-     * @param pointType
-     *            the point with the zero index in the segments
-     * @param n
-     *            the segment list
+     * @param pointType the point with the zero index in the segments
+     * @param n the segment list
      * @throws ProfileException
      * @throws UnavailableBorderTagException
      */
@@ -289,16 +267,15 @@ public interface IProfileCollection extends Serializable, Loggable {
     /**
      * Get the values within the profile aggregate for the given position
      * 
-     * @param type
-     *            the profile type to search
-     * @param position
-     *            the position between zero and one
+     * @param type the profile type to search
+     * @param position the position between zero and one
      * @return the values at that position
      * @throws UnavailableProfileTypeException
      *             if the profile type is not present
      */
     double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws UnavailableProfileTypeException;
 
+    @Deprecated
     List<Double> getXKeyset(@NonNull ProfileType type);
 
 }
