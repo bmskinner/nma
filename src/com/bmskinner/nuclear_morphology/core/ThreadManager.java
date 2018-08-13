@@ -47,8 +47,8 @@ public class ThreadManager implements Loggable {
     
     private final BlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1024);
 
-    private final ExecutorService executorService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors()-1, 
-    		Runtime.getRuntime().availableProcessors()-1, keepAliveTime,
+    private final ExecutorService executorService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 
+    		Runtime.getRuntime().availableProcessors()+1, keepAliveTime,
             TimeUnit.MILLISECONDS, executorQueue);
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
