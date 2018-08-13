@@ -41,7 +41,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultProfileCollection;

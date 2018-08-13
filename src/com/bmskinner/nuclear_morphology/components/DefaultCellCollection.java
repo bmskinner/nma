@@ -54,7 +54,6 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 //import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileManager;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileSegmenter.UnsegmentableProfileException;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;

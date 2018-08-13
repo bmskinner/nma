@@ -8,7 +8,6 @@ import java.io.File;
 import org.assertj.swing.util.Arrays;
 import org.junit.Test;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.ComponentFactory.ComponentCreationException;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;

@@ -123,6 +123,7 @@ public class DockableMainWindow extends AbstractMainWindow {
     		dockModel.getFloatDock(this).setChildDockFactory(floatFactory); // ensure floating docks are not converted to tab docks
             
             logPanel = new LogPanel(eh.getInputSupplier());
+            
             LogPanelHandler textHandler = new LogPanelHandler(logPanel);
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
@@ -130,7 +131,6 @@ public class DockableMainWindow extends AbstractMainWindow {
             Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
             SingleDock logTabDock = new SingleDock();
             logTabDock.addDockable(dockable1, new Position(0));
-            
             
             CompositeLineDock lineDock1 = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
 

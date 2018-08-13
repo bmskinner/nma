@@ -16,12 +16,13 @@
  *******************************************************************************/
 
 
-package com.bmskinner.nuclear_morphology.analysis.profiles;
+package com.bmskinner.nuclear_morphology.components;
 
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
+import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;

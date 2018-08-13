@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.components.generic.IProfileCollection;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileManager;

@@ -36,8 +36,6 @@ import org.eclipse.jdt.annotation.NonNull;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileCreator;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BooleanProfile;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderPoint;
 import com.bmskinner.nuclear_morphology.components.generic.DefaultBorderSegment;

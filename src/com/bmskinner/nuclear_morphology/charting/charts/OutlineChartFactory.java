@@ -58,7 +58,6 @@ import com.bmskinner.nuclear_morphology.analysis.mesh.MeshVertex;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMesh;
 import com.bmskinner.nuclear_morphology.analysis.mesh.DefaultMeshImage;
 import com.bmskinner.nuclear_morphology.analysis.mesh.UncomparableMeshImageException;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.analysis.signals.SignalManager;
 import com.bmskinner.nuclear_morphology.charting.ChartComponents;
 import com.bmskinner.nuclear_morphology.charting.datasets.CellDataset;
@@ -73,6 +72,7 @@ import com.bmskinner.nuclear_morphology.components.CellularComponent;
 import com.bmskinner.nuclear_morphology.components.DefaultCell;
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.ICell;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.generic.BorderTag;
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalGroup;
@@ -156,7 +156,7 @@ public class OutlineChartFactory extends AbstractChartFactory {
 
         Mesh<Nucleus> meshConsensus;
         try {
-            meshConsensus = new DefaultMesh((@NonNull Taggable) options.getComponent());
+            meshConsensus = new DefaultMesh((com.bmskinner.nuclear_morphology.components.Taggable) options.getComponent());
         } catch (MeshCreationException e1) {
             fine("Cannot make consensus mesh");
             stack("Error creating mesh", e1);

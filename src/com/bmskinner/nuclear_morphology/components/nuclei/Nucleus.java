@@ -18,9 +18,9 @@
 
 package com.bmskinner.nuclear_morphology.components.nuclei;
 
-import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
-import com.bmskinner.nuclear_morphology.analysis.profiles.Taggable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
+import com.bmskinner.nuclear_morphology.components.Profileable;
+import com.bmskinner.nuclear_morphology.components.Taggable;
 import com.bmskinner.nuclear_morphology.components.nuclear.IBorderPoint;
 import com.bmskinner.nuclear_morphology.components.nuclear.ISignalCollection;
 
