@@ -116,16 +116,13 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
 
             boolean oneHasConsensus = false;
             for (IAnalysisDataset d : options.getDatasets()) {
-                if (d.getCollection().hasConsensus()) {
+                if (d.getCollection().hasConsensus())
                     oneHasConsensus = true;
-                }
             }
 
-            if (oneHasConsensus) {
+            if (oneHasConsensus) 
                 return makeMultipleConsensusChart();
-            } else {
-                return makeEmptyChart();
-            }
+			return makeEmptyChart();
         }
 
         if (options.isSingleDataset()) {
@@ -146,10 +143,8 @@ public class ConsensusNucleusChartFactory extends AbstractChartFactory {
                     stack("Error creating mesh", e);
                     return makeErrorChart();
                 }
-
-            } else {
-                return makeSegmentedConsensusChart(options.firstDataset());
             }
+			return makeSegmentedConsensusChart(options.firstDataset());
 
         }
         return makeEmptyChart();

@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.swing.table.TableModel;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
@@ -58,12 +59,12 @@ public class ChartCache implements Cache {
     }
 
     @Override
-    public synchronized void add(ChartOptions options, JFreeChart chart) {
+    public synchronized void add(@NonNull ChartOptions options, @NonNull JFreeChart chart) {
         chartMap.put(options, chart);
     }
 
     @Override
-    public synchronized void add(TableOptions options, TableModel model) {
+    public synchronized void add(@NonNull TableOptions options, @NonNull TableModel model) {
     }
 
     @Override

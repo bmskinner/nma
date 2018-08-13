@@ -40,7 +40,8 @@ public class NucleusMeshXYDataset extends DefaultXYDataset {
         this.ratioMap.put(seriesKey, ratio);
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
 
         StringBuilder b = new StringBuilder();
         for (int series = 0; series < this.getSeriesCount(); series++) {
@@ -51,9 +52,7 @@ public class NucleusMeshXYDataset extends DefaultXYDataset {
                 double y = this.getYValue(series, item);
 
                 b.append("Series " + series + " - Item " + item + ": " + x + "   " + y + "\n");
-
             }
-
         }
         return b.toString();
     }

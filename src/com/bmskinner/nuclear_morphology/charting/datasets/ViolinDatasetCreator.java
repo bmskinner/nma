@@ -58,7 +58,7 @@ public class ViolinDatasetCreator extends AbstractDatasetCreator<ChartOptions> {
      * 
      * @param options
      */
-    public ViolinDatasetCreator(final ChartOptions options) {
+    public ViolinDatasetCreator(@NonNull final ChartOptions options) {
         super(options);
     }
 

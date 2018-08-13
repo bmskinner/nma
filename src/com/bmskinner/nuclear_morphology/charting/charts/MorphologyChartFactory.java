@@ -608,7 +608,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
         if (!options.isNormalised()) {
             for (IAnalysisDataset d : options.getDatasets()) {
-                length = (int) Math.max(d.getCollection().getMedianArrayLength(), length);
+                length = Math.max(d.getCollection().getMedianArrayLength(), length);
             }
         }
 

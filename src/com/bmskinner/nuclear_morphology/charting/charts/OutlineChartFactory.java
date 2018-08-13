@@ -130,10 +130,9 @@ public class OutlineChartFactory extends AbstractChartFactory {
             if (options.isShowWarp()) {
                 finer("Warp chart for signal outline chart");
                 return makeSignalWarpChart();
-            } else {
-                finer("Signal CoM for signal outline chart");
-                return new NuclearSignalChartFactory(options).makeSignalCoMNucleusOutlineChart();
             }
+			finer("Signal CoM for signal outline chart");
+			return new NuclearSignalChartFactory(options).makeSignalCoMNucleusOutlineChart();
         } catch (Exception e) {
             warn("Error making signal chart");
             stack("Error making signal chart", e);
@@ -229,8 +228,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                                                                                             // set
                                                                                             // (fixed
                                                                                             // 1.12.2)
-        int w = (int) ((double) r.getWidth() * 1.2);
-        int h = (int) ((double) r.getHeight() * 1.2);
+        int w = (int) (r.getWidth() * 1.2);
+        int h = (int) (r.getHeight() * 1.2);
 
         int xOffset = w >> 1;
         int yOffset = h >> 1;
@@ -333,10 +332,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return makeErrorChart();
                     }
 
-                } else {
-                    return makeEmptyChart();
-
                 }
+				return makeEmptyChart();
 
             }
 
@@ -379,9 +376,8 @@ public class OutlineChartFactory extends AbstractChartFactory {
                         return makeErrorChart();
                     }
 
-                } else {
-                    return makeEmptyChart();
                 }
+				return makeEmptyChart();
             }
             return makeStandardCellOutlineChart();
         } catch (ChartCreationException e) {
@@ -846,10 +842,10 @@ public class OutlineChartFactory extends AbstractChartFactory {
         int yBase = positions[CellularComponent.Y_BASE];
 
         int padding = 10; // a border of pixels beyond the cell boundary
-        int wideW = (int) (positions[CellularComponent.WIDTH] + (padding * 2));
-        int wideH = (int) (positions[CellularComponent.HEIGHT] + (padding * 2));
-        int wideX = (int) (xBase - padding);
-        int wideY = (int) (yBase - padding);
+        int wideW = positions[CellularComponent.WIDTH] + (padding * 2);
+        int wideH = positions[CellularComponent.HEIGHT] + (padding * 2);
+        int wideX = xBase - padding;
+        int wideY = yBase - padding;
 
         wideX = wideX < 0 ? 0 : wideX;
         wideY = wideY < 0 ? 0 : wideY;

@@ -319,7 +319,7 @@ public class AnalysisDatasetTableCreator extends AbstractTableCreator {
             return createBlankTable();
         }
 
-        TableOptions op = (TableOptions) options;
+        TableOptions op = options;
 
         if (op.getType().equals(TableType.ANALYSIS_PARAMETERS)) {
             return createAnalysisParametersTable();
