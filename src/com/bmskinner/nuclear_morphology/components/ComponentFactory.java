@@ -22,6 +22,8 @@ import ij.gui.Roi;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.components.generic.IPoint;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
@@ -39,22 +41,16 @@ public interface ComponentFactory<E extends CellularComponent> extends Loggable 
     /**
      * Create a component of the appropriate class for the factory
      * 
-     * @param roi
-     *            the roi to create a nucleus from
-     * @param file
-     *            the image file the component is found in
-     * @param channel
-     *            the RGB image channel
-     * @param originalPosition
-     *            the position of the roi in the source image in the format of
+     * @param roi the roi to create a nucleus from
+     * @param file the image file the component is found in
+     * @param channel the RGB image channel
+     * @param originalPosition the position of the roi in the source image in the format of
      *            {@link CellularComponent#getPosition()}
-     * @param centreOfMass
-     *            the centre of mass of the roi
+     * @param centreOfMass the centre of mass of the roi
      * @return a component of the type for this factory
-     * @throws ComponentCreationException
-     *             if creation fails
+     * @throws ComponentCreationException if creation fails
      */
-    E buildInstance(Roi roi, File file, int channel, int[] originalPosition, IPoint centreOfMass)
+    E buildInstance(@NonNull Roi roi, File file, int channel, int[] originalPosition, @NonNull IPoint centreOfMass)
             throws ComponentCreationException;
 
     /**

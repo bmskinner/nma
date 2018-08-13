@@ -57,7 +57,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
     }
 
-    public void addValues(@NonNull final IProfile profile) throws ProfileException {
+    @Override
+	public void addValues(@NonNull final IProfile profile) throws ProfileException {
 
         if (counter >= profileCount)
             throw new ProfileException("Aggregate is full");
@@ -78,11 +79,13 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
 
     }
 
-    public int length() {
+    @Override
+	public int length() {
         return length;
     }
 
-    public IProfile getMedian() {
+    @Override
+	public IProfile getMedian() {
         return calculateQuartile(Stats.MEDIAN);
     }
 
@@ -115,7 +118,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      *            the position to search. Must be between 0 and 1.
      * @return an unsorted array of the values at the given position
      */
-    public double[] getValuesAtPosition(double position) {
+    @Override
+	public double[] getValuesAtPosition(double position) {
         if (position < 0 || position > 1)
             throw new IllegalArgumentException("Desired x-position is out of range: " + position);
 
@@ -138,7 +142,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
      * 
      * @return the Profile of positions
      */
-    public IProfile getXPositions() {
+    @Override
+	public IProfile getXPositions() {
         float[] result = new float[length];
 
         float profileIncrement = 100f / (float) length;
@@ -154,7 +159,8 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         return new FloatProfile(result);
     }
 
-    public List<Double> getXKeyset() {
+    @Override
+	public List<Double> getXKeyset() {
         List<Double> result = new ArrayList<Double>(length);
         for (int i = 0; i < length; i++) {
             double profilePosition = (double) i / (double) length;

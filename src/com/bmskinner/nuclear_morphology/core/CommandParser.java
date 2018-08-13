@@ -48,12 +48,15 @@ public class CommandParser implements Loggable {
 	    new ConfigFileReader();
 	    
 	    if(headless){
-	    	log("Running on folder: "+folder.getAbsolutePath());
-	    	try {
-				new BasicAnalysisPipeline(folder);
-			} catch (Exception e) {
-				error("Error in pipeline", e);
-			}
+	    	
+	    	if(folder!=null) {
+	    		log("Running on folder: "+folder.getAbsolutePath());
+	    		try {
+	    			new BasicAnalysisPipeline(folder);
+	    		} catch (Exception e) {
+	    			error("Error in pipeline", e);
+	    		}
+	    	}
 	    } else {
 	        runWithGUI();
 	    }

@@ -217,7 +217,7 @@ public interface ICellCollection
      * @param cell
      * @return
      */
-    boolean contains(@NonNull ICell cell);
+    boolean contains(ICell cell);
 
     /**
      * Test if a cell with the given id is present in the collection
@@ -225,7 +225,7 @@ public interface ICellCollection
      * @param cellID the id of the cell
      * @return
      */
-    boolean contains(@NonNull UUID cellID);
+    boolean contains(UUID cellID);
 
     /**
      * Test if the given cell object is present (== test)

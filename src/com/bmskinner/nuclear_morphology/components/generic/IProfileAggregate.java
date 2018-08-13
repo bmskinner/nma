@@ -20,11 +20,18 @@ package com.bmskinner.nuclear_morphology.components.generic;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 
 public interface IProfileAggregate {
 
-    void addValues(IProfile yvalues) throws ProfileException;
+    /**
+     * Add the values from the given profile to the aggregate via interpolation
+     * @param yvalues
+     * @throws ProfileException
+     */
+    void addValues(@NonNull IProfile yvalues) throws ProfileException;
 
     /**
      * Get the size of the bins covering the range 0-100

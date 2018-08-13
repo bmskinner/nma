@@ -18,21 +18,11 @@
 
 package com.bmskinner.nuclear_morphology.core;
 
-import java.awt.Cursor;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -40,13 +30,10 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetSegmentationMet
 import com.bmskinner.nuclear_morphology.components.IAnalysisDataset;
 import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.components.options.IAnalysisOptions;
-import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
-import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
-import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
-import com.bmskinner.nuclear_morphology.gui.ConsensusNucleusPanel;
+import com.bmskinner.nuclear_morphology.core.InputSupplier.RequestCancelledException;
 import com.bmskinner.nuclear_morphology.gui.DatasetEvent;
 import com.bmskinner.nuclear_morphology.gui.DatasetEventListener;
 import com.bmskinner.nuclear_morphology.gui.DatasetUpdateEvent;
@@ -65,6 +52,7 @@ import com.bmskinner.nuclear_morphology.gui.actions.DatasetArithmeticAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportNuclearStatsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportShellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExportStatsAction.ExportSignalsAction;
+import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ExtractRandomCellsAction;
 import com.bmskinner.nuclear_morphology.gui.actions.FishRemappingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.LobeDetectionAction;
@@ -78,21 +66,13 @@ import com.bmskinner.nuclear_morphology.gui.actions.ReplaceSourceImageDirectoryA
 import com.bmskinner.nuclear_morphology.gui.actions.RunProfilingAction;
 import com.bmskinner.nuclear_morphology.gui.actions.RunSegmentationAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SaveDatasetAction;
-import com.bmskinner.nuclear_morphology.gui.actions.ExportWorkspaceAction;
 import com.bmskinner.nuclear_morphology.gui.actions.ShellAnalysisAction;
 import com.bmskinner.nuclear_morphology.gui.actions.SingleDatasetResultAction;
 import com.bmskinner.nuclear_morphology.gui.actions.WorkspaceImportAction;
 import com.bmskinner.nuclear_morphology.gui.dialogs.collections.CellCollectionOverviewDialog;
-import com.bmskinner.nuclear_morphology.gui.main.MainWindow;
-import com.bmskinner.nuclear_morphology.gui.tabs.CosmeticHandler;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener;
 import com.bmskinner.nuclear_morphology.gui.tabs.DatasetSelectionListener.DatasetSelectionEvent;
-import com.bmskinner.nuclear_morphology.gui.tabs.TabPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.nuclear.NuclearStatisticsPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.segments.SegmentsDetailPanel;
-import com.bmskinner.nuclear_morphology.gui.tabs.signals.SignalsDetailPanel;
 import com.bmskinner.nuclear_morphology.io.CellFileExporter;
-import com.bmskinner.nuclear_morphology.io.WorkspaceImporter;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 /**
@@ -208,6 +188,44 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
         	final IAnalysisDataset selectedDataset = selectedDatasets.isEmpty() ? null
                     : selectedDatasets.get(0);
         	
+        	if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
+                String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
+                if(s.equals(""))
+                	return new PopulationImportAction(acceptor, EventHandler.this);
+                File f = new File(s);
+                return new PopulationImportAction(acceptor, EventHandler.this, f);
+            }
+            
+            if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
+            	return () -> {
+            		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
+            		if(s.equals("")) {
+            			new WorkspaceImportAction(acceptor, EventHandler.this).run();
+            			return;
+            		}
+            		File f = new File(s);
+            		new WorkspaceImportAction(acceptor, EventHandler.this, f).run();
+            	};
+
+            	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
+            		return () -> {
+            			String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
+            			if(s.equals(""))
+            				return;
+            			File f = new File(s);
+
+            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();;
+            		};
+            	}
+            
+            if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
+            	return () ->{
+            		createWorkspace();
+            	};
+        	
+        	if(selectedDataset==null)
+        		return null;
+        	
 
             if (event.type().equals(SignalChangeEvent.EXPORT_WORKSPACE))
                 return new ExportWorkspaceAction(DatasetListManager.getInstance().getWorkspaces(), acceptor, EventHandler.this);
@@ -275,43 +293,7 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
                         log("Export failed");
                     }
                 };
-            
-            if (event.type().startsWith(SignalChangeEvent.IMPORT_DATASET_PREFIX)) {
-                String s = event.type().replace(SignalChangeEvent.IMPORT_DATASET_PREFIX, "");
-                if(s.equals(""))
-                	return new PopulationImportAction(acceptor, EventHandler.this);
-                File f = new File(s);
-                return new PopulationImportAction(acceptor, EventHandler.this, f);
-            }
-            
-            if (event.type().startsWith(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX))
-            	return () -> {
-            		String s = event.type().replace(SignalChangeEvent.IMPORT_WORKSPACE_PREFIX, "");
-            		if(s.equals("")) {
-            			new WorkspaceImportAction(acceptor, EventHandler.this).run();
-            			return;
-            		}
-            		File f = new File(s);
-            		new WorkspaceImportAction(acceptor, EventHandler.this, f).run();
-            	};
-
-            	if (event.type().startsWith(SignalChangeEvent.NEW_ANALYSIS_PREFIX)) {
-            		return () -> {
-            			String s = event.type().replace(SignalChangeEvent.NEW_ANALYSIS_PREFIX, "");
-            			if(s.equals(""))
-            				return;
-            			File f = new File(s);
-
-            			new NewAnalysisAction(acceptor, EventHandler.this, f).run();;
-            		};
-            	}
-            
-            if (event.type().equals(SignalChangeEvent.NEW_WORKSPACE))
-            	return () ->{
-            		createWorkspace();
-            	};
-            	
-                        
+                    
             if (event.type().startsWith(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX))
             	return () ->{
             		String workspaceName = event.type().replace(SignalChangeEvent.REMOVE_FROM_WORKSPACE_PREFIX, "");
@@ -343,7 +325,9 @@ public class EventHandler implements Loggable, SignalChangeListener, DatasetEven
 						List<IWorkspace> workspaces = DatasetListManager.getInstance().getWorkspaces(selectedDataset);
 						for(IWorkspace w : workspaces) {
 							w.addBioSample(bsName);
-							w.getBioSample(bsName).addDataset(selectedDataset);
+							BioSample bs = w.getBioSample(bsName);
+							if(bs!=null)
+								bs.addDataset(selectedDataset);
 						}
 						fireDatasetSelectionEvent(selectedDataset); // Using to trigger a refresh of the populations panel
 					} catch (RequestCancelledException e) {

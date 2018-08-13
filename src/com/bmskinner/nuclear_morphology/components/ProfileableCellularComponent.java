@@ -487,7 +487,7 @@ public abstract class ProfileableCellularComponent extends DefaultCellularCompon
     }
 
     @Override
-	public ISegmentedProfile getProfile(ProfileType type) throws UnavailableProfileTypeException {
+	public ISegmentedProfile getProfile(@NonNull ProfileType type) throws UnavailableProfileTypeException {
 
         if (!this.hasProfile(type))
             throw new UnavailableProfileTypeException("Cannot get profile type " + type);

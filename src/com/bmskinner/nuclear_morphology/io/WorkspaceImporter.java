@@ -36,6 +36,7 @@ import org.jdom2.input.SAXBuilder;
 
 import com.bmskinner.nuclear_morphology.components.workspaces.DefaultWorkspace;
 import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace;
+import com.bmskinner.nuclear_morphology.components.workspaces.IWorkspace.BioSample;
 import com.bmskinner.nuclear_morphology.components.workspaces.WorkspaceFactory;
 import com.bmskinner.nuclear_morphology.io.Io.Importer;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
@@ -146,8 +147,9 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
 		        	 for(Element d : sampleDatasets) {
 		        		 String datasetId =  d.getValue();
 		        		 File f = new File(datasetId);
-
-		        		 w.getBioSample(name).addDataset(f);
+		        		 BioSample bs = w.getBioSample(name);
+		        		 if(bs!=null)
+		        			 bs.addDataset(f);
 		        	 }
 		         }
 		         		         
@@ -229,11 +231,9 @@ public abstract class WorkspaceImporter implements Loggable, Importer {
                 String group = arr[1];
                 
                 w.addBioSample(group);
-                
-                w.getBioSample(group).addDataset(f);
-                
-                
-
+                BioSample bs = w.getBioSample(group);
+                if(bs!=null)
+                	bs.addDataset(f);
             }
 
             if (f.exists()) {

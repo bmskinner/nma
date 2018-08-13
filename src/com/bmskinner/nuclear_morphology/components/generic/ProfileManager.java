@@ -18,6 +18,7 @@
 
 package com.bmskinner.nuclear_morphology.components.generic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -350,10 +351,10 @@ public class ProfileManager implements Loggable {
         fine("Updating core border tag index");
         // Store the existing core points in a map (OP and RP)
         // This is to force segmentation at the OP and RP
-        Map<Tag, Integer> map = new HashMap<Tag, Integer>();
+        List<Integer> map = new ArrayList<Integer>();
         for (Tag test : BorderTagObject.values(BorderTagType.CORE)) {
             int i = collection.getProfileCollection().getIndex(test);
-            map.put(test, i);
+            map.add(i);
             finer("Storing existing median " + test + " at index " + i + " in map");
         }
 
@@ -361,7 +362,7 @@ public class ProfileManager implements Loggable {
         finest(collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN).toString());
 
         // Overwrite the new tag for segmentation
-        map.put(tag, index);
+        map.add(index);
         finer("Replacing median " + tag + " with index " + index + " in segmenter map");
 
         // Store the offset for the new point
@@ -411,34 +412,31 @@ public class ProfileManager implements Loggable {
                     finer("Explicit setting of RP index to zero");
                     continue;
 
-                } else {
-
-                    // Other points are offset by an appropriate amount relative
-                    // to the new RP index
-                    int oldIndex = pc.getIndex(test);
-                    if (oldIndex != -1) { // Only bother if the tag exists
-
-                        int newIndex = CellularComponent.wrapIndex((oldIndex - index), pc.length()); // offset
-                                                                                                     // by
-                                                                                                     // 1
-                        pc.addIndex(test, newIndex);
-                        finer("Explicit setting of " + test + " index to " + newIndex + " from " + oldIndex);
-
-                        // Ensure that core tags (the OP) get segmented
-                        if (test.type().equals(BorderTagType.CORE)) {
-                            map.put(test, newIndex); // Overwrite the map
-                            finest("Forcing segmentation at index " + newIndex + " for " + test);
-                        }
-                    }
-
                 }
 
+                // Other points are offset by an appropriate amount relative
+                // to the new RP index
+                int oldIndex = pc.getIndex(test);
+                if (oldIndex != -1) { // Only bother if the tag exists
+
+                	int newIndex = CellularComponent.wrapIndex((oldIndex - index), pc.length()); // offset
+                	// by
+                	// 1
+                	pc.addIndex(test, newIndex);
+                	finer("Explicit setting of " + test + " index to " + newIndex + " from " + oldIndex);
+
+                	// Ensure that core tags (the OP) get segmented
+                	if (test.type().equals(BorderTagType.CORE)) {
+                		map.add(newIndex); // Overwrite the map
+                		finest("Forcing segmentation at index " + newIndex + " for " + test);
+                	}
+                }
             }
 
             rpIndex = pc.getIndex(tag);
             finer("After explicit set, RP index is " + rpIndex);
 
-            map.put(tag, 0); // the RP is back at zero
+            map.add(0); // the RP is back at zero
 
         }
 
