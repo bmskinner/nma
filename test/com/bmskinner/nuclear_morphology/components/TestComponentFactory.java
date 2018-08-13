@@ -1,6 +1,12 @@
 package com.bmskinner.nuclear_morphology.components;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
+
+import org.assertj.swing.util.Arrays;
+import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.Profileable;
 import com.bmskinner.nuclear_morphology.components.CellularComponent;
@@ -75,7 +81,7 @@ public class TestComponentFactory {
 	
 	/**
 	 * Create a rectangular component based at 10, 10 with the given width 
-	 * and height
+	 * and height. The border may be drawn from any starting position in the object
 	 * @param w
 	 * @param h
 	 * @return
@@ -94,11 +100,16 @@ public class TestComponentFactory {
 			int y = i<=w ? 0 : i<=w+h ? i-w : i<=w+h+w ? h : (w+h+w+h-i);
 			ypoints[i] = y+yBase;
 		}
+
+		// Choose offset so not all objects will start on the RP
+		int offset = (int) (Math.random()*(double)xpoints.length);
+		xpoints = offsetArray(xpoints, offset);
+		ypoints = offsetArray(ypoints, offset);
 		
-//		for(int i=0; i<(w+h)*2; i++) {
+//		for(int i=0; i<ypoints.length; i++) {
 //			System.out.println(xpoints[i]+"\t"+ypoints[i]);
 //		}
-
+		
 		Roi roi  = new PolygonRoi(xpoints, ypoints, xpoints.length, Roi.POLYGON);
 		IPoint com = IPoint.makeNew(xBase+(w/2), yBase+(h/2));
 		int[] position = {xBase, yBase, w, h};		
@@ -107,15 +118,53 @@ public class TestComponentFactory {
 		
 		n.rotate(rotation);
 		
-		// The roi interpolation will smooth corners
-		
-//		for(IBorderPoint b : n.getBorderList()) {
-//			System.out.println(b.toString());
-//		}
-
+		// Note - the roi interpolation will smooth corners
 		n.initialise(Profileable.DEFAULT_PROFILE_WINDOW_PROPORTION);
 		n.findPointsAroundBorder();
 		return n;
+	}
+	
+	/**
+	 * Offset the int array by the given amount with wrapping
+	 * @param array
+	 * @param offset the offset. Positive integer only.
+	 * @return
+	 */
+	private static int[] offsetArray(int[] array, int offset) {
+		int[] result = new int[array.length];
+		System.arraycopy(array, offset, result, 0, array.length-offset);
+		System.arraycopy(array, 0, result, array.length-offset, offset);
+		return result;
+	}
+	
+	@Test
+	public void testOffsettingWithZeroOffset() {
+		int[] arr = { 1, 2, 3, 4, 5 };
+		int offset = 0;
+		int[] exp = { 1, 2, 3, 4, 5 };
+		
+		int[] res = offsetArray(arr, offset);
+		assertArrayEquals(exp, res);
+	}
+	
+	@Test
+	public void testOffsettingWithSingleOffset() {
+		int[] arr = { 1, 2, 3, 4, 5 };
+		int offset = 1;
+		int[] exp = { 2, 3, 4, 5, 1 };
+		
+		int[] res = offsetArray(arr, offset);
+		assertArrayEquals(exp, res);
+	}
+	
+	@Test
+	public void testOffsettingWitArrayLengthOffset() {
+		int[] arr = { 1, 2, 3, 4, 5 };
+		int offset = arr.length;
+		int[] exp = { 1, 2, 3, 4, 5 };
+		
+		int[] res = offsetArray(arr, offset);
+		assertArrayEquals(exp, res);
 	}
 
 }

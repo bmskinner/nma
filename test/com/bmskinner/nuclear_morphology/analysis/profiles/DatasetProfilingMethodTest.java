@@ -76,11 +76,18 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
+		
+//		System.out.println("Median profile");
+//		System.out.println(median.toString());
 				
 		for(ICell cell : dataset.getCollection().getCells()) {
-			
 			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			assertTrue(equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f));
+			if(!equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f)) {
+//				System.out.println("Cell profile");
+//				System.out.println(cellProfile.toString());
+				fail();
+			}
+			
 		}
 	}
 	
