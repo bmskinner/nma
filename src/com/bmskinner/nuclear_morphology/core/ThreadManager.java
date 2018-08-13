@@ -36,17 +36,19 @@ import com.bmskinner.nuclear_morphology.logging.Loggable;
 public class ThreadManager implements Loggable {
     private static volatile ThreadManager instance   = null;
     private static final Object           lockObject = new Object(); // synchronisation
+   
     /*
      * Handle threading
      */
 
-    public static final int corePoolSize    = 100;
-    public static final int maximumPoolSize = 100;
+//    public static final int corePoolSize    = 100;
+//    public static final int maximumPoolSize = 100;
     public static final int keepAliveTime   = 10000;
     
     private final BlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1024);
 
-    private final ExecutorService executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+    private final ExecutorService executorService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors()-1, 
+    		Runtime.getRuntime().availableProcessors()-1, keepAliveTime,
             TimeUnit.MILLISECONDS, executorQueue);
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
@@ -58,7 +60,6 @@ public class ThreadManager implements Loggable {
     
     public int queueLength(){
     	return queueLength.get();
-//    	return executorQueue.size();
     }
 
     /**
@@ -68,19 +69,14 @@ public class ThreadManager implements Loggable {
      */
     public static ThreadManager getInstance() {
 
-        if (instance != null) {
+        if (instance != null)
             return instance;
-        } else {
-
-            synchronized (lockObject) {
-                if (instance == null) {
-                    instance = new ThreadManager();
-                }
-            }
-
-            return instance;
-        }
-
+		synchronized (lockObject) {
+		    if (instance == null) {
+		        instance = new ThreadManager();
+		    }
+		}
+		return instance;
     }
     
     @Override
