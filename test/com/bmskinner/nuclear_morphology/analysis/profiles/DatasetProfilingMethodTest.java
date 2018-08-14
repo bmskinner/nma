@@ -44,74 +44,49 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		logger.setLevel(Level.FINE);
 		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
 	}
-
-	@Test
-	public void testSingleCellDataset() throws Exception {
-
-		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
+	
+	private void testProfiling(IAnalysisDataset dataset) throws Exception {
 		DatasetProfilingMethod m = new DatasetProfilingMethod(dataset);
 		m.call();
-		
+
 		// Check the collection
 		IProfile median = dataset.getCollection()
 				.getProfileCollection()
 				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		
-		ICell cell = dataset.getCollection().getCells().stream().findFirst().get();
-		
-		ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+						
+		for(ICell cell : dataset.getCollection().getCells()) {
+			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+			if(!equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f))
+				fail();			
+		}
+	}
 
-//		A single cell dataset has the same profile for median
-		assertTrue(equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f));
+	@Test
+	public void testSingleCellDataset() throws Exception {
+		IAnalysisDataset dataset = TestDatasetFactory.squareDataset(1);
+		testProfiling(dataset);
 	}
 	
 	@Test
 	public void testMultiCellIdenticalRectangularDataset() throws Exception {
-
-		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0);
-		DatasetProfilingMethod m = new DatasetProfilingMethod(dataset);
-		m.call();
-
-		// Check the collection
-		IProfile median = dataset.getCollection()
-				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-		
-//		System.out.println("Median profile");
-//		System.out.println(median.toString());
-				
-		for(ICell cell : dataset.getCollection().getCells()) {
-			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			if(!equals(median.toFloatArray(), cellProfile.toFloatArray(), 0.0001f)) {
-//				System.out.println("Cell profile");
-//				System.out.println(cellProfile.toString());
-				fail();
-			}
-			
-		}
+		int nCells = 10;
+		IAnalysisDataset dataset = TestDatasetFactory.identicalRectangularDataset(nCells);
+		testProfiling(dataset);
+	}
+	
+	@Test
+	public void testMultiCellIdenticalRectangularDatasetIsNotAffectedByFixedBorderOffset() throws Exception {
+		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, TestDatasetFactory.DEFAULT_BASE_WIDTH, 
+				TestDatasetFactory.DEFAULT_BASE_HEIGHT, TestDatasetFactory.DEFAULT_X_BASE, TestDatasetFactory.DEFAULT_Y_BASE, 
+				TestDatasetFactory.DEFAULT_ROTATION, false, TestDatasetFactory.DEFAULT_BORDER_OFFSET);
+		testProfiling(dataset);
 	}
 	
 	@Test
 	public void testMultiCellVariableRectangularDataset() throws Exception {
 
 		IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 20);
-		DatasetProfilingMethod m = new DatasetProfilingMethod(dataset);
-		m.call();
-
-		// Check the collection
-		IProfile median = dataset.getCollection()
-				.getProfileCollection()
-				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
-				
-		for(ICell cell : dataset.getCollection().getCells()) {
-			
-			ISegmentedProfile cellProfile = cell.getNucleus().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-			System.out.println("Cell: ");
-			System.out.println(cellProfile.valueString());
-		}
-				
-		System.out.println("Median profile");
-		System.out.println(median.toString());
+		testProfiling(dataset);
 	}
 	
 	@Test
@@ -126,8 +101,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 			for(int yBase = -10; yBase<10; yBase++) {
 				
 				System.out.println("xBase "+xBase+"; yBase "+yBase);
-				IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, 0);
-//				System.out.println("Created dataset");
+				IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, 0, false, 20);
 				
 				Nucleus loopCell = null;
 				
@@ -178,7 +152,7 @@ public class DatasetProfilingMethodTest extends FloatArrayTester {
 		// Allow variation in angles from none to 90 degrees
 		for(int angle=0; angle<90; angle++) {
 
-			IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, angle);
+			IAnalysisDataset dataset = TestDatasetFactory.variableRectangularDataset(10, 0, 40, 50, xBase, yBase, angle, false, 20);
 
 			IAnalysisMethod m = new DatasetProfilingMethod(dataset);
 			m.call();

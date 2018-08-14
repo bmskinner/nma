@@ -29,10 +29,13 @@ import com.bmskinner.nuclear_morphology.components.generic.BorderTagObject;
 import com.bmskinner.nuclear_morphology.components.generic.IProfile;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.components.generic.Tag;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableBorderTagException;
+import com.bmskinner.nuclear_morphology.components.generic.UnavailableProfileTypeException;
 import com.bmskinner.nuclear_morphology.stats.Stats;
 
 /**
- * The method for profiling nuclei within a dataset
+ * The method for profiling nuclei within a dataset. This detects the optimal indexes
+ * to assign border tags within each nucleus
  * 
  * @author ben
  * @since 1.13.4
@@ -40,180 +43,170 @@ import com.bmskinner.nuclear_morphology.stats.Stats;
  */
 public class DatasetProfilingMethod extends SingleDatasetAnalysisMethod {
 
-    private static final Tag DEFAULT_BORDER_TAG = Tag.REFERENCE_POINT;
+	private static final Tag DEFAULT_BORDER_TAG = Tag.REFERENCE_POINT;
 
-    public static final int RECALCULATE_MEDIAN = 0;
+	public static final int RECALCULATE_MEDIAN = 0;
+	
+	private final ProfileIndexFinder finder = new ProfileIndexFinder();
 
-    public DatasetProfilingMethod(IAnalysisDataset dataset) {
-        super(dataset);
-    }
+	/**
+	 * Create a profiler for the given dataset
+	 * @param dataset
+	 */
+	public DatasetProfilingMethod(IAnalysisDataset dataset) {
+		super(dataset);
+	}
 
-    @Override
-    public IAnalysisResult call() throws Exception {
+	@Override
+	public IAnalysisResult call() throws Exception {
+		fine("Profiling collection");
+		run();
+		fine("Finished profiling collection");
+		return new DefaultAnalysisResult(dataset);
+	}
 
-        run();
-        IAnalysisResult r = new DefaultAnalysisResult(dataset);
+	/**
+	 * Calculate the median profile of the colleciton, and generate the best
+	 * fit offsets of each nucleus to match. 
+	 * 
+	 * The individual nuclei within the collection have had RP
+	 * determined from their internal profiles. (This is part of Nucleus
+	 * constructor)
+	 * 
+	 * Build the median based on the RP indexes.
+	 * If moving RP index in a nucleus improves the median, move it.
+	 * 
+	 * Continue until the best-fit of RP has been obtained.
+	 * 
+	 * Find the OP and other BorderTags in the median
+	 * 
+	 * Apply to nuclei using offsets
+	 * 
+	 * @param collection
+	 * @param pointType
+	 * @throws ProfileException 
+	 * @throws UnavailableProfileTypeException 
+	 * @throws UnavailableBorderTagException 
+	 * @throws NoDetectedIndexException 
+	 */
+	private void run() throws ProfileException, UnavailableBorderTagException, UnavailableProfileTypeException, NoDetectedIndexException {
 
-        return r;
-    }
+		ICellCollection collection = dataset.getCollection();
 
-    private void run() {
-        runProfiler(DEFAULT_BORDER_TAG);
-    }
+		collection.createProfileCollection();
 
-    /**
-     * Calculaate the median profile of the colleciton, and generate the best
-     * fit offsets of each nucleus to match
-     * 
-     * @param collection
-     * @param pointType
-     */
-    private void runProfiler(Tag pointType) {
-
-        try {
-            fine("Profiling collection");
-
-            /*
-             * The individual nuclei within the collection have had RP
-             * determined from their internal profiles. (This is part of Nucleus
-             * constructor)
-             * 
-             * Build the median based on the RP indexes.
-             * 
-             * 
-             * If moving RP index in a nucleus improves the median, move it.
-             * 
-             * Continue until the best-fit of RP has been obtained.
-             * 
-             * Find the OP and other BorderTags in the median
-             * 
-             * Apply to nuclei using offsets
-             * 
-             * 
-             */
-
-            ICellCollection collection = dataset.getCollection();
-
-
-            collection.createProfileCollection();
-            finest("Created profile collections");
-
-            // Create a median from the current reference points in the nuclei
-            IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT,
-            		Stats.MEDIAN);
-            finest("Fetched median from initial RP");
-
-            // RP index *should be* zero in the median profile at this point
-            // Check this before updating nuclei
-            ProfileIndexFinder finder = new ProfileIndexFinder();
-            int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-            fine("RP in default median is located at index " + rpIndex);
-
-            // Update the nucleus profiles to best fit the median
-            collection.getProfileManager().offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+		// Create a median from the current reference points in the nuclei
+		IProfile median = collection.getProfileCollection()
+				.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN);
 
 
-            int coercionCounter = 0;
-            while (rpIndex != 0) {
+		// RP index *should be* zero in the median profile at this point
+		// Check this before updating nuclei
+		
+		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		finer("RP in default median is located at index " + rpIndex);
 
-                // Rebuild the median and offset the nuclei until the RP settles
-                // at zero
-                fine("Coercing RP to zero, round " + coercionCounter);
-                coercionCounter++;
-                rpIndex = coerceRPToZero(collection);
+		// Update the position of the RP in the nuclei to best fit the median
+		collection.getProfileManager().updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
 
-                if (coercionCounter > 50) {
-                    warn("Unable to cleanly assign RP");
-                    break;
-                }
-            }
+		// Regenerate the profile aggregates based on the new RP positions
+		collection.getProfileManager().recalculateProfileAggregates();
+		
+		rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+		if(rpIndex != 0) 
+			warn("Could not assign RP cleanly");
 
-            fine("Identified best RP in nuclei and constructed median profiles");
+//		int coercionCounter = 0;
+//		while (rpIndex != 0) {
+//
+//			// Rebuild the median and offset the nuclei until the RP settles
+//			// at zero
+//			fine("Coercing RP to zero, round " + coercionCounter);
+//			coercionCounter++;
+//			rpIndex = coerceRPToZero(collection);
+//
+//			if (coercionCounter > 50) {
+//				warn("Unable to cleanly assign RP");
+//				break;
+//			}
+//		}
+		identifyNonCoreTags(collection);
+	}
 
-            fine("Current state of profile collection:" + collection.getProfileCollection().tagString());
+	private synchronized void identifyNonCoreTags(ICellCollection collection) throws NoDetectedIndexException, UnavailableBorderTagException, UnavailableProfileTypeException, ProfileException {
+		// Identify the border tags in the median profile
+		for (Tag tag : BorderTagObject.values()) {
 
-            fine("Identifying OP and other BorderTags");
+			// Don't identify the RP again, it could cause off-by-one errors
+			// We do need to assign the RP in other ProfileTypes though
+			if (tag.equals(Tag.REFERENCE_POINT)) {
 
-            // Identify the border tags in the median profile
+				fine("Checking location of RP in profile");
+				int index = finder.identifyIndex(collection, tag);
+				fine("RP is found at index " + index);
+				continue;
+			}
 
-            for (Tag tag : BorderTagObject.values()) {
+			int index = 0;
 
-                // Don't identify the RP again, it could cause off-by-one errors
-                // We do need to assign the RP in other ProfileTypes though
-                if (tag.equals(Tag.REFERENCE_POINT)) {
+			try {
 
-                    fine("Checking location of RP in profile");
-                    int index = finder.identifyIndex(collection, tag);
-                    fine("RP is found at index " + index);
-                    continue;
-                }
+				index = finder.identifyIndex(collection, tag);
 
-                int index = 0;
+			} catch (NoDetectedIndexException e) {
+				warn("Unable to detect " + tag + " using default ruleset");
 
-                try {
+				if (tag.type().equals(BorderTag.BorderTagType.CORE)) {
+					warn("Falling back on reference point");
+				}
+				continue;
+			} catch (IllegalArgumentException e) {
+				fine("No ruleset for " + tag + "; skipping");
+				continue;
+			}
 
-                    index = finder.identifyIndex(collection, tag);
+			// Add the index to the median profiles
+			collection.getProfileManager().updateProfileCollectionOffsets(tag, index);
 
-                } catch (NoDetectedIndexException e) {
-                    warn("Unable to detect " + tag + " using default ruleset");
+			fine(tag + " in median is located at index " + index);
 
-                    if (tag.type().equals(BorderTag.BorderTagType.CORE)) {
-                        warn("Falling back on reference point");
-                    }
-                    continue;
-                } catch (IllegalArgumentException e) {
-                    fine("No ruleset for " + tag + "; skipping");
-                    continue;
-                }
+			// Create a median from the current reference points in the
+			// nuclei
+			IProfile tagMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag,
+					Stats.MEDIAN);
 
-                // Add the index to the median profiles
-                collection.getProfileManager().updateProfileCollectionOffsets(tag, index);
+			collection.getProfileManager().updateTagToMedianBestFit(tag, ProfileType.ANGLE, tagMedian);
+			fine("Assigned offset in nucleus profiles for " + tag);
+		}
+	}
 
-                fine(tag + " in median is located at index " + index);
-
-                // Create a median from the current reference points in the
-                // nuclei
-                IProfile tagMedian = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag,
-                		Stats.MEDIAN);
-
-                collection.getProfileManager().offsetNucleusProfiles(tag, ProfileType.ANGLE, tagMedian);
-                fine("Assigned offset in nucleus profiles for " + tag);
-            }
-
-            fine("Finished profiling collection");
-
-        } catch (Exception e) {
-            error("Error in dataset profiling", e);
-        }
-    }
-
-    private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException {
-
-        ProfileIndexFinder finder = new ProfileIndexFinder();
-
-        // check the RP index in the median
-        int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-        fine("RP in median is located at index " + rpIndex);
-
-        // If RP is not at zero, update
-        if (rpIndex != 0) {
-
-            fine("RP in median is not yet at zero");
-
-            // Update the offsets in the profile collection to the new RP
-            collection.getProfileManager().updateRP(rpIndex);
-
-            // Find the effects of the offsets on the RP
-            // It should be found at zero
-            finer("Checking RP index again");
-            rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
-            fine("RP in median is now located at index " + rpIndex);
-
-            fine("Current state of profile collection:");
-            fine(collection.getProfileCollection().tagString());
-
-        }
-
-        return rpIndex;
-    }
+//	private int coerceRPToZero(ICellCollection collection) throws NoDetectedIndexException {
+//
+//		ProfileIndexFinder finder = new ProfileIndexFinder();
+//
+//		// check the RP index in the median
+//		int rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+//		fine("RP in median is located at index " + rpIndex);
+//
+//		// If RP is not at zero, update
+//		if (rpIndex != 0) {
+//
+//			fine("RP in median is not yet at zero");
+//
+//			// Update the offsets in the profile collection to the new RP
+//			collection.getProfileManager().updateRP(rpIndex);
+//
+//			// Find the effects of the offsets on the RP
+//			// It should be found at zero
+//			finer("Checking RP index again");
+//			rpIndex = finder.identifyIndex(collection, Tag.REFERENCE_POINT);
+//			fine("RP in median is now located at index " + rpIndex);
+//
+//			fine("Current state of profile collection:");
+//			fine(collection.getProfileCollection().tagString());
+//
+//		}
+//
+//		return rpIndex;
+//	}
 }

@@ -257,7 +257,7 @@ public interface ICellCollection
     IProfileCollection getProfileCollection();
 
     /**
-     * Generate the profile collection and aggregates based on the profile
+     * Generate the profile and aggregates based on the profile
      * length of the population.
      * @throws ProfileException 
      */

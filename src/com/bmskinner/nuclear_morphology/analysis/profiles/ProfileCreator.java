@@ -116,7 +116,6 @@ public class ProfileCreator implements Loggable {
 
         Shape s = target.toShape();
 
-        int index = 0;
         List<IBorderPoint> borderList = target.getBorderList();
 
         if (borderList == null)
@@ -127,36 +126,22 @@ public class ProfileCreator implements Loggable {
         if (pointOffset == 0)
             throw new UnavailableBorderPointException("Window size has not been set in Profilable object");
 
-        Iterator<IBorderPoint> it = borderList.iterator();
+        for(int index=0; index<borderList.size(); index++) {
 
-        while (it.hasNext()) {
-
-            IBorderPoint point = it.next();
-
+        	IBorderPoint point       = borderList.get(index);
             IBorderPoint pointBefore = point.prevPoint(pointOffset);
+            IBorderPoint pointAfter  = point.nextPoint(pointOffset);
 
-            IBorderPoint pointAfter = point.nextPoint(pointOffset);
-
-            // Get the smallest angle between the points
+            // Find the smallest angle between the points
             float angle = (float) point.findAngle(pointBefore, pointAfter);
-
-            // Now discover if this measured angle is inside or outside the
-            // object
-
-            // find the halfway point between the first and last points.
-            // is this within the roi?
-            // if yes, keep min angle as interior angle
-            // if no, 360-min is interior
+            
+            // Is the measured angle is inside or outside the object?
+            // Take the midpoint between the before and after points.
+            // If it is within the ROI, the angle is the interior angle
+            // if no, 360-min is the interior angle
             float midX = (float) ((pointBefore.getX() + pointAfter.getX()) / 2);
             float midY = (float) ((pointBefore.getY() + pointAfter.getY()) / 2);
-
-            // Check if the polygon contains the point
-            if (s.contains(midX, midY)) {
-                angles[index] = angle;
-            } else {
-                angles[index] = 360 - angle;
-            }
-            index++;
+            angles[index] = s.contains(midX, midY) ? angle : 360 - angle;
         }
 
         // Make a new profile. If possible, use the internal segmentation type of the component
@@ -166,7 +151,6 @@ public class ProfileCreator implements Loggable {
         } else {
         	newProfile = new SegmentedFloatProfile(angles);
         }
-//        ISegmentedProfile 
 
         // Reapply any segments that were present in the original profile
         if (!segments.isEmpty()) 
@@ -175,10 +159,14 @@ public class ProfileCreator implements Loggable {
     }
 
     private void reapplySegments(List<IBorderSegment> segments, ISegmentedProfile profile) {
+//    	fine("Detected preexisting segments to apply");
+//    	for(IBorderSegment s : segments) {
+//    		fine(s.toString());
+//    	}
         // If the border list has changed, the profile lengths will be different
         // In this case, add and normalise the segment lengths
         if (segments.get(0).getProfileLength() != target.getBorderLength()) {
-
+//        	fine("Rescaling preexisting segments from "+segments.get(0).getProfileLength()+" to "+target.getBorderLength());
             try {
                 segments = IBorderSegment.scaleSegments(segments, target.getBorderLength());
             } catch (ProfileException e) {

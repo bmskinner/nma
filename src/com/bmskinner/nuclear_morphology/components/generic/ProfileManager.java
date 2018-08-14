@@ -90,11 +90,22 @@ public class ProfileManager implements Loggable {
      * @param type
      * @param median
      */
-    public void offsetNucleusProfiles(Tag tag, ProfileType type, IProfile median) {
+    public void updateTagToMedianBestFit(Tag tag, ProfileType type, IProfile median) {
 
-        collection.getNuclei().parallelStream().forEach(n -> {
+        collection.getNuclei().stream().forEach(n -> {
             if (!n.isLocked()) {
 
+            	int oldIndex = n.getBorderIndex(tag);
+            	if(Tag.REFERENCE_POINT.equals(tag)) {
+            		try {
+            			System.out.println(tag+" from old index "+oldIndex);
+            			System.out.println(n.getProfile(type, tag).valueString());
+            		} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e2) {
+            			// TODO Auto-generated catch block
+            			e2.printStackTrace();
+            		}
+            	}
+            	
                 // returns the positive offset index of this profile which best
                 // matches the median profile
                 int newIndex;
@@ -109,16 +120,24 @@ public class ProfileManager implements Loggable {
                 try {
                     n.setBorderTag(tag, newIndex);
                 } catch (IndexOutOfBoundsException e) {
-                    warn("Error updating nucleus tag " + n.getNameAndNumber());
+                    warn("Error updating nucleus tag " + tag+": "+ n.getNameAndNumber());
                     stack(e.getMessage(), e);
                     return;
                 }
 
                 if (tag.equals(Tag.TOP_VERTICAL) || tag.equals(Tag.BOTTOM_VERTICAL)) {
-
                     n.updateVerticallyRotatedNucleus();
                     n.updateDependentStats();
-
+                }
+                
+                if(Tag.REFERENCE_POINT.equals(tag)) {
+                	try {
+                		System.out.println(tag+" from new index "+newIndex);
+                		System.out.println(n.getProfile(type, tag).valueString());
+                	} catch (UnavailableBorderTagException | UnavailableProfileTypeException | ProfileException e2) {
+                		// TODO Auto-generated catch block
+                		e2.printStackTrace();
+                	}
                 }
             }
         });
@@ -156,23 +175,23 @@ public class ProfileManager implements Loggable {
      * 
      * @param index
      */
-    public void updateRP(int index) {
-
-        // Get the existing median, and offset it to the new index
-        IProfile median;
-        try {
-            median = collection.getProfileCollection()
-                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).offset(index);
-            
-            
-            offsetNucleusProfiles(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
-
-            collection.createProfileCollection();
-        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
-            fine("Error updating the RP", e);
-            return;
-        }
-    }
+//    public void updateRP(int index) {
+//
+//        // Get the existing median, and offset it to the new index
+//        IProfile median;
+//        try {
+//            median = collection.getProfileCollection()
+//                    .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Stats.MEDIAN).offset(index);
+//            
+//            
+//            updateTagToMedianBestFit(Tag.REFERENCE_POINT, ProfileType.ANGLE, median);
+//
+//            collection.createProfileCollection();
+//        } catch (ProfileException | UnavailableBorderTagException | UnavailableProfileTypeException e) {
+//            fine("Error updating the RP", e);
+//            return;
+//        }
+//    }
 
     /**
      * Use the collection's ruleset to calculate the positions of the top and
@@ -216,9 +235,9 @@ public class ProfileManager implements Loggable {
             return;
         }
 
-        offsetNucleusProfiles(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
+        updateTagToMedianBestFit(Tag.TOP_VERTICAL, ProfileType.ANGLE, topMedian);
 
-        offsetNucleusProfiles(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
+        updateTagToMedianBestFit(Tag.BOTTOM_VERTICAL, ProfileType.ANGLE, btmMedian);
 
         collection.updateVerticalNuclei();
 
@@ -229,8 +248,7 @@ public class ProfileManager implements Loggable {
      * Update the location of the given border tag within the profile
      * 
      * @param tag
-     * @param index
-     *            the new index within the median profile
+     * @param index the new index within the median profile
      * @throws IndexOutOfBoundsException
      * @throws UnavailableBorderTagException
      * @throws ProfileException
@@ -242,7 +260,8 @@ public class ProfileManager implements Loggable {
         finer("Updating border tag " + tag);
 
         if (tag.equals(Tag.REFERENCE_POINT)) {
-            updateRP(index);
+//            updateRP(index);
+        	warn("Disabled RP updates in ProfileManager:245 for now");
             return;
         }
 
@@ -287,7 +306,7 @@ public class ProfileManager implements Loggable {
         IProfile median = collection.getProfileCollection().getProfile(ProfileType.ANGLE, tag, Stats.MEDIAN);
 
         finer("Updating tag in nuclei");
-        offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
+        updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
 
         collection.updateVerticalNuclei();
 
@@ -381,7 +400,7 @@ public class ProfileManager implements Loggable {
         // finest("Current state of regular profile collection:");
         // finest(collection.getProfileCollection(ProfileType.REGULAR).toString());
         finest("Offsetting individual nucleus indexes");
-        offsetNucleusProfiles(tag, ProfileType.ANGLE, median);
+        updateTagToMedianBestFit(tag, ProfileType.ANGLE, median);
 
         finer("Nucleus indexes for " + tag + " updated");
 
@@ -492,7 +511,8 @@ public class ProfileManager implements Loggable {
 
     /**
      * Regenerate the profile aggregate in each of the profile types of the
-     * collection. The length is set to the angle profile length
+     * collection. The length is set to the angle profile length. The zero index
+     * of the profile aggregate is the RP.
      * @throws ProfileException 
      * 
      * @throws Exception
@@ -512,8 +532,7 @@ public class ProfileManager implements Loggable {
      * build the median profiles for all profile types. Also copy the segments
      * from the regular angle profile onto all other profile types
      * 
-     * @param destination
-     *            the collection to update
+     * @param destination the collection to update
      * @throws Exception
      */
     public void copyCollectionOffsets(final ICellCollection destination) throws ProfileException {

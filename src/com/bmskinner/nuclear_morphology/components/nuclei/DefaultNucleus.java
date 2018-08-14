@@ -131,6 +131,7 @@ public class DefaultNucleus extends SegmentedCellularComponent implements Nucleu
 
         try {
 
+        	// estimate the RP using the round rules
             RuleSet rpSet = RuleSet.roundRPRuleSet();
             IProfile p = this.getProfile(rpSet.getType());
             ProfileIndexFinder f = new ProfileIndexFinder();
