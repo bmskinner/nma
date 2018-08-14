@@ -23,7 +23,6 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
@@ -92,9 +91,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeEmptyChart() {
         JFreeChart chart = makeEmptyProfileChart(options.getType());
-
         applyAxisOptions(chart);
-
         return chart;
     }
 
@@ -139,17 +136,14 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      */
     public JFreeChart createProfileChart() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return makeEmptyProfileChart(options.getType());
-        }
 
-        if (options.isSingleDataset() && !options.isHideProfiles()) {
+        if (options.isSingleDataset() && !options.isHideProfiles())
             return makeSingleProfileChart();
-        }
 
-        if (options.isMultipleDatasets() || options.isHideProfiles()) {
+        if (options.isMultipleDatasets() || options.isHideProfiles())
             return makeMultiProfileChart();
-        }
         return makeEmptyProfileChart(options.getType());
     }
 
@@ -161,13 +155,11 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      */
     public JFreeChart makeIndividualNucleusProfileChart() {
 
-        if (options.isMultipleDatasets()) {
+        if (options.isMultipleDatasets())
             return makeEmptyChart();
-        }
 
-        if (options.getCell() == null) {
+        if (options.getCell() == null)
             return makeEmptyChart();
-        }
 
         finest("Creating individual nucleus profile chart");
 
@@ -271,13 +263,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
     /**
      * Create a segmented profile chart from a given XYDataset. Set the series
      * colours for each component. Draw lines on the offset indexes
-     * 
-     * @param dataset
-     *            the dataset the values come from
-     * @param normalised
-     *            should the scales be normalised
-     * @param rightAligm
-     *            should the chart be aligned to the right
      * @return a chart
      */
     private JFreeChart makeSingleProfileChart() {
@@ -290,10 +275,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         if (options.hasDatasets()) {
 
             try {
-
                 if (options.getType().equals(ProfileType.FRANKEN)) {
                     ds = new NucleusDatasetCreator(options).createFrankenSegmentDataset();
-
                 } else {
                     ds = new NucleusDatasetCreator(options).createSegmentedProfileDataset();
                 }
@@ -302,12 +285,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                 return makeErrorChart();
             }
 
-            int length = 100; // default if normalised
-
-            // if we set raw values, get the maximum nucleus length
-            if (!options.isNormalised()) {
-                length = collection.getMaxProfileLength();
-            }
+            int length = options.isNormalised() ? 100 : collection.getMaxProfileLength(); // default if normalised
 
             chart = makeProfileChart(ds, length, options.getType());
 
@@ -317,10 +295,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
             for (Tag tag : collection.getProfileCollection().getBorderTags()) {
 
-                // get the index of the tag
-
                 try {
-
                     int index = collection.getProfileCollection().getIndex(tag);
 
                     // get the offset from to the current draw point
@@ -329,25 +304,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
                     // adjust the index to the offset
                     index = CellularComponent.wrapIndex(index - offset, collection.getProfileCollection().length());
 
-                    double indexToDraw = index; // convert to a double to allow
-                                                // normalised positioning
+                    double indexToDraw = index; // convert to a double to allow normalised positioning
 
-                    if (options.isNormalised()) { // set to the proportion of
-                                                  // the point along the profile
+                    if (options.isNormalised()) // set to the proportion of the point along the profile
                         indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * 100);
-                    }
+
                     if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
                         int maxX = DatasetUtilities.findMaximumDomainValue(ds).intValue();
                         int amountToAdd = maxX - collection.getProfileCollection().length();
                         indexToDraw += amountToAdd;
-
                     }
 
-                    if (options.isShowMarkers()) {
-
+                    if (options.isShowMarkers())
                         addMarkerToXYPlot(plot, tag, indexToDraw);
-
-                    }
 
                 } catch (UnavailableBorderTagException e) {
                     fine("Tag not present in profile: " + tag);
@@ -361,7 +330,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         applyAxisOptions(chart);
         return chart;
     }
-
+    
     /**
      * Create a profile chart with the median line only, segmented. Can have
      * multiple datasets shown. If a single dataset is shown, the chart is real
@@ -374,28 +343,19 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
         JFreeChart chart = makeEmptyChart();
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return chart;
-        }
+
         applyAxisOptions(chart);
 
         XYPlot plot = chart.getXYPlot();
 
         // Set the length to 100 if normalised or multiple datasets.
         // Otherwise use the median profile length
-        int length;
-        // try {
-        length = options.isNormalised() || options.isMultipleDatasets() ? 100
+        int length = options.isNormalised() || options.isMultipleDatasets() ? 100
                 : options.firstDataset().getCollection()
-                        // .getMedianArrayLength();
                         .getProfileCollection().length() - 1;
-        // .getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, Quartile.MEDIAN)
-        // .size();
-        // } catch (UnavailableBorderTagException | ProfileException |
-        // UnavailableProfileTypeException e) {
-        // stack("Error getting median profile", e);
-        // return makeErrorChart();
-        // }
+
 
         // the default is to use an x range of 100, for a normalised chart
         plot.getDomainAxis().setRange(-1, length);
@@ -514,8 +474,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      * Create a profile chart from a given XYDataset. Set the series colours for
      * each component
      * 
-     * @param ds
-     *            the profile dataset
+     * @param ds the profile dataset
      * @return a chart
      */
     private JFreeChart makeProfileChart(XYDataset ds, int xLength, ProfileType type) {
@@ -571,14 +530,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
      * Create a multi dataset profile chart. Shows medians and iqrs for each
      * dataset, and scales to the given length
      * 
-     * @param list
-     *            the analysis datasets (contain colour information)
-     * @param medianProfiles
-     *            the medians
-     * @param iqrProfiles
-     *            the iqrs
-     * @param xLength
-     *            the length of the x axis
      * @return a chart
      */
     private JFreeChart makeMultiProfileChart() {
@@ -613,11 +564,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         }
 
         JFreeChart chart = createBaseXYChart();
-        // JFreeChart chart =
-        // ChartFactory.createXYLineChart(null,
-        // "Position", options.getType().getLabel(), null,
-        // PlotOrientation.VERTICAL, true, true,
-        // false);
 
         XYPlot plot = chart.getXYPlot();
         plot.getDomainAxis().setLabel("Position");
@@ -684,36 +630,24 @@ public class MorphologyChartFactory extends AbstractChartFactory {
 
     public JFreeChart makeVariabilityChart() {
 
-        if (!options.hasDatasets()) {
+        if (!options.hasDatasets())
             return makeEmptyProfileChart(options.getType());
-        }
 
         try {
-
-            if (options.isSingleDataset()) {
+            if (options.isSingleDataset())
                 return makeSingleVariabilityChart();
-            }
-
-            if (options.isMultipleDatasets()) {
-                return makeMultiVariabilityChart();
-            }
+            return makeMultiVariabilityChart();
         } catch (Exception e) {
-            warn("Error making variability chart");
-            log(Level.FINE, "Error making variability chart", e);
-            return makeEmptyProfileChart(options.getType());
+            return makeErrorChart();
         }
-
-        return makeEmptyProfileChart(options.getType());
     }
 
     /**
      * Create a variabillity chart showing the IQR for a single dataset. Segment
      * colours are applied.
      * 
-     * @param list
-     *            the dataset
-     * @param xLength
-     *            the length of the plot
+     * @param list the dataset
+     * @param xLength the length of the plot
      * @return a chart
      */
     private JFreeChart makeSingleVariabilityChart() {
@@ -721,7 +655,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         try {
             ds = new NucleusDatasetCreator(options).createIQRVariabilityDataset();
         } catch (ChartDatasetCreationException e) {
-            fine("Error creating variability chart", e);
             return makeErrorChart();
         }
 
@@ -772,10 +705,8 @@ public class MorphologyChartFactory extends AbstractChartFactory {
     /**
      * Create a variabillity chart showing the IQR for a multiple datasets.
      * 
-     * @param list
-     *            the datasets
-     * @param xLength
-     *            the length of the plot
+     * @param list the datasets
+     * @param xLength the length of the plot
      * @return a chart
      */
     private JFreeChart makeMultiVariabilityChart() throws Exception {
@@ -887,21 +818,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         applyAxisOptions(chart);
         return chart;
 
-    }
-
-    /**
-     * Create a chart showing the distribution of xy points for a segment start
-     * 
-     * @param options
-     *            the chart options. Should have a segID
-     * @return a chart
-     */
-    public JFreeChart makeSegmentStartPositionChart() {
-
-        if (options.hasDatasets()) {
-            return makeMultiSegmentStartPositionChart(options);
-        }
-        return ConsensusNucleusChartFactory.makeEmptyChart();
     }
 
     /**
@@ -1066,66 +982,6 @@ public class MorphologyChartFactory extends AbstractChartFactory {
     }
 
     /**
-     * Create a QQ plot for the given datasets, at the given positon along a
-     * profile
-     * 
-     * @param position
-     * @param list
-     * @param type
-     * @return
-     * @throws Exception
-     */
-    // public static JFreeChart createQQChart(Double position,
-    // List<AnalysisDataset> list, ProfileType type) throws Exception {
-    //
-    // JFreeChart chart =
-    // ChartFactory.createXYLineChart(null,
-    // "Angle", "Probability", null, PlotOrientation.VERTICAL, true, true,
-    // false);
-    //
-    // XYPlot plot = chart.getXYPlot();
-    //
-    // int datasetCount = 0;
-    // int iteration = 0;
-    // for(IAnalysisDataset dataset : list){
-    //
-    //// XYDataset ds =
-    // NucleusDatasetCreator.getInstance().createModalityProbabililtyDataset(position,
-    // dataset, type);
-    //// XYDataset values =
-    // NucleusDatasetCreator.getInstance().createModalityValuesDataset(position,
-    // dataset, type);
-    // ICellCollection collection = dataset.getCollection();
-    //
-    // double[] values =
-    // collection.getProfileCollection().getValuesAtPosition(position);
-    // XYDataset ds = new NucleusDatasetCreator().createQQDataset(values);
-    //
-    // Color colour = dataset.getDatasetColour() == null
-    // ? ColourSelecter.getColor(iteration)
-    // : dataset.getDatasetColour();
-    //
-    // plot.setDataset(datasetCount, ds);
-    //
-    // XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer(false,
-    // true);
-    // plot.setRenderer(datasetCount,lineRenderer);
-    // int seriesCount = plot.getDataset(datasetCount).getSeriesCount();
-    // for(int i=0; i<seriesCount;i++){
-    //
-    // lineRenderer.setSeriesPaint(i, colour);
-    // lineRenderer.setSeriesStroke(i, ChartComponents.MARKER_STROKE);
-    // lineRenderer.setSeriesVisibleInLegend(i, false);
-    // }
-    //
-    // datasetCount++;
-    // iteration++;
-    //
-    // }
-    // return chart;
-    // }
-
-    /**
      * Create a blank chart with default formatting for probability values
      * across a normalised profile
      * 
@@ -1161,9 +1017,7 @@ public class MorphologyChartFactory extends AbstractChartFactory {
         XYDataset secondProfileDataset;
         try {
             if (frankenNormalise) {
-
                 kruskalDataset = creator.createFrankenKruskalProfileDataset();
-
             } else {
                 kruskalDataset = creator.createKruskalProfileDataset();
             }

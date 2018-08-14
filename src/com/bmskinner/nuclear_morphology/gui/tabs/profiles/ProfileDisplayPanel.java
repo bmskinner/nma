@@ -85,10 +85,16 @@ public class ProfileDisplayPanel extends AbstractProfileDisplayPanel {
 
         // log("Creating options: normalised: "+normalised);
 
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normalised)
-                .setAlignment(alignment).setTag(Tag.REFERENCE_POINT).setShowMarkers(showMarkers)
-                .setHideProfiles(hideProfiles).setSwatch(GlobalOptions.getInstance().getSwatch()).setProfileType(type)
-                .setTarget(chartPanel).build();
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets())
+        		.setNormalised(normalised)
+                .setAlignment(alignment)
+                .setTag(Tag.REFERENCE_POINT)
+                .setShowMarkers(showMarkers)
+                .setHideProfiles(hideProfiles)
+                .setSwatch(GlobalOptions.getInstance().getSwatch())
+                .setProfileType(type)
+                .setTarget(chartPanel)
+                .build();
         return options;
     }
 }

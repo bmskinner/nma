@@ -493,22 +493,24 @@ public class NucleusDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 
         // rendering order will be first on top
 
-        // add the segments
-        List<IBorderSegment> segments;
-        try {
-            segments = collection.getProfileCollection().getSegmentedProfile(type, options.getTag(), Stats.MEDIAN)
-                    .getOrderedSegments();
+        // add the segments if any exist
+        if(collection.getProfileCollection().getSegmentIDs().size()>1) {
+        	List<IBorderSegment> segments;
+        	try {
+        		segments = collection.getProfileCollection().getSegmentedProfile(type, options.getTag(), Stats.MEDIAN)
+        				.getOrderedSegments();
 
-            if (normalised) {
-                addSegmentsFromProfile(segments, profile, ds, 100, 0);
-            } else {
-                addSegmentsFromProfile(segments, profile, ds, collection.getMedianArrayLength(), offset);
-            }
+        		if (normalised) {
+        			addSegmentsFromProfile(segments, profile, ds, 100, 0);
+        		} else {
+        			addSegmentsFromProfile(segments, profile, ds, collection.getMedianArrayLength(), offset);
+        		}
 
-        } catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
-                | UnsegmentedProfileException e) {
-            fine("Error getting profile from tag", e);
-            throw new ChartDatasetCreationException("Unable to get median profile", e);
+        	} catch (UnavailableBorderTagException | ProfileException | UnavailableProfileTypeException
+        			| UnsegmentedProfileException e) {
+        		fine("Error getting profile from tag", e);
+        		throw new ChartDatasetCreationException("Unable to get median profile", e);
+        	}
         }
 
         // make the IQR
