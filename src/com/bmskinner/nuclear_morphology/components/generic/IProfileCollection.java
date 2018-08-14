@@ -42,7 +42,7 @@ public interface IProfileCollection extends Serializable, Loggable {
      * point type. Returns -1 if the border tag is not found
      * 
      * @param pointType
-     * @return the offset or -1
+     * @return the offset
      */
     int getIndex(@NonNull Tag pointType) throws UnavailableBorderTagException;
 
@@ -83,12 +83,9 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @param  s the pointType of the profile to find
      * @return the profile
      * @throws ProfileException
-     * @throws UnavailableBorderTagException
-     *             when the tag is not present as an offset
-     * @throws UnavailableProfileTypeException
-     *             when the profile type does not have an associated aggregate
-     * @throws UnsegmentedProfileException
-     *             when no segments are available for the profile
+     * @throws UnavailableBorderTagException when the tag is not present as an offset
+     * @throws UnavailableProfileTypeException when the profile type does not have an associated aggregate
+     * @throws UnsegmentedProfileException when no segments are available for the profile
      */
     ISegmentedProfile getSegmentedProfile(@NonNull ProfileType type, @NonNull Tag tag, double quartile)
             throws UnavailableBorderTagException, ProfileException, UnavailableProfileTypeException,
@@ -101,12 +98,24 @@ public interface IProfileCollection extends Serializable, Loggable {
      * @return Length, or zero if the aggregate is not yet created
      */
     int length();
+    
+    
+    /**
+     * The number of segments in the profile
+     * @return
+     */
+    int segmentCount();
+    
+    /**
+     * Is the number of segments greater than zero?
+     * @return
+     */
+    boolean hasSegments();
 
     /**
      * Create a list of segments based on an offset of existing segments.
      * 
-     * @param s
-     *            the name of the tag
+     * @param s the name of the tag
      * @return a copy of the segments in the profile, offset to start at the tag
      * @throws ProfileException
      */

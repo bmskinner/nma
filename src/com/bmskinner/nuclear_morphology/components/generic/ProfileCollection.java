@@ -70,6 +70,16 @@ public class ProfileCollection implements IProfileCollection {
     public ProfileCollection() {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
     }
+    
+    @Override
+    public int segmentCount() {
+    	return segments.size();
+    }
+    
+    @Override
+    public boolean hasSegments() {
+    	return segmentCount()>0;
+    }
 
     /*
      * (non-Javadoc)

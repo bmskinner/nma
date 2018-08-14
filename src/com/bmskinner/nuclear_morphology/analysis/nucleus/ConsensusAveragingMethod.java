@@ -130,11 +130,14 @@ public class ConsensusAveragingMethod extends SingleDatasetAnalysisMethod {
         double diff = median.absoluteSquareDifference(nucProfile);
 
         // // Adjust segments to fit size
-        ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
-        List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
-        List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
-        profile.setSegments(newSegs);
-        cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+
+        if(dataset.getCollection().getProfileCollection().hasSegments()) {
+        	ISegmentedProfile profile = cons.getProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT);
+        	List<IBorderSegment> segs = dataset.getCollection().getProfileCollection().getSegments(Tag.REFERENCE_POINT);
+        	List<IBorderSegment> newSegs = IBorderSegment.scaleSegments(segs, profile.size());
+        	profile.setSegments(newSegs);
+        	cons.setProfile(ProfileType.ANGLE, Tag.REFERENCE_POINT, profile);
+        }
         
         // Do not use DefaultNucleus::roateVertically; it will not align properly
         if (cons.hasBorderTag(Tag.TOP_VERTICAL) && cons.hasBorderTag(Tag.BOTTOM_VERTICAL)) {

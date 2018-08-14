@@ -69,16 +69,26 @@ public class DefaultProfileCollection implements IProfileCollection {
         indexes.put(Tag.REFERENCE_POINT, ZERO_INDEX);
 
     }
+    
+    @Override
+    public int segmentCount() {
+    	if(segments==null)
+    		return 0;
+    	return segments.length;
+    }
+    
+    @Override
+    public boolean hasSegments() {
+    	return segmentCount()>0;
+    }
 
     @Override
     public int getIndex(@NonNull Tag pointType) {
         if (pointType == null)
             throw new IllegalArgumentException("The requested offset key is null: " + pointType);
-        if (indexes.containsKey(pointType)) {
+        if (indexes.containsKey(pointType))
             return indexes.get(pointType);
-        } else {
-            return -1;
-        }
+		return -1;
     }
 
     @Override
@@ -203,7 +213,6 @@ public class DefaultProfileCollection implements IProfileCollection {
         	}
         	return Arrays.asList(result);
         } catch (ProfileException e) {
-        	// TODO Auto-generated catch block
         	e.printStackTrace();
         }
         return new ArrayList<>(0);        
