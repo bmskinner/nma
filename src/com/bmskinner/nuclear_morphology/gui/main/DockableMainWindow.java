@@ -3,6 +3,9 @@ package com.bmskinner.nuclear_morphology.gui.main;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
@@ -128,50 +131,72 @@ public class DockableMainWindow extends AbstractMainWindow {
             textHandler.setFormatter(new LogPanelFormatter());
             Logger.getLogger(Loggable.PROGRAM_LOGGER).addHandler(textHandler);
             
-            Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
-            SingleDock logTabDock = new SingleDock();
-            logTabDock.addDockable(dockable1, new Position(0));
+//            Dockable dockable1 = new DefaultDockable("Window1", logPanel, "Log panel", null, DockingMode.ALL);
+//            SingleDock logTabDock = new SingleDock();
+//            logTabDock.addDockable(dockable1, new Position(0));
             
-            CompositeLineDock lineDock1 = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
+        
+//            CompositeLineDock lineDock1 = new CompositeLineDock(CompositeLineDock.ORIENTATION_HORIZONTAL, true, new LeafDockFactory());
 
-            lineDock1.addChildDock(logTabDock, new Position(0));
+//            lineDock1.addChildDock(logTabDock, new Position(0));
             
             
-    		dockModel.addRootDock("topdock", lineDock1, this);
+//    		dockModel.addRootDock("topdock", lineDock1, this);
     		
             // ---------------
             // Create the consensus chart
             // ---------------
             populationsPanel = new PopulationsPanel(eh.getInputSupplier());
             
-            Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
-            SingleDock popTabDock = new SingleDock();
-            popTabDock.addDockable(popDockable, new Position(0));
-            lineDock1.addChildDock(popTabDock, new Position(1));
+//            Dockable popDockable = new DefaultDockable("Window2", populationsPanel, "Datasets", null, DockingMode.ALL);
+//            SingleDock popTabDock = new SingleDock();
+//            popTabDock.addDockable(popDockable, new Position(0));
+//            lineDock1.addChildDock(popTabDock, new Position(1));
             
             
             
             consensusNucleusPanel = new ConsensusNucleusPanel(eh.getInputSupplier());
             
-            Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
-            SingleDock consTabDock = new SingleDock();
-            consTabDock.addDockable(consDockable, new Position(0));
-            lineDock1.addChildDock(consTabDock, new Position(2));
+//            Dockable consDockable = new DefaultDockable("Window3", consensusNucleusPanel, "Consensus", null, DockingMode.ALL);
+//            SingleDock consTabDock = new SingleDock();
+//            consTabDock.addDockable(consDockable, new Position(0));
+//            lineDock1.addChildDock(consTabDock, new Position(2));
             detailPanels.add(consensusNucleusPanel);
-
+            
+            
+            JSplitPane logAndPopulations = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, logPanel, populationsPanel);
+           
 
             // Provide minimum sizes for the two components in the split pane
             Dimension minimumSize = new Dimension(300, 200);
             logPanel.setMinimumSize(minimumSize);
             populationsPanel.setMinimumSize(minimumSize);
+            // ---------------
+            // Make the top row panel
+            // ---------------
+            JPanel topRow = new JPanel();
 
+            GridBagConstraints c = new GridBagConstraints();
+            c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last element
+            c.fill = GridBagConstraints.BOTH; // fill both axes of container
+            c.weightx = 1.0; // maximum weighting
+            c.weighty = 1.0;
+
+            topRow.setLayout(new GridBagLayout());
+            topRow.add(logAndPopulations, c);
+
+            c.gridwidth = GridBagConstraints.REMAINDER; // last element in row
+            c.weightx = 0.5; // allow padding on x axis
+            c.weighty = 1.0; // max weighting on y axis
+            c.fill = GridBagConstraints.BOTH; // fill to bounds where possible
+            topRow.add(consensusNucleusPanel, c);
             createTabs();
             dockModel.addRootDock("tabdock", tabDock, this);
             // ---------------
             // Add the top and bottom rows to the main panel
             // ---------------
-            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lineDock1, tabDock);
-
+//            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, lineDock1, tabDock);
+            JSplitPane panelMain = new JSplitPane(JSplitPane.VERTICAL_SPLIT, topRow, tabDock);
             contentPane.add(panelMain, BorderLayout.CENTER);
            
             this.pack();
