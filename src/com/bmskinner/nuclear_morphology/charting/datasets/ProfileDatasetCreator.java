@@ -35,6 +35,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	public static final String NUCLEUS_SERIES_PREFIX  = "Nucleus_";
 	public static final String QUARTILE_SERIES_PREFIX = "Q";
 	public static final String PROFILE_SERIES_PREFIX  = "Profile_";
+	public static final String MEDIAN_SERIES_PREFIX   = "Median_";
 
 	public ProfileDatasetCreator(ChartOptions options) {
 		super(options);
@@ -182,10 +183,10 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 					addSegmentsFromProfile(segments, medianProfile, ds.getLines(), collection.getMedianArrayLength(), offset, 0);
 				}
 			} else {
-				log("Drawing only median");
+				log("Drawing only median: isSegmented "+isSegmented+" isShowSegments "+isShowSegments);
 				// add the median profile
 				float[][] data50 = { xpoints.toFloatArray(), medianProfile.toFloatArray() };
-				ds.addLines(PROFILE_SERIES_PREFIX+i, data50, i);
+				ds.addLines(MEDIAN_SERIES_PREFIX+i, data50, i);
 			}
 
 			// make the IQR
@@ -289,8 +290,7 @@ public class ProfileDatasetCreator extends AbstractDatasetCreator<ChartOptions> 
 	 * @param ds the dataset the segments are to be added to
 	 * @param length the profile length
 	 * @param offset an offset to the x position. Used to align plots to the right
-	 * @param binSize the size of the ProfileAggregate bins, to adjust the offset of
-	 *            the median
+	 * @param datasetIndex the index of the dataset for adding to the chart dataset
 	 * @return the updated dataset
 	 * @throws ProfileException
 	 */

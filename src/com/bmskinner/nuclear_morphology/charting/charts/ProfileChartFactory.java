@@ -259,13 +259,13 @@ public class ProfileChartFactory extends AbstractChartFactory {
     private JFreeChart makeMultiDatasetProfileChart() {
 
     	ProfileChartDataset profiles;
-		try {
-			profiles = new ProfileDatasetCreator(options).createProfileDataset();
-		} catch (ChartDatasetCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			 return makeErrorChart();
-		}
+    	try {
+    		profiles = new ProfileDatasetCreator(options).createProfileDataset();
+    	} catch (ChartDatasetCreationException e) {
+    		// TODO Auto-generated catch block
+    		fine("Unable to create profile dataset", e);
+    		return makeErrorChart();
+    	}
 		
 		JFreeChart chart = makeProfileChart(profiles, 100, options.getType());
 		return chart;
@@ -396,7 +396,14 @@ public class ProfileChartFactory extends AbstractChartFactory {
 				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
 				Paint colour = ColourSelecter.getColor(index);
 				plot.getRenderer().setSeriesPaint(i, colour);
-
+			}
+			
+			
+			// median profiles with no segments
+			if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX)) {
+				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
+				Paint colour = ColourSelecter.getColor(index);
+				plot.getRenderer().setSeriesPaint(i, colour);
 			}
 
 			// entire nucleus profile

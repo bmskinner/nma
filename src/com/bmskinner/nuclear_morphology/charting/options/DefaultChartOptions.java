@@ -363,7 +363,7 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
     			.append("Datasets: "+this.datasetCount()+newline)
     			.append("Cell: "+this.hasCell()+newline)
     			.append("Normalised: "+normalised+newline)
-    			.append("Alignement: "+alignment+newline)
+    			.append("Alignment: "+alignment+newline)
     			.append("Hide profiles: "+hideProfiles+newline)
     			.append("Show points: "+showPoints+newline)
     			.append("Show lines: "+showLines+newline)

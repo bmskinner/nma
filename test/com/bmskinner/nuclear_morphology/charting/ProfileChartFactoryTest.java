@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.ScrollPane;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -14,6 +16,7 @@ import javax.swing.JTextArea;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.DatasetProfilingMethod;
@@ -32,8 +35,24 @@ import com.bmskinner.nuclear_morphology.components.nuclei.Nucleus;
 import com.bmskinner.nuclear_morphology.core.GlobalOptions;
 import com.bmskinner.nuclear_morphology.gui.components.ColourSelecter.ColourSwatch;
 import com.bmskinner.nuclear_morphology.gui.components.panels.ProfileAlignmentOptionsPanel.ProfileAlignment;
+import com.bmskinner.nuclear_morphology.logging.ConsoleHandler;
+import com.bmskinner.nuclear_morphology.logging.LogPanelFormatter;
+import com.bmskinner.nuclear_morphology.logging.Loggable;
 
+/**
+ * Test the profile charting functions
+ * @author bms41
+ * @since 1.14.0
+ *
+ */
 public class ProfileChartFactoryTest {
+	
+	@Before
+	public void setUp(){
+		Logger logger = Logger.getLogger(Loggable.PROGRAM_LOGGER);
+		logger.setLevel(Level.FINEST);
+		logger.addHandler(new ConsoleHandler(new LogPanelFormatter()));
+	}
 	
 	/**
 	 * Create a panel with a chart and the options used to create the chart
@@ -201,7 +220,7 @@ public class ProfileChartFactoryTest {
 	
 	@Test
 	public void testMultipleNucleusDatasetProfile() throws Exception {
-		IAnalysisDataset d = TestDatasetFactory.variableRectangularDataset(10, 20);
+		IAnalysisDataset d = TestDatasetFactory.variableRectangularDataset(100, 20);
 		DatasetProfilingMethod m = new DatasetProfilingMethod(d);
 		m.call();
 		generateChartsforOptions(d);
