@@ -43,6 +43,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentFitter;
 import com.bmskinner.nuclear_morphology.analysis.profiles.SegmentationHandler;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.ChildAnalysisDataset;
@@ -221,9 +222,8 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         ChartOptions options = new ChartOptionsBuilder().setShowXAxis(false).setShowYAxis(false).build();
 
-        JFreeChart mainChart = new MorphologyChartFactory(options).makeEmptyChart();
-
-        JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart mainChart = ProfileChartFactory.makeEmptyChart(null);
+        JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(null);
 
         dualPanel.setCharts(mainChart, rangeChart);
         setButtonsEnabled(false);
@@ -237,7 +237,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
+    	return new ProfileChartFactory(options).createProfileChart();
     }
 
     /**

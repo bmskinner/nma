@@ -22,6 +22,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.components.generic.ProfileType;
 import com.bmskinner.nuclear_morphology.core.InputSupplier;
@@ -37,10 +38,7 @@ public class SegmentProfilePanel extends ProfileDisplayPanel {
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        // options.setShowMarkers(false);
-        // options.setShowAnnotations(false);
-        // options.setShowLines(true);
-        return new MorphologyChartFactory(options).makeMultiSegmentedProfileChart();
+        return new ProfileChartFactory(options).createProfileChart();
     }
 
 }

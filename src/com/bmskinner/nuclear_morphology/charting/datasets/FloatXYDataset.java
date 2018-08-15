@@ -21,7 +21,10 @@ package com.bmskinner.nuclear_morphology.charting.datasets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jfree.data.DomainOrder;
 import org.jfree.data.general.DatasetChangeEvent;
@@ -42,7 +45,8 @@ public class FloatXYDataset extends AbstractXYDataset
          * seriesList.
          */
         private List seriesKeys;
-
+        private List<Integer> datasetIndexes;
+        
         /** 
          * Storage for the series in the dataset.  We use a list because the
          * order of the series is significant.  This list must be kept in sync 
@@ -55,8 +59,9 @@ public class FloatXYDataset extends AbstractXYDataset
          * containing no data.
          */
         public FloatXYDataset() {
-            this.seriesKeys = new java.util.ArrayList();
-            this.seriesList = new java.util.ArrayList();    
+        	seriesKeys     = new ArrayList(); 
+        	datasetIndexes = new ArrayList<>(); 
+            seriesList     = new ArrayList();    
         }
 
         /**
@@ -85,6 +90,10 @@ public class FloatXYDataset extends AbstractXYDataset
             if ((series < 0) || (series >= getSeriesCount()))
                 throw new IllegalArgumentException("Series index out of bounds");
             return (Comparable<?>) this.seriesKeys.get(series);
+        }
+        
+        public int getDatasetIndex(Comparable<?> seriesKey) {
+            return datasetIndexes.get(indexOf(seriesKey));
         }
 
         /**
@@ -231,7 +240,7 @@ public class FloatXYDataset extends AbstractXYDataset
          *     arrays of equal length, the first containing the x-values and the
          *     second containing the y-values). 
          */
-        public void addSeries(Comparable<?> seriesKey, float[][] data) {
+        public void addSeries(Comparable<?> seriesKey, float[][] data, int datasetIndex) {
             if (seriesKey == null)
                 throw new IllegalArgumentException("The 'seriesKey' cannot be null.");
             if (data == null)
@@ -244,6 +253,7 @@ public class FloatXYDataset extends AbstractXYDataset
             if (seriesIndex == -1) {  // add a new series
                 this.seriesKeys.add(seriesKey);
                 this.seriesList.add(data);
+                this.datasetIndexes.add(datasetIndex);
             }
             else {  // replace an existing series
                 this.seriesList.remove(seriesIndex);
@@ -335,8 +345,9 @@ public class FloatXYDataset extends AbstractXYDataset
         @Override
 		public Object clone() throws CloneNotSupportedException {
             FloatXYDataset clone = (FloatXYDataset) super.clone();
-            clone.seriesKeys = new java.util.ArrayList(this.seriesKeys);
+            clone.seriesKeys = new ArrayList(this.seriesKeys);
             clone.seriesList = new ArrayList(this.seriesList.size());
+            clone.datasetIndexes = new ArrayList(seriesList);
             for (int i = 0; i < this.seriesList.size(); i++) {
                 float[][] data = (float[][]) this.seriesList.get(i);
                 float[] x = data[0];

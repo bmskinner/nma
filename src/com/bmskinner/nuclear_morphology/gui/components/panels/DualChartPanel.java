@@ -25,6 +25,7 @@ import java.util.UUID;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.overlays.RectangleOverlayObject;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.PositionSelectionChartPanel;
@@ -62,7 +63,7 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         chartPanel = new ExportableChartPanel(profileChart);
 
         chartPanel.setMinimumDrawWidth(0);
@@ -76,7 +77,7 @@ public abstract class DualChartPanel implements SignalChangeListener, SegmentEve
          * A second chart panel at the south with a domain overlay crosshair to
          * define the centre of the zoomed range on the centre chart panel
          */
-        JFreeChart rangeChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart rangeChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         rangePanel = new PositionSelectionChartPanel(rangeChart);
         rangePanel.addSignalChangeListener(this);
         rangePanel.addChartSetEventListener(this);

@@ -51,6 +51,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder;
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileIndexFinder.NoDetectedIndexException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.ExportableChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.DefaultChartOptions;
@@ -434,7 +435,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
     private JPanel createChartPanel() {
         JPanel panel = new JPanel(new BorderLayout());
 
-        chartPanel = new ExportableChartPanel(MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE));
+        chartPanel = new ExportableChartPanel(ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
 
         panel.add(chartPanel, BorderLayout.CENTER);
 
@@ -449,7 +450,7 @@ public class RulesetDialog extends LoadingIconDialog implements TreeSelectionLis
 
         ProfileIndexFinder finder = new ProfileIndexFinder();
 
-        JFreeChart chart = MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE);
+        JFreeChart chart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
 
         ChartOptions options = new DefaultChartOptions((IAnalysisDataset) null);
         MorphologyChartFactory chf = new MorphologyChartFactory(options);

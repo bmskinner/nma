@@ -21,6 +21,7 @@ package com.bmskinner.nuclear_morphology.gui.components.panels;
 import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.DraggableOverlayChartPanel;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
@@ -35,7 +36,7 @@ public class SegmentationDualChartPanel extends DualChartPanel {
         ChartOptions options = new ChartOptionsBuilder().setProfileType(ProfileType.ANGLE).setShowXAxis(false)
                 .setShowYAxis(false).build();
 
-        JFreeChart profileChart = new MorphologyChartFactory(options).makeEmptyChart();
+        JFreeChart profileChart = ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE);
         chartPanel = new DraggableOverlayChartPanel(profileChart, null, false);
         ((DraggableOverlayChartPanel) chartPanel).addSignalChangeListener(this);
     }

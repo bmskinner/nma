@@ -92,30 +92,15 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
         }.init());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isNormalised()
-     */
     @Override
     public boolean isNormalised() {
         return normalised;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setNormalised(boolean)
-     */
     public void setNormalised(boolean normalised) {
         this.normalised = normalised;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getTarget()
-     */
     @Override
     public ChartPanel getTarget() {
         return target;
@@ -130,518 +115,276 @@ public class DefaultChartOptions extends AbstractOptions implements ChartOptions
         this.target = target;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getAlignment()
-     */
     @Override
     public ProfileAlignment getAlignment() {
         return alignment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setAlignment(gui.components.panels.
-     * ProfileAlignmentOptionsPanel.ProfileAlignment)
-     */
     public void setAlignment(ProfileAlignment alignment) {
         this.alignment = alignment;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getModalityPosition()
-     */
     @Override
     public double getModalityPosition() {
         return modalityPosition;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setModalityPosition(double)
-     */
     public void setModalityPosition(double modalityPosition) {
         this.modalityPosition = modalityPosition;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getTag()
-     */
+
     @Override
     public Tag getTag() {
         return tag;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setTag(components.generic.Tag)
-     */
+
     public void setTag(Tag tag) {
         this.tag = tag;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowMarkers()
-     */
     @Override
     public boolean isShowMarkers() {
         return showMarkers;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowMarkers(boolean)
-     */
     public void setShowMarkers(boolean showMarkers) {
         this.showMarkers = showMarkers;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isHideProfiles()
-     */
     @Override
     public boolean isHideProfiles() {
         return hideProfiles;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setHideProfiles(boolean)
-     */
     public void setHideProfiles(boolean hideProfiles) {
         this.hideProfiles = hideProfiles;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowPoints()
-     */
     @Override
     public boolean isShowPoints() {
         return showPoints;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowPoints(boolean)
-     */
     public void setShowPoints(boolean showPoints) {
         this.showPoints = showPoints;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowLines()
-     */
     @Override
     public boolean isShowLines() {
         return showLines;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowLines(boolean)
-     */
     public void setShowLines(boolean showLines) {
         this.showLines = showLines;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowAnnotations()
-     */
     @Override
     public boolean isShowAnnotations() {
         return showAnnotations;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowAnnotations(boolean)
-     */
     public void setShowAnnotations(boolean showAnnotations) {
         this.showAnnotations = showAnnotations;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getType()
-     */
     @Override
     public ProfileType getType() {
         return type;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * charting.options.ChartOptions#setType(components.generic.ProfileType)
-     */
     public void setType(ProfileType type) {
         this.type = type;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getSignalGroup()
-     */
     @Override
     public UUID getSignalGroup() {
         return signalGroup;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setSignalGroup(java.util.UUID)
-     */
     public void setSignalGroup(UUID signalGroup) {
         this.signalGroup = signalGroup;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isUseDensity()
-     */
     @Override
     public boolean isUseDensity() {
         return useDensity;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setUseDensity(boolean)
-     */
     public void setUseDensity(boolean useDensity) {
         this.useDensity = useDensity;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowMesh()
-     */
     @Override
     public boolean isShowMesh() {
         return showMesh;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowMesh(boolean)
-     */
     public void setShowMesh(boolean showMesh) {
         this.showMesh = showMesh;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowMeshEdges()
-     */
     @Override
     public boolean isShowMeshEdges() {
         return showMeshEdges;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowMeshEdges(boolean)
-     */
     public void setShowMeshEdges(boolean showMeshEdges) {
         this.showMeshEdges = showMeshEdges;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowMeshFaces()
-     */
     @Override
     public boolean isShowMeshFaces() {
         return showMeshFaces;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowMeshFaces(boolean)
-     */
     public void setShowMeshFaces(boolean showMeshFaces) {
         this.showMeshFaces = showMeshFaces;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isStraightenMesh()
-     */
     @Override
     public boolean isStraightenMesh() {
         return straightenMesh;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setStraightenMesh(boolean)
-     */
     public void setStraightenMesh(boolean straightenMesh) {
         this.straightenMesh = straightenMesh;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getMeshSize()
-     */
     @Override
     public int getMeshSize() {
         return meshSize;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setMeshSize(int)
-     */
     public void setMeshSize(int meshSize) {
         this.meshSize = meshSize;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowBounds()
-     */
     @Override
     public boolean isShowBounds() {
         return showBounds;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowBounds(boolean)
-     */
     public void setShowBounds(boolean showBounds) {
         this.showBounds = showBounds;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowXAxis()
-     */
     @Override
     public boolean isShowXAxis() {
         return showXAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowXAxis(boolean)
-     */
     public void setShowXAxis(boolean showXAxis) {
         this.showXAxis = showXAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowYAxis()
-     */
     @Override
     public boolean isShowYAxis() {
         return showYAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowYAxis(boolean)
-     */
     public void setShowYAxis(boolean showYAxis) {
         this.showYAxis = showYAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isInvertXAxis()
-     */
     @Override
     public boolean isInvertXAxis() {
         return invertXAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setInvertXAxis(boolean)
-     */
     public void setInvertXAxis(boolean invertXAxis) {
         this.invertXAxis = invertXAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isInvertYAxis()
-     */
     @Override
     public boolean isInvertYAxis() {
         return invertYAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setInvertYAxis(boolean)
-     */
     public void setInvertYAxis(boolean invertYAxis) {
         this.invertYAxis = invertYAxis;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getRotateMode()
-     */
     @Override
     public RotationMode getRotateMode() {
         return rotateMode;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setRotateMode(gui.RotationMode)
-     */
     public void setRotateMode(RotationMode rotateMode) {
         this.rotateMode = rotateMode;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#getComponent()
-     */
     @Override
     public CellularComponent getComponent() {
         return component;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * charting.options.ChartOptions#setComponent(components.CellularComponent)
-     */
     public void setComponent(CellularComponent component) {
         this.component = component;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#hasComponent()
-     */
     @Override
     public boolean hasComponent() {
         return this.component != null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowWarp()
-     */
     @Override
     public boolean isShowWarp() {
         return showWarp;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowWarp(boolean)
-     */
     public void setShowWarp(boolean showWarp) {
         this.showWarp = showWarp;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowBorderTags()
-     */
     @Override
     public boolean isShowBorderTags() {
         return showBorderTags;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowBorderTags(boolean)
-     */
     public void setShowBorderTags(boolean showBorderTags) {
         this.showBorderTags = showBorderTags;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#isShowSignals()
-     */
     @Override
     public boolean isShowSignals() {
         return showSignals;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#setShowSignals(boolean)
-     */
     public void setShowSignals(boolean showSignals) {
         this.showSignals = showSignals;
     }
+    
+    @Override
+    public String toString() {
+    	String newline = System.getProperty("line.separator");
+    	return new StringBuilder("Options:"+newline)
+    			.append("Datasets: "+this.datasetCount()+newline)
+    			.append("Cell: "+this.hasCell()+newline)
+    			.append("Normalised: "+normalised+newline)
+    			.append("Alignement: "+alignment+newline)
+    			.append("Hide profiles: "+hideProfiles+newline)
+    			.append("Show points: "+showPoints+newline)
+    			.append("Show lines: "+showLines+newline)
+    			.append("Show annotations: "+showAnnotations+newline)
+    			.append("Show markers: "+showMarkers+newline)
+    			.append("Show mesh: "+showMesh+newline)
+    			.append("Show x axis: "+showXAxis+newline)
+    			.append("Show y axis: "+showYAxis+newline)
+    			.append("Invert x axis: "+invertXAxis+newline)
+    			.append("Invert y axis: "+invertYAxis+newline)
+    			.append("Tag: "+tag+newline)
+    			.append("Type: "+type+newline)
+    			.append("Show border tags: "+showBorderTags+newline)
+    			.append("Show signals: "+showSignals+newline)
+    			.append("Signal group: "+signalGroup+newline)
+    			.append("Rotate mode: "+rotateMode+newline)
+    			.append("Use density: "+useDensity+newline)
+    			.append("Show warp: "+showWarp+newline)
+    			.toString();
+    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see charting.options.ChartOptions#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;

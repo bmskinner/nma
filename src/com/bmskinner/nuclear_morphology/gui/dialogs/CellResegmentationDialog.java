@@ -44,6 +44,7 @@ import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.ConsensusNucleusChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.OutlineChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEvent;
 import com.bmskinner.nuclear_morphology.charting.charts.panels.CoupledProfileOutlineChartPanel.BorderPointEventListener;
@@ -141,7 +142,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
             JFreeChart outlineChart = ConsensusNucleusChartFactory.makeEmptyChart();
 
             ExportableChartPanel profile = new ExportableChartPanel(
-                    MorphologyChartFactory.makeEmptyChart(ProfileType.ANGLE));
+                    ProfileChartFactory.makeEmptyChart(ProfileType.ANGLE));
             ExportableChartPanel outline = new ExportableChartPanel(outlineChart);
             outline.setFixedAspectRatio(true);
 
@@ -364,7 +365,7 @@ public class CellResegmentationDialog extends AbstractCellEditingDialog implemen
                     .setShowPoints(false).setCellularComponent(cell.getNucleus()).build();
 
             finer("Making charts");
-            JFreeChart profileChart = new MorphologyChartFactory(profileOptions).makeIndividualNucleusProfileChart();
+            JFreeChart profileChart = new ProfileChartFactory(profileOptions).createProfileChart();
             JFreeChart outlineChart = new OutlineChartFactory(outlineOptions).makeCellOutlineChart();
             finer("Updating charts");
             panel.setObject(cell.getNucleus());

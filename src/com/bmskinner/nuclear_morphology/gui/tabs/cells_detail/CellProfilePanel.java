@@ -32,6 +32,7 @@ import org.jfree.chart.JFreeChart;
 
 import com.bmskinner.nuclear_morphology.analysis.profiles.ProfileException;
 import com.bmskinner.nuclear_morphology.charting.charts.MorphologyChartFactory;
+import com.bmskinner.nuclear_morphology.charting.charts.ProfileChartFactory;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptions;
 import com.bmskinner.nuclear_morphology.charting.options.ChartOptionsBuilder;
 import com.bmskinner.nuclear_morphology.components.generic.ISegmentedProfile;
@@ -224,7 +225,7 @@ public class CellProfilePanel extends AbstractCellDetailPanel implements ChartSe
 
     @Override
     protected JFreeChart createPanelChartType(ChartOptions options) {
-        return new MorphologyChartFactory(options).makeIndividualNucleusProfileChart();
+    	return new ProfileChartFactory(options).createProfileChart();
     }
 
     @Override
