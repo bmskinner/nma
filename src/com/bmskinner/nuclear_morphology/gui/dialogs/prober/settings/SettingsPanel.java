@@ -99,13 +99,11 @@ public abstract class SettingsPanel extends JPanel
      */
     protected boolean hasSubPanel(SettingsPanel panel) {
 
-        if (subPanels.contains(panel)) {
+        if (subPanels.contains(panel))
             return true;
-        }
         for (SettingsPanel p : subPanels) {
-            if (p.hasSubPanel(panel)) {
+            if (p.hasSubPanel(panel))
                 return true;
-            }
         }
         return false;
     }
@@ -131,14 +129,10 @@ public abstract class SettingsPanel extends JPanel
     /**
      * Add components to a container via a list
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields  the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(List<JLabel> labels, List<? extends Component> fields, Container container) {
 
@@ -152,14 +146,10 @@ public abstract class SettingsPanel extends JPanel
     /**
      * Add components to a container via arrays
      * 
-     * @param labels
-     *            the list of labels
-     * @param fields
-     *            the list of components
-     * @param gridbag
-     *            the layout
-     * @param container
-     *            the container to add the labels and fields to
+     * @param labels the list of labels
+     * @param fields the list of components
+     * @param gridbag the layout
+     * @param container the container to add the labels and fields to
      */
     protected void addLabelTextRows(JLabel[] labels, Component[] fields,
 
@@ -254,19 +244,15 @@ public abstract class SettingsPanel extends JPanel
 
     @Override
     public void panelUpdatingEventReceived(PanelUpdatingEvent e) {
-        finest("Panel updating event heard");
-        if (e.getType() == PanelUpdatingEvent.UPDATING) {
+        if (e.getType() == PanelUpdatingEvent.UPDATING)
             this.setEnabled(false);
-        }
 
-        if (e.getType() == PanelUpdatingEvent.COMPLETE) {
+        if (e.getType() == PanelUpdatingEvent.COMPLETE)
             this.setEnabled(true);
-        }
 
         for (SettingsPanel s : this.getSubPanels()) {
             s.panelUpdatingEventReceived(e);
         }
-
     }
 
 }

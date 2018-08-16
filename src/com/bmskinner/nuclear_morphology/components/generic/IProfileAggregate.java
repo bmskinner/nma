@@ -80,6 +80,4 @@ public interface IProfileAggregate {
      * @throws Exception
      */
     double[] getValuesAtPosition(double position);
-
-    List<Double> getXKeyset();
 }

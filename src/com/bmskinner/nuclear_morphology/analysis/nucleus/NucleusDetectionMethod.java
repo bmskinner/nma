@@ -176,9 +176,12 @@ public class NucleusDetectionMethod extends AbstractAnalysisMethod {
 
                 log("Filtering collection...");
 
+
                 Filterer<ICellCollection> filter = new CellCollectionFilterer();
-                filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
-                log("Filtered OK");
+                if(collection.getNucleusType()!=NucleusType.ROUND) {
+                    filter.removeOutliers(collection, failedNuclei, DEFAULT_FILTERING_DELTA);
+                    log("Filtered out "+failedNuclei.size()+" nuclei based on variance");
+                }
 
                 
                 // Ensure medians do not include filtered nuclei

@@ -186,7 +186,7 @@ public class OptionsFactory {
         op.setNucleusType(NucleusType.ROUND);
         
         IDetectionOptions nop = OptionsFactory.makeNucleusDetectionOptions(testFolder);
-        nop.setMinCirc(0.0);
+        nop.setMinCirc(0.6);
         nop.setMaxCirc(1.0);
         
         op.setDetectionOptions(IAnalysisOptions.NUCLEUS, nop);

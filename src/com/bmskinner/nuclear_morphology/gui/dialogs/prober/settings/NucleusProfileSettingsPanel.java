@@ -81,24 +81,6 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
 
         	NucleusType type = (NucleusType) typeBox.getSelectedItem();
         	options.setNucleusType(type);
-
-        	if (type.equals(NucleusType.ROUND)) {
-        		nucleusOptions.setMinCirc(0.0);
-        		nucleusOptions.setMaxCirc(1.0);
-        	}
-
-        	if (type.equals(NucleusType.RODENT_SPERM)) {
-        		nucleusOptions.setMinCirc(0.2);
-        		nucleusOptions.setMaxCirc(0.8);
-        	}
-
-        	if (type.equals(NucleusType.PIG_SPERM)) {
-        		nucleusOptions.setMinCirc(0.1);
-        		nucleusOptions.setMaxCirc(0.9);
-        	}
-
-        	fireOptionsChangeEvent();
-
         });
 
         profileWindow = new JSpinner(new SpinnerNumberModel(options.getProfileWindowProportion(), MIN_PROFILE_PROP,
@@ -146,6 +128,7 @@ public class NucleusProfileSettingsPanel extends SettingsPanel {
     @Override
     protected void update() {
         super.update();
+        typeBox.setSelectedItem(options.getNucleusType());
         profileWindow.setValue(options.getProfileWindowProportion());
     }
 

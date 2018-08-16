@@ -602,8 +602,9 @@ public class SignalManager implements Loggable {
      */
     public int getShellCount() {
 
-        for (ISignalGroup group : this.getSignalGroups()) {
-        	Optional<IShellResult> r = group.getShellResult();
+        for(UUID id : getSignalGroupIDs()) {
+            ISignalGroup group = collection.getSignalGroup(id).get();
+            Optional<IShellResult> r = group.getShellResult();
         	if(r.isPresent())
                 return r.get().getNumberOfShells();
         }

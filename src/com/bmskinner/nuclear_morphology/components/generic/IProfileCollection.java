@@ -283,8 +283,4 @@ public interface IProfileCollection extends Serializable, Loggable {
      *             if the profile type is not present
      */
     double[] getValuesAtPosition(@NonNull ProfileType type, double position) throws UnavailableProfileTypeException;
-
-    @Deprecated
-    List<Double> getXKeyset(@NonNull ProfileType type);
-
 }

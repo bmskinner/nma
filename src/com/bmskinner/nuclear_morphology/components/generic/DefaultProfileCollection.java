@@ -429,11 +429,6 @@ public class DefaultProfileCollection implements IProfileCollection {
     }
 
     @Override
-    public List<Double> getXKeyset(ProfileType type) {
-        return map.get(type).getXKeyset();
-    }
-
-    @Override
     public void createProfileAggregate(@NonNull ICellCollection collection, int length) throws ProfileException {
         if (length <= 0)
             throw new IllegalArgumentException("Requested profile aggregate length is zero or negative");

@@ -459,7 +459,7 @@ public class ConstructableSettingsPanel extends SettingsPanel {
     	Optional<IDetectionOptions> subOptions = options.getDetectionOptions(optionsKey);
         if(!subOptions.isPresent())
         	return this;
-        SettingsPanel panel = new CopyFromOpenDatasetPanel(subOptions.get());
+        SettingsPanel panel = new CopyFromOpenDatasetPanel(options, subOptions.get());
         if (label != null) {
             panel.setBorder(BorderFactory.createTitledBorder(label));
         }

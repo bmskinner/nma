@@ -159,17 +159,6 @@ public class DefaultProfileAggregate implements Loggable, IProfileAggregate {
         return new FloatProfile(result);
     }
 
-    @Override
-	public List<Double> getXKeyset() {
-        List<Double> result = new ArrayList<Double>(length);
-        for (int i = 0; i < length; i++) {
-            double profilePosition = (double) i / (double) length;
-            result.add(profilePosition);
-        }
-
-        return result;
-    }
-
     /*
      * 
      * PRIVATE METHODS

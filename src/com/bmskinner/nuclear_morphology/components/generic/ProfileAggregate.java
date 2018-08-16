@@ -399,21 +399,6 @@ public class ProfileAggregate implements Loggable, Serializable, IProfileAggrega
     /*
      * (non-Javadoc)
      * 
-     * @see components.generic.IProfileAggregate#getXKeyset()
-     */
-    @Override
-    public List<Double> getXKeyset() {
-        List<Double> result = new ArrayList<Double>();
-        for (Double d : aggregate.keySet()) {
-            result.add(d);
-        }
-        Collections.sort(result);
-        return result;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see components.generic.IProfileAggregate#toString()
      */
     @Override
