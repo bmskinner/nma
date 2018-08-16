@@ -205,8 +205,6 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
 		
 	}
     
-    private static final class Lock { }
-
     public class PanelUpdater implements CancellableRunnable {
         private final List<IAnalysisDataset> list;
         
@@ -215,55 +213,14 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         public PanelUpdater(final List<IAnalysisDataset> list) {
             this.list = list;
         }
-        private final Lock lock = new Lock();
 
         @Override
         public synchronized void run() {
 
-//            try {
-            	log("Setting panels to loading");
-            	 for (TabPanel p : getTabPanels()) {
-                     p.setChartsAndTablesLoading();
-                 }
-            	 
-//            	// Loader to put all the panels into a loading state
-//            	final PanelLoadingUpdater loader = new PanelLoadingUpdater(lock);
-//            	
-//            	// Run the loading job on a background thread
-//                final Future<?> f = ThreadManager.getInstance().submit(loader);
-//               
-//                // Wait for loading state to be set in all panels
-//                synchronized (lock) {
-//                	while (!f.isDone() && !isCancelled.get()) {
-//                		lock.wait();
-//                	}
-//                }
-//                
-//                // Stop if a cancel signal was heard in the meantime
-//                if (isCancelled.get())
-//                    return;
-//                
-//                Boolean ok = (Boolean) f.get();
-//
-//                if(ok!=null && !ok)
-//                    warn("Error updating the UI panels");
-//
-//            } catch (InterruptedException e1) {
-//                warn("Interrupted update");
-//                error("Error setting loading state", e1);
-//                error("Cause of loading state error", e1.getCause());
-//                return;
-//            } catch (ExecutionException e1) {
-//                error("Error setting loading state", e1);
-//                error("Cause of loading state error", e1.getCause());
-//                return;
-//            } catch (Exception e1){
-//                error("Undefined error setting panel loading state", e1);
-//            }
-            
-            // All panels are in loading state
-            // Now fire the update
-            log("Beginning update");
+        	for (TabPanel p : getTabPanels()) {
+        		p.setChartsAndTablesLoading();
+        	}
+
             DatasetUpdateEvent e = new DatasetUpdateEvent(this, list);
             Iterator<EventListener> iterator = updateListeners.iterator();
             while (iterator.hasNext()) {
@@ -277,35 +234,6 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
         @Override
         public void cancel() {
             isCancelled.set(true);
-        }
-
-    }
-
-    private class PanelLoadingUpdater implements Callable {
-    	private final Object lock;
-    	
-    	public PanelLoadingUpdater(Lock l) {
-    		lock = l;
-    	}
-    	
-        @Override
-        public synchronized Boolean call() {
-            // Update charts and panels to loading
-            try {
-                for (TabPanel p : getTabPanels()) {
-                    p.setChartsAndTablesLoading();
-                }
-            } catch(Exception e){
-                error("Error setting loading state", e);
-                return false;
-            }
-            
-            // Notify all listeners that the loading state is set
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-            return true;
-
         }
 
     }
