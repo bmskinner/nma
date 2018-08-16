@@ -52,12 +52,14 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         super(dataset);
     }
 
+	@Override
 	protected void createWorker(){
 		worker = new ShellAnnotationWorker(dataset, table.getModel(), false);
         worker.addPropertyChangeListener(this);
         worker.execute();
 	}
 	
+	@Override
 	protected JPanel createHeader(){
 		JPanel header = new JPanel(new FlowLayout());
 		header.add(new JLabel(HEADER_LBL + dataset.getCollection().getOutputFolder().getAbsolutePath()));
@@ -65,6 +67,7 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
 		
 	}
 
+	@Override
 	protected void createUI() {
 
         this.setLayout(new BorderLayout());
@@ -90,7 +93,8 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
         table = new JTable(model) {
             // Returning the Class of each column will allow different
             // renderers to be used based on Class
-            public Class<?> getColumnClass(int column) {
+            @Override
+			public Class<?> getColumnClass(int column) {
                 return JLabel.class;
             }
         };
@@ -160,7 +164,14 @@ public class ShellOverviewDialog extends CollectionOverviewDialog {
             return null;
         }
         
+        if(!dataset.getCollection().getSignalManager().hasShellResult())
+            return ip;
+
+        
         int shellCount = dataset.getCollection().getSignalManager().getShellCount();
+        if(shellCount==0) 
+            fine("No shells present, cannot draw");
+
         ShrinkType t = dataset.getCollection().getSignalManager().getShrinkType().get();
 
         ImageAnnotator an = new ImageAnnotator(ip);

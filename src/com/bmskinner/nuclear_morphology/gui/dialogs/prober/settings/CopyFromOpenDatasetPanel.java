@@ -48,9 +48,19 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
     private static final String CHOOSE_DATASET_TTL_LBL = "Source dataset";
 
     private JButton copyBtn;
+    
+    private IAnalysisOptions parent;
 
-    public CopyFromOpenDatasetPanel(IDetectionOptions op) {
+
+    /**
+     * Create with an analysis options and the detection options to copy to
+     * @param parent
+     * @param op
+     */
+    public CopyFromOpenDatasetPanel(IAnalysisOptions parent, IDetectionOptions op) {
+
         super(op);
+        this.parent = parent;
         this.add(createPanel(), BorderLayout.CENTER);
     }
 
@@ -80,6 +90,7 @@ public class CopyFromOpenDatasetPanel extends DetectionSettingsPanel {
             		Optional<IDetectionOptions> srcOptions = op.get().getDetectionOptions(IAnalysisOptions.NUCLEUS);
             		options.set(srcOptions.get());
             		options.setFolder(folder);
+                    parent.setNucleusType(op.get().getNucleusType());
             	}
 
                 fireOptionsChangeEvent();

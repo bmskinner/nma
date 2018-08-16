@@ -69,6 +69,7 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
             "ComponentImageFolder",
             "ComponentImage",
             "SignalType",
+            "SignalGroupId",
             "SignalGroup",
             "SignalFolder",
             "SignalImage",
@@ -135,6 +136,7 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
                     .append(n.getSourceFolder() + TAB)
                     .append(n.getSourceFileName() + TAB)
                     .append(CellularComponent.NUCLEUS + TAB)
+                    .append(signalGroupId.toString() + TAB)
                     .append(groupName + TAB)
                     .append(groupFolder + TAB)
                     .append(n.getSignalCollection().getSourceFile(signalGroupId).getName() + TAB)
@@ -164,6 +166,7 @@ public class DatasetShellsExporter extends StatsExporter implements Loggable {
                         .append(n.getSourceFolder() + TAB)
                         .append(n.getSourceFileName() + TAB)
                         .append(CellularComponent.NUCLEAR_SIGNAL + TAB)
+                        .append(signalGroupId.toString() + TAB)
                         .append(groupName + TAB)
                         .append(groupFolder + TAB)
                         .append(s.getSourceFile().getName() + TAB)

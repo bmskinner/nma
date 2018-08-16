@@ -931,12 +931,4 @@ public class ProfileCollection implements IProfileCollection {
 
         return result;
     }
-
-    @Override
-    public List<Double> getXKeyset(ProfileType type) {
-        if (this.type == null) {
-            this.type = type;
-        }
-        return this.getAggregate().getXKeyset();
-    }
 }
