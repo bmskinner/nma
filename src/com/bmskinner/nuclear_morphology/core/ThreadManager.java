@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.bmskinner.nuclear_morphology.gui.CancellableRunnable;
+import com.bmskinner.nuclear_morphology.gui.main.AbstractMainWindow.PanelUpdater;
 import com.bmskinner.nuclear_morphology.logging.Loggable;
 
 public class ThreadManager implements Loggable {
@@ -40,22 +41,23 @@ public class ThreadManager implements Loggable {
     /*
      * Handle threading
      */
-
-//    public static final int corePoolSize    = 100;
-//    public static final int maximumPoolSize = 100;
     public static final int keepAliveTime   = 10000;
     
     private final BlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(1024);
 
-    private final ExecutorService executorService = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), 
-    		Runtime.getRuntime().availableProcessors()+1, keepAliveTime,
-            TimeUnit.MILLISECONDS, executorQueue);
+    private final ExecutorService executorService;
 
     Map<CancellableRunnable, Future<?>> cancellableFutures = new HashMap<>();
 
     AtomicInteger queueLength = new AtomicInteger();
 
     protected ThreadManager() {
+    	int maxThreads = Runtime.getRuntime().availableProcessors();
+    	if(maxThreads>1)
+    		maxThreads-=1; // leave something for the OS, EDT etc.
+    	log("Creating thread manager with max pool size of "+maxThreads);
+    	executorService = new ThreadPoolExecutor(maxThreads, maxThreads, keepAliveTime,
+                TimeUnit.MILLISECONDS, executorQueue);
     }
     
     public int queueLength(){
@@ -86,7 +88,7 @@ public class ThreadManager implements Loggable {
 
     public synchronized Future<?> submit(Runnable r) {
         queueLength.incrementAndGet(); // Increment queue when submitting task.
-        return executorService.submit(makeSubmitableRunnable(r));
+        return executorService.submit(new TrackedRunnable(r));
     }
 
     public synchronized Future<?> submit(Callable r) {
@@ -94,9 +96,27 @@ public class ThreadManager implements Loggable {
         return executorService.submit(makeSubmitableCallable(r));
     }
     
+    /**
+     * Add the given task to the executor service queue. If the job is a panel 
+     * update, any existing queued panel updates will be cancelled.
+     * @param r
+     */
     public synchronized void execute(Runnable r) {
-        queueLength.incrementAndGet();
-        executorService.execute(makeSubmitableRunnable(r));
+    	 // if a new update is requested, clear older queued updates
+    	if(r instanceof PanelUpdater) {
+    		executorQueue.removeIf(e->{
+    			if(e instanceof TrackedRunnable) {
+    				boolean b = ((TrackedRunnable)e).getSubmittedRunnable() instanceof PanelUpdater;
+    				if(b) 
+    					queueLength.decrementAndGet();
+    				return b;
+    			}
+    			return false;
+    		});
+    	}
+
+        queueLength.incrementAndGet(); // Increment queue when submitting task.
+        executorService.execute(new TrackedRunnable(r));
     }
     
     private synchronized Callable makeSubmitableCallable(Callable r){
@@ -118,18 +138,6 @@ public class ThreadManager implements Loggable {
     	};
     }
     
-    private synchronized Runnable makeSubmitableRunnable(Runnable r){
-    	return () -> {
-    		r.run();
-    		queueLength.decrementAndGet();
-//    		if(queueLength.decrementAndGet()==0){
-////    			log("Queue is empty");
-//    		}
-    		
-    	};
-    }
-    
-
     /**
      * Request an update of a cencellable process. If an update is already in
      * progress, it will be cancelled. Designed for dataset updates - cancel an
@@ -161,5 +169,30 @@ public class ThreadManager implements Loggable {
         }
         Future<?> future = executorService.submit(r);
         cancellableFutures.put(r, future);
+    }
+    
+    /**
+     * Wrap a Runnable in another Runnable that updates the job queue
+     * when done, and allows access to the original Runnable for checking
+     * the class.
+     * @author ben
+     *
+     */
+    private class TrackedRunnable implements Runnable {
+    	private Runnable r;
+    	
+		public TrackedRunnable(Runnable r) {
+			this.r = r;
+		}
+    	
+    	@Override
+		public void run() {
+			r.run();
+    		queueLength.decrementAndGet();
+		}
+    	
+    	public Runnable getSubmittedRunnable() {
+    		return r;
+    	}
     }
 }

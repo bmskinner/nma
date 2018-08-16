@@ -201,7 +201,7 @@ public abstract class AbstractMainWindow extends JFrame implements Loggable, Mai
     @Override
 	public void eventReceived(DatasetUpdateEvent event) {
 		PanelUpdater r = new PanelUpdater(event.getDatasets());
-        ThreadManager.getInstance().submit(r);
+        ThreadManager.getInstance().execute(r);
 		
 	}
     
