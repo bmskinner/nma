@@ -183,9 +183,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         ISegmentedProfile profile = null;
 
-        boolean normaliseProfile = true;
-
-        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+        ChartOptions options = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
                 .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowPoints(true).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getMainPanel())
@@ -200,7 +198,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
          * Create the chart for the range panel
          */
 
-        ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(normaliseProfile)
+        ChartOptions rangeOptions = new ChartOptionsBuilder().setDatasets(getDatasets()).setNormalised(true)
                 .setAlignment(ProfileAlignment.LEFT).setTag(Tag.REFERENCE_POINT).setShowMarkers(false)
                 .setProfileType(ProfileType.ANGLE).setSwatch(GlobalOptions.getInstance().getSwatch())
                 .setShowPoints(false).setShowXAxis(false).setShowYAxis(false).setTarget(dualPanel.getRangePanel())
@@ -217,7 +215,7 @@ public class SegmentsEditingPanel extends AbstractEditingPanel implements Action
 
         }
 
-        dualPanel.setCharts(chart, profile, normaliseProfile, rangeChart);
+        dualPanel.setCharts(chart, profile, true, rangeChart);
     }
 
     @Override

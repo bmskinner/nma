@@ -3,6 +3,7 @@ package com.bmskinner.nuclear_morphology.charting.charts;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
+import java.awt.Stroke;
 import java.util.List;
 
 import org.jfree.chart.JFreeChart;
@@ -217,36 +218,38 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		// mark the reference and orientation points
 
 		XYPlot plot = chart.getXYPlot();
+		
+		if (options.isShowMarkers()) {
 
-		for (Tag tag : collection.getProfileCollection().getBorderTags()) {
+			for (Tag tag : collection.getProfileCollection().getBorderTags()) {
 
-			try {
-				int index = collection.getProfileCollection().getIndex(tag);
+				try {
+					int index = collection.getProfileCollection().getIndex(tag);
 
-				// get the offset from to the current draw point
-				int offset = collection.getProfileCollection().getIndex(options.getTag());
+					// get the offset from to the current draw point
+					int offset = collection.getProfileCollection().getIndex(options.getTag());
 
-				// adjust the index to the offset
-				index = CellularComponent.wrapIndex(index - offset, collection.getProfileCollection().length());
+					// adjust the index to the offset
+					index = CellularComponent.wrapIndex(index - offset, collection.getProfileCollection().length());
 
-				double indexToDraw = index; // convert to a double to allow normalised positioning
+					double indexToDraw = index; // convert to a double to allow normalised positioning
 
-				if (options.isNormalised()) // set to the proportion of the point along the profile
-					indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * 100);
+					if (options.isNormalised()) // set to the proportion of the point along the profile
+						indexToDraw = ((indexToDraw / collection.getProfileCollection().length()) * 100);
 
-				if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
-					int maxX = DatasetUtilities.findMaximumDomainValue(ds.getLines()).intValue();
-					int amountToAdd = maxX - collection.getProfileCollection().length();
-					indexToDraw += amountToAdd;
-				}
+					if (options.getAlignment().equals(ProfileAlignment.RIGHT) && !options.isNormalised()) {
+						int maxX = DatasetUtilities.findMaximumDomainValue(ds.getLines()).intValue();
+						int amountToAdd = maxX - collection.getProfileCollection().length();
+						indexToDraw += amountToAdd;
+					}
 
-				if (options.isShowMarkers())
 					addMarkerToXYPlot(plot, tag, indexToDraw);
 
-			} catch (UnavailableBorderTagException e) {
-				fine("Tag not present in profile: " + tag);
-			}
+				} catch (UnavailableBorderTagException e) {
+					fine("Tag not present in profile: " + tag);
+				}
 
+			}
 		}
 		applyAxisOptions(chart);
 		return chart;
@@ -383,48 +386,18 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		plot.getDomainAxis().setRange(DEFAULT_PROFILE_START_INDEX, xLength);
 		plot.setRenderer(0, new StandardXYItemRenderer());
 
-		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
-		plot.getRenderer().setBaseToolTipGenerator(tooltip);
+//		StandardXYToolTipGenerator tooltip = new StandardXYToolTipGenerator();
+		plot.getRenderer().setBaseToolTipGenerator(null);
 		
 		
 		// Format the line charts
-		for (int i = 0; i < plot.getDataset(0).getSeriesCount(); i++) {
+		for (int i=0; i<ds.getLines().getSeriesCount(); i++) {
 			plot.getRenderer().setSeriesVisibleInLegend(i, false);
 			String name = ds.getLines().getSeriesKey(i).toString();
 			int index   = ds.getLines().getDatasetIndex(name);
-
-			// segments along the median profile
-			if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX)) {
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
-				Paint colour = ColourSelecter.getColor(index);
-				plot.getRenderer().setSeriesPaint(i, colour);
-			}
 			
-			
-			// median profiles with no segments
-			if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX)) {
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.SEGMENT_STROKE);
-				Paint colour = ColourSelecter.getColor(index);
-				plot.getRenderer().setSeriesPaint(i, colour);
-			}
-
-			// entire nucleus profile
-			if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX)) {
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-			}
-
-			// quartile profiles
-			if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX)) {
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.QUARTILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.DARK_GRAY);
-			}
-
-			// simple profiles
-			if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX)) {
-				plot.getRenderer().setSeriesStroke(i, ChartComponents.PROFILE_STROKE);
-				plot.getRenderer().setSeriesPaint(i, Color.LIGHT_GRAY);
-			}
+			plot.getRenderer().setSeriesStroke(i, chooseSeriesStroke(name));
+			plot.getRenderer().setSeriesPaint(i,  chooseSeriesColour(name, index));
 		}
 		
 		// Format the range charts
@@ -442,6 +415,34 @@ public class ProfileChartFactory extends AbstractChartFactory {
 		}
 		
 		return chart;
+	}
+	
+	private Stroke chooseSeriesStroke(String name) {
+		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
+			return ChartComponents.SEGMENT_STROKE;
+		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
+			return ChartComponents.SEGMENT_STROKE;
+		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
+			return ChartComponents.PROFILE_STROKE;
+		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
+			return ChartComponents.QUARTILE_STROKE;
+		if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX))
+			return ChartComponents.PROFILE_STROKE;
+		return ChartComponents.PROFILE_STROKE;
+	}
+	
+	private Color chooseSeriesColour(String name, int index) {
+		if (name.startsWith(ProfileDatasetCreator.SEGMENT_SERIES_PREFIX))
+			return ColourSelecter.getColor(index);
+		if (name.startsWith(ProfileDatasetCreator.MEDIAN_SERIES_PREFIX))
+			return ColourSelecter.getColor(index);
+		if (name.startsWith(ProfileDatasetCreator.NUCLEUS_SERIES_PREFIX))
+			return Color.LIGHT_GRAY;
+		if (name.startsWith(ProfileDatasetCreator.QUARTILE_SERIES_PREFIX))
+			return Color.DARK_GRAY;
+		if (name.startsWith(ProfileDatasetCreator.PROFILE_SERIES_PREFIX))
+			return Color.LIGHT_GRAY;
+		return ColourSelecter.getColor(index);
 	}
 
 	/**
